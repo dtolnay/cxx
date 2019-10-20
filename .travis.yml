@@ -1,0 +1,3 @@
+language: rust
+rust: nightly
+script: cargo run --manifest-path demo-rs/Cargo.toml

@@ -1,0 +1,25 @@
+[package]
+name = "cxxbridge-cmd"
+version = "0.0.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+edition = "2018"
+license = "MIT OR Apache-2.0"
+description = "C++ code generator for integrating `cxx` crate into a non-Cargo build."
+repository = "https://github.com/dtolnay/cxx"
+
+[[bin]]
+name = "cxxbridge"
+path = "src/main.rs"
+
+[badges]
+travis-ci = { repository = "dtolnay/cxx" }
+
+[dependencies]
+anyhow = "1.0"
+codespan = "0.7"
+codespan-reporting = "0.7"
+proc-macro2 = { version = "1.0", features = ["span-locations"] }
+quote = "1.0"
+structopt = "0.3"
+syn = { version = "1.0", features = ["full"] }
+thiserror = "1.0"
