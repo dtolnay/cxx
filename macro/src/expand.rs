@@ -128,7 +128,7 @@ fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types
         let ret = expand_extern_type(efn.ret.as_ref().unwrap());
         outparam = Some(quote!(__return: *mut #ret));
     }
-    let link_name = format!("{}cxxbridge00${}", namespace, ident);
+    let link_name = format!("{}cxxbridge01${}", namespace, ident);
     let local_name = format_ident!("__{}", ident);
     quote! {
         #[link_name = #link_name]
@@ -266,7 +266,7 @@ fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Type
         expr = quote!(::std::ptr::write(__return, #expr));
     }
     let ret = expand_extern_return_type(&efn.ret, types);
-    let link_name = format!("{}cxxbridge00${}", namespace, ident);
+    let link_name = format!("{}cxxbridge01${}", namespace, ident);
     let local_name = format_ident!("__{}", ident);
     let catch_unwind_label = format!("::{}", ident);
     quote! {
@@ -280,7 +280,7 @@ fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Type
 }
 
 fn expand_rust_box(namespace: &Namespace, ident: &Ident) -> TokenStream {
-    let link_prefix = format!("cxxbridge00$rust_box${}{}$", namespace, ident);
+    let link_prefix = format!("cxxbridge01$rust_box${}{}$", namespace, ident);
     let link_uninit = format!("{}uninit", link_prefix);
     let link_set_raw = format!("{}set_raw", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
@@ -337,7 +337,7 @@ fn expand_rust_box(namespace: &Namespace, ident: &Ident) -> TokenStream {
 }
 
 fn expand_unique_ptr(namespace: &Namespace, ident: &Ident) -> TokenStream {
-    let prefix = format!("cxxbridge00$unique_ptr${}{}$", namespace, ident);
+    let prefix = format!("cxxbridge01$unique_ptr${}{}$", namespace, ident);
     let link_null = format!("{}null", prefix);
     let link_new = format!("{}new", prefix);
     let link_raw = format!("{}raw", prefix);

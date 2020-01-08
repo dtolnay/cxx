@@ -3,48 +3,48 @@
 #include <memory>
 #include <stdexcept>
 
-namespace cxxbridge = cxxbridge00;
+namespace cxxbridge = cxxbridge01;
 
 extern "C" {
-const char *cxxbridge00$cxx_string$data(const std::string &s) noexcept {
+const char *cxxbridge01$cxx_string$data(const std::string &s) noexcept {
   return s.data();
 }
 
-size_t cxxbridge00$cxx_string$length(const std::string &s) noexcept {
+size_t cxxbridge01$cxx_string$length(const std::string &s) noexcept {
   return s.length();
 }
 
 // RustString
-void cxxbridge00$rust_string$new(cxxbridge::RustString *self) noexcept;
-void cxxbridge00$rust_string$clone(cxxbridge::RustString *self,
+void cxxbridge01$rust_string$new(cxxbridge::RustString *self) noexcept;
+void cxxbridge01$rust_string$clone(cxxbridge::RustString *self,
                                    const cxxbridge::RustString &other) noexcept;
-bool cxxbridge00$rust_string$from(cxxbridge::RustString *self, const char *ptr,
+bool cxxbridge01$rust_string$from(cxxbridge::RustString *self, const char *ptr,
                                   size_t len) noexcept;
-void cxxbridge00$rust_string$drop(cxxbridge::RustString *self) noexcept;
+void cxxbridge01$rust_string$drop(cxxbridge::RustString *self) noexcept;
 const char *
-cxxbridge00$rust_string$ptr(const cxxbridge::RustString *self) noexcept;
-size_t cxxbridge00$rust_string$len(const cxxbridge::RustString *self) noexcept;
+cxxbridge01$rust_string$ptr(const cxxbridge::RustString *self) noexcept;
+size_t cxxbridge01$rust_string$len(const cxxbridge::RustString *self) noexcept;
 
 // RustStr
-bool cxxbridge00$rust_str$valid(const char *ptr, size_t len) noexcept;
+bool cxxbridge01$rust_str$valid(const char *ptr, size_t len) noexcept;
 } // extern "C"
 
-namespace cxxbridge00 {
+namespace cxxbridge01 {
 
-RustString::RustString() noexcept { cxxbridge00$rust_string$new(this); }
+RustString::RustString() noexcept { cxxbridge01$rust_string$new(this); }
 
 RustString::RustString(const RustString &other) noexcept {
-  cxxbridge00$rust_string$clone(this, other);
+  cxxbridge01$rust_string$clone(this, other);
 }
 
 RustString::RustString(RustString &&other) noexcept {
   this->repr = other.repr;
-  cxxbridge00$rust_string$new(&other);
+  cxxbridge01$rust_string$new(&other);
 }
 
 RustString::RustString(const char *s) {
   auto len = strlen(s);
-  if (!cxxbridge00$rust_string$from(this, s, len)) {
+  if (!cxxbridge01$rust_string$from(this, s, len)) {
     throw std::invalid_argument("data for RustString is not utf-8");
   }
 }
@@ -52,12 +52,12 @@ RustString::RustString(const char *s) {
 RustString::RustString(const std::string &s) {
   auto ptr = s.data();
   auto len = s.length();
-  if (!cxxbridge00$rust_string$from(this, ptr, len)) {
+  if (!cxxbridge01$rust_string$from(this, ptr, len)) {
     throw std::invalid_argument("data for RustString is not utf-8");
   }
 }
 
-RustString::~RustString() noexcept { cxxbridge00$rust_string$drop(this); }
+RustString::~RustString() noexcept { cxxbridge01$rust_string$drop(this); }
 
 RustString::operator std::string() const {
   return std::string(this->data(), this->size());
@@ -65,31 +65,31 @@ RustString::operator std::string() const {
 
 RustString &RustString::operator=(const RustString &other) noexcept {
   if (this != &other) {
-    cxxbridge00$rust_string$drop(this);
-    cxxbridge00$rust_string$clone(this, other);
+    cxxbridge01$rust_string$drop(this);
+    cxxbridge01$rust_string$clone(this, other);
   }
   return *this;
 }
 
 RustString &RustString::operator=(RustString &&other) noexcept {
   if (this != &other) {
-    cxxbridge00$rust_string$drop(this);
+    cxxbridge01$rust_string$drop(this);
     this->repr = other.repr;
-    cxxbridge00$rust_string$new(&other);
+    cxxbridge01$rust_string$new(&other);
   }
   return *this;
 }
 
 const char *RustString::data() const noexcept {
-  return cxxbridge00$rust_string$ptr(this);
+  return cxxbridge01$rust_string$ptr(this);
 }
 
 size_t RustString::size() const noexcept {
-  return cxxbridge00$rust_string$len(this);
+  return cxxbridge01$rust_string$len(this);
 }
 
 size_t RustString::length() const noexcept {
-  return cxxbridge00$rust_string$len(this);
+  return cxxbridge01$rust_string$len(this);
 }
 
 std::ostream &operator<<(std::ostream &os, const RustString &s) {
@@ -101,13 +101,13 @@ RustStr::RustStr() noexcept
     : repr(Repr{reinterpret_cast<const char *>(this), 0}) {}
 
 RustStr::RustStr(const char *s) : repr(Repr{s, strlen(s)}) {
-  if (!cxxbridge00$rust_str$valid(this->repr.ptr, this->repr.len)) {
+  if (!cxxbridge01$rust_str$valid(this->repr.ptr, this->repr.len)) {
     throw std::invalid_argument("data for RustStr is not utf-8");
   }
 }
 
 RustStr::RustStr(const std::string &s) : repr(Repr{s.data(), s.length()}) {
-  if (!cxxbridge00$rust_str$valid(this->repr.ptr, this->repr.len)) {
+  if (!cxxbridge01$rust_str$valid(this->repr.ptr, this->repr.len)) {
     throw std::invalid_argument("data for RustStr is not utf-8");
   }
 }
@@ -138,30 +138,30 @@ std::ostream &operator<<(std::ostream &os, const RustStr &s) {
   return os;
 }
 
-} // namespace cxxbridge00
+} // namespace cxxbridge01
 
 extern "C" {
-void cxxbridge00$unique_ptr$std$string$null(
+void cxxbridge01$unique_ptr$std$string$null(
     std::unique_ptr<std::string> *ptr) noexcept {
   new (ptr) std::unique_ptr<std::string>();
 }
-void cxxbridge00$unique_ptr$std$string$new(std::unique_ptr<std::string> *ptr,
+void cxxbridge01$unique_ptr$std$string$new(std::unique_ptr<std::string> *ptr,
                                            std::string *value) noexcept {
   new (ptr) std::unique_ptr<std::string>(new std::string(std::move(*value)));
 }
-void cxxbridge00$unique_ptr$std$string$raw(std::unique_ptr<std::string> *ptr,
+void cxxbridge01$unique_ptr$std$string$raw(std::unique_ptr<std::string> *ptr,
                                            std::string *raw) noexcept {
   new (ptr) std::unique_ptr<std::string>(raw);
 }
-const std::string *cxxbridge00$unique_ptr$std$string$get(
+const std::string *cxxbridge01$unique_ptr$std$string$get(
     const std::unique_ptr<std::string> &ptr) noexcept {
   return ptr.get();
 }
-std::string *cxxbridge00$unique_ptr$std$string$release(
+std::string *cxxbridge01$unique_ptr$std$string$release(
     std::unique_ptr<std::string> &ptr) noexcept {
   return ptr.release();
 }
-void cxxbridge00$unique_ptr$std$string$drop(
+void cxxbridge01$unique_ptr$std$string$drop(
     std::unique_ptr<std::string> *ptr) noexcept {
   ptr->~unique_ptr();
 }

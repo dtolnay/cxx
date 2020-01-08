@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-namespace cxxbridge00 {
+namespace cxxbridge01 {
 
 class RustString final {
 public:
@@ -58,8 +58,8 @@ private:
   Repr repr;
 };
 
-#ifndef CXXBRIDGE00_RUST_BOX
-#define CXXBRIDGE00_RUST_BOX
+#ifndef CXXBRIDGE01_RUST_BOX
+#define CXXBRIDGE01_RUST_BOX
 template <typename T> class RustBox final {
 public:
   RustBox(const RustBox &other) : RustBox(*other) {}
@@ -122,11 +122,11 @@ private:
   T *deref_mut() noexcept;
   uintptr_t repr;
 };
-#endif // CXXBRIDGE00_RUST_BOX
+#endif // CXXBRIDGE01_RUST_BOX
 
 std::ostream &operator<<(std::ostream &os, const RustString &s);
 std::ostream &operator<<(std::ostream &os, const RustStr &s);
 
-} // namespace cxxbridge00
+} // namespace cxxbridge01
 
-namespace cxxbridge = cxxbridge00;
+namespace cxxbridge = cxxbridge01;
