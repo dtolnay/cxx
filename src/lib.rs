@@ -2,6 +2,12 @@
 //! and Rust code from C++, not subject to the many ways that things can go
 //! wrong when using bindgen or cbindgen to generate unsafe C-style bindings.
 //!
+//! This doesn't change the fact that 100% of C++ code is unsafe. When auditing
+//! a project, you would be on the hook for auditing all the unsafe Rust code
+//! and *all* the C++ code. The core safety claim under this new model is that
+//! auditing just the C++ side would be sufficient to catch all problems, i.e.
+//! the Rust side can be 100% safe.
+//!
 //! <br>
 //!
 //! *Compiler support: requires rustc 1.42+ (beta on January 30, stable on March
