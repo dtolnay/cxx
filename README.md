@@ -316,13 +316,13 @@ matter of designing a nice API for each in its non-native language.
 
 <table>
 <tr><th>name in Rust</th><th>name in C++</th></tr>
-<tr><td>&amp;[T]</td><td></td></tr>
-<tr><td>Vec&lt;T&gt;</td><td></td></tr>
-<tr><td>BTreeMap&lt;K, V&gt;</td><td></td></tr>
-<tr><td>HashMap&lt;K, V&gt;</td><td></td></tr>
-<tr><td></td><td>std::vector&lt;T&gt;</td></tr>
-<tr><td></td><td>std::map&lt;K, V&gt;</td></tr>
-<tr><td></td><td>std::unordered_map&lt;K, V&gt;</td></tr>
+<tr><td>&amp;[T]</td><td><sup><i>tbd</i></sup></td></tr>
+<tr><td>Vec&lt;T&gt;</td><td><sup><i>tbd</i></sup></td></tr>
+<tr><td>BTreeMap&lt;K, V&gt;</td><td><sup><i>tbd</i></sup></td></tr>
+<tr><td>HashMap&lt;K, V&gt;</td><td><sup><i>tbd</i></sup></td></tr>
+<tr><td><sup><i>tbd</i></sup></td><td>std::vector&lt;T&gt;</td></tr>
+<tr><td><sup><i>tbd</i></sup></td><td>std::map&lt;K, V&gt;</td></tr>
+<tr><td><sup><i>tbd</i></sup></td><td>std::unordered_map&lt;K, V&gt;</td></tr>
 </table>
 
 <br>
