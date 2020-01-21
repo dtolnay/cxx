@@ -40,7 +40,8 @@ pub(super) fn gen(namespace: Vec<String>, apis: &[Api], types: &Types, header: b
     for api in apis {
         match api {
             Api::Struct(strct) => write_struct_decl(out, &strct.ident),
-            Api::CxxType(ety) | Api::RustType(ety) => write_struct_decl(out, &ety.ident),
+            Api::CxxType(ety) => write_struct_using(out, &ety.ident),
+            Api::RustType(ety) => write_struct_decl(out, &ety.ident),
             _ => {}
         }
     }
@@ -165,6 +166,10 @@ fn write_struct(out: &mut OutFile, strct: &Struct) {
 
 fn write_struct_decl(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "struct {};", ident);
+}
+
+fn write_struct_using(out: &mut OutFile, ident: &Ident) {
+    writeln!(out, "using {} = {};", ident, ident);
 }
 
 fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
