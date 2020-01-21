@@ -308,6 +308,11 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
                 write!(out, "&");
             }
             write!(out, "{}", arg.ident);
+            match arg.ty {
+                Type::RustBox(_) => write!(out, ".into_raw()"),
+                Type::UniquePtr(_) => write!(out, ".release()"),
+                _ => {}
+            }
         }
         if indirect_return {
             if !efn.args.is_empty() {

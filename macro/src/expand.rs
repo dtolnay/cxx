@@ -231,10 +231,21 @@ fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Type
     let args = efn.args.iter().map(|arg| expand_extern_arg(arg, types));
     let vars = efn.args.iter().map(|arg| {
         let ident = &arg.ident;
-        if types.needs_indirect_abi(&arg.ty) {
+        let var = if types.needs_indirect_abi(&arg.ty) {
             quote!(::std::ptr::read(#ident))
         } else {
             quote!(#ident)
+        };
+        match &arg.ty {
+            Type::Ident(ident) if ident == "String" => quote!(#var.into_string()),
+            Type::RustBox(_) => quote!(::std::boxed::Box::from_raw(#var)),
+            Type::UniquePtr(_) => quote!(::cxx::UniquePtr::from_raw(#var)),
+            Type::Ref(ty) => match &ty.inner {
+                Type::Ident(ident) if ident == "String" => quote!(#var.as_string()),
+                _ => var,
+            },
+            Type::Str(_) => quote!(#var.as_str()),
+            _ => var,
         }
     });
     let mut outparam = None;
