@@ -15,10 +15,19 @@ struct Opt {
     /// Emit header with declarations only
     #[structopt(long)]
     header: bool,
+
+    /// Emit full cxxbridge header
+    #[structopt(long)]
+    cxxbridge: bool,
+
 }
 
 fn main() {
     let opt = Opt::from_args();
+    if opt.cxxbridge {
+        let _ = io::stdout().lock().write_all(gen::include::get_full_cxxbridge().as_ref());
+        return;
+    }
     let gen = if opt.header {
         gen::do_generate_header
     } else {
