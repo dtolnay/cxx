@@ -342,6 +342,8 @@
     clippy::useless_let_if_seq
 )]
 
+extern crate link_cplusplus;
+
 mod cxx_string;
 mod error;
 mod gen;
