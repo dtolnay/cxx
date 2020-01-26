@@ -370,6 +370,7 @@ pub mod private {
 }
 
 use crate::error::Result;
+use anyhow::anyhow;
 use std::fs;
 use std::io::{self, Write};
 use std::path::Path;
@@ -442,7 +443,7 @@ impl Build {
         match try_generate_bridge(rust_source_file.as_ref()) {
             Ok(build) => build,
             Err(err) => {
-                let _ = writeln!(io::stderr(), "\n\ncxxbridge error: {}\n\n", err);
+                let _ = writeln!(io::stderr(), "\n\ncxxbridge error: {:?}\n\n", anyhow!(err));
                 process::exit(1);
             }
         }
