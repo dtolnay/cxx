@@ -13,5 +13,5 @@ pub fn get(guard: &str) -> &'static str {
 }
 
 pub fn get_full_cxxbridge() -> &'static str {
-	return HEADER
-} 
+    return HEADER
+}
