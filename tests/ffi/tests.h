@@ -11,6 +11,7 @@ struct Shared;
 class C {
 public:
   C(size_t n);
+  size_t get() const;
 
 private:
   size_t n;
