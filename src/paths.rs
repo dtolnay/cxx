@@ -44,10 +44,17 @@ fn try_symlink_header(path: &Path, original: &Path) -> Result<()> {
 
 fn relative_to_parent_of_target_dir(original: &Path) -> Result<PathBuf> {
     let target_dir = target_dir()?;
-    let parent_of_target_dir = target_dir.parent().unwrap();
+    let mut outer = target_dir.parent().unwrap();
     let original = original.canonicalize()?;
-    let suffix = original.strip_prefix(parent_of_target_dir)?;
-    Ok(suffix.to_owned())
+    loop {
+        if let Ok(suffix) = original.strip_prefix(outer) {
+            return Ok(suffix.to_owned());
+        }
+        match outer.parent() {
+            Some(parent) => outer = parent,
+            None => return Ok(original.components().skip(1).collect()),
+        }
+    }
 }
 
 pub(crate) fn out_with_extension(path: &Path, ext: &str) -> Result<PathBuf> {
