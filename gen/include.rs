@@ -11,3 +11,7 @@ pub fn get(guard: &str) -> &'static str {
         panic!("not found in cxxbridge.h header: {}", guard)
     }
 }
+
+pub fn get_full_cxxbridge() -> &'static str {
+    return HEADER
+}

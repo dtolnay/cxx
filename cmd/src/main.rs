@@ -1,7 +1,8 @@
 mod gen;
 mod syntax;
 
-use std::io::{self, Write};
+use gen::include::get_full_cxxbridge;
+use std::io::{self, Error, ErrorKind, Write};
 use std::path::PathBuf;
 use structopt::StructOpt;
 
@@ -10,20 +11,28 @@ use structopt::StructOpt;
 struct Opt {
     /// Input Rust source file containing #[cxx::bridge]
     #[structopt(parse(from_os_str))]
-    input: PathBuf,
+    input: Option<PathBuf>,
 
-    /// Emit header with declarations only
+    /// Emit header with declarations only. If no input is specified, emit cxxbridge.h
     #[structopt(long)]
     header: bool,
 }
 
-fn main() {
+fn main() -> Result<(), Error> {
     let opt = Opt::from_args();
-    let gen = if opt.header {
-        gen::do_generate_header
+
+    if let Some(input) = opt.input {
+        let gen = if opt.header {
+            gen::do_generate_header
+        } else {
+            gen::do_generate_bridge
+        };
+        let bridge = gen(&input);
+        io::stdout().lock().write_all(bridge.as_ref())
+    } else if opt.header {
+        io::stdout().lock().write_all(get_full_cxxbridge().as_ref())
     } else {
-        gen::do_generate_bridge
-    };
-    let bridge = gen(&opt.input);
-    let _ = io::stdout().lock().write_all(bridge.as_ref());
+        let mut clap = Opt::clap().after_help("");
+        clap.print_help().or(Err(Error::new(ErrorKind::Other, "Failed to write help")))
+    }
 }
