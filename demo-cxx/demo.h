@@ -1,5 +1,5 @@
 #pragma once
-#include "../include/cxxbridge.h"
+#include "cxxbridge/cxxbridge.h"
 #include <memory>
 #include <string>
 
