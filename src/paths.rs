@@ -31,9 +31,10 @@ pub(crate) fn symlink_header(path: &Path, original: &Path) {
 
 fn try_symlink_header(path: &Path, original: &Path) -> Result<()> {
     let suffix = relative_to_parent_of_target_dir(original)?;
-    let dst = target_dir()?.join("cxxbridge").join(suffix);
+    let ref dst = target_dir()?.join("cxxbridge").join(suffix);
 
     fs::create_dir_all(dst.parent().unwrap())?;
+    let _ = fs::remove_file(dst);
     #[cfg(unix)]
     os::unix::fs::symlink(path, dst)?;
     #[cfg(windows)]
