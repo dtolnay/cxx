@@ -1,4 +1,4 @@
-static HEADER: &str = include_str!("include/cxxbridge.h");
+pub static HEADER: &str = include_str!("include/cxxbridge.h");
 
 pub fn get(guard: &str) -> &'static str {
     let ifndef = format!("#ifndef {}\n", guard);
@@ -10,8 +10,4 @@ pub fn get(guard: &str) -> &'static str {
     } else {
         panic!("not found in cxxbridge.h header: {}", guard)
     }
-}
-
-pub fn get_full_cxxbridge() -> &'static str {
-    return HEADER
 }
