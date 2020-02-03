@@ -14,23 +14,23 @@ use structopt::StructOpt;
     usage = "\
     cxxbridge <input>.rs              Emit .cc file for bridge to stdout
     cxxbridge <input>.rs --header     Emit .h file for bridge to stdout
-    cxxbridge --header                Emit cxxbridge.h header to stdout",
+    cxxbridge --header                Emit cxxbridge.h header to stdout,
+    cxxbridge --runtime               Emit cxxbridge.cc file to stdout", 
     help_message = "Print help information",
     version_message = "Print version information"
 )]
 struct Opt {
     /// Input Rust source file containing #[cxx::bridge]
-    #[structopt(parse(from_os_str), required_unless = "header")]
+    #[structopt(parse(from_os_str), required_unless_one = &["header", "runtime"])]
     input: Option<PathBuf>,
 
     /// Emit header with declarations only
-    #[structopt(long)]
+    #[structopt(long, conflicts_with = "runtime")]
     header: bool,
 
     /// Emit full cxxbridge header
-    #[structopt(long)]
-    cxxbridge: bool,
-
+    #[structopt(long, conflicts_with_all = &["header", "input"])]
+    runtime: bool,
 }
 
 fn write(content: impl AsRef<[u8]>) {
@@ -40,10 +40,11 @@ fn write(content: impl AsRef<[u8]>) {
 fn main() {
     let opt = Opt::from_args();
 
-    match (opt.input, opt.header) {
-        (Some(input), true) => write(gen::do_generate_header(&input)),
-        (Some(input), false) => write(gen::do_generate_bridge(&input)),
-        (None, true) => write(include::HEADER),
-        (None, false) => unreachable!(), // enforced by required_unless
+    match (opt.input, opt.header, opt.runtime) {
+        (Some(input), true, false) => write(gen::do_generate_header(&input)),
+        (Some(input), false, false) => write(gen::do_generate_bridge(&input)),
+        (None, true, false) => write(include::HEADER),
+        (None, false, true) => write(include::HEADER),
+        _ => unreachable!(), // enforced by structopt
     }
 }
