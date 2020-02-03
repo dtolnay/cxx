@@ -1,0 +1,32 @@
+[package]
+name = "cxx_bazel_test"
+version = "0.1.0"
+edition = "2018"
+features = ["std"]
+
+[dependencies]
+cxx = { git = "https://github.com/dtolnay/cxx" }
+cxxbridge-cmd = { git = "https://github.com/dtolnay/cxx", path = "./cmd" }
+num_cpus = "1.12.0"
+
+[workspace]
+[lib]
+path = "fake_lib.rs"
+
+[raze]
+workspace_path = "//cargo"
+output_buildfile_suffix = "BUILD.bazel"
+
+[raze.crates.proc-macro2.'1.0.8']
+additional_flags = [
+    "--cfg=span_locations",
+]
+
+[raze.crates.rustversion.'1.0.2']
+gen_buildrs = true
+
+[raze.crates.cxxbridge-cmd.'0.1.2']
+additional_flags = [
+    "--cfg", "procmacro2_semver_exempt",
+]
+data_attr = 'glob(["**/*.h"])'

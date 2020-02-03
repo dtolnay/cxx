@@ -1,0 +1,18 @@
+"""
+cargo-raze workspace build file.
+
+DO NOT EDIT! Replaced on runs of cargo-raze
+"""
+package(default_visibility = ["//visibility:public"])
+
+licenses([
+  "notice" # See individual crates for specific licenses
+])
+alias(
+    name = "cxx",
+    actual = "//rust_bindings/cargo/vendor/cxx-0.1.2:cxx",
+)
+alias(
+    name = "num_cpus",
+    actual = "//rust_bindings/cargo/vendor/num_cpus-1.12.0:num_cpus",
+)
