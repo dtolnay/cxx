@@ -21,6 +21,4 @@ install:
 script:
   - cargo run --manifest-path demo-rs/Cargo.toml
   - cargo test
-  - pushd tests/bazel_integration/cargo && \
-    ./update.sh && \
-    popd
+  - pushd tests/bazel_integration/cargo && ./update.sh && popd
