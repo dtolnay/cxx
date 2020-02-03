@@ -15,11 +15,9 @@ pub(crate) fn cc_build() -> cc::Build {
 }
 
 fn try_cc_build() -> Result<cc::Build> {
-    let target_dir = target_dir()?;
-
     let mut build = cc::Build::new();
-    build.include(target_dir.join("cxxbridge"));
-    build.include(target_dir.parent().unwrap());
+    build.include(include_dir()?);
+    build.include(target_dir()?.parent().unwrap());
     Ok(build)
 }
 
@@ -31,9 +29,10 @@ pub(crate) fn symlink_header(path: &Path, original: &Path) {
 
 fn try_symlink_header(path: &Path, original: &Path) -> Result<()> {
     let suffix = relative_to_parent_of_target_dir(original)?;
-    let dst = target_dir()?.join("cxxbridge").join(suffix);
+    let ref dst = include_dir()?.join(suffix);
 
     fs::create_dir_all(dst.parent().unwrap())?;
+    let _ = fs::remove_file(dst);
     #[cfg(unix)]
     os::unix::fs::symlink(path, dst)?;
     #[cfg(windows)]
@@ -44,10 +43,17 @@ fn try_symlink_header(path: &Path, original: &Path) -> Result<()> {
 
 fn relative_to_parent_of_target_dir(original: &Path) -> Result<PathBuf> {
     let target_dir = target_dir()?;
-    let parent_of_target_dir = target_dir.parent().unwrap();
+    let mut outer = target_dir.parent().unwrap();
     let original = original.canonicalize()?;
-    let suffix = original.strip_prefix(parent_of_target_dir)?;
-    Ok(suffix.to_owned())
+    loop {
+        if let Ok(suffix) = original.strip_prefix(outer) {
+            return Ok(suffix.to_owned());
+        }
+        match outer.parent() {
+            Some(parent) => outer = parent,
+            None => return Ok(original.components().skip(1).collect()),
+        }
+    }
 }
 
 pub(crate) fn out_with_extension(path: &Path, ext: &str) -> Result<PathBuf> {
@@ -57,6 +63,11 @@ pub(crate) fn out_with_extension(path: &Path, ext: &str) -> Result<PathBuf> {
     let out_dir = out_dir()?;
     let rel = relative_to_parent_of_target_dir(path)?;
     Ok(out_dir.join(rel).with_file_name(file_name))
+}
+
+pub(crate) fn include_dir() -> Result<PathBuf> {
+    let target_dir = target_dir()?;
+    Ok(target_dir.join("cxxbridge"))
 }
 
 fn target_dir() -> Result<PathBuf> {

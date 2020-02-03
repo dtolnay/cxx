@@ -211,8 +211,11 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         write!(out, "new (return$) ");
         write_type(out, efn.ret.as_ref().unwrap());
         write!(out, "(");
-    } else if efn.ret.is_some() {
+    } else if let Some(ret) = &efn.ret {
         write!(out, "return ");
+        if let Type::Ref(_) = ret {
+            write!(out, "&");
+        }
     }
     write!(out, "{}$(", efn.ident);
     for (i, arg) in efn.args.iter().enumerate() {
@@ -298,8 +301,11 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
             write_type(out, efn.ret.as_ref().unwrap());
             writeln!(out, ")];");
             write!(out, "  ");
-        } else if efn.ret.is_some() {
+        } else if let Some(ret) = &efn.ret {
             write!(out, "return ");
+            if let Type::Ref(_) = ret {
+                write!(out, "*");
+            }
         }
         for name in out.namespace.clone() {
             write!(out, "{}$", name);
@@ -351,6 +357,13 @@ fn write_extern_return_type(out: &mut OutFile, ty: &Option<Type>, types: &Types)
         Some(Type::RustBox(ty)) | Some(Type::UniquePtr(ty)) => {
             write_type_space(out, &ty.inner);
             write!(out, "*");
+        }
+        Some(Type::Ref(ty)) => {
+            if ty.mutability.is_none() {
+                write!(out, "const ");
+            }
+            write_type(out, &ty.inner);
+            write!(out, " *");
         }
         Some(Type::Str(_)) => write!(out, "cxxbridge::RustStr::Repr "),
         Some(ty) if types.needs_indirect_abi(ty) => write!(out, "void "),

@@ -342,6 +342,8 @@
     clippy::useless_let_if_seq
 )]
 
+extern crate link_cplusplus;
+
 mod cxx_string;
 mod error;
 mod gen;
@@ -368,6 +370,7 @@ pub mod private {
 }
 
 use crate::error::Result;
+use anyhow::anyhow;
 use std::fs;
 use std::io::{self, Write};
 use std::path::Path;
@@ -440,7 +443,7 @@ impl Build {
         match try_generate_bridge(rust_source_file.as_ref()) {
             Ok(build) => build,
             Err(err) => {
-                let _ = writeln!(io::stderr(), "\n\ncxxbridge error: {}\n\n", err);
+                let _ = writeln!(io::stderr(), "\n\ncxxbridge error: {:?}\n\n", anyhow!(err));
                 process::exit(1);
             }
         }
@@ -459,6 +462,11 @@ fn try_generate_bridge(rust_source_file: &Path) -> Result<cc::Build> {
     fs::write(&bridge_path, bridge)?;
     let mut build = paths::cc_build();
     build.file(&bridge_path);
+
+    let ref cxxbridge_h = paths::include_dir()?.join("cxxbridge/cxxbridge.h");
+    let _ = fs::create_dir_all(cxxbridge_h.parent().unwrap());
+    let _ = fs::remove_file(cxxbridge_h);
+    let _ = fs::write(cxxbridge_h, gen::include::HEADER);
 
     Ok(build)
 }

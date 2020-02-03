@@ -1,4 +1,4 @@
-static HEADER: &str = include_str!("include/cxxbridge.h");
+pub static HEADER: &str = include_str!("include/cxxbridge.h");
 
 pub fn get(guard: &str) -> &'static str {
     let ifndef = format!("#ifndef {}\n", guard);

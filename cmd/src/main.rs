@@ -1,16 +1,27 @@
 mod gen;
 mod syntax;
 
+use gen::include;
 use std::io::{self, Write};
 use std::path::PathBuf;
 use structopt::StructOpt;
 
 #[derive(StructOpt, Debug)]
-#[structopt(name = "cxxbridge", author)]
+#[structopt(
+    name = "cxxbridge",
+    author,
+    about = "https://github.com/dtolnay/cxx",
+    usage = "\
+    cxxbridge <input>.rs              Emit .cc file for bridge to stdout
+    cxxbridge <input>.rs --header     Emit .h file for bridge to stdout
+    cxxbridge --header                Emit cxxbridge.h header to stdout",
+    help_message = "Print help information",
+    version_message = "Print version information"
+)]
 struct Opt {
     /// Input Rust source file containing #[cxx::bridge]
-    #[structopt(parse(from_os_str))]
-    input: PathBuf,
+    #[structopt(parse(from_os_str), required_unless = "header")]
+    input: Option<PathBuf>,
 
     /// Emit header with declarations only
     #[structopt(long)]
@@ -22,17 +33,17 @@ struct Opt {
 
 }
 
+fn write(content: impl AsRef<[u8]>) {
+    let _ = io::stdout().lock().write_all(content.as_ref());
+}
+
 fn main() {
     let opt = Opt::from_args();
-    if opt.cxxbridge {
-        let _ = io::stdout().lock().write_all(gen::include::get_full_cxxbridge().as_ref());
-        return;
+
+    match (opt.input, opt.header) {
+        (Some(input), true) => write(gen::do_generate_header(&input)),
+        (Some(input), false) => write(gen::do_generate_bridge(&input)),
+        (None, true) => write(include::HEADER),
+        (None, false) => unreachable!(), // enforced by required_unless
     }
-    let gen = if opt.header {
-        gen::do_generate_header
-    } else {
-        gen::do_generate_bridge
-    };
-    let bridge = gen(&opt.input);
-    let _ = io::stdout().lock().write_all(bridge.as_ref());
 }
