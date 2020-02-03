@@ -6,12 +6,16 @@ os:
   - linux
   - macos
 
+addons:
+  apt:
+    sources:
+      - sourceline: 'deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8'
+        key_url: 'https://bazel.build/bazel-release.pub.gpg'
+    packages:
+      - bazel
+
 install:
   - cargo install cargo-raze
-  - if [ $TRAVIS_OS_NAME = linux ]; then sudo apt install curl && \
-    curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add - echo "deb [arch=amd64] https://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list && \
-    sudo apt update && sudo apt install bazel
-
   - if [ $TRAVIS_OS_NAME = osx ]; brew tap bazelbuild/tap && brew install bazelbuild/tap/bazel
 
 script:
