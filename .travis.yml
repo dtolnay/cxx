@@ -1,6 +1,11 @@
 language: rust
+
 rust: nightly
+
 os:
   - linux
   - macos
-script: cargo run --manifest-path demo-rs/Cargo.toml && cargo test
+
+script:
+  - cargo run --manifest-path demo-rs/Cargo.toml
+  - cargo test
