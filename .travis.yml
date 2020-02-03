@@ -16,7 +16,7 @@ addons:
 
 install:
   - cargo install cargo-raze
-  - if [ $TRAVIS_OS_NAME = osx ]; brew tap bazelbuild/tap && brew install bazelbuild/tap/bazel
+  - if [ $TRAVIS_OS_NAME = osx ]; then brew tap bazelbuild/tap && brew install bazelbuild/tap/bazel; fi
 
 script:
   - cargo run --manifest-path demo-rs/Cargo.toml
