@@ -15,7 +15,7 @@ addons:
       - bazel
   homebrew:
     taps: bazelbuild/tap
-    casks: bazel
+    packages: bazelbuild/tap/bazel
 
 install:
   - cargo install cargo-raze
