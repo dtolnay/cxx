@@ -13,10 +13,12 @@ addons:
         key_url: 'https://bazel.build/bazel-release.pub.gpg'
     packages:
       - bazel
+  homebrew:
+    taps: bazelbuild/tap
+    casks: bazel
 
 install:
   - cargo install cargo-raze
-  - if [ $TRAVIS_OS_NAME = osx ]; then brew tap bazelbuild/tap && brew install bazelbuild/tap/bazel; fi
 
 script:
   - cargo run --manifest-path demo-rs/Cargo.toml
