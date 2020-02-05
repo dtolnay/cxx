@@ -5,6 +5,7 @@
 #include <exception>
 #include <iosfwd>
 #include <string>
+#include <vector>
 #include <type_traits>
 #include <utility>
 #if defined(_WIN32)
@@ -82,6 +83,27 @@ private:
   Repr repr;
 };
 #endif // CXXBRIDGE02_RUST_STR
+
+#ifndef CXXBRIDGE02_RUST_VEC
+#define CXXBRIDGE02_RUST_VEC
+template <typename T>
+class Vec final {
+public:
+  size_t size() const noexcept;
+  explicit operator std::vector<T>() const noexcept;
+
+private:
+  Vec() noexcept;
+  Vec(const Vec &other) noexcept;
+  Vec &operator=(Vec other) noexcept;
+  void drop() noexcept;
+  
+  // Repr
+  const T *ptr;
+  size_t len;
+  size_t capacity;
+};
+#endif // CXXBRIDGE02_RUST_VEC
 
 #ifndef CXXBRIDGE02_RUST_SLICE
 #define CXXBRIDGE02_RUST_SLICE
@@ -234,14 +256,11 @@ private:
 };
 #endif // CXXBRIDGE02_RUST_ERROR
 
-#ifndef CXXBRIDGE02_RUST_ISIZE
-#define CXXBRIDGE02_RUST_ISIZE
 #if defined(_WIN32)
 using isize = SSIZE_T;
 #else
 using isize = ssize_t;
 #endif
-#endif // CXXBRIDGE02_RUST_ISIZE
 
 std::ostream &operator<<(std::ostream &, const String &);
 std::ostream &operator<<(std::ostream &, const Str &);

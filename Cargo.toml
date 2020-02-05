@@ -17,6 +17,7 @@ travis-ci = { repository = "dtolnay/cxx" }
 [dependencies]
 anyhow = "1.0"
 cc = "1.0.49"
+codespan = "0.7"
 codespan-reporting = "0.9"
 cxxbridge-macro = { version = "=0.2.10", path = "macro" }
 link-cplusplus = "1.0"

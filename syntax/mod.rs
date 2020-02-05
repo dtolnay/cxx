@@ -8,11 +8,13 @@ pub mod error;
 pub mod ident;
 mod impls;
 pub mod mangle;
+pub mod mangled;
 pub mod namespace;
 mod parse;
 pub mod set;
 pub mod symbol;
 mod tokens;
+pub mod typename;
 pub mod types;
 
 use self::parse::kw;
@@ -86,9 +88,11 @@ pub struct Receiver {
 pub enum Type {
     Ident(Ident),
     RustBox(Box<Ty1>),
+    RustVec(Box<Ty1>),
     UniquePtr(Box<Ty1>),
     Ref(Box<Ref>),
     Str(Box<Ref>),
+    Vector(Box<Ty1>),
     Fn(Box<Signature>),
     Void(Span),
     Slice(Box<Slice>),
