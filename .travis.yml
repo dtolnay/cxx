@@ -9,3 +9,18 @@ os:
 script:
   - cargo run --manifest-path demo-rs/Cargo.toml
   - cargo test
+
+matrix:
+  include:
+    - name: Buck
+      before_install:
+        - sudo apt-get install -y openjdk-8-jdk
+        - export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+        - wget -O buck.deb https://github.com/facebook/buck/releases/download/v2019.10.17.01/buck.2019.10.17.01_all.deb
+        - sudo dpkg -i buck.deb
+      before_script:
+        - cp third-party/Cargo.lock .
+        - cargo vendor --versioned-dirs third-party/vendor
+      script:
+        - buck build :cxx#check --verbose=0
+        - buck run demo-rs --verbose=0

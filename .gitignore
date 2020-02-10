@@ -1,3 +1,5 @@
+/.buckd
+/buck-out
 /Cargo.lock
 /expand.cc
 /expand.rs
