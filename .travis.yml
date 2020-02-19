@@ -4,16 +4,14 @@ rust:
   - nightly
   - beta
 
-os:
-  - linux
-  - macos
-
 script:
   - cargo run --manifest-path demo-rs/Cargo.toml
   - cargo test
 
 matrix:
   include:
+    - os: macos
+      rust: nightly
     - name: Buck
       rust: nightly
       before_install:
