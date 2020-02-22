@@ -21,7 +21,7 @@ matrix:
         - sudo dpkg -i buck.deb
       before_script:
         - cp third-party/Cargo.lock .
-        - cargo vendor --versioned-dirs third-party/vendor
+        - cargo vendor --versioned-dirs --locked third-party/vendor
       script:
         - buck build :cxx#check --verbose=0
         - buck run demo-rs --verbose=0
