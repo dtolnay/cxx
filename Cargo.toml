@@ -29,8 +29,9 @@ thiserror = "1.0"
 cc = "1.0.49"
 
 [dev-dependencies]
+cxx-test-suite = { version = "0", path = "tests/ffi" }
 rustversion = "1.0"
-trybuild = "1.0"
+trybuild = "1.0.21"
 
 [workspace]
-members = ["cmd", "demo-rs", "macro"]
+members = ["cmd", "demo-rs", "macro", "tests/ffi"]
