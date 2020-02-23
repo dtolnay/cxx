@@ -25,6 +25,7 @@ matrix:
       script:
         - buck build :cxx#check --verbose=0
         - buck run demo-rs --verbose=0
+        - buck test ... --verbose=0
     - name: Bazel
       rust: nightly
       before_install:
@@ -36,3 +37,4 @@ matrix:
         - cargo vendor --versioned-dirs --locked third-party/vendor
       script:
         - bazel run demo-rs:demo_rs --verbose_failures --noshow_progress
+        - bazel test ... --verbose_failures --noshow_progress
