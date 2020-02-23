@@ -66,7 +66,7 @@ public:
   RustBox(RustBox &&other) noexcept : repr(other.repr) { other.repr = 0; }
   RustBox(const T &val) {
     this->uninit();
-    new (this->deref_mut()) T(val);
+    ::new (this->deref_mut()) T(val);
   }
   RustBox &operator=(const RustBox &other) {
     if (this != &other) {
@@ -74,7 +74,7 @@ public:
         **this = *other;
       } else {
         this->uninit();
-        new (this->deref_mut()) T(*other);
+        ::new (this->deref_mut()) T(*other);
       }
     }
     return *this;
