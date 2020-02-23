@@ -1,5 +1,6 @@
 use cxx_test_suite::ffi;
 use std::cell::Cell;
+use std::ffi::CStr;
 
 thread_local! {
     static CORRECT: Cell<bool> = Cell::new(false);
@@ -8,6 +9,14 @@ thread_local! {
 #[no_mangle]
 extern "C" fn cxx_test_suite_set_correct() {
     CORRECT.with(|correct| correct.set(true));
+}
+
+macro_rules! check {
+    ($run:expr) => {{
+        CORRECT.with(|correct| correct.set(false));
+        $run;
+        assert!(CORRECT.with(|correct| correct.get()), stringify!($run));
+    }};
 }
 
 #[test]
@@ -32,14 +41,6 @@ fn test_c_return() {
 
 #[test]
 fn test_c_take() {
-    macro_rules! check {
-        ($run:expr) => {{
-            CORRECT.with(|correct| correct.set(false));
-            $run;
-            assert!(CORRECT.with(|correct| correct.get()), stringify!($run));
-        }};
-    }
-
     let unique_ptr = ffi::c_return_unique_ptr();
 
     check!(ffi::c_take_primitive(2020));
@@ -52,4 +53,19 @@ fn test_c_take() {
     check!(ffi::c_take_unique_ptr_string(
         ffi::c_return_unique_ptr_string()
     ));
+}
+
+#[test]
+fn test_c_call_r() {
+    fn cxx_run_test() {
+        extern "C" {
+            fn cxx_run_test() -> *const i8;
+        }
+        let failure = unsafe { cxx_run_test() };
+        if !failure.is_null() {
+            let msg = unsafe { CStr::from_ptr(failure) };
+            eprintln!("{}", msg.to_string_lossy());
+        }
+    }
+    check!(cxx_run_test());
 }

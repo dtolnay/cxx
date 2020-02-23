@@ -79,11 +79,11 @@ fn r_return_rust_string() -> String {
 }
 
 fn r_take_primitive(n: usize) {
-    let _ = n;
+    assert_eq!(n, 2020);
 }
 
 fn r_take_shared(shared: ffi::Shared) {
-    let _ = shared;
+    assert_eq!(shared.z, 2020);
 }
 
 fn r_take_box(r: Box<R>) {
@@ -103,13 +103,13 @@ fn r_take_ref_c(c: &ffi::C) {
 }
 
 fn r_take_str(s: &str) {
-    let _ = s;
+    assert_eq!(s, "2020");
 }
 
 fn r_take_rust_string(s: String) {
-    let _ = s;
+    assert_eq!(s, "2020");
 }
 
 fn r_take_unique_ptr_string(s: UniquePtr<CxxString>) {
-    let _ = s;
+    assert_eq!(s.as_ref().unwrap().to_str().unwrap(), "2020");
 }
