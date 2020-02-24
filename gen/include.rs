@@ -1,8 +1,8 @@
 pub static HEADER: &str = include_str!("include/cxxbridge.h");
 
 pub fn get(guard: &str) -> &'static str {
-    let ifndef = format!("#ifndef {}\n", guard);
-    let endif = format!("#endif // {}\n", guard);
+    let ifndef = format!("#ifndef {}", guard);
+    let endif = format!("#endif // {}", guard);
     let begin = HEADER.find(&ifndef);
     let end = HEADER.find(&endif);
     if let (Some(begin), Some(end)) = (begin, end) {
