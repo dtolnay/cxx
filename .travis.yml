@@ -12,6 +12,12 @@ matrix:
   include:
     - os: macos
       rust: nightly
+    - os: windows
+      rust: nightly
+      before_script:
+        # windows is bad at symlinks
+        - rm cmd/src/gen cmd/src/syntax gen/include macro/src/syntax src/gen src/syntax
+        - cp -r include gen; cp -r gen cmd/src; cp -r syntax cmd/src; cp -r syntax macro/src; cp -r gen src; cp -r syntax src
     - name: Buck
       rust: nightly
       before_install:
