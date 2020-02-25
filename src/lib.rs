@@ -463,7 +463,7 @@ fn try_generate_bridge(rust_source_file: &Path) -> Result<cc::Build> {
     let mut build = paths::cc_build();
     build.file(&bridge_path);
 
-    let ref cxxbridge_h = paths::include_dir()?.join("cxxbridge/cxxbridge.h");
+    let ref cxxbridge_h = paths::include_dir()?.join("cxxbridge").join("cxxbridge.h");
     let _ = fs::create_dir_all(cxxbridge_h.parent().unwrap());
     let _ = fs::remove_file(cxxbridge_h);
     let _ = fs::write(cxxbridge_h, gen::include::HEADER);
