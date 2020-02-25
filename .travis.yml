@@ -42,7 +42,7 @@ matrix:
         - cp third-party/Cargo.lock .
         - cargo vendor --versioned-dirs --locked third-party/vendor
       script:
-        - bazel run demo-rs:demo_rs --verbose_failures --noshow_progress
+        - bazel run demo-rs --verbose_failures --noshow_progress
         - bazel test ... --verbose_failures --noshow_progress
   allow_failures:
     - os: windows # https://github.com/dtolnay/cxx/issues/25
