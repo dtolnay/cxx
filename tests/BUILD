@@ -1,4 +1,4 @@
-load("//:build/rust.bzl", "rust_library", "rust_test")
+load("//tools/bazel:rust.bzl", "rust_library", "rust_test")
 
 rust_test(
     name = "test",

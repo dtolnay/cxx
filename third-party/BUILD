@@ -1,5 +1,5 @@
 load(
-    "//:build/rust.bzl",
+    "//tools/bazel:rust.bzl",
     rust_binary = "third_party_rust_binary",
     rust_library = "third_party_rust_library",
 )
