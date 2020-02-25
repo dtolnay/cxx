@@ -44,5 +44,3 @@ matrix:
       script:
         - bazel run demo-rs --verbose_failures --noshow_progress
         - bazel test ... --verbose_failures --noshow_progress
-  allow_failures:
-    - os: windows # https://github.com/dtolnay/cxx/issues/25
