@@ -30,7 +30,7 @@ rust_library(
     deps = [
         ":bitflags",
         ":textwrap",
-        ":unicode_width",
+        ":unicode-width",
     ],
 )
 
@@ -38,17 +38,17 @@ rust_library(
     name = "codespan",
     srcs = glob(["vendor/codespan-0.7.0/src/**"]),
     visibility = ["//visibility:public"],
-    deps = [":unicode_segmentation"],
+    deps = [":unicode-segmentation"],
 )
 
 rust_library(
-    name = "codespan_reporting",
+    name = "codespan-reporting",
     srcs = glob(["vendor/codespan-reporting-0.7.0/src/**"]),
     visibility = ["//visibility:public"],
     deps = [
         ":codespan",
         ":termcolor",
-        ":unicode_width",
+        ":unicode-width",
     ],
 )
 
@@ -56,7 +56,7 @@ rust_library(
     name = "heck",
     srcs = glob(["vendor/heck-0.3.1/src/**"]),
     edition = "2015",
-    deps = [":unicode_segmentation"],
+    deps = [":unicode-segmentation"],
 )
 
 rust_library(
@@ -65,38 +65,38 @@ rust_library(
 )
 
 rust_library(
-    name = "link_cplusplus",
+    name = "link-cplusplus",
     srcs = glob(["vendor/link-cplusplus-1.0.1/src/**"]),
     visibility = ["//visibility:public"],
 )
 
 rust_library(
-    name = "proc_macro_error",
+    name = "proc-macro-error",
     srcs = glob(["vendor/proc-macro-error-0.4.9/src/**"]),
     rustc_flags = ["--cfg=use_fallback"],
     deps = [
-        ":proc_macro2",
-        ":proc_macro_error_attr",
+        ":proc-macro2",
+        ":proc-macro-error-attr",
         ":quote",
         ":syn",
     ],
 )
 
 rust_library(
-    name = "proc_macro_error_attr",
+    name = "proc-macro-error-attr",
     srcs = glob(["vendor/proc-macro-error-attr-0.4.9/src/**"]),
     crate_type = "proc-macro",
     deps = [
-        ":proc_macro2",
+        ":proc-macro2",
         ":quote",
         ":rustversion",
         ":syn",
-        ":syn_mid",
+        ":syn-mid",
     ],
 )
 
 rust_library(
-    name = "proc_macro2",
+    name = "proc-macro2",
     srcs = glob(["vendor/proc-macro2-1.0.8/src/**"]),
     crate_features = [
         "proc-macro",
@@ -108,7 +108,7 @@ rust_library(
         "--cfg=wrap_proc_macro",
     ],
     visibility = ["//visibility:public"],
-    deps = [":unicode_xid"],
+    deps = [":unicode-xid"],
 )
 
 rust_library(
@@ -116,7 +116,7 @@ rust_library(
     srcs = glob(["vendor/quote-1.0.2/src/**"]),
     crate_features = ["proc-macro"],
     visibility = ["//visibility:public"],
-    deps = [":proc_macro2"],
+    deps = [":proc-macro2"],
 )
 
 rust_library(
@@ -125,7 +125,7 @@ rust_library(
     crate_type = "proc-macro",
     out_dir_tar = ":rustversion_buildscript_outdir",
     deps = [
-        ":proc_macro2",
+        ":proc-macro2",
         ":quote",
         ":syn",
     ],
@@ -157,18 +157,18 @@ rust_library(
     deps = [
         ":clap",
         ":lazy_static",
-        ":structopt_derive",
+        ":structopt-derive",
     ],
 )
 
 rust_library(
-    name = "structopt_derive",
+    name = "structopt-derive",
     srcs = glob(["vendor/structopt-derive-0.4.2/src/**"]),
     crate_type = "proc-macro",
     deps = [
         ":heck",
-        ":proc_macro2",
-        ":proc_macro_error",
+        ":proc-macro2",
+        ":proc-macro-error",
         ":quote",
         ":syn",
     ],
@@ -187,17 +187,17 @@ rust_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        ":proc_macro2",
+        ":proc-macro2",
         ":quote",
-        ":unicode_xid",
+        ":unicode-xid",
     ],
 )
 
 rust_library(
-    name = "syn_mid",
+    name = "syn-mid",
     srcs = glob(["vendor/syn-mid-0.5.0/src/**"]),
     deps = [
-        ":proc_macro2",
+        ":proc-macro2",
         ":quote",
         ":syn",
     ],
@@ -211,39 +211,39 @@ rust_library(
 rust_library(
     name = "textwrap",
     srcs = glob(["vendor/textwrap-0.11.0/src/**"]),
-    deps = [":unicode_width"],
+    deps = [":unicode-width"],
 )
 
 rust_library(
     name = "thiserror",
     srcs = glob(["vendor/thiserror-1.0.11/src/**"]),
     visibility = ["//visibility:public"],
-    deps = [":thiserror_impl"],
+    deps = [":thiserror-impl"],
 )
 
 rust_library(
-    name = "thiserror_impl",
+    name = "thiserror-impl",
     srcs = glob(["vendor/thiserror-impl-1.0.11/src/**"]),
     crate_type = "proc-macro",
     deps = [
-        ":proc_macro2",
+        ":proc-macro2",
         ":quote",
         ":syn",
     ],
 )
 
 rust_library(
-    name = "unicode_segmentation",
+    name = "unicode-segmentation",
     srcs = glob(["vendor/unicode-segmentation-1.6.0/src/**"]),
     edition = "2015",
 )
 
 rust_library(
-    name = "unicode_width",
+    name = "unicode-width",
     srcs = glob(["vendor/unicode-width-0.1.7/src/**"]),
 )
 
 rust_library(
-    name = "unicode_xid",
+    name = "unicode-xid",
     srcs = glob(["vendor/unicode-xid-0.2.0/src/**"]),
 )

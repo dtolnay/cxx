@@ -1,7 +1,7 @@
 load("//:build/rust.bzl", "rust_binary", "rust_library")
 
 rust_binary(
-    name = "demo_rs",
+    name = "demo-rs",
     srcs = glob(["src/**"]),
     deps = [
         ":gen",

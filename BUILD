@@ -6,14 +6,14 @@ rust_library(
     data = ["src/gen/include/cxxbridge.h"],
     visibility = ["//visibility:public"],
     deps = [
-        ":core_lib",
-        ":cxxbridge_macro",
+        ":core-lib",
+        ":cxxbridge-macro",
         "//third-party:anyhow",
         "//third-party:cc",
         "//third-party:codespan",
-        "//third-party:codespan_reporting",
-        "//third-party:link_cplusplus",
-        "//third-party:proc_macro2",
+        "//third-party:codespan-reporting",
+        "//third-party:link-cplusplus",
+        "//third-party:proc-macro2",
         "//third-party:quote",
         "//third-party:syn",
         "//third-party:thiserror",
@@ -28,8 +28,8 @@ rust_binary(
     deps = [
         "//third-party:anyhow",
         "//third-party:codespan",
-        "//third-party:codespan_reporting",
-        "//third-party:proc_macro2",
+        "//third-party:codespan-reporting",
+        "//third-party:proc-macro2",
         "//third-party:quote",
         "//third-party:structopt",
         "//third-party:syn",
@@ -46,17 +46,17 @@ cc_library(
 )
 
 cc_library(
-    name = "core_lib",
+    name = "core-lib",
     srcs = ["src/cxxbridge.cc"],
     hdrs = ["include/cxxbridge.h"],
 )
 
 rust_library(
-    name = "cxxbridge_macro",
+    name = "cxxbridge-macro",
     srcs = glob(["macro/src/**"]),
     crate_type = "proc-macro",
     deps = [
-        "//third-party:proc_macro2",
+        "//third-party:proc-macro2",
         "//third-party:quote",
         "//third-party:syn",
     ],
