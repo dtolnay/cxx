@@ -4,6 +4,9 @@
 #include <iostream>
 #include <string>
 
+namespace cxxbridge01 {}
+namespace cxxbridge = cxxbridge01;
+
 namespace cxxbridge01 {
 
 class RustString final {
@@ -128,5 +131,3 @@ std::ostream &operator<<(std::ostream &os, const RustString &s);
 std::ostream &operator<<(std::ostream &os, const RustStr &s);
 
 } // namespace cxxbridge01
-
-namespace cxxbridge = cxxbridge01;
