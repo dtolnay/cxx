@@ -9,7 +9,7 @@ ThingC::ThingC(std::string appname) : appname(std::move(appname)) {}
 
 ThingC::~ThingC() { std::cout << "done with ThingC" << std::endl; }
 
-std::unique_ptr<ThingC> make_demo(rust::Str appname) {
+std::unique_ptr<ThingC> make_demo(rust::str appname) {
   return std::unique_ptr<ThingC>(new ThingC(appname));
 }
 

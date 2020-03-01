@@ -16,7 +16,7 @@ public:
 
 struct SharedThing;
 
-std::unique_ptr<ThingC> make_demo(rust::Str appname);
+std::unique_ptr<ThingC> make_demo(rust::str appname);
 const std::string &get_name(const ThingC &thing);
 void do_thing(SharedThing state);
 
