@@ -21,19 +21,9 @@ pub(super) fn gen(namespace: Vec<String>, apis: &[Api], types: &Types, header: b
     write_includes(out, types);
     write_include_cxxbridge(out, types);
 
-    if !header {
-        out.next_section();
-        write_namespace_alias(out, types);
-    }
-
     out.next_section();
     for name in &namespace {
         writeln!(out, "namespace {} {{", name);
-    }
-
-    if header {
-        out.next_section();
-        write_namespace_alias(out, types);
     }
 
     out.next_section();
@@ -125,7 +115,8 @@ fn write_include_cxxbridge(out: &mut OutFile, types: &Types) {
         }
     }
 
-    out.begin_block("namespace cxxbridge01");
+    out.begin_block("namespace rust");
+    out.begin_block("inline namespace cxxbridge01");
     if needs_rust_box {
         writeln!(out, "// #include \"cxxbridge.h\"");
         for line in include::get("CXXBRIDGE01_RUST_BOX").lines() {
@@ -135,20 +126,7 @@ fn write_include_cxxbridge(out: &mut OutFile, types: &Types) {
         }
     }
     out.end_block();
-}
-
-fn write_namespace_alias(out: &mut OutFile, types: &Types) {
-    let mut needs_namespace_alias = false;
-    for ty in types {
-        if let Type::RustBox(_) = ty {
-            needs_namespace_alias = true;
-            break;
-        }
-    }
-
-    if needs_namespace_alias {
-        writeln!(out, "namespace cxxbridge = cxxbridge01;");
-    }
+    out.end_block();
 }
 
 fn write_struct(out: &mut OutFile, strct: &Struct) {
@@ -365,7 +343,7 @@ fn write_extern_return_type(out: &mut OutFile, ty: &Option<Type>, types: &Types)
             write_type(out, &ty.inner);
             write!(out, " *");
         }
-        Some(Type::Str(_)) => write!(out, "::cxxbridge::RustStr::Repr "),
+        Some(Type::Str(_)) => write!(out, "::rust::Str::Repr "),
         Some(ty) if types.needs_indirect_abi(ty) => write!(out, "void "),
         _ => write_return_type(out, ty),
     }
@@ -377,7 +355,7 @@ fn write_extern_arg(out: &mut OutFile, arg: &Var, types: &Types) {
             write_type_space(out, &ty.inner);
             write!(out, "*");
         }
-        Type::Str(_) => write!(out, "::cxxbridge::RustStr::Repr "),
+        Type::Str(_) => write!(out, "::rust::Str::Repr "),
         _ => write_type_space(out, &arg.ty),
     }
     if types.needs_indirect_abi(&arg.ty) {
@@ -401,11 +379,11 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             Some(I64) => write!(out, "int64_t"),
             Some(Isize) => write!(out, "ssize_t"),
             Some(CxxString) => write!(out, "::std::string"),
-            Some(RustString) => write!(out, "::cxxbridge::RustString"),
+            Some(RustString) => write!(out, "::rust::String"),
             None => write!(out, "{}", ident),
         },
         Type::RustBox(ty) => {
-            write!(out, "::cxxbridge::RustBox<");
+            write!(out, "::rust::Box<");
             write_type(out, &ty.inner);
             write!(out, ">");
         }
@@ -422,7 +400,7 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write!(out, " &");
         }
         Type::Str(_) => {
-            write!(out, "::cxxbridge::RustStr");
+            write!(out, "::rust::Str");
         }
     }
 }
@@ -458,7 +436,8 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
     }
     out.end_block();
 
-    out.begin_block("namespace cxxbridge01");
+    out.begin_block("namespace rust");
+    out.begin_block("inline namespace cxxbridge01");
     for ty in types {
         if let Type::RustBox(ty) = ty {
             if let Type::Ident(inner) = &ty.inner {
@@ -466,6 +445,7 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
             }
         }
     }
+    out.end_block();
     out.end_block();
 }
 
@@ -482,27 +462,27 @@ fn write_rust_box_extern(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "#define CXXBRIDGE01_RUST_BOX_{}", instance);
     writeln!(
         out,
-        "void cxxbridge01$rust_box${}$uninit(::cxxbridge::RustBox<{}> *ptr) noexcept;",
+        "void cxxbridge01$rust_box${}$uninit(::rust::Box<{}> *ptr) noexcept;",
         instance, inner,
     );
     writeln!(
         out,
-        "void cxxbridge01$rust_box${}$set_raw(::cxxbridge::RustBox<{}> *ptr, {} *raw) noexcept;",
+        "void cxxbridge01$rust_box${}$set_raw(::rust::Box<{}> *ptr, {} *raw) noexcept;",
         instance, inner, inner
     );
     writeln!(
         out,
-        "void cxxbridge01$rust_box${}$drop(::cxxbridge::RustBox<{}> *ptr) noexcept;",
+        "void cxxbridge01$rust_box${}$drop(::rust::Box<{}> *ptr) noexcept;",
         instance, inner,
     );
     writeln!(
         out,
-        "const {} *cxxbridge01$rust_box${}$deref(const ::cxxbridge::RustBox<{}> *ptr) noexcept;",
+        "const {} *cxxbridge01$rust_box${}$deref(const ::rust::Box<{}> *ptr) noexcept;",
         inner, instance, inner,
     );
     writeln!(
         out,
-        "{} *cxxbridge01$rust_box${}$deref_mut(::cxxbridge::RustBox<{}> *ptr) noexcept;",
+        "{} *cxxbridge01$rust_box${}$deref_mut(::rust::Box<{}> *ptr) noexcept;",
         inner, instance, inner,
     );
     writeln!(out, "#endif // CXXBRIDGE01_RUST_BOX_{}", instance);
@@ -518,7 +498,7 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
     let instance = inner.replace("::", "$");
 
     writeln!(out, "template <>");
-    writeln!(out, "void RustBox<{}>::uninit() noexcept {{", inner);
+    writeln!(out, "void Box<{}>::uninit() noexcept {{", inner);
     writeln!(
         out,
         "  return cxxbridge01$rust_box${}$uninit(this);",
@@ -529,7 +509,7 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "template <>");
     writeln!(
         out,
-        "void RustBox<{}>::set_raw({} *raw) noexcept {{",
+        "void Box<{}>::set_raw({} *raw) noexcept {{",
         inner, inner,
     );
     writeln!(
@@ -540,7 +520,7 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
-    writeln!(out, "void RustBox<{}>::drop() noexcept {{", inner);
+    writeln!(out, "void Box<{}>::drop() noexcept {{", inner);
     writeln!(
         out,
         "  return cxxbridge01$rust_box${}$drop(this);",
@@ -551,7 +531,7 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "template <>");
     writeln!(
         out,
-        "const {} *RustBox<{}>::deref() const noexcept {{",
+        "const {} *Box<{}>::deref() const noexcept {{",
         inner, inner,
     );
     writeln!(
@@ -562,11 +542,7 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
-    writeln!(
-        out,
-        "{} *RustBox<{}>::deref_mut() noexcept {{",
-        inner, inner,
-    );
+    writeln!(out, "{} *Box<{}>::deref_mut() noexcept {{", inner, inner);
     writeln!(
         out,
         "  return cxxbridge01$rust_box${}$deref_mut(this);",

@@ -4,21 +4,19 @@
 #include <iostream>
 #include <string>
 
-namespace cxxbridge01 {}
-namespace cxxbridge = cxxbridge01;
+namespace rust {
+inline namespace cxxbridge01 {
 
-namespace cxxbridge01 {
-
-class RustString final {
+class String final {
 public:
-  RustString() noexcept;
-  RustString(const RustString &other) noexcept;
-  RustString(RustString &&other) noexcept;
-  RustString(const char *s);
-  RustString(const std::string &s);
-  RustString &operator=(const RustString &other) noexcept;
-  RustString &operator=(RustString &&other) noexcept;
-  ~RustString() noexcept;
+  String() noexcept;
+  String(const String &other) noexcept;
+  String(String &&other) noexcept;
+  String(const char *s);
+  String(const std::string &s);
+  String &operator=(const String &other) noexcept;
+  String &operator=(String &&other) noexcept;
+  ~String() noexcept;
   operator std::string() const;
 
   // Note: no null terminator.
@@ -31,14 +29,14 @@ private:
   std::array<uintptr_t, 3> repr;
 };
 
-class RustStr final {
+class Str final {
 public:
-  RustStr() noexcept;
-  RustStr(const char *s);
-  RustStr(const std::string &s);
-  RustStr(std::string &&s) = delete;
-  RustStr(const RustStr &other) noexcept;
-  RustStr &operator=(RustStr other) noexcept;
+  Str() noexcept;
+  Str(const char *s);
+  Str(const std::string &s);
+  Str(std::string &&s) = delete;
+  Str(const Str &other) noexcept;
+  Str &operator=(Str other) noexcept;
   operator std::string() const;
 
   // Note: no null terminator.
@@ -54,7 +52,7 @@ public:
     const char *ptr;
     size_t len;
   };
-  RustStr(Repr repr) noexcept;
+  Str(Repr repr) noexcept;
   operator Repr() noexcept;
 
 private:
@@ -63,15 +61,15 @@ private:
 
 #ifndef CXXBRIDGE01_RUST_BOX
 #define CXXBRIDGE01_RUST_BOX
-template <typename T> class RustBox final {
+template <typename T> class Box final {
 public:
-  RustBox(const RustBox &other) : RustBox(*other) {}
-  RustBox(RustBox &&other) noexcept : repr(other.repr) { other.repr = 0; }
-  RustBox(const T &val) {
+  Box(const Box &other) : Box(*other) {}
+  Box(Box &&other) noexcept : repr(other.repr) { other.repr = 0; }
+  Box(const T &val) {
     this->uninit();
     ::new (this->deref_mut()) T(val);
   }
-  RustBox &operator=(const RustBox &other) {
+  Box &operator=(const Box &other) {
     if (this != &other) {
       if (this->repr) {
         **this = *other;
@@ -82,7 +80,7 @@ public:
     }
     return *this;
   }
-  RustBox &operator=(RustBox &&other) noexcept {
+  Box &operator=(Box &&other) noexcept {
     if (this->repr) {
       this->drop();
     }
@@ -90,7 +88,7 @@ public:
     other.repr = 0;
     return *this;
   }
-  ~RustBox() noexcept {
+  ~Box() noexcept {
     if (this->repr) {
       this->drop();
     }
@@ -103,8 +101,8 @@ public:
 
   // Important: requires that `raw` came from an into_raw call. Do not pass a
   // pointer from `new` or any other source.
-  static RustBox from_raw(T *raw) noexcept {
-    RustBox box;
+  static Box from_raw(T *raw) noexcept {
+    Box box;
     box.set_raw(raw);
     return box;
   }
@@ -116,7 +114,7 @@ public:
   }
 
 private:
-  RustBox() noexcept {}
+  Box() noexcept {}
   void uninit() noexcept;
   void set_raw(T *) noexcept;
   T *get_raw() noexcept;
@@ -127,7 +125,8 @@ private:
 };
 #endif // CXXBRIDGE01_RUST_BOX
 
-std::ostream &operator<<(std::ostream &os, const RustString &s);
-std::ostream &operator<<(std::ostream &os, const RustStr &s);
+std::ostream &operator<<(std::ostream &os, const String &s);
+std::ostream &operator<<(std::ostream &os, const Str &s);
 
-} // namespace cxxbridge01
+} // inline namespace cxxbridge01
+} // namespace rust
