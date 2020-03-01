@@ -19,8 +19,7 @@ void cxxbridge01$rust_string$clone(rust::String *self,
 bool cxxbridge01$rust_string$from(rust::String *self, const char *ptr,
                                   size_t len) noexcept;
 void cxxbridge01$rust_string$drop(rust::String *self) noexcept;
-const char *
-cxxbridge01$rust_string$ptr(const rust::String *self) noexcept;
+const char *cxxbridge01$rust_string$ptr(const rust::String *self) noexcept;
 size_t cxxbridge01$rust_string$len(const rust::String *self) noexcept;
 
 // rust::Str
@@ -96,8 +95,7 @@ std::ostream &operator<<(std::ostream &os, const String &s) {
   return os;
 }
 
-Str::Str() noexcept
-    : repr(Repr{reinterpret_cast<const char *>(this), 0}) {}
+Str::Str() noexcept : repr(Repr{reinterpret_cast<const char *>(this), 0}) {}
 
 Str::Str(const char *s) : repr(Repr{s, strlen(s)}) {
   if (!cxxbridge01$rust_str$valid(this->repr.ptr, this->repr.len)) {
@@ -137,7 +135,7 @@ std::ostream &operator<<(std::ostream &os, const Str &s) {
   return os;
 }
 
-} // inline namespace cxxbridge01
+} // namespace cxxbridge01
 } // namespace rust
 
 extern "C" {

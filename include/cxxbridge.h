@@ -128,5 +128,5 @@ private:
 std::ostream &operator<<(std::ostream &os, const String &s);
 std::ostream &operator<<(std::ostream &os, const Str &s);
 
-} // inline namespace cxxbridge01
+} // namespace cxxbridge01
 } // namespace rust
