@@ -4,10 +4,8 @@
 #include <iostream>
 #include <string>
 
-namespace cxxbridge01 {}
-namespace cxxbridge = cxxbridge01;
-
-namespace cxxbridge01 {
+namespace rust {
+inline namespace cxxbridge01 {
 
 class String final {
 public:
@@ -130,4 +128,5 @@ private:
 std::ostream &operator<<(std::ostream &os, const String &s);
 std::ostream &operator<<(std::ostream &os, const Str &s);
 
-} // namespace cxxbridge01
+} // inline namespace cxxbridge01
+} // namespace rust
