@@ -19,12 +19,12 @@ std::unique_ptr<C> c_return_unique_ptr() {
 
 const size_t &c_return_ref(const Shared &shared) { return shared.z; }
 
-rust::str c_return_str(const Shared &shared) {
+rust::Str c_return_str(const Shared &shared) {
   (void)shared;
   return "2020";
 }
 
-rust::string c_return_rust_string() { return "2020"; }
+rust::String c_return_rust_string() { return "2020"; }
 
 std::unique_ptr<std::string> c_return_unique_ptr_string() {
   return std::unique_ptr<std::string>(new std::string("2020"));
@@ -42,7 +42,7 @@ void c_take_shared(Shared shared) {
   }
 }
 
-void c_take_box(rust::box<R> r) {
+void c_take_box(rust::Box<R> r) {
   (void)r;
   cxx_test_suite_set_correct();
 }
@@ -61,13 +61,13 @@ void c_take_ref_c(const C &c) {
   }
 }
 
-void c_take_str(rust::str s) {
+void c_take_str(rust::Str s) {
   if (std::string(s) == "2020") {
     cxx_test_suite_set_correct();
   }
 }
 
-void c_take_rust_string(rust::string s) {
+void c_take_rust_string(rust::String s) {
   if (std::string(s) == "2020") {
     cxx_test_suite_set_correct();
   }
@@ -99,8 +99,8 @@ extern "C" const char *cxx_run_test() noexcept {
   r_take_shared(Shared{2020});
   r_take_unique_ptr(std::unique_ptr<C>(new C{2020}));
   r_take_ref_c(C{2020});
-  r_take_str(rust::str("2020"));
-  // TODO r_take_rust_string(rust::string("2020"));
+  r_take_str(rust::Str("2020"));
+  // TODO r_take_rust_string(rust::String("2020"));
   r_take_unique_ptr_string(
       std::unique_ptr<std::string>(new std::string("2020")));
 
