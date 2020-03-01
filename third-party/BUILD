@@ -72,7 +72,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro-error",
-    srcs = glob(["vendor/proc-macro-error-0.4.9/src/**"]),
+    srcs = glob(["vendor/proc-macro-error-0.4.10/src/**"]),
     rustc_flags = ["--cfg=use_fallback"],
     deps = [
         ":proc-macro-error-attr",
@@ -84,12 +84,11 @@ rust_library(
 
 rust_library(
     name = "proc-macro-error-attr",
-    srcs = glob(["vendor/proc-macro-error-attr-0.4.9/src/**"]),
+    srcs = glob(["vendor/proc-macro-error-attr-0.4.10/src/**"]),
     crate_type = "proc-macro",
     deps = [
         ":proc-macro2",
         ":quote",
-        ":rustversion",
         ":syn",
         ":syn-mid",
     ],
@@ -97,7 +96,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.8/src/**"]),
+    srcs = glob(["vendor/proc-macro2-1.0.9/src/**"]),
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -120,39 +119,8 @@ rust_library(
 )
 
 rust_library(
-    name = "rustversion",
-    srcs = glob(["vendor/rustversion-1.0.2/src/**"]),
-    crate_type = "proc-macro",
-    out_dir_tar = ":rustversion_buildscript_outdir",
-    deps = [
-        ":proc-macro2",
-        ":quote",
-        ":syn",
-    ],
-)
-
-rust_binary(
-    name = "rustversion_buildscript",
-    srcs = glob(["vendor/rustversion-1.0.2/build/**"]),
-    crate_root = "vendor/rustversion-1.0.2/build/build.rs",
-)
-
-pkg_tar(
-    name = "rustversion_buildscript_outdir",
-    srcs = [":rustversion_buildscript_run"],
-    extension = "tar.gz",
-)
-
-genrule(
-    name = "rustversion_buildscript_run",
-    outs = ["version.rs"],
-    cmd = "OUT_DIR=$(@D) $(location :rustversion_buildscript)",
-    tools = [":rustversion_buildscript"],
-)
-
-rust_library(
     name = "structopt",
-    srcs = glob(["vendor/structopt-0.3.9/src/**"]),
+    srcs = glob(["vendor/structopt-0.3.11/src/**"]),
     visibility = ["//visibility:public"],
     deps = [
         ":clap",
@@ -163,7 +131,7 @@ rust_library(
 
 rust_library(
     name = "structopt-derive",
-    srcs = glob(["vendor/structopt-derive-0.4.2/src/**"]),
+    srcs = glob(["vendor/structopt-derive-0.4.4/src/**"]),
     crate_type = "proc-macro",
     deps = [
         ":heck",
@@ -176,7 +144,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.15/src/**"]),
+    srcs = glob(["vendor/syn-1.0.16/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
