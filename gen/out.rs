@@ -5,8 +5,7 @@ pub(crate) struct OutFile {
     pub header: bool,
     content: Vec<u8>,
     section_pending: bool,
-    blocks: Vec<&'static str>,
-    blocks_pending: usize,
+    blocks_pending: Vec<&'static str>,
 }
 
 impl OutFile {
@@ -16,8 +15,7 @@ impl OutFile {
             header,
             content: Vec::new(),
             section_pending: false,
-            blocks: Vec::new(),
-            blocks_pending: 0,
+            blocks_pending: Vec::new(),
         }
     }
 
@@ -27,17 +25,13 @@ impl OutFile {
     }
 
     pub fn begin_block(&mut self, block: &'static str) {
-        self.blocks.push(block);
-        self.blocks_pending += 1;
+        self.blocks_pending.push(block);
     }
 
-    pub fn end_block(&mut self) {
-        if self.blocks_pending > 0 {
-            self.blocks_pending -= 1;
-        } else {
+    pub fn end_block(&mut self, block: &'static str) {
+        if self.blocks_pending.pop().is_none() {
             self.content.extend_from_slice(b"} // ");
-            self.content
-                .extend_from_slice(self.blocks.pop().unwrap().as_bytes());
+            self.content.extend_from_slice(block.as_bytes());
             self.content.push(b'\n');
             self.section_pending = true;
         }
@@ -51,13 +45,12 @@ impl OutFile {
 impl Write for OutFile {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         if !s.is_empty() {
-            if self.blocks_pending > 0 {
+            if !self.blocks_pending.is_empty() {
                 self.content.push(b'\n');
-                for block in &self.blocks[self.blocks.len() - self.blocks_pending..] {
+                for block in self.blocks_pending.drain(..) {
                     self.content.extend_from_slice(block.as_bytes());
                     self.content.extend_from_slice(b" {\n");
                 }
-                self.blocks_pending = 0;
                 self.section_pending = false;
             } else if self.section_pending {
                 self.content.push(b'\n');

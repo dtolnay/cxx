@@ -54,7 +54,7 @@ pub(super) fn gen(namespace: Vec<String>, apis: &[Api], types: &Types, header: b
             out.next_section();
             write(out, efn, types);
         }
-        out.end_block();
+        out.end_block("extern \"C\"");
     }
 
     for api in apis {
@@ -125,8 +125,8 @@ fn write_include_cxxbridge(out: &mut OutFile, types: &Types) {
             }
         }
     }
-    out.end_block();
-    out.end_block();
+    out.end_block("namespace cxxbridge01");
+    out.end_block("namespace rust");
 }
 
 fn write_struct(out: &mut OutFile, strct: &Struct) {
@@ -434,7 +434,7 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
             }
         }
     }
-    out.end_block();
+    out.end_block("extern \"C\"");
 
     out.begin_block("namespace rust");
     out.begin_block("inline namespace cxxbridge01");
@@ -445,8 +445,8 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
             }
         }
     }
-    out.end_block();
-    out.end_block();
+    out.end_block("namespace cxxbridge01");
+    out.end_block("namespace rust");
 }
 
 fn write_rust_box_extern(out: &mut OutFile, ident: &Ident) {
