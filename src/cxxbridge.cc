@@ -25,7 +25,7 @@ const char *
 cxxbridge01$rust_string$ptr(const cxxbridge::String *self) noexcept;
 size_t cxxbridge01$rust_string$len(const cxxbridge::String *self) noexcept;
 
-// RustStr
+// cxxbridge::Str
 bool cxxbridge01$rust_str$valid(const char *ptr, size_t len) noexcept;
 } // extern "C"
 
@@ -97,43 +97,43 @@ std::ostream &operator<<(std::ostream &os, const String &s) {
   return os;
 }
 
-RustStr::RustStr() noexcept
+Str::Str() noexcept
     : repr(Repr{reinterpret_cast<const char *>(this), 0}) {}
 
-RustStr::RustStr(const char *s) : repr(Repr{s, strlen(s)}) {
+Str::Str(const char *s) : repr(Repr{s, strlen(s)}) {
   if (!cxxbridge01$rust_str$valid(this->repr.ptr, this->repr.len)) {
-    throw std::invalid_argument("data for RustStr is not utf-8");
+    throw std::invalid_argument("data for cxxbridge::Str is not utf-8");
   }
 }
 
-RustStr::RustStr(const std::string &s) : repr(Repr{s.data(), s.length()}) {
+Str::Str(const std::string &s) : repr(Repr{s.data(), s.length()}) {
   if (!cxxbridge01$rust_str$valid(this->repr.ptr, this->repr.len)) {
-    throw std::invalid_argument("data for RustStr is not utf-8");
+    throw std::invalid_argument("data for cxxbridge::Str is not utf-8");
   }
 }
 
-RustStr::RustStr(const RustStr &) noexcept = default;
+Str::Str(const Str &) noexcept = default;
 
-RustStr &RustStr::operator=(RustStr other) noexcept {
+Str &Str::operator=(Str other) noexcept {
   this->repr = other.repr;
   return *this;
 }
 
-RustStr::operator std::string() const {
+Str::operator std::string() const {
   return std::string(this->data(), this->size());
 }
 
-const char *RustStr::data() const noexcept { return this->repr.ptr; }
+const char *Str::data() const noexcept { return this->repr.ptr; }
 
-size_t RustStr::size() const noexcept { return this->repr.len; }
+size_t Str::size() const noexcept { return this->repr.len; }
 
-size_t RustStr::length() const noexcept { return this->repr.len; }
+size_t Str::length() const noexcept { return this->repr.len; }
 
-RustStr::RustStr(Repr repr_) noexcept : repr(repr_) {}
+Str::Str(Repr repr_) noexcept : repr(repr_) {}
 
-RustStr::operator Repr() noexcept { return this->repr; }
+Str::operator Repr() noexcept { return this->repr; }
 
-std::ostream &operator<<(std::ostream &os, const RustStr &s) {
+std::ostream &operator<<(std::ostream &os, const Str &s) {
   os.write(s.data(), s.size());
   return os;
 }

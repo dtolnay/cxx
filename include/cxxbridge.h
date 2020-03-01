@@ -31,14 +31,14 @@ private:
   std::array<uintptr_t, 3> repr;
 };
 
-class RustStr final {
+class Str final {
 public:
-  RustStr() noexcept;
-  RustStr(const char *s);
-  RustStr(const std::string &s);
-  RustStr(std::string &&s) = delete;
-  RustStr(const RustStr &other) noexcept;
-  RustStr &operator=(RustStr other) noexcept;
+  Str() noexcept;
+  Str(const char *s);
+  Str(const std::string &s);
+  Str(std::string &&s) = delete;
+  Str(const Str &other) noexcept;
+  Str &operator=(Str other) noexcept;
   operator std::string() const;
 
   // Note: no null terminator.
@@ -54,7 +54,7 @@ public:
     const char *ptr;
     size_t len;
   };
-  RustStr(Repr repr) noexcept;
+  Str(Repr repr) noexcept;
   operator Repr() noexcept;
 
 private:
@@ -128,6 +128,6 @@ private:
 #endif // CXXBRIDGE01_RUST_BOX
 
 std::ostream &operator<<(std::ostream &os, const String &s);
-std::ostream &operator<<(std::ostream &os, const RustStr &s);
+std::ostream &operator<<(std::ostream &os, const Str &s);
 
 } // namespace cxxbridge01

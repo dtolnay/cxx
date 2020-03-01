@@ -365,7 +365,7 @@ fn write_extern_return_type(out: &mut OutFile, ty: &Option<Type>, types: &Types)
             write_type(out, &ty.inner);
             write!(out, " *");
         }
-        Some(Type::Str(_)) => write!(out, "::cxxbridge::RustStr::Repr "),
+        Some(Type::Str(_)) => write!(out, "::cxxbridge::Str::Repr "),
         Some(ty) if types.needs_indirect_abi(ty) => write!(out, "void "),
         _ => write_return_type(out, ty),
     }
@@ -377,7 +377,7 @@ fn write_extern_arg(out: &mut OutFile, arg: &Var, types: &Types) {
             write_type_space(out, &ty.inner);
             write!(out, "*");
         }
-        Type::Str(_) => write!(out, "::cxxbridge::RustStr::Repr "),
+        Type::Str(_) => write!(out, "::cxxbridge::Str::Repr "),
         _ => write_type_space(out, &arg.ty),
     }
     if types.needs_indirect_abi(&arg.ty) {
@@ -422,7 +422,7 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write!(out, " &");
         }
         Type::Str(_) => {
-            write!(out, "::cxxbridge::RustStr");
+            write!(out, "::cxxbridge::Str");
         }
     }
 }
