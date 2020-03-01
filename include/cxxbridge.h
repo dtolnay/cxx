@@ -63,15 +63,15 @@ private:
 
 #ifndef CXXBRIDGE01_RUST_BOX
 #define CXXBRIDGE01_RUST_BOX
-template <typename T> class RustBox final {
+template <typename T> class Box final {
 public:
-  RustBox(const RustBox &other) : RustBox(*other) {}
-  RustBox(RustBox &&other) noexcept : repr(other.repr) { other.repr = 0; }
-  RustBox(const T &val) {
+  Box(const Box &other) : Box(*other) {}
+  Box(Box &&other) noexcept : repr(other.repr) { other.repr = 0; }
+  Box(const T &val) {
     this->uninit();
     ::new (this->deref_mut()) T(val);
   }
-  RustBox &operator=(const RustBox &other) {
+  Box &operator=(const Box &other) {
     if (this != &other) {
       if (this->repr) {
         **this = *other;
@@ -82,7 +82,7 @@ public:
     }
     return *this;
   }
-  RustBox &operator=(RustBox &&other) noexcept {
+  Box &operator=(Box &&other) noexcept {
     if (this->repr) {
       this->drop();
     }
@@ -90,7 +90,7 @@ public:
     other.repr = 0;
     return *this;
   }
-  ~RustBox() noexcept {
+  ~Box() noexcept {
     if (this->repr) {
       this->drop();
     }
@@ -103,8 +103,8 @@ public:
 
   // Important: requires that `raw` came from an into_raw call. Do not pass a
   // pointer from `new` or any other source.
-  static RustBox from_raw(T *raw) noexcept {
-    RustBox box;
+  static Box from_raw(T *raw) noexcept {
+    Box box;
     box.set_raw(raw);
     return box;
   }
@@ -116,7 +116,7 @@ public:
   }
 
 private:
-  RustBox() noexcept {}
+  Box() noexcept {}
   void uninit() noexcept;
   void set_raw(T *) noexcept;
   T *get_raw() noexcept;

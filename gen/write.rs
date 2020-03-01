@@ -405,7 +405,7 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             None => write!(out, "{}", ident),
         },
         Type::RustBox(ty) => {
-            write!(out, "::cxxbridge::RustBox<");
+            write!(out, "::cxxbridge::Box<");
             write_type(out, &ty.inner);
             write!(out, ">");
         }
@@ -482,27 +482,27 @@ fn write_rust_box_extern(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "#define CXXBRIDGE01_RUST_BOX_{}", instance);
     writeln!(
         out,
-        "void cxxbridge01$rust_box${}$uninit(::cxxbridge::RustBox<{}> *ptr) noexcept;",
+        "void cxxbridge01$rust_box${}$uninit(::cxxbridge::Box<{}> *ptr) noexcept;",
         instance, inner,
     );
     writeln!(
         out,
-        "void cxxbridge01$rust_box${}$set_raw(::cxxbridge::RustBox<{}> *ptr, {} *raw) noexcept;",
+        "void cxxbridge01$rust_box${}$set_raw(::cxxbridge::Box<{}> *ptr, {} *raw) noexcept;",
         instance, inner, inner
     );
     writeln!(
         out,
-        "void cxxbridge01$rust_box${}$drop(::cxxbridge::RustBox<{}> *ptr) noexcept;",
+        "void cxxbridge01$rust_box${}$drop(::cxxbridge::Box<{}> *ptr) noexcept;",
         instance, inner,
     );
     writeln!(
         out,
-        "const {} *cxxbridge01$rust_box${}$deref(const ::cxxbridge::RustBox<{}> *ptr) noexcept;",
+        "const {} *cxxbridge01$rust_box${}$deref(const ::cxxbridge::Box<{}> *ptr) noexcept;",
         inner, instance, inner,
     );
     writeln!(
         out,
-        "{} *cxxbridge01$rust_box${}$deref_mut(::cxxbridge::RustBox<{}> *ptr) noexcept;",
+        "{} *cxxbridge01$rust_box${}$deref_mut(::cxxbridge::Box<{}> *ptr) noexcept;",
         inner, instance, inner,
     );
     writeln!(out, "#endif // CXXBRIDGE01_RUST_BOX_{}", instance);
@@ -518,7 +518,7 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
     let instance = inner.replace("::", "$");
 
     writeln!(out, "template <>");
-    writeln!(out, "void RustBox<{}>::uninit() noexcept {{", inner);
+    writeln!(out, "void Box<{}>::uninit() noexcept {{", inner);
     writeln!(
         out,
         "  return cxxbridge01$rust_box${}$uninit(this);",
@@ -529,7 +529,7 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "template <>");
     writeln!(
         out,
-        "void RustBox<{}>::set_raw({} *raw) noexcept {{",
+        "void Box<{}>::set_raw({} *raw) noexcept {{",
         inner, inner,
     );
     writeln!(
@@ -540,7 +540,7 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
-    writeln!(out, "void RustBox<{}>::drop() noexcept {{", inner);
+    writeln!(out, "void Box<{}>::drop() noexcept {{", inner);
     writeln!(
         out,
         "  return cxxbridge01$rust_box${}$drop(this);",
@@ -551,7 +551,7 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "template <>");
     writeln!(
         out,
-        "const {} *RustBox<{}>::deref() const noexcept {{",
+        "const {} *Box<{}>::deref() const noexcept {{",
         inner, inner,
     );
     writeln!(
@@ -562,11 +562,7 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
-    writeln!(
-        out,
-        "{} *RustBox<{}>::deref_mut() noexcept {{",
-        inner, inner,
-    );
+    writeln!(out, "{} *Box<{}>::deref_mut() noexcept {{", inner, inner);
     writeln!(
         out,
         "  return cxxbridge01$rust_box${}$deref_mut(this);",

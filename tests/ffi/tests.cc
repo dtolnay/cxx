@@ -42,7 +42,7 @@ void c_take_shared(Shared shared) {
   }
 }
 
-void c_take_box(cxxbridge::RustBox<R> r) {
+void c_take_box(cxxbridge::Box<R> r) {
   (void)r;
   cxx_test_suite_set_correct();
 }
