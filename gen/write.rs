@@ -229,7 +229,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
             write_type(out, &arg.ty);
             write!(out, "({})", arg.ident);
         } else if types.needs_indirect_abi(&arg.ty) {
-            write!(out, "std::move(*{})", arg.ident);
+            write!(out, "::std::move(*{})", arg.ident);
         } else {
             write!(out, "{}", arg.ident);
         }
@@ -365,7 +365,7 @@ fn write_extern_return_type(out: &mut OutFile, ty: &Option<Type>, types: &Types)
             write_type(out, &ty.inner);
             write!(out, " *");
         }
-        Some(Type::Str(_)) => write!(out, "cxxbridge::RustStr::Repr "),
+        Some(Type::Str(_)) => write!(out, "::cxxbridge::RustStr::Repr "),
         Some(ty) if types.needs_indirect_abi(ty) => write!(out, "void "),
         _ => write_return_type(out, ty),
     }
@@ -377,7 +377,7 @@ fn write_extern_arg(out: &mut OutFile, arg: &Var, types: &Types) {
             write_type_space(out, &ty.inner);
             write!(out, "*");
         }
-        Type::Str(_) => write!(out, "cxxbridge::RustStr::Repr "),
+        Type::Str(_) => write!(out, "::cxxbridge::RustStr::Repr "),
         _ => write_type_space(out, &arg.ty),
     }
     if types.needs_indirect_abi(&arg.ty) {
@@ -400,17 +400,17 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             Some(I32) => write!(out, "int32_t"),
             Some(I64) => write!(out, "int64_t"),
             Some(Isize) => write!(out, "ssize_t"),
-            Some(CxxString) => write!(out, "std::string"),
-            Some(RustString) => write!(out, "cxxbridge::RustString"),
+            Some(CxxString) => write!(out, "::std::string"),
+            Some(RustString) => write!(out, "::cxxbridge::RustString"),
             None => write!(out, "{}", ident),
         },
         Type::RustBox(ty) => {
-            write!(out, "cxxbridge::RustBox<");
+            write!(out, "::cxxbridge::RustBox<");
             write_type(out, &ty.inner);
             write!(out, ">");
         }
         Type::UniquePtr(ptr) => {
-            write!(out, "std::unique_ptr<");
+            write!(out, "::std::unique_ptr<");
             write_type(out, &ptr.inner);
             write!(out, ">");
         }
@@ -422,7 +422,7 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write!(out, " &");
         }
         Type::Str(_) => {
-            write!(out, "cxxbridge::RustStr");
+            write!(out, "::cxxbridge::RustStr");
         }
     }
 }
@@ -482,27 +482,27 @@ fn write_rust_box_extern(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "#define CXXBRIDGE01_RUST_BOX_{}", instance);
     writeln!(
         out,
-        "void cxxbridge01$rust_box${}$uninit(cxxbridge::RustBox<{}> *ptr) noexcept;",
+        "void cxxbridge01$rust_box${}$uninit(::cxxbridge::RustBox<{}> *ptr) noexcept;",
         instance, inner,
     );
     writeln!(
         out,
-        "void cxxbridge01$rust_box${}$set_raw(cxxbridge::RustBox<{}> *ptr, {} *raw) noexcept;",
+        "void cxxbridge01$rust_box${}$set_raw(::cxxbridge::RustBox<{}> *ptr, {} *raw) noexcept;",
         instance, inner, inner
     );
     writeln!(
         out,
-        "void cxxbridge01$rust_box${}$drop(cxxbridge::RustBox<{}> *ptr) noexcept;",
+        "void cxxbridge01$rust_box${}$drop(::cxxbridge::RustBox<{}> *ptr) noexcept;",
         instance, inner,
     );
     writeln!(
         out,
-        "const {} *cxxbridge01$rust_box${}$deref(const cxxbridge::RustBox<{}> *ptr) noexcept;",
+        "const {} *cxxbridge01$rust_box${}$deref(const ::cxxbridge::RustBox<{}> *ptr) noexcept;",
         inner, instance, inner,
     );
     writeln!(
         out,
-        "{} *cxxbridge01$rust_box${}$deref_mut(cxxbridge::RustBox<{}> *ptr) noexcept;",
+        "{} *cxxbridge01$rust_box${}$deref_mut(::cxxbridge::RustBox<{}> *ptr) noexcept;",
         inner, instance, inner,
     );
     writeln!(out, "#endif // CXXBRIDGE01_RUST_BOX_{}", instance);
@@ -588,56 +588,56 @@ fn write_unique_ptr(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "#define CXXBRIDGE01_UNIQUE_PTR_{}", instance);
     writeln!(
         out,
-        "static_assert(sizeof(std::unique_ptr<{}>) == sizeof(void *), \"\");",
+        "static_assert(sizeof(::std::unique_ptr<{}>) == sizeof(void *), \"\");",
         inner,
     );
     writeln!(
         out,
-        "static_assert(alignof(std::unique_ptr<{}>) == alignof(void *), \"\");",
+        "static_assert(alignof(::std::unique_ptr<{}>) == alignof(void *), \"\");",
         inner,
     );
     writeln!(
         out,
-        "void cxxbridge01$unique_ptr${}$null(std::unique_ptr<{}> *ptr) noexcept {{",
+        "void cxxbridge01$unique_ptr${}$null(::std::unique_ptr<{}> *ptr) noexcept {{",
         instance, inner,
     );
-    writeln!(out, "  new (ptr) std::unique_ptr<{}>();", inner);
+    writeln!(out, "  new (ptr) ::std::unique_ptr<{}>();", inner);
     writeln!(out, "}}");
     writeln!(
         out,
-        "void cxxbridge01$unique_ptr${}$new(std::unique_ptr<{}> *ptr, {} *value) noexcept {{",
+        "void cxxbridge01$unique_ptr${}$new(::std::unique_ptr<{}> *ptr, {} *value) noexcept {{",
         instance, inner, inner,
     );
     writeln!(
         out,
-        "  new (ptr) std::unique_ptr<{}>(new {}(std::move(*value)));",
+        "  new (ptr) ::std::unique_ptr<{}>(new {}(::std::move(*value)));",
         inner, inner,
     );
     writeln!(out, "}}");
     writeln!(
         out,
-        "void cxxbridge01$unique_ptr${}$raw(std::unique_ptr<{}> *ptr, {} *raw) noexcept {{",
+        "void cxxbridge01$unique_ptr${}$raw(::std::unique_ptr<{}> *ptr, {} *raw) noexcept {{",
         instance, inner, inner,
     );
-    writeln!(out, "  new (ptr) std::unique_ptr<{}>(raw);", inner);
+    writeln!(out, "  new (ptr) ::std::unique_ptr<{}>(raw);", inner);
     writeln!(out, "}}");
     writeln!(
         out,
-        "const {} *cxxbridge01$unique_ptr${}$get(const std::unique_ptr<{}>& ptr) noexcept {{",
+        "const {} *cxxbridge01$unique_ptr${}$get(const ::std::unique_ptr<{}>& ptr) noexcept {{",
         inner, instance, inner,
     );
     writeln!(out, "  return ptr.get();");
     writeln!(out, "}}");
     writeln!(
         out,
-        "{} *cxxbridge01$unique_ptr${}$release(std::unique_ptr<{}>& ptr) noexcept {{",
+        "{} *cxxbridge01$unique_ptr${}$release(::std::unique_ptr<{}>& ptr) noexcept {{",
         inner, instance, inner,
     );
     writeln!(out, "  return ptr.release();");
     writeln!(out, "}}");
     writeln!(
         out,
-        "void cxxbridge01$unique_ptr${}$drop(std::unique_ptr<{}> *ptr) noexcept {{",
+        "void cxxbridge01$unique_ptr${}$drop(::std::unique_ptr<{}> *ptr) noexcept {{",
         instance, inner,
     );
     writeln!(out, "  ptr->~unique_ptr();");
