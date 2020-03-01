@@ -128,5 +128,10 @@ private:
 std::ostream &operator<<(std::ostream &os, const String &s);
 std::ostream &operator<<(std::ostream &os, const Str &s);
 
+// Snake case aliases for use in code that uses this style for type names.
+using string = String;
+using str = Str;
+template <class T> using box = Box<T>;
+
 } // namespace cxxbridge01
 } // namespace rust
