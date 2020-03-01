@@ -401,7 +401,7 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             Some(I64) => write!(out, "int64_t"),
             Some(Isize) => write!(out, "ssize_t"),
             Some(CxxString) => write!(out, "::std::string"),
-            Some(RustString) => write!(out, "::cxxbridge::RustString"),
+            Some(RustString) => write!(out, "::cxxbridge::String"),
             None => write!(out, "{}", ident),
         },
         Type::RustBox(ty) => {

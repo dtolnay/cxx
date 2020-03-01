@@ -14,16 +14,16 @@ size_t cxxbridge01$cxx_string$length(const std::string &s) noexcept {
   return s.length();
 }
 
-// RustString
-void cxxbridge01$rust_string$new(cxxbridge::RustString *self) noexcept;
-void cxxbridge01$rust_string$clone(cxxbridge::RustString *self,
-                                   const cxxbridge::RustString &other) noexcept;
-bool cxxbridge01$rust_string$from(cxxbridge::RustString *self, const char *ptr,
+// cxxbridge::String
+void cxxbridge01$rust_string$new(cxxbridge::String *self) noexcept;
+void cxxbridge01$rust_string$clone(cxxbridge::String *self,
+                                   const cxxbridge::String &other) noexcept;
+bool cxxbridge01$rust_string$from(cxxbridge::String *self, const char *ptr,
                                   size_t len) noexcept;
-void cxxbridge01$rust_string$drop(cxxbridge::RustString *self) noexcept;
+void cxxbridge01$rust_string$drop(cxxbridge::String *self) noexcept;
 const char *
-cxxbridge01$rust_string$ptr(const cxxbridge::RustString *self) noexcept;
-size_t cxxbridge01$rust_string$len(const cxxbridge::RustString *self) noexcept;
+cxxbridge01$rust_string$ptr(const cxxbridge::String *self) noexcept;
+size_t cxxbridge01$rust_string$len(const cxxbridge::String *self) noexcept;
 
 // RustStr
 bool cxxbridge01$rust_str$valid(const char *ptr, size_t len) noexcept;
@@ -31,39 +31,39 @@ bool cxxbridge01$rust_str$valid(const char *ptr, size_t len) noexcept;
 
 namespace cxxbridge01 {
 
-RustString::RustString() noexcept { cxxbridge01$rust_string$new(this); }
+String::String() noexcept { cxxbridge01$rust_string$new(this); }
 
-RustString::RustString(const RustString &other) noexcept {
+String::String(const String &other) noexcept {
   cxxbridge01$rust_string$clone(this, other);
 }
 
-RustString::RustString(RustString &&other) noexcept {
+String::String(String &&other) noexcept {
   this->repr = other.repr;
   cxxbridge01$rust_string$new(&other);
 }
 
-RustString::RustString(const char *s) {
+String::String(const char *s) {
   auto len = strlen(s);
   if (!cxxbridge01$rust_string$from(this, s, len)) {
-    throw std::invalid_argument("data for RustString is not utf-8");
+    throw std::invalid_argument("data for cxxbridge::String is not utf-8");
   }
 }
 
-RustString::RustString(const std::string &s) {
+String::String(const std::string &s) {
   auto ptr = s.data();
   auto len = s.length();
   if (!cxxbridge01$rust_string$from(this, ptr, len)) {
-    throw std::invalid_argument("data for RustString is not utf-8");
+    throw std::invalid_argument("data for cxxbridge::String is not utf-8");
   }
 }
 
-RustString::~RustString() noexcept { cxxbridge01$rust_string$drop(this); }
+String::~String() noexcept { cxxbridge01$rust_string$drop(this); }
 
-RustString::operator std::string() const {
+String::operator std::string() const {
   return std::string(this->data(), this->size());
 }
 
-RustString &RustString::operator=(const RustString &other) noexcept {
+String &String::operator=(const String &other) noexcept {
   if (this != &other) {
     cxxbridge01$rust_string$drop(this);
     cxxbridge01$rust_string$clone(this, other);
@@ -71,7 +71,7 @@ RustString &RustString::operator=(const RustString &other) noexcept {
   return *this;
 }
 
-RustString &RustString::operator=(RustString &&other) noexcept {
+String &String::operator=(String &&other) noexcept {
   if (this != &other) {
     cxxbridge01$rust_string$drop(this);
     this->repr = other.repr;
@@ -80,19 +80,19 @@ RustString &RustString::operator=(RustString &&other) noexcept {
   return *this;
 }
 
-const char *RustString::data() const noexcept {
+const char *String::data() const noexcept {
   return cxxbridge01$rust_string$ptr(this);
 }
 
-size_t RustString::size() const noexcept {
+size_t String::size() const noexcept {
   return cxxbridge01$rust_string$len(this);
 }
 
-size_t RustString::length() const noexcept {
+size_t String::length() const noexcept {
   return cxxbridge01$rust_string$len(this);
 }
 
-std::ostream &operator<<(std::ostream &os, const RustString &s) {
+std::ostream &operator<<(std::ostream &os, const String &s) {
   os.write(s.data(), s.size());
   return os;
 }

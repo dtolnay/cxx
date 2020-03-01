@@ -302,7 +302,7 @@
 //!
 //! <table>
 //! <tr><th>name in Rust</th><th>name in C++</th><th>restrictions</th></tr>
-//! <tr><td>String</td><td>cxxbridge::RustString</td><td></td></tr>
+//! <tr><td>String</td><td>cxxbridge::String</td><td></td></tr>
 //! <tr><td>&amp;str</td><td>cxxbridge::RustStr</td><td></td></tr>
 //! <tr><td><a href="https://docs.rs/cxx/0.1/cxx/struct.CxxString.html">CxxString</a></td><td>std::string</td><td><sup><i>cannot be passed by value</i></sup></td></tr>
 //! <tr><td>Box&lt;T&gt;</td><td>cxxbridge::RustBox&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>

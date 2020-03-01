@@ -9,16 +9,16 @@ namespace cxxbridge = cxxbridge01;
 
 namespace cxxbridge01 {
 
-class RustString final {
+class String final {
 public:
-  RustString() noexcept;
-  RustString(const RustString &other) noexcept;
-  RustString(RustString &&other) noexcept;
-  RustString(const char *s);
-  RustString(const std::string &s);
-  RustString &operator=(const RustString &other) noexcept;
-  RustString &operator=(RustString &&other) noexcept;
-  ~RustString() noexcept;
+  String() noexcept;
+  String(const String &other) noexcept;
+  String(String &&other) noexcept;
+  String(const char *s);
+  String(const std::string &s);
+  String &operator=(const String &other) noexcept;
+  String &operator=(String &&other) noexcept;
+  ~String() noexcept;
   operator std::string() const;
 
   // Note: no null terminator.
@@ -127,7 +127,7 @@ private:
 };
 #endif // CXXBRIDGE01_RUST_BOX
 
-std::ostream &operator<<(std::ostream &os, const RustString &s);
+std::ostream &operator<<(std::ostream &os, const String &s);
 std::ostream &operator<<(std::ostream &os, const RustStr &s);
 
 } // namespace cxxbridge01

@@ -24,7 +24,7 @@ cxxbridge::RustStr c_return_str(const Shared &shared) {
   return "2020";
 }
 
-cxxbridge::RustString c_return_rust_string() { return "2020"; }
+cxxbridge::String c_return_rust_string() { return "2020"; }
 
 std::unique_ptr<std::string> c_return_unique_ptr_string() {
   return std::unique_ptr<std::string>(new std::string("2020"));
@@ -67,7 +67,7 @@ void c_take_str(cxxbridge::RustStr s) {
   }
 }
 
-void c_take_rust_string(cxxbridge::RustString s) {
+void c_take_rust_string(cxxbridge::String s) {
   if (std::string(s) == "2020") {
     cxx_test_suite_set_correct();
   }
@@ -100,7 +100,7 @@ extern "C" const char *cxx_run_test() noexcept {
   r_take_unique_ptr(std::unique_ptr<C>(new C{2020}));
   r_take_ref_c(C{2020});
   r_take_str(cxxbridge::RustStr("2020"));
-  // TODO r_take_rust_string(cxxbridge::RustString("2020"));
+  // TODO r_take_rust_string(cxxbridge::String("2020"));
   r_take_unique_ptr_string(
       std::unique_ptr<std::string>(new std::string("2020")));
 
