@@ -38,9 +38,9 @@ public:
   Str() noexcept;
   Str(const Str &) noexcept;
 
-  Str(const std::string &s);
-  Str(const char *s);
-  Str(std::string &&s) = delete;
+  Str(const std::string &);
+  Str(const char *);
+  Str(std::string &&) = delete;
 
   Str &operator=(Str) noexcept;
 
@@ -137,8 +137,8 @@ private:
 };
 #endif // CXXBRIDGE01_RUST_BOX
 
-std::ostream &operator<<(std::ostream &os, const String &s);
-std::ostream &operator<<(std::ostream &os, const Str &s);
+std::ostream &operator<<(std::ostream &, const String &);
+std::ostream &operator<<(std::ostream &, const Str &);
 
 // Snake case aliases for use in code that uses this style for type names.
 using string = String;
