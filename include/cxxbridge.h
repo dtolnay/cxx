@@ -10,13 +10,16 @@ inline namespace cxxbridge01 {
 class String final {
 public:
   String() noexcept;
-  String(const String &other) noexcept;
-  String(String &&other) noexcept;
-  String(const char *s);
-  String(const std::string &s);
-  String &operator=(const String &other) noexcept;
-  String &operator=(String &&other) noexcept;
+  String(const String &) noexcept;
+  String(String &&) noexcept;
   ~String() noexcept;
+
+  String(const std::string &);
+  String(const char *);
+
+  String &operator=(const String &) noexcept;
+  String &operator=(String &&) noexcept;
+
   explicit operator std::string() const;
 
   // Note: no null terminator.
@@ -32,11 +35,14 @@ private:
 class Str final {
 public:
   Str() noexcept;
-  Str(const char *s);
+  Str(const Str &) noexcept;
+
   Str(const std::string &s);
+  Str(const char *s);
   Str(std::string &&s) = delete;
-  Str(const Str &other) noexcept;
-  Str &operator=(Str other) noexcept;
+
+  Str &operator=(Str) noexcept;
+
   explicit operator std::string() const;
 
   // Note: no null terminator.
@@ -52,7 +58,7 @@ public:
     const char *ptr;
     size_t len;
   };
-  Str(Repr repr) noexcept;
+  Str(Repr) noexcept;
   explicit operator Repr() noexcept;
 
 private:

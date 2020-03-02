@@ -41,12 +41,7 @@ String::String(String &&other) noexcept {
   cxxbridge01$rust_string$new(&other);
 }
 
-String::String(const char *s) {
-  auto len = strlen(s);
-  if (!cxxbridge01$rust_string$from(this, s, len)) {
-    throw std::invalid_argument("data for rust::String is not utf-8");
-  }
-}
+String::~String() noexcept { cxxbridge01$rust_string$drop(this); }
 
 String::String(const std::string &s) {
   auto ptr = s.data();
@@ -56,10 +51,11 @@ String::String(const std::string &s) {
   }
 }
 
-String::~String() noexcept { cxxbridge01$rust_string$drop(this); }
-
-String::operator std::string() const {
-  return std::string(this->data(), this->size());
+String::String(const char *s) {
+  auto len = strlen(s);
+  if (!cxxbridge01$rust_string$from(this, s, len)) {
+    throw std::invalid_argument("data for rust::String is not utf-8");
+  }
 }
 
 String &String::operator=(const String &other) noexcept {
@@ -77,6 +73,10 @@ String &String::operator=(String &&other) noexcept {
     cxxbridge01$rust_string$new(&other);
   }
   return *this;
+}
+
+String::operator std::string() const {
+  return std::string(this->data(), this->size());
 }
 
 const char *String::data() const noexcept {
@@ -98,11 +98,7 @@ std::ostream &operator<<(std::ostream &os, const String &s) {
 
 Str::Str() noexcept : repr(Repr{reinterpret_cast<const char *>(this), 0}) {}
 
-Str::Str(const char *s) : repr(Repr{s, strlen(s)}) {
-  if (!cxxbridge01$rust_str$valid(this->repr.ptr, this->repr.len)) {
-    throw std::invalid_argument("data for rust::Str is not utf-8");
-  }
-}
+Str::Str(const Str &) noexcept = default;
 
 Str::Str(const std::string &s) : repr(Repr{s.data(), s.length()}) {
   if (!cxxbridge01$rust_str$valid(this->repr.ptr, this->repr.len)) {
@@ -110,7 +106,11 @@ Str::Str(const std::string &s) : repr(Repr{s.data(), s.length()}) {
   }
 }
 
-Str::Str(const Str &) noexcept = default;
+Str::Str(const char *s) : repr(Repr{s, strlen(s)}) {
+  if (!cxxbridge01$rust_str$valid(this->repr.ptr, this->repr.len)) {
+    throw std::invalid_argument("data for rust::Str is not utf-8");
+  }
+}
 
 Str &Str::operator=(Str other) noexcept {
   this->repr = other.repr;
