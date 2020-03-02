@@ -53,7 +53,7 @@ public:
     size_t len;
   };
   Str(Repr repr) noexcept;
-  operator Repr() noexcept;
+  explicit operator Repr() noexcept;
 
 private:
   Repr repr;
