@@ -293,7 +293,7 @@ fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Type
 }
 
 fn expand_rust_box(namespace: &Namespace, ident: &Ident) -> TokenStream {
-    let link_prefix = format!("cxxbridge01$rust_box${}{}$", namespace, ident);
+    let link_prefix = format!("cxxbridge01$box${}{}$", namespace, ident);
     let link_uninit = format!("{}uninit", link_prefix);
     let link_set_raw = format!("{}set_raw", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
