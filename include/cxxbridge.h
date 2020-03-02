@@ -129,7 +129,6 @@ private:
   Box() noexcept {}
   void uninit() noexcept;
   void set_raw(pointer) noexcept;
-  pointer get_raw() noexcept;
   void drop() noexcept;
   const_pointer deref() const noexcept;
   pointer deref_mut() noexcept;
