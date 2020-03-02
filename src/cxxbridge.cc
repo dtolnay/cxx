@@ -1,5 +1,6 @@
 #include "../include/cxxbridge.h"
 #include <cstring>
+#include <iostream>
 #include <memory>
 #include <stdexcept>
 
