@@ -128,11 +128,11 @@ public:
 private:
   Box() noexcept {}
   void uninit() noexcept;
-  void set_raw(T *) noexcept;
-  T *get_raw() noexcept;
+  void set_raw(pointer) noexcept;
+  pointer get_raw() noexcept;
   void drop() noexcept;
-  const T *deref() const noexcept;
-  T *deref_mut() noexcept;
+  const_pointer deref() const noexcept;
+  pointer deref_mut() noexcept;
   uintptr_t repr;
 };
 #endif // CXXBRIDGE01_RUST_BOX
