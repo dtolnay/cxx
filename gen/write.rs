@@ -191,8 +191,10 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         write!(out, "(");
     } else if let Some(ret) = &efn.ret {
         write!(out, "return ");
-        if let Type::Ref(_) = ret {
-            write!(out, "&");
+        match ret {
+            Type::Ref(_) => write!(out, "&"),
+            Type::Str(_) => write!(out, "::rust::Str::Repr("),
+            _ => {}
         }
     }
     write!(out, "{}$(", efn.ident);
@@ -216,6 +218,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     match &efn.ret {
         Some(Type::RustBox(_)) => write!(out, ".into_raw()"),
         Some(Type::UniquePtr(_)) => write!(out, ".release()"),
+        Some(Type::Str(_)) => write!(out, ")"),
         _ => {}
     }
     if indirect_return {
@@ -293,13 +296,16 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
             if i > 0 {
                 write!(out, ", ");
             }
-            if types.needs_indirect_abi(&arg.ty) {
-                write!(out, "&");
+            match &arg.ty {
+                Type::Str(_) => write!(out, "::rust::Str::Repr("),
+                ty if types.needs_indirect_abi(ty) => write!(out, "&"),
+                _ => {}
             }
             write!(out, "{}", arg.ident);
             match arg.ty {
                 Type::RustBox(_) => write!(out, ".into_raw()"),
                 Type::UniquePtr(_) => write!(out, ".release()"),
+                Type::Str(_) => write!(out, ")"),
                 _ => {}
             }
         }

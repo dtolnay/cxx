@@ -17,7 +17,7 @@ public:
   String &operator=(const String &other) noexcept;
   String &operator=(String &&other) noexcept;
   ~String() noexcept;
-  operator std::string() const;
+  explicit operator std::string() const;
 
   // Note: no null terminator.
   const char *data() const noexcept;
@@ -37,7 +37,7 @@ public:
   Str(std::string &&s) = delete;
   Str(const Str &other) noexcept;
   Str &operator=(Str other) noexcept;
-  operator std::string() const;
+  explicit operator std::string() const;
 
   // Note: no null terminator.
   const char *data() const noexcept;
@@ -53,7 +53,7 @@ public:
     size_t len;
   };
   Str(Repr repr) noexcept;
-  operator Repr() noexcept;
+  explicit operator Repr() noexcept;
 
 private:
   Repr repr;
