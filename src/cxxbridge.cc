@@ -14,63 +14,63 @@ size_t cxxbridge01$cxx_string$length(const std::string &s) noexcept {
 }
 
 // rust::String
-void cxxbridge01$rust_string$new(rust::String *self) noexcept;
-void cxxbridge01$rust_string$clone(rust::String *self,
-                                   const rust::String &other) noexcept;
-bool cxxbridge01$rust_string$from(rust::String *self, const char *ptr,
-                                  size_t len) noexcept;
-void cxxbridge01$rust_string$drop(rust::String *self) noexcept;
-const char *cxxbridge01$rust_string$ptr(const rust::String *self) noexcept;
-size_t cxxbridge01$rust_string$len(const rust::String *self) noexcept;
+void cxxbridge01$string$new(rust::String *self) noexcept;
+void cxxbridge01$string$clone(rust::String *self,
+                              const rust::String &other) noexcept;
+bool cxxbridge01$string$from(rust::String *self, const char *ptr,
+                             size_t len) noexcept;
+void cxxbridge01$string$drop(rust::String *self) noexcept;
+const char *cxxbridge01$string$ptr(const rust::String *self) noexcept;
+size_t cxxbridge01$string$len(const rust::String *self) noexcept;
 
 // rust::Str
-bool cxxbridge01$rust_str$valid(const char *ptr, size_t len) noexcept;
+bool cxxbridge01$str$valid(const char *ptr, size_t len) noexcept;
 } // extern "C"
 
 namespace rust {
 inline namespace cxxbridge01 {
 
-String::String() noexcept { cxxbridge01$rust_string$new(this); }
+String::String() noexcept { cxxbridge01$string$new(this); }
 
 String::String(const String &other) noexcept {
-  cxxbridge01$rust_string$clone(this, other);
+  cxxbridge01$string$clone(this, other);
 }
 
 String::String(String &&other) noexcept {
   this->repr = other.repr;
-  cxxbridge01$rust_string$new(&other);
+  cxxbridge01$string$new(&other);
 }
 
-String::~String() noexcept { cxxbridge01$rust_string$drop(this); }
+String::~String() noexcept { cxxbridge01$string$drop(this); }
 
 String::String(const std::string &s) {
   auto ptr = s.data();
   auto len = s.length();
-  if (!cxxbridge01$rust_string$from(this, ptr, len)) {
+  if (!cxxbridge01$string$from(this, ptr, len)) {
     throw std::invalid_argument("data for rust::String is not utf-8");
   }
 }
 
 String::String(const char *s) {
   auto len = strlen(s);
-  if (!cxxbridge01$rust_string$from(this, s, len)) {
+  if (!cxxbridge01$string$from(this, s, len)) {
     throw std::invalid_argument("data for rust::String is not utf-8");
   }
 }
 
 String &String::operator=(const String &other) noexcept {
   if (this != &other) {
-    cxxbridge01$rust_string$drop(this);
-    cxxbridge01$rust_string$clone(this, other);
+    cxxbridge01$string$drop(this);
+    cxxbridge01$string$clone(this, other);
   }
   return *this;
 }
 
 String &String::operator=(String &&other) noexcept {
   if (this != &other) {
-    cxxbridge01$rust_string$drop(this);
+    cxxbridge01$string$drop(this);
     this->repr = other.repr;
-    cxxbridge01$rust_string$new(&other);
+    cxxbridge01$string$new(&other);
   }
   return *this;
 }
@@ -80,16 +80,12 @@ String::operator std::string() const {
 }
 
 const char *String::data() const noexcept {
-  return cxxbridge01$rust_string$ptr(this);
+  return cxxbridge01$string$ptr(this);
 }
 
-size_t String::size() const noexcept {
-  return cxxbridge01$rust_string$len(this);
-}
+size_t String::size() const noexcept { return cxxbridge01$string$len(this); }
 
-size_t String::length() const noexcept {
-  return cxxbridge01$rust_string$len(this);
-}
+size_t String::length() const noexcept { return cxxbridge01$string$len(this); }
 
 std::ostream &operator<<(std::ostream &os, const String &s) {
   os.write(s.data(), s.size());
@@ -101,13 +97,13 @@ Str::Str() noexcept : repr(Repr{reinterpret_cast<const char *>(this), 0}) {}
 Str::Str(const Str &) noexcept = default;
 
 Str::Str(const std::string &s) : repr(Repr{s.data(), s.length()}) {
-  if (!cxxbridge01$rust_str$valid(this->repr.ptr, this->repr.len)) {
+  if (!cxxbridge01$str$valid(this->repr.ptr, this->repr.len)) {
     throw std::invalid_argument("data for rust::Str is not utf-8");
   }
 }
 
 Str::Str(const char *s) : repr(Repr{s, strlen(s)}) {
-  if (!cxxbridge01$rust_str$valid(this->repr.ptr, this->repr.len)) {
+  if (!cxxbridge01$str$valid(this->repr.ptr, this->repr.len)) {
     throw std::invalid_argument("data for rust::Str is not utf-8");
   }
 }
