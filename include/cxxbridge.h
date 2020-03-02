@@ -1,7 +1,7 @@
 #pragma once
 #include <array>
 #include <cstdint>
-#include <iostream>
+#include <iosfwd>
 #include <string>
 
 namespace rust {
