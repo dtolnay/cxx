@@ -79,6 +79,7 @@ pub(super) fn gen(namespace: Vec<String>, apis: &[Api], types: &Types, header: b
 
 fn write_includes(out: &mut OutFile, types: &Types) {
     let mut has_int = false;
+    let mut has_box = false;
     let mut has_unique_ptr = false;
     let mut has_string = false;
 
@@ -90,6 +91,7 @@ fn write_includes(out: &mut OutFile, types: &Types) {
                 Some(CxxString) => has_string = true,
                 Some(Bool) | Some(RustString) | None => {}
             },
+            Type::RustBox(_) => has_box = true,
             Type::UniquePtr(_) => has_unique_ptr = true,
             _ => {}
         }
@@ -103,6 +105,9 @@ fn write_includes(out: &mut OutFile, types: &Types) {
     }
     if has_string {
         writeln!(out, "#include <string>");
+    }
+    if has_box {
+        writeln!(out, "#include <type_traits>");
     }
 }
 

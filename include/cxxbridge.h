@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <iosfwd>
 #include <string>
+#include <type_traits>
 
 namespace rust {
 inline namespace cxxbridge01 {
@@ -69,6 +70,10 @@ private:
 #define CXXBRIDGE01_RUST_BOX
 template <typename T> class Box final {
 public:
+  using value_type = T;
+  using const_pointer = std::add_pointer_t<std::add_const_t<value_type>>;
+  using pointer = std::add_pointer_t<value_type>;
+
   Box(const Box &other) : Box(*other) {}
   Box(Box &&other) noexcept : repr(other.repr) { other.repr = 0; }
   Box(const T &val) {
