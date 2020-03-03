@@ -1,6 +1,6 @@
 use crate::namespace::Namespace;
 use crate::syntax::atom::Atom;
-use crate::syntax::{self, check, Api, ExternFn, ExternType, Struct, Type, Types, Var};
+use crate::syntax::{self, check, Api, ExternFn, ExternType, Struct, Type, Types};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned};
 use syn::{Error, ItemMod, Result, Token};
@@ -123,7 +123,15 @@ fn expand_cxx_type(ety: &ExternType) -> TokenStream {
 
 fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types) -> TokenStream {
     let ident = &efn.ident;
-    let args = efn.args.iter().map(|arg| expand_extern_arg(arg, types));
+    let args = efn.args.iter().map(|arg| {
+        let ident = &arg.ident;
+        let ty = expand_extern_type(&arg.ty);
+        if types.needs_indirect_abi(&arg.ty) {
+            quote!(#ident: *mut #ty)
+        } else {
+            quote!(#ident: #ty)
+        }
+    });
     let ret = expand_extern_return_type(&efn.ret, types);
     let mut outparam = None;
     if indirect_return(&efn.ret, types) {
@@ -230,7 +238,15 @@ fn expand_rust_type(ety: &ExternType) -> TokenStream {
 
 fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types) -> TokenStream {
     let ident = &efn.ident;
-    let args = efn.args.iter().map(|arg| expand_extern_arg(arg, types));
+    let args = efn.args.iter().map(|arg| {
+        let ident = &arg.ident;
+        let ty = expand_extern_type(&arg.ty);
+        if types.needs_indirect_abi(&arg.ty) {
+            quote!(#ident: *mut #ty)
+        } else {
+            quote!(#ident: #ty)
+        }
+    });
     let vars = efn.args.iter().map(|arg| {
         let ident = &arg.ident;
         match &arg.ty {
@@ -443,14 +459,4 @@ fn expand_extern_return_type(ret: &Option<Type>, types: &Types) -> TokenStream {
     };
     let ty = expand_extern_type(ret);
     quote!(-> #ty)
-}
-
-fn expand_extern_arg(arg: &Var, types: &Types) -> TokenStream {
-    let ident = &arg.ident;
-    let ty = expand_extern_type(&arg.ty);
-    if types.needs_indirect_abi(&arg.ty) {
-        quote!(#ident: *mut #ty)
-    } else {
-        quote!(#ident: #ty)
-    }
 }
