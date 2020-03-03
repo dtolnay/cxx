@@ -24,6 +24,10 @@ impl RustString {
     pub fn as_string(&self) -> &String {
         &self.repr
     }
+
+    pub fn as_mut_string(&mut self) -> &mut String {
+        &mut self.repr
+    }
 }
 
 #[export_name = "cxxbridge01$string$new"]
