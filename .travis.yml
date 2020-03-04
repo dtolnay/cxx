@@ -46,7 +46,7 @@ matrix:
         - wget -O install.sh https://github.com/bazelbuild/bazel/releases/download/2.1.1/bazel-2.1.1-installer-linux-x86_64.sh
         - chmod +x install.sh
         - ./install.sh --user
-        - cargo install cargo-raze
+        - cargo install cargo-raze --debug
       before_script:
         - cp third-party/Cargo.lock .
         - cargo vendor --versioned-dirs --locked third-party/vendor
