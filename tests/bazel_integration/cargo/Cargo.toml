@@ -17,13 +17,10 @@ path = "fake_lib.rs"
 workspace_path = "//cargo"
 output_buildfile_suffix = "BUILD.bazel"
 
-[raze.crates.proc-macro2.'1.0.8']
+[raze.crates.proc-macro2.'1.0.9']
 additional_flags = [
     "--cfg=span_locations",
 ]
-
-[raze.crates.rustversion.'1.0.2']
-gen_buildrs = true
 
 [raze.crates.cxxbridge-cmd.'0.1.2']
 additional_flags = [

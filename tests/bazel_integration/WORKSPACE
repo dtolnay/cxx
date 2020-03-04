@@ -22,9 +22,9 @@ bazel_skylib_workspace()
 http_archive(
     name = "io_bazel_rules_rust",
     #sha256 = "f33bffd6b779ae5a4f57944e86307f876872b9dbfc07b3d10d0e7f0041f29d5f",
-    strip_prefix = "rules_rust-e0dcca40f303e76c4347b9cf541d757edb029441",
+    strip_prefix = "rules_rust-f92d5b1533c28f41a0455def6205e0ecbcdd65a1",
     urls = [
-        "https://github.com/sayrer/rules_rust/archive/e0dcca40f303e76c4347b9cf541d757edb029441.tar.gz",
+        "https://github.com/sayrer/rules_rust/archive/f92d5b1533c28f41a0455def6205e0ecbcdd65a1.tar.gz",
     ],
 )
 
