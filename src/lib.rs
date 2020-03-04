@@ -302,10 +302,10 @@
 //!
 //! <table>
 //! <tr><th>name in Rust</th><th>name in C++</th><th>restrictions</th></tr>
-//! <tr><td>String</td><td>cxxbridge::RustString</td><td></td></tr>
-//! <tr><td>&amp;str</td><td>cxxbridge::RustStr</td><td></td></tr>
+//! <tr><td>String</td><td>rust::String</td><td></td></tr>
+//! <tr><td>&amp;str</td><td>rust::Str</td><td></td></tr>
 //! <tr><td><a href="https://docs.rs/cxx/0.1/cxx/struct.CxxString.html">CxxString</a></td><td>std::string</td><td><sup><i>cannot be passed by value</i></sup></td></tr>
-//! <tr><td>Box&lt;T&gt;</td><td>cxxbridge::RustBox&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
+//! <tr><td>Box&lt;T&gt;</td><td>rust::Box&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
 //! <tr><td><a href="https://docs.rs/cxx/0.1/cxx/struct.UniquePtr.html">UniquePtr&lt;T&gt;</a></td><td>std::unique_ptr&lt;T&gt;</td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
 //! <tr><td></td><td></td><td></td></tr>
 //! </table>
@@ -463,7 +463,7 @@ fn try_generate_bridge(rust_source_file: &Path) -> Result<cc::Build> {
     let mut build = paths::cc_build();
     build.file(&bridge_path);
 
-    let ref cxxbridge_h = paths::include_dir()?.join("cxxbridge/cxxbridge.h");
+    let ref cxxbridge_h = paths::include_dir()?.join("cxxbridge").join("cxxbridge.h");
     let _ = fs::create_dir_all(cxxbridge_h.parent().unwrap());
     let _ = fs::remove_file(cxxbridge_h);
     let _ = fs::write(cxxbridge_h, gen::include::HEADER);

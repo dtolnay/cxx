@@ -1,3 +1,9 @@
+/.buckd
+/bazel-bin
+/bazel-cxx
+/bazel-out
+/bazel-testlogs
+/buck-out
 /Cargo.lock
 /expand.cc
 /expand.rs

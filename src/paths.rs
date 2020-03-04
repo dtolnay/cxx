@@ -44,7 +44,7 @@ fn try_symlink_header(path: &Path, original: &Path) -> Result<()> {
 fn relative_to_parent_of_target_dir(original: &Path) -> Result<PathBuf> {
     let target_dir = target_dir()?;
     let mut outer = target_dir.parent().unwrap();
-    let original = original.canonicalize()?;
+    let original = canonicalize(original)?;
     loop {
         if let Ok(suffix) = original.strip_prefix(outer) {
             return Ok(suffix.to_owned());
@@ -71,7 +71,7 @@ pub(crate) fn include_dir() -> Result<PathBuf> {
 }
 
 fn target_dir() -> Result<PathBuf> {
-    let mut dir = out_dir()?.canonicalize()?;
+    let mut dir = out_dir().and_then(canonicalize)?;
     loop {
         if dir.ends_with("target") {
             return Ok(dir);
@@ -80,4 +80,18 @@ fn target_dir() -> Result<PathBuf> {
             return Err(Error::TargetDir);
         }
     }
+}
+
+#[cfg(not(windows))]
+fn canonicalize(path: impl AsRef<Path>) -> Result<PathBuf> {
+    Ok(fs::canonicalize(path)?)
+}
+
+#[cfg(windows)]
+fn canonicalize(path: impl AsRef<Path>) -> Result<PathBuf> {
+    // Real fs::canonicalize on Windows produces UNC paths which cl.exe is
+    // unable to handle in includes. Use a poor approximation instead.
+    // https://github.com/rust-lang/rust/issues/42869
+    // https://github.com/alexcrichton/cc-rs/issues/169
+    Ok(env::current_dir()?.join(path))
 }

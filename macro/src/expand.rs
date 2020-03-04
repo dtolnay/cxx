@@ -1,6 +1,6 @@
 use crate::namespace::Namespace;
 use crate::syntax::atom::Atom;
-use crate::syntax::{self, check, Api, ExternFn, ExternType, Struct, Type, Types, Var};
+use crate::syntax::{self, check, Api, ExternFn, ExternType, Struct, Type, Types};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned};
 use syn::{Error, ItemMod, Result, Token};
@@ -123,7 +123,15 @@ fn expand_cxx_type(ety: &ExternType) -> TokenStream {
 
 fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types) -> TokenStream {
     let ident = &efn.ident;
-    let args = efn.args.iter().map(|arg| expand_extern_arg(arg, types));
+    let args = efn.args.iter().map(|arg| {
+        let ident = &arg.ident;
+        let ty = expand_extern_type(&arg.ty);
+        if types.needs_indirect_abi(&arg.ty) {
+            quote!(#ident: *mut #ty)
+        } else {
+            quote!(#ident: #ty)
+        }
+    });
     let ret = expand_extern_return_type(&efn.ret, types);
     let mut outparam = None;
     if indirect_return(&efn.ret, types) {
@@ -230,24 +238,28 @@ fn expand_rust_type(ety: &ExternType) -> TokenStream {
 
 fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types) -> TokenStream {
     let ident = &efn.ident;
-    let args = efn.args.iter().map(|arg| expand_extern_arg(arg, types));
+    let args = efn.args.iter().map(|arg| {
+        let ident = &arg.ident;
+        let ty = expand_extern_type(&arg.ty);
+        if types.needs_indirect_abi(&arg.ty) {
+            quote!(#ident: *mut #ty)
+        } else {
+            quote!(#ident: #ty)
+        }
+    });
     let vars = efn.args.iter().map(|arg| {
         let ident = &arg.ident;
-        let var = if types.needs_indirect_abi(&arg.ty) {
-            quote!(::std::ptr::read(#ident))
-        } else {
-            quote!(#ident)
-        };
         match &arg.ty {
-            Type::Ident(ident) if ident == "String" => quote!(#var.into_string()),
-            Type::RustBox(_) => quote!(::std::boxed::Box::from_raw(#var)),
-            Type::UniquePtr(_) => quote!(::cxx::UniquePtr::from_raw(#var)),
+            Type::Ident(i) if i == "String" => quote!(::std::mem::take((*#ident).as_mut_string())),
+            Type::RustBox(_) => quote!(::std::boxed::Box::from_raw(#ident)),
+            Type::UniquePtr(_) => quote!(::cxx::UniquePtr::from_raw(#ident)),
             Type::Ref(ty) => match &ty.inner {
-                Type::Ident(ident) if ident == "String" => quote!(#var.as_string()),
-                _ => var,
+                Type::Ident(i) if i == "String" => quote!(#ident.as_string()),
+                _ => quote!(#ident),
             },
-            Type::Str(_) => quote!(#var.as_str()),
-            _ => var,
+            Type::Str(_) => quote!(#ident.as_str()),
+            ty if types.needs_indirect_abi(ty) => quote!(::std::ptr::read(#ident)),
+            _ => quote!(#ident),
         }
     });
     let mut outparam = None;
@@ -293,7 +305,7 @@ fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Type
 }
 
 fn expand_rust_box(namespace: &Namespace, ident: &Ident) -> TokenStream {
-    let link_prefix = format!("cxxbridge01$rust_box${}{}$", namespace, ident);
+    let link_prefix = format!("cxxbridge01$box${}{}$", namespace, ident);
     let link_uninit = format!("{}uninit", link_prefix);
     let link_set_raw = format!("{}set_raw", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
@@ -447,14 +459,4 @@ fn expand_extern_return_type(ret: &Option<Type>, types: &Types) -> TokenStream {
     };
     let ty = expand_extern_type(ret);
     quote!(-> #ty)
-}
-
-fn expand_extern_arg(arg: &Var, types: &Types) -> TokenStream {
-    let ident = &arg.ident;
-    let ty = expand_extern_type(&arg.ty);
-    if types.needs_indirect_abi(&arg.ty) {
-        quote!(#ident: *mut #ty)
-    } else {
-        quote!(#ident: #ty)
-    }
 }

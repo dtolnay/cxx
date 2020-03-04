@@ -10,3 +10,4 @@ error[E0277]: the size for values of type `str` cannot be known at compilation t
   = help: within `TypeR`, the trait `std::marker::Sized` is not implemented for `str`
   = note: to learn more, visit <https://doc.rust-lang.org/book/ch19-04-advanced-types.html#dynamically-sized-types-and-the-sized-trait>
   = note: required because it appears within the type `TypeR`
+  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
