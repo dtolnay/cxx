@@ -8,6 +8,8 @@
 namespace rust {
 inline namespace cxxbridge01 {
 
+struct unsafe_bitcopy_t;
+
 class String final {
 public:
   String() noexcept;
@@ -27,6 +29,9 @@ public:
   const char *data() const noexcept;
   size_t size() const noexcept;
   size_t length() const noexcept;
+
+  // Internal API only intended for the cxxbridge code generator.
+  String(unsafe_bitcopy_t, const String &) noexcept;
 
 private:
   // Size and alignment statically verified by rust_string.rs.
@@ -143,6 +148,11 @@ std::ostream &operator<<(std::ostream &, const Str &);
 using string = String;
 using str = Str;
 template <class T> using box = Box<T>;
+
+struct unsafe_bitcopy_t {
+  explicit unsafe_bitcopy_t() = default;
+};
+constexpr unsafe_bitcopy_t unsafe_bitcopy{};
 
 } // namespace cxxbridge01
 } // namespace rust

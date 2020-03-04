@@ -87,6 +87,9 @@ size_t String::size() const noexcept { return cxxbridge01$string$len(this); }
 
 size_t String::length() const noexcept { return cxxbridge01$string$len(this); }
 
+String::String(unsafe_bitcopy_t, const String &bits) noexcept
+    : repr(bits.repr) {}
+
 std::ostream &operator<<(std::ostream &os, const String &s) {
   os.write(s.data(), s.size());
   return os;
