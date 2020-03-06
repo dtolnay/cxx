@@ -126,7 +126,9 @@ fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types
     let args = efn.args.iter().map(|arg| {
         let ident = &arg.ident;
         let ty = expand_extern_type(&arg.ty);
-        if types.needs_indirect_abi(&arg.ty) {
+        if arg.ty == RustString {
+            quote!(#ident: *const #ty)
+        } else if types.needs_indirect_abi(&arg.ty) {
             quote!(#ident: *mut #ty)
         } else {
             quote!(#ident: #ty)
@@ -157,7 +159,7 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
         let var = &arg.ident;
         match &arg.ty {
             Type::Ident(ident) if ident == RustString => {
-                quote!(#var.as_mut_ptr() as *mut ::cxx::private::RustString)
+                quote!(#var.as_mut_ptr() as *const ::cxx::private::RustString)
             }
             Type::RustBox(_) => quote!(::std::boxed::Box::into_raw(#var)),
             Type::UniquePtr(_) => quote!(::cxx::UniquePtr::into_raw(#var)),

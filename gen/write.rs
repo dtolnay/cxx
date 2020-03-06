@@ -169,6 +169,9 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         if i > 0 {
             write!(out, ", ");
         }
+        if arg.ty == RustString {
+            write!(out, "const ");
+        }
         write_extern_arg(out, arg, types);
     }
     if indirect_return {
@@ -213,6 +216,8 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         } else if let Type::UniquePtr(_) = &arg.ty {
             write_type(out, &arg.ty);
             write!(out, "({})", arg.ident);
+        } else if arg.ty == RustString {
+            write!(out, "::rust::String(::rust::unsafe_bitcopy, *{})", arg.ident);
         } else if types.needs_indirect_abi(&arg.ty) {
             write!(out, "::std::move(*{})", arg.ident);
         } else {
