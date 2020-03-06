@@ -54,3 +54,15 @@ impl PartialEq<Atom> for Type {
         }
     }
 }
+
+impl PartialEq<Atom> for &Ident {
+    fn eq(&self, atom: &Atom) -> bool {
+        *self == atom
+    }
+}
+
+impl PartialEq<Atom> for &Type {
+    fn eq(&self, atom: &Atom) -> bool {
+        *self == atom
+    }
+}
