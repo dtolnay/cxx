@@ -14,7 +14,7 @@ pub(super) fn gen(namespace: Vec<String>, apis: &[Api], types: &Types, header: b
 
     for api in apis {
         if let Api::Include(include) = api {
-            writeln!(out, "#include \"{}\"", include.value().escape_default());
+            out.include.insert(include.value());
         }
     }
 
@@ -74,40 +74,24 @@ pub(super) fn gen(namespace: Vec<String>, apis: &[Api], types: &Types, header: b
         write_generic_instantiations(out, types);
     }
 
+    out.prepend(out.include.to_string());
+
     out_file
 }
 
 fn write_includes(out: &mut OutFile, types: &Types) {
-    let mut has_int = false;
-    let mut has_box = false;
-    let mut has_unique_ptr = false;
-    let mut has_string = false;
-
     for ty in types {
         match ty {
             Type::Ident(ident) => match Atom::from(ident) {
                 Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize) | Some(I8)
-                | Some(I16) | Some(I32) | Some(I64) | Some(Isize) => has_int = true,
-                Some(CxxString) => has_string = true,
+                | Some(I16) | Some(I32) | Some(I64) | Some(Isize) => out.include.cstdint = true,
+                Some(CxxString) => out.include.string = true,
                 Some(Bool) | Some(RustString) | None => {}
             },
-            Type::RustBox(_) => has_box = true,
-            Type::UniquePtr(_) => has_unique_ptr = true,
+            Type::RustBox(_) => out.include.type_traits = true,
+            Type::UniquePtr(_) => out.include.memory = true,
             _ => {}
         }
-    }
-
-    if has_int {
-        writeln!(out, "#include <cstdint>");
-    }
-    if has_unique_ptr {
-        writeln!(out, "#include <memory>");
-    }
-    if has_string {
-        writeln!(out, "#include <string>");
-    }
-    if has_box {
-        writeln!(out, "#include <type_traits>");
     }
 }
 

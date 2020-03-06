@@ -1,8 +1,10 @@
+use crate::gen::include::Includes;
 use std::fmt::{self, Arguments, Write};
 
 pub(crate) struct OutFile {
     pub namespace: Vec<String>,
     pub header: bool,
+    pub include: Includes,
     content: Vec<u8>,
     section_pending: bool,
     blocks_pending: Vec<&'static str>,
@@ -13,6 +15,7 @@ impl OutFile {
         OutFile {
             namespace,
             header,
+            include: Includes::new(),
             content: Vec::new(),
             section_pending: false,
             blocks_pending: Vec::new(),
@@ -35,6 +38,10 @@ impl OutFile {
             self.content.push(b'\n');
             self.section_pending = true;
         }
+    }
+
+    pub fn prepend(&mut self, section: String) {
+        self.content.splice(..0, section.into_bytes());
     }
 
     pub fn write_fmt(&mut self, args: Arguments) {
