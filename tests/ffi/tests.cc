@@ -102,6 +102,7 @@ extern "C" const char *cxx_run_test() noexcept {
 
   ASSERT(r_return_primitive() == 2020);
   ASSERT(r_return_shared().z == 2020);
+  ASSERT(cxx_test_suite_r_is_correct(&*r_return_box()));
   ASSERT(r_return_ref(Shared{2020}) == 2020);
   ASSERT(std::string(r_return_str(Shared{2020})) == "2020");
   ASSERT(std::string(r_return_rust_string()) == "2020");

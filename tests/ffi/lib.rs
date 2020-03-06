@@ -36,7 +36,7 @@ pub mod ffi {
 
         fn r_return_primitive() -> usize;
         fn r_return_shared() -> Shared;
-        //TODO fn r_return_box() -> Box<R>;
+        fn r_return_box() -> Box<R>;
         //TODO fn r_return_unique_ptr() -> UniquePtr<C>;
         fn r_return_ref(shared: &Shared) -> &usize;
         fn r_return_str(shared: &Shared) -> &str;
@@ -63,6 +63,10 @@ fn r_return_primitive() -> usize {
 
 fn r_return_shared() -> ffi::Shared {
     ffi::Shared { z: 2020 }
+}
+
+fn r_return_box() -> Box<R> {
+    Box::new(2020)
 }
 
 fn r_return_ref(shared: &ffi::Shared) -> &usize {

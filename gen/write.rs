@@ -336,8 +336,13 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
             write!(out, "  ");
         } else if let Some(ret) = &efn.ret {
             write!(out, "return ");
-            if let Type::Ref(_) = ret {
-                write!(out, "*");
+            match ret {
+                Type::RustBox(_) => {
+                    write_type(out, ret);
+                    write!(out, "::from_raw(");
+                }
+                Type::Ref(_) => write!(out, "*"),
+                _ => {}
             }
         }
         for name in out.namespace.clone() {
@@ -368,7 +373,13 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
             }
             write!(out, "&return$.value");
         }
-        writeln!(out, ");");
+        write!(out, ")");
+        if let Some(ret) = &efn.ret {
+            if let Type::RustBox(_) = ret {
+                write!(out, ")");
+            }
+        }
+        writeln!(out, ";");
         if indirect_return {
             writeln!(out, "  return ::std::move(return$.value);");
         }
