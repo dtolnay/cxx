@@ -105,12 +105,18 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
     }
 
     let mut needs_manually_drop = false;
-    'outer: for api in apis {
+    let mut needs_maybe_uninit = false;
+    for api in apis {
         if let Api::RustFunction(efn) = api {
             for arg in &efn.args {
                 if arg.ty != RustString && types.needs_indirect_abi(&arg.ty) {
                     needs_manually_drop = true;
-                    break 'outer;
+                    break;
+                }
+            }
+            if let Some(ret) = &efn.ret {
+                if types.needs_indirect_abi(ret) {
+                    needs_maybe_uninit = true;
                 }
             }
         }
@@ -119,7 +125,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
     out.begin_block("namespace rust");
     out.begin_block("inline namespace cxxbridge01");
 
-    if needs_rust_box || needs_manually_drop {
+    if needs_rust_box || needs_manually_drop || needs_maybe_uninit {
         writeln!(out, "// #include \"cxxbridge.h\"");
     }
 
@@ -142,6 +148,16 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
             "  ManuallyDrop(T &&value) : value(::std::move(value)) {{}}",
         );
         writeln!(out, "  ~ManuallyDrop() {{}}");
+        writeln!(out, "}};");
+    }
+
+    if needs_maybe_uninit {
+        out.next_section();
+        writeln!(out, "template <typename T>");
+        writeln!(out, "union MaybeUninit {{");
+        writeln!(out, "  T value;");
+        writeln!(out, "  MaybeUninit() {{}}");
+        writeln!(out, "  ~MaybeUninit() {{}}");
         writeln!(out, "}};");
     }
 
@@ -314,9 +330,9 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         }
         write!(out, "  ");
         if indirect_return {
-            write!(out, "char return$[sizeof(");
+            write!(out, "::rust::MaybeUninit<");
             write_type(out, efn.ret.as_ref().unwrap());
-            writeln!(out, ")];");
+            writeln!(out, "> return$;");
             write!(out, "  ");
         } else if let Some(ret) = &efn.ret {
             write!(out, "return ");
@@ -350,17 +366,11 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
             if !efn.args.is_empty() {
                 write!(out, ", ");
             }
-            write!(out, "reinterpret_cast<");
-            write_return_type(out, &efn.ret);
-            write!(out, "*>(return$)");
+            write!(out, "&return$.value");
         }
         writeln!(out, ");");
         if indirect_return {
-            write!(out, "  return ");
-            write_type(out, efn.ret.as_ref().unwrap());
-            write!(out, "(*reinterpret_cast<");
-            write_return_type(out, &efn.ret);
-            writeln!(out, "*>(return$));");
+            writeln!(out, "  return ::std::move(return$.value);");
         }
         writeln!(out, "}}");
     }
