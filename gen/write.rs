@@ -19,7 +19,7 @@ pub(super) fn gen(namespace: Vec<String>, apis: &[Api], types: &Types, header: b
     }
 
     write_includes(out, types);
-    write_include_cxxbridge(out, types);
+    write_include_cxxbridge(out, apis, types);
 
     out.next_section();
     for name in &namespace {
@@ -95,7 +95,7 @@ fn write_includes(out: &mut OutFile, types: &Types) {
     }
 }
 
-fn write_include_cxxbridge(out: &mut OutFile, types: &Types) {
+fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
     let mut needs_rust_box = false;
     for ty in types {
         if let Type::RustBox(_) = ty {
@@ -104,16 +104,47 @@ fn write_include_cxxbridge(out: &mut OutFile, types: &Types) {
         }
     }
 
+    let mut needs_manually_drop = false;
+    'outer: for api in apis {
+        if let Api::RustFunction(efn) = api {
+            for arg in &efn.args {
+                if arg.ty != RustString && types.needs_indirect_abi(&arg.ty) {
+                    needs_manually_drop = true;
+                    break 'outer;
+                }
+            }
+        }
+    }
+
     out.begin_block("namespace rust");
     out.begin_block("inline namespace cxxbridge01");
-    if needs_rust_box {
+
+    if needs_rust_box || needs_manually_drop {
         writeln!(out, "// #include \"cxxbridge.h\"");
+    }
+
+    if needs_rust_box {
+        out.next_section();
         for line in include::get("CXXBRIDGE01_RUST_BOX").lines() {
             if !line.trim_start().starts_with("//") {
                 writeln!(out, "{}", line);
             }
         }
     }
+
+    if needs_manually_drop {
+        out.next_section();
+        writeln!(out, "template <typename T>");
+        writeln!(out, "union ManuallyDrop {{");
+        writeln!(out, "  T value;");
+        writeln!(
+            out,
+            "  ManuallyDrop(T &&value) : value(::std::move(value)) {{}}",
+        );
+        writeln!(out, "  ~ManuallyDrop() {{}}");
+        writeln!(out, "}};");
+    }
+
     out.end_block("namespace cxxbridge01");
     out.end_block("namespace rust");
 }
@@ -274,6 +305,13 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         writeln!(out, ";");
     } else {
         writeln!(out, " {{");
+        for arg in &efn.args {
+            if arg.ty != RustString && types.needs_indirect_abi(&arg.ty) {
+                write!(out, "  ::rust::ManuallyDrop<");
+                write_type(out, &arg.ty);
+                writeln!(out, "> {}$(::std::move({0}));", arg.ident);
+            }
+        }
         write!(out, "  ");
         if indirect_return {
             write!(out, "char return$[sizeof(");
@@ -300,10 +338,11 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
                 _ => {}
             }
             write!(out, "{}", arg.ident);
-            match arg.ty {
+            match &arg.ty {
                 Type::RustBox(_) => write!(out, ".into_raw()"),
                 Type::UniquePtr(_) => write!(out, ".release()"),
                 Type::Str(_) => write!(out, ")"),
+                ty if ty != RustString && types.needs_indirect_abi(ty) => write!(out, "$.value"),
                 _ => {}
             }
         }
