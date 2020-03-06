@@ -96,7 +96,7 @@ fn is_unsized(ty: &Type, types: &Types) -> bool {
         Type::Ident(ident) => ident,
         _ => return false,
     };
-    ident == "CxxString" || types.cxx.contains(ident) || types.rust.contains(ident)
+    ident == CxxString || types.cxx.contains(ident) || types.rust.contains(ident)
 }
 
 fn check_mut_return_restriction(efn: &ExternFn) -> Result<()> {

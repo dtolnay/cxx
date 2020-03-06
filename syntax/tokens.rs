@@ -1,3 +1,4 @@
+use crate::syntax::atom::Atom::*;
 use crate::syntax::{Derive, ExternFn, Ref, Ty1, Type, Var};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote_spanned, ToTokens};
@@ -7,7 +8,7 @@ impl ToTokens for Type {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         match self {
             Type::Ident(ident) => {
-                if ident == "CxxString" {
+                if ident == CxxString {
                     let span = ident.span();
                     tokens.extend(quote_spanned!(span=> ::cxx::));
                 }

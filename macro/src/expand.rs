@@ -1,5 +1,5 @@
 use crate::namespace::Namespace;
-use crate::syntax::atom::Atom;
+use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::{self, check, Api, ExternFn, ExternType, Struct, Type, Types};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned};
@@ -156,13 +156,13 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
     let vars = efn.args.iter().map(|arg| {
         let var = &arg.ident;
         match &arg.ty {
-            Type::Ident(ident) if ident == "String" => {
+            Type::Ident(ident) if ident == RustString => {
                 quote!(#var.as_mut_ptr() as *mut ::cxx::private::RustString)
             }
             Type::RustBox(_) => quote!(::std::boxed::Box::into_raw(#var)),
             Type::UniquePtr(_) => quote!(::cxx::UniquePtr::into_raw(#var)),
             Type::Ref(ty) => match &ty.inner {
-                Type::Ident(ident) if ident == "String" => {
+                Type::Ident(ident) if ident == RustString => {
                     quote!(::cxx::private::RustString::from_ref(#var))
                 }
                 _ => quote!(#var),
@@ -204,11 +204,11 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
         .ret
         .as_ref()
         .and_then(|ret| match ret {
-            Type::Ident(ident) if ident == "String" => Some(quote!(#call.into_string())),
+            Type::Ident(ident) if ident == RustString => Some(quote!(#call.into_string())),
             Type::RustBox(_) => Some(quote!(::std::boxed::Box::from_raw(#call))),
             Type::UniquePtr(_) => Some(quote!(::cxx::UniquePtr::from_raw(#call))),
             Type::Ref(ty) => match &ty.inner {
-                Type::Ident(ident) if ident == "String" => Some(quote!(#call.as_string())),
+                Type::Ident(ident) if ident == RustString => Some(quote!(#call.as_string())),
                 _ => None,
             },
             Type::Str(_) => Some(quote!(#call.as_str())),
@@ -250,11 +250,11 @@ fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Type
     let vars = efn.args.iter().map(|arg| {
         let ident = &arg.ident;
         match &arg.ty {
-            Type::Ident(i) if i == "String" => quote!(::std::mem::take((*#ident).as_mut_string())),
+            Type::Ident(i) if i == RustString => quote!(::std::mem::take((*#ident).as_mut_string())),
             Type::RustBox(_) => quote!(::std::boxed::Box::from_raw(#ident)),
             Type::UniquePtr(_) => quote!(::cxx::UniquePtr::from_raw(#ident)),
             Type::Ref(ty) => match &ty.inner {
-                Type::Ident(i) if i == "String" => quote!(#ident.as_string()),
+                Type::Ident(i) if i == RustString => quote!(#ident.as_string()),
                 _ => quote!(#ident),
             },
             Type::Str(_) => quote!(#ident.as_str()),
@@ -270,13 +270,13 @@ fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Type
         .ret
         .as_ref()
         .and_then(|ret| match ret {
-            Type::Ident(ident) if ident == "String" => {
+            Type::Ident(ident) if ident == RustString => {
                 Some(quote!(::cxx::private::RustString::from(#call)))
             }
             Type::RustBox(_) => Some(quote!(::std::boxed::Box::into_raw(#call))),
             Type::UniquePtr(_) => Some(quote!(::cxx::UniquePtr::into_raw(#call))),
             Type::Ref(ty) => match &ty.inner {
-                Type::Ident(ident) if ident == "String" => {
+                Type::Ident(ident) if ident == RustString => {
                     Some(quote!(::cxx::private::RustString::from_ref(#call)))
                 }
                 _ => None,
@@ -438,13 +438,13 @@ fn indirect_return(ret: &Option<Type>, types: &Types) -> bool {
 
 fn expand_extern_type(ty: &Type) -> TokenStream {
     match ty {
-        Type::Ident(ident) if ident == "String" => quote!(::cxx::private::RustString),
+        Type::Ident(ident) if ident == RustString => quote!(::cxx::private::RustString),
         Type::RustBox(ty) | Type::UniquePtr(ty) => {
             let inner = &ty.inner;
             quote!(*mut #inner)
         }
         Type::Ref(ty) => match &ty.inner {
-            Type::Ident(ident) if ident == "String" => quote!(&::cxx::private::RustString),
+            Type::Ident(ident) if ident == RustString => quote!(&::cxx::private::RustString),
             _ => quote!(#ty),
         },
         Type::Str(_) => quote!(::cxx::private::RustStr),
