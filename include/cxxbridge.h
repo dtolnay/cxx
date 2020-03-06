@@ -81,63 +81,60 @@ public:
   using pointer = typename std::add_pointer<value_type>::type;
 
   Box(const Box &other) : Box(*other) {}
-  Box(Box &&other) noexcept : repr(other.repr) { other.repr = 0; }
+  Box(Box &&other) noexcept : ptr(other.ptr) { other.ptr = nullptr; }
   Box(const T &val) {
     this->uninit();
-    ::new (this->deref_mut()) T(val);
+    ::new (this->ptr) T(val);
   }
   Box &operator=(const Box &other) {
     if (this != &other) {
-      if (this->repr) {
+      if (this->ptr) {
         **this = *other;
       } else {
         this->uninit();
-        ::new (this->deref_mut()) T(*other);
+        ::new (this->ptr) T(*other);
       }
     }
     return *this;
   }
   Box &operator=(Box &&other) noexcept {
-    if (this->repr) {
+    if (this->ptr) {
       this->drop();
     }
-    this->repr = other.repr;
-    other.repr = 0;
+    this->ptr = other.ptr;
+    other.ptr = nullptr;
     return *this;
   }
   ~Box() noexcept {
-    if (this->repr) {
+    if (this->ptr) {
       this->drop();
     }
   }
 
-  const T *operator->() const noexcept { return this->deref(); }
-  const T &operator*() const noexcept { return *this->deref(); }
-  T *operator->() noexcept { return this->deref_mut(); }
-  T &operator*() noexcept { return *this->deref_mut(); }
+  const T *operator->() const noexcept { return this->ptr; }
+  const T &operator*() const noexcept { return *this->ptr; }
+  T *operator->() noexcept { return this->ptr; }
+  T &operator*() noexcept { return *this->ptr; }
 
   // Important: requires that `raw` came from an into_raw call. Do not pass a
   // pointer from `new` or any other source.
   static Box from_raw(T *raw) noexcept {
     Box box;
-    box.set_raw(raw);
+    box.ptr = raw;
     return box;
   }
 
   T *into_raw() noexcept {
-    T *raw = this->deref_mut();
-    this->repr = 0;
+    T *raw = this->ptr;
+    this->ptr = nullptr;
     return raw;
   }
 
 private:
   Box() noexcept {}
   void uninit() noexcept;
-  void set_raw(pointer) noexcept;
   void drop() noexcept;
-  const_pointer deref() const noexcept;
-  pointer deref_mut() noexcept;
-  uintptr_t repr;
+  T *ptr;
 };
 #endif // CXXBRIDGE01_RUST_BOX
 

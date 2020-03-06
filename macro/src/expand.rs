@@ -311,17 +311,11 @@ fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Type
 fn expand_rust_box(namespace: &Namespace, ident: &Ident) -> TokenStream {
     let link_prefix = format!("cxxbridge01$box${}{}$", namespace, ident);
     let link_uninit = format!("{}uninit", link_prefix);
-    let link_set_raw = format!("{}set_raw", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
-    let link_deref = format!("{}deref", link_prefix);
-    let link_deref_mut = format!("{}deref_mut", link_prefix);
 
     let local_prefix = format_ident!("{}__box_", ident);
     let local_uninit = format_ident!("{}uninit", local_prefix);
-    let local_set_raw = format_ident!("{}set_raw", local_prefix);
     let local_drop = format_ident!("{}drop", local_prefix);
-    let local_deref = format_ident!("{}deref", local_prefix);
-    let local_deref_mut = format_ident!("{}deref_mut", local_prefix);
 
     let span = ident.span();
     quote_spanned! {span=>
@@ -336,31 +330,9 @@ fn expand_rust_box(namespace: &Namespace, ident: &Ident) -> TokenStream {
             );
         }
         #[doc(hidden)]
-        #[export_name = #link_set_raw]
-        unsafe extern "C" fn #local_set_raw(
-            this: *mut ::std::boxed::Box<#ident>,
-            raw: *mut #ident,
-        ) {
-            ::std::ptr::write(this, ::std::boxed::Box::from_raw(raw));
-        }
-        #[doc(hidden)]
         #[export_name = #link_drop]
         unsafe extern "C" fn #local_drop(this: *mut ::std::boxed::Box<#ident>) {
             ::std::ptr::drop_in_place(this);
-        }
-        #[doc(hidden)]
-        #[export_name = #link_deref]
-        unsafe extern "C" fn #local_deref(
-            this: *const ::std::boxed::Box<::std::mem::MaybeUninit<#ident>>,
-        ) -> *const ::std::mem::MaybeUninit<#ident> {
-            &**this
-        }
-        #[doc(hidden)]
-        #[export_name = #link_deref_mut]
-        unsafe extern "C" fn #local_deref_mut(
-            this: *mut ::std::boxed::Box<::std::mem::MaybeUninit<#ident>>,
-        ) -> *mut ::std::mem::MaybeUninit<#ident> {
-            &mut **this
         }
     }
 }

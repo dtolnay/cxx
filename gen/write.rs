@@ -471,23 +471,8 @@ fn write_rust_box_extern(out: &mut OutFile, ident: &Ident) {
     );
     writeln!(
         out,
-        "void cxxbridge01$box${}$set_raw(::rust::Box<{}> *ptr, {} *raw) noexcept;",
-        instance, inner, inner
-    );
-    writeln!(
-        out,
         "void cxxbridge01$box${}$drop(::rust::Box<{}> *ptr) noexcept;",
         instance, inner,
-    );
-    writeln!(
-        out,
-        "const {} *cxxbridge01$box${}$deref(const ::rust::Box<{}> *ptr) noexcept;",
-        inner, instance, inner,
-    );
-    writeln!(
-        out,
-        "{} *cxxbridge01$box${}$deref_mut(::rust::Box<{}> *ptr) noexcept;",
-        inner, instance, inner,
     );
     writeln!(out, "#endif // CXXBRIDGE01_RUST_BOX_{}", instance);
 }
@@ -507,39 +492,8 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
-    writeln!(
-        out,
-        "void Box<{}>::set_raw({} *raw) noexcept {{",
-        inner, inner,
-    );
-    writeln!(
-        out,
-        "  return cxxbridge01$box${}$set_raw(this, raw);",
-        instance
-    );
-    writeln!(out, "}}");
-
-    writeln!(out, "template <>");
     writeln!(out, "void Box<{}>::drop() noexcept {{", inner);
     writeln!(out, "  return cxxbridge01$box${}$drop(this);", instance);
-    writeln!(out, "}}");
-
-    writeln!(out, "template <>");
-    writeln!(
-        out,
-        "const {} *Box<{}>::deref() const noexcept {{",
-        inner, inner,
-    );
-    writeln!(out, "  return cxxbridge01$box${}$deref(this);", instance);
-    writeln!(out, "}}");
-
-    writeln!(out, "template <>");
-    writeln!(out, "{} *Box<{}>::deref_mut() noexcept {{", inner, inner);
-    writeln!(
-        out,
-        "  return cxxbridge01$box${}$deref_mut(this);",
-        instance
-    );
     writeln!(out, "}}");
 }
 
