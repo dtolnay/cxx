@@ -19,7 +19,7 @@ pub(super) fn gen(namespace: Vec<String>, apis: &[Api], types: &Types, header: b
     }
 
     write_includes(out, types);
-    write_include_cxxbridge(out, types);
+    write_include_cxxbridge(out, apis, types);
 
     out.next_section();
     for name in &namespace {
@@ -95,7 +95,7 @@ fn write_includes(out: &mut OutFile, types: &Types) {
     }
 }
 
-fn write_include_cxxbridge(out: &mut OutFile, types: &Types) {
+fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
     let mut needs_rust_box = false;
     for ty in types {
         if let Type::RustBox(_) = ty {
@@ -104,16 +104,46 @@ fn write_include_cxxbridge(out: &mut OutFile, types: &Types) {
         }
     }
 
+    let mut needs_move = false;
+    'outer: for api in apis {
+        if let Api::CxxFunction(efn) = api {
+            for arg in &efn.args {
+                if arg.ty != RustString && types.needs_indirect_abi(&arg.ty) {
+                    needs_move = true;
+                    break 'outer;
+                }
+            }
+        }
+    }
+
     out.begin_block("namespace rust");
     out.begin_block("inline namespace cxxbridge01");
-    if needs_rust_box {
+
+    if needs_rust_box || needs_move {
         writeln!(out, "// #include \"cxxbridge.h\"");
+    }
+
+    if needs_rust_box {
+        out.next_section();
         for line in include::get("CXXBRIDGE01_RUST_BOX").lines() {
             if !line.trim_start().starts_with("//") {
                 writeln!(out, "{}", line);
             }
         }
     }
+
+    if needs_move {
+        out.include.cstring = true;
+        out.next_section();
+        writeln!(out, "template <typename T>");
+        writeln!(out, "class move : public T {{");
+        writeln!(out, "public:");
+        writeln!(out, "  move(unsafe_bitcopy_t, const T &bits) {{");
+        writeln!(out, "    std::memcpy(this, &bits, sizeof *this);");
+        writeln!(out, "  }}");
+        writeln!(out, "}};");
+    }
+
     out.end_block("namespace cxxbridge01");
     out.end_block("namespace rust");
 }
@@ -122,7 +152,7 @@ fn write_struct(out: &mut OutFile, strct: &Struct) {
     for line in strct.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
-    writeln!(out, "struct {} final {{", strct.ident);
+    writeln!(out, "struct {} {{", strct.ident);
     for field in &strct.fields {
         write!(out, "  ");
         write_type_space(out, &field.ty);
@@ -153,7 +183,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         if i > 0 {
             write!(out, ", ");
         }
-        if arg.ty == RustString {
+        if types.needs_indirect_abi(&arg.ty) {
             write!(out, "const ");
         }
         write_extern_arg(out, arg, types);
@@ -207,7 +237,9 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
                 arg.ident,
             );
         } else if types.needs_indirect_abi(&arg.ty) {
-            write!(out, "::std::move(*{})", arg.ident);
+            write!(out, "::rust::move<");
+            write_type(out, &arg.ty);
+            write!(out, ">(::rust::unsafe_bitcopy, *{})", arg.ident);
         } else {
             write!(out, "{}", arg.ident);
         }

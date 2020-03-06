@@ -126,10 +126,8 @@ fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types
     let args = efn.args.iter().map(|arg| {
         let ident = &arg.ident;
         let ty = expand_extern_type(&arg.ty);
-        if arg.ty == RustString {
+        if types.needs_indirect_abi(&arg.ty) {
             quote!(#ident: *const #ty)
-        } else if types.needs_indirect_abi(&arg.ty) {
-            quote!(#ident: *mut #ty)
         } else {
             quote!(#ident: #ty)
         }
@@ -170,7 +168,7 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
                 _ => quote!(#var),
             },
             Type::Str(_) => quote!(::cxx::private::RustStr::from(#var)),
-            ty if types.needs_indirect_abi(ty) => quote!(#var.as_mut_ptr()),
+            ty if types.needs_indirect_abi(ty) => quote!(#var.as_mut_ptr() as *const #ty),
             _ => quote!(#var),
         }
     });

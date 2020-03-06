@@ -18,6 +18,7 @@ pub fn get(guard: &str) -> &'static str {
 pub struct Includes {
     custom: Vec<String>,
     pub cstdint: bool,
+    pub cstring: bool,
     pub memory: bool,
     pub string: bool,
     pub type_traits: bool,
@@ -40,6 +41,9 @@ impl Display for Includes {
         }
         if self.cstdint {
             writeln!(f, "#include <cstdint>")?;
+        }
+        if self.cstring {
+            writeln!(f, "#include <cstring>")?;
         }
         if self.memory {
             writeln!(f, "#include <memory>")?;
