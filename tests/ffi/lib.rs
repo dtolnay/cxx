@@ -13,7 +13,7 @@ pub mod ffi {
 
         fn c_return_primitive() -> usize;
         fn c_return_shared() -> Shared;
-        //TODO fn c_return_box() -> Box<R>;
+        fn c_return_box() -> Box<R>;
         fn c_return_unique_ptr() -> UniquePtr<C>;
         fn c_return_ref(shared: &Shared) -> &usize;
         fn c_return_str(shared: &Shared) -> &str;
@@ -55,7 +55,7 @@ pub mod ffi {
     }
 }
 
-type R = ();
+pub type R = usize;
 
 fn r_return_primitive() -> usize {
     2020

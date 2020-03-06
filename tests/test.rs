@@ -25,6 +25,7 @@ fn test_c_return() {
 
     assert_eq!(2020, ffi::c_return_primitive());
     assert_eq!(2020, ffi::c_return_shared().z);
+    assert_eq!(2020, *ffi::c_return_box());
     ffi::c_return_unique_ptr();
     assert_eq!(2020, *ffi::c_return_ref(&shared));
     assert_eq!("2020", ffi::c_return_str(&shared));
@@ -45,7 +46,7 @@ fn test_c_take() {
 
     check!(ffi::c_take_primitive(2020));
     check!(ffi::c_take_shared(ffi::Shared { z: 2020 }));
-    check!(ffi::c_take_box(Box::new(())));
+    check!(ffi::c_take_box(Box::new(2020)));
     check!(ffi::c_take_ref_c(unique_ptr.as_ref().unwrap()));
     check!(ffi::c_take_unique_ptr(unique_ptr));
     check!(ffi::c_take_str("2020"));
@@ -68,4 +69,9 @@ fn test_c_call_r() {
         }
     }
     check!(cxx_run_test());
+}
+
+#[no_mangle]
+extern "C" fn cxx_test_suite_get_box() -> *mut cxx_test_suite::R {
+    Box::into_raw(Box::new(2020usize))
 }

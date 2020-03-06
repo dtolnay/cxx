@@ -2,6 +2,7 @@
 #include "tests/ffi/lib.rs"
 
 extern "C" void cxx_test_suite_set_correct();
+extern "C" tests::R *cxx_test_suite_get_box();
 
 namespace tests {
 
@@ -12,6 +13,10 @@ size_t C::get() const { return this->n; }
 size_t c_return_primitive() { return 2020; }
 
 Shared c_return_shared() { return Shared{2020}; }
+
+rust::Box<R> c_return_box() {
+  return rust::Box<R>::from_raw(cxx_test_suite_get_box());
+}
 
 std::unique_ptr<C> c_return_unique_ptr() {
   return std::unique_ptr<C>(new C{2020});
