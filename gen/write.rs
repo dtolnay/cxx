@@ -217,7 +217,11 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
             write_type(out, &arg.ty);
             write!(out, "({})", arg.ident);
         } else if arg.ty == RustString {
-            write!(out, "::rust::String(::rust::unsafe_bitcopy, *{})", arg.ident);
+            write!(
+                out,
+                "::rust::String(::rust::unsafe_bitcopy, *{})",
+                arg.ident,
+            );
         } else if types.needs_indirect_abi(&arg.ty) {
             write!(out, "::std::move(*{})", arg.ident);
         } else {

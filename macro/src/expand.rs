@@ -252,7 +252,9 @@ fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Type
     let vars = efn.args.iter().map(|arg| {
         let ident = &arg.ident;
         match &arg.ty {
-            Type::Ident(i) if i == RustString => quote!(::std::mem::take((*#ident).as_mut_string())),
+            Type::Ident(i) if i == RustString => {
+                quote!(::std::mem::take((*#ident).as_mut_string()))
+            }
             Type::RustBox(_) => quote!(::std::boxed::Box::from_raw(#ident)),
             Type::UniquePtr(_) => quote!(::cxx::UniquePtr::from_raw(#ident)),
             Type::Ref(ty) => match &ty.inner {
