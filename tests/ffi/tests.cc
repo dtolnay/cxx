@@ -3,6 +3,7 @@
 
 extern "C" void cxx_test_suite_set_correct();
 extern "C" tests::R *cxx_test_suite_get_box();
+extern "C" bool cxx_test_suite_r_is_correct(const tests::R *);
 
 namespace tests {
 
@@ -48,8 +49,9 @@ void c_take_shared(Shared shared) {
 }
 
 void c_take_box(rust::Box<R> r) {
-  (void)r;
-  cxx_test_suite_set_correct();
+  if (cxx_test_suite_r_is_correct(&*r)) {
+    cxx_test_suite_set_correct();
+  }
 }
 
 void c_take_unique_ptr(std::unique_ptr<C> c) {
@@ -58,7 +60,11 @@ void c_take_unique_ptr(std::unique_ptr<C> c) {
   }
 }
 
-void c_take_ref_r(const R &r) { (void)r; }
+void c_take_ref_r(const R &r) {
+  if (cxx_test_suite_r_is_correct(&r)) {
+    cxx_test_suite_set_correct();
+  }
+}
 
 void c_take_ref_c(const C &c) {
   if (c.get() == 2020) {

@@ -75,3 +75,8 @@ fn test_c_call_r() {
 extern "C" fn cxx_test_suite_get_box() -> *mut cxx_test_suite::R {
     Box::into_raw(Box::new(2020usize))
 }
+
+#[no_mangle]
+unsafe extern "C" fn cxx_test_suite_r_is_correct(r: *const cxx_test_suite::R) -> bool {
+    *r == 2020
+}
