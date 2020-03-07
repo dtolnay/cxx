@@ -9,6 +9,7 @@ description = "Safe interop between Rust and C++"
 repository = "https://github.com/dtolnay/cxx"
 documentation = "https://docs.rs/cxx"
 readme = "README.md"
+exclude = ["/demo-cxx", "/gen", "/syntax", "/third-party"]
 
 [badges]
 travis-ci = { repository = "dtolnay/cxx" }
