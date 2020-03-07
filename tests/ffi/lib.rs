@@ -37,7 +37,7 @@ pub mod ffi {
         fn r_return_primitive() -> usize;
         fn r_return_shared() -> Shared;
         fn r_return_box() -> Box<R>;
-        //TODO fn r_return_unique_ptr() -> UniquePtr<C>;
+        fn r_return_unique_ptr() -> UniquePtr<C>;
         fn r_return_ref(shared: &Shared) -> &usize;
         fn r_return_str(shared: &Shared) -> &str;
         fn r_return_rust_string() -> String;
@@ -67,6 +67,13 @@ fn r_return_shared() -> ffi::Shared {
 
 fn r_return_box() -> Box<R> {
     Box::new(2020)
+}
+
+fn r_return_unique_ptr() -> UniquePtr<ffi::C> {
+    extern "C" {
+        fn cxx_test_suite_get_unique_ptr() -> *mut ffi::C;
+    }
+    unsafe { UniquePtr::from_raw(cxx_test_suite_get_unique_ptr()) }
 }
 
 fn r_return_ref(shared: &ffi::Shared) -> &usize {

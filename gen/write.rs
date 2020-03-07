@@ -341,6 +341,10 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
                     write_type(out, ret);
                     write!(out, "::from_raw(");
                 }
+                Type::UniquePtr(_) => {
+                    write_type(out, ret);
+                    write!(out, "(");
+                }
                 Type::Ref(_) => write!(out, "*"),
                 _ => {}
             }
@@ -375,7 +379,7 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         }
         write!(out, ")");
         if let Some(ret) = &efn.ret {
-            if let Type::RustBox(_) = ret {
+            if let Type::RustBox(_) | Type::UniquePtr(_) = ret {
                 write!(out, ")");
             }
         }
