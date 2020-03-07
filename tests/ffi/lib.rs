@@ -41,7 +41,7 @@ pub mod ffi {
         fn r_return_ref(shared: &Shared) -> &usize;
         fn r_return_str(shared: &Shared) -> &str;
         fn r_return_rust_string() -> String;
-        //TODO fn r_return_unique_ptr_string() -> UniquePtr<CxxString>;
+        fn r_return_unique_ptr_string() -> UniquePtr<CxxString>;
 
         fn r_take_primitive(n: usize);
         fn r_take_shared(shared: Shared);
@@ -87,6 +87,13 @@ fn r_return_str(shared: &ffi::Shared) -> &str {
 
 fn r_return_rust_string() -> String {
     "2020".to_owned()
+}
+
+fn r_return_unique_ptr_string() -> UniquePtr<CxxString> {
+    extern "C" {
+        fn cxx_test_suite_get_unique_ptr_string() -> *mut CxxString;
+    }
+    unsafe { UniquePtr::from_raw(cxx_test_suite_get_unique_ptr_string()) }
 }
 
 fn r_take_primitive(n: usize) {

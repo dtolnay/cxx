@@ -94,6 +94,10 @@ extern "C" C *cxx_test_suite_get_unique_ptr() noexcept {
   return std::unique_ptr<C>(new C{2020}).release();
 }
 
+extern "C" std::string *cxx_test_suite_get_unique_ptr_string() noexcept {
+  return std::unique_ptr<std::string>(new std::string("2020")).release();
+}
+
 extern "C" const char *cxx_run_test() noexcept {
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
@@ -111,6 +115,7 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(r_return_ref(Shared{2020}) == 2020);
   ASSERT(std::string(r_return_str(Shared{2020})) == "2020");
   ASSERT(std::string(r_return_rust_string()) == "2020");
+  ASSERT(*r_return_unique_ptr_string() == "2020");
 
   r_take_primitive(2020);
   r_take_shared(Shared{2020});
