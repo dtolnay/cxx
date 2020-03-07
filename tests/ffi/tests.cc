@@ -1,9 +1,9 @@
 #include "tests/ffi/tests.h"
 #include "tests/ffi/lib.rs"
 
-extern "C" void cxx_test_suite_set_correct();
-extern "C" tests::R *cxx_test_suite_get_box();
-extern "C" bool cxx_test_suite_r_is_correct(const tests::R *);
+extern "C" void cxx_test_suite_set_correct() noexcept;
+extern "C" tests::R *cxx_test_suite_get_box() noexcept;
+extern "C" bool cxx_test_suite_r_is_correct(const tests::R *) noexcept;
 
 namespace tests {
 
@@ -90,7 +90,7 @@ void c_take_unique_ptr_string(std::unique_ptr<std::string> s) {
   }
 }
 
-extern "C" C *cxx_test_suite_get_unique_ptr() {
+extern "C" C *cxx_test_suite_get_unique_ptr() noexcept {
   return std::unique_ptr<C>(new C{2020}).release();
 }
 
