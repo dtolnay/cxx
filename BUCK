@@ -38,11 +38,11 @@ rust_binary(
 
 cxx_library(
     name = "core",
-    srcs = ["src/cxxbridge.cc"],
+    srcs = ["src/cxx.cc"],
     visibility = ["PUBLIC"],
-    header_namespace = "cxxbridge",
+    header_namespace = "rust",
     exported_headers = {
-        "cxxbridge.h": "include/cxxbridge.h",
+        "cxx.h": "include/cxx.h",
     },
     exported_linker_flags = ["-lstdc++"],
 )

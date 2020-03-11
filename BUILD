@@ -3,7 +3,7 @@ load("//tools/bazel:rust.bzl", "rust_binary", "rust_library")
 rust_library(
     name = "cxx",
     srcs = glob(["src/**/*.rs"]),
-    data = ["src/gen/include/cxxbridge.h"],
+    data = ["src/gen/include/cxx.h"],
     visibility = ["//visibility:public"],
     deps = [
         ":core-lib",
@@ -23,7 +23,7 @@ rust_library(
 rust_binary(
     name = "codegen",
     srcs = glob(["cmd/src/**/*.rs"]),
-    data = ["cmd/src/gen/include/cxxbridge.h"],
+    data = ["cmd/src/gen/include/cxx.h"],
     visibility = ["//visibility:public"],
     deps = [
         "//third-party:anyhow",
@@ -39,16 +39,16 @@ rust_binary(
 
 cc_library(
     name = "core",
-    hdrs = ["include/cxxbridge.h"],
-    include_prefix = "cxxbridge",
+    hdrs = ["include/cxx.h"],
+    include_prefix = "rust",
     strip_include_prefix = "include",
     visibility = ["//visibility:public"],
 )
 
 cc_library(
     name = "core-lib",
-    srcs = ["src/cxxbridge.cc"],
-    hdrs = ["include/cxxbridge.h"],
+    srcs = ["src/cxx.cc"],
+    hdrs = ["include/cxx.h"],
 )
 
 rust_library(

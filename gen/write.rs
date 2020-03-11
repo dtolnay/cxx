@@ -126,7 +126,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
     out.begin_block("inline namespace cxxbridge01");
 
     if needs_rust_box || needs_manually_drop || needs_maybe_uninit {
-        writeln!(out, "// #include \"cxxbridge.h\"");
+        writeln!(out, "// #include \"rust/cxx.h\"");
     }
 
     if needs_rust_box {

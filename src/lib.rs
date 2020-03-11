@@ -310,9 +310,9 @@
 //! <tr><td></td><td></td><td></td></tr>
 //! </table>
 //!
-//! The C++ API of the `cxxbridge` namespace is defined by the
-//! *include/cxxbridge.h* file in https://github.com/dtolnay/cxx. You will need
-//! to include this header in your C++ code when working with those types.
+//! The C++ API of the `rust` namespace is defined by the *include/cxx.h* file
+//! in https://github.com/dtolnay/cxx. You will need to include this header in
+//! your C++ code when working with those types.
 //!
 //! The following types are intended to be supported "soon" but are just not
 //! implemented yet. I don't expect any of these to be hard to make work but
@@ -463,10 +463,10 @@ fn try_generate_bridge(rust_source_file: &Path) -> Result<cc::Build> {
     let mut build = paths::cc_build();
     build.file(&bridge_path);
 
-    let ref cxxbridge_h = paths::include_dir()?.join("cxxbridge").join("cxxbridge.h");
-    let _ = fs::create_dir_all(cxxbridge_h.parent().unwrap());
-    let _ = fs::remove_file(cxxbridge_h);
-    let _ = fs::write(cxxbridge_h, gen::include::HEADER);
+    let ref cxx_h = paths::include_dir()?.join("rust").join("cxx.h");
+    let _ = fs::create_dir_all(cxx_h.parent().unwrap());
+    let _ = fs::remove_file(cxx_h);
+    let _ = fs::write(cxx_h, gen::include::HEADER);
 
     Ok(build)
 }

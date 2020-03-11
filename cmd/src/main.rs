@@ -14,7 +14,7 @@ use structopt::StructOpt;
     usage = "\
     cxxbridge <input>.rs              Emit .cc file for bridge to stdout
     cxxbridge <input>.rs --header     Emit .h file for bridge to stdout
-    cxxbridge --header                Emit cxxbridge.h header to stdout",
+    cxxbridge --header                Emit rust/cxx.h header to stdout",
     help_message = "Print help information",
     version_message = "Print version information"
 )]
