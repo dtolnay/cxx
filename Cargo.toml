@@ -1,6 +1,6 @@
 [package]
 name = "cxx"
-version = "0.1.2"
+version = "0.1.2" # remember to update html_root_url
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 edition = "2018"
 links = "cxxbridge01"

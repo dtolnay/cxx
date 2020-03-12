@@ -329,6 +329,7 @@
 //! <tr><td><sup><i>tbd</i></sup></td><td>std::unordered_map&lt;K, V&gt;</td></tr>
 //! </table>
 
+#![doc(html_root_url = "https://docs.rs/cxx/0.1.2")]
 #![deny(improper_ctypes)]
 #![allow(
     clippy::large_enum_variant,
