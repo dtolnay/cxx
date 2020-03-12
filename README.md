@@ -306,9 +306,9 @@ of functions.
 <tr><td></td><td></td><td></td></tr>
 </table>
 
-The C++ API of the `cxxbridge` namespace is defined by the *include/cxxbridge.h*
-file in this repo. You will need to include this header in your C++ code when
-working with those types.
+The C++ API of the `rust` namespace is defined by the *include/cxx.h* file in
+this repo. You will need to include this header in your C++ code when working
+with those types.
 
 The following types are intended to be supported "soon" but are just not
 implemented yet. I don't expect any of these to be hard to make work but it's a

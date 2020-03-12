@@ -1,6 +1,6 @@
 use std::fmt::{self, Display};
 
-pub static HEADER: &str = include_str!("include/cxxbridge.h");
+pub static HEADER: &str = include_str!("include/cxx.h");
 
 pub fn get(guard: &str) -> &'static str {
     let ifndef = format!("#ifndef {}", guard);
@@ -10,7 +10,7 @@ pub fn get(guard: &str) -> &'static str {
     if let (Some(begin), Some(end)) = (begin, end) {
         &HEADER[begin..end + endif.len()]
     } else {
-        panic!("not found in cxxbridge.h header: {}", guard)
+        panic!("not found in cxx.h header: {}", guard)
     }
 }
 
