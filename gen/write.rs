@@ -86,7 +86,7 @@ fn write_includes(out: &mut OutFile, types: &Types) {
                 Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize) | Some(I8)
                 | Some(I16) | Some(I32) | Some(I64) | Some(Isize) => out.include.cstdint = true,
                 Some(CxxString) => out.include.string = true,
-                Some(Bool) | Some(RustString) | None => {}
+                Some(Bool) | Some(F32) | Some(F64) | Some(RustString) | None => {}
             },
             Type::RustBox(_) => out.include.type_traits = true,
             Type::UniquePtr(_) => out.include.memory = true,
@@ -446,6 +446,8 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             Some(I32) => write!(out, "int32_t"),
             Some(I64) => write!(out, "int64_t"),
             Some(Isize) => write!(out, "ssize_t"),
+            Some(F32) => write!(out, "float"),
+            Some(F64) => write!(out, "double"),
             Some(CxxString) => write!(out, "::std::string"),
             Some(RustString) => write!(out, "::rust::String"),
             None => write!(out, "{}", ident),
