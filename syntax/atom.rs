@@ -14,6 +14,8 @@ pub enum Atom {
     I32,
     I64,
     Isize,
+    F32,
+    F64,
     CxxString,
     RustString,
 }
@@ -32,6 +34,8 @@ impl Atom {
             "i16" => Some(I16),
             "i32" => Some(I32),
             "i64" => Some(I64),
+            "f32" => Some(F32),
+            "f64" => Some(F64),
             "isize" => Some(Isize),
             "CxxString" => Some(CxxString),
             "String" => Some(RustString),
