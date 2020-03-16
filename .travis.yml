@@ -41,7 +41,7 @@ matrix:
         - buck run demo-rs --verbose=0
         - buck test ... --verbose=0
     - name: Bazel
-      rust: nightly
+      rust: beta
       before_install:
         - wget -O install.sh https://github.com/bazelbuild/bazel/releases/download/2.1.1/bazel-2.1.1-installer-linux-x86_64.sh
         - chmod +x install.sh
