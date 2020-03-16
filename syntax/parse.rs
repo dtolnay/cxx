@@ -180,7 +180,10 @@ fn parse_extern_fn(foreign_fn: &ForeignItemFn) -> Result<ExternFn> {
     }
     let ret = match &foreign_fn.sig.output {
         ReturnType::Default => None,
-        ReturnType::Type(_, ty) => Some(parse_type(ty)?),
+        ReturnType::Type(_, ty) => match parse_type(ty)? {
+            Type::Void(_) => None,
+            ty => Some(ty),
+        },
     };
     let doc = attrs::parse_doc(&foreign_fn.attrs)?;
     let fn_token = foreign_fn.sig.fn_token;
