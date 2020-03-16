@@ -1,3 +1,10 @@
+#![allow(
+    clippy::inherent_to_string,
+    clippy::large_enum_variant,
+    clippy::new_without_default,
+    clippy::toplevel_ref_arg
+)]
+
 mod gen;
 mod syntax;
 

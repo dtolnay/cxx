@@ -1,4 +1,5 @@
 #![allow(
+    clippy::inherent_to_string,
     clippy::large_enum_variant,
     clippy::new_without_default,
     clippy::or_fun_call,

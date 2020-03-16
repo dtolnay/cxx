@@ -335,9 +335,11 @@
 #![doc(html_root_url = "https://docs.rs/cxx/0.1.2")]
 #![deny(improper_ctypes)]
 #![allow(
+    clippy::inherent_to_string,
     clippy::large_enum_variant,
     clippy::missing_safety_doc,
     clippy::module_inception,
+    clippy::needless_doctest_main,
     clippy::new_without_default,
     clippy::or_fun_call,
     clippy::ptr_arg,
