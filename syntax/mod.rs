@@ -50,6 +50,7 @@ pub struct ExternFn {
     pub receiver: Option<Receiver>,
     pub args: Vec<Var>,
     pub ret: Option<Type>,
+    pub throws: bool,
     pub semi_token: Token![;],
 }
 
