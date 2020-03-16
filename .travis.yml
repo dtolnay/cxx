@@ -46,6 +46,7 @@ matrix:
         - wget -O install.sh https://github.com/bazelbuild/bazel/releases/download/2.1.1/bazel-2.1.1-installer-linux-x86_64.sh
         - chmod +x install.sh
         - ./install.sh --user
+        - cd /tmp
         - git clone --single-branch --branch optional_cargo https://github.com/sayrer/cargo-raze
         - cd cargo-raze/impl
         - cargo install --debug -f --path .
