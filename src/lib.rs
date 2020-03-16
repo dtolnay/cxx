@@ -10,8 +10,7 @@
 //!
 //! <br>
 //!
-//! *Compiler support: requires rustc 1.42+ (beta on January 30, stable on March
-//! 12)*
+//! *Compiler support: requires rustc 1.42+*
 //!
 //! <br>
 //!
