@@ -9,17 +9,15 @@ pub mod ident;
 mod impls;
 mod parse;
 pub mod set;
-mod span;
 mod tokens;
 pub mod types;
 
-use proc_macro2::Ident;
+use proc_macro2::{Ident, Span};
 use syn::{LitStr, Token};
 
 pub use self::atom::Atom;
 pub use self::doc::Doc;
 pub use self::parse::parse_items;
-pub use self::span::Span;
 pub use self::types::Types;
 
 pub enum Api {
