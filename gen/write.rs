@@ -271,7 +271,11 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
 }
 
 fn write_rust_function_decl(out: &mut OutFile, efn: &ExternFn, types: &Types) {
-    write_extern_return_type(out, &efn.ret, types);
+    if efn.throws {
+        write!(out, "::rust::Str::Repr ");
+    } else {
+        write_extern_return_type(out, &efn.ret, types);
+    }
     for name in out.namespace.clone() {
         write!(out, "{}$", name);
     }
@@ -305,7 +309,10 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         write_type_space(out, &arg.ty);
         write!(out, "{}", arg.ident);
     }
-    write!(out, ") noexcept");
+    write!(out, ")");
+    if !efn.throws {
+        write!(out, " noexcept");
+    }
     if out.header {
         writeln!(out, ";");
     } else {
@@ -338,6 +345,9 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
                 Type::Ref(_) => write!(out, "*"),
                 _ => {}
             }
+        }
+        if efn.throws {
+            write!(out, "::rust::Str::Repr error$ = ");
         }
         for name in out.namespace.clone() {
             write!(out, "{}$", name);
@@ -374,6 +384,11 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
             }
         }
         writeln!(out, ";");
+        if efn.throws {
+            writeln!(out, "  if (error$.ptr) {{");
+            writeln!(out, "    throw ::rust::Error(error$);");
+            writeln!(out, "  }}");
+        }
         if indirect_return {
             writeln!(out, "  return ::std::move(return$.value);");
         }
@@ -391,7 +406,7 @@ fn write_return_type(out: &mut OutFile, ty: &Option<Type>) {
 fn indirect_return(efn: &ExternFn, types: &Types) -> bool {
     efn.ret
         .as_ref()
-        .map_or(false, |ret| types.needs_indirect_abi(ret))
+        .map_or(false, |ret| efn.throws || types.needs_indirect_abi(ret))
 }
 
 fn write_extern_return_type(out: &mut OutFile, ty: &Option<Type>, types: &Types) {

@@ -354,6 +354,7 @@ mod assert;
 
 mod cxx_string;
 mod error;
+mod exception;
 mod gen;
 mod opaque;
 mod paths;
@@ -370,6 +371,7 @@ pub use cxxbridge_macro::bridge;
 // Not public API.
 #[doc(hidden)]
 pub mod private {
+    pub use crate::exception::r#try;
     pub use crate::opaque::Opaque;
     pub use crate::rust_str::RustStr;
     pub use crate::rust_string::RustString;

@@ -135,6 +135,32 @@ std::ostream &operator<<(std::ostream &os, const Str &s) {
   return os;
 }
 
+extern "C" {
+const char *cxxbridge02$error(const char *ptr, size_t len) {
+  char *copy = new char[len];
+  strncpy(copy, ptr, len);
+  return copy;
+}
+} // extern "C"
+
+Error::Error(Str::Repr msg) noexcept : msg(msg) {}
+
+Error::Error(const Error &other) {
+  this->msg.ptr = cxxbridge02$error(other.msg.ptr, other.msg.len);
+  this->msg.len = other.msg.len;
+}
+
+Error::Error(Error &&other) noexcept {
+  delete[] this->msg.ptr;
+  this->msg = other.msg;
+  other.msg.ptr = nullptr;
+  other.msg.len = 0;
+}
+
+Error::~Error() noexcept { delete[] this->msg.ptr; }
+
+const char *Error::what() const noexcept { return this->msg.ptr; }
+
 } // namespace cxxbridge02
 } // namespace rust
 
