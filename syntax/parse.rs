@@ -178,13 +178,34 @@ fn parse_extern_fn(foreign_fn: &ForeignItemFn) -> Result<ExternFn> {
             }
         }
     }
+
+    let mut throws = false;
     let ret = match &foreign_fn.sig.output {
         ReturnType::Default => None,
-        ReturnType::Type(_, ty) => match parse_type(ty)? {
-            Type::Void(_) => None,
-            ty => Some(ty),
-        },
+        ReturnType::Type(_, ret) => {
+            let mut ret = ret.as_ref();
+            if let RustType::Path(ty) = ret {
+                let path = &ty.path;
+                if ty.qself.is_none() && path.leading_colon.is_none() && path.segments.len() == 1 {
+                    let segment = &path.segments[0];
+                    let ident = segment.ident.clone();
+                    if let PathArguments::AngleBracketed(generic) = &segment.arguments {
+                        if ident == "Result" && generic.args.len() == 1 {
+                            if let GenericArgument::Type(arg) = &generic.args[0] {
+                                ret = arg;
+                                throws = true;
+                            }
+                        }
+                    }
+                }
+            }
+            match parse_type(ret)? {
+                Type::Void(_) => None,
+                ty => Some(ty),
+            }
+        }
     };
+
     let doc = attrs::parse_doc(&foreign_fn.attrs)?;
     let fn_token = foreign_fn.sig.fn_token;
     let ident = foreign_fn.sig.ident.clone();
@@ -196,12 +217,13 @@ fn parse_extern_fn(foreign_fn: &ForeignItemFn) -> Result<ExternFn> {
         receiver,
         args,
         ret,
+        throws,
         semi_token,
     })
 }
 
 fn parse_type(ty: &RustType) -> Result<Type> {
-    match &ty {
+    match ty {
         RustType::Reference(ty) => {
             let inner = parse_type(&ty.elem)?;
             let which = match &inner {
