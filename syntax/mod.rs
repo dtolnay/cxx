@@ -12,7 +12,7 @@ pub mod set;
 mod tokens;
 pub mod types;
 
-use proc_macro2::Ident;
+use proc_macro2::{Ident, Span};
 use syn::{LitStr, Token};
 
 pub use self::atom::Atom;
@@ -63,13 +63,13 @@ pub struct Receiver {
     pub ident: Ident,
 }
 
-#[derive(Hash, Eq, PartialEq)]
 pub enum Type {
     Ident(Ident),
     RustBox(Box<Ty1>),
     UniquePtr(Box<Ty1>),
     Ref(Box<Ref>),
     Str(Box<Ref>),
+    Void(Span),
 }
 
 pub struct Ty1 {

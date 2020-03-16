@@ -1,5 +1,36 @@
-use crate::syntax::{Ref, Ty1};
+use crate::syntax::{Ref, Ty1, Type};
 use std::hash::{Hash, Hasher};
+use std::mem;
+
+impl Hash for Type {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        mem::discriminant(self).hash(state);
+        match self {
+            Type::Ident(t) => t.hash(state),
+            Type::RustBox(t) => t.hash(state),
+            Type::UniquePtr(t) => t.hash(state),
+            Type::Ref(t) => t.hash(state),
+            Type::Str(t) => t.hash(state),
+            Type::Void(_) => {}
+        }
+    }
+}
+
+impl Eq for Type {}
+
+impl PartialEq for Type {
+    fn eq(&self, other: &Type) -> bool {
+        match (self, other) {
+            (Type::Ident(lhs), Type::Ident(rhs)) => lhs == rhs,
+            (Type::RustBox(lhs), Type::RustBox(rhs)) => lhs == rhs,
+            (Type::UniquePtr(lhs), Type::UniquePtr(rhs)) => lhs == rhs,
+            (Type::Ref(lhs), Type::Ref(rhs)) => lhs == rhs,
+            (Type::Str(lhs), Type::Str(rhs)) => lhs == rhs,
+            (Type::Void(_), Type::Void(_)) => true,
+            (_, _) => false,
+        }
+    }
+}
 
 impl Eq for Ty1 {}
 
