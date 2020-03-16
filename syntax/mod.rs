@@ -65,7 +65,6 @@ pub struct Receiver {
     pub ident: Ident,
 }
 
-#[derive(Hash, Eq, PartialEq)]
 pub enum Type {
     Ident(Ident),
     RustBox(Box<Ty1>),
