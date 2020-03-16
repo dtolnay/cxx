@@ -16,6 +16,7 @@ impl ToTokens for Type {
             }
             Type::RustBox(ty) | Type::UniquePtr(ty) => ty.to_tokens(tokens),
             Type::Ref(r) | Type::Str(r) => r.to_tokens(tokens),
+            Type::Void(span) => tokens.extend(quote_spanned!(span.0=> ())),
         }
     }
 }

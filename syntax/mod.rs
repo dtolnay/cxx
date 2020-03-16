@@ -9,9 +9,11 @@ pub mod ident;
 mod impls;
 mod parse;
 pub mod set;
+mod span;
 mod tokens;
 pub mod types;
 
+use self::span::Span;
 use proc_macro2::Ident;
 use syn::{LitStr, Token};
 
@@ -70,6 +72,7 @@ pub enum Type {
     UniquePtr(Box<Ty1>),
     Ref(Box<Ref>),
     Str(Box<Ref>),
+    Void(Span),
 }
 
 pub struct Ty1 {
