@@ -69,6 +69,12 @@ pub(crate) fn typecheck(apis: &[Api], types: &Types) -> Result<()> {
                         errors.push(return_by_value(ty, types));
                     }
                 }
+                if efn.throws {
+                    errors.push(Error::new_spanned(
+                        efn,
+                        "fallible functions are not implemented yet",
+                    ));
+                }
             }
             _ => {}
         }
