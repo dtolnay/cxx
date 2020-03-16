@@ -1,5 +1,5 @@
 use crate::syntax::{
-    attrs, error, Api, Atom, Doc, ExternFn, ExternType, Receiver, Ref, Struct, Ty1, Type, Var,
+    attrs, error, Api, Atom, Doc, ExternFn, ExternType, Lang, Receiver, Ref, Struct, Ty1, Type, Var,
 };
 use proc_macro2::Ident;
 use quote::quote;
@@ -7,12 +7,6 @@ use syn::{
     Abi, Error, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType, GenericArgument, Item,
     ItemForeignMod, ItemStruct, Pat, PathArguments, Result, ReturnType, Type as RustType,
 };
-
-#[derive(Copy, Clone)]
-enum Lang {
-    Cxx,
-    Rust,
-}
 
 pub fn parse_items(items: Vec<Item>) -> Result<Vec<Api>> {
     let mut apis = Vec::new();
@@ -92,7 +86,7 @@ fn parse_foreign_mod(foreign_mod: ItemForeignMod) -> Result<Vec<Api>> {
                 items.push(api_type(ety));
             }
             ForeignItem::Fn(foreign) => {
-                let efn = parse_extern_fn(foreign)?;
+                let efn = parse_extern_fn(foreign, lang)?;
                 items.push(api_function(efn));
             }
             ForeignItem::Macro(foreign) if foreign.mac.path.is_ident("include") => {
@@ -133,7 +127,7 @@ fn parse_extern_type(foreign_type: &ForeignItemType) -> Result<ExternType> {
     })
 }
 
-fn parse_extern_fn(foreign_fn: &ForeignItemFn) -> Result<ExternFn> {
+fn parse_extern_fn(foreign_fn: &ForeignItemFn, lang: Lang) -> Result<ExternFn> {
     let generics = &foreign_fn.sig.generics;
     if !generics.params.is_empty() || generics.where_clause.is_some() {
         return Err(Error::new_spanned(
@@ -211,6 +205,7 @@ fn parse_extern_fn(foreign_fn: &ForeignItemFn) -> Result<ExternFn> {
     let ident = foreign_fn.sig.ident.clone();
     let semi_token = foreign_fn.semi_token;
     Ok(ExternFn {
+        lang,
         doc,
         fn_token,
         ident,
