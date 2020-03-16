@@ -1,5 +1,5 @@
 use crate::syntax::{
-    attrs, error, Api, Atom, Doc, ExternFn, ExternType, Receiver, Ref, Struct, Ty1, Type, Var,
+    self, attrs, error, Api, Atom, Doc, ExternFn, ExternType, Receiver, Ref, Struct, Ty1, Type, Var,
 };
 use proc_macro2::Ident;
 use quote::quote;
@@ -250,6 +250,9 @@ fn parse_type(ty: &RustType) -> Result<Type> {
                     PathArguments::Parenthesized(_) => {}
                 }
             }
+        }
+        RustType::Tuple(ty) if ty.elems.is_empty() => {
+            return Ok(Type::Void(syntax::Span(ty.paren_token.span)));
         }
         _ => {}
     }

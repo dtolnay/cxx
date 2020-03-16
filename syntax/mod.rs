@@ -13,13 +13,13 @@ mod span;
 mod tokens;
 pub mod types;
 
-use self::span::Span;
 use proc_macro2::Ident;
 use syn::{LitStr, Token};
 
 pub use self::atom::Atom;
 pub use self::doc::Doc;
 pub use self::parse::parse_items;
+pub use self::span::Span;
 pub use self::types::Types;
 
 pub enum Api {
