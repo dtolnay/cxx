@@ -293,7 +293,11 @@ fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Type
         outparam = Some(quote!(__return: *mut #ret));
     }
     if efn.throws {
-        expr = quote!(::cxx::private::r#try(__return, #expr));
+        let out = match efn.ret {
+            Some(_) => quote!(__return),
+            None => quote!(&mut ()),
+        };
+        expr = quote!(::cxx::private::r#try(#out, #expr));
     } else if indirect_return {
         expr = quote!(::std::ptr::write(__return, #expr));
     }

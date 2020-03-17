@@ -54,6 +54,7 @@ pub mod ffi {
         fn r_take_rust_string(s: String);
         fn r_take_unique_ptr_string(s: UniquePtr<CxxString>);
 
+        fn r_try_return_void() -> Result<()>;
         fn r_try_return_primitive() -> Result<usize>;
         fn r_fail_return_primitive() -> Result<usize>;
     }
@@ -145,6 +146,10 @@ fn r_take_rust_string(s: String) {
 
 fn r_take_unique_ptr_string(s: UniquePtr<CxxString>) {
     assert_eq!(s.as_ref().unwrap().to_str().unwrap(), "2020");
+}
+
+fn r_try_return_void() -> Result<(), Error> {
+    Ok(())
 }
 
 fn r_try_return_primitive() -> Result<usize, Error> {
