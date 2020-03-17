@@ -30,6 +30,10 @@ pub mod ffi {
         fn c_take_str(s: &str);
         fn c_take_rust_string(s: String);
         fn c_take_unique_ptr_string(s: UniquePtr<CxxString>);
+
+        fn c_try_return_void() -> Result<()>;
+        fn c_try_return_primitive() -> Result<usize>;
+        fn c_fail_return_primitive() -> Result<usize>;
     }
 
     extern "Rust" {

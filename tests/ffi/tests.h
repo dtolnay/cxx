@@ -36,4 +36,8 @@ void c_take_str(rust::Str s);
 void c_take_rust_string(rust::String s);
 void c_take_unique_ptr_string(std::unique_ptr<std::string> s);
 
+void c_try_return_void();
+size_t c_try_return_primitive();
+size_t c_fail_return_primitive();
+
 } // namespace tests

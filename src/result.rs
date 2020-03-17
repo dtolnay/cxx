@@ -1,5 +1,7 @@
+use crate::exception::Exception;
 use crate::rust_str::RustStr;
 use std::fmt::Display;
+use std::mem;
 use std::ptr;
 use std::result::Result as StdResult;
 use std::slice;
@@ -40,4 +42,19 @@ unsafe fn to_c_error(msg: String) -> Result {
     let string = str::from_utf8_unchecked(slice);
     let err = RustStr::from(string);
     Result { err }
+}
+
+impl Result {
+    pub unsafe fn exception(self) -> StdResult<(), Exception> {
+        if self.ok.is_null() {
+            Ok(())
+        } else {
+            let err = self.err;
+            let slice = slice::from_raw_parts(err.ptr.as_ptr(), err.len);
+            let s = str::from_utf8_unchecked(slice);
+            Err(Exception {
+                what: mem::transmute::<*const str, Box<str>>(s),
+            })
+        }
+    }
 }

@@ -7,8 +7,8 @@ use std::str;
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct RustStr {
-    ptr: NonNull<u8>,
-    len: usize,
+    pub(crate) ptr: NonNull<u8>,
+    pub(crate) len: usize,
 }
 
 impl RustStr {

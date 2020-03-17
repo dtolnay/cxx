@@ -45,6 +45,7 @@ pub(super) fn gen(namespace: Vec<String>, apis: &[Api], types: &Types, header: b
 
     if !header {
         out.begin_block("extern \"C\"");
+        write_exception_glue(out, apis);
         for api in apis {
             let (efn, write): (_, fn(_, _, _)) = match api {
                 Api::CxxFunction(efn) => (efn, write_cxx_function_shim),
@@ -186,8 +187,32 @@ fn write_struct_using(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "using {} = {};", ident, ident);
 }
 
+fn write_exception_glue(out: &mut OutFile, apis: &[Api]) {
+    let mut has_cxx_throws = false;
+    for api in apis {
+        if let Api::CxxFunction(efn) = api {
+            if efn.throws {
+                has_cxx_throws = true;
+                break;
+            }
+        }
+    }
+
+    if has_cxx_throws {
+        out.next_section();
+        write!(
+            out,
+            "const char *cxxbridge02$exception(const char *, size_t);",
+        );
+    }
+}
+
 fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
-    write_extern_return_type(out, &efn.ret, types);
+    if efn.throws {
+        write!(out, "::rust::Str::Repr ");
+    } else {
+        write_extern_return_type(out, &efn.ret, types);
+    }
     for name in out.namespace.clone() {
         write!(out, "{}$", name);
     }
@@ -221,6 +246,11 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     }
     writeln!(out, ") = {};", efn.ident);
     write!(out, "  ");
+    if efn.throws {
+        writeln!(out, "::rust::Str::Repr throw$;");
+        writeln!(out, "  try {{");
+        write!(out, "    ");
+    }
     if indirect_return {
         write!(out, "new (return$) ");
         write_type(out, efn.ret.as_ref().unwrap());
@@ -267,6 +297,19 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         write!(out, ")");
     }
     writeln!(out, ";");
+    if efn.throws {
+        out.include.cstring = true;
+        writeln!(out, "    throw$.ptr = nullptr;");
+        writeln!(out, "  }} catch (const ::std::exception &catch$) {{");
+        writeln!(out, "    const char *return$ = catch$.what();");
+        writeln!(out, "    throw$.len = ::std::strlen(return$);");
+        writeln!(
+            out,
+            "    throw$.ptr = cxxbridge02$exception(return$, throw$.len);",
+        );
+        writeln!(out, "  }}");
+        writeln!(out, "  return throw$;");
+    }
     writeln!(out, "}}");
 }
 
