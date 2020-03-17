@@ -299,7 +299,7 @@ fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Type
     }
     expr = quote!(::cxx::private::catch_unwind(__fn, move || #expr));
     let ret = if efn.throws {
-        quote!(-> ::std::option::Option<::cxx::private::RustStr>)
+        quote!(-> ::cxx::private::Error)
     } else {
         expand_extern_return_type(&efn.ret, types)
     };

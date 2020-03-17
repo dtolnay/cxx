@@ -1,23 +1,29 @@
-use crate::rust_str::RustStr;
 use std::fmt::Display;
 use std::ptr;
-use std::slice;
-use std::str;
 
-pub unsafe fn r#try<T, E>(ret: *mut T, result: Result<T, E>) -> Option<RustStr>
+#[repr(C)]
+pub struct Error {
+    ptr: *const u8,
+    len: usize,
+}
+
+pub unsafe fn r#try<T, E>(ret: *mut T, result: Result<T, E>) -> Error
 where
     E: Display,
 {
     match result {
         Ok(ok) => {
             ptr::write(ret, ok);
-            None
+            Error {
+                ptr: ptr::null(),
+                len: 0,
+            }
         }
-        Err(err) => Some(to_c_string(err.to_string())),
+        Err(err) => to_c_string(err.to_string()),
     }
 }
 
-unsafe fn to_c_string(msg: String) -> RustStr {
+unsafe fn to_c_string(msg: String) -> Error {
     let mut msg = msg;
     msg.as_mut_vec().push(b'\0');
     let ptr = msg.as_ptr();
@@ -29,7 +35,5 @@ unsafe fn to_c_string(msg: String) -> RustStr {
     }
 
     let copy = error(ptr, len);
-    let slice = slice::from_raw_parts(copy, len);
-    let string = str::from_utf8_unchecked(slice);
-    RustStr::from(string)
+    Error { ptr: copy, len }
 }
