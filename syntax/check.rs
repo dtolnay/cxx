@@ -75,12 +75,6 @@ pub(crate) fn typecheck(apis: &[Api], types: &Types) -> Result<()> {
                         "fallible C++ functions are not implemented yet",
                     ));
                 }
-                if efn.throws && efn.lang == Rust {
-                    errors.push(Error::new_spanned(
-                        efn,
-                        "fallible Rust functions are not implemented yet",
-                    ));
-                }
             }
             _ => {}
         }

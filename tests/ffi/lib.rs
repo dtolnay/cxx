@@ -1,4 +1,5 @@
 use cxx::{CxxString, UniquePtr};
+use std::fmt::{self, Display};
 
 #[cxx::bridge(namespace = tests)]
 pub mod ffi {
@@ -52,10 +53,24 @@ pub mod ffi {
         fn r_take_str(s: &str);
         fn r_take_rust_string(s: String);
         fn r_take_unique_ptr_string(s: UniquePtr<CxxString>);
+
+        fn r_try_return_primitive() -> Result<usize>;
+        fn r_fail_return_primitive() -> Result<usize>;
     }
 }
 
 pub type R = usize;
+
+#[derive(Debug)]
+struct Error;
+
+impl std::error::Error for Error {}
+
+impl Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str("rust error")
+    }
+}
 
 fn r_return_primitive() -> usize {
     2020
@@ -130,4 +145,12 @@ fn r_take_rust_string(s: String) {
 
 fn r_take_unique_ptr_string(s: UniquePtr<CxxString>) {
     assert_eq!(s.as_ref().unwrap().to_str().unwrap(), "2020");
+}
+
+fn r_try_return_primitive() -> Result<usize, Error> {
+    Ok(2020)
+}
+
+fn r_fail_return_primitive() -> Result<usize, Error> {
+    Err(Error)
 }

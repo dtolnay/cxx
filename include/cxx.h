@@ -138,6 +138,18 @@ private:
 };
 #endif // CXXBRIDGE02_RUST_BOX
 
+class Error final : std::exception {
+public:
+  Error(const Error &);
+  Error(Error &&) noexcept;
+  Error(Str::Repr) noexcept;
+  ~Error() noexcept;
+  const char *what() const noexcept override;
+
+private:
+  Str::Repr msg;
+};
+
 std::ostream &operator<<(std::ostream &, const String &);
 std::ostream &operator<<(std::ostream &, const Str &);
 
@@ -145,6 +157,7 @@ std::ostream &operator<<(std::ostream &, const Str &);
 using string = String;
 using str = Str;
 template <class T> using box = Box<T>;
+using error = Error;
 
 struct unsafe_bitcopy_t {
   explicit unsafe_bitcopy_t() = default;
