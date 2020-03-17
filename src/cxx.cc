@@ -52,7 +52,7 @@ String::String(const std::string &s) {
 }
 
 String::String(const char *s) {
-  auto len = strlen(s);
+  auto len = std::strlen(s);
   if (!cxxbridge02$string$from(this, s, len)) {
     throw std::invalid_argument("data for rust::String is not utf-8");
   }
@@ -105,7 +105,7 @@ Str::Str(const std::string &s) : repr(Repr{s.data(), s.length()}) {
   }
 }
 
-Str::Str(const char *s) : repr(Repr{s, strlen(s)}) {
+Str::Str(const char *s) : repr(Repr{s, std::strlen(s)}) {
   if (!cxxbridge02$str$valid(this->repr.ptr, this->repr.len)) {
     throw std::invalid_argument("data for rust::Str is not utf-8");
   }
