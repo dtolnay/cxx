@@ -349,6 +349,9 @@
 
 extern crate link_cplusplus;
 
+#[macro_use]
+mod assert;
+
 mod cxx_string;
 mod error;
 mod gen;
