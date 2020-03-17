@@ -36,3 +36,6 @@ trybuild = "1.0.21"
 
 [workspace]
 members = ["cmd", "demo-rs", "macro", "tests/ffi"]
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
