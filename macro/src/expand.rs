@@ -134,7 +134,11 @@ fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types
             quote!(#ident: #ty)
         }
     });
-    let ret = expand_extern_return_type(&efn.ret, types);
+    let ret = if efn.throws {
+        quote!(-> ::cxx::private::Result)
+    } else {
+        expand_extern_return_type(&efn.ret, types)
+    };
     let mut outparam = None;
     if indirect_return(efn, types) {
         let ret = expand_extern_type(efn.ret.as_ref().unwrap());
@@ -153,7 +157,15 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
     let doc = &efn.doc;
     let decl = expand_cxx_function_decl(namespace, efn, types);
     let args = &efn.args;
-    let ret = expand_return_type(&efn.ret);
+    let ret = if efn.throws {
+        let ok = match &efn.ret {
+            Some(ret) => quote!(#ret),
+            None => quote!(()),
+        };
+        quote!(-> ::std::result::Result<#ok, ::cxx::Exception>)
+    } else {
+        expand_return_type(&efn.ret)
+    };
     let indirect_return = indirect_return(efn, types);
     let vars = efn.args.iter().map(|arg| {
         let var = &arg.ident;
@@ -192,10 +204,21 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
         let ret = expand_extern_type(efn.ret.as_ref().unwrap());
         setup.extend(quote! {
             let mut __return = ::std::mem::MaybeUninit::<#ret>::uninit();
-            #local_name(#(#vars,)* __return.as_mut_ptr());
         });
+        if efn.throws {
+            setup.extend(quote! {
+                #local_name(#(#vars,)* __return.as_mut_ptr()).exception()?;
+            });
+            quote!(::std::result::Result::Ok(__return.assume_init()))
+        } else {
+            setup.extend(quote! {
+                #local_name(#(#vars,)* __return.as_mut_ptr());
+            });
+            quote!(__return.assume_init())
+        }
+    } else if efn.throws {
         quote! {
-            __return.assume_init()
+            #local_name(#(#vars),*).exception()
         }
     } else {
         quote! {

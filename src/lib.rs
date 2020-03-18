@@ -354,6 +354,7 @@ mod assert;
 
 mod cxx_string;
 mod error;
+mod exception;
 mod gen;
 mod opaque;
 mod paths;
@@ -365,6 +366,7 @@ mod unique_ptr;
 mod unwind;
 
 pub use crate::cxx_string::CxxString;
+pub use crate::exception::Exception;
 pub use crate::unique_ptr::UniquePtr;
 pub use cxxbridge_macro::bridge;
 

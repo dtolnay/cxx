@@ -38,6 +38,13 @@ fn test_c_return() {
             .to_str()
             .unwrap()
     );
+
+    assert_eq!((), ffi::c_try_return_void().unwrap());
+    assert_eq!(2020, ffi::c_try_return_primitive().unwrap());
+    assert_eq!(
+        "logic error",
+        ffi::c_fail_return_primitive().unwrap_err().what(),
+    );
 }
 
 #[test]

@@ -1,5 +1,5 @@
 use crate::syntax::atom::Atom::{self, *};
-use crate::syntax::{error, ident, Api, ExternFn, Lang::*, Ref, Ty1, Type, Types, Var};
+use crate::syntax::{error, ident, Api, ExternFn, Ref, Ty1, Type, Types, Var};
 use proc_macro2::Ident;
 use syn::{Error, Result};
 
@@ -68,12 +68,6 @@ pub(crate) fn typecheck(apis: &[Api], types: &Types) -> Result<()> {
                     if is_unsized(ty, types) {
                         errors.push(return_by_value(ty, types));
                     }
-                }
-                if efn.throws && efn.lang == Cxx {
-                    errors.push(Error::new_spanned(
-                        efn,
-                        "fallible C++ functions are not implemented yet",
-                    ));
                 }
             }
             _ => {}

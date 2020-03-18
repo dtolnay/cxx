@@ -1,6 +1,7 @@
 #include "tests/ffi/tests.h"
 #include "tests/ffi/lib.rs"
 #include <cstring>
+#include <stdexcept>
 
 extern "C" void cxx_test_suite_set_correct() noexcept;
 extern "C" tests::R *cxx_test_suite_get_box() noexcept;
@@ -90,6 +91,12 @@ void c_take_unique_ptr_string(std::unique_ptr<std::string> s) {
     cxx_test_suite_set_correct();
   }
 }
+
+void c_try_return_void() {}
+
+size_t c_try_return_primitive() { return 2020; }
+
+size_t c_fail_return_primitive() { throw std::logic_error("logic error"); }
 
 extern "C" C *cxx_test_suite_get_unique_ptr() noexcept {
   return std::unique_ptr<C>(new C{2020}).release();
