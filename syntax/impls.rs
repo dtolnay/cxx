@@ -45,14 +45,32 @@ impl Eq for Ty1 {}
 
 impl PartialEq for Ty1 {
     fn eq(&self, other: &Ty1) -> bool {
-        self.name == other.name && self.inner == other.inner
+        let Ty1 {
+            name,
+            langle: _,
+            inner,
+            rangle: _,
+        } = self;
+        let Ty1 {
+            name: name2,
+            langle: _,
+            inner: inner2,
+            rangle: _,
+        } = other;
+        name == name2 && inner == inner2
     }
 }
 
 impl Hash for Ty1 {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.name.hash(state);
-        self.inner.hash(state);
+        let Ty1 {
+            name,
+            langle: _,
+            inner,
+            rangle: _,
+        } = self;
+        name.hash(state);
+        inner.hash(state);
     }
 }
 
@@ -60,12 +78,28 @@ impl Eq for Ref {}
 
 impl PartialEq for Ref {
     fn eq(&self, other: &Ref) -> bool {
-        self.inner == other.inner
+        let Ref {
+            ampersand: _,
+            mutability,
+            inner,
+        } = self;
+        let Ref {
+            ampersand: _,
+            mutability: mutability2,
+            inner: inner2,
+        } = other;
+        mutability.is_some() == mutability2.is_some() && inner == inner2
     }
 }
 
 impl Hash for Ref {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        self.inner.hash(state);
+        let Ref {
+            ampersand: _,
+            mutability,
+            inner,
+        } = self;
+        mutability.is_some().hash(state);
+        inner.hash(state);
     }
 }
