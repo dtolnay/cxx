@@ -36,6 +36,7 @@ pub struct Includes {
     pub memory: bool,
     pub string: bool,
     pub type_traits: bool,
+    pub utility: bool,
 }
 
 impl Includes {
@@ -73,6 +74,9 @@ impl Display for Includes {
         }
         if self.type_traits {
             writeln!(f, "#include <type_traits>")?;
+        }
+        if self.utility {
+            writeln!(f, "#include <utility>")?;
         }
         if *self != Self::default() {
             writeln!(f)?;

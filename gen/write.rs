@@ -178,6 +178,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
 
     if needs_manually_drop {
         out.next_section();
+        out.include.utility = true;
         writeln!(out, "template <typename T>");
         writeln!(out, "union ManuallyDrop {{");
         writeln!(out, "  T value;");
@@ -329,6 +330,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
                 arg.ident,
             );
         } else if types.needs_indirect_abi(&arg.ty) {
+            out.include.utility = true;
             write!(out, "::std::move(*{})", arg.ident);
         } else {
             write!(out, "{}", arg.ident);
@@ -347,6 +349,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     writeln!(out, ";");
     if efn.throws {
         out.include.cstring = true;
+        out.include.exception = true;
         writeln!(out, "    throw$.ptr = nullptr;");
         writeln!(out, "  }} catch (const ::std::exception &catch$) {{");
         writeln!(out, "    const char *return$ = catch$.what();");
@@ -410,6 +413,7 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         writeln!(out, " {{");
         for arg in &efn.args {
             if arg.ty != RustString && types.needs_indirect_abi(&arg.ty) {
+                out.include.utility = true;
                 write!(out, "  ::rust::ManuallyDrop<");
                 write_type(out, &arg.ty);
                 writeln!(out, "> {}$(::std::move({0}));", arg.ident);
@@ -481,6 +485,7 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
             writeln!(out, "  }}");
         }
         if indirect_return {
+            out.include.utility = true;
             writeln!(out, "  return ::std::move(return$.value);");
         }
         writeln!(out, "}}");
@@ -668,6 +673,8 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
 }
 
 fn write_unique_ptr(out: &mut OutFile, ident: &Ident) {
+    out.include.utility = true;
+
     let mut inner = String::new();
     for name in &out.namespace {
         inner += name;

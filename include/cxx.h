@@ -5,6 +5,7 @@
 #include <iosfwd>
 #include <string>
 #include <type_traits>
+#include <utility>
 
 namespace rust {
 inline namespace cxxbridge02 {
