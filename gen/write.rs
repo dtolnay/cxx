@@ -205,10 +205,21 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
         writeln!(out, "}};");
     }
 
+    out.end_block("namespace cxxbridge02");
+
     if needs_trycatch {
-        out.next_section();
+        out.begin_block("namespace behavior");
         out.include.exception = true;
-        writeln!(out, "template <typename Try, typename Fail>");
+        writeln!(out, "struct trycatch {{");
+        writeln!(out, "  template <typename T> trycatch(T);");
+        writeln!(out, "  static char use_default;");
+        writeln!(out, "}};");
+        writeln!(out);
+        writeln!(out, "template <typename Try, typename Fail,");
+        writeln!(
+            out,
+            "          typename = decltype(trycatch(std::declval<Try>()).use_default)>",
+        );
         writeln!(
             out,
             "static void trycatch(Try &&func, Fail &&fail) noexcept try {{",
@@ -217,9 +228,9 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
         writeln!(out, "}} catch (const ::std::exception &e) {{");
         writeln!(out, "  fail(e.what());");
         writeln!(out, "}}");
+        out.end_block("namespace behavior");
     }
 
-    out.end_block("namespace cxxbridge02");
     out.end_block("namespace rust");
 }
 
@@ -316,7 +327,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     write!(out, "  ");
     if efn.throws {
         writeln!(out, "::rust::Str::Repr throw$;");
-        writeln!(out, "  ::rust::trycatch(");
+        writeln!(out, "  ::rust::behavior::trycatch(");
         writeln!(out, "      [&] {{");
         write!(out, "        ");
     }
