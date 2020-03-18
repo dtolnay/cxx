@@ -2,7 +2,7 @@
 
 rust_library(
     name = "anyhow",
-    srcs = glob(["vendor/anyhow-1.0.26/src/**"]),
+    srcs = glob(["vendor/anyhow-1.0.27/src/**"]),
     visibility = ["PUBLIC"],
     features = ["std"],
 )
@@ -115,7 +115,7 @@ rust_library(
 
 rust_library(
     name = "structopt",
-    srcs = glob(["vendor/structopt-0.3.11/src/**"]),
+    srcs = glob(["vendor/structopt-0.3.12/src/**"]),
     visibility = ["PUBLIC"],
     deps = [
         ":clap",
@@ -126,7 +126,7 @@ rust_library(
 
 rust_library(
     name = "structopt-derive",
-    srcs = glob(["vendor/structopt-derive-0.4.4/src/**"]),
+    srcs = glob(["vendor/structopt-derive-0.4.5/src/**"]),
     proc_macro = True,
     deps = [
         ":heck",

@@ -7,7 +7,7 @@ load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 
 rust_library(
     name = "anyhow",
-    srcs = glob(["vendor/anyhow-1.0.26/src/**"]),
+    srcs = glob(["vendor/anyhow-1.0.27/src/**"]),
     crate_features = ["std"],
     visibility = ["//visibility:public"],
 )
@@ -120,7 +120,7 @@ rust_library(
 
 rust_library(
     name = "structopt",
-    srcs = glob(["vendor/structopt-0.3.11/src/**"]),
+    srcs = glob(["vendor/structopt-0.3.12/src/**"]),
     visibility = ["//visibility:public"],
     deps = [
         ":clap",
@@ -131,7 +131,7 @@ rust_library(
 
 rust_library(
     name = "structopt-derive",
-    srcs = glob(["vendor/structopt-derive-0.4.4/src/**"]),
+    srcs = glob(["vendor/structopt-derive-0.4.5/src/**"]),
     crate_type = "proc-macro",
     deps = [
         ":heck",
