@@ -3,11 +3,11 @@ use crate::syntax::{
     Ty1, Type, Var,
 };
 use proc_macro2::Ident;
-use quote::quote;
+use quote::{format_ident, quote};
 use syn::{
     Abi, Error, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType, GenericArgument, Item,
-    ItemForeignMod, ItemStruct, Pat, PathArguments, Result, ReturnType, Type as RustType, TypePath,
-    TypeReference,
+    ItemForeignMod, ItemStruct, Pat, PathArguments, Result, ReturnType, Type as RustType,
+    TypeBareFn, TypePath, TypeReference,
 };
 
 pub fn parse_items(items: Vec<Item>) -> Result<Vec<Api>> {
@@ -176,32 +176,7 @@ fn parse_extern_fn(foreign_fn: &ForeignItemFn, lang: Lang) -> Result<ExternFn> {
     }
 
     let mut throws = false;
-    let ret = match &foreign_fn.sig.output {
-        ReturnType::Default => None,
-        ReturnType::Type(_, ret) => {
-            let mut ret = ret.as_ref();
-            if let RustType::Path(ty) = ret {
-                let path = &ty.path;
-                if ty.qself.is_none() && path.leading_colon.is_none() && path.segments.len() == 1 {
-                    let segment = &path.segments[0];
-                    let ident = segment.ident.clone();
-                    if let PathArguments::AngleBracketed(generic) = &segment.arguments {
-                        if ident == "Result" && generic.args.len() == 1 {
-                            if let GenericArgument::Type(arg) = &generic.args[0] {
-                                ret = arg;
-                                throws = true;
-                            }
-                        }
-                    }
-                }
-            }
-            match parse_type(ret)? {
-                Type::Void(_) => None,
-                ty => Some(ty),
-            }
-        }
-    };
-
+    let ret = parse_return_type(&foreign_fn.sig.output, &mut throws)?;
     let doc = attrs::parse_doc(&foreign_fn.attrs)?;
     let fn_token = foreign_fn.sig.fn_token;
     let ident = foreign_fn.sig.ident.clone();
@@ -230,6 +205,7 @@ fn parse_type(ty: &RustType) -> Result<Type> {
     match ty {
         RustType::Reference(ty) => parse_type_reference(ty),
         RustType::Path(ty) => parse_type_path(ty),
+        RustType::BareFn(ty) => parse_type_fn(ty),
         RustType::Tuple(ty) if ty.elems.is_empty() => Ok(Type::Void(ty.paren_token.span)),
         _ => Err(Error::new_spanned(ty, "unsupported type")),
     }
@@ -288,6 +264,71 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
         }
     }
     Err(Error::new_spanned(ty, "unsupported type"))
+}
+
+fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
+    if ty.lifetimes.is_some() {
+        return Err(Error::new_spanned(
+            ty,
+            "function pointer with lifetime parameters is not supported yet",
+        ));
+    }
+    if ty.variadic.is_some() {
+        return Err(Error::new_spanned(
+            ty,
+            "variadic function pointer is not supported yet",
+        ));
+    }
+    let args = ty
+        .inputs
+        .iter()
+        .enumerate()
+        .map(|(i, arg)| {
+            let ty = parse_type(&arg.ty)?;
+            let ident = match &arg.name {
+                Some(ident) => ident.0.clone(),
+                None => format_ident!("_{}", i),
+            };
+            Ok(Var { ident, ty })
+        })
+        .collect::<Result<_>>()?;
+    let mut throws = false;
+    let ret = parse_return_type(&ty.output, &mut throws)?;
+    let tokens = quote!(#ty);
+    Ok(Type::Fn(Box::new(Signature {
+        fn_token: ty.fn_token,
+        receiver: None,
+        args,
+        ret,
+        throws,
+        tokens,
+    })))
+}
+
+fn parse_return_type(ty: &ReturnType, throws: &mut bool) -> Result<Option<Type>> {
+    let mut ret = match ty {
+        ReturnType::Default => return Ok(None),
+        ReturnType::Type(_, ret) => ret.as_ref(),
+    };
+    if let RustType::Path(ty) = ret {
+        let path = &ty.path;
+        if ty.qself.is_none() && path.leading_colon.is_none() && path.segments.len() == 1 {
+            let segment = &path.segments[0];
+            let ident = segment.ident.clone();
+            if let PathArguments::AngleBracketed(generic) = &segment.arguments {
+                if ident == "Result" && generic.args.len() == 1 {
+                    if let GenericArgument::Type(arg) = &generic.args[0] {
+                        ret = arg;
+                        *throws = true;
+                    }
+                }
+            }
+        }
+    }
+    match parse_type(ret)? {
+        Type::Void(_) => Ok(None),
+        ty => Ok(Some(ty)),
+    }
 }
 
 fn check_reserved_name(ident: &Ident) -> Result<()> {
