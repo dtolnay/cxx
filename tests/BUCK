@@ -31,12 +31,12 @@ genrule(
     name = "gen-header",
     srcs = ["ffi/lib.rs"],
     cmd = "$(exe //:codegen) --header ${SRCS} > ${OUT}",
-    out = "gen.h",
+    out = "generated.h",
 )
 
 genrule(
     name = "gen-source",
     srcs = ["ffi/lib.rs"],
     cmd = "$(exe //:codegen) ${SRCS} > ${OUT}",
-    out = "gen.cc",
+    out = "generated.cc",
 )

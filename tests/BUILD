@@ -39,7 +39,7 @@ genrule(
 genrule(
     name = "gen-source",
     srcs = ["ffi/lib.rs"],
-    outs = ["gen.cc"],
+    outs = ["generated.cc"],
     cmd = "$(location //:codegen) $< > $@",
     tools = ["//:codegen"],
 )
