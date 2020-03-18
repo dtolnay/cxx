@@ -10,7 +10,6 @@ rust_library(
         ":cxxbridge-macro",
         "//third-party:anyhow",
         "//third-party:cc",
-        "//third-party:codespan",
         "//third-party:codespan-reporting",
         "//third-party:link-cplusplus",
         "//third-party:proc-macro2",
@@ -27,7 +26,6 @@ rust_binary(
     visibility = ["//visibility:public"],
     deps = [
         "//third-party:anyhow",
-        "//third-party:codespan",
         "//third-party:codespan-reporting",
         "//third-party:proc-macro2",
         "//third-party:quote",

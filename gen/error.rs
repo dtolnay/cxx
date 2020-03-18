@@ -1,8 +1,8 @@
 use crate::gen::Error;
 use crate::syntax;
 use anyhow::anyhow;
-use codespan::{FileId, Files};
 use codespan_reporting::diagnostic::{Diagnostic, Label};
+use codespan_reporting::files::SimpleFiles;
 use codespan_reporting::term::termcolor::{ColorChoice, StandardStream, WriteColor};
 use codespan_reporting::term::{self, Config};
 use std::io::Write;
@@ -46,32 +46,30 @@ fn display_syn_error(stderr: &mut dyn WriteColor, path: &Path, source: &str, err
     }
     end_offset += end.column;
 
-    let mut files = Files::new();
+    let mut files = SimpleFiles::new();
     let file = files.add(path.to_string_lossy(), source);
 
-    let range = start_offset as u32..end_offset as u32;
-    let diagnostic = diagnose(file, range, error);
+    let diagnostic = diagnose(file, start_offset..end_offset, error);
 
     let config = Config::default();
     let _ = term::emit(stderr, &config, &files, &diagnostic);
 }
 
-fn diagnose(file: FileId, range: Range<u32>, error: syn::Error) -> Diagnostic {
+fn diagnose(file: usize, range: Range<usize>, error: syn::Error) -> Diagnostic<usize> {
     let message = error.to_string();
     let info = syntax::error::ERRORS
         .iter()
         .find(|e| message.contains(e.msg));
-    let mut diagnostic = if let Some(info) = info {
-        let label = Label::new(file, range, info.label.unwrap_or(&message));
-        let mut diagnostic = Diagnostic::new_error(&message, label);
-        if let Some(note) = info.note {
-            diagnostic = diagnostic.with_notes(vec![note.to_owned()]);
-        }
-        diagnostic
+    let mut diagnostic = Diagnostic::error().with_message(&message);
+    let mut label = Label::primary(file, range);
+    if let Some(info) = info {
+        label.message = info.label.map_or(message, str::to_owned);
+        diagnostic.labels.push(label);
+        diagnostic.notes.extend(info.note.map(str::to_owned));
     } else {
-        let label = Label::new(file, range, &message);
-        Diagnostic::new_error(&message, label)
-    };
+        label.message = message;
+        diagnostic.labels.push(label);
+    }
     diagnostic.code = Some("cxxbridge".to_owned());
     diagnostic
 }
