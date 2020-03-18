@@ -278,7 +278,7 @@ fn write_exception_glue(out: &mut OutFile, apis: &[Api]) {
 
     if has_cxx_throws {
         out.next_section();
-        write!(
+        writeln!(
             out,
             "const char *cxxbridge02$exception(const char *, size_t);",
         );
