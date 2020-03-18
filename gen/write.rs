@@ -608,6 +608,7 @@ fn write_type(out: &mut OutFile, ty: &Type) {
         Type::Str(_) => {
             write!(out, "::rust::Str");
         }
+        Type::Fn(_) => unimplemented!(),
         Type::Void(_) => unreachable!(),
     }
 }
@@ -617,6 +618,7 @@ fn write_type_space(out: &mut OutFile, ty: &Type) {
     match ty {
         Type::Ident(_) | Type::RustBox(_) | Type::UniquePtr(_) | Type::Str(_) => write!(out, " "),
         Type::Ref(_) => {}
+        Type::Fn(_) => unimplemented!(),
         Type::Void(_) => unreachable!(),
     }
 }

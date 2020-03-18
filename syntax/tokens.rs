@@ -1,7 +1,7 @@
 use crate::syntax::atom::Atom::*;
 use crate::syntax::{Derive, ExternFn, Ref, Ty1, Type, Var};
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::{quote_spanned, ToTokens};
+use quote::{quote, quote_spanned, ToTokens};
 use syn::Token;
 
 impl ToTokens for Type {
@@ -16,6 +16,21 @@ impl ToTokens for Type {
             }
             Type::RustBox(ty) | Type::UniquePtr(ty) => ty.to_tokens(tokens),
             Type::Ref(r) | Type::Str(r) => r.to_tokens(tokens),
+            Type::Fn(f) => {
+                let fn_token = f.fn_token;
+                let args = &f.args;
+                tokens.extend(quote!(#fn_token(#(#args),*)));
+                let mut ret = match &f.ret {
+                    Some(ret) => quote!(#ret),
+                    None => quote!(()),
+                };
+                if f.throws {
+                    ret = quote!(::std::result::Result<#ret, _>);
+                }
+                if f.ret.is_some() || f.throws {
+                    tokens.extend(quote!(-> #ret));
+                }
+            }
             Type::Void(span) => tokens.extend(quote_spanned!(*span=> ())),
         }
     }

@@ -167,6 +167,7 @@ fn describe(ty: &Type, types: &Types) -> String {
         Type::UniquePtr(_) => "unique_ptr".to_owned(),
         Type::Ref(_) => "reference".to_owned(),
         Type::Str(_) => "&str".to_owned(),
+        Type::Fn(_) => "function pointer".to_owned(),
         Type::Void(_) => "()".to_owned(),
     }
 }

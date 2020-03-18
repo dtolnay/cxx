@@ -59,6 +59,7 @@ pub struct Signature {
     pub throws: bool,
 }
 
+#[derive(Eq, PartialEq, Hash)]
 pub struct Var {
     pub ident: Ident,
     pub ty: Type,
@@ -75,6 +76,7 @@ pub enum Type {
     UniquePtr(Box<Ty1>),
     Ref(Box<Ref>),
     Str(Box<Ref>),
+    Fn(Box<Signature>),
     Void(Span),
 }
 

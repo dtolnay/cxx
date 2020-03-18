@@ -1,4 +1,4 @@
-use crate::syntax::{ExternFn, Ref, Signature, Ty1, Type};
+use crate::syntax::{ExternFn, Receiver, Ref, Signature, Ty1, Type};
 use std::hash::{Hash, Hasher};
 use std::mem;
 use std::ops::Deref;
@@ -20,6 +20,7 @@ impl Hash for Type {
             Type::UniquePtr(t) => t.hash(state),
             Type::Ref(t) => t.hash(state),
             Type::Str(t) => t.hash(state),
+            Type::Fn(t) => t.hash(state),
             Type::Void(_) => {}
         }
     }
@@ -35,6 +36,7 @@ impl PartialEq for Type {
             (Type::UniquePtr(lhs), Type::UniquePtr(rhs)) => lhs == rhs,
             (Type::Ref(lhs), Type::Ref(rhs)) => lhs == rhs,
             (Type::Str(lhs), Type::Str(rhs)) => lhs == rhs,
+            (Type::Fn(lhs), Type::Fn(rhs)) => lhs == rhs,
             (Type::Void(_), Type::Void(_)) => true,
             (_, _) => false,
         }
@@ -101,5 +103,64 @@ impl Hash for Ref {
         } = self;
         mutability.is_some().hash(state);
         inner.hash(state);
+    }
+}
+
+impl Eq for Signature {}
+
+impl PartialEq for Signature {
+    fn eq(&self, other: &Signature) -> bool {
+        let Signature {
+            fn_token: _,
+            receiver,
+            args,
+            ret,
+            throws,
+        } = self;
+        let Signature {
+            fn_token: _,
+            receiver: receiver2,
+            args: args2,
+            ret: ret2,
+            throws: throws2,
+        } = other;
+        receiver == receiver2 && args == args2 && ret == ret2 && throws == throws2
+    }
+}
+
+impl Hash for Signature {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let Signature {
+            fn_token: _,
+            receiver,
+            args,
+            ret,
+            throws,
+        } = self;
+        receiver.hash(state);
+        args.hash(state);
+        ret.hash(state);
+        throws.hash(state);
+    }
+}
+
+impl Eq for Receiver {}
+
+impl PartialEq for Receiver {
+    fn eq(&self, other: &Receiver) -> bool {
+        let Receiver { mutability, ident } = self;
+        let Receiver {
+            mutability: mutability2,
+            ident: ident2,
+        } = other;
+        mutability.is_some() == mutability2.is_some() && ident == ident2
+    }
+}
+
+impl Hash for Receiver {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let Receiver { mutability, ident } = self;
+        mutability.is_some().hash(state);
+        ident.hash(state);
     }
 }

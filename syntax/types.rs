@@ -26,6 +26,14 @@ impl<'a> Types<'a> {
                 Type::Ident(_) | Type::Str(_) | Type::Void(_) => {}
                 Type::RustBox(ty) | Type::UniquePtr(ty) => visit(all, &ty.inner),
                 Type::Ref(r) => visit(all, &r.inner),
+                Type::Fn(f) => {
+                    if let Some(ret) = &f.ret {
+                        visit(all, ret);
+                    }
+                    for arg in &f.args {
+                        visit(all, &arg.ty);
+                    }
+                }
             }
         }
 
