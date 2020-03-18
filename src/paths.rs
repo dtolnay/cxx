@@ -22,21 +22,28 @@ fn try_cc_build() -> Result<cc::Build> {
 }
 
 // Symlink the header file into a predictable place. The header generated from
-// path/to/mod.rs gets linked to targets/cxxbridge/path/to/mod.h.
+// path/to/mod.rs gets linked to targets/cxxbridge/path/to/mod.rs.h.
 pub(crate) fn symlink_header(path: &Path, original: &Path) {
     let _ = try_symlink_header(path, original);
 }
 
 fn try_symlink_header(path: &Path, original: &Path) -> Result<()> {
+    #[cfg(unix)]
+    use os::unix::fs::symlink;
+    #[cfg(windows)]
+    use os::windows::fs::symlink_file as symlink;
+
     let suffix = relative_to_parent_of_target_dir(original)?;
     let ref dst = include_dir()?.join(suffix);
 
     fs::create_dir_all(dst.parent().unwrap())?;
     let _ = fs::remove_file(dst);
-    #[cfg(unix)]
-    os::unix::fs::symlink(path, dst)?;
-    #[cfg(windows)]
-    os::windows::fs::symlink_file(path, dst)?;
+    symlink(path, dst)?;
+
+    let mut file_name = dst.file_name().unwrap().to_os_string();
+    file_name.push(".h");
+    let dst2 = dst.with_file_name(file_name);
+    symlink(path, dst2)?;
 
     Ok(())
 }

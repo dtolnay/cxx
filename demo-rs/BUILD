@@ -22,7 +22,7 @@ cc_library(
 genrule(
     name = "gen-header",
     srcs = ["src/main.rs"],
-    outs = ["main.rs"],
+    outs = ["main.rs.h"],
     cmd = "$(location //:codegen) --header $< > $@",
     tools = ["//:codegen"],
 )
