@@ -26,7 +26,7 @@ fn find_line(line: &str) -> Option<usize> {
     }
 }
 
-#[derive(Default)]
+#[derive(Default, PartialEq)]
 pub struct Includes {
     custom: Vec<String>,
     pub array: bool,
@@ -73,6 +73,9 @@ impl Display for Includes {
         }
         if self.type_traits {
             writeln!(f, "#include <type_traits>")?;
+        }
+        if *self != Self::default() {
+            writeln!(f)?;
         }
         Ok(())
     }

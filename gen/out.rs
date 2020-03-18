@@ -53,14 +53,18 @@ impl Write for OutFile {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         if !s.is_empty() {
             if !self.blocks_pending.is_empty() {
-                self.content.push(b'\n');
+                if !self.content.is_empty() {
+                    self.content.push(b'\n');
+                }
                 for block in self.blocks_pending.drain(..) {
                     self.content.extend_from_slice(block.as_bytes());
                     self.content.extend_from_slice(b" {\n");
                 }
                 self.section_pending = false;
             } else if self.section_pending {
-                self.content.push(b'\n');
+                if !self.content.is_empty() {
+                    self.content.push(b'\n');
+                }
                 self.section_pending = false;
             }
             self.content.extend_from_slice(s.as_bytes());
