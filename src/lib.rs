@@ -295,9 +295,9 @@
 //!
 //! # Builtin types
 //!
-//! In addition to all the primitive types (i32 &xharr; int32_t), the following
-//! common types may be used in the fields of shared structs and the arguments
-//! and returns of functions.
+//! In addition to all the primitive types (i32 &lt;=&gt; int32_t), the
+//! following common types may be used in the fields of shared structs and the
+//! arguments and returns of functions.
 //!
 //! <table>
 //! <tr><th>name in Rust</th><th>name in C++</th><th>restrictions</th></tr>
@@ -306,7 +306,7 @@
 //! <tr><td><a href="https://docs.rs/cxx/0.2/cxx/struct.CxxString.html">CxxString</a></td><td>std::string</td><td><sup><i>cannot be passed by value</i></sup></td></tr>
 //! <tr><td>Box&lt;T&gt;</td><td>rust::Box&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
 //! <tr><td><a href="https://docs.rs/cxx/0.2/cxx/struct.UniquePtr.html">UniquePtr&lt;T&gt;</a></td><td>std::unique_ptr&lt;T&gt;</td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
-//! <tr><td>Result&lt;T&gt;</td><td>error &harr; exception</td><td><sup><i>allowed as return type only</i></sup></td></tr>
+//! <tr><td>Result&lt;T&gt;</td><td>error &lt;=&gt; exception</td><td><sup><i>allowed as return type only</i></sup></td></tr>
 //! </table>
 //!
 //! The C++ API of the `rust` namespace is defined by the *include/cxx.h* file
