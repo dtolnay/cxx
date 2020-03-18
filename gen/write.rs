@@ -371,7 +371,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         out.include.cstring = true;
         writeln!(out, "        throw$.ptr = nullptr;");
         writeln!(out, "      }},");
-        writeln!(out, "      [&](const char *catch$) {{");
+        writeln!(out, "      [&](const char *catch$) noexcept {{");
         writeln!(out, "        throw$.len = ::std::strlen(catch$);");
         writeln!(
             out,
