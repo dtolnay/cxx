@@ -21,7 +21,7 @@ cxx_library(
         ":gen-source",
     ],
     headers = {
-        "ffi/lib.rs": ":gen-header",
+        "ffi/lib.rs.h": ":gen-header",
         "ffi/tests.h": "ffi/tests.h",
     },
     deps = ["//:core"],
