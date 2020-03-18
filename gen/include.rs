@@ -5,12 +5,24 @@ pub static HEADER: &str = include_str!("include/cxx.h");
 pub fn get(guard: &str) -> &'static str {
     let ifndef = format!("#ifndef {}", guard);
     let endif = format!("#endif // {}", guard);
-    let begin = HEADER.find(&ifndef);
-    let end = HEADER.find(&endif);
+    let begin = find_line(&ifndef);
+    let end = find_line(&endif);
     if let (Some(begin), Some(end)) = (begin, end) {
         &HEADER[begin..end + endif.len()]
     } else {
         panic!("not found in cxx.h header: {}", guard)
+    }
+}
+
+fn find_line(line: &str) -> Option<usize> {
+    let mut offset = 0;
+    loop {
+        offset += HEADER[offset..].find(line)?;
+        let rest = &HEADER[offset + line.len()..];
+        if rest.starts_with('\n') || rest.starts_with('\r') {
+            return Some(offset);
+        }
+        offset += line.len();
     }
 }
 
