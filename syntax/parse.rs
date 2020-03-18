@@ -111,7 +111,7 @@ fn parse_lang(abi: Abi) -> Result<Lang> {
         }
     };
     match name.value().as_str() {
-        "C" => Ok(Lang::Cxx),
+        "C" | "C++" => Ok(Lang::Cxx),
         "Rust" => Ok(Lang::Rust),
         _ => Err(Error::new_spanned(abi, "unrecognized ABI")),
     }
