@@ -46,13 +46,17 @@ pub struct Struct {
 pub struct ExternFn {
     pub lang: Lang,
     pub doc: Doc,
-    pub fn_token: Token![fn],
     pub ident: Ident,
+    pub sig: Signature,
+    pub semi_token: Token![;],
+}
+
+pub struct Signature {
+    pub fn_token: Token![fn],
     pub receiver: Option<Receiver>,
     pub args: Vec<Var>,
     pub ret: Option<Type>,
     pub throws: bool,
-    pub semi_token: Token![;],
 }
 
 pub struct Var {

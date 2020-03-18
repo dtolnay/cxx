@@ -1,6 +1,15 @@
-use crate::syntax::{Ref, Ty1, Type};
+use crate::syntax::{ExternFn, Ref, Signature, Ty1, Type};
 use std::hash::{Hash, Hasher};
 use std::mem;
+use std::ops::Deref;
+
+impl Deref for ExternFn {
+    type Target = Signature;
+
+    fn deref(&self) -> &Self::Target {
+        &self.sig
+    }
+}
 
 impl Hash for Type {
     fn hash<H: Hasher>(&self, state: &mut H) {

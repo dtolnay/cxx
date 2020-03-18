@@ -1,5 +1,6 @@
 use crate::syntax::{
-    attrs, error, Api, Atom, Doc, ExternFn, ExternType, Lang, Receiver, Ref, Struct, Ty1, Type, Var,
+    attrs, error, Api, Atom, Doc, ExternFn, ExternType, Lang, Receiver, Ref, Signature, Struct,
+    Ty1, Type, Var,
 };
 use proc_macro2::Ident;
 use quote::quote;
@@ -207,12 +208,14 @@ fn parse_extern_fn(foreign_fn: &ForeignItemFn, lang: Lang) -> Result<ExternFn> {
     Ok(ExternFn {
         lang,
         doc,
-        fn_token,
         ident,
-        receiver,
-        args,
-        ret,
-        throws,
+        sig: Signature {
+            fn_token,
+            receiver,
+            args,
+            ret,
+            throws,
+        },
         semi_token,
     })
 }
