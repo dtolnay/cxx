@@ -210,20 +210,19 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
     if needs_trycatch {
         out.begin_block("namespace behavior");
         out.include.exception = true;
-        writeln!(out, "struct trycatch {{");
-        writeln!(out, "  template <typename T> trycatch(T);");
-        writeln!(out, "  static char use_default;");
-        writeln!(out, "}};");
+        out.include.type_traits = true;
+        out.include.utility = true;
+        writeln!(out, "class missing {{}};");
+        writeln!(out, "missing trycatch(...);");
         writeln!(out);
-        writeln!(out, "template <typename Try, typename Fail,");
+        writeln!(out, "template <typename Try, typename Fail>");
+        writeln!(out, "static typename std::enable_if<");
         writeln!(
             out,
-            "          typename = decltype(trycatch(std::declval<Try>()).use_default)>",
+            "    std::is_same<decltype(trycatch(std::declval<Try>(), std::declval<Fail>())),",
         );
-        writeln!(
-            out,
-            "static void trycatch(Try &&func, Fail &&fail) noexcept try {{",
-        );
+        writeln!(out, "                 missing>::value>::type");
+        writeln!(out, "trycatch(Try &&func, Fail &&fail) noexcept try {{");
         writeln!(out, "  func();");
         writeln!(out, "}} catch (const ::std::exception &e) {{");
         writeln!(out, "  fail(e.what());");
