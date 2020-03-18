@@ -125,9 +125,13 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
     let mut needs_unsafe_bitcopy = false;
     let mut needs_manually_drop = false;
     let mut needs_maybe_uninit = false;
+    let mut needs_trycatch = false;
     for api in apis {
         match api {
             Api::CxxFunction(efn) if !out.header => {
+                if efn.throws {
+                    needs_trycatch = true;
+                }
                 for arg in &efn.args {
                     if arg.ty == RustString {
                         needs_unsafe_bitcopy = true;
@@ -166,6 +170,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
         || needs_unsafe_bitcopy
         || needs_manually_drop
         || needs_maybe_uninit
+        || needs_trycatch
     {
         writeln!(out, "// #include \"rust/cxx.h\"");
     }
@@ -198,6 +203,20 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
         writeln!(out, "  MaybeUninit() {{}}");
         writeln!(out, "  ~MaybeUninit() {{}}");
         writeln!(out, "}};");
+    }
+
+    if needs_trycatch {
+        out.next_section();
+        out.include.exception = true;
+        writeln!(out, "template <typename Try, typename Fail>");
+        writeln!(
+            out,
+            "static void trycatch(Try &&func, Fail &&fail) noexcept try {{",
+        );
+        writeln!(out, "  func();");
+        writeln!(out, "}} catch (const ::std::exception &e) {{");
+        writeln!(out, "  fail(e.what());");
+        writeln!(out, "}}");
     }
 
     out.end_block("namespace cxxbridge02");
@@ -297,8 +316,9 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     write!(out, "  ");
     if efn.throws {
         writeln!(out, "::rust::Str::Repr throw$;");
-        writeln!(out, "  try {{");
-        write!(out, "    ");
+        writeln!(out, "  ::rust::trycatch(");
+        writeln!(out, "      [&] {{");
+        write!(out, "        ");
     }
     if indirect_return {
         write!(out, "new (return$) ");
@@ -349,16 +369,15 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     writeln!(out, ";");
     if efn.throws {
         out.include.cstring = true;
-        out.include.exception = true;
-        writeln!(out, "    throw$.ptr = nullptr;");
-        writeln!(out, "  }} catch (const ::std::exception &catch$) {{");
-        writeln!(out, "    const char *return$ = catch$.what();");
-        writeln!(out, "    throw$.len = ::std::strlen(return$);");
+        writeln!(out, "        throw$.ptr = nullptr;");
+        writeln!(out, "      }},");
+        writeln!(out, "      [&](const char *catch$) {{");
+        writeln!(out, "        throw$.len = ::std::strlen(catch$);");
         writeln!(
             out,
-            "    throw$.ptr = cxxbridge02$exception(return$, throw$.len);",
+            "        throw$.ptr = cxxbridge02$exception(catch$, throw$.len);",
         );
-        writeln!(out, "  }}");
+        writeln!(out, "      }});");
         writeln!(out, "  return throw$;");
     }
     writeln!(out, "}}");
