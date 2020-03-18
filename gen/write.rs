@@ -205,21 +205,31 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
         writeln!(out, "}};");
     }
 
+    out.end_block("namespace cxxbridge02");
+
     if needs_trycatch {
-        out.next_section();
+        out.begin_block("namespace behavior");
         out.include.exception = true;
+        out.include.type_traits = true;
+        out.include.utility = true;
+        writeln!(out, "class missing {{}};");
+        writeln!(out, "missing trycatch(...);");
+        writeln!(out);
         writeln!(out, "template <typename Try, typename Fail>");
+        writeln!(out, "static typename std::enable_if<");
         writeln!(
             out,
-            "static void trycatch(Try &&func, Fail &&fail) noexcept try {{",
+            "    std::is_same<decltype(trycatch(std::declval<Try>(), std::declval<Fail>())),",
         );
+        writeln!(out, "                 missing>::value>::type");
+        writeln!(out, "trycatch(Try &&func, Fail &&fail) noexcept try {{");
         writeln!(out, "  func();");
         writeln!(out, "}} catch (const ::std::exception &e) {{");
         writeln!(out, "  fail(e.what());");
         writeln!(out, "}}");
+        out.end_block("namespace behavior");
     }
 
-    out.end_block("namespace cxxbridge02");
     out.end_block("namespace rust");
 }
 
@@ -316,7 +326,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     write!(out, "  ");
     if efn.throws {
         writeln!(out, "::rust::Str::Repr throw$;");
-        writeln!(out, "  ::rust::trycatch(");
+        writeln!(out, "  ::rust::behavior::trycatch(");
         writeln!(out, "      [&] {{");
         write!(out, "        ");
     }
