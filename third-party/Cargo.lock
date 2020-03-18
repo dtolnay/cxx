@@ -54,21 +54,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "codespan"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "21094c000d5db8035900662bbfddec754e79f795324254ac0817f36e5ccfc3f5"
-dependencies = [
- "unicode-segmentation",
-]
-
-[[package]]
 name = "codespan-reporting"
-version = "0.7.0"
+version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "657b2c99e1f17bc3e5153808d9f704c8ba6171c3fe45e69fde26e2876156938b"
+checksum = "7606d610349258b637bb639f7565bb7ee5fd6114130d2af59d0f39154e92426a"
 dependencies = [
- "codespan",
  "termcolor",
  "unicode-width",
 ]
@@ -79,7 +69,6 @@ version = "0.2.0"
 dependencies = [
  "anyhow",
  "cc",
- "codespan",
  "codespan-reporting",
  "cxx-test-suite",
  "cxxbridge-macro",
@@ -104,7 +93,6 @@ name = "cxxbridge-cmd"
 version = "0.2.0"
 dependencies = [
  "anyhow",
- "codespan",
  "codespan-reporting",
  "proc-macro2",
  "quote",

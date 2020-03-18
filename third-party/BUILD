@@ -35,18 +35,10 @@ rust_library(
 )
 
 rust_library(
-    name = "codespan",
-    srcs = glob(["vendor/codespan-0.7.0/src/**"]),
-    visibility = ["//visibility:public"],
-    deps = [":unicode-segmentation"],
-)
-
-rust_library(
     name = "codespan-reporting",
-    srcs = glob(["vendor/codespan-reporting-0.7.0/src/**"]),
+    srcs = glob(["vendor/codespan-reporting-0.9.0/src/**"]),
     visibility = ["//visibility:public"],
     deps = [
-        ":codespan",
         ":termcolor",
         ":unicode-width",
     ],
