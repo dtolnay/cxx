@@ -29,8 +29,10 @@ fn find_line(line: &str) -> Option<usize> {
 #[derive(Default)]
 pub struct Includes {
     custom: Vec<String>,
+    pub array: bool,
     pub cstdint: bool,
     pub cstring: bool,
+    pub exception: bool,
     pub memory: bool,
     pub string: bool,
     pub type_traits: bool,
@@ -51,11 +53,17 @@ impl Display for Includes {
         for include in &self.custom {
             writeln!(f, "#include \"{}\"", include.escape_default())?;
         }
+        if self.array {
+            writeln!(f, "#include <array>")?;
+        }
         if self.cstdint {
             writeln!(f, "#include <cstdint>")?;
         }
         if self.cstring {
             writeln!(f, "#include <cstring>")?;
+        }
+        if self.exception {
+            writeln!(f, "#include <exception>")?;
         }
         if self.memory {
             writeln!(f, "#include <memory>")?;

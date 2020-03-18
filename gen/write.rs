@@ -97,47 +97,84 @@ fn write_includes(out: &mut OutFile, types: &Types) {
 }
 
 fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
+    let mut needs_rust_string = false;
+    let mut needs_rust_str = false;
     let mut needs_rust_box = false;
     for ty in types {
-        if let Type::RustBox(_) = ty {
-            needs_rust_box = true;
-            break;
+        match ty {
+            Type::RustBox(_) => {
+                out.include.type_traits = true;
+                needs_rust_box = true;
+            }
+            Type::Str(_) => {
+                out.include.cstdint = true;
+                out.include.string = true;
+                needs_rust_str = true;
+            }
+            ty if ty == RustString => {
+                out.include.array = true;
+                out.include.cstdint = true;
+                out.include.string = true;
+                needs_rust_string = true;
+            }
+            _ => {}
         }
     }
 
+    let mut needs_rust_error = false;
+    let mut needs_unsafe_bitcopy = false;
     let mut needs_manually_drop = false;
     let mut needs_maybe_uninit = false;
     for api in apis {
-        if let Api::RustFunction(efn) = api {
-            for arg in &efn.args {
-                if arg.ty != RustString && types.needs_indirect_abi(&arg.ty) {
-                    needs_manually_drop = true;
-                    break;
+        match api {
+            Api::CxxFunction(efn) if !out.header => {
+                for arg in &efn.args {
+                    if arg.ty == RustString {
+                        needs_unsafe_bitcopy = true;
+                        break;
+                    }
                 }
             }
-            if let Some(ret) = &efn.ret {
-                if types.needs_indirect_abi(ret) {
-                    needs_maybe_uninit = true;
+            Api::RustFunction(efn) if !out.header => {
+                if efn.throws {
+                    out.include.exception = true;
+                    needs_rust_error = true;
+                }
+                for arg in &efn.args {
+                    if arg.ty != RustString && types.needs_indirect_abi(&arg.ty) {
+                        needs_manually_drop = true;
+                        break;
+                    }
+                }
+                if let Some(ret) = &efn.ret {
+                    if types.needs_indirect_abi(ret) {
+                        needs_maybe_uninit = true;
+                    }
                 }
             }
+            _ => {}
         }
     }
 
     out.begin_block("namespace rust");
     out.begin_block("inline namespace cxxbridge02");
 
-    if needs_rust_box || needs_manually_drop || needs_maybe_uninit {
+    if needs_rust_string
+        || needs_rust_str
+        || needs_rust_box
+        || needs_rust_error
+        || needs_unsafe_bitcopy
+        || needs_manually_drop
+        || needs_maybe_uninit
+    {
         writeln!(out, "// #include \"rust/cxx.h\"");
     }
 
-    if needs_rust_box {
-        out.next_section();
-        for line in include::get("CXXBRIDGE02_RUST_BOX").lines() {
-            if !line.trim_start().starts_with("//") {
-                writeln!(out, "{}", line);
-            }
-        }
-    }
+    write_header_section(out, needs_rust_string, "CXXBRIDGE02_RUST_STRING");
+    write_header_section(out, needs_rust_str, "CXXBRIDGE02_RUST_STR");
+    write_header_section(out, needs_rust_box, "CXXBRIDGE02_RUST_BOX");
+    write_header_section(out, needs_rust_error, "CXXBRIDGE02_RUST_ERROR");
+    write_header_section(out, needs_unsafe_bitcopy, "CXXBRIDGE02_RUST_BITCOPY");
 
     if needs_manually_drop {
         out.next_section();
@@ -164,6 +201,17 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
 
     out.end_block("namespace cxxbridge02");
     out.end_block("namespace rust");
+}
+
+fn write_header_section(out: &mut OutFile, needed: bool, section: &str) {
+    if needed {
+        out.next_section();
+        for line in include::get(section).lines() {
+            if !line.trim_start().starts_with("//") {
+                writeln!(out, "{}", line);
+            }
+        }
+    }
 }
 
 fn write_struct(out: &mut OutFile, strct: &Struct) {
