@@ -29,7 +29,6 @@ fn do_typecheck(cx: &mut Check) {
             Type::RustBox(ptr) => check_type_box(cx, ptr),
             Type::UniquePtr(ptr) => check_type_unique_ptr(cx, ptr),
             Type::Ref(ty) => check_type_ref(cx, ty),
-            Type::Fn(_) => cx.error(ty, "function pointer support is not implemented yet"),
             _ => {}
         }
     }
@@ -100,9 +99,12 @@ fn check_type_unique_ptr(cx: &mut Check, ptr: &Ty1) {
 }
 
 fn check_type_ref(cx: &mut Check, ty: &Ref) {
-    if let Type::Void(_) = ty.inner {
-        cx.error(ty, "unsupported reference type");
+    match ty.inner {
+        Type::Fn(_) | Type::Void(_) => {}
+        _ => return,
     }
+
+    cx.error(ty, "unsupported reference type");
 }
 
 fn check_api_struct(cx: &mut Check, strct: &Struct) {
@@ -117,6 +119,12 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
             let msg = format!("using {} by value is not supported", desc);
             cx.error(field, msg);
         }
+        if let Type::Fn(_) = field.ty {
+            cx.error(
+                field,
+                "function pointers in a struct field are not implemented yet",
+            );
+        }
     }
 }
 
@@ -127,6 +135,12 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
             let msg = format!("passing {} by value is not supported", desc);
             cx.error(arg, msg);
         }
+        if let Type::Fn(_) = arg.ty {
+            cx.error(
+                arg,
+                "passing a function pointer argument is not implemented yet",
+            );
+        }
     }
 
     if let Some(ty) = &efn.ret {
@@ -134,6 +148,9 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
             let desc = describe(cx, ty);
             let msg = format!("returning {} by value is not supported", desc);
             cx.error(ty, msg);
+        }
+        if let Type::Fn(_) = ty {
+            cx.error(ty, "returning a function pointer is not implemented yet");
         }
     }
 }
