@@ -14,7 +14,7 @@ impl RustString {
     }
 
     pub fn from_ref(s: &String) -> &Self {
-        unsafe { std::mem::transmute::<&String, &RustString>(s) }
+        unsafe { &*(s as *const String as *const RustString) }
     }
 
     pub fn into_string(self) -> String {

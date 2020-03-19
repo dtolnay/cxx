@@ -345,7 +345,6 @@
     clippy::or_fun_call,
     clippy::ptr_arg,
     clippy::toplevel_ref_arg,
-    clippy::transmute_ptr_to_ptr,
     clippy::useless_let_if_seq
 )]
 
