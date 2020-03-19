@@ -12,7 +12,7 @@ pub mod set;
 mod tokens;
 pub mod types;
 
-use proc_macro2::{Ident, Span};
+use proc_macro2::{Ident, Span, TokenStream};
 use syn::{LitStr, Token};
 
 pub use self::atom::Atom;
@@ -57,6 +57,7 @@ pub struct Signature {
     pub args: Vec<Var>,
     pub ret: Option<Type>,
     pub throws: bool,
+    pub tokens: TokenStream,
 }
 
 #[derive(Eq, PartialEq, Hash)]

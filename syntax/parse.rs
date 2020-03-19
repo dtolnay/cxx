@@ -205,7 +205,11 @@ fn parse_extern_fn(foreign_fn: &ForeignItemFn, lang: Lang) -> Result<ExternFn> {
     let doc = attrs::parse_doc(&foreign_fn.attrs)?;
     let fn_token = foreign_fn.sig.fn_token;
     let ident = foreign_fn.sig.ident.clone();
+    let mut foreign_fn2 = foreign_fn.clone();
+    foreign_fn2.attrs.clear();
+    let tokens = quote!(#foreign_fn2);
     let semi_token = foreign_fn.semi_token;
+
     Ok(ExternFn {
         lang,
         doc,
@@ -216,6 +220,7 @@ fn parse_extern_fn(foreign_fn: &ForeignItemFn, lang: Lang) -> Result<ExternFn> {
             args,
             ret,
             throws,
+            tokens,
         },
         semi_token,
     })
