@@ -383,6 +383,7 @@ pub mod private {
 }
 
 use crate::error::Result;
+use crate::gen::Opt;
 use anyhow::anyhow;
 use std::fs;
 use std::io::{self, Write};
@@ -465,13 +466,13 @@ impl Build {
 }
 
 fn try_generate_bridge(rust_source_file: &Path) -> Result<cc::Build> {
-    let header = gen::do_generate_header(rust_source_file);
+    let header = gen::do_generate_header(rust_source_file, Opt::default());
     let header_path = paths::out_with_extension(rust_source_file, ".h")?;
     fs::create_dir_all(header_path.parent().unwrap())?;
     fs::write(&header_path, header)?;
     paths::symlink_header(&header_path, rust_source_file);
 
-    let bridge = gen::do_generate_bridge(rust_source_file);
+    let bridge = gen::do_generate_bridge(rust_source_file, Opt::default());
     let bridge_path = paths::out_with_extension(rust_source_file, ".cc")?;
     fs::write(&bridge_path, bridge)?;
     let mut build = paths::cc_build();

@@ -1,10 +1,16 @@
-use crate::gen::include;
 use crate::gen::out::OutFile;
+use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::{Api, ExternFn, Struct, Type, Types, Var};
 use proc_macro2::Ident;
 
-pub(super) fn gen(namespace: Vec<String>, apis: &[Api], types: &Types, header: bool) -> OutFile {
+pub(super) fn gen(
+    namespace: Vec<String>,
+    apis: &[Api],
+    types: &Types,
+    opt: Opt,
+    header: bool,
+) -> OutFile {
     let mut out_file = OutFile::new(namespace.clone(), header);
     let out = &mut out_file;
 
@@ -12,6 +18,7 @@ pub(super) fn gen(namespace: Vec<String>, apis: &[Api], types: &Types, header: b
         writeln!(out, "#pragma once");
     }
 
+    out.include.extend(opt.include);
     for api in apis {
         if let Api::Include(include) = api {
             out.include.insert(include.value());

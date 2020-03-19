@@ -49,6 +49,12 @@ impl Includes {
     }
 }
 
+impl Extend<String> for Includes {
+    fn extend<I: IntoIterator<Item = String>>(&mut self, iter: I) {
+        self.custom.extend(iter);
+    }
+}
+
 impl Display for Includes {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for include in &self.custom {

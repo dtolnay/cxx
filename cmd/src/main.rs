@@ -33,6 +33,10 @@ struct Opt {
     /// Emit header with declarations only
     #[structopt(long)]
     header: bool,
+
+    /// Any additional headers to #include
+    #[structopt(short, long)]
+    include: Vec<String>,
 }
 
 fn write(content: impl AsRef<[u8]>) {
@@ -42,9 +46,13 @@ fn write(content: impl AsRef<[u8]>) {
 fn main() {
     let opt = Opt::from_args();
 
+    let gen = gen::Opt {
+        include: opt.include,
+    };
+
     match (opt.input, opt.header) {
-        (Some(input), true) => write(gen::do_generate_header(&input)),
-        (Some(input), false) => write(gen::do_generate_bridge(&input)),
+        (Some(input), true) => write(gen::do_generate_header(&input, gen)),
+        (Some(input), false) => write(gen::do_generate_bridge(&input, gen)),
         (None, true) => write(include::HEADER),
         (None, false) => unreachable!(), // enforced by required_unless
     }

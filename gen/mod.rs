@@ -36,17 +36,23 @@ struct Input {
     module: Vec<Item>,
 }
 
-pub(super) fn do_generate_bridge(path: &Path) -> OutFile {
+#[derive(Default)]
+pub(super) struct Opt {
+    /// Any additional headers to #include
+    pub include: Vec<String>,
+}
+
+pub(super) fn do_generate_bridge(path: &Path, opt: Opt) -> OutFile {
     let header = false;
-    generate(path, header)
+    generate(path, opt, header)
 }
 
-pub(super) fn do_generate_header(path: &Path) -> OutFile {
+pub(super) fn do_generate_header(path: &Path, opt: Opt) -> OutFile {
     let header = true;
-    generate(path, header)
+    generate(path, opt, header)
 }
 
-fn generate(path: &Path, header: bool) -> OutFile {
+fn generate(path: &Path, opt: Opt, header: bool) -> OutFile {
     let source = match fs::read_to_string(path) {
         Ok(source) => source,
         Err(err) => format_err(path, "", Error::Io(err)),
@@ -57,7 +63,7 @@ fn generate(path: &Path, header: bool) -> OutFile {
         let apis = syntax::parse_items(bridge.module)?;
         let types = Types::collect(&apis)?;
         check::typecheck(&apis, &types)?;
-        let out = write::gen(bridge.namespace, &apis, &types, header);
+        let out = write::gen(bridge.namespace, &apis, &types, opt, header);
         Ok(out)
     })() {
         Ok(out) => out,
