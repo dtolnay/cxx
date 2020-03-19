@@ -1,7 +1,6 @@
 use crate::exception::Exception;
 use crate::rust_str::RustStr;
 use std::fmt::Display;
-use std::mem;
 use std::ptr;
 use std::result::Result as StdResult;
 use std::slice;
@@ -50,10 +49,10 @@ impl Result {
             Ok(())
         } else {
             let err = self.err;
-            let slice = slice::from_raw_parts(err.ptr.as_ptr(), err.len);
-            let s = str::from_utf8_unchecked(slice);
+            let slice = slice::from_raw_parts_mut(err.ptr.as_ptr(), err.len);
+            let s = str::from_utf8_unchecked_mut(slice);
             Err(Exception {
-                what: mem::transmute::<*const str, Box<str>>(s),
+                what: Box::from_raw(s),
             })
         }
     }
