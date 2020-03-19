@@ -7,6 +7,34 @@
 #include <type_traits>
 #include <utility>
 
+// CXX_HAVE_STD_STRING_VIEW
+//
+// Checks whether C++17 std::string_view is available.
+#ifdef CXX_HAVE_STD_STRING_VIEW
+#error "CXX_HAVE_STD_STRING_VIEW cannot be directly set."
+#endif
+
+#ifdef __has_include
+#if __has_include(<string_view>) && __cplusplus >= 201703L
+#define CXX_HAVE_STD_STRING_VIEW 1
+#endif
+#endif
+
+// For MSVC, `__has_include` is supported in VS 2017 15.3, which is later than
+// the support for <optional>, <any>, <string_view>, <variant>. So we use
+// _MSC_VER to check whether we have VS 2017 RTM (when <optional>, <any>,
+// <string_view>, <variant> is implemented) or higher. Also, `__cplusplus` is
+// not correctly set by MSVC, so we use `_MSVC_LANG` to check the language
+// version.
+#if defined(_MSC_VER) && _MSC_VER >= 1910 && \
+    ((defined(_MSVC_LANG) && _MSVC_LANG > 201402) || __cplusplus > 201402)
+#define CXX_HAVE_STD_STRING_VIEW 1
+#endif
+
+#ifdef CXX_HAVE_STD_STRING_VIEW
+#include <string_view>
+#endif
+
 namespace rust {
 inline namespace cxxbridge02 {
 
@@ -50,8 +78,13 @@ public:
   Str() noexcept;
   Str(const Str &) noexcept;
 
+#ifdef CXX_HAVE_STD_STRING_VIEW
+  Str(std::string_view);
+#else
   Str(const std::string &);
   Str(const char *);
+#endif
+
   Str(std::string &&) = delete;
 
   Str &operator=(Str) noexcept;
