@@ -13,7 +13,7 @@ mod tokens;
 pub mod types;
 
 use proc_macro2::{Ident, Span, TokenStream};
-use syn::{LitStr, Token};
+use syn::{token::Brace, LitStr, Token};
 
 pub use self::atom::Atom;
 pub use self::doc::Doc;
@@ -40,6 +40,7 @@ pub struct Struct {
     pub derives: Vec<Ident>,
     pub struct_token: Token![struct],
     pub ident: Ident,
+    pub brace_token: Brace,
     pub fields: Vec<Var>,
 }
 

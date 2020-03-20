@@ -46,26 +46,32 @@ fn parse_struct(item: ItemStruct) -> Result<Api> {
     let mut derives = Vec::new();
     attrs::parse(&item.attrs, &mut doc, Some(&mut derives))?;
     check_reserved_name(&item.ident)?;
-    match item.fields {
-        Fields::Named(fields) => Ok(Api::Struct(Struct {
-            doc,
-            derives,
-            struct_token: item.struct_token,
-            ident: item.ident,
-            fields: fields
-                .named
-                .into_iter()
-                .map(|field| {
-                    Ok(Var {
-                        ident: field.ident.unwrap(),
-                        ty: parse_type(&field.ty)?,
-                    })
+
+    let fields = match item.fields {
+        Fields::Named(fields) => fields,
+        Fields::Unit => return Err(Error::new_spanned(item, "unit structs are not supported")),
+        Fields::Unnamed(_) => {
+            return Err(Error::new_spanned(item, "tuple structs are not supported"))
+        }
+    };
+
+    Ok(Api::Struct(Struct {
+        doc,
+        derives,
+        struct_token: item.struct_token,
+        ident: item.ident,
+        brace_token: fields.brace_token,
+        fields: fields
+            .named
+            .into_iter()
+            .map(|field| {
+                Ok(Var {
+                    ident: field.ident.unwrap(),
+                    ty: parse_type(&field.ty)?,
                 })
-                .collect::<Result<_>>()?,
-        })),
-        Fields::Unit => Err(Error::new_spanned(item, "unit structs are not supported")),
-        Fields::Unnamed(_) => Err(Error::new_spanned(item, "tuple structs are not supported")),
-    }
+            })
+            .collect::<Result<_>>()?,
+    }))
 }
 
 fn parse_foreign_mod(foreign_mod: ItemForeignMod) -> Result<Vec<Api>> {

@@ -1,6 +1,7 @@
 use crate::syntax::atom::Atom::{self, *};
-use crate::syntax::{error, ident, Api, ExternFn, Ref, Ty1, Type, Types, Var};
-use proc_macro2::Ident;
+use crate::syntax::{error, ident, Api, ExternFn, Ref, Struct, Ty1, Type, Types, Var};
+use proc_macro2::{Delimiter, Group, Ident, TokenStream};
+use quote::quote;
 use syn::{Error, Result};
 
 pub(crate) fn typecheck(apis: &[Api], types: &Types) -> Result<()> {
@@ -53,6 +54,9 @@ pub(crate) fn typecheck(apis: &[Api], types: &Types) -> Result<()> {
     for api in apis {
         match api {
             Api::Struct(strct) => {
+                if strct.fields.is_empty() {
+                    errors.push(struct_empty(strct));
+                }
                 for field in &strct.fields {
                     if is_unsized(&field.ty, types) {
                         errors.push(field_by_value(field, types));
@@ -195,6 +199,14 @@ fn unsupported_rust_type_in_unique_ptr(unique_ptr: &Ty1) -> Error {
 
 fn unsupported_unique_ptr_target(unique_ptr: &Ty1) -> Error {
     Error::new_spanned(unique_ptr, "unsupported unique_ptr target type")
+}
+
+fn struct_empty(strct: &Struct) -> Error {
+    let struct_token = strct.struct_token;
+    let mut brace_token = Group::new(Delimiter::Brace, TokenStream::new());
+    brace_token.set_span(strct.brace_token.span);
+    let span = quote!(#struct_token #brace_token);
+    Error::new_spanned(span, "structs without any fields are not supported")
 }
 
 fn field_by_value(field: &Var, types: &Types) -> Error {
