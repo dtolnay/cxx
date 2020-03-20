@@ -30,6 +30,7 @@ fn find_line(line: &str) -> Option<usize> {
 pub struct Includes {
     custom: Vec<String>,
     pub array: bool,
+    pub cstddef: bool,
     pub cstdint: bool,
     pub cstring: bool,
     pub exception: bool,
@@ -62,6 +63,9 @@ impl Display for Includes {
         }
         if self.array {
             writeln!(f, "#include <array>")?;
+        }
+        if self.cstddef {
+            writeln!(f, "#include <cstddef>")?;
         }
         if self.cstdint {
             writeln!(f, "#include <cstdint>")?;
