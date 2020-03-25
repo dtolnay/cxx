@@ -225,10 +225,24 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
             #local_name(#(#vars),*)
         }
     };
-    let expr = efn
-        .ret
-        .as_ref()
-        .and_then(|ret| match ret {
+    let expr = if efn.throws {
+        efn.ret.as_ref().and_then(|ret| match ret {
+            Type::Ident(ident) if ident == RustString => {
+                Some(quote!(#call.map(|r| r.into_string())))
+            }
+            Type::RustBox(_) => Some(quote!(#call.map(|r| ::std::boxed::Box::from_raw(r)))),
+            Type::UniquePtr(_) => Some(quote!(#call.map(|r| ::cxx::UniquePtr::from_raw(r)))),
+            Type::Ref(ty) => match &ty.inner {
+                Type::Ident(ident) if ident == RustString => {
+                    Some(quote!(#call.map(|r| r.as_string())))
+                }
+                _ => None,
+            },
+            Type::Str(_) => Some(quote!(#call.map(|r| r.as_str()))),
+            _ => None,
+        })
+    } else {
+        efn.ret.as_ref().and_then(|ret| match ret {
             Type::Ident(ident) if ident == RustString => Some(quote!(#call.into_string())),
             Type::RustBox(_) => Some(quote!(::std::boxed::Box::from_raw(#call))),
             Type::UniquePtr(_) => Some(quote!(::cxx::UniquePtr::from_raw(#call))),
@@ -239,7 +253,8 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
             Type::Str(_) => Some(quote!(#call.as_str())),
             _ => None,
         })
-        .unwrap_or(call);
+    }
+    .unwrap_or(call);
     quote! {
         #doc
         pub fn #ident(#(#args),*) #ret {
