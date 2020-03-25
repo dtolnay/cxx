@@ -5,47 +5,14 @@ use quote::quote;
 use syn::{Error, Result};
 
 pub(crate) fn typecheck(apis: &[Api], types: &Types) -> Result<()> {
-    let mut errors = Vec::new();
+    let ref mut errors = Vec::new();
 
     for ty in types {
         match ty {
-            Type::Ident(ident) => {
-                if Atom::from(ident).is_none()
-                    && !types.structs.contains_key(ident)
-                    && !types.cxx.contains(ident)
-                    && !types.rust.contains(ident)
-                {
-                    errors.push(unsupported_type(ident));
-                }
-            }
-            Type::RustBox(ptr) => {
-                if let Type::Ident(ident) = &ptr.inner {
-                    if types.cxx.contains(ident) {
-                        errors.push(unsupported_cxx_type_in_box(ptr));
-                    }
-                    if Atom::from(ident).is_none() {
-                        continue;
-                    }
-                }
-                errors.push(unsupported_box_target(ptr));
-            }
-            Type::UniquePtr(ptr) => {
-                if let Type::Ident(ident) = &ptr.inner {
-                    if types.rust.contains(ident) {
-                        errors.push(unsupported_rust_type_in_unique_ptr(ptr));
-                    }
-                    match Atom::from(ident) {
-                        None | Some(CxxString) => continue,
-                        _ => {}
-                    }
-                }
-                errors.push(unsupported_unique_ptr_target(ptr));
-            }
-            Type::Ref(ty) => {
-                if let Type::Void(_) = ty.inner {
-                    errors.push(unsupported_reference_type(ty));
-                }
-            }
+            Type::Ident(ident) => check_type_ident(errors, types, ident),
+            Type::RustBox(ptr) => check_type_box(errors, types, ptr),
+            Type::UniquePtr(ptr) => check_type_unique_ptr(errors, types, ptr),
+            Type::Ref(ty) => check_type_ref(errors, ty),
             Type::Fn(_) => errors.push(unimplemented_fn_type(ty)),
             _ => {}
         }
@@ -53,28 +20,8 @@ pub(crate) fn typecheck(apis: &[Api], types: &Types) -> Result<()> {
 
     for api in apis {
         match api {
-            Api::Struct(strct) => {
-                if strct.fields.is_empty() {
-                    errors.push(struct_empty(strct));
-                }
-                for field in &strct.fields {
-                    if is_unsized(&field.ty, types) {
-                        errors.push(field_by_value(field, types));
-                    }
-                }
-            }
-            Api::CxxFunction(efn) | Api::RustFunction(efn) => {
-                for arg in &efn.args {
-                    if is_unsized(&arg.ty, types) {
-                        errors.push(argument_by_value(arg, types));
-                    }
-                }
-                if let Some(ty) = &efn.ret {
-                    if is_unsized(ty, types) {
-                        errors.push(return_by_value(ty, types));
-                    }
-                }
-            }
+            Api::Struct(strct) => check_api_struct(errors, types, strct),
+            Api::CxxFunction(efn) | Api::RustFunction(efn) => check_api_fn(errors, types, efn),
             _ => {}
         }
     }
@@ -88,9 +35,9 @@ pub(crate) fn typecheck(apis: &[Api], types: &Types) -> Result<()> {
         }
     }
 
-    ident::check_all(apis, &mut errors);
+    ident::check_all(apis, errors);
 
-    let mut iter = errors.into_iter();
+    let mut iter = errors.drain(..);
     let mut all_errors = match iter.next() {
         Some(err) => err,
         None => return Ok(()),
@@ -101,13 +48,69 @@ pub(crate) fn typecheck(apis: &[Api], types: &Types) -> Result<()> {
     Err(all_errors)
 }
 
-fn is_unsized(ty: &Type, types: &Types) -> bool {
-    let ident = match ty {
-        Type::Ident(ident) => ident,
-        Type::Void(_) => return true,
-        _ => return false,
-    };
-    ident == CxxString || types.cxx.contains(ident) || types.rust.contains(ident)
+fn check_type_ident(errors: &mut Vec<Error>, types: &Types, ident: &Ident) {
+    if Atom::from(ident).is_none()
+        && !types.structs.contains_key(ident)
+        && !types.cxx.contains(ident)
+        && !types.rust.contains(ident)
+    {
+        errors.push(unsupported_type(ident));
+    }
+}
+
+fn check_type_box(errors: &mut Vec<Error>, types: &Types, ptr: &Ty1) {
+    if let Type::Ident(ident) = &ptr.inner {
+        if types.cxx.contains(ident) {
+            errors.push(unsupported_cxx_type_in_box(ptr));
+        }
+        if Atom::from(ident).is_none() {
+            return;
+        }
+    }
+    errors.push(unsupported_box_target(ptr));
+}
+
+fn check_type_unique_ptr(errors: &mut Vec<Error>, types: &Types, ptr: &Ty1) {
+    if let Type::Ident(ident) = &ptr.inner {
+        if types.rust.contains(ident) {
+            errors.push(unsupported_rust_type_in_unique_ptr(ptr));
+        }
+        match Atom::from(ident) {
+            None | Some(CxxString) => return,
+            _ => {}
+        }
+    }
+    errors.push(unsupported_unique_ptr_target(ptr));
+}
+
+fn check_type_ref(errors: &mut Vec<Error>, ty: &Ref) {
+    if let Type::Void(_) = ty.inner {
+        errors.push(unsupported_reference_type(ty));
+    }
+}
+
+fn check_api_struct(errors: &mut Vec<Error>, types: &Types, strct: &Struct) {
+    if strct.fields.is_empty() {
+        errors.push(struct_empty(strct));
+    }
+    for field in &strct.fields {
+        if is_unsized(&field.ty, types) {
+            errors.push(field_by_value(field, types));
+        }
+    }
+}
+
+fn check_api_fn(errors: &mut Vec<Error>, types: &Types, efn: &ExternFn) {
+    for arg in &efn.args {
+        if is_unsized(&arg.ty, types) {
+            errors.push(argument_by_value(arg, types));
+        }
+    }
+    if let Some(ty) = &efn.ret {
+        if is_unsized(ty, types) {
+            errors.push(return_by_value(ty, types));
+        }
+    }
 }
 
 fn check_mut_return_restriction(efn: &ExternFn) -> Result<()> {
@@ -151,6 +154,15 @@ fn check_multiple_arg_lifetimes(efn: &ExternFn) -> Result<()> {
             "functions that return a reference must take exactly one input reference",
         ))
     }
+}
+
+fn is_unsized(ty: &Type, types: &Types) -> bool {
+    let ident = match ty {
+        Type::Ident(ident) => ident,
+        Type::Void(_) => return true,
+        _ => return false,
+    };
+    ident == CxxString || types.cxx.contains(ident) || types.rust.contains(ident)
 }
 
 fn describe(ty: &Type, types: &Types) -> String {
