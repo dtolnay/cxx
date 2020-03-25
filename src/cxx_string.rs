@@ -80,12 +80,12 @@ impl CxxString {
 
 impl Display for CxxString {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        Display::fmt(&String::from_utf8_lossy(self.as_bytes()), f)
+        Display::fmt(self.to_string_lossy().as_ref(), f)
     }
 }
 
 impl Debug for CxxString {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        Debug::fmt(&String::from_utf8_lossy(self.as_bytes()), f)
+        Debug::fmt(self.to_string_lossy().as_ref(), f)
     }
 }
