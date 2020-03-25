@@ -102,8 +102,8 @@ std::unique_ptr<std::string> c_try_return_string() {
   return std::unique_ptr<std::string>(new std::string("ok"));
 }
 
-std::unique_ptr<std::string> c_fail_return_string() { 
-  throw std::logic_error("logic error getting string"); 
+std::unique_ptr<std::string> c_fail_return_string() {
+  throw std::logic_error("logic error getting string");
 }
 
 extern "C" C *cxx_test_suite_get_unique_ptr() noexcept {
