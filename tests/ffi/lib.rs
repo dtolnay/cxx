@@ -36,8 +36,11 @@ pub mod ffi {
         fn c_try_return_void() -> Result<()>;
         fn c_try_return_primitive() -> Result<usize>;
         fn c_fail_return_primitive() -> Result<usize>;
-        fn c_try_return_string() -> Result<UniquePtr<CxxString>>;
-        fn c_fail_return_string() -> Result<UniquePtr<CxxString>>;
+        fn c_try_return_box() -> Result<Box<R>>;
+        fn c_try_return_ref(s: &String) -> Result<&String>;
+        fn c_try_return_str(s: &str) -> Result<&str>;
+        fn c_try_return_rust_string() -> Result<String>;
+        fn c_try_return_unique_ptr_string() -> Result<UniquePtr<CxxString>>;
     }
 
     extern "Rust" {

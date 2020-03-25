@@ -39,7 +39,10 @@ void c_take_unique_ptr_string(std::unique_ptr<std::string> s);
 void c_try_return_void();
 size_t c_try_return_primitive();
 size_t c_fail_return_primitive();
-std::unique_ptr<std::string> c_try_return_string();
-std::unique_ptr<std::string> c_fail_return_string();
+rust::Box<R> c_try_return_box();
+const rust::String &c_try_return_ref(const rust::String &);
+rust::Str c_try_return_str(rust::Str);
+rust::String c_try_return_rust_string();
+std::unique_ptr<std::string> c_try_return_unique_ptr_string();
 
 } // namespace tests
