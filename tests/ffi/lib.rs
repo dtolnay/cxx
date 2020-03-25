@@ -36,6 +36,8 @@ pub mod ffi {
         fn c_try_return_void() -> Result<()>;
         fn c_try_return_primitive() -> Result<usize>;
         fn c_fail_return_primitive() -> Result<usize>;
+        fn c_try_return_string() -> Result<UniquePtr<CxxString>>;
+        fn c_fail_return_string() -> Result<UniquePtr<CxxString>>;
     }
 
     extern "Rust" {
