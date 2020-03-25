@@ -89,3 +89,21 @@ impl Debug for CxxString {
         Debug::fmt(self.to_string_lossy().as_ref(), f)
     }
 }
+
+impl PartialEq for CxxString {
+    fn eq(&self, other: &CxxString) -> bool {
+        self.as_bytes() == other.as_bytes()
+    }
+}
+
+impl PartialEq<CxxString> for str {
+    fn eq(&self, other: &CxxString) -> bool {
+        self.as_bytes() == other.as_bytes()
+    }
+}
+
+impl PartialEq<str> for CxxString {
+    fn eq(&self, other: &str) -> bool {
+        self.as_bytes() == other.as_bytes()
+    }
+}

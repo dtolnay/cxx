@@ -45,14 +45,7 @@ fn test_c_return() {
         "logic error",
         ffi::c_fail_return_primitive().unwrap_err().what(),
     );
-    assert_eq!(
-        "ok",
-        ffi::c_try_return_string()
-            .unwrap()
-            .as_ref()
-            .unwrap()
-            .to_string()
-    );
+    assert_eq!("ok", ffi::c_try_return_string().unwrap().as_ref().unwrap());
     assert_eq!(
         "logic error getting string",
         ffi::c_fail_return_string().unwrap_err().what(),
