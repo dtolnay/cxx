@@ -92,6 +92,10 @@ void c_take_unique_ptr_string(std::unique_ptr<std::string> s) {
   }
 }
 
+void c_take_callback(rust::Fn<size_t(rust::String)> callback) {
+  callback("2020");
+}
+
 void c_try_return_void() {}
 
 size_t c_try_return_primitive() { return 2020; }

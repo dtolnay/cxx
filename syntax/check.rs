@@ -1,5 +1,5 @@
 use crate::syntax::atom::Atom::{self, *};
-use crate::syntax::{error, ident, Api, ExternFn, Ref, Struct, Ty1, Type, Types};
+use crate::syntax::{error, ident, Api, ExternFn, Lang, Ref, Struct, Ty1, Type, Types};
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
 use std::fmt::Display;
@@ -136,10 +136,12 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
             cx.error(arg, msg);
         }
         if let Type::Fn(_) = arg.ty {
-            cx.error(
-                arg,
-                "passing a function pointer argument is not implemented yet",
-            );
+            if efn.lang == Lang::Rust {
+                cx.error(
+                    arg,
+                    "passing a function pointer from C++ to Rust is not implemented yet",
+                );
+            }
         }
     }
 

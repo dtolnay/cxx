@@ -147,6 +147,23 @@ private:
 };
 #endif // CXXBRIDGE02_RUST_BOX
 
+#ifndef CXXBRIDGE02_RUST_FN
+#define CXXBRIDGE02_RUST_FN
+template <typename Signature, bool Throws = false> class Fn;
+
+template <typename Ret, typename... Args, bool Throws>
+class Fn<Ret(Args...), Throws> {
+public:
+  Ret operator()(Args... args) noexcept(!Throws);
+
+private:
+  Ret (*trampoline)(Args..., void *fn) noexcept(!Throws);
+  void *fn;
+};
+
+template <typename Signature> using TryFn = Fn<Signature, true>;
+#endif // CXXBRIDGE02_RUST_FN
+
 #ifndef CXXBRIDGE02_RUST_ERROR
 #define CXXBRIDGE02_RUST_ERROR
 class Error final : std::exception {
@@ -170,6 +187,9 @@ using string = String;
 using str = Str;
 template <class T> using box = Box<T>;
 using error = Error;
+template <typename Signature, bool Throws = false>
+using fn = Fn<Signature, Throws>;
+template <typename Signature> using try_fn = TryFn<Signature>;
 
 #ifndef CXXBRIDGE02_RUST_BITCOPY
 #define CXXBRIDGE02_RUST_BITCOPY
@@ -178,6 +198,11 @@ struct unsafe_bitcopy_t {
 };
 constexpr unsafe_bitcopy_t unsafe_bitcopy{};
 #endif // CXXBRIDGE02_RUST_BITCOPY
+
+template <typename Ret, typename... Args, bool Throws>
+Ret Fn<Ret(Args...), Throws>::operator()(Args... args) noexcept(!Throws) {
+  return (*this->trampoline)(std::move(args)..., this->fn);
+}
 
 } // namespace cxxbridge02
 } // namespace rust
