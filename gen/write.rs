@@ -183,6 +183,11 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
         writeln!(out, "// #include \"rust/cxx.h\"");
     }
 
+    if needs_rust_string {
+        out.next_section();
+        writeln!(out, "struct unsafe_bitcopy_t;");
+    }
+
     write_header_section(out, needs_rust_string, "CXXBRIDGE02_RUST_STRING");
     write_header_section(out, needs_rust_str, "CXXBRIDGE02_RUST_STR");
     write_header_section(out, needs_rust_box, "CXXBRIDGE02_RUST_BOX");
