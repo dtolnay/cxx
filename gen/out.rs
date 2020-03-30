@@ -1,12 +1,17 @@
 use crate::gen::include::Includes;
 use crate::gen::namespace::Namespace;
+use std::cell::RefCell;
 use std::fmt::{self, Arguments, Write};
 
 pub(crate) struct OutFile {
     pub namespace: Namespace,
     pub header: bool,
     pub include: Includes,
-    content: Vec<u8>,
+    content: RefCell<Content>,
+}
+
+struct Content {
+    bytes: Vec<u8>,
     section_pending: bool,
     blocks_pending: Vec<&'static str>,
 }
@@ -17,65 +22,70 @@ impl OutFile {
             namespace,
             header,
             include: Includes::new(),
-            content: Vec::new(),
-            section_pending: false,
-            blocks_pending: Vec::new(),
+            content: RefCell::new(Content {
+                bytes: Vec::new(),
+                section_pending: false,
+                blocks_pending: Vec::new(),
+            }),
         }
     }
 
     // Write a blank line if the preceding section had any contents.
     pub fn next_section(&mut self) {
-        self.section_pending = true;
+        let content = self.content.get_mut();
+        content.section_pending = true;
     }
 
     pub fn begin_block(&mut self, block: &'static str) {
-        self.blocks_pending.push(block);
+        let content = self.content.get_mut();
+        content.blocks_pending.push(block);
     }
 
     pub fn end_block(&mut self, block: &'static str) {
-        if self.blocks_pending.pop().is_none() {
-            self.content.extend_from_slice(b"} // ");
-            self.content.extend_from_slice(block.as_bytes());
-            self.content.push(b'\n');
-            self.section_pending = true;
+        let content = self.content.get_mut();
+        if content.blocks_pending.pop().is_none() {
+            content.bytes.extend_from_slice(b"} // ");
+            content.bytes.extend_from_slice(block.as_bytes());
+            content.bytes.push(b'\n');
+            content.section_pending = true;
         }
     }
 
     pub fn prepend(&mut self, section: String) {
-        self.content.splice(..0, section.into_bytes());
+        let content = self.content.get_mut();
+        content.bytes.splice(..0, section.into_bytes());
     }
 
-    pub fn write_fmt(&mut self, args: Arguments) {
-        Write::write_fmt(self, args).unwrap();
+    pub fn write_fmt(&self, args: Arguments) {
+        let content = &mut *self.content.borrow_mut();
+        Write::write_fmt(content, args).unwrap();
+    }
+
+    pub fn content(&self) -> Vec<u8> {
+        self.content.borrow().bytes.clone()
     }
 }
 
-impl Write for OutFile {
+impl Write for Content {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         if !s.is_empty() {
             if !self.blocks_pending.is_empty() {
-                if !self.content.is_empty() {
-                    self.content.push(b'\n');
+                if !self.bytes.is_empty() {
+                    self.bytes.push(b'\n');
                 }
                 for block in self.blocks_pending.drain(..) {
-                    self.content.extend_from_slice(block.as_bytes());
-                    self.content.extend_from_slice(b" {\n");
+                    self.bytes.extend_from_slice(block.as_bytes());
+                    self.bytes.extend_from_slice(b" {\n");
                 }
                 self.section_pending = false;
             } else if self.section_pending {
-                if !self.content.is_empty() {
-                    self.content.push(b'\n');
+                if !self.bytes.is_empty() {
+                    self.bytes.push(b'\n');
                 }
                 self.section_pending = false;
             }
-            self.content.extend_from_slice(s.as_bytes());
+            self.bytes.extend_from_slice(s.as_bytes());
         }
         Ok(())
-    }
-}
-
-impl AsRef<[u8]> for OutFile {
-    fn as_ref(&self) -> &[u8] {
-        &self.content
     }
 }
