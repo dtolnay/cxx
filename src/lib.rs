@@ -306,6 +306,7 @@
 //! <tr><td><a href="https://docs.rs/cxx/0.2/cxx/struct.CxxString.html">CxxString</a></td><td>std::string</td><td><sup><i>cannot be passed by value</i></sup></td></tr>
 //! <tr><td>Box&lt;T&gt;</td><td>rust::Box&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
 //! <tr><td><a href="https://docs.rs/cxx/0.2/cxx/struct.UniquePtr.html">UniquePtr&lt;T&gt;</a></td><td>std::unique_ptr&lt;T&gt;</td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
+//! <tr><td>fn(T, U) -&gt; V</td><td>rust::Fn&lt;V(T, U)&gt;</td><td><sup><i>only passing from Rust to C++ is implemented so far</i></sup></td></tr>
 //! <tr><td>Result&lt;T&gt;</td><td>error &lt;=&gt; exception</td><td><sup><i>allowed as return type only</i></sup></td></tr>
 //! </table>
 //!
