@@ -1,3 +1,7 @@
+//! **[https://github.com/dtolnay/cxx]**
+//!
+//! <br>
+//!
 //! This library provides a **safe** mechanism for calling C++ code from Rust
 //! and Rust code from C++, not subject to the many ways that things can go
 //! wrong when using bindgen or cbindgen to generate unsafe C-style bindings.
