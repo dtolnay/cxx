@@ -1,4 +1,5 @@
 use crate::syntax::ident;
+use quote::IdentFragment;
 use std::fmt::{self, Display};
 use syn::parse::{Parse, ParseStream, Result};
 use syn::{Path, Token};
@@ -35,5 +36,11 @@ impl Display for Namespace {
             f.write_str("$")?;
         }
         Ok(())
+    }
+}
+
+impl IdentFragment for Namespace {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        Display::fmt(self, f)
     }
 }
