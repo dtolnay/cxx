@@ -1,6 +1,5 @@
 use std::fmt::{self, Display};
 use std::slice::Iter;
-use std::vec::IntoIter;
 
 #[derive(Clone)]
 pub struct Namespace {
@@ -32,13 +31,5 @@ impl<'a> IntoIterator for &'a Namespace {
     type IntoIter = Iter<'a, String>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
-    }
-}
-
-impl IntoIterator for Namespace {
-    type Item = String;
-    type IntoIter = IntoIter<String>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.segments.into_iter()
     }
 }
