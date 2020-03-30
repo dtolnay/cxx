@@ -1,9 +1,9 @@
 use crate::namespace::Namespace;
 use crate::syntax::atom::Atom::{self, *};
-use crate::syntax::{self, check, Api, ExternFn, ExternType, Struct, Type, Types};
+use crate::syntax::{self, check, Api, ExternFn, ExternType, Signature, Struct, Type, Types};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned};
-use syn::{Error, ItemMod, Result, Token};
+use syn::{parse_quote, Error, ItemMod, Result, Token};
 
 pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
     let ident = &ffi.ident;
@@ -128,6 +128,8 @@ fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types
         let ty = expand_extern_type(&arg.ty);
         if arg.ty == RustString {
             quote!(#ident: *const #ty)
+        } else if let Type::Fn(_) = arg.ty {
+            quote!(#ident: ::cxx::private::FatFunction)
         } else if types.needs_indirect_abi(&arg.ty) {
             quote!(#ident: *mut #ty)
         } else {
@@ -186,6 +188,20 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
             _ => quote!(#var),
         }
     });
+    let trampolines = efn
+        .args
+        .iter()
+        .filter_map(|arg| {
+            if let Type::Fn(f) = &arg.ty {
+                let var = &arg.ident;
+                Some(expand_function_pointer_trampoline(
+                    namespace, efn, var, f, types,
+                ))
+            } else {
+                None
+            }
+        })
+        .collect::<TokenStream>();
     let mut setup = efn
         .args
         .iter()
@@ -261,11 +277,47 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
             extern "C" {
                 #decl
             }
+            #trampolines
             unsafe {
                 #setup
                 #expr
             }
         }
+    }
+}
+
+fn expand_function_pointer_trampoline(
+    namespace: &Namespace,
+    efn: &ExternFn,
+    var: &Ident,
+    sig: &Signature,
+    types: &Types,
+) -> TokenStream {
+    let c_trampoline = format!("{}cxxbridge02${}${}$0", namespace, efn.ident, var);
+    let r_trampoline = format!("{}cxxbridge02${}${}$1", namespace, efn.ident, var);
+    let local_name = parse_quote!(__);
+    let catch_unwind_label = format!("::{}::{}", efn.ident, var);
+    let shim = expand_rust_function_shim_impl(
+        sig,
+        types,
+        &r_trampoline,
+        local_name,
+        catch_unwind_label,
+        None,
+    );
+
+    quote! {
+        let #var = ::cxx::private::FatFunction {
+            trampoline: {
+                extern "C" {
+                    #[link_name = #c_trampoline]
+                    fn trampoline();
+                }
+                #shim
+                trampoline as usize as *const ()
+            },
+            ptr: #var as usize as *const (),
+        };
     }
 }
 
@@ -278,7 +330,29 @@ fn expand_rust_type(ety: &ExternType) -> TokenStream {
 
 fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types) -> TokenStream {
     let ident = &efn.ident;
-    let args = efn.args.iter().map(|arg| {
+    let link_name = format!("{}cxxbridge02${}", namespace, ident);
+    let local_name = format_ident!("__{}", ident);
+    let catch_unwind_label = format!("::{}", ident);
+    let invoke = Some(ident);
+    expand_rust_function_shim_impl(
+        efn,
+        types,
+        &link_name,
+        local_name,
+        catch_unwind_label,
+        invoke,
+    )
+}
+
+fn expand_rust_function_shim_impl(
+    sig: &Signature,
+    types: &Types,
+    link_name: &str,
+    local_name: Ident,
+    catch_unwind_label: String,
+    invoke: Option<&Ident>,
+) -> TokenStream {
+    let args = sig.args.iter().map(|arg| {
         let ident = &arg.ident;
         let ty = expand_extern_type(&arg.ty);
         if types.needs_indirect_abi(&arg.ty) {
@@ -287,7 +361,8 @@ fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Type
             quote!(#ident: #ty)
         }
     });
-    let vars = efn.args.iter().map(|arg| {
+
+    let vars = sig.args.iter().map(|arg| {
         let ident = &arg.ident;
         match &arg.ty {
             Type::Ident(i) if i == RustString => {
@@ -304,9 +379,14 @@ fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Type
             _ => quote!(#ident),
         }
     });
-    let mut outparam = None;
-    let call = quote!(super::#ident(#(#vars),*));
-    let mut expr = efn
+
+    let mut call = match invoke {
+        Some(ident) => quote!(super::#ident),
+        None => quote!(__extern),
+    };
+    call.extend(quote! { (#(#vars),*) });
+
+    let mut expr = sig
         .ret
         .as_ref()
         .and_then(|ret| match ret {
@@ -325,13 +405,15 @@ fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Type
             _ => None,
         })
         .unwrap_or(call);
-    let indirect_return = indirect_return(efn, types);
+
+    let mut outparam = None;
+    let indirect_return = indirect_return(sig, types);
     if indirect_return {
-        let ret = expand_extern_type(efn.ret.as_ref().unwrap());
-        outparam = Some(quote!(__return: *mut #ret));
+        let ret = expand_extern_type(sig.ret.as_ref().unwrap());
+        outparam = Some(quote!(__return: *mut #ret,));
     }
-    if efn.throws {
-        let out = match efn.ret {
+    if sig.throws {
+        let out = match sig.ret {
             Some(_) => quote!(__return),
             None => quote!(&mut ()),
         };
@@ -339,19 +421,24 @@ fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Type
     } else if indirect_return {
         expr = quote!(::std::ptr::write(__return, #expr));
     }
+
     expr = quote!(::cxx::private::catch_unwind(__fn, move || #expr));
-    let ret = if efn.throws {
+
+    let ret = if sig.throws {
         quote!(-> ::cxx::private::Result)
     } else {
-        expand_extern_return_type(&efn.ret, types)
+        expand_extern_return_type(&sig.ret, types)
     };
-    let link_name = format!("{}cxxbridge02${}", namespace, ident);
-    let local_name = format_ident!("__{}", ident);
-    let catch_unwind_label = format!("::{}", ident);
+
+    let pointer = match invoke {
+        None => Some(quote!(__extern: #sig)),
+        Some(_) => None,
+    };
+
     quote! {
         #[doc(hidden)]
         #[export_name = #link_name]
-        unsafe extern "C" fn #local_name(#(#args,)* #outparam) #ret {
+        unsafe extern "C" fn #local_name(#(#args,)* #outparam #pointer) #ret {
             let __fn = concat!(module_path!(), #catch_unwind_label);
             #expr
         }
@@ -457,10 +544,10 @@ fn expand_return_type(ret: &Option<Type>) -> TokenStream {
     }
 }
 
-fn indirect_return(efn: &ExternFn, types: &Types) -> bool {
-    efn.ret
+fn indirect_return(sig: &Signature, types: &Types) -> bool {
+    sig.ret
         .as_ref()
-        .map_or(false, |ret| efn.throws || types.needs_indirect_abi(ret))
+        .map_or(false, |ret| sig.throws || types.needs_indirect_abi(ret))
 }
 
 fn expand_extern_type(ty: &Type) -> TokenStream {

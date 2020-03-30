@@ -78,6 +78,18 @@ fn test_c_take() {
 }
 
 #[test]
+fn test_c_callback() {
+    fn callback(s: String) -> usize {
+        if s == "2020" {
+            cxx_test_suite_set_correct();
+        }
+        0
+    }
+
+    check!(ffi::c_take_callback(callback));
+}
+
+#[test]
 fn test_c_call_r() {
     fn cxx_run_test() {
         extern "C" {

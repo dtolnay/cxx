@@ -35,6 +35,7 @@ void c_take_ref_c(const C &c);
 void c_take_str(rust::Str s);
 void c_take_rust_string(rust::String s);
 void c_take_unique_ptr_string(std::unique_ptr<std::string> s);
+void c_take_callback(rust::Fn<size_t(rust::String)> callback);
 
 void c_try_return_void();
 size_t c_try_return_primitive();
