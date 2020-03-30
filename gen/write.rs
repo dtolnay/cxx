@@ -305,10 +305,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     } else {
         write_extern_return_type_space(out, &efn.ret, types);
     }
-    for name in out.namespace.clone() {
-        write!(out, "{}$", name);
-    }
-    write!(out, "cxxbridge02${}(", efn.ident);
+    write!(out, "{}cxxbridge02${}(", out.namespace, efn.ident);
     for (i, arg) in efn.args.iter().enumerate() {
         if i > 0 {
             write!(out, ", ");
@@ -413,10 +410,7 @@ fn write_rust_function_decl(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     } else {
         write_extern_return_type_space(out, &efn.ret, types);
     }
-    for name in out.namespace.clone() {
-        write!(out, "{}$", name);
-    }
-    write!(out, "cxxbridge02${}(", efn.ident);
+    write!(out, "{}cxxbridge02${}(", out.namespace, efn.ident);
     for (i, arg) in efn.args.iter().enumerate() {
         if i > 0 {
             write!(out, ", ");
@@ -487,10 +481,7 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         if efn.throws {
             write!(out, "::rust::Str::Repr error$ = ");
         }
-        for name in out.namespace.clone() {
-            write!(out, "{}$", name);
-        }
-        write!(out, "cxxbridge02${}(", efn.ident);
+        write!(out, "{}cxxbridge02${}(", out.namespace, efn.ident);
         for (i, arg) in efn.args.iter().enumerate() {
             if i > 0 {
                 write!(out, ", ");
