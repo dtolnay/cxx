@@ -1,8 +1,9 @@
 use crate::gen::include::Includes;
+use crate::gen::namespace::Namespace;
 use std::fmt::{self, Arguments, Write};
 
 pub(crate) struct OutFile {
-    pub namespace: Vec<String>,
+    pub namespace: Namespace,
     pub header: bool,
     pub include: Includes,
     content: Vec<u8>,
@@ -11,7 +12,7 @@ pub(crate) struct OutFile {
 }
 
 impl OutFile {
-    pub fn new(namespace: Vec<String>, header: bool) -> Self {
+    pub fn new(namespace: Namespace, header: bool) -> Self {
         OutFile {
             namespace,
             header,

@@ -3,10 +3,12 @@
 
 mod error;
 pub(super) mod include;
+mod namespace;
 pub(super) mod out;
 mod write;
 
 use self::error::format_err;
+use self::namespace::Namespace;
 use self::out::OutFile;
 use crate::syntax::{self, check, ident, Types};
 use quote::quote;
@@ -32,7 +34,7 @@ pub(super) enum Error {
 }
 
 struct Input {
-    namespace: Vec<String>,
+    namespace: Namespace,
     module: Vec<Item>,
 }
 
@@ -86,10 +88,9 @@ fn find_bridge_mod(syntax: File) -> Result<Input> {
                             )));
                         }
                     };
-                    return Ok(Input {
-                        namespace: parse_args(attr)?,
-                        module,
-                    });
+                    let namespace_segments = parse_args(attr)?;
+                    let namespace = Namespace::new(namespace_segments);
+                    return Ok(Input { namespace, module });
                 }
             }
         }

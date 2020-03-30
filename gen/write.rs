@@ -1,3 +1,4 @@
+use crate::gen::namespace::Namespace;
 use crate::gen::out::OutFile;
 use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
@@ -5,7 +6,7 @@ use crate::syntax::{Api, ExternFn, Struct, Type, Types, Var};
 use proc_macro2::Ident;
 
 pub(super) fn gen(
-    namespace: Vec<String>,
+    namespace: Namespace,
     apis: &[Api],
     types: &Types,
     opt: Opt,
