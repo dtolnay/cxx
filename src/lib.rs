@@ -337,7 +337,7 @@
 //!
 //! [https://github.com/dtolnay/cxx]: https://github.com/dtolnay/cxx
 
-#![doc(html_root_url = "https://docs.rs/cxx/0.1.2")]
+#![doc(html_root_url = "https://docs.rs/cxx/0.2.1")]
 #![deny(improper_ctypes)]
 #![allow(
     clippy::declare_interior_mutable_const,
