@@ -7,7 +7,7 @@ load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 
 rust_library(
     name = "anyhow",
-    srcs = glob(["vendor/anyhow-1.0.27/src/**"]),
+    srcs = glob(["vendor/anyhow-1.0.28/src/**"]),
     crate_features = ["std"],
     visibility = ["//visibility:public"],
 )
@@ -36,7 +36,7 @@ rust_library(
 
 rust_library(
     name = "codespan-reporting",
-    srcs = glob(["vendor/codespan-reporting-0.9.0/src/**"]),
+    srcs = glob(["vendor/codespan-reporting-0.9.2/src/**"]),
     visibility = ["//visibility:public"],
     deps = [
         ":termcolor",
@@ -64,7 +64,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro-error",
-    srcs = glob(["vendor/proc-macro-error-0.4.11/src/**"]),
+    srcs = glob(["vendor/proc-macro-error-0.4.12/src/**"]),
     rustc_flags = ["--cfg=use_fallback"],
     deps = [
         ":proc-macro-error-attr",
@@ -76,7 +76,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro-error-attr",
-    srcs = glob(["vendor/proc-macro-error-attr-0.4.11/src/**"]),
+    srcs = glob(["vendor/proc-macro-error-attr-0.4.12/src/**"]),
     crate_type = "proc-macro",
     deps = [
         ":proc-macro2",
@@ -88,7 +88,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.9/src/**"]),
+    srcs = glob(["vendor/proc-macro2-1.0.10/src/**"]),
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -136,7 +136,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.16/src/**"]),
+    srcs = glob(["vendor/syn-1.0.17/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
@@ -176,14 +176,14 @@ rust_library(
 
 rust_library(
     name = "thiserror",
-    srcs = glob(["vendor/thiserror-1.0.11/src/**"]),
+    srcs = glob(["vendor/thiserror-1.0.14/src/**"]),
     visibility = ["//visibility:public"],
     deps = [":thiserror-impl"],
 )
 
 rust_library(
     name = "thiserror-impl",
-    srcs = glob(["vendor/thiserror-impl-1.0.11/src/**"]),
+    srcs = glob(["vendor/thiserror-impl-1.0.14/src/**"]),
     crate_type = "proc-macro",
     deps = [
         ":proc-macro2",
