@@ -337,7 +337,6 @@ the facets that I still intend for this project to tackle:
 
 - [ ] Support associated methods: `extern "Rust" { fn f(self: &Struct); }`
 - [ ] Support C++ member functions
-- [ ] Support passing function pointers across the FFI
 - [ ] Support structs with type parameters
 - [ ] Support async functions
 
