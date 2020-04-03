@@ -63,7 +63,7 @@ this repo (with the C++ side of the implementation in the *demo-cxx* directory).
 To try it out, jump into demo-rs and run `cargo run`.
 
 ```rust
-#[cxx::bridge]
+#[cxx::bridge(namespace = org::example)]
 mod ffi {
     // Any shared structs, whose fields will be visible to both languages.
     struct SharedThing {
