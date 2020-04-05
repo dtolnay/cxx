@@ -821,12 +821,12 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
 
     writeln!(out, "template <>");
     writeln!(out, "void Box<{}>::uninit() noexcept {{", inner);
-    writeln!(out, "  return cxxbridge02$box${}$uninit(this);", instance);
+    writeln!(out, "  cxxbridge02$box${}$uninit(this);", instance);
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
     writeln!(out, "void Box<{}>::drop() noexcept {{", inner);
-    writeln!(out, "  return cxxbridge02$box${}$drop(this);", instance);
+    writeln!(out, "  cxxbridge02$box${}$drop(this);", instance);
     writeln!(out, "}}");
 }
 
