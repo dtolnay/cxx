@@ -107,6 +107,18 @@ fn test_c_call_r() {
     check!(cxx_run_test());
 }
 
+#[test]
+fn test_c_method_calls() {
+    let mut unique_ptr = ffi::c_return_unique_ptr();
+
+    let old_value = unique_ptr.as_ref().unwrap().get();
+    assert_eq!(2020, old_value);
+    assert_eq!(2021, unique_ptr.as_mut().unwrap().set(2021));
+    assert_eq!(2021, unique_ptr.as_ref().unwrap().get());
+    assert_eq!(old_value, unique_ptr.as_mut().unwrap().set(old_value));
+    assert_eq!(old_value, unique_ptr.as_ref().unwrap().get())
+}
+
 #[no_mangle]
 extern "C" fn cxx_test_suite_get_box() -> *mut cxx_test_suite::R {
     Box::into_raw(Box::new(2020usize))

@@ -15,6 +15,11 @@ C::C(size_t n) : n(n) {}
 
 size_t C::get() const { return this->n; }
 
+size_t C::set(size_t n) {
+  this->n = n;
+  return this->n;
+}
+
 size_t c_return_primitive() { return 2020; }
 
 Shared c_return_shared() { return Shared{2020}; }

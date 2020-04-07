@@ -11,8 +11,9 @@ mod ffi {
 
         type ThingC;
         fn make_demo(appname: &str) -> UniquePtr<ThingC>;
-        fn get_name(thing: &ThingC) -> &CxxString;
+        fn get_name(self: &ThingC) -> &CxxString;
         fn do_thing(state: SharedThing);
+
     }
 
     extern "Rust" {
@@ -29,7 +30,7 @@ fn print_r(r: &ThingR) {
 
 fn main() {
     let x = ffi::make_demo("demo of cxx::bridge");
-    println!("this is a {}", ffi::get_name(x.as_ref().unwrap()));
+    println!("this is a {}", x.as_ref().unwrap().get_name());
 
     ffi::do_thing(ffi::SharedThing {
         z: 222,

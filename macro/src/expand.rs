@@ -123,6 +123,13 @@ fn expand_cxx_type(ety: &ExternType) -> TokenStream {
 
 fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types) -> TokenStream {
     let ident = &efn.ident;
+    let receiver = efn.receiver.iter().map(|base| {
+        let ident = &base.ident;
+        match base.mutability {
+            None => quote!(_: &#ident),
+            Some(_) => quote!(_: &mut #ident),
+        }
+    });
     let args = efn.args.iter().map(|arg| {
         let ident = &arg.ident;
         let ty = expand_extern_type(&arg.ty);
@@ -136,6 +143,7 @@ fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types
             quote!(#ident: #ty)
         }
     });
+    let all_args = receiver.chain(args);
     let ret = if efn.throws {
         quote!(-> ::cxx::private::Result)
     } else {
@@ -150,7 +158,7 @@ fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types
     let local_name = format_ident!("__{}", ident);
     quote! {
         #[link_name = #link_name]
-        fn #local_name(#(#args,)* #outparam) #ret;
+        fn #local_name(#(#all_args,)* #outparam) #ret;
     }
 }
 
@@ -158,7 +166,12 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
     let ident = &efn.ident;
     let doc = &efn.doc;
     let decl = expand_cxx_function_decl(namespace, efn, types);
-    let args = &efn.args;
+    let receiver = efn.receiver.iter().map(|base| match base.mutability {
+        None => quote!(&self),
+        Some(_) => quote!(&mut self),
+    });
+    let args = efn.args.iter().map(|arg| quote!(#arg));
+    let all_args = receiver.chain(args);
     let ret = if efn.throws {
         let ok = match &efn.ret {
             Some(ret) => quote!(#ret),
@@ -169,7 +182,8 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
         expand_return_type(&efn.ret)
     };
     let indirect_return = indirect_return(efn, types);
-    let vars = efn.args.iter().map(|arg| {
+    let receiver_var = efn.receiver.iter().map(|_| quote!(self));
+    let arg_vars = efn.args.iter().map(|arg| {
         let var = &arg.ident;
         match &arg.ty {
             Type::Ident(ident) if ident == RustString => {
@@ -189,6 +203,7 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
             _ => quote!(#var),
         }
     });
+    let vars = receiver_var.chain(arg_vars);
     let trampolines = efn
         .args
         .iter()
@@ -274,18 +289,36 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
         })
     }
     .unwrap_or(call);
-    quote! {
-        #doc
-        pub fn #ident(#args) #ret {
-            extern "C" {
-                #decl
+    let receiver_ident = efn.receiver.as_ref().map(|base| &base.ident);
+    match receiver_ident {
+        None => quote! {
+            #doc
+            pub fn #ident(#(#all_args,)*) #ret {
+                extern "C" {
+                    #decl
+                }
+                #trampolines
+                unsafe {
+                    #setup
+                    #expr
+                }
             }
-            #trampolines
-            unsafe {
-                #setup
-                #expr
+        },
+        Some(base_ident) => quote! {
+            #doc
+            impl #base_ident {
+                pub fn #ident(#(#all_args,)*) #ret {
+                    extern "C" {
+                        #decl
+                    }
+                    #trampolines
+                    unsafe {
+                        #setup
+                        #expr
+                    }
+                }
             }
-        }
+        },
     }
 }
 

@@ -2,7 +2,7 @@ use crate::gen::namespace::Namespace;
 use crate::gen::out::OutFile;
 use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
-use crate::syntax::{Api, ExternFn, Signature, Struct, Type, Types, Var};
+use crate::syntax::{Api, ExternFn, Receiver, Signature, Struct, Type, Types, Var};
 use proc_macro2::Ident;
 
 pub(super) fn gen(
@@ -327,8 +327,11 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         write_extern_return_type_space(out, &efn.ret, types);
     }
     write!(out, "{}cxxbridge02${}(", out.namespace, efn.ident);
+    if let Some(base) = &efn.receiver {
+        write!(out, "{} *__receiver$", base.ident);
+    }
     for (i, arg) in efn.args.iter().enumerate() {
-        if i > 0 {
+        if i > 0 || efn.receiver.is_some() {
             write!(out, ", ");
         }
         if arg.ty == RustString {
@@ -347,14 +350,27 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     writeln!(out, ") noexcept {{");
     write!(out, "  ");
     write_return_type(out, &efn.ret);
-    write!(out, "(*{}$)(", efn.ident);
+    match &efn.receiver {
+        None => write!(out, "(*{}$)(", efn.ident),
+        Some(base) => write!(out, "({}::*{}$)(", base.ident, efn.ident),
+    }
     for (i, arg) in efn.args.iter().enumerate() {
         if i > 0 {
             write!(out, ", ");
         }
         write_type(out, &arg.ty);
     }
-    writeln!(out, ") = {};", efn.ident);
+    write!(out, ")");
+    match &efn.receiver {
+        Some(Receiver { mutability: None, ident: _ }) => write!(out, " const"),
+        _ => {},
+    }
+    write!(out, " = ");
+    match &efn.receiver {
+        None => write!(out, "{}", efn.ident),
+        Some(base) => write!(out, "&{}::{}", base.ident, efn.ident),
+    }
+    writeln!(out, ";");
     write!(out, "  ");
     if efn.throws {
         writeln!(out, "::rust::Str::Repr throw$;");
@@ -377,7 +393,10 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         }
         _ => {}
     }
-    write!(out, "{}$(", efn.ident);
+    match &efn.receiver {
+        None => write!(out, "{}$(", efn.ident),
+        Some(_) => write!(out, "(__receiver$->*{}$)(", efn.ident),
+    }
     for (i, arg) in efn.args.iter().enumerate() {
         if i > 0 {
             write!(out, ", ");
