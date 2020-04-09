@@ -64,7 +64,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro-error",
-    srcs = glob(["vendor/proc-macro-error-0.4.12/src/**"]),
+    srcs = glob(["vendor/proc-macro-error-1.0.1/src/**"]),
     rustc_flags = ["--cfg=use_fallback"],
     deps = [
         ":proc-macro-error-attr",
@@ -76,7 +76,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro-error-attr",
-    srcs = glob(["vendor/proc-macro-error-attr-0.4.12/src/**"]),
+    srcs = glob(["vendor/proc-macro-error-attr-1.0.1/src/**"]),
     crate_type = "proc-macro",
     deps = [
         ":proc-macro2",
@@ -112,7 +112,7 @@ rust_library(
 
 rust_library(
     name = "structopt",
-    srcs = glob(["vendor/structopt-0.3.12/src/**"]),
+    srcs = glob(["vendor/structopt-0.3.13/src/**"]),
     visibility = ["//visibility:public"],
     deps = [
         ":clap",
@@ -123,7 +123,7 @@ rust_library(
 
 rust_library(
     name = "structopt-derive",
-    srcs = glob(["vendor/structopt-derive-0.4.5/src/**"]),
+    srcs = glob(["vendor/structopt-derive-0.4.6/src/**"]),
     crate_type = "proc-macro",
     deps = [
         ":heck",
