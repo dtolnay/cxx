@@ -155,6 +155,7 @@ template <typename Ret, typename... Args, bool Throws>
 class Fn<Ret(Args...), Throws> {
 public:
   Ret operator()(Args... args) noexcept(!Throws);
+  Fn operator*() noexcept;
 
 private:
   Ret (*trampoline)(Args..., void *fn) noexcept(!Throws);
@@ -202,6 +203,11 @@ constexpr unsafe_bitcopy_t unsafe_bitcopy{};
 template <typename Ret, typename... Args, bool Throws>
 Ret Fn<Ret(Args...), Throws>::operator()(Args... args) noexcept(!Throws) {
   return (*this->trampoline)(std::move(args)..., this->fn);
+}
+
+template <typename Ret, typename... Args, bool Throws>
+Fn<Ret(Args...), Throws> Fn<Ret(Args...), Throws>::operator*() noexcept {
+  return *this;
 }
 
 } // namespace cxxbridge02
