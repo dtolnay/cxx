@@ -18,7 +18,7 @@ where
 
 #[cold]
 fn abort(label: &'static str) -> ! {
-    let mut stdout = io::stdout();
-    let _ = writeln!(stdout, "Error: panic in ffi function {}, aborting.", label);
+    let mut stderr = io::stderr();
+    let _ = writeln!(stderr, "Error: panic in ffi function {}, aborting.", label);
     process::abort();
 }
