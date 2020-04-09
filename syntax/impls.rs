@@ -116,7 +116,8 @@ impl PartialEq for Signature {
             args,
             ret,
             throws,
-            tokens: _,
+            paren_token: _,
+            throws_tokens: _,
         } = self;
         let Signature {
             fn_token: _,
@@ -124,9 +125,14 @@ impl PartialEq for Signature {
             args: args2,
             ret: ret2,
             throws: throws2,
-            tokens: _,
+            paren_token: _,
+            throws_tokens: _,
         } = other;
-        receiver == receiver2 && args == args2 && ret == ret2 && throws == throws2
+        receiver == receiver2
+            && ret == ret2
+            && throws == throws2
+            && args.len() == args2.len()
+            && args.iter().zip(args2).all(|(arg, arg2)| arg == arg2)
     }
 }
 
@@ -138,10 +144,13 @@ impl Hash for Signature {
             args,
             ret,
             throws,
-            tokens: _,
+            paren_token: _,
+            throws_tokens: _,
         } = self;
         receiver.hash(state);
-        args.hash(state);
+        for arg in args {
+            arg.hash(state);
+        }
         ret.hash(state);
         throws.hash(state);
     }

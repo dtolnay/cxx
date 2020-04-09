@@ -4,11 +4,16 @@ use crate::syntax::{
 };
 use proc_macro2::Ident;
 use quote::{format_ident, quote};
+use syn::punctuated::Punctuated;
 use syn::{
     Abi, Error, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType, GenericArgument, Item,
-    ItemForeignMod, ItemStruct, Pat, PathArguments, Result, ReturnType, Type as RustType,
+    ItemForeignMod, ItemStruct, Pat, PathArguments, Result, ReturnType, Token, Type as RustType,
     TypeBareFn, TypePath, TypeReference,
 };
+
+pub mod kw {
+    syn::custom_keyword!(Result);
+}
 
 pub fn parse_items(items: Vec<Item>) -> Result<Vec<Api>> {
     let mut apis = Vec::new();
@@ -151,8 +156,9 @@ fn parse_extern_fn(foreign_fn: &ForeignItemFn, lang: Lang) -> Result<ExternFn> {
     }
 
     let mut receiver = None;
-    let mut args = Vec::new();
-    for arg in &foreign_fn.sig.inputs {
+    let mut args = Punctuated::new();
+    for arg in foreign_fn.sig.inputs.pairs() {
+        let (arg, comma) = arg.into_tuple();
         match arg {
             FnArg::Receiver(receiver) => {
                 return Err(Error::new_spanned(receiver, "unsupported signature"))
@@ -164,7 +170,10 @@ fn parse_extern_fn(foreign_fn: &ForeignItemFn, lang: Lang) -> Result<ExternFn> {
                 };
                 let ty = parse_type(&arg.ty)?;
                 if ident != "self" {
-                    args.push(Var { ident, ty });
+                    args.push_value(Var { ident, ty });
+                    if let Some(comma) = comma {
+                        args.push_punct(*comma);
+                    }
                     continue;
                 }
                 if let Type::Ref(reference) = ty {
@@ -181,14 +190,13 @@ fn parse_extern_fn(foreign_fn: &ForeignItemFn, lang: Lang) -> Result<ExternFn> {
         }
     }
 
-    let mut throws = false;
-    let ret = parse_return_type(&foreign_fn.sig.output, &mut throws)?;
+    let mut throws_tokens = None;
+    let ret = parse_return_type(&foreign_fn.sig.output, &mut throws_tokens)?;
+    let throws = throws_tokens.is_some();
     let doc = attrs::parse_doc(&foreign_fn.attrs)?;
     let fn_token = foreign_fn.sig.fn_token;
     let ident = foreign_fn.sig.ident.clone();
-    let mut foreign_fn2 = foreign_fn.clone();
-    foreign_fn2.attrs.clear();
-    let tokens = quote!(#foreign_fn2);
+    let paren_token = foreign_fn.sig.paren_token;
     let semi_token = foreign_fn.semi_token;
 
     Ok(ExternFn {
@@ -201,7 +209,8 @@ fn parse_extern_fn(foreign_fn: &ForeignItemFn, lang: Lang) -> Result<ExternFn> {
             args,
             ret,
             throws,
-            tokens,
+            paren_token,
+            throws_tokens,
         },
         semi_token,
     })
@@ -298,20 +307,24 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
             Ok(Var { ident, ty })
         })
         .collect::<Result<_>>()?;
-    let mut throws = false;
-    let ret = parse_return_type(&ty.output, &mut throws)?;
-    let tokens = quote!(#ty);
+    let mut throws_tokens = None;
+    let ret = parse_return_type(&ty.output, &mut throws_tokens)?;
+    let throws = throws_tokens.is_some();
     Ok(Type::Fn(Box::new(Signature {
         fn_token: ty.fn_token,
         receiver: None,
         args,
         ret,
         throws,
-        tokens,
+        paren_token: ty.paren_token,
+        throws_tokens,
     })))
 }
 
-fn parse_return_type(ty: &ReturnType, throws: &mut bool) -> Result<Option<Type>> {
+fn parse_return_type(
+    ty: &ReturnType,
+    throws_tokens: &mut Option<(kw::Result, Token![<], Token![>])>,
+) -> Result<Option<Type>> {
     let mut ret = match ty {
         ReturnType::Default => return Ok(None),
         ReturnType::Type(_, ret) => ret.as_ref(),
@@ -325,7 +338,8 @@ fn parse_return_type(ty: &ReturnType, throws: &mut bool) -> Result<Option<Type>>
                 if ident == "Result" && generic.args.len() == 1 {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
                         ret = arg;
-                        *throws = true;
+                        *throws_tokens =
+                            Some((kw::Result(ident.span()), generic.lt_token, generic.gt_token));
                     }
                 }
             }

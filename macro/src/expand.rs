@@ -273,7 +273,7 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
     .unwrap_or(call);
     quote! {
         #doc
-        pub fn #ident(#(#args),*) #ret {
+        pub fn #ident(#args) #ret {
             extern "C" {
                 #decl
             }

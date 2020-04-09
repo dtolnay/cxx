@@ -63,12 +63,28 @@ impl ToTokens for Derive {
 
 impl ToTokens for ExternFn {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        self.sig.tokens.to_tokens(tokens);
+        // Notional token range for error reporting purposes.
+        self.sig.fn_token.to_tokens(tokens);
+        self.semi_token.to_tokens(tokens);
     }
 }
 
 impl ToTokens for Signature {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        self.tokens.to_tokens(tokens);
+        self.fn_token.to_tokens(tokens);
+        self.paren_token.surround(tokens, |tokens| {
+            self.args.to_tokens(tokens);
+        });
+        if let Some(ret) = &self.ret {
+            Token![->](self.paren_token.span).to_tokens(tokens);
+            if let Some((result, langle, rangle)) = self.throws_tokens {
+                result.to_tokens(tokens);
+                langle.to_tokens(tokens);
+                ret.to_tokens(tokens);
+                rangle.to_tokens(tokens);
+            } else {
+                ret.to_tokens(tokens);
+            }
+        }
     }
 }

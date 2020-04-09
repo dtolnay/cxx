@@ -12,8 +12,11 @@ pub mod set;
 mod tokens;
 pub mod types;
 
-use proc_macro2::{Ident, Span, TokenStream};
-use syn::{token::Brace, LitStr, Token};
+use self::parse::kw;
+use proc_macro2::{Ident, Span};
+use syn::punctuated::Punctuated;
+use syn::token::{Brace, Paren};
+use syn::{LitStr, Token};
 
 pub use self::atom::Atom;
 pub use self::doc::Doc;
@@ -55,10 +58,11 @@ pub struct ExternFn {
 pub struct Signature {
     pub fn_token: Token![fn],
     pub receiver: Option<Receiver>,
-    pub args: Vec<Var>,
+    pub args: Punctuated<Var, Token![,]>,
     pub ret: Option<Type>,
     pub throws: bool,
-    pub tokens: TokenStream,
+    pub paren_token: Paren,
+    pub throws_tokens: Option<(kw::Result, Token![<], Token![>])>,
 }
 
 #[derive(Eq, PartialEq, Hash)]
