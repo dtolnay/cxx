@@ -51,6 +51,12 @@ where
         unsafe { T::__get(self.repr).as_ref() }
     }
 
+    /// Returns a mutable reference to the object owned by this UniquePtr if
+    /// any, otherwise None.
+    pub fn as_mut(&mut self) -> Option<&mut T> {
+        unsafe { (T::__get(self.repr) as *mut T).as_mut() }
+    }
+
     /// Consumes the UniquePtr, releasing its ownership of the heap-allocated T.
     ///
     /// Matches the behavior of [std::unique_ptr\<T\>::release](https://en.cppreference.com/w/cpp/memory/unique_ptr/release).
