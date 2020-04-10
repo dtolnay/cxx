@@ -64,7 +64,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro-error",
-    srcs = glob(["vendor/proc-macro-error-1.0.1/src/**"]),
+    srcs = glob(["vendor/proc-macro-error-1.0.2/src/**"]),
     rustc_flags = ["--cfg=use_fallback"],
     deps = [
         ":proc-macro-error-attr",
@@ -76,7 +76,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro-error-attr",
-    srcs = glob(["vendor/proc-macro-error-attr-1.0.1/src/**"]),
+    srcs = glob(["vendor/proc-macro-error-attr-1.0.2/src/**"]),
     crate_type = "proc-macro",
     deps = [
         ":proc-macro2",
