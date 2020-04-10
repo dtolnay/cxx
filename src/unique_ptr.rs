@@ -118,7 +118,15 @@ pub unsafe trait UniquePtrTarget {
     #[doc(hidden)]
     fn __null() -> *mut c_void;
     #[doc(hidden)]
-    fn __new(value: Self) -> *mut c_void;
+    fn __new(value: Self) -> *mut c_void
+    where
+        Self: Sized,
+    {
+        // Opaque C types do not get this method because they can never exist by
+        // value on the Rust side of the bridge.
+        let _ = value;
+        unreachable!()
+    }
     #[doc(hidden)]
     unsafe fn __raw(raw: *mut Self) -> *mut c_void;
     #[doc(hidden)]
