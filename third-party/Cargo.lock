@@ -65,7 +65,7 @@ dependencies = [
 
 [[package]]
 name = "cxx"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "anyhow",
  "cc",
@@ -90,7 +90,7 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-cmd"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "anyhow",
  "codespan-reporting",
@@ -110,7 +110,7 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-macro"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "cxx",
  "proc-macro2",
@@ -171,9 +171,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro-error"
-version = "1.0.1"
+version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8931031034aa65c73f3f1a05c3ec0fa51287fcd06557ecf4e88b2768bdca375e"
+checksum = "98e9e4b82e0ef281812565ea4751049f1bdcdfccda7d3f459f2e138a40c08678"
 dependencies = [
  "proc-macro-error-attr",
  "proc-macro2",
@@ -184,9 +184,9 @@ dependencies = [
 
 [[package]]
 name = "proc-macro-error-attr"
-version = "1.0.1"
+version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2147536f412ee7ae5529364ed50172ca0220fd64591e236296f45f36b38b2f98"
+checksum = "4f5444ead4e9935abd7f27dc51f7e852a0569ac888096d5ec2499470794e2e53"
 dependencies = [
  "proc-macro2",
  "quote",
