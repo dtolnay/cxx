@@ -104,7 +104,7 @@ where
     fn deref(&self) -> &Self::Target {
         match self.as_ref() {
             Some(target) => target,
-            None => panic!("called deref on a null UniquePtr"),
+            None => panic!("called deref on a null UniquePtr<{}>", T::__NAME),
         }
     }
 }
@@ -116,7 +116,7 @@ where
     fn deref_mut(&mut self) -> &mut Self::Target {
         match self.as_mut() {
             Some(target) => target,
-            None => panic!("called deref_mut on a null UniquePtr"),
+            None => panic!("called deref_mut on a null UniquePtr<{}>", T::__NAME),
         }
     }
 }
