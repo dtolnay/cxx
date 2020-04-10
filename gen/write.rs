@@ -766,7 +766,7 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
             if let Type::Ident(inner) = &ptr.inner {
                 if allow_unique_ptr(inner) {
                     out.next_section();
-                    write_unique_ptr(out, inner);
+                    write_unique_ptr(out, inner, types);
                 }
             }
         }
@@ -830,7 +830,7 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "}}");
 }
 
-fn write_unique_ptr(out: &mut OutFile, ident: &Ident) {
+fn write_unique_ptr(out: &mut OutFile, ident: &Ident, types: &Types) {
     out.include.utility = true;
 
     let mut inner = String::new();
@@ -860,17 +860,19 @@ fn write_unique_ptr(out: &mut OutFile, ident: &Ident) {
     );
     writeln!(out, "  new (ptr) ::std::unique_ptr<{}>();", inner);
     writeln!(out, "}}");
-    writeln!(
-        out,
-        "void cxxbridge02$unique_ptr${}$new(::std::unique_ptr<{}> *ptr, {} *value) noexcept {{",
-        instance, inner, inner,
-    );
-    writeln!(
-        out,
-        "  new (ptr) ::std::unique_ptr<{}>(new {}(::std::move(*value)));",
-        inner, inner,
-    );
-    writeln!(out, "}}");
+    if types.structs.contains_key(ident) {
+        writeln!(
+            out,
+            "void cxxbridge02$unique_ptr${}$new(::std::unique_ptr<{}> *ptr, {} *value) noexcept {{",
+            instance, inner, inner,
+        );
+        writeln!(
+            out,
+            "  new (ptr) ::std::unique_ptr<{}>(new {}(::std::move(*value)));",
+            inner, inner,
+        );
+        writeln!(out, "}}");
+    }
     writeln!(
         out,
         "void cxxbridge02$unique_ptr${}$raw(::std::unique_ptr<{}> *ptr, {} *raw) noexcept {{",
