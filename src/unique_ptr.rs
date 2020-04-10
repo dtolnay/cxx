@@ -122,6 +122,8 @@ where
 // codebase.
 pub unsafe trait UniquePtrTarget {
     #[doc(hidden)]
+    const __NAME: &'static str;
+    #[doc(hidden)]
     fn __null() -> *mut c_void;
     #[doc(hidden)]
     fn __new(value: Self) -> *mut c_void
@@ -157,6 +159,7 @@ extern "C" {
 }
 
 unsafe impl UniquePtrTarget for CxxString {
+    const __NAME: &'static str = "CxxString";
     fn __null() -> *mut c_void {
         let mut repr = ptr::null_mut::<c_void>();
         unsafe { unique_ptr_std_string_null(&mut repr) }

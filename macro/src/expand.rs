@@ -475,6 +475,7 @@ fn expand_rust_box(namespace: &Namespace, ident: &Ident) -> TokenStream {
 }
 
 fn expand_unique_ptr(namespace: &Namespace, ident: &Ident, types: &Types) -> TokenStream {
+    let name = ident.to_string();
     let prefix = format!("cxxbridge02$unique_ptr${}{}$", namespace, ident);
     let link_null = format!("{}null", prefix);
     let link_new = format!("{}new", prefix);
@@ -501,6 +502,7 @@ fn expand_unique_ptr(namespace: &Namespace, ident: &Ident, types: &Types) -> Tok
 
     quote! {
         unsafe impl ::cxx::private::UniquePtrTarget for #ident {
+            const __NAME: &'static str = #name;
             fn __null() -> *mut ::std::ffi::c_void {
                 extern "C" {
                     #[link_name = #link_null]
