@@ -126,6 +126,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
                 needs_rust_fn = true;
             }
             ty if ty == Isize => {
+                out.include.base_tsd = true;
                 needs_rust_isize = true;
             }
             ty if ty == RustString => {

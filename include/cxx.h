@@ -7,6 +7,9 @@
 #include <string>
 #include <type_traits>
 #include <utility>
+#if defined(_WIN32)
+#include <BaseTsd.h>
+#endif
 
 namespace rust {
 inline namespace cxxbridge02 {
