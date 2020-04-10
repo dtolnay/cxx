@@ -53,3 +53,5 @@ matrix:
       script:
         - bazel run demo-rs --verbose_failures --noshow_progress
         - bazel test ... --verbose_failures --noshow_progress
+    - name: Minimum rustc
+      rust: 1.42.0
