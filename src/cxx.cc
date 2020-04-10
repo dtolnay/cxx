@@ -169,10 +169,6 @@ void cxxbridge02$unique_ptr$std$string$null(
     std::unique_ptr<std::string> *ptr) noexcept {
   new (ptr) std::unique_ptr<std::string>();
 }
-void cxxbridge02$unique_ptr$std$string$new(std::unique_ptr<std::string> *ptr,
-                                           std::string *value) noexcept {
-  new (ptr) std::unique_ptr<std::string>(new std::string(std::move(*value)));
-}
 void cxxbridge02$unique_ptr$std$string$raw(std::unique_ptr<std::string> *ptr,
                                            std::string *raw) noexcept {
   new (ptr) std::unique_ptr<std::string>(raw);

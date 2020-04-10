@@ -2,7 +2,7 @@ use crate::cxx_string::CxxString;
 use std::ffi::c_void;
 use std::fmt::{self, Debug, Display};
 use std::marker::PhantomData;
-use std::mem::{self, MaybeUninit};
+use std::mem;
 use std::ptr;
 
 /// Binding to C++ `std::unique_ptr<T, std::default_delete<T>>`.
@@ -140,8 +140,6 @@ pub unsafe trait UniquePtrTarget {
 extern "C" {
     #[link_name = "cxxbridge02$unique_ptr$std$string$null"]
     fn unique_ptr_std_string_null(this: *mut *mut c_void);
-    #[link_name = "cxxbridge02$unique_ptr$std$string$new"]
-    fn unique_ptr_std_string_new(this: *mut *mut c_void, value: *mut CxxString);
     #[link_name = "cxxbridge02$unique_ptr$std$string$raw"]
     fn unique_ptr_std_string_raw(this: *mut *mut c_void, raw: *mut CxxString);
     #[link_name = "cxxbridge02$unique_ptr$std$string$get"]
@@ -156,12 +154,6 @@ unsafe impl UniquePtrTarget for CxxString {
     fn __null() -> *mut c_void {
         let mut repr = ptr::null_mut::<c_void>();
         unsafe { unique_ptr_std_string_null(&mut repr) }
-        repr
-    }
-    fn __new(value: Self) -> *mut c_void {
-        let mut repr = ptr::null_mut::<c_void>();
-        let mut value = MaybeUninit::new(value);
-        unsafe { unique_ptr_std_string_new(&mut repr, value.as_mut_ptr() as *mut Self) }
         repr
     }
     unsafe fn __raw(raw: *mut Self) -> *mut c_void {
