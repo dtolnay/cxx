@@ -261,9 +261,10 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
 }
 
 fn write_header_section(out: &mut OutFile, needed: bool, section: &str) {
+    let section = include::get(section);
     if needed {
         out.next_section();
-        for line in include::get(section).lines() {
+        for line in section.lines() {
             if !line.trim_start().starts_with("//") {
                 writeln!(out, "{}", line);
             }
