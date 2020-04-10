@@ -3,6 +3,7 @@ use std::ffi::c_void;
 use std::fmt::{self, Debug, Display};
 use std::marker::PhantomData;
 use std::mem;
+use std::ops::{Deref, DerefMut};
 use std::ptr;
 
 /// Binding to C++ `std::unique_ptr<T, std::default_delete<T>>`.
@@ -91,6 +92,32 @@ where
 {
     fn drop(&mut self) {
         unsafe { T::__drop(self.repr) }
+    }
+}
+
+impl<T> Deref for UniquePtr<T>
+where
+    T: UniquePtrTarget,
+{
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        match self.as_ref() {
+            Some(target) => target,
+            None => panic!("called deref on a null UniquePtr<{}>", T::__NAME),
+        }
+    }
+}
+
+impl<T> DerefMut for UniquePtr<T>
+where
+    T: UniquePtrTarget,
+{
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        match self.as_mut() {
+            Some(target) => target,
+            None => panic!("called deref_mut on a null UniquePtr<{}>", T::__NAME),
+        }
     }
 }
 
