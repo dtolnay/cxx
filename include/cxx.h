@@ -8,6 +8,10 @@
 #include <type_traits>
 #include <utility>
 
+#ifdef _WIN32
+#define ssize_t SSIZE_T
+#endif
+
 namespace rust {
 inline namespace cxxbridge02 {
 
