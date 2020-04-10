@@ -1,4 +1,8 @@
-#![allow(clippy::boxed_local, clippy::trivially_copy_pass_by_ref)]
+#![allow(
+    clippy::boxed_local,
+    clippy::ptr_arg,
+    clippy::trivially_copy_pass_by_ref
+)]
 
 use cxx::{CxxString, UniquePtr};
 use std::fmt::{self, Display};
