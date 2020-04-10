@@ -340,6 +340,7 @@
 #![doc(html_root_url = "https://docs.rs/cxx/0.2.5")]
 #![deny(improper_ctypes)]
 #![allow(
+    clippy::cognitive_complexity,
     clippy::declare_interior_mutable_const,
     clippy::inherent_to_string,
     clippy::large_enum_variant,

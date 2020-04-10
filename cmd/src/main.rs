@@ -1,4 +1,5 @@
 #![allow(
+    clippy::cognitive_complexity,
     clippy::inherent_to_string,
     clippy::large_enum_variant,
     clippy::new_without_default,
