@@ -1,8 +1,19 @@
 #include "../include/cxx.h"
+#include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
+
+template <typename Exception>
+[[noreturn]] static void panic(const char *msg) {
+#if defined(RUST_CXX_NO_EXCEPTIONS)
+  std::cerr << "Error: " << msg << ". Aborting." << std::endl;
+  std::abort();
+#else
+  throw Exception(msg);
+#endif
+}
 
 extern "C" {
 const char *cxxbridge02$cxx_string$data(const std::string &s) noexcept {
@@ -47,14 +58,14 @@ String::String(const std::string &s) {
   auto ptr = s.data();
   auto len = s.length();
   if (!cxxbridge02$string$from(this, ptr, len)) {
-    throw std::invalid_argument("data for rust::String is not utf-8");
+    panic<std::invalid_argument>("data for rust::String is not utf-8");
   }
 }
 
 String::String(const char *s) {
   auto len = std::strlen(s);
   if (!cxxbridge02$string$from(this, s, len)) {
-    throw std::invalid_argument("data for rust::String is not utf-8");
+    panic<std::invalid_argument>("data for rust::String is not utf-8");
   }
 }
 
@@ -101,13 +112,13 @@ Str::Str(const Str &) noexcept = default;
 
 Str::Str(const std::string &s) : repr(Repr{s.data(), s.length()}) {
   if (!cxxbridge02$str$valid(this->repr.ptr, this->repr.len)) {
-    throw std::invalid_argument("data for rust::Str is not utf-8");
+    panic<std::invalid_argument>("data for rust::Str is not utf-8");
   }
 }
 
 Str::Str(const char *s) : repr(Repr{s, std::strlen(s)}) {
   if (!cxxbridge02$str$valid(this->repr.ptr, this->repr.len)) {
-    throw std::invalid_argument("data for rust::Str is not utf-8");
+    panic<std::invalid_argument>("data for rust::Str is not utf-8");
   }
 }
 
