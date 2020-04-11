@@ -94,11 +94,11 @@ public:
 
   Box(const Box &other) : Box(*other) {}
   Box(Box &&other) noexcept : ptr(other.ptr) { other.ptr = nullptr; }
-  Box(const T &val) {
+  explicit Box(const T &val) {
     this->uninit();
     ::new (this->ptr) T(val);
   }
-  Box(T &&val) {
+  explicit Box(T &&val) {
     this->uninit();
     ::new (this->ptr) T(std::move(val));
   }
