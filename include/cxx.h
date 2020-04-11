@@ -92,17 +92,20 @@ public:
       typename std::add_const<value_type>::type>::type;
   using pointer = typename std::add_pointer<value_type>::type;
 
-  Box(const Box &other) : Box(*other) {}
+  Box(const Box &other) noexcept(std::is_nothrow_copy_constructible<T>::value)
+      : Box(*other) {}
   Box(Box &&other) noexcept : ptr(other.ptr) { other.ptr = nullptr; }
-  Box(const T &val) {
+  Box(const T &val) noexcept(std::is_nothrow_copy_constructible<T>::value) {
     this->uninit();
     ::new (this->ptr) T(val);
   }
-  Box(T &&val) {
+  Box(T &&val) noexcept(std::is_nothrow_move_constructible<T>::value) {
     this->uninit();
     ::new (this->ptr) T(std::move(val));
   }
-  Box &operator=(const Box &other) {
+  Box &operator=(const Box &other) noexcept(
+      std::is_nothrow_copy_assignable<T>::value
+          and std::is_nothrow_copy_constructible<T>::value) {
     if (this != &other) {
       if (this->ptr) {
         **this = *other;
