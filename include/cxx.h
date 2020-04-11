@@ -132,6 +132,14 @@ public:
   T *operator->() noexcept { return this->ptr; }
   T &operator*() noexcept { return *this->ptr; }
 
+  template <typename... Fields>
+  static Box in_place(Fields&&... fields) {
+    Box box;
+    box.uninit();
+    ::new (box.ptr) T{std::forward<Fields>(fields)...};
+    return box;
+  }
+
   // Important: requires that `raw` came from an into_raw call. Do not pass a
   // pointer from `new` or any other source.
   static Box from_raw(T *raw) noexcept {
