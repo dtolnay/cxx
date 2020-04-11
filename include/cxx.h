@@ -98,6 +98,10 @@ public:
     this->uninit();
     ::new (this->ptr) T(val);
   }
+  Box(T &&val) {
+    this->uninit();
+    ::new (this->ptr) T(std::move(val));
+  }
   Box &operator=(const Box &other) {
     if (this != &other) {
       if (this->ptr) {
