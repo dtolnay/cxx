@@ -132,8 +132,7 @@ public:
   T *operator->() noexcept { return this->ptr; }
   T &operator*() noexcept { return *this->ptr; }
 
-  template <typename... Fields>
-  static Box in_place(Fields&&... fields) {
+  template <typename... Fields> static Box in_place(Fields &&... fields) {
     Box box;
     box.uninit();
     ::new (box.ptr) T{std::forward<Fields>(fields)...};

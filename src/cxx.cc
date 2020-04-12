@@ -5,8 +5,7 @@
 #include <memory>
 #include <stdexcept>
 
-template <typename Exception>
-[[noreturn]] static void panic(const char *msg) {
+template <typename Exception> static void panic [[noreturn]] (const char *msg) {
 #if defined(RUST_CXX_NO_EXCEPTIONS)
   std::cerr << "Error: " << msg << ". Aborting." << std::endl;
   std::terminate();
