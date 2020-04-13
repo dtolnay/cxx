@@ -17,7 +17,7 @@ use structopt::StructOpt;
 #[derive(StructOpt, Debug)]
 #[structopt(
     name = "cxxbridge",
-    author = "dtolnay@gmail.com",
+    author = "David Tolnay <dtolnay@gmail.com>",
     about = "https://github.com/dtolnay/cxx",
     usage = "\
     cxxbridge <input>.rs              Emit .cc file for bridge to stdout
