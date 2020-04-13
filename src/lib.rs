@@ -367,6 +367,7 @@ mod gen;
 mod opaque;
 mod paths;
 mod result;
+mod rust_sliceu8;
 mod rust_str;
 mod rust_string;
 mod syntax;
@@ -384,6 +385,7 @@ pub mod private {
     pub use crate::function::FatFunction;
     pub use crate::opaque::Opaque;
     pub use crate::result::{r#try, Result};
+    pub use crate::rust_sliceu8::RustSliceU8;
     pub use crate::rust_str::RustStr;
     pub use crate::rust_string::RustString;
     pub use crate::unique_ptr::UniquePtrTarget;

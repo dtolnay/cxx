@@ -1,6 +1,6 @@
 use crate::syntax::{
-    attrs, error, Api, Atom, Doc, ExternFn, ExternType, Lang, Receiver, Ref, Signature, Struct,
-    Ty1, Type, Var,
+    attrs, error, Api, Atom, Doc, ExternFn, ExternType, Lang, Receiver, Ref, Signature, Slice,
+    Struct, Ty1, Type, Var,
 };
 use proc_macro2::Ident;
 use quote::{format_ident, quote};
@@ -8,7 +8,7 @@ use syn::punctuated::Punctuated;
 use syn::{
     Abi, Error, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType, GenericArgument, Item,
     ItemForeignMod, ItemStruct, Pat, PathArguments, Result, ReturnType, Token, Type as RustType,
-    TypeBareFn, TypePath, TypeReference,
+    TypeBareFn, TypePath, TypeReference, TypeSlice,
 };
 
 pub mod kw {
@@ -222,8 +222,23 @@ fn parse_type(ty: &RustType) -> Result<Type> {
         RustType::Path(ty) => parse_type_path(ty),
         RustType::BareFn(ty) => parse_type_fn(ty),
         RustType::Tuple(ty) if ty.elems.is_empty() => Ok(Type::Void(ty.paren_token.span)),
+        RustType::Slice(ty) => parse_type_slice(ty),
         _ => Err(Error::new_spanned(ty, "unsupported type")),
     }
+}
+
+fn parse_type_slice(ty: &TypeSlice) -> Result<Type> {
+    let inner = parse_type(&ty.elem)?;
+    let which = match &inner {
+        Type::Ident(ident) if ident == "u8" => {
+            Type::Slice
+        },
+        _ => return Err(Error::new_spanned(ty, "unsupported type"))
+    };
+    Ok(which(Box::new(Slice {
+        bracket: ty.bracket_token,
+        inner
+    })))
 }
 
 fn parse_type_reference(ty: &TypeReference) -> Result<Type> {
@@ -234,6 +249,14 @@ fn parse_type_reference(ty: &TypeReference) -> Result<Type> {
                 return Err(Error::new_spanned(ty, "unsupported type"));
             } else {
                 Type::Str
+            }
+        }
+        Type::Slice(inner2) => {
+            match &inner2.inner {
+                Type::Ident(ident) if ident == "u8" => {
+                    Type::SliceRefU8
+                }
+                _ => return Err(Error::new_spanned(ty, "unsupported type"))
             }
         }
         _ => Type::Ref,

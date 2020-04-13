@@ -1,5 +1,5 @@
 use crate::syntax::atom::Atom::*;
-use crate::syntax::{Derive, ExternFn, Ref, Signature, Ty1, Type, Var};
+use crate::syntax::{Derive, ExternFn, Ref, Signature, Slice, Ty1, Type, Var};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote_spanned, ToTokens};
 use syn::Token;
@@ -15,7 +15,8 @@ impl ToTokens for Type {
                 ident.to_tokens(tokens);
             }
             Type::RustBox(ty) | Type::UniquePtr(ty) => ty.to_tokens(tokens),
-            Type::Ref(r) | Type::Str(r) => r.to_tokens(tokens),
+            Type::Ref(r) | Type::Str(r) | Type::SliceRefU8(r) => r.to_tokens(tokens),
+            Type::Slice(s) => s.to_tokens(tokens),
             Type::Fn(f) => f.to_tokens(tokens),
             Type::Void(span) => tokens.extend(quote_spanned!(*span=> ())),
         }
@@ -48,6 +49,14 @@ impl ToTokens for Ref {
         self.ampersand.to_tokens(tokens);
         self.mutability.to_tokens(tokens);
         self.inner.to_tokens(tokens);
+    }
+}
+
+impl ToTokens for Slice {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        self.bracket.surround(tokens, |tokens| {
+            self.inner.to_tokens(tokens);
+        });
     }
 }
 

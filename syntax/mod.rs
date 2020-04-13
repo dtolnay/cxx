@@ -15,7 +15,7 @@ pub mod types;
 use self::parse::kw;
 use proc_macro2::{Ident, Span};
 use syn::punctuated::Punctuated;
-use syn::token::{Brace, Paren};
+use syn::token::{Brace, Bracket, Paren};
 use syn::{LitStr, Token};
 
 pub use self::atom::Atom;
@@ -84,6 +84,8 @@ pub enum Type {
     Str(Box<Ref>),
     Fn(Box<Signature>),
     Void(Span),
+    Slice(Box<Slice>),
+    SliceRefU8(Box<Ref>),
 }
 
 pub struct Ty1 {
@@ -96,6 +98,11 @@ pub struct Ty1 {
 pub struct Ref {
     pub ampersand: Token![&],
     pub mutability: Option<Token![mut]>,
+    pub inner: Type,
+}
+
+pub struct Slice {
+    pub bracket: Bracket,
     pub inner: Type,
 }
 
