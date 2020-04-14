@@ -176,14 +176,14 @@ rust_library(
 
 rust_library(
     name = "thiserror",
-    srcs = glob(["vendor/thiserror-1.0.14/src/**"]),
+    srcs = glob(["vendor/thiserror-1.0.15/src/**"]),
     visibility = ["//visibility:public"],
     deps = [":thiserror-impl"],
 )
 
 rust_library(
     name = "thiserror-impl",
-    srcs = glob(["vendor/thiserror-impl-1.0.14/src/**"]),
+    srcs = glob(["vendor/thiserror-impl-1.0.15/src/**"]),
     crate_type = "proc-macro",
     deps = [
         ":proc-macro2",
