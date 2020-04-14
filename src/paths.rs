@@ -1,7 +1,6 @@
 use crate::error::{Error, Result};
 use std::env;
 use std::fs;
-use std::os;
 use std::path::{Path, PathBuf};
 
 fn out_dir() -> Result<PathBuf> {
@@ -28,22 +27,17 @@ pub(crate) fn symlink_header(path: &Path, original: &Path) {
 }
 
 fn try_symlink_header(path: &Path, original: &Path) -> Result<()> {
-    #[cfg(unix)]
-    use os::unix::fs::symlink;
-    #[cfg(windows)]
-    use os::windows::fs::symlink_file as symlink;
-
     let suffix = relative_to_parent_of_target_dir(original)?;
     let ref dst = include_dir()?.join(suffix);
 
     fs::create_dir_all(dst.parent().unwrap())?;
     let _ = fs::remove_file(dst);
-    symlink(path, dst)?;
+    symlink_or_copy(path, dst)?;
 
     let mut file_name = dst.file_name().unwrap().to_os_string();
     file_name.push(".h");
-    let dst2 = dst.with_file_name(file_name);
-    symlink(path, dst2)?;
+    let ref dst2 = dst.with_file_name(file_name);
+    symlink_or_copy(path, dst2)?;
 
     Ok(())
 }
@@ -102,3 +96,21 @@ fn canonicalize(path: impl AsRef<Path>) -> Result<PathBuf> {
     // https://github.com/alexcrichton/cc-rs/issues/169
     Ok(env::current_dir()?.join(path))
 }
+
+#[cfg(unix)]
+use std::os::unix::fs::symlink as symlink_or_copy;
+
+#[cfg(windows)]
+fn symlink_or_copy(src: &Path, dst: &Path) -> Result<()> {
+    use std::os::windows::fs::symlink_file;
+
+    // Pre-Windows 10, symlinks require admin privileges. Since Windows 10, they
+    // require Developer Mode. If it fails, fall back to copying the file.
+    if symlink_file(src, dst).is_err() {
+        fs::copy(src, dst)?;
+    }
+    Ok(())
+}
+
+#[cfg(not(any(unix, windows)))]
+use std::fs::copy as symlink_or_copy;
