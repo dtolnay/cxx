@@ -16,43 +16,6 @@ inline namespace cxxbridge02 {
 
 struct unsafe_bitcopy_t;
 
-#ifndef CXXBRIDGE02_RUST_SLICE
-#define CXXBRIDGE02_RUST_SLICE
-template <typename T>
-class Slice final {
-public:
-  Slice() noexcept : repr(Repr{reinterpret_cast<const T *>(this), 0}) {}
-  Slice(const Slice<T> &) noexcept = default;
-
-  Slice(const T *s, size_t size) : repr(Repr{s, size}) {}
-
-  Slice &operator=(Slice<T> other) noexcept {
-    this->repr = other.repr;
-    return *this;
-  }
-
-  const T *data() const noexcept { return this->repr.ptr; }
-  size_t size() const noexcept { return this->repr.len; }
-  size_t length() const noexcept { return this->repr.len; }
-
-  // Repr is PRIVATE; must not be used other than by our generated code.
-  //
-  // At present this class is only used for &[u8] slices.
-  // Not necessarily ABI compatible with &[u8]. Codegen will translate to
-  // cxx::rust_slice_u8::RustSlice which matches this layout.
-  struct Repr {
-    const T *ptr;
-    size_t len;
-  };
-  Slice(Repr repr_) noexcept : repr(repr_) {}
-  explicit operator Repr() noexcept { return this->repr; }
-
-private:
-  Repr repr;
-};
-
-#endif // CXXBRIDGE02_RUST_SLICE
-
 #ifndef CXXBRIDGE02_RUST_STRING
 #define CXXBRIDGE02_RUST_STRING
 class String final {
@@ -119,6 +82,42 @@ private:
   Repr repr;
 };
 #endif // CXXBRIDGE02_RUST_STR
+
+#ifndef CXXBRIDGE02_RUST_SLICE
+#define CXXBRIDGE02_RUST_SLICE
+template <typename T>
+class Slice final {
+public:
+  Slice() noexcept : repr(Repr{reinterpret_cast<const T *>(this), 0}) {}
+  Slice(const Slice<T> &) noexcept = default;
+
+  Slice(const T *s, size_t size) : repr(Repr{s, size}) {}
+
+  Slice &operator=(Slice<T> other) noexcept {
+    this->repr = other.repr;
+    return *this;
+  }
+
+  const T *data() const noexcept { return this->repr.ptr; }
+  size_t size() const noexcept { return this->repr.len; }
+  size_t length() const noexcept { return this->repr.len; }
+
+  // Repr is PRIVATE; must not be used other than by our generated code.
+  //
+  // At present this class is only used for &[u8] slices.
+  // Not necessarily ABI compatible with &[u8]. Codegen will translate to
+  // cxx::rust_slice_u8::RustSlice which matches this layout.
+  struct Repr {
+    const T *ptr;
+    size_t len;
+  };
+  Slice(Repr repr_) noexcept : repr(repr_) {}
+  explicit operator Repr() noexcept { return this->repr; }
+
+private:
+  Repr repr;
+};
+#endif // CXXBRIDGE02_RUST_SLICE
 
 #ifndef CXXBRIDGE02_RUST_BOX
 #define CXXBRIDGE02_RUST_BOX

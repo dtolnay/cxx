@@ -166,7 +166,7 @@ fn r_take_rust_string(s: String) {
 
 fn r_take_sliceu8(s: &[u8]) {
     assert_eq!(s.len(), 5);
-    assert_eq!(std::str::from_utf8(s).unwrap(), "2020\u{0}");
+    assert_eq!(std::str::from_utf8(s).unwrap(), "2020\0");
 }
 
 fn r_take_unique_ptr_string(s: UniquePtr<CxxString>) {
