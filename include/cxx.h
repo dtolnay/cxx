@@ -106,7 +106,7 @@ public:
   //
   // At present this class is only used for &[u8] slices.
   // Not necessarily ABI compatible with &[u8]. Codegen will translate to
-  // cxx::rust_slice_u8::RustSlice which matches this layout.
+  // cxx::rust_sliceu8::RustSliceU8 which matches this layout.
   struct Repr {
     const T *ptr;
     size_t len;
