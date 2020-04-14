@@ -114,10 +114,7 @@ impl Eq for Slice {}
 
 impl PartialEq for Slice {
     fn eq(&self, other: &Slice) -> bool {
-        let Slice {
-            bracket: _,
-            inner,
-        } = self;
+        let Slice { bracket: _, inner } = self;
         let Slice {
             bracket: _,
             inner: inner2,
@@ -128,10 +125,7 @@ impl PartialEq for Slice {
 
 impl Hash for Slice {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        let Slice {
-            bracket: _,
-            inner,
-        } = self;
+        let Slice { bracket: _, inner } = self;
         inner.hash(state);
     }
 }

@@ -365,7 +365,9 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     match &efn.ret {
         Some(Type::Ref(_)) => write!(out, "&"),
         Some(Type::Str(_)) if !indirect_return => write!(out, "::rust::Str::Repr("),
-        Some(Type::SliceRefU8(_)) if !indirect_return => write!(out, "::rust::Slice<uint8_t>::Repr("),
+        Some(Type::SliceRefU8(_)) if !indirect_return => {
+            write!(out, "::rust::Slice<uint8_t>::Repr(")
+        }
         _ => {}
     }
     write!(out, "{}$(", efn.ident);
@@ -762,9 +764,12 @@ fn write_type_space(out: &mut OutFile, ty: &Type) {
 
 fn write_space_after_type(out: &mut OutFile, ty: &Type) {
     match ty {
-        Type::Ident(_) | Type::RustBox(_) | Type::UniquePtr(_) | Type::Str(_) | Type::SliceRefU8(_) | Type::Fn(_) => {
-            write!(out, " ")
-        }
+        Type::Ident(_)
+        | Type::RustBox(_)
+        | Type::UniquePtr(_)
+        | Type::Str(_)
+        | Type::SliceRefU8(_)
+        | Type::Fn(_) => write!(out, " "),
         Type::Ref(_) => {}
         Type::Void(_) | Type::Slice(_) => unreachable!(),
     }

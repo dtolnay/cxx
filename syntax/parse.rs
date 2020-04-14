@@ -230,14 +230,12 @@ fn parse_type(ty: &RustType) -> Result<Type> {
 fn parse_type_slice(ty: &TypeSlice) -> Result<Type> {
     let inner = parse_type(&ty.elem)?;
     let which = match &inner {
-        Type::Ident(ident) if ident == "u8" => {
-            Type::Slice
-        },
-        _ => return Err(Error::new_spanned(ty, "unsupported type"))
+        Type::Ident(ident) if ident == "u8" => Type::Slice,
+        _ => return Err(Error::new_spanned(ty, "unsupported type")),
     };
     Ok(which(Box::new(Slice {
         bracket: ty.bracket_token,
-        inner
+        inner,
     })))
 }
 
@@ -251,14 +249,10 @@ fn parse_type_reference(ty: &TypeReference) -> Result<Type> {
                 Type::Str
             }
         }
-        Type::Slice(inner2) => {
-            match &inner2.inner {
-                Type::Ident(ident) if ident == "u8" => {
-                    Type::SliceRefU8
-                }
-                _ => return Err(Error::new_spanned(ty, "unsupported type"))
-            }
-        }
+        Type::Slice(inner2) => match &inner2.inner {
+            Type::Ident(ident) if ident == "u8" => Type::SliceRefU8,
+            _ => return Err(Error::new_spanned(ty, "unsupported type")),
+        },
         _ => Type::Ref,
     };
     Ok(which(Box::new(Ref {
