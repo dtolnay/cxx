@@ -29,6 +29,7 @@ fn test_c_return() {
     ffi::c_return_unique_ptr();
     assert_eq!(2020, *ffi::c_return_ref(&shared));
     assert_eq!("2020", ffi::c_return_str(&shared));
+    assert_eq!(b"2020\0", ffi::c_return_sliceu8(&shared));
     assert_eq!("2020", ffi::c_return_rust_string());
     assert_eq!(
         "2020",
@@ -51,6 +52,7 @@ fn test_c_try_return() {
     assert_eq!(2020, *ffi::c_try_return_box().unwrap());
     assert_eq!("2020", *ffi::c_try_return_ref(&"2020".to_owned()).unwrap());
     assert_eq!("2020", ffi::c_try_return_str("2020").unwrap());
+    assert_eq!(b"2020", ffi::c_try_return_sliceu8(b"2020").unwrap());
     assert_eq!("2020", ffi::c_try_return_rust_string().unwrap());
     assert_eq!(
         "2020",
@@ -71,6 +73,7 @@ fn test_c_take() {
     check!(ffi::c_take_ref_c(unique_ptr.as_ref().unwrap()));
     check!(ffi::c_take_unique_ptr(unique_ptr));
     check!(ffi::c_take_str("2020"));
+    check!(ffi::c_take_sliceu8(b"2020"));
     check!(ffi::c_take_rust_string("2020".to_owned()));
     check!(ffi::c_take_unique_ptr_string(
         ffi::c_return_unique_ptr_string()

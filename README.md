@@ -299,6 +299,7 @@ returns of functions.
 <tr><th>name in Rust</th><th>name in C++</th><th>restrictions</th></tr>
 <tr><td>String</td><td>rust::String</td><td></td></tr>
 <tr><td>&amp;str</td><td>rust::Str</td><td></td></tr>
+<tr><td>&amp;[u8]</td><td>rust::Slice&lt;uint8_t&gt;</td><td>(no other slice types currently supported)</td></tr>
 <tr><td><a href="https://docs.rs/cxx/0.2/cxx/struct.CxxString.html">CxxString</a></td><td>std::string</td><td><sup><i>cannot be passed by value</i></sup></td></tr>
 <tr><td>Box&lt;T&gt;</td><td>rust::Box&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
 <tr><td><a href="https://docs.rs/cxx/0.2/cxx/struct.UniquePtr.html">UniquePtr&lt;T&gt;</a></td><td>std::unique_ptr&lt;T&gt;</td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
@@ -316,7 +317,6 @@ matter of designing a nice API for each in its non-native language.
 
 <table>
 <tr><th>name in Rust</th><th>name in C++</th></tr>
-<tr><td>&amp;[T]</td><td><sup><i>tbd</i></sup></td></tr>
 <tr><td>Vec&lt;T&gt;</td><td><sup><i>tbd</i></sup></td></tr>
 <tr><td>BTreeMap&lt;K, V&gt;</td><td><sup><i>tbd</i></sup></td></tr>
 <tr><td>HashMap&lt;K, V&gt;</td><td><sup><i>tbd</i></sup></td></tr>
