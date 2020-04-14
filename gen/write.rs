@@ -100,6 +100,7 @@ fn write_includes(out: &mut OutFile, types: &Types) {
             },
             Type::RustBox(_) => out.include.type_traits = true,
             Type::UniquePtr(_) => out.include.memory = true,
+            Type::SliceRefU8(_) => out.include.cstdint = true,
             _ => {}
         }
     }
@@ -108,6 +109,7 @@ fn write_includes(out: &mut OutFile, types: &Types) {
 fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
     let mut needs_rust_string = false;
     let mut needs_rust_str = false;
+    let mut needs_rust_slice = false;
     let mut needs_rust_box = false;
     let mut needs_rust_fn = false;
     let mut needs_rust_isize = false;
@@ -124,6 +126,9 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
             }
             Type::Fn(_) => {
                 needs_rust_fn = true;
+            }
+            Type::Slice(_) | Type::SliceRefU8(_) => {
+                needs_rust_slice = true;
             }
             ty if ty == Isize => {
                 out.include.base_tsd = true;
@@ -183,6 +188,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
 
     if needs_rust_string
         || needs_rust_str
+        || needs_rust_slice
         || needs_rust_box
         || needs_rust_fn
         || needs_rust_error
@@ -202,6 +208,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
 
     write_header_section(out, needs_rust_string, "CXXBRIDGE02_RUST_STRING");
     write_header_section(out, needs_rust_str, "CXXBRIDGE02_RUST_STR");
+    write_header_section(out, needs_rust_slice, "CXXBRIDGE02_RUST_SLICE");
     write_header_section(out, needs_rust_box, "CXXBRIDGE02_RUST_BOX");
     write_header_section(out, needs_rust_fn, "CXXBRIDGE02_RUST_FN");
     write_header_section(out, needs_rust_error, "CXXBRIDGE02_RUST_ERROR");
