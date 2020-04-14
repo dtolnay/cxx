@@ -121,7 +121,7 @@ const rust::String &c_try_return_ref(const rust::String &s) { return s; }
 
 rust::Str c_try_return_str(rust::Str s) { return s; }
 
-rust::Slice<uint8_t> c_try_return_sliceU8(rust::Slice<uint8_t> s) { return s; }
+rust::Slice<uint8_t> c_try_return_sliceu8(rust::Slice<uint8_t> s) { return s; }
 
 rust::String c_try_return_rust_string() { return c_return_rust_string(); }
 
