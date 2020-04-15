@@ -3,6 +3,7 @@ use crate::gen::out::OutFile;
 use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::{Api, ExternFn, ExternType, Receiver, Signature, Struct, Type, Types, Var};
+use itertools::Itertools;
 use proc_macro2::Ident;
 
 pub(super) fn gen(
@@ -44,6 +45,14 @@ pub(super) fn gen(
         }
     }
 
+    let methods_for_type = apis.iter().filter_map(|api| match api {
+        Api::RustFunction(efn) => match &efn.sig.receiver {
+            Some(rcvr) => Some((&rcvr.ident, efn)),
+            _ => None,
+        },
+        _ => None,
+    }).into_group_map();
+
     for api in apis {
         match api {
             Api::Struct(strct) => {
@@ -51,16 +60,12 @@ pub(super) fn gen(
                 write_struct(out, strct);
             }
             Api::RustType(ety) => {
-                let methods = apis.iter().filter_map(|api| match api {
-                    Api::RustFunction(efn) => match &efn.sig.receiver {
-                        Some(rcvr) if rcvr.ident == ety.ident => Some(efn),
-                        _ => None,
+                match methods_for_type.get(&ety.ident) {
+                    Some(methods) => {
+                        out.next_section();
+                        write_struct_with_methods(out, ety, methods);
                     },
-                    _ => None,
-                }).collect::<Vec<_>>();
-                if !methods.is_empty() {
-                    out.next_section();
-                    write_struct_with_methods(out, ety, methods);
+                    _ => {}
                 }
             }
             _ => {}
@@ -316,12 +321,12 @@ fn write_struct_using(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "using {} = {};", ident, ident);
 }
 
-fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: Vec<&ExternFn>) {
+fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &Vec<&ExternFn>) {
     for line in ety.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
     writeln!(out, "struct {} final {{", ety.ident);
-    for method in &methods {
+    for method in methods {
         write!(out, "  ");
         let sig = &method.sig;
         let local_name = method.ident.to_string();
