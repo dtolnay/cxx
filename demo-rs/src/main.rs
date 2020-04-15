@@ -19,6 +19,7 @@ mod ffi {
     extern "Rust" {
         type ThingR;
         fn print_r(r: &ThingR);
+        fn print(self: &ThingR);
     }
 }
 
@@ -26,6 +27,12 @@ pub struct ThingR(usize);
 
 fn print_r(r: &ThingR) {
     println!("called back with r={}", r.0);
+}
+
+impl ThingR {
+    fn print(&self) {
+        println!("method called back with r={}", self.0);
+    }
 }
 
 fn main() {

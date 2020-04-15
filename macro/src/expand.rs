@@ -154,7 +154,11 @@ fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types
         let ret = expand_extern_type(efn.ret.as_ref().unwrap());
         outparam = Some(quote!(__return: *mut #ret));
     }
-    let link_name = format!("{}cxxbridge02${}", namespace, ident);
+    let receiver_type = match &efn.receiver {
+        Some(base) => base.ident.to_string(),
+        None => "_".to_string(),
+    };
+    let link_name = format!("{}cxxbridge02${}${}", namespace, receiver_type, ident);
     let local_name = format_ident!("__{}", ident);
     quote! {
         #[link_name = #link_name]
@@ -366,7 +370,11 @@ fn expand_rust_type(ety: &ExternType) -> TokenStream {
 
 fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types) -> TokenStream {
     let ident = &efn.ident;
-    let link_name = format!("{}cxxbridge02${}", namespace, ident);
+    let receiver_type = match &efn.receiver {
+        Some(base) => base.ident.to_string(),
+        None => "_".to_string(),
+    };
+    let link_name = format!("{}cxxbridge02${}${}", namespace, receiver_type, ident);
     let local_name = format_ident!("__{}", ident);
     let catch_unwind_label = format!("::{}", ident);
     let invoke = Some(ident);
@@ -388,6 +396,13 @@ fn expand_rust_function_shim_impl(
     catch_unwind_label: String,
     invoke: Option<&Ident>,
 ) -> TokenStream {
+    let receiver = sig.receiver.iter().map(|base| {
+        let ident = &base.ident;
+        match base.mutability {
+            None => quote!(__receiver: &#ident),
+            Some(_) => quote!(__receiver: &mut #ident),
+        }
+    });
     let args = sig.args.iter().map(|arg| {
         let ident = &arg.ident;
         let ty = expand_extern_type(&arg.ty);
@@ -397,6 +412,7 @@ fn expand_rust_function_shim_impl(
             quote!(#ident: #ty)
         }
     });
+    let all_args = receiver.chain(args);
 
     let vars = sig.args.iter().map(|arg| {
         let ident = &arg.ident;
@@ -418,7 +434,10 @@ fn expand_rust_function_shim_impl(
     });
 
     let mut call = match invoke {
-        Some(ident) => quote!(super::#ident),
+        Some(ident) => match sig.receiver {
+            None => quote!(super::#ident),
+            Some(_) => quote!(__receiver.#ident),
+        },
         None => quote!(__extern),
     };
     call.extend(quote! { (#(#vars),*) });
@@ -476,7 +495,7 @@ fn expand_rust_function_shim_impl(
     quote! {
         #[doc(hidden)]
         #[export_name = #link_name]
-        unsafe extern "C" fn #local_name(#(#args,)* #outparam #pointer) #ret {
+        unsafe extern "C" fn #local_name(#(#all_args,)* #outparam #pointer) #ret {
             let __fn = concat!(module_path!(), #catch_unwind_label);
             #expr
         }

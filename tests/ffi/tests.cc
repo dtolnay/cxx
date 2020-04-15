@@ -181,6 +181,13 @@ extern "C" const char *cxx_run_test() noexcept {
     ASSERT(std::strcmp(e.what(), "rust error") == 0);
   }
 
+  auto r2 = r_return_r2(2020);
+  ASSERT(r2->get() == 2020);
+  ASSERT(r2->set(2021) == 2021);
+  ASSERT(r2->get() == 2021);
+  ASSERT(r2->set(2020) == 2020);
+  ASSERT(r2->get() == 2020);
+
   cxx_test_suite_set_correct();
   return nullptr;
 }

@@ -56,6 +56,7 @@ pub mod ffi {
 
     extern "Rust" {
         type R;
+        type R2;
 
         fn r_return_primitive() -> usize;
         fn r_return_shared() -> Shared;
@@ -80,10 +81,27 @@ pub mod ffi {
         fn r_try_return_void() -> Result<()>;
         fn r_try_return_primitive() -> Result<usize>;
         fn r_fail_return_primitive() -> Result<usize>;
+
+        fn r_return_r2(n: usize) -> Box<R2>;
+        fn get(self: &R2) -> usize;
+        fn set(self: &mut R2, n: usize) -> usize;
     }
 }
 
 pub type R = usize;
+
+pub struct R2(usize);
+
+impl R2 {
+    fn get(&self) -> usize {
+        self.0
+    }
+
+    fn set(&mut self, n: usize) -> usize {
+        self.0 = n;
+        n
+    }
+}
 
 #[derive(Debug)]
 struct Error;
@@ -186,4 +204,8 @@ fn r_try_return_primitive() -> Result<usize, Error> {
 
 fn r_fail_return_primitive() -> Result<usize, Error> {
     Err(Error)
+}
+
+fn r_return_r2(n: usize) -> Box<R2> {
+    Box::new(R2(n))
 }
