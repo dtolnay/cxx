@@ -84,8 +84,10 @@ mod ffi {
 
         // Functions implemented in C++.
         fn make_demo(appname: &str) -> UniquePtr<ThingC>;
-        fn get_name(thing: &ThingC) -> &CxxString;
         fn do_thing(state: SharedThing);
+
+        // Methods implemented in C++.
+        fn get_name(self: &ThingC) -> &CxxString;
     }
 
     extern "Rust" {
@@ -95,6 +97,9 @@ mod ffi {
 
         // Functions implemented in Rust.
         fn print_r(r: &ThingR);
+
+        // Methods implemented in Rust.
+        fn print(self: &ThingR);
     }
 }
 ```
@@ -335,8 +340,6 @@ This is still early days for CXX; I am releasing it as a minimum viable product
 to collect feedback on the direction and invite collaborators. Here are some of
 the facets that I still intend for this project to tackle:
 
-- [ ] Support associated methods: `extern "Rust" { fn f(self: &Struct); }`
-- [ ] Support C++ member functions
 - [ ] Support structs with type parameters
 - [ ] Support async functions
 
