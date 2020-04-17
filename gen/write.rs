@@ -326,6 +326,8 @@ fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &Vec<
         writeln!(out, "//{}", line);
     }
     writeln!(out, "struct {} final {{", ety.ident);
+    writeln!(out, "  {}() = delete;", ety.ident);
+    writeln!(out, "  {}(const {}&) = delete;", ety.ident, ety.ident);
     for method in methods {
         write!(out, "  ");
         let sig = &method.sig;
