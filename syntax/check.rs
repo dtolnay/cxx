@@ -195,6 +195,10 @@ fn check_multiple_arg_lifetimes(cx: &mut Check, efn: &ExternFn) {
         }
     }
 
+    if efn.receiver.is_some() {
+        reference_args += 1;
+    }
+
     if reference_args != 1 {
         cx.error(
             efn,
