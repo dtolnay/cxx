@@ -31,14 +31,7 @@ fn test_c_return() {
     assert_eq!("2020", ffi::c_return_str(&shared));
     assert_eq!(b"2020\0", ffi::c_return_sliceu8(&shared));
     assert_eq!("2020", ffi::c_return_rust_string());
-    assert_eq!(
-        "2020",
-        ffi::c_return_unique_ptr_string()
-            .as_ref()
-            .unwrap()
-            .to_str()
-            .unwrap()
-    );
+    assert_eq!("2020", ffi::c_return_unique_ptr_string().to_str().unwrap());
 }
 
 #[test]
@@ -54,13 +47,7 @@ fn test_c_try_return() {
     assert_eq!("2020", ffi::c_try_return_str("2020").unwrap());
     assert_eq!(b"2020", ffi::c_try_return_sliceu8(b"2020").unwrap());
     assert_eq!("2020", ffi::c_try_return_rust_string().unwrap());
-    assert_eq!(
-        "2020",
-        ffi::c_try_return_unique_ptr_string()
-            .unwrap()
-            .as_ref()
-            .unwrap()
-    );
+    assert_eq!("2020", &*ffi::c_try_return_unique_ptr_string().unwrap());
 }
 
 #[test]
@@ -70,7 +57,7 @@ fn test_c_take() {
     check!(ffi::c_take_primitive(2020));
     check!(ffi::c_take_shared(ffi::Shared { z: 2020 }));
     check!(ffi::c_take_box(Box::new(2020)));
-    check!(ffi::c_take_ref_c(unique_ptr.as_ref().unwrap()));
+    check!(ffi::c_take_ref_c(&unique_ptr));
     check!(ffi::c_take_unique_ptr(unique_ptr));
     check!(ffi::c_take_str("2020"));
     check!(ffi::c_take_sliceu8(b"2020"));
@@ -111,12 +98,12 @@ fn test_c_call_r() {
 fn test_c_method_calls() {
     let mut unique_ptr = ffi::c_return_unique_ptr();
 
-    let old_value = unique_ptr.as_ref().unwrap().get();
+    let old_value = unique_ptr.get();
     assert_eq!(2020, old_value);
-    assert_eq!(2021, unique_ptr.as_mut().unwrap().set(2021));
-    assert_eq!(2021, unique_ptr.as_ref().unwrap().get());
-    assert_eq!(old_value, unique_ptr.as_mut().unwrap().set(old_value));
-    assert_eq!(old_value, unique_ptr.as_ref().unwrap().get())
+    assert_eq!(2021, unique_ptr.set(2021));
+    assert_eq!(2021, unique_ptr.get());
+    assert_eq!(old_value, unique_ptr.set(old_value));
+    assert_eq!(old_value, unique_ptr.get())
 }
 
 #[no_mangle]
