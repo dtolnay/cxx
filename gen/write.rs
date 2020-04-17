@@ -63,13 +63,12 @@ pub(super) fn gen(
                 out.next_section();
                 write_struct(out, strct);
             }
-            Api::RustType(ety) => match methods_for_type.get(&ety.ident) {
-                Some(methods) => {
+            Api::RustType(ety) => {
+                if let Some(methods) = methods_for_type.get(&ety.ident) {
                     out.next_section();
                     write_struct_with_methods(out, ety, methods);
                 }
-                _ => {}
-            },
+            }
             _ => {}
         }
     }
@@ -323,7 +322,7 @@ fn write_struct_using(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "using {} = {};", ident, ident);
 }
 
-fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &Vec<&ExternFn>) {
+fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &[&ExternFn]) {
     for line in ety.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
