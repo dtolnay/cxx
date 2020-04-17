@@ -3,8 +3,8 @@ use crate::gen::out::OutFile;
 use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::{Api, ExternFn, ExternType, Receiver, Signature, Struct, Type, Types, Var};
-use itertools::Itertools;
 use proc_macro2::Ident;
+use std::collections::HashMap;
 
 pub(super) fn gen(
     namespace: Namespace,
@@ -45,16 +45,17 @@ pub(super) fn gen(
         }
     }
 
-    let methods_for_type = apis
-        .iter()
-        .filter_map(|api| match api {
-            Api::RustFunction(efn) => match &efn.sig.receiver {
-                Some(rcvr) => Some((&rcvr.ident, efn)),
-                _ => None,
-            },
-            _ => None,
-        })
-        .into_group_map();
+    let mut methods_for_type = HashMap::new();
+    for api in apis {
+        if let Api::RustFunction(efn) = api {
+            if let Some(receiver) = &efn.sig.receiver {
+                methods_for_type
+                    .entry(&receiver.ident)
+                    .or_insert_with(Vec::new)
+                    .push(efn);
+            }
+        }
+    }
 
     for api in apis {
         match api {
