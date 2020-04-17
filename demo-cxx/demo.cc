@@ -9,19 +9,13 @@ ThingC::ThingC(std::string appname) : appname(std::move(appname)) {}
 
 ThingC::~ThingC() { std::cout << "done with ThingC" << std::endl; }
 
-const std::string &ThingC::get_name() const {
-  std::cout << "I'm a C++ method!" << std::endl;
-  return this->appname;
-}
-
 std::unique_ptr<ThingC> make_demo(rust::Str appname) {
   return std::unique_ptr<ThingC>(new ThingC(std::string(appname)));
 }
 
-void do_thing(SharedThing state) {
-  print_r(*state.y);
-  state.y->print();
-}
+const std::string &get_name(const ThingC &thing) { return thing.appname; }
+
+void do_thing(SharedThing state) { print_r(*state.y); }
 
 } // namespace example
 } // namespace org

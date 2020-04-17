@@ -79,10 +79,8 @@
 //!
 //!         // Functions implemented in C++.
 //!         fn make_demo(appname: &str) -> UniquePtr<ThingC>;
+//!         fn get_name(thing: &ThingC) -> &CxxString;
 //!         fn do_thing(state: SharedThing);
-//!
-//!         // Methods implemented in C++.
-//!         fn get_name(self: &ThingC) -> &CxxString;
 //!     }
 //!
 //!     extern "Rust" {
@@ -92,9 +90,6 @@
 //!
 //!         // Functions implemented in Rust.
 //!         fn print_r(r: &ThingR);
-//!
-//!         // Methods implemented in Rust.
-//!         fn print(self: &ThingR);
 //!     }
 //! }
 //! #
@@ -102,12 +97,6 @@
 //! #
 //! # fn print_r(r: &ThingR) {
 //! #     println!("called back with r={}", r.0);
-//! # }
-//! #
-//! # impl ThingR {
-//! #     fn print(&self) {
-//! #         println!("method called back with r={}", self.0);
-//! #     }
 //! # }
 //! #
 //! # fn main() {}
