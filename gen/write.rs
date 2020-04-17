@@ -45,13 +45,16 @@ pub(super) fn gen(
         }
     }
 
-    let methods_for_type = apis.iter().filter_map(|api| match api {
-        Api::RustFunction(efn) => match &efn.sig.receiver {
-            Some(rcvr) => Some((&rcvr.ident, efn)),
+    let methods_for_type = apis
+        .iter()
+        .filter_map(|api| match api {
+            Api::RustFunction(efn) => match &efn.sig.receiver {
+                Some(rcvr) => Some((&rcvr.ident, efn)),
+                _ => None,
+            },
             _ => None,
-        },
-        _ => None,
-    }).into_group_map();
+        })
+        .into_group_map();
 
     for api in apis {
         match api {
@@ -59,15 +62,13 @@ pub(super) fn gen(
                 out.next_section();
                 write_struct(out, strct);
             }
-            Api::RustType(ety) => {
-                match methods_for_type.get(&ety.ident) {
-                    Some(methods) => {
-                        out.next_section();
-                        write_struct_with_methods(out, ety, methods);
-                    },
-                    _ => {}
+            Api::RustType(ety) => match methods_for_type.get(&ety.ident) {
+                Some(methods) => {
+                    out.next_section();
+                    write_struct_with_methods(out, ety, methods);
                 }
-            }
+                _ => {}
+            },
             _ => {}
         }
     }
@@ -368,7 +369,11 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         Some(base) => base.ident.to_string(),
         None => "_".to_string(),
     };
-    write!(out, "{}cxxbridge02${}${}(", out.namespace, receiver_type, efn.ident);
+    write!(
+        out,
+        "{}cxxbridge02${}${}(",
+        out.namespace, receiver_type, efn.ident
+    );
     if let Some(base) = &efn.receiver {
         write!(out, "{} *__receiver$", base.ident);
     }
@@ -404,8 +409,11 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     }
     write!(out, ")");
     match &efn.receiver {
-        Some(Receiver { mutability: None, ident: _ }) => write!(out, " const"),
-        _ => {},
+        Some(Receiver {
+            mutability: None,
+            ident: _,
+        }) => write!(out, " const"),
+        _ => {}
     }
     write!(out, " = ");
     match &efn.receiver {
@@ -517,7 +525,10 @@ fn write_rust_function_decl(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         Some(base) => base.ident.to_string(),
         None => "_".to_string(),
     };
-    let link_name = format!("{}cxxbridge02${}${}", out.namespace, receiver_type, efn.ident);
+    let link_name = format!(
+        "{}cxxbridge02${}${}",
+        out.namespace, receiver_type, efn.ident
+    );
     let indirect_call = false;
     write_rust_function_decl_impl(out, &link_name, efn, types, indirect_call);
 }
@@ -573,7 +584,10 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         Some(base) => base.ident.to_string(),
         None => "_".to_string(),
     };
-    let invoke = format!("{}cxxbridge02${}${}", out.namespace, receiver_type, efn.ident);
+    let invoke = format!(
+        "{}cxxbridge02${}${}",
+        out.namespace, receiver_type, efn.ident
+    );
     let indirect_call = false;
     write_rust_function_shim_impl(out, &local_name, efn, types, &invoke, indirect_call);
 }
