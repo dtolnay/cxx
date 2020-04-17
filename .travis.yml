@@ -3,7 +3,6 @@ language: rust
 rust:
   - nightly
   - beta
-  - stable
 
 script:
   - cargo run --manifest-path demo-rs/Cargo.toml
@@ -55,3 +54,5 @@ matrix:
         - bazel test ... --verbose_failures --noshow_progress
     - name: Minimum rustc
       rust: 1.42.0
+      script:
+        - cargo run --manifest-path demo-rs/Cargo.toml
