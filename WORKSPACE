@@ -27,7 +27,7 @@ rust_repository_set(
     name = "rust_1_43_beta_linux",
     exec_triple = "x86_64-unknown-linux-gnu",
     extra_target_triples = [],
-    iso_date = "2020-04-07",
+    iso_date = "2020-04-19",
     version = "beta",
 )
 
@@ -35,6 +35,6 @@ rust_repository_set(
     name = "rust_1_43_beta_darwin",
     exec_triple = "x86_64-apple-darwin",
     extra_target_triples = [],
-    iso_date = "2020-04-07",
+    iso_date = "2020-04-19",
     version = "beta",
 )
