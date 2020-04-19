@@ -161,6 +161,7 @@ rust_library(
 rust_library(
     name = "termcolor",
     srcs = glob(["vendor/termcolor-1.1.0/src/**"]),
+    deps = [":winapi-util"],
 )
 
 rust_library(
@@ -201,4 +202,55 @@ rust_library(
 rust_library(
     name = "unicode-xid",
     srcs = glob(["vendor/unicode-xid-0.2.0/src/**"]),
+)
+
+rust_library(
+    name = "winapi",
+    srcs = glob(["vendor/winapi-0.3.8/src/**"]),
+    features = [
+        "basetsd",
+        "cfg",
+        "cfgmgr32",
+        "consoleapi",
+        "devpropdef",
+        "errhandlingapi",
+        "excpt",
+        "fileapi",
+        "guiddef",
+        "ktmtypes",
+        "libloaderapi",
+        "minwinbase",
+        "minwindef",
+        "ntdef",
+        "ntstatus",
+        "processenv",
+        "processthreadsapi",
+        "rpcndr",
+        "std",
+        "vadefs",
+        "vcruntime",
+        "winbase",
+        "wincon",
+        "wincontypes",
+        "windef",
+        "winerror",
+        "wingdi",
+        "winnt",
+        "winreg",
+        "wtypesbase",
+    ],
+    edition = "2015",
+    deps = [":winapi-x86_64-pc-windows-gnu"],
+)
+
+rust_library(
+    name = "winapi-util",
+    srcs = glob(["vendor/winapi-util-0.1.4/src/**"]),
+    deps = [":winapi"],
+)
+
+rust_library(
+    name = "winapi-x86_64-pc-windows-gnu",
+    srcs = glob(["vendor/winapi-x86_64-pc-windows-gnu-0.4.0/src/**"]),
+    edition = "2015",
 )
