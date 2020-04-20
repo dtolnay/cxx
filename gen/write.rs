@@ -370,8 +370,8 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     }
     let mangled = mangle::extern_fn(&out.namespace, efn);
     write!(out, "{}(", mangled);
-    if let Some(base) = &efn.receiver {
-        write!(out, "{} *self$", base.ident);
+    if let Some(receiver) = &efn.receiver {
+        write!(out, "{} *self$", receiver.ident);
     }
     for (i, arg) in efn.args.iter().enumerate() {
         if i > 0 || efn.receiver.is_some() {
@@ -395,7 +395,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     write_return_type(out, &efn.ret);
     match &efn.receiver {
         None => write!(out, "(*{}$)(", efn.ident),
-        Some(base) => write!(out, "({}::*{}$)(", base.ident, efn.ident),
+        Some(receiver) => write!(out, "({}::*{}$)(", receiver.ident, efn.ident),
     }
     for (i, arg) in efn.args.iter().enumerate() {
         if i > 0 {
@@ -412,7 +412,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     write!(out, " = ");
     match &efn.receiver {
         None => write!(out, "{}", efn.ident),
-        Some(base) => write!(out, "&{}::{}", base.ident, efn.ident),
+        Some(receiver) => write!(out, "&{}::{}", receiver.ident, efn.ident),
     }
     writeln!(out, ";");
     write!(out, "  ");
@@ -534,8 +534,8 @@ fn write_rust_function_decl_impl(
     }
     write!(out, "{}(", link_name);
     let mut needs_comma = false;
-    if let Some(base) = &sig.receiver {
-        write!(out, "{} &self$", base.ident);
+    if let Some(receiver) = &sig.receiver {
+        write!(out, "{} &self$", receiver.ident);
         needs_comma = true;
     }
     for arg in &sig.args {
@@ -580,8 +580,8 @@ fn write_rust_function_shim_decl(
     indirect_call: bool,
 ) {
     write_return_type(out, &sig.ret);
-    if let Some(base) = receiver {
-        write!(out, "{}::", base.ident);
+    if let Some(receiver) = receiver {
+        write!(out, "{}::", receiver.ident);
     }
     write!(out, "{}(", local_name);
     for (i, arg) in sig.args.iter().enumerate() {

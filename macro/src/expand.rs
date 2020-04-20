@@ -126,9 +126,9 @@ fn expand_cxx_type(ety: &ExternType) -> TokenStream {
 
 fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types) -> TokenStream {
     let ident = &efn.ident;
-    let receiver = efn.receiver.iter().map(|base| {
-        let ident = &base.ident;
-        match base.mutability {
+    let receiver = efn.receiver.iter().map(|receiver| {
+        let ident = &receiver.ident;
+        match receiver.mutability {
             None => quote!(_: &#ident),
             Some(_) => quote!(_: &mut #ident),
         }
@@ -169,10 +169,13 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
     let ident = &efn.ident;
     let doc = &efn.doc;
     let decl = expand_cxx_function_decl(namespace, efn, types);
-    let receiver = efn.receiver.iter().map(|base| match base.mutability {
-        None => quote!(&self),
-        Some(_) => quote!(&mut self),
-    });
+    let receiver = efn
+        .receiver
+        .iter()
+        .map(|receiver| match receiver.mutability {
+            None => quote!(&self),
+            Some(_) => quote!(&mut self),
+        });
     let args = efn.args.iter().map(|arg| quote!(#arg));
     let all_args = receiver.chain(args);
     let ret = if efn.throws {
@@ -292,8 +295,8 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
         })
     }
     .unwrap_or(call);
-    let receiver_ident = efn.receiver.as_ref().map(|base| &base.ident);
-    match receiver_ident {
+    let receiver_type = efn.receiver.as_ref().map(|receiver| &receiver.ident);
+    match receiver_type {
         None => quote! {
             #doc
             pub fn #ident(#(#all_args,)*) #ret {
@@ -307,9 +310,9 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
                 }
             }
         },
-        Some(base_ident) => quote! {
+        Some(receiver_type) => quote! {
             #doc
-            impl #base_ident {
+            impl #receiver_type {
                 pub fn #ident(#(#all_args,)*) #ret {
                     extern "C" {
                         #decl
@@ -391,9 +394,9 @@ fn expand_rust_function_shim_impl(
     catch_unwind_label: String,
     invoke: Option<&Ident>,
 ) -> TokenStream {
-    let receiver = sig.receiver.iter().map(|base| {
-        let ident = &base.ident;
-        match base.mutability {
+    let receiver = sig.receiver.iter().map(|receiver| {
+        let ident = &receiver.ident;
+        match receiver.mutability {
             None => quote!(__self: &#ident),
             Some(_) => quote!(__self: &mut #ident),
         }
