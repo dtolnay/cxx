@@ -408,12 +408,10 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         write_type(out, &arg.ty);
     }
     write!(out, ")");
-    match &efn.receiver {
-        Some(Receiver {
-            mutability: None,
-            ident: _,
-        }) => write!(out, " const"),
-        _ => {}
+    if let Some(receiver) = &efn.receiver {
+        if receiver.mutability.is_none() {
+            write!(out, " const");
+        }
     }
     write!(out, " = ");
     match &efn.receiver {
