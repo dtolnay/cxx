@@ -302,8 +302,8 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
             }
         },
         Some(receiver_type) => quote! {
-            #doc
             impl #receiver_type {
+                #doc
                 pub fn #ident(#(#all_args,)*) #ret {
                     extern "C" {
                         #decl
