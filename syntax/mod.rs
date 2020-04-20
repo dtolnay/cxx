@@ -77,7 +77,8 @@ pub struct Var {
 pub struct Receiver {
     pub ampersand: Token![&],
     pub mutability: Option<Token![mut]>,
-    pub ident: Ident,
+    pub var: Token![self],
+    pub ty: Ident,
 }
 
 pub enum Type {

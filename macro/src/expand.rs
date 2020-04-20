@@ -302,7 +302,7 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
     match &efn.receiver {
         None => function_shim,
         Some(receiver) => {
-            let receiver_type = &receiver.ident;
+            let receiver_type = &receiver.ty;
             quote!(impl #receiver_type { #function_shim })
         }
     }
@@ -414,7 +414,7 @@ fn expand_rust_function_shim_impl(
         Some(ident) => match &sig.receiver {
             None => quote!(super::#ident),
             Some(receiver) => {
-                let receiver_type = &receiver.ident;
+                let receiver_type = &receiver.ty;
                 quote!(#receiver_type::#ident)
             }
         },

@@ -102,6 +102,6 @@ impl ToTokens for Receiver {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         self.ampersand.to_tokens(tokens);
         self.mutability.to_tokens(tokens);
-        self.ident.to_tokens(tokens);
+        self.ty.to_tokens(tokens);
     }
 }

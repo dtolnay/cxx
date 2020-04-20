@@ -51,7 +51,7 @@ pub(super) fn gen(
         if let Api::RustFunction(efn) = api {
             if let Some(receiver) = &efn.sig.receiver {
                 methods_for_type
-                    .entry(&receiver.ident)
+                    .entry(&receiver.ty)
                     .or_insert_with(Vec::new)
                     .push(efn);
             }
@@ -372,7 +372,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         if receiver.mutability.is_none() {
             write!(out, "const ");
         }
-        write!(out, "{} &self", receiver.ident);
+        write!(out, "{} &self", receiver.ty);
     }
     for (i, arg) in efn.args.iter().enumerate() {
         if i > 0 || efn.receiver.is_some() {
@@ -396,7 +396,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     write_return_type(out, &efn.ret);
     match &efn.receiver {
         None => write!(out, "(*{}$)(", efn.ident),
-        Some(receiver) => write!(out, "({}::*{}$)(", receiver.ident, efn.ident),
+        Some(receiver) => write!(out, "({}::*{}$)(", receiver.ty, efn.ident),
     }
     for (i, arg) in efn.args.iter().enumerate() {
         if i > 0 {
@@ -413,7 +413,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     write!(out, " = ");
     match &efn.receiver {
         None => write!(out, "{}", efn.ident),
-        Some(receiver) => write!(out, "&{}::{}", receiver.ident, efn.ident),
+        Some(receiver) => write!(out, "&{}::{}", receiver.ty, efn.ident),
     }
     writeln!(out, ";");
     write!(out, "  ");
@@ -539,7 +539,7 @@ fn write_rust_function_decl_impl(
         if receiver.mutability.is_none() {
             write!(out, "const ");
         }
-        write!(out, "{} &self", receiver.ident);
+        write!(out, "{} &self", receiver.ty);
         needs_comma = true;
     }
     for arg in &sig.args {
@@ -572,7 +572,7 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     }
     let local_name = match &efn.sig.receiver {
         None => efn.ident.to_string(),
-        Some(receiver) => format!("{}::{}", receiver.ident, efn.ident),
+        Some(receiver) => format!("{}::{}", receiver.ty, efn.ident),
     };
     let invoke = mangle::extern_fn(&out.namespace, efn);
     let indirect_call = false;
