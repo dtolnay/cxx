@@ -389,7 +389,8 @@ fn expand_rust_function_shim_impl(
     });
     let all_args = receiver.chain(args);
 
-    let vars = sig.args.iter().map(|arg| {
+    let receiver_var = sig.receiver.iter().map(|_| quote!(__self));
+    let arg_vars = sig.args.iter().map(|arg| {
         let ident = &arg.ident;
         match &arg.ty {
             Type::Ident(i) if i == RustString => {
@@ -407,11 +408,15 @@ fn expand_rust_function_shim_impl(
             _ => quote!(#ident),
         }
     });
+    let vars = receiver_var.chain(arg_vars);
 
     let mut call = match invoke {
-        Some(ident) => match sig.receiver {
+        Some(ident) => match &sig.receiver {
             None => quote!(super::#ident),
-            Some(_) => quote!(__self.#ident),
+            Some(receiver) => {
+                let receiver_type = &receiver.ident;
+                quote!(#receiver_type::#ident)
+            }
         },
         None => quote!(__extern),
     };
