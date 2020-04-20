@@ -375,7 +375,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         out.namespace, receiver_type, efn.ident
     );
     if let Some(base) = &efn.receiver {
-        write!(out, "{} *__receiver$", base.ident);
+        write!(out, "{} *self$", base.ident);
     }
     for (i, arg) in efn.args.iter().enumerate() {
         if i > 0 || efn.receiver.is_some() {
@@ -445,7 +445,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     }
     match &efn.receiver {
         None => write!(out, "{}$(", efn.ident),
-        Some(_) => write!(out, "(__receiver$->*{}$)(", efn.ident),
+        Some(_) => write!(out, "(self$->*{}$)(", efn.ident),
     }
     for (i, arg) in efn.args.iter().enumerate() {
         if i > 0 {
@@ -548,7 +548,7 @@ fn write_rust_function_decl_impl(
     write!(out, "{}(", link_name);
     let mut needs_comma = false;
     if let Some(base) = &sig.receiver {
-        write!(out, "{} &__receiver$", base.ident);
+        write!(out, "{} &self$", base.ident);
         needs_comma = true;
     }
     for arg in &sig.args {

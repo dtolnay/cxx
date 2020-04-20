@@ -399,8 +399,8 @@ fn expand_rust_function_shim_impl(
     let receiver = sig.receiver.iter().map(|base| {
         let ident = &base.ident;
         match base.mutability {
-            None => quote!(__receiver: &#ident),
-            Some(_) => quote!(__receiver: &mut #ident),
+            None => quote!(__self: &#ident),
+            Some(_) => quote!(__self: &mut #ident),
         }
     });
     let args = sig.args.iter().map(|arg| {
@@ -436,7 +436,7 @@ fn expand_rust_function_shim_impl(
     let mut call = match invoke {
         Some(ident) => match sig.receiver {
             None => quote!(super::#ident),
-            Some(_) => quote!(__receiver.#ident),
+            Some(_) => quote!(__self.#ident),
         },
         None => quote!(__extern),
     };
