@@ -1,6 +1,8 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::namespace::Namespace;
-use crate::syntax::{self, check, Api, ExternFn, ExternType, Signature, Struct, Type, Types};
+use crate::syntax::{
+    self, check, mangle, Api, ExternFn, ExternType, Signature, Struct, Type, Types,
+};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned};
 use syn::{parse_quote, Error, ItemMod, Result, Token};
@@ -154,11 +156,7 @@ fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types
         let ret = expand_extern_type(efn.ret.as_ref().unwrap());
         outparam = Some(quote!(__return: *mut #ret));
     }
-    let receiver_type = match &efn.receiver {
-        Some(base) => base.ident.to_string(),
-        None => "_".to_string(),
-    };
-    let link_name = format!("{}cxxbridge02${}${}", namespace, receiver_type, ident);
+    let link_name = mangle::extern_fn(namespace, efn);
     let local_name = format_ident!("__{}", ident);
     quote! {
         #[link_name = #link_name]
@@ -370,11 +368,7 @@ fn expand_rust_type(ety: &ExternType) -> TokenStream {
 
 fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types) -> TokenStream {
     let ident = &efn.ident;
-    let receiver_type = match &efn.receiver {
-        Some(base) => base.ident.to_string(),
-        None => "_".to_string(),
-    };
-    let link_name = format!("{}cxxbridge02${}${}", namespace, receiver_type, ident);
+    let link_name = mangle::extern_fn(namespace, efn);
     let local_name = format_ident!("__{}", ident);
     let catch_unwind_label = format!("::{}", ident);
     let invoke = Some(ident);
