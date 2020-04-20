@@ -2,7 +2,9 @@ use crate::gen::out::OutFile;
 use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::namespace::Namespace;
-use crate::syntax::{Api, ExternFn, ExternType, Receiver, Signature, Struct, Type, Types, Var};
+use crate::syntax::{
+    mangle, Api, ExternFn, ExternType, Receiver, Signature, Struct, Type, Types, Var,
+};
 use proc_macro2::Ident;
 use std::collections::HashMap;
 
@@ -365,15 +367,8 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     } else {
         write_extern_return_type_space(out, &efn.ret, types);
     }
-    let receiver_type = match &efn.receiver {
-        Some(base) => base.ident.to_string(),
-        None => "_".to_string(),
-    };
-    write!(
-        out,
-        "{}cxxbridge02${}${}(",
-        out.namespace, receiver_type, efn.ident
-    );
+    let mangled = mangle::extern_fn(&out.namespace, efn);
+    write!(out, "{}(", mangled);
     if let Some(base) = &efn.receiver {
         write!(out, "{} *self$", base.ident);
     }
@@ -519,14 +514,7 @@ fn write_function_pointer_trampoline(
 }
 
 fn write_rust_function_decl(out: &mut OutFile, efn: &ExternFn, types: &Types) {
-    let receiver_type = match &efn.receiver {
-        Some(base) => base.ident.to_string(),
-        None => "_".to_string(),
-    };
-    let link_name = format!(
-        "{}cxxbridge02${}${}",
-        out.namespace, receiver_type, efn.ident
-    );
+    let link_name = mangle::extern_fn(&out.namespace, efn);
     let indirect_call = false;
     write_rust_function_decl_impl(out, &link_name, efn, types, indirect_call);
 }
@@ -578,14 +566,7 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         writeln!(out, "//{}", line);
     }
     let local_name = efn.ident.to_string();
-    let receiver_type = match &efn.receiver {
-        Some(base) => base.ident.to_string(),
-        None => "_".to_string(),
-    };
-    let invoke = format!(
-        "{}cxxbridge02${}${}",
-        out.namespace, receiver_type, efn.ident
-    );
+    let invoke = mangle::extern_fn(&out.namespace, efn);
     let indirect_call = false;
     write_rust_function_shim_impl(out, &local_name, efn, types, &invoke, indirect_call);
 }
