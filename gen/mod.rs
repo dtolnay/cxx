@@ -3,12 +3,11 @@
 
 mod error;
 pub(super) mod include;
-mod namespace;
 pub(super) mod out;
 mod write;
 
 use self::error::format_err;
-use self::namespace::Namespace;
+use crate::syntax::namespace::Namespace;
 use crate::syntax::{self, check, ident, Types};
 use quote::quote;
 use std::fs;

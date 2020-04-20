@@ -13,7 +13,7 @@ mod expand;
 mod namespace;
 mod syntax;
 
-use crate::namespace::Namespace;
+use crate::syntax::namespace::Namespace;
 use proc_macro::TokenStream;
 use syn::{parse_macro_input, ItemMod};
 

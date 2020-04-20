@@ -1,4 +1,5 @@
 use crate::syntax::ident;
+use crate::syntax::namespace::Namespace;
 use quote::IdentFragment;
 use std::fmt::{self, Display};
 use syn::parse::{Parse, ParseStream, Result};
@@ -6,10 +7,6 @@ use syn::{Path, Token};
 
 mod kw {
     syn::custom_keyword!(namespace);
-}
-
-pub struct Namespace {
-    segments: Vec<String>,
 }
 
 impl Parse for Namespace {
@@ -25,17 +22,7 @@ impl Parse for Namespace {
             }
             input.parse::<Option<Token![,]>>()?;
         }
-        Ok(Namespace { segments })
-    }
-}
-
-impl Display for Namespace {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for segment in &self.segments {
-            f.write_str(segment)?;
-            f.write_str("$")?;
-        }
-        Ok(())
+        Ok(Namespace::new(segments))
     }
 }
 
