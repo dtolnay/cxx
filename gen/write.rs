@@ -374,7 +374,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         if receiver.mutability.is_none() {
             write!(out, "const ");
         }
-        write!(out, "{} *self$", receiver.ident);
+        write!(out, "{} *self", receiver.ident);
     }
     for (i, arg) in efn.args.iter().enumerate() {
         if i > 0 || efn.receiver.is_some() {
@@ -442,7 +442,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     }
     match &efn.receiver {
         None => write!(out, "{}$(", efn.ident),
-        Some(_) => write!(out, "(self$->*{}$)(", efn.ident),
+        Some(_) => write!(out, "(self->*{}$)(", efn.ident),
     }
     for (i, arg) in efn.args.iter().enumerate() {
         if i > 0 {
@@ -541,7 +541,7 @@ fn write_rust_function_decl_impl(
         if receiver.mutability.is_none() {
             write!(out, "const ");
         }
-        write!(out, "{} &self$", receiver.ident);
+        write!(out, "{} &self", receiver.ident);
         needs_comma = true;
     }
     for arg in &sig.args {
