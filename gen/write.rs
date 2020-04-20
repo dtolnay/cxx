@@ -3,9 +3,7 @@ use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::namespace::Namespace;
 use crate::syntax::symbol::Symbol;
-use crate::syntax::{
-    mangle, Api, ExternFn, ExternType, Receiver, Signature, Struct, Type, Types, Var,
-};
+use crate::syntax::{mangle, Api, ExternFn, ExternType, Signature, Struct, Type, Types, Var};
 use proc_macro2::Ident;
 use std::collections::HashMap;
 
@@ -335,8 +333,8 @@ fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &[&Ex
     for method in methods {
         write!(out, "  ");
         let sig = &method.sig;
-        let local_name = Symbol::from(&method.ident);
-        write_rust_function_shim_decl(out, &local_name, sig, None, false);
+        let local_name = method.ident.to_string();
+        write_rust_function_shim_decl(out, &local_name, sig, false);
         writeln!(out, ";");
     }
     writeln!(out, "}};");
@@ -513,7 +511,7 @@ fn write_function_pointer_trampoline(
     write_rust_function_decl_impl(out, &r_trampoline, f, types, indirect_call);
 
     out.next_section();
-    let c_trampoline = mangle::c_trampoline(&out.namespace, efn, var);
+    let c_trampoline = mangle::c_trampoline(&out.namespace, efn, var).to_string();
     write_rust_function_shim_impl(out, &c_trampoline, f, types, &r_trampoline, indirect_call);
 }
 
@@ -572,7 +570,10 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     for line in efn.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
-    let local_name = Symbol::from(&efn.ident);
+    let local_name = match &efn.sig.receiver {
+        None => efn.ident.to_string(),
+        Some(receiver) => format!("{}::{}", receiver.ident, efn.ident),
+    };
     let invoke = mangle::extern_fn(&out.namespace, efn);
     let indirect_call = false;
     write_rust_function_shim_impl(out, &local_name, efn, types, &invoke, indirect_call);
@@ -580,15 +581,11 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
 
 fn write_rust_function_shim_decl(
     out: &mut OutFile,
-    local_name: &Symbol,
+    local_name: &str,
     sig: &Signature,
-    receiver: Option<&Receiver>,
     indirect_call: bool,
 ) {
     write_return_type(out, &sig.ret);
-    if let Some(receiver) = receiver {
-        write!(out, "{}::", receiver.ident);
-    }
     write!(out, "{}(", local_name);
     for (i, arg) in sig.args.iter().enumerate() {
         if i > 0 {
@@ -616,7 +613,7 @@ fn write_rust_function_shim_decl(
 
 fn write_rust_function_shim_impl(
     out: &mut OutFile,
-    local_name: &Symbol,
+    local_name: &str,
     sig: &Signature,
     types: &Types,
     invoke: &Symbol,
@@ -626,7 +623,7 @@ fn write_rust_function_shim_impl(
         // We've already defined this inside the struct.
         return;
     }
-    write_rust_function_shim_decl(out, local_name, sig, sig.receiver.as_ref(), indirect_call);
+    write_rust_function_shim_decl(out, local_name, sig, indirect_call);
     if out.header {
         writeln!(out, ";");
         return;
