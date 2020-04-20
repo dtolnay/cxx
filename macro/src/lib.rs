@@ -10,7 +10,6 @@
 extern crate proc_macro;
 
 mod expand;
-mod namespace;
 mod syntax;
 
 use crate::syntax::namespace::Namespace;

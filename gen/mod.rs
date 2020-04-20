@@ -8,13 +8,12 @@ mod write;
 
 use self::error::format_err;
 use crate::syntax::namespace::Namespace;
-use crate::syntax::{self, check, ident, Types};
+use crate::syntax::{self, check, Types};
 use quote::quote;
 use std::fs;
 use std::io;
 use std::path::Path;
-use syn::parse::ParseStream;
-use syn::{Attribute, File, Item, Token};
+use syn::{Attribute, File, Item};
 use thiserror::Error;
 
 pub(super) type Result<T, E = Error> = std::result::Result<T, E>;
@@ -86,8 +85,7 @@ fn find_bridge_mod(syntax: File) -> Result<Input> {
                             )));
                         }
                     };
-                    let namespace_segments = parse_args(attr)?;
-                    let namespace = Namespace::new(namespace_segments);
+                    let namespace = parse_args(attr)?;
                     return Ok(Input { namespace, module });
                 }
             }
@@ -96,24 +94,10 @@ fn find_bridge_mod(syntax: File) -> Result<Input> {
     Err(Error::NoBridgeMod)
 }
 
-fn parse_args(attr: &Attribute) -> syn::Result<Vec<String>> {
+fn parse_args(attr: &Attribute) -> syn::Result<Namespace> {
     if attr.tokens.is_empty() {
-        return Ok(Vec::new());
+        Ok(Namespace::none())
+    } else {
+        attr.parse_args()
     }
-    attr.parse_args_with(|input: ParseStream| {
-        mod kw {
-            syn::custom_keyword!(namespace);
-        }
-        input.parse::<kw::namespace>()?;
-        input.parse::<Token![=]>()?;
-        let path = syn::Path::parse_mod_style(input)?;
-        input.parse::<Option<Token![,]>>()?;
-        path.segments
-            .into_iter()
-            .map(|seg| {
-                ident::check(&seg.ident)?;
-                Ok(seg.ident.to_string())
-            })
-            .collect()
-    })
 }
