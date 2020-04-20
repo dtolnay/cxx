@@ -11,6 +11,7 @@ pub mod mangle;
 pub mod namespace;
 mod parse;
 pub mod set;
+mod symbol;
 mod tokens;
 pub mod types;
 

@@ -1,10 +1,18 @@
 use crate::syntax::namespace::Namespace;
-use crate::syntax::ExternFn;
+use crate::syntax::{symbol, ExternFn};
+
+const CXXBRIDGE: &str = "cxxbridge02";
+
+macro_rules! join {
+    ($($segment:expr),*) => {
+        symbol::join(&[$(&$segment),*])
+    };
+}
 
 pub fn extern_fn(namespace: &Namespace, efn: &ExternFn) -> String {
-    let receiver = match &efn.receiver {
-        Some(receiver) => receiver.ident.to_string() + "$",
-        None => String::new(),
-    };
-    format!("{}cxxbridge02${}{}", namespace, receiver, efn.ident)
+    match &efn.receiver {
+        Some(receiver) => join!(namespace, CXXBRIDGE, receiver.ident, efn.ident),
+        None => join!(namespace, CXXBRIDGE, efn.ident),
+    }
+    .to_string()
 }
