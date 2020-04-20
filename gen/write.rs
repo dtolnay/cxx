@@ -629,94 +629,94 @@ fn write_rust_function_shim_impl(
     write_rust_function_shim_decl(out, local_name, sig, sig.receiver.as_ref(), indirect_call);
     if out.header {
         writeln!(out, ";");
-    } else {
-        writeln!(out, " {{");
-        for arg in &sig.args {
-            if arg.ty != RustString && types.needs_indirect_abi(&arg.ty) {
-                out.include.utility = true;
-                write!(out, "  ::rust::ManuallyDrop<");
-                write_type(out, &arg.ty);
-                writeln!(out, "> {}$(::std::move({0}));", arg.ident);
-            }
-        }
-        write!(out, "  ");
-        let indirect_return = indirect_return(sig, types);
-        if indirect_return {
-            write!(out, "::rust::MaybeUninit<");
-            write_type(out, sig.ret.as_ref().unwrap());
-            writeln!(out, "> return$;");
-            write!(out, "  ");
-        } else if let Some(ret) = &sig.ret {
-            write!(out, "return ");
-            match ret {
-                Type::RustBox(_) => {
-                    write_type(out, ret);
-                    write!(out, "::from_raw(");
-                }
-                Type::UniquePtr(_) => {
-                    write_type(out, ret);
-                    write!(out, "(");
-                }
-                Type::Ref(_) => write!(out, "*"),
-                _ => {}
-            }
-        }
-        if sig.throws {
-            write!(out, "::rust::Str::Repr error$ = ");
-        }
-        write!(out, "{}(", invoke);
-        if sig.receiver.is_some() {
-            write!(out, "*this");
-        }
-        for (i, arg) in sig.args.iter().enumerate() {
-            if i > 0 || sig.receiver.is_some() {
-                write!(out, ", ");
-            }
-            match &arg.ty {
-                Type::Str(_) => write!(out, "::rust::Str::Repr("),
-                Type::SliceRefU8(_) => write!(out, "::rust::Slice<uint8_t>::Repr("),
-                ty if types.needs_indirect_abi(ty) => write!(out, "&"),
-                _ => {}
-            }
-            write!(out, "{}", arg.ident);
-            match &arg.ty {
-                Type::RustBox(_) => write!(out, ".into_raw()"),
-                Type::UniquePtr(_) => write!(out, ".release()"),
-                Type::Str(_) | Type::SliceRefU8(_) => write!(out, ")"),
-                ty if ty != RustString && types.needs_indirect_abi(ty) => write!(out, "$.value"),
-                _ => {}
-            }
-        }
-        if indirect_return {
-            if !sig.args.is_empty() {
-                write!(out, ", ");
-            }
-            write!(out, "&return$.value");
-        }
-        if indirect_call {
-            if !sig.args.is_empty() || indirect_return {
-                write!(out, ", ");
-            }
-            write!(out, "extern$");
-        }
-        write!(out, ")");
-        if let Some(ret) = &sig.ret {
-            if let Type::RustBox(_) | Type::UniquePtr(_) = ret {
-                write!(out, ")");
-            }
-        }
-        writeln!(out, ";");
-        if sig.throws {
-            writeln!(out, "  if (error$.ptr) {{");
-            writeln!(out, "    throw ::rust::Error(error$);");
-            writeln!(out, "  }}");
-        }
-        if indirect_return {
-            out.include.utility = true;
-            writeln!(out, "  return ::std::move(return$.value);");
-        }
-        writeln!(out, "}}");
+        return;
     }
+    writeln!(out, " {{");
+    for arg in &sig.args {
+        if arg.ty != RustString && types.needs_indirect_abi(&arg.ty) {
+            out.include.utility = true;
+            write!(out, "  ::rust::ManuallyDrop<");
+            write_type(out, &arg.ty);
+            writeln!(out, "> {}$(::std::move({0}));", arg.ident);
+        }
+    }
+    write!(out, "  ");
+    let indirect_return = indirect_return(sig, types);
+    if indirect_return {
+        write!(out, "::rust::MaybeUninit<");
+        write_type(out, sig.ret.as_ref().unwrap());
+        writeln!(out, "> return$;");
+        write!(out, "  ");
+    } else if let Some(ret) = &sig.ret {
+        write!(out, "return ");
+        match ret {
+            Type::RustBox(_) => {
+                write_type(out, ret);
+                write!(out, "::from_raw(");
+            }
+            Type::UniquePtr(_) => {
+                write_type(out, ret);
+                write!(out, "(");
+            }
+            Type::Ref(_) => write!(out, "*"),
+            _ => {}
+        }
+    }
+    if sig.throws {
+        write!(out, "::rust::Str::Repr error$ = ");
+    }
+    write!(out, "{}(", invoke);
+    if sig.receiver.is_some() {
+        write!(out, "*this");
+    }
+    for (i, arg) in sig.args.iter().enumerate() {
+        if i > 0 || sig.receiver.is_some() {
+            write!(out, ", ");
+        }
+        match &arg.ty {
+            Type::Str(_) => write!(out, "::rust::Str::Repr("),
+            Type::SliceRefU8(_) => write!(out, "::rust::Slice<uint8_t>::Repr("),
+            ty if types.needs_indirect_abi(ty) => write!(out, "&"),
+            _ => {}
+        }
+        write!(out, "{}", arg.ident);
+        match &arg.ty {
+            Type::RustBox(_) => write!(out, ".into_raw()"),
+            Type::UniquePtr(_) => write!(out, ".release()"),
+            Type::Str(_) | Type::SliceRefU8(_) => write!(out, ")"),
+            ty if ty != RustString && types.needs_indirect_abi(ty) => write!(out, "$.value"),
+            _ => {}
+        }
+    }
+    if indirect_return {
+        if !sig.args.is_empty() {
+            write!(out, ", ");
+        }
+        write!(out, "&return$.value");
+    }
+    if indirect_call {
+        if !sig.args.is_empty() || indirect_return {
+            write!(out, ", ");
+        }
+        write!(out, "extern$");
+    }
+    write!(out, ")");
+    if let Some(ret) = &sig.ret {
+        if let Type::RustBox(_) | Type::UniquePtr(_) = ret {
+            write!(out, ")");
+        }
+    }
+    writeln!(out, ";");
+    if sig.throws {
+        writeln!(out, "  if (error$.ptr) {{");
+        writeln!(out, "    throw ::rust::Error(error$);");
+        writeln!(out, "  }}");
+    }
+    if indirect_return {
+        out.include.utility = true;
+        writeln!(out, "  return ::std::move(return$.value);");
+    }
+    writeln!(out, "}}");
 }
 
 fn write_return_type(out: &mut OutFile, ty: &Option<Type>) {
