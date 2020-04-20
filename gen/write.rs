@@ -672,7 +672,7 @@ fn write_rust_function_shim_impl(
             write!(out, "::rust::Str::Repr error$ = ");
         }
         write!(out, "{}(", invoke);
-        if let Some(_) = &sig.receiver {
+        if sig.receiver.is_some() {
             write!(out, "*this");
         }
         for (i, arg) in sig.args.iter().enumerate() {
