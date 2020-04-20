@@ -286,36 +286,25 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
         })
     }
     .unwrap_or(call);
-    let receiver_type = efn.receiver.as_ref().map(|receiver| &receiver.ident);
-    match receiver_type {
-        None => quote! {
-            #doc
-            pub fn #ident(#(#all_args,)*) #ret {
-                extern "C" {
-                    #decl
-                }
-                #trampolines
-                unsafe {
-                    #setup
-                    #expr
-                }
+    let function_shim = quote! {
+        #doc
+        pub fn #ident(#(#all_args,)*) #ret {
+            extern "C" {
+                #decl
             }
-        },
-        Some(receiver_type) => quote! {
-            impl #receiver_type {
-                #doc
-                pub fn #ident(#(#all_args,)*) #ret {
-                    extern "C" {
-                        #decl
-                    }
-                    #trampolines
-                    unsafe {
-                        #setup
-                        #expr
-                    }
-                }
+            #trampolines
+            unsafe {
+                #setup
+                #expr
             }
-        },
+        }
+    };
+    match &efn.receiver {
+        None => function_shim,
+        Some(receiver) => {
+            let receiver_type = &receiver.ident;
+            quote!(impl #receiver_type { #function_shim })
+        }
     }
 }
 
