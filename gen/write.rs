@@ -371,6 +371,9 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     let mangled = mangle::extern_fn(&out.namespace, efn);
     write!(out, "{}(", mangled);
     if let Some(receiver) = &efn.receiver {
+        if receiver.mutability.is_none() {
+            write!(out, "const ");
+        }
         write!(out, "{} *self$", receiver.ident);
     }
     for (i, arg) in efn.args.iter().enumerate() {
@@ -535,6 +538,9 @@ fn write_rust_function_decl_impl(
     write!(out, "{}(", link_name);
     let mut needs_comma = false;
     if let Some(receiver) = &sig.receiver {
+        if receiver.mutability.is_none() {
+            write!(out, "const ");
+        }
         write!(out, "{} &self$", receiver.ident);
         needs_comma = true;
     }
@@ -598,6 +604,11 @@ fn write_rust_function_shim_decl(
         write!(out, "void *extern$");
     }
     write!(out, ")");
+    if let Some(receiver) = &sig.receiver {
+        if receiver.mutability.is_none() {
+            write!(out, " const");
+        }
+    }
     if !sig.throws {
         write!(out, " noexcept");
     }
