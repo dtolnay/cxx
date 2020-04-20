@@ -2,10 +2,10 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "io_bazel_rules_rust",
-    sha256 = "abc75a5b6c8eda46a3d141921841e3577e9707b32d4d5b5cc156f7b8b28631ad",
-    strip_prefix = "rules_rust-d97f99628439df8bec89f5b7bc439f9d43d1586b",
+    sha256 = "b83154a58f95618e06845b774b079000e0c39830e185db4c7bf46e79896cb3a1",
+    strip_prefix = "rules_rust-0deef6dd8180cd3bc610878558bb26921b4e8de1",
     # Master branch as of 2020-03-07
-    url = "https://github.com/bazelbuild/rules_rust/archive/d97f99628439df8bec89f5b7bc439f9d43d1586b.tar.gz",
+    url = "https://github.com/bazelbuild/rules_rust/archive/0deef6dd8180cd3bc610878558bb26921b4e8de1.tar.gz",
 )
 
 http_archive(
@@ -26,7 +26,6 @@ load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repository_set")
 rust_repository_set(
     name = "rust_1_43_beta_linux",
     exec_triple = "x86_64-unknown-linux-gnu",
-    extra_target_triples = [],
     iso_date = "2020-04-19",
     version = "beta",
 )
@@ -34,7 +33,6 @@ rust_repository_set(
 rust_repository_set(
     name = "rust_1_43_beta_darwin",
     exec_triple = "x86_64-apple-darwin",
-    extra_target_triples = [],
     iso_date = "2020-04-19",
     version = "beta",
 )
