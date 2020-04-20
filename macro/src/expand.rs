@@ -1,5 +1,5 @@
-use crate::namespace::Namespace;
 use crate::syntax::atom::Atom::{self, *};
+use crate::syntax::namespace::Namespace;
 use crate::syntax::{self, check, Api, ExternFn, ExternType, Signature, Struct, Type, Types};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned};

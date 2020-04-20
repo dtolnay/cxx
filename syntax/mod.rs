@@ -7,6 +7,7 @@ mod doc;
 pub mod error;
 pub mod ident;
 mod impls;
+pub mod namespace;
 mod parse;
 pub mod set;
 mod tokens;

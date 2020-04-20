@@ -1,5 +1,5 @@
 use crate::gen::include::Includes;
-use crate::gen::namespace::Namespace;
+use crate::syntax::namespace::Namespace;
 use std::cell::RefCell;
 use std::fmt::{self, Arguments, Write};
 

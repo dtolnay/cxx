@@ -1,7 +1,7 @@
-use crate::gen::namespace::Namespace;
 use crate::gen::out::OutFile;
 use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
+use crate::syntax::namespace::Namespace;
 use crate::syntax::{Api, ExternFn, ExternType, Receiver, Signature, Struct, Type, Types, Var};
 use proc_macro2::Ident;
 use std::collections::HashMap;

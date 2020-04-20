@@ -1,6 +1,7 @@
 use crate::syntax::ident;
 use quote::IdentFragment;
 use std::fmt::{self, Display};
+use std::slice::Iter;
 use syn::parse::{Parse, ParseStream, Result};
 use syn::{Path, Token};
 
@@ -8,8 +9,21 @@ mod kw {
     syn::custom_keyword!(namespace);
 }
 
+#[derive(Clone)]
 pub struct Namespace {
     segments: Vec<String>,
+}
+
+impl Namespace {
+    pub fn none() -> Self {
+        Namespace {
+            segments: Vec::new(),
+        }
+    }
+
+    pub fn iter(&self) -> Iter<String> {
+        self.segments.iter()
+    }
 }
 
 impl Parse for Namespace {
@@ -31,7 +45,7 @@ impl Parse for Namespace {
 
 impl Display for Namespace {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for segment in &self.segments {
+        for segment in self {
             f.write_str(segment)?;
             f.write_str("$")?;
         }
@@ -42,5 +56,13 @@ impl Display for Namespace {
 impl IdentFragment for Namespace {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         Display::fmt(self, f)
+    }
+}
+
+impl<'a> IntoIterator for &'a Namespace {
+    type Item = &'a String;
+    type IntoIter = Iter<'a, String>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
     }
 }
