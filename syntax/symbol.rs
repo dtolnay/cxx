@@ -19,6 +19,12 @@ impl ToTokens for Symbol {
     }
 }
 
+impl From<&Ident> for Symbol {
+    fn from(ident: &Ident) -> Self {
+        Symbol(ident.to_string())
+    }
+}
+
 impl Symbol {
     fn push(&mut self, segment: &dyn Display) {
         let len_before = self.0.len();
@@ -37,7 +43,9 @@ pub trait Segment: Display {
 }
 
 impl Segment for str {}
+impl Segment for usize {}
 impl Segment for Ident {}
+impl Segment for Symbol {}
 
 impl Segment for Namespace {
     fn write(&self, symbol: &mut Symbol) {

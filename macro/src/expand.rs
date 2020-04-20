@@ -1,5 +1,6 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::namespace::Namespace;
+use crate::syntax::symbol::Symbol;
 use crate::syntax::{
     self, check, mangle, Api, ExternFn, ExternType, Signature, Struct, Type, Types,
 };
@@ -331,8 +332,8 @@ fn expand_function_pointer_trampoline(
     sig: &Signature,
     types: &Types,
 ) -> TokenStream {
-    let c_trampoline = format!("{}cxxbridge02${}${}$0", namespace, efn.ident, var);
-    let r_trampoline = format!("{}cxxbridge02${}${}$1", namespace, efn.ident, var);
+    let c_trampoline = mangle::c_trampoline(namespace, efn, var);
+    let r_trampoline = mangle::r_trampoline(namespace, efn, var);
     let local_name = parse_quote!(__);
     let catch_unwind_label = format!("::{}::{}", efn.ident, var);
     let shim = expand_rust_function_shim_impl(
@@ -385,7 +386,7 @@ fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Type
 fn expand_rust_function_shim_impl(
     sig: &Signature,
     types: &Types,
-    link_name: &str,
+    link_name: &Symbol,
     local_name: Ident,
     catch_unwind_label: String,
     invoke: Option<&Ident>,

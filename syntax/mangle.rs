@@ -1,5 +1,7 @@
 use crate::syntax::namespace::Namespace;
-use crate::syntax::{symbol, ExternFn};
+use crate::syntax::symbol::{self, Symbol};
+use crate::syntax::ExternFn;
+use proc_macro2::Ident;
 
 const CXXBRIDGE: &str = "cxxbridge02";
 
@@ -9,10 +11,19 @@ macro_rules! join {
     };
 }
 
-pub fn extern_fn(namespace: &Namespace, efn: &ExternFn) -> String {
+pub fn extern_fn(namespace: &Namespace, efn: &ExternFn) -> Symbol {
     match &efn.receiver {
         Some(receiver) => join!(namespace, CXXBRIDGE, receiver.ident, efn.ident),
         None => join!(namespace, CXXBRIDGE, efn.ident),
     }
-    .to_string()
+}
+
+// The C half of a function pointer trampoline.
+pub fn c_trampoline(namespace: &Namespace, efn: &ExternFn, var: &Ident) -> Symbol {
+    join!(extern_fn(namespace, efn), var, 0)
+}
+
+// The Rust half of a function pointer trampoline.
+pub fn r_trampoline(namespace: &Namespace, efn: &ExternFn, var: &Ident) -> Symbol {
+    join!(extern_fn(namespace, efn), var, 1)
 }

@@ -2,6 +2,7 @@ use crate::gen::out::OutFile;
 use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::namespace::Namespace;
+use crate::syntax::symbol::Symbol;
 use crate::syntax::{
     mangle, Api, ExternFn, ExternType, Receiver, Signature, Struct, Type, Types, Var,
 };
@@ -334,7 +335,7 @@ fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &[&Ex
     for method in methods {
         write!(out, "  ");
         let sig = &method.sig;
-        let local_name = method.ident.to_string();
+        let local_name = Symbol::from(&method.ident);
         write_rust_function_shim_decl(out, &local_name, sig, None, false);
         writeln!(out, ";");
     }
@@ -504,12 +505,12 @@ fn write_function_pointer_trampoline(
     types: &Types,
 ) {
     out.next_section();
-    let r_trampoline = format!("{}cxxbridge02${}${}$1", out.namespace, efn.ident, var);
+    let r_trampoline = mangle::r_trampoline(&out.namespace, efn, var);
     let indirect_call = true;
     write_rust_function_decl_impl(out, &r_trampoline, f, types, indirect_call);
 
     out.next_section();
-    let c_trampoline = format!("{}cxxbridge02${}${}$0", out.namespace, efn.ident, var);
+    let c_trampoline = mangle::c_trampoline(&out.namespace, efn, var);
     write_rust_function_shim_impl(out, &c_trampoline, f, types, &r_trampoline, indirect_call);
 }
 
@@ -521,7 +522,7 @@ fn write_rust_function_decl(out: &mut OutFile, efn: &ExternFn, types: &Types) {
 
 fn write_rust_function_decl_impl(
     out: &mut OutFile,
-    link_name: &str,
+    link_name: &Symbol,
     sig: &Signature,
     types: &Types,
     indirect_call: bool,
@@ -565,7 +566,7 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     for line in efn.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
-    let local_name = efn.ident.to_string();
+    let local_name = Symbol::from(&efn.ident);
     let invoke = mangle::extern_fn(&out.namespace, efn);
     let indirect_call = false;
     write_rust_function_shim_impl(out, &local_name, efn, types, &invoke, indirect_call);
@@ -573,7 +574,7 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
 
 fn write_rust_function_shim_decl(
     out: &mut OutFile,
-    local_name: &str,
+    local_name: &Symbol,
     sig: &Signature,
     receiver: Option<&Receiver>,
     indirect_call: bool,
@@ -604,10 +605,10 @@ fn write_rust_function_shim_decl(
 
 fn write_rust_function_shim_impl(
     out: &mut OutFile,
-    local_name: &str,
+    local_name: &Symbol,
     sig: &Signature,
     types: &Types,
-    invoke: &str,
+    invoke: &Symbol,
     indirect_call: bool,
 ) {
     if out.header && sig.receiver.is_some() {
