@@ -75,6 +75,7 @@ pub struct Var {
 }
 
 pub struct Receiver {
+    pub ampersand: Token![&],
     pub mutability: Option<Token![mut]>,
     pub ident: Ident,
 }

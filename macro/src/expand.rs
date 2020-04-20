@@ -126,13 +126,7 @@ fn expand_cxx_type(ety: &ExternType) -> TokenStream {
 
 fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types) -> TokenStream {
     let ident = &efn.ident;
-    let receiver = efn.receiver.iter().map(|receiver| {
-        let ident = &receiver.ident;
-        match receiver.mutability {
-            None => quote!(_: &#ident),
-            Some(_) => quote!(_: &mut #ident),
-        }
-    });
+    let receiver = efn.receiver.iter().map(|receiver| quote!(_: #receiver));
     let args = efn.args.iter().map(|arg| {
         let ident = &arg.ident;
         let ty = expand_extern_type(&arg.ty);
@@ -169,13 +163,10 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
     let ident = &efn.ident;
     let doc = &efn.doc;
     let decl = expand_cxx_function_decl(namespace, efn, types);
-    let receiver = efn
-        .receiver
-        .iter()
-        .map(|receiver| match receiver.mutability {
-            None => quote!(&self),
-            Some(_) => quote!(&mut self),
-        });
+    let receiver = efn.receiver.iter().map(|receiver| {
+        let mutability = receiver.mutability;
+        quote!(&#mutability self)
+    });
     let args = efn.args.iter().map(|arg| quote!(#arg));
     let all_args = receiver.chain(args);
     let ret = if efn.throws {
@@ -394,13 +385,10 @@ fn expand_rust_function_shim_impl(
     catch_unwind_label: String,
     invoke: Option<&Ident>,
 ) -> TokenStream {
-    let receiver = sig.receiver.iter().map(|receiver| {
-        let ident = &receiver.ident;
-        match receiver.mutability {
-            None => quote!(__self: &#ident),
-            Some(_) => quote!(__self: &mut #ident),
-        }
-    });
+    let receiver = sig
+        .receiver
+        .iter()
+        .map(|receiver| quote!(__self: #receiver));
     let args = sig.args.iter().map(|arg| {
         let ident = &arg.ident;
         let ty = expand_extern_type(&arg.ty);
