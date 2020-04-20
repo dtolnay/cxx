@@ -5,7 +5,7 @@ use crate::syntax::{
     self, check, mangle, Api, ExternFn, ExternType, Signature, Struct, Type, Types,
 };
 use proc_macro2::{Ident, Span, TokenStream};
-use quote::{format_ident, quote, quote_spanned};
+use quote::{format_ident, quote, quote_spanned, ToTokens};
 use syn::{parse_quote, Error, ItemMod, Result, Token};
 
 pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
@@ -164,8 +164,10 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
     let doc = &efn.doc;
     let decl = expand_cxx_function_decl(namespace, efn, types);
     let receiver = efn.receiver.iter().map(|receiver| {
+        let ampersand = receiver.ampersand;
         let mutability = receiver.mutability;
-        quote!(&#mutability self)
+        let var = receiver.var;
+        quote!(#ampersand #mutability #var)
     });
     let args = efn.args.iter().map(|arg| quote!(#arg));
     let all_args = receiver.chain(args);
@@ -179,7 +181,10 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
         expand_return_type(&efn.ret)
     };
     let indirect_return = indirect_return(efn, types);
-    let receiver_var = efn.receiver.iter().map(|_| quote!(self));
+    let receiver_var = efn
+        .receiver
+        .iter()
+        .map(|receiver| receiver.var.to_token_stream());
     let arg_vars = efn.args.iter().map(|arg| {
         let var = &arg.ident;
         match &arg.ty {
@@ -374,10 +379,14 @@ fn expand_rust_function_shim_impl(
     catch_unwind_label: String,
     invoke: Option<&Ident>,
 ) -> TokenStream {
+    let receiver_var = sig
+        .receiver
+        .as_ref()
+        .map(|receiver| quote_spanned!(receiver.var.span=> __self));
     let receiver = sig
         .receiver
-        .iter()
-        .map(|receiver| quote!(__self: #receiver));
+        .as_ref()
+        .map(|receiver| quote!(#receiver_var: #receiver));
     let args = sig.args.iter().map(|arg| {
         let ident = &arg.ident;
         let ty = expand_extern_type(&arg.ty);
@@ -387,9 +396,8 @@ fn expand_rust_function_shim_impl(
             quote!(#ident: #ty)
         }
     });
-    let all_args = receiver.chain(args);
+    let all_args = receiver.into_iter().chain(args);
 
-    let receiver_var = sig.receiver.iter().map(|_| quote!(__self));
     let arg_vars = sig.args.iter().map(|arg| {
         let ident = &arg.ident;
         match &arg.ty {
@@ -408,7 +416,7 @@ fn expand_rust_function_shim_impl(
             _ => quote!(#ident),
         }
     });
-    let vars = receiver_var.chain(arg_vars);
+    let vars = receiver_var.into_iter().chain(arg_vars);
 
     let mut call = match invoke {
         Some(ident) => match &sig.receiver {
