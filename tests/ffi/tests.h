@@ -13,6 +13,8 @@ public:
   C(size_t n);
   size_t get() const;
   size_t set(size_t n);
+  size_t get2() const;
+  size_t set2(size_t n);
 
 private:
   size_t n;

@@ -52,6 +52,8 @@ pub mod ffi {
 
         fn get(self: &C) -> usize;
         fn set(self: &mut C, n: usize) -> usize;
+        fn get2(&self) -> usize;
+        fn set2(&mut self, n: usize) -> usize;
     }
 
     extern "Rust" {

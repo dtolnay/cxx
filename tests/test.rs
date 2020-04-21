@@ -102,8 +102,8 @@ fn test_c_method_calls() {
     assert_eq!(2020, old_value);
     assert_eq!(2021, unique_ptr.set(2021));
     assert_eq!(2021, unique_ptr.get());
-    assert_eq!(old_value, unique_ptr.set(old_value));
-    assert_eq!(old_value, unique_ptr.get())
+    assert_eq!(old_value, unique_ptr.set2(old_value));
+    assert_eq!(old_value, unique_ptr.get2())
 }
 
 #[no_mangle]
