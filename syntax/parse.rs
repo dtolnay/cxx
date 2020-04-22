@@ -182,7 +182,7 @@ fn parse_extern_fn(
                             ampersand: *ampersand,
                             lifetime: lifetime.clone(),
                             mutability: arg.mutability,
-                            var: Token![self](ety.ident.span()),
+                            var: arg.self_token,
                             ty: ety.ident.clone(),
                             shorthand: true,
                         });
