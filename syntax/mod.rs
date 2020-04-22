@@ -19,7 +19,7 @@ use self::parse::kw;
 use proc_macro2::{Ident, Span};
 use syn::punctuated::Punctuated;
 use syn::token::{Brace, Bracket, Paren};
-use syn::{LitStr, Token};
+use syn::{Lifetime, LitStr, Token};
 
 pub use self::atom::Atom;
 pub use self::doc::Doc;
@@ -76,9 +76,11 @@ pub struct Var {
 
 pub struct Receiver {
     pub ampersand: Token![&],
+    pub lifetime: Option<Lifetime>,
     pub mutability: Option<Token![mut]>,
     pub var: Token![self],
     pub ty: Ident,
+    pub shorthand: bool,
 }
 
 pub enum Type {
@@ -102,6 +104,7 @@ pub struct Ty1 {
 
 pub struct Ref {
     pub ampersand: Token![&],
+    pub lifetime: Option<Lifetime>,
     pub mutability: Option<Token![mut]>,
     pub inner: Type,
 }

@@ -1,5 +1,7 @@
 use crate::syntax::atom::Atom::{self, *};
-use crate::syntax::{error, ident, Api, ExternFn, Lang, Ref, Slice, Struct, Ty1, Type, Types};
+use crate::syntax::{
+    error, ident, Api, ExternFn, Lang, Receiver, Ref, Slice, Struct, Ty1, Type, Types,
+};
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
 use std::fmt::Display;
@@ -100,6 +102,10 @@ fn check_type_unique_ptr(cx: &mut Check, ptr: &Ty1) {
 }
 
 fn check_type_ref(cx: &mut Check, ty: &Ref) {
+    if ty.lifetime.is_some() {
+        cx.error(ty, "references with explicit lifetimes are not supported");
+    }
+
     match ty.inner {
         Type::Fn(_) | Type::Void(_) => {}
         _ => return,
@@ -134,6 +140,13 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
 }
 
 fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
+    if let Some(receiver) = &efn.receiver {
+        if receiver.lifetime.is_some() {
+            let span = span_for_receiver_error(receiver);
+            cx.error(span, "references with explicit lifetimes are not supported");
+        }
+    }
+
     for arg in &efn.args {
         if is_unsized(cx, &arg.ty) {
             let desc = describe(cx, &arg.ty);
@@ -221,6 +234,19 @@ fn span_for_struct_error(strct: &Struct) -> TokenStream {
     let mut brace_token = Group::new(Delimiter::Brace, TokenStream::new());
     brace_token.set_span(strct.brace_token.span);
     quote!(#struct_token #brace_token)
+}
+
+fn span_for_receiver_error(receiver: &Receiver) -> TokenStream {
+    let ampersand = receiver.ampersand;
+    let lifetime = &receiver.lifetime;
+    let mutability = receiver.mutability;
+    if receiver.shorthand {
+        let var = receiver.var;
+        quote!(#ampersand #lifetime #mutability #var)
+    } else {
+        let ty = &receiver.ty;
+        quote!(#ampersand #lifetime #mutability #ty)
+    }
 }
 
 fn combine_errors(errors: Vec<Error>) -> Result<()> {

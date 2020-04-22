@@ -86,15 +86,17 @@ impl PartialEq for Ref {
     fn eq(&self, other: &Ref) -> bool {
         let Ref {
             ampersand: _,
+            lifetime,
             mutability,
             inner,
         } = self;
         let Ref {
             ampersand: _,
+            lifetime: lifetime2,
             mutability: mutability2,
             inner: inner2,
         } = other;
-        mutability.is_some() == mutability2.is_some() && inner == inner2
+        lifetime == lifetime2 && mutability.is_some() == mutability2.is_some() && inner == inner2
     }
 }
 
@@ -102,9 +104,11 @@ impl Hash for Ref {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let Ref {
             ampersand: _,
+            lifetime,
             mutability,
             inner,
         } = self;
+        lifetime.hash(state);
         mutability.is_some().hash(state);
         inner.hash(state);
     }
@@ -186,17 +190,21 @@ impl PartialEq for Receiver {
     fn eq(&self, other: &Receiver) -> bool {
         let Receiver {
             ampersand: _,
+            lifetime,
             mutability,
             var: _,
             ty,
+            shorthand: _,
         } = self;
         let Receiver {
             ampersand: _,
+            lifetime: lifetime2,
             mutability: mutability2,
             var: _,
             ty: ty2,
+            shorthand: _,
         } = other;
-        mutability.is_some() == mutability2.is_some() && ty == ty2
+        lifetime == lifetime2 && mutability.is_some() == mutability2.is_some() && ty == ty2
     }
 }
 
@@ -204,10 +212,13 @@ impl Hash for Receiver {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let Receiver {
             ampersand: _,
+            lifetime,
             mutability,
             var: _,
             ty,
+            shorthand: _,
         } = self;
+        lifetime.hash(state);
         mutability.is_some().hash(state);
         ty.hash(state);
     }

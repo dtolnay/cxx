@@ -1,0 +1,11 @@
+error: references with explicit lifetimes are not supported
+ --> $DIR/disallow_lifetime.rs:9:22
+  |
+9 |         fn f(string: &'a String);
+  |                      ^^^^^^^^^^
+
+error: references with explicit lifetimes are not supported
+ --> $DIR/disallow_lifetime.rs:5:14
+  |
+5 |         fn f(&'static self);
+  |              ^^^^^^^^^^^^^
