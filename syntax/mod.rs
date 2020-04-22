@@ -80,6 +80,7 @@ pub struct Receiver {
     pub mutability: Option<Token![mut]>,
     pub var: Token![self],
     pub ty: Ident,
+    pub shorthand: bool,
 }
 
 pub enum Type {

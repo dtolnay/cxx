@@ -184,6 +184,7 @@ fn parse_extern_fn(
                             mutability: arg.mutability,
                             var: Token![self](ety.ident.span()),
                             ty: ety.ident.clone(),
+                            shorthand: true,
                         });
                         continue;
                     }
@@ -211,6 +212,7 @@ fn parse_extern_fn(
                             mutability: reference.mutability,
                             var: Token![self](ident.span()),
                             ty: ident,
+                            shorthand: false,
                         });
                         continue;
                     }

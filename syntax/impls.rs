@@ -194,6 +194,7 @@ impl PartialEq for Receiver {
             mutability,
             var: _,
             ty,
+            shorthand: _,
         } = self;
         let Receiver {
             ampersand: _,
@@ -201,6 +202,7 @@ impl PartialEq for Receiver {
             mutability: mutability2,
             var: _,
             ty: ty2,
+            shorthand: _,
         } = other;
         lifetime == lifetime2 && mutability.is_some() == mutability2.is_some() && ty == ty2
     }
@@ -214,6 +216,7 @@ impl Hash for Receiver {
             mutability,
             var: _,
             ty,
+            shorthand: _,
         } = self;
         lifetime.hash(state);
         mutability.is_some().hash(state);
