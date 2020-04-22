@@ -177,9 +177,10 @@ fn parse_extern_fn(
         match arg {
             FnArg::Receiver(arg) => {
                 if let Some(ety) = single_type {
-                    if let Some((ampersand, _)) = arg.reference {
+                    if let Some((ampersand, lifetime)) = &arg.reference {
                         receiver = Some(Receiver {
-                            ampersand,
+                            ampersand: *ampersand,
+                            lifetime: lifetime.clone(),
                             mutability: arg.mutability,
                             var: Token![self](ety.ident.span()),
                             ty: ety.ident.clone(),
@@ -206,6 +207,7 @@ fn parse_extern_fn(
                     if let Type::Ident(ident) = reference.inner {
                         receiver = Some(Receiver {
                             ampersand: reference.ampersand,
+                            lifetime: reference.lifetime,
                             mutability: reference.mutability,
                             var: Token![self](ident.span()),
                             ty: ident,
@@ -273,6 +275,7 @@ fn parse_type_reference(ty: &TypeReference) -> Result<Type> {
     };
     Ok(which(Box::new(Ref {
         ampersand: ty.and_token,
+        lifetime: ty.lifetime.clone(),
         mutability: ty.mutability,
         inner,
     })))
