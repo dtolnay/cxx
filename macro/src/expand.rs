@@ -126,7 +126,10 @@ fn expand_cxx_type(ety: &ExternType) -> TokenStream {
 
 fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types) -> TokenStream {
     let ident = &efn.ident;
-    let receiver = efn.receiver.iter().map(|receiver| quote!(_: #receiver));
+    let receiver = efn.receiver.iter().map(|receiver| {
+        let receiver_type = receiver.ty();
+        quote!(_: #receiver_type)
+    });
     let args = efn.args.iter().map(|arg| {
         let ident = &arg.ident;
         let ty = expand_extern_type(&arg.ty);
@@ -383,10 +386,10 @@ fn expand_rust_function_shim_impl(
         .receiver
         .as_ref()
         .map(|receiver| quote_spanned!(receiver.var.span=> __self));
-    let receiver = sig
-        .receiver
-        .as_ref()
-        .map(|receiver| quote!(#receiver_var: #receiver));
+    let receiver = sig.receiver.as_ref().map(|receiver| {
+        let receiver_type = receiver.ty();
+        quote!(#receiver_var: #receiver_type)
+    });
     let args = sig.args.iter().map(|arg| {
         let ident = &arg.ident;
         let ty = expand_extern_type(&arg.ty);

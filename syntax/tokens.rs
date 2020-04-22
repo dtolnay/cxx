@@ -98,10 +98,19 @@ impl ToTokens for Signature {
     }
 }
 
-impl ToTokens for Receiver {
+pub struct ReceiverType<'a>(&'a Receiver);
+
+impl Receiver {
+    // &TheType
+    pub fn ty(&self) -> ReceiverType {
+        ReceiverType(self)
+    }
+}
+
+impl ToTokens for ReceiverType<'_> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        self.ampersand.to_tokens(tokens);
-        self.mutability.to_tokens(tokens);
-        self.ty.to_tokens(tokens);
+        self.0.ampersand.to_tokens(tokens);
+        self.0.mutability.to_tokens(tokens);
+        self.0.ty.to_tokens(tokens);
     }
 }
