@@ -15,7 +15,14 @@ C::C(size_t n) : n(n) {}
 
 size_t C::get() const { return this->n; }
 
+size_t C::get2() const { return this->n; }
+
 size_t C::set(size_t n) {
+  this->n = n;
+  return this->n;
+}
+
+size_t C::set2(size_t n) {
   this->n = n;
   return this->n;
 }
