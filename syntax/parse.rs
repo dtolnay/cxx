@@ -93,13 +93,10 @@ fn parse_foreign_mod(foreign_mod: ItemForeignMod) -> Result<Vec<Api>> {
 
     let mut types = Vec::new();
     for foreign in &foreign_mod.items {
-        match foreign {
-            ForeignItem::Type(foreign) => {
-                check_reserved_name(&foreign.ident)?;
-                let ety = parse_extern_type(foreign)?;
-                types.push(ety);
-            }
-            _ => {}
+        if let ForeignItem::Type(foreign) = foreign {
+            check_reserved_name(&foreign.ident)?;
+            let ety = parse_extern_type(foreign)?;
+            types.push(ety);
         }
     }
     let single_type = if types.len() == 1 {
@@ -178,19 +175,19 @@ fn parse_extern_fn(
     for arg in foreign_fn.sig.inputs.pairs() {
         let (arg, comma) = arg.into_tuple();
         match arg {
-            FnArg::Receiver(rcvr) => {
+            FnArg::Receiver(arg) => {
                 if let Some(ety) = single_type {
-                    if let Some((and, _)) = rcvr.reference {
+                    if let Some((ampersand, _)) = arg.reference {
                         receiver = Some(Receiver {
-                            ampersand: and,
-                            mutability: rcvr.mutability,
+                            ampersand,
+                            mutability: arg.mutability,
                             var: Token![self](ety.ident.span()),
                             ty: ety.ident.clone(),
                         });
                         continue;
                     }
                 }
-                return Err(Error::new_spanned(rcvr, "unsupported signature"));
+                return Err(Error::new_spanned(arg, "unsupported signature"));
             }
             FnArg::Typed(arg) => {
                 let ident = match arg.pat.as_ref() {
