@@ -141,6 +141,14 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
 
 fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
     if let Some(receiver) = &efn.receiver {
+        if !cx.types.structs.contains_key(&receiver.ty)
+            && !cx.types.cxx.contains(&receiver.ty)
+            && !cx.types.rust.contains(&receiver.ty)
+        {
+            let span = span_for_receiver_error(receiver);
+            cx.error(span, "unrecognized receiver type");
+        }
+
         if receiver.lifetime.is_some() {
             let span = span_for_receiver_error(receiver);
             cx.error(span, "references with explicit lifetimes are not supported");
