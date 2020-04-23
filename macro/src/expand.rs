@@ -32,7 +32,8 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
                 has_rust_type = true;
             }
             let ident = &ety.ident;
-            hidden.extend(quote!(__assert_sized::<#ident>();));
+            let span = ident.span();
+            hidden.extend(quote_spanned!(span=> __assert_sized::<#ident>();));
         }
     }
 
