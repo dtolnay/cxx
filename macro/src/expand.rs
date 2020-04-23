@@ -20,20 +20,15 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
 
     let mut expanded = TokenStream::new();
     let mut hidden = TokenStream::new();
-    let mut has_rust_type = false;
 
     for api in &apis {
         if let Api::RustType(ety) = api {
             expanded.extend(expand_rust_type(ety));
-            if !has_rust_type {
-                hidden.extend(quote!(
-                    const fn __assert_sized<T>() {}
-                ));
-                has_rust_type = true;
-            }
             let ident = &ety.ident;
             let span = ident.span();
-            hidden.extend(quote_spanned!(span=> __assert_sized::<#ident>();));
+            hidden.extend(quote_spanned! {span=>
+                let _ = ::std::ptr::read::<#ident>;
+            });
         }
     }
 
