@@ -332,11 +332,8 @@ matter of designing a nice API for each in its non-native language.
 ## Remaining work
 
 This is still early days for CXX; I am releasing it as a minimum viable product
-to collect feedback on the direction and invite collaborators. Here are some of
-the facets that I still intend for this project to tackle:
-
-- [ ] Support structs with type parameters
-- [ ] Support async functions
+to collect feedback on the direction and invite collaborators. Please check the
+open issues.
 
 On the build side, I don't have much experience with the `cc` crate so I expect
 there may be someone who can suggest ways to make that aspect of this crate
