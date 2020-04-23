@@ -89,24 +89,15 @@ fn parse_foreign_mod(foreign_mod: ItemForeignMod) -> Result<Vec<Api>> {
         Lang::Rust => Api::RustFunction,
     };
 
-    let mut types = Vec::new();
-    for foreign in &foreign_mod.items {
-        if let ForeignItem::Type(foreign) = foreign {
-            let ety = parse_extern_type(foreign)?;
-            types.push(ety);
-        }
-    }
-    let single_type = if types.len() == 1 {
-        Some(&types[0])
-    } else {
-        None
-    };
     let mut items = Vec::new();
     for foreign in &foreign_mod.items {
         match foreign {
-            ForeignItem::Type(_) => {}
+            ForeignItem::Type(foreign) => {
+                let ety = parse_extern_type(foreign)?;
+                items.push(api_type(ety));
+            }
             ForeignItem::Fn(foreign) => {
-                let efn = parse_extern_fn(foreign, lang, &single_type)?;
+                let efn = parse_extern_fn(foreign, lang)?;
                 items.push(api_function(efn));
             }
             ForeignItem::Macro(foreign) if foreign.mac.path.is_ident("include") => {
@@ -116,7 +107,24 @@ fn parse_foreign_mod(foreign_mod: ItemForeignMod) -> Result<Vec<Api>> {
             _ => return Err(Error::new_spanned(foreign, "unsupported foreign item")),
         }
     }
-    items.extend(types.into_iter().map(|ety| api_type(ety)));
+
+    let mut types = items.iter().filter_map(|item| match item {
+        Api::CxxType(ty) | Api::RustType(ty) => Some(ty),
+        _ => None,
+    });
+    if let (Some(single_type), None) = (types.next(), types.next()) {
+        let single_type = single_type.ident.clone();
+        for item in &mut items {
+            if let Api::CxxFunction(efn) | Api::RustFunction(efn) = item {
+                if let Some(receiver) = &mut efn.receiver {
+                    if receiver.ty == "Self" {
+                        receiver.ty = single_type.clone();
+                    }
+                }
+            }
+        }
+    }
+
     Ok(items)
 }
 
@@ -148,11 +156,7 @@ fn parse_extern_type(foreign_type: &ForeignItemType) -> Result<ExternType> {
     })
 }
 
-fn parse_extern_fn(
-    foreign_fn: &ForeignItemFn,
-    lang: Lang,
-    single_type: &Option<&ExternType>,
-) -> Result<ExternFn> {
+fn parse_extern_fn(foreign_fn: &ForeignItemFn, lang: Lang) -> Result<ExternFn> {
     let generics = &foreign_fn.sig.generics;
     if !generics.params.is_empty() || generics.where_clause.is_some() {
         return Err(Error::new_spanned(
@@ -173,18 +177,16 @@ fn parse_extern_fn(
         let (arg, comma) = arg.into_tuple();
         match arg {
             FnArg::Receiver(arg) => {
-                if let Some(ety) = single_type {
-                    if let Some((ampersand, lifetime)) = &arg.reference {
-                        receiver = Some(Receiver {
-                            ampersand: *ampersand,
-                            lifetime: lifetime.clone(),
-                            mutability: arg.mutability,
-                            var: arg.self_token,
-                            ty: ety.ident.clone(),
-                            shorthand: true,
-                        });
-                        continue;
-                    }
+                if let Some((ampersand, lifetime)) = &arg.reference {
+                    receiver = Some(Receiver {
+                        ampersand: *ampersand,
+                        lifetime: lifetime.clone(),
+                        mutability: arg.mutability,
+                        var: arg.self_token,
+                        ty: Token![Self](arg.self_token.span).into(),
+                        shorthand: true,
+                    });
+                    continue;
                 }
                 return Err(Error::new_spanned(arg, "unsupported signature"));
             }

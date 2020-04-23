@@ -148,16 +148,28 @@ fn check_api_type(cx: &mut Check, ty: &ExternType) {
 
 fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
     if let Some(receiver) = &efn.receiver {
-        if !cx.types.structs.contains_key(&receiver.ty)
+        let ref span = span_for_receiver_error(receiver);
+
+        if receiver.ty == "Self" {
+            let mutability = match receiver.mutability {
+                Some(_) => "mut ",
+                None => "",
+            };
+            let msg = format!(
+                "unnamed receiver type is only allowed if the surrounding \
+                 extern block contains exactly one extern type; \
+                 use `self: &{mutability}TheType`",
+                mutability = mutability,
+            );
+            cx.error(span, msg);
+        } else if !cx.types.structs.contains_key(&receiver.ty)
             && !cx.types.cxx.contains(&receiver.ty)
             && !cx.types.rust.contains(&receiver.ty)
         {
-            let span = span_for_receiver_error(receiver);
             cx.error(span, "unrecognized receiver type");
         }
 
         if receiver.lifetime.is_some() {
-            let span = span_for_receiver_error(receiver);
             cx.error(span, "references with explicit lifetimes are not supported");
         }
     }
