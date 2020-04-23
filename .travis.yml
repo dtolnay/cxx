@@ -3,6 +3,7 @@ language: rust
 rust:
   - nightly
   - beta
+  - stable
 
 script:
   - cargo run --manifest-path demo-rs/Cargo.toml
