@@ -1,6 +1,6 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::{
-    error, ident, Api, ExternFn, Lang, Receiver, Ref, Slice, Struct, Ty1, Type, Types,
+    error, ident, Api, ExternFn, ExternType, Lang, Receiver, Ref, Slice, Struct, Ty1, Type, Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
@@ -39,6 +39,7 @@ fn do_typecheck(cx: &mut Check) {
     for api in cx.apis {
         match api {
             Api::Struct(strct) => check_api_struct(cx, strct),
+            Api::CxxType(ty) | Api::RustType(ty) => check_api_type(cx, ty),
             Api::CxxFunction(efn) | Api::RustFunction(efn) => check_api_fn(cx, efn),
             _ => {}
         }
@@ -119,6 +120,8 @@ fn check_type_slice(cx: &mut Check, ty: &Slice) {
 }
 
 fn check_api_struct(cx: &mut Check, strct: &Struct) {
+    check_reserved_name(cx, &strct.ident);
+
     if strct.fields.is_empty() {
         let span = span_for_struct_error(strct);
         cx.error(span, "structs without any fields are not supported");
@@ -137,6 +140,10 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
             );
         }
     }
+}
+
+fn check_api_type(cx: &mut Check, ty: &ExternType) {
+    check_reserved_name(cx, &ty.ident);
 }
 
 fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
@@ -225,6 +232,12 @@ fn check_multiple_arg_lifetimes(cx: &mut Check, efn: &ExternFn) {
             efn,
             "functions that return a reference must take exactly one input reference",
         );
+    }
+}
+
+fn check_reserved_name(cx: &mut Check, ident: &Ident) {
+    if ident == "Box" || ident == "UniquePtr" || Atom::from(ident).is_some() {
+        cx.error(ident, "reserved name");
     }
 }
 
