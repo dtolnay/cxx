@@ -1,9 +1,8 @@
 use crate::syntax::Atom::*;
 use crate::syntax::{
-    attrs, error, Api, Atom, Doc, ExternFn, ExternType, Lang, Receiver, Ref, Signature, Slice,
-    Struct, Ty1, Type, Var,
+    attrs, error, Api, Doc, ExternFn, ExternType, Lang, Receiver, Ref, Signature, Slice, Struct,
+    Ty1, Type, Var,
 };
-use proc_macro2::Ident;
 use quote::{format_ident, quote};
 use syn::punctuated::Punctuated;
 use syn::{
@@ -51,7 +50,6 @@ fn parse_struct(item: ItemStruct) -> Result<Api> {
     let mut doc = Doc::new();
     let mut derives = Vec::new();
     attrs::parse(&item.attrs, &mut doc, Some(&mut derives))?;
-    check_reserved_name(&item.ident)?;
 
     let fields = match item.fields {
         Fields::Named(fields) => fields,
@@ -94,7 +92,6 @@ fn parse_foreign_mod(foreign_mod: ItemForeignMod) -> Result<Vec<Api>> {
     let mut types = Vec::new();
     for foreign in &foreign_mod.items {
         if let ForeignItem::Type(foreign) = foreign {
-            check_reserved_name(&foreign.ident)?;
             let ety = parse_extern_type(foreign)?;
             types.push(ety);
         }
@@ -394,13 +391,5 @@ fn parse_return_type(
     match parse_type(ret)? {
         Type::Void(_) => Ok(None),
         ty => Ok(Some(ty)),
-    }
-}
-
-fn check_reserved_name(ident: &Ident) -> Result<()> {
-    if ident == "Box" || ident == "UniquePtr" || Atom::from(ident).is_some() {
-        Err(Error::new(ident.span(), "reserved name"))
-    } else {
-        Ok(())
     }
 }
