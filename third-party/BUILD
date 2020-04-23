@@ -19,7 +19,7 @@ rust_library(
 
 rust_library(
     name = "cc",
-    srcs = glob(["vendor/cc-1.0.50/src/**"]),
+    srcs = glob(["vendor/cc-1.0.52/src/**"]),
     visibility = ["//visibility:public"],
 )
 
@@ -112,7 +112,7 @@ rust_library(
 
 rust_library(
     name = "structopt",
-    srcs = glob(["vendor/structopt-0.3.13/src/**"]),
+    srcs = glob(["vendor/structopt-0.3.14/src/**"]),
     visibility = ["//visibility:public"],
     deps = [
         ":clap",
@@ -123,7 +123,7 @@ rust_library(
 
 rust_library(
     name = "structopt-derive",
-    srcs = glob(["vendor/structopt-derive-0.4.6/src/**"]),
+    srcs = glob(["vendor/structopt-derive-0.4.7/src/**"]),
     crate_type = "proc-macro",
     deps = [
         ":heck",
