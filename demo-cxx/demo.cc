@@ -13,9 +13,9 @@ std::unique_ptr<ThingC> make_demo(rust::Str appname) {
   return std::unique_ptr<ThingC>(new ThingC(std::string(appname)));
 }
 
-const std::string &get_name(const ThingC &thing) { return thing.appname; }
+const std::string &ThingC::get_name() const { return this->appname; }
 
-void do_thing(SharedThing state) { print_r(*state.y); }
+void do_thing(SharedThing state) { state.y->print(); }
 
 } // namespace example
 } // namespace org
