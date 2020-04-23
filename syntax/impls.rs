@@ -1,13 +1,19 @@
 use crate::syntax::{ExternFn, Receiver, Ref, Signature, Slice, Ty1, Type};
 use std::hash::{Hash, Hasher};
 use std::mem;
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 
 impl Deref for ExternFn {
     type Target = Signature;
 
     fn deref(&self) -> &Self::Target {
         &self.sig
+    }
+}
+
+impl DerefMut for ExternFn {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.sig
     }
 }
 
