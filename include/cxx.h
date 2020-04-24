@@ -84,24 +84,6 @@ private:
 };
 #endif // CXXBRIDGE02_RUST_STR
 
-#ifndef CXXBRIDGE02_RUST_VEC
-#define CXXBRIDGE02_RUST_VEC
-template <typename T>
-class Vec final {
-public:
-  size_t size() const noexcept;
-
-private:
-  Vec() noexcept;
-  Vec(const Vec &other) noexcept;
-  Vec &operator=(Vec other) noexcept;
-  void drop() noexcept;
-
-  // Size and alignment statically verified by rust_vec.rs.
-  std::array<uintptr_t, 3> repr;
-};
-#endif // CXXBRIDGE02_RUST_VEC
-
 #ifndef CXXBRIDGE02_RUST_SLICE
 #define CXXBRIDGE02_RUST_SLICE
 template <typename T>
@@ -217,6 +199,24 @@ private:
   T *ptr;
 };
 #endif // CXXBRIDGE02_RUST_BOX
+
+#ifndef CXXBRIDGE02_RUST_VEC
+#define CXXBRIDGE02_RUST_VEC
+template <typename T>
+class Vec final {
+public:
+  size_t size() const noexcept;
+
+private:
+  Vec() noexcept;
+  Vec(const Vec &other) noexcept;
+  Vec &operator=(Vec other) noexcept;
+  void drop() noexcept;
+
+  // Size and alignment statically verified by rust_vec.rs.
+  std::array<uintptr_t, 3> repr;
+};
+#endif // CXXBRIDGE02_RUST_VEC
 
 #ifndef CXXBRIDGE02_RUST_FN
 #define CXXBRIDGE02_RUST_FN
