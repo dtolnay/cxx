@@ -36,6 +36,10 @@ impl CxxString {
     }
 
     /// Returns true if `self` has a length of zero bytes.
+    ///
+    /// Matches the behavior of C++ [std::string::empty][empty].
+    ///
+    /// [empty]: https://en.cppreference.com/w/cpp/string/basic_string/empty
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
