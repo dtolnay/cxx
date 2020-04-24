@@ -594,7 +594,7 @@ fn expand_rust_vec(namespace: &Namespace, ty: &Type, ident: &Ident) -> TokenStre
         #[doc(hidden)]
         #[export_name = #link_drop]
         unsafe extern "C" fn #local_drop(this: *mut ::cxx::RustVec<#inner>) {
-            std::ptr::drop_in_place(this);
+            ::std::ptr::drop_in_place(this);
         }
         #[doc(hidden)]
         #[export_name = #link_len]
