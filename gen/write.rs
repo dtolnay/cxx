@@ -1147,10 +1147,10 @@ fn write_vector(out: &mut OutFile, ident: &Ident) {
 
     writeln!(
         out,
-        "const {} *cxxbridge02$std$vector${}$get_unchecked(const ::std::vector<{}> &s, size_t pos) noexcept {{",
+        "const {} &cxxbridge02$std$vector${}$get_unchecked(const ::std::vector<{}> &s, size_t pos) noexcept {{",
         inner, instance, inner,
     );
-    writeln!(out, "  return &s[pos];");
+    writeln!(out, "  return s[pos];");
     writeln!(out, "}}");
     writeln!(out, "#endif // CXXBRIDGE02_vector_{}", instance);
 }

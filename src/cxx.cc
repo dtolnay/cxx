@@ -209,9 +209,9 @@ void cxxbridge02$unique_ptr$std$string$drop(
       std::vector<CXX_TYPE> &s, const CXX_TYPE &item) noexcept {               \
     s.push_back(item);                                                         \
   }                                                                            \
-  const CXX_TYPE *cxxbridge02$std$vector$##RUST_TYPE##$get_unchecked(          \
+  const CXX_TYPE &cxxbridge02$std$vector$##RUST_TYPE##$get_unchecked(          \
       const std::vector<CXX_TYPE> &s, size_t pos) noexcept {                   \
-    return &s[pos];                                                            \
+    return s[pos];                                                             \
   }                                                                            \
   static_assert(sizeof(::std::unique_ptr<std::vector<CXX_TYPE>>) ==            \
                     sizeof(void *),                                            \
