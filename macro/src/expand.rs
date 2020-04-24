@@ -228,7 +228,7 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
             // These are arguments for which C++ has taken ownership of the data
             // behind the mut reference it received.
             quote! {
-                let mut #var = std::mem::MaybeUninit::new(#var);
+                let mut #var = ::std::mem::MaybeUninit::new(#var);
             }
         })
         .collect::<TokenStream>();
