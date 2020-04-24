@@ -68,15 +68,9 @@ impl<'a, T: VectorElement<T>> Iterator for VectorIntoIterator<'a, T> {
 // codebase.
 #[doc(hidden)]
 pub unsafe trait VectorElement<T> {
-    fn __get_unchecked(v: &CxxVector<T>, pos: usize) -> &T
-    where
-        Self: Sized;
-    fn __vector_length(v: &CxxVector<T>) -> usize
-    where
-        Self: Sized;
-    fn __push_back(v: &CxxVector<T>, item: &T)
-    where
-        Self: Sized;
+    fn __get_unchecked(v: &CxxVector<T>, pos: usize) -> &T;
+    fn __vector_length(v: &CxxVector<T>) -> usize;
+    fn __push_back(v: &CxxVector<T>, item: &T);
 }
 
 cxxbridge_macro::vector_builtin!(u8);
