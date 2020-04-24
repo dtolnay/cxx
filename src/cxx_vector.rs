@@ -19,15 +19,6 @@ impl<T: VectorElement> CxxVector<T> {
         T::__vector_length(self)
     }
 
-    /// Returns a reference to an element without doing bounds checking.
-    ///
-    /// This is generally not recommended, use with caution! Calling this method
-    /// with an out-of-bounds index is undefined behavior even if the resulting
-    /// reference is not used.
-    pub unsafe fn get_unchecked(&self, pos: usize) -> &T {
-        T::__get_unchecked(self, pos)
-    }
-
     /// Returns true if the vector contains no elements.
     pub fn is_empty(&self) -> bool {
         self.len() == 0
@@ -41,6 +32,15 @@ impl<T: VectorElement> CxxVector<T> {
         } else {
             None
         }
+    }
+
+    /// Returns a reference to an element without doing bounds checking.
+    ///
+    /// This is generally not recommended, use with caution! Calling this method
+    /// with an out-of-bounds index is undefined behavior even if the resulting
+    /// reference is not used.
+    pub unsafe fn get_unchecked(&self, pos: usize) -> &T {
+        T::__get_unchecked(self, pos)
     }
 
     /// Appends an element to the back of the vector.
