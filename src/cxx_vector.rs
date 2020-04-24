@@ -49,21 +49,21 @@ impl<T: VectorElement> CxxVector<T> {
     }
 }
 
-pub struct VectorIntoIterator<'a, T> {
+pub struct Iter<'a, T> {
     v: &'a CxxVector<T>,
     index: usize,
 }
 
 impl<'a, T: VectorElement> IntoIterator for &'a CxxVector<T> {
     type Item = &'a T;
-    type IntoIter = VectorIntoIterator<'a, T>;
+    type IntoIter = Iter<'a, T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        VectorIntoIterator { v: self, index: 0 }
+        Iter { v: self, index: 0 }
     }
 }
 
-impl<'a, T: VectorElement> Iterator for VectorIntoIterator<'a, T> {
+impl<'a, T: VectorElement> Iterator for Iter<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
