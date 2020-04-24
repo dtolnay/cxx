@@ -599,7 +599,7 @@ fn expand_rust_vec(namespace: &Namespace, ty: &Type, ident: &Ident) -> TokenStre
         #[doc(hidden)]
         #[export_name = #link_len]
         unsafe extern "C" fn #local_len(this: *const ::cxx::RustVec<#inner>) -> usize {
-            this.as_ref().unwrap().len()
+            (*this).len()
         }
     }
 }
