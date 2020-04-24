@@ -58,9 +58,10 @@ impl CxxString {
     /// Note that the return type may look like `const char *` but is not a
     /// `const char *` in the typical C sense, as C++ strings may contain
     /// internal null bytes. As such, the returned pointer only makes sense as a
-    /// string in combination with the length returned by [`len()`](#len).
+    /// string in combination with the length returned by [`len()`][len].
     ///
     /// [data]: https://en.cppreference.com/w/cpp/string/basic_string/data
+    /// [len]: #method.len
     pub fn as_ptr(&self) -> *const u8 {
         unsafe { string_data(self) }
     }
