@@ -664,22 +664,18 @@ fn expand_vector(namespace: &Namespace, ty: &Type) -> TokenStream {
                 __get_unchecked(v, pos)
             }
             fn __vector_size(v: &::cxx::CxxVector<#inner>) -> usize {
-                unsafe {
-                    extern "C" {
-                        #[link_name = #link_size]
-                        fn __vector_size(_: &::cxx::CxxVector<#inner>) -> usize;
-                    }
-                    __vector_size(v)
+                extern "C" {
+                    #[link_name = #link_size]
+                    fn __vector_size(_: &::cxx::CxxVector<#inner>) -> usize;
                 }
+                unsafe { __vector_size(v) }
             }
             fn __push_back(v: &::cxx::CxxVector<#inner>, item: &#inner) {
-                unsafe {
-                    extern "C" {
-                        #[link_name = #link_push_back]
-                        fn __push_back(_: &::cxx::CxxVector<#inner>, _: &#inner);
-                    }
-                    __push_back(v, item);
+                extern "C" {
+                    #[link_name = #link_push_back]
+                    fn __push_back(_: &::cxx::CxxVector<#inner>, _: &#inner);
                 }
+                unsafe { __push_back(v, item) }
             }
         }
     }
@@ -705,22 +701,18 @@ pub fn impl_vector_element_for_primitive(ident: Ident) -> TokenStream {
                 __get_unchecked(v, pos)
             }
             fn __vector_size(v: &CxxVector<#inner>) -> usize {
-                unsafe {
-                    extern "C" {
-                        #[link_name = #link_size]
-                        fn __vector_size(_: &CxxVector<#inner>) -> usize;
-                    }
-                    __vector_size(v)
+                extern "C" {
+                    #[link_name = #link_size]
+                    fn __vector_size(_: &CxxVector<#inner>) -> usize;
                 }
+                unsafe { __vector_size(v) }
             }
             fn __push_back(v: &CxxVector<#inner>, item: &#inner) {
-                unsafe {
-                    extern "C" {
-                        #[link_name = #link_push_back]
-                        fn __push_back(_: &CxxVector<#inner>, _: &#inner);
-                    }
-                    __push_back(v, item);
+                extern "C" {
+                    #[link_name = #link_push_back]
+                    fn __push_back(_: &CxxVector<#inner>, _: &#inner);
                 }
+                unsafe { __push_back(v, item) }
             }
         }
     }
