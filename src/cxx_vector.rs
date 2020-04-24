@@ -14,20 +14,27 @@ pub struct CxxVector<T> {
 }
 
 impl<T: VectorElement> CxxVector<T> {
-    /// Returns the length of the vector in bytes.
+    /// Returns the number of elements in the vector.
     pub fn len(&self) -> usize {
         T::__vector_length(self)
     }
 
+    /// Returns a reference to an element without doing bounds checking.
+    ///
+    /// This is generally not recommended, use with caution! Calling this method
+    /// with an out-of-bounds index is undefined behavior even if the resulting
+    /// reference is not used.
     pub unsafe fn get_unchecked(&self, pos: usize) -> &T {
         T::__get_unchecked(self, pos)
     }
 
-    /// Returns true if `self` has a length of zero bytes.
+    /// Returns true if the vector contains no elements.
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
 
+    /// Returns a reference to an element at the given position, or `None` if
+    /// out of bounds.
     pub fn get(&self, pos: usize) -> Option<&T> {
         if pos < self.len() {
             Some(unsafe { T::__get_unchecked(self, pos) })
@@ -36,6 +43,7 @@ impl<T: VectorElement> CxxVector<T> {
         }
     }
 
+    /// Appends an element to the back of the vector.
     pub fn push_back(&mut self, item: &T) {
         T::__push_back(self, item);
     }
