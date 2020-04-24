@@ -663,13 +663,13 @@ fn expand_vector(namespace: &Namespace, ty: &Type) -> TokenStream {
                 }
                 __get_unchecked(v, pos)
             }
-            fn __vector_length(v: &::cxx::CxxVector<#inner>) -> usize {
+            fn __vector_size(v: &::cxx::CxxVector<#inner>) -> usize {
                 unsafe {
                     extern "C" {
                         #[link_name = #link_length]
-                        fn __vector_length(_: &::cxx::CxxVector<#inner>) -> usize;
+                        fn __vector_size(_: &::cxx::CxxVector<#inner>) -> usize;
                     }
-                    __vector_length(v)
+                    __vector_size(v)
                 }
             }
             fn __push_back(v: &::cxx::CxxVector<#inner>, item: &#inner) {
@@ -704,13 +704,13 @@ pub fn expand_vector_builtin(ident: Ident) -> TokenStream {
                 }
                 __get_unchecked(v, pos)
             }
-            fn __vector_length(v: &CxxVector<#inner>) -> usize {
+            fn __vector_size(v: &CxxVector<#inner>) -> usize {
                 unsafe {
                     extern "C" {
                         #[link_name = #link_length]
-                        fn __vector_length(_: &CxxVector<#inner>) -> usize;
+                        fn __vector_size(_: &CxxVector<#inner>) -> usize;
                     }
-                    __vector_length(v)
+                    __vector_size(v)
                 }
             }
             fn __push_back(v: &CxxVector<#inner>, item: &#inner) {

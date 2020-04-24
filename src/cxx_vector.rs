@@ -16,7 +16,7 @@ pub struct CxxVector<T> {
 impl<T: VectorElement> CxxVector<T> {
     /// Returns the number of elements in the vector.
     pub fn len(&self) -> usize {
-        T::__vector_length(self)
+        T::__vector_size(self)
     }
 
     /// Returns true if the vector contains no elements.
@@ -77,7 +77,7 @@ impl<'a, T: VectorElement> Iterator for Iter<'a, T> {
 #[doc(hidden)]
 pub unsafe trait VectorElement: Sized {
     unsafe fn __get_unchecked(v: &CxxVector<Self>, pos: usize) -> &Self;
-    fn __vector_length(v: &CxxVector<Self>) -> usize;
+    fn __vector_size(v: &CxxVector<Self>) -> usize;
     fn __push_back(v: &CxxVector<Self>, item: &Self);
 }
 
