@@ -23,4 +23,4 @@ impl RustSliceU8 {
     }
 }
 
-const_assert!(mem::size_of::<Option<RustSliceU8>>() == mem::size_of::<RustSliceU8>());
+const_assert_eq!(mem::size_of::<Option<RustSliceU8>>(), mem::size_of::<RustSliceU8>());

@@ -31,4 +31,4 @@ unsafe extern "C" fn str_valid(ptr: *const u8, len: usize) -> bool {
     str::from_utf8(slice).is_ok()
 }
 
-const_assert!(mem::size_of::<Option<RustStr>>() == mem::size_of::<RustStr>());
+const_assert_eq!(mem::size_of::<Option<RustStr>>(), mem::size_of::<RustStr>());
