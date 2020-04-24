@@ -206,6 +206,7 @@ template <typename T>
 class Vec final {
 public:
   size_t size() const noexcept;
+  bool empty() const noexcept { return size() == 0; }
 
 private:
   Vec() noexcept;
