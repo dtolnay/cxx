@@ -71,7 +71,5 @@ unsafe extern "C" fn string_len(this: &String) -> usize {
     this.len()
 }
 
-fn _assert() {
-    let _: [(); mem::size_of::<[usize; 3]>()] = [(); mem::size_of::<String>()];
-    let _: [(); mem::align_of::<usize>()] = [(); mem::align_of::<String>()];
-}
+const_assert_eq!(mem::size_of::<[usize; 3]>(), mem::size_of::<String>());
+const_assert_eq!(mem::align_of::<usize>(), mem::align_of::<String>());

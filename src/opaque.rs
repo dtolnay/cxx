@@ -10,7 +10,5 @@ pub struct Opaque {
     _private: [*const u8; 0],
 }
 
-fn _assert() {
-    let _: [(); 0] = [(); mem::size_of::<Opaque>()];
-    let _: [(); 1] = [(); mem::align_of::<Opaque>()];
-}
+const_assert_eq!(0, mem::size_of::<Opaque>());
+const_assert_eq!(1, mem::align_of::<Opaque>());
