@@ -1,6 +1,6 @@
 use std::mem;
 
-/// Binding to C++ `std::vector<T>`.
+/// Binding to C++ `std::vector<T, std::allocator<T>>`.
 ///
 /// # Invariants
 ///
