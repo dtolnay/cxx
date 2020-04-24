@@ -656,14 +656,12 @@ fn expand_vector(namespace: &Namespace, ty: &Type) -> TokenStream {
 
     quote! {
         unsafe impl ::cxx::private::VectorElement<#inner> for #inner {
-            fn __get_unchecked(v: &::cxx::CxxVector<#inner>, pos: usize) -> &#inner {
+            unsafe fn __get_unchecked(v: &::cxx::CxxVector<#inner>, pos: usize) -> &#inner {
                 extern "C" {
                     #[link_name = #link_get_unchecked]
                     fn __get_unchecked(_: &::cxx::CxxVector<#inner>, _: usize) -> &#inner;
                 }
-                unsafe {
-                    __get_unchecked(v, pos)
-                }
+                __get_unchecked(v, pos)
             }
             fn __vector_length(v: &::cxx::CxxVector<#inner>) -> usize {
                 unsafe {
@@ -699,14 +697,12 @@ pub fn expand_vector_builtin(ident: Ident) -> TokenStream {
 
     quote! {
         unsafe impl VectorElement<#inner> for #inner {
-            fn __get_unchecked(v: &CxxVector<#inner>, pos: usize) -> &#inner {
+            unsafe fn __get_unchecked(v: &CxxVector<#inner>, pos: usize) -> &#inner {
                 extern "C" {
                     #[link_name = #link_get_unchecked]
                     fn __get_unchecked(_: &CxxVector<#inner>, _: usize) -> &#inner;
                 }
-                unsafe {
-                    __get_unchecked(v, pos)
-                }
+                __get_unchecked(v, pos)
             }
             fn __vector_length(v: &CxxVector<#inner>) -> usize {
                 unsafe {

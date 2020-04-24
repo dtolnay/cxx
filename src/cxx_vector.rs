@@ -19,7 +19,7 @@ impl<T: VectorElement<T>> CxxVector<T> {
         T::__vector_length(self)
     }
 
-    pub fn get_unchecked(&self, pos: usize) -> &T {
+    pub unsafe fn get_unchecked(&self, pos: usize) -> &T {
         T::__get_unchecked(self, pos)
     }
 
@@ -30,7 +30,7 @@ impl<T: VectorElement<T>> CxxVector<T> {
 
     pub fn get(&self, pos: usize) -> Option<&T> {
         if pos < self.size() {
-            Some(self.get_unchecked(pos))
+            Some(unsafe { T::__get_unchecked(self, pos) })
         } else {
             None
         }
@@ -68,7 +68,7 @@ impl<'a, T: VectorElement<T>> Iterator for VectorIntoIterator<'a, T> {
 // codebase.
 #[doc(hidden)]
 pub unsafe trait VectorElement<T> {
-    fn __get_unchecked(v: &CxxVector<T>, pos: usize) -> &T;
+    unsafe fn __get_unchecked(v: &CxxVector<T>, pos: usize) -> &T;
     fn __vector_length(v: &CxxVector<T>) -> usize;
     fn __push_back(v: &CxxVector<T>, item: &T);
 }
