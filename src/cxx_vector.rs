@@ -1,3 +1,4 @@
+use cxxbridge_macro::vector_builtin;
 use std::mem;
 
 /// Binding to C++ `std::vector<T>`.
@@ -81,17 +82,17 @@ pub unsafe trait VectorElement: Sized {
     fn __push_back(v: &CxxVector<Self>, item: &Self);
 }
 
-cxxbridge_macro::vector_builtin!(u8);
-cxxbridge_macro::vector_builtin!(u16);
-cxxbridge_macro::vector_builtin!(u32);
-cxxbridge_macro::vector_builtin!(u64);
-cxxbridge_macro::vector_builtin!(usize);
-cxxbridge_macro::vector_builtin!(i8);
-cxxbridge_macro::vector_builtin!(i16);
-cxxbridge_macro::vector_builtin!(i32);
-cxxbridge_macro::vector_builtin!(i64);
-cxxbridge_macro::vector_builtin!(isize);
-cxxbridge_macro::vector_builtin!(f32);
-cxxbridge_macro::vector_builtin!(f64);
+vector_builtin!(u8);
+vector_builtin!(u16);
+vector_builtin!(u32);
+vector_builtin!(u64);
+vector_builtin!(usize);
+vector_builtin!(i8);
+vector_builtin!(i16);
+vector_builtin!(i32);
+vector_builtin!(i64);
+vector_builtin!(isize);
+vector_builtin!(f32);
+vector_builtin!(f64);
 
 const_assert_eq!(1, mem::align_of::<CxxVector<usize>>());
