@@ -13,7 +13,7 @@ pub struct CxxVector<T> {
     _private: [T; 0],
 }
 
-impl<T: VectorElement<T>> CxxVector<T> {
+impl<T: VectorElement> CxxVector<T> {
     /// Returns the length of the vector in bytes.
     pub fn len(&self) -> usize {
         T::__vector_length(self)
@@ -46,7 +46,7 @@ pub struct VectorIntoIterator<'a, T> {
     index: usize,
 }
 
-impl<'a, T: VectorElement<T>> IntoIterator for &'a CxxVector<T> {
+impl<'a, T: VectorElement> IntoIterator for &'a CxxVector<T> {
     type Item = &'a T;
     type IntoIter = VectorIntoIterator<'a, T>;
 
@@ -55,7 +55,7 @@ impl<'a, T: VectorElement<T>> IntoIterator for &'a CxxVector<T> {
     }
 }
 
-impl<'a, T: VectorElement<T>> Iterator for VectorIntoIterator<'a, T> {
+impl<'a, T: VectorElement> Iterator for VectorIntoIterator<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -67,10 +67,10 @@ impl<'a, T: VectorElement<T>> Iterator for VectorIntoIterator<'a, T> {
 // Methods are private; not intended to be implemented outside of cxxbridge
 // codebase.
 #[doc(hidden)]
-pub unsafe trait VectorElement<T> {
-    unsafe fn __get_unchecked(v: &CxxVector<T>, pos: usize) -> &T;
-    fn __vector_length(v: &CxxVector<T>) -> usize;
-    fn __push_back(v: &CxxVector<T>, item: &T);
+pub unsafe trait VectorElement: Sized {
+    unsafe fn __get_unchecked(v: &CxxVector<Self>, pos: usize) -> &Self;
+    fn __vector_length(v: &CxxVector<Self>) -> usize;
+    fn __push_back(v: &CxxVector<Self>, item: &Self);
 }
 
 cxxbridge_macro::vector_builtin!(u8);

@@ -655,7 +655,7 @@ fn expand_vector(namespace: &Namespace, ty: &Type) -> TokenStream {
     let link_push_back = format!("{}push_back", prefix);
 
     quote! {
-        unsafe impl ::cxx::private::VectorElement<#inner> for #inner {
+        unsafe impl ::cxx::private::VectorElement for #inner {
             unsafe fn __get_unchecked(v: &::cxx::CxxVector<#inner>, pos: usize) -> &#inner {
                 extern "C" {
                     #[link_name = #link_get_unchecked]
@@ -696,7 +696,7 @@ pub fn expand_vector_builtin(ident: Ident) -> TokenStream {
     let link_push_back = format!("{}push_back", prefix);
 
     quote! {
-        unsafe impl VectorElement<#inner> for #inner {
+        unsafe impl VectorElement for #inner {
             unsafe fn __get_unchecked(v: &CxxVector<#inner>, pos: usize) -> &#inner {
                 extern "C" {
                     #[link_name = #link_get_unchecked]
