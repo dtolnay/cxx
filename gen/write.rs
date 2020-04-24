@@ -1131,7 +1131,7 @@ fn write_vector(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "#define CXXBRIDGE02_vector_{}", instance);
     writeln!(
         out,
-        "size_t cxxbridge02$std$vector${}$length(const ::std::vector<{}> &s) noexcept {{",
+        "size_t cxxbridge02$std$vector${}$size(const ::std::vector<{}> &s) noexcept {{",
         instance, inner,
     );
     writeln!(out, "  return s.size();");

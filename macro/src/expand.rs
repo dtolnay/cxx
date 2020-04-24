@@ -650,7 +650,7 @@ fn expand_vector(namespace: &Namespace, ty: &Type) -> TokenStream {
     let inner = ty;
     let mangled = ty.to_mangled(&namespace.segments) + "$";
     let prefix = format!("cxxbridge02$std$vector${}", mangled);
-    let link_length = format!("{}length", prefix);
+    let link_size = format!("{}size", prefix);
     let link_get_unchecked = format!("{}get_unchecked", prefix);
     let link_push_back = format!("{}push_back", prefix);
 
@@ -666,7 +666,7 @@ fn expand_vector(namespace: &Namespace, ty: &Type) -> TokenStream {
             fn __vector_size(v: &::cxx::CxxVector<#inner>) -> usize {
                 unsafe {
                     extern "C" {
-                        #[link_name = #link_length]
+                        #[link_name = #link_size]
                         fn __vector_size(_: &::cxx::CxxVector<#inner>) -> usize;
                     }
                     __vector_size(v)
@@ -691,7 +691,7 @@ pub fn impl_vector_element_for_primitive(ident: Ident) -> TokenStream {
     let namespace = Namespace { segments: vec![] };
     let mangled = ty.to_mangled(&namespace.segments) + "$";
     let prefix = format!("cxxbridge02$std$vector${}", mangled);
-    let link_length = format!("{}length", prefix);
+    let link_size = format!("{}size", prefix);
     let link_get_unchecked = format!("{}get_unchecked", prefix);
     let link_push_back = format!("{}push_back", prefix);
 
@@ -707,7 +707,7 @@ pub fn impl_vector_element_for_primitive(ident: Ident) -> TokenStream {
             fn __vector_size(v: &CxxVector<#inner>) -> usize {
                 unsafe {
                     extern "C" {
-                        #[link_name = #link_length]
+                        #[link_name = #link_size]
                         fn __vector_size(_: &CxxVector<#inner>) -> usize;
                     }
                     __vector_size(v)

@@ -201,7 +201,7 @@ void cxxbridge02$unique_ptr$std$string$drop(
 
 #define STD_VECTOR_OPS(RUST_TYPE, CXX_TYPE)                                    \
   extern "C" {                                                                 \
-  size_t cxxbridge02$std$vector$##RUST_TYPE##$length(                          \
+  size_t cxxbridge02$std$vector$##RUST_TYPE##$size(                            \
       const std::vector<CXX_TYPE> &s) noexcept {                               \
     return s.size();                                                           \
   }                                                                            \
