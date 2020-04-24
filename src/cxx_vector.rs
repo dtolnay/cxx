@@ -1,3 +1,5 @@
+use std::mem;
+
 pub trait VectorTarget<T> {
     fn get_unchecked(v: &CxxVector<T>, pos: usize) -> &T
     where
@@ -20,7 +22,7 @@ pub trait VectorTarget<T> {
 /// compatible with Rust's move behavior. Instead in Rust code we will only ever
 /// look at a Vector through a reference or smart pointer, as in `&Vector`
 /// or `UniquePtr<Vector>`.
-#[repr(C)]
+#[repr(C, packed)]
 pub struct CxxVector<T> {
     _private: [T; 0],
 }
@@ -90,3 +92,5 @@ cxxbridge_macro::vector_builtin!(i64);
 cxxbridge_macro::vector_builtin!(isize);
 cxxbridge_macro::vector_builtin!(f32);
 cxxbridge_macro::vector_builtin!(f64);
+
+const_assert_eq!(1, mem::align_of::<CxxVector<usize>>());
