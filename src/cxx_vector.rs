@@ -64,8 +64,10 @@ impl<'a, T: VectorElement<T>> Iterator for VectorIntoIterator<'a, T> {
     }
 }
 
+// Methods are private; not intended to be implemented outside of cxxbridge
+// codebase.
 #[doc(hidden)]
-pub trait VectorElement<T> {
+pub unsafe trait VectorElement<T> {
     fn __get_unchecked(v: &CxxVector<T>, pos: usize) -> &T
     where
         Self: Sized;
