@@ -681,43 +681,6 @@ fn expand_vector(namespace: &Namespace, ty: &Type) -> TokenStream {
     }
 }
 
-pub fn impl_vector_element_for_primitive(ident: Ident) -> TokenStream {
-    let ty = Type::Ident(ident);
-    let inner = &ty;
-    let namespace = Namespace { segments: vec![] };
-    let mangled = ty.to_mangled(&namespace.segments) + "$";
-    let prefix = format!("cxxbridge02$std$vector${}", mangled);
-    let link_size = format!("{}size", prefix);
-    let link_get_unchecked = format!("{}get_unchecked", prefix);
-    let link_push_back = format!("{}push_back", prefix);
-
-    quote! {
-        unsafe impl VectorElement for #inner {
-            fn __vector_size(v: &CxxVector<#inner>) -> usize {
-                extern "C" {
-                    #[link_name = #link_size]
-                    fn __vector_size(_: &CxxVector<#inner>) -> usize;
-                }
-                unsafe { __vector_size(v) }
-            }
-            unsafe fn __get_unchecked(v: &CxxVector<#inner>, pos: usize) -> &#inner {
-                extern "C" {
-                    #[link_name = #link_get_unchecked]
-                    fn __get_unchecked(_: &CxxVector<#inner>, _: usize) -> *const #inner;
-                }
-                &*__get_unchecked(v, pos)
-            }
-            fn __push_back(v: &CxxVector<#inner>, item: &#inner) {
-                extern "C" {
-                    #[link_name = #link_push_back]
-                    fn __push_back(_: &CxxVector<#inner>, _: &#inner);
-                }
-                unsafe { __push_back(v, item) }
-            }
-        }
-    }
-}
-
 fn expand_return_type(ret: &Option<Type>) -> TokenStream {
     match ret {
         Some(ret) => quote!(-> #ret),

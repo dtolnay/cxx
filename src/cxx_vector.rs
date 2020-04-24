@@ -1,4 +1,3 @@
-use cxxbridge_macro::impl_vector_element_for_primitive;
 use std::mem;
 
 /// Binding to C++ `std::vector<T>`.
@@ -80,6 +79,40 @@ pub unsafe trait VectorElement: Sized {
     fn __vector_size(v: &CxxVector<Self>) -> usize;
     unsafe fn __get_unchecked(v: &CxxVector<Self>, pos: usize) -> &Self;
     fn __push_back(v: &CxxVector<Self>, item: &Self);
+}
+
+macro_rules! impl_vector_element_for_primitive {
+    ($ty:ident) => {
+        unsafe impl VectorElement for $ty {
+            fn __vector_size(v: &CxxVector<$ty>) -> usize {
+                extern "C" {
+                    attr! {
+                        #[link_name = concat!("cxxbridge02$std$vector$", stringify!($ty), "$size")]
+                        fn __vector_size(_: &CxxVector<$ty>) -> usize;
+                    }
+                }
+                unsafe { __vector_size(v) }
+            }
+            unsafe fn __get_unchecked(v: &CxxVector<$ty>, pos: usize) -> &$ty {
+                extern "C" {
+                    attr! {
+                        #[link_name = concat!("cxxbridge02$std$vector$", stringify!($ty), "$get_unchecked")]
+                        fn __get_unchecked(_: &CxxVector<$ty>, _: usize) -> *const $ty;
+                    }
+                }
+                &*__get_unchecked(v, pos)
+            }
+            fn __push_back(v: &CxxVector<$ty>, item: &$ty) {
+                extern "C" {
+                    attr! {
+                        #[link_name = concat!("cxxbridge02$std$vector$", stringify!($ty), "$push_back")]
+                        fn __push_back(_: &CxxVector<$ty>, _: &$ty);
+                    }
+                }
+                unsafe { __push_back(v, item) }
+            }
+        }
+    };
 }
 
 impl_vector_element_for_primitive!(u8);

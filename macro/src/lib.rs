@@ -14,7 +14,7 @@ mod syntax;
 
 use crate::syntax::namespace::Namespace;
 use proc_macro::TokenStream;
-use syn::{parse_macro_input, Ident, ItemMod};
+use syn::{parse_macro_input, ItemMod};
 
 /// `#[cxx::bridge] mod ffi { ... }`
 ///
@@ -43,10 +43,4 @@ pub fn bridge(args: TokenStream, input: TokenStream) -> TokenStream {
     expand::bridge(&namespace, ffi)
         .unwrap_or_else(|err| err.to_compile_error())
         .into()
-}
-
-#[proc_macro]
-pub fn impl_vector_element_for_primitive(input: TokenStream) -> TokenStream {
-    let ident = parse_macro_input!(input as Ident);
-    expand::impl_vector_element_for_primitive(ident).into()
 }

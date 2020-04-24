@@ -358,6 +358,8 @@ extern crate link_cplusplus;
 
 #[macro_use]
 mod assert;
+#[macro_use]
+mod concat;
 
 mod cxx_string;
 mod cxx_vector;
