@@ -15,7 +15,7 @@ pub struct CxxVector<T> {
 
 impl<T: VectorElement<T>> CxxVector<T> {
     /// Returns the length of the vector in bytes.
-    pub fn size(&self) -> usize {
+    pub fn len(&self) -> usize {
         T::__vector_length(self)
     }
 
@@ -25,11 +25,11 @@ impl<T: VectorElement<T>> CxxVector<T> {
 
     /// Returns true if `self` has a length of zero bytes.
     pub fn is_empty(&self) -> bool {
-        self.size() == 0
+        self.len() == 0
     }
 
     pub fn get(&self, pos: usize) -> Option<&T> {
-        if pos < self.size() {
+        if pos < self.len() {
             Some(unsafe { T::__get_unchecked(self, pos) })
         } else {
             None
