@@ -583,12 +583,10 @@ fn expand_rust_vec(namespace: &Namespace, ty: &Type, ident: &Ident) -> TokenStre
     let mangled = ty.to_mangled(&namespace.segments) + "$";
     let link_prefix = format!("cxxbridge02$rust_vec${}", mangled);
     let link_drop = format!("{}drop", link_prefix);
-    let link_vector_from = format!("{}vector_from", link_prefix);
     let link_len = format!("{}len", link_prefix);
 
     let local_prefix = format_ident!("{}__vec_", ident);
     let local_drop = format_ident!("{}drop", local_prefix);
-    let local_vector_from = format_ident!("{}vector_from", local_prefix);
     let local_len = format_ident!("{}len", local_prefix);
 
     let span = ty.span();
@@ -597,10 +595,6 @@ fn expand_rust_vec(namespace: &Namespace, ty: &Type, ident: &Ident) -> TokenStre
         #[export_name = #link_drop]
         unsafe extern "C" fn #local_drop(this: *mut ::cxx::RustVec<#inner>) {
             std::ptr::drop_in_place(this);
-        }
-        #[export_name = #link_vector_from]
-        unsafe extern "C" fn #local_vector_from(this: *mut ::cxx::RustVec<#inner>, vector: *mut ::cxx::RealVector<#inner>) {
-            this.as_ref().unwrap().into_vector(vector.as_mut().unwrap());
         }
         #[doc(hidden)]
         #[export_name = #link_len]

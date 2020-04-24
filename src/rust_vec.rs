@@ -1,4 +1,3 @@
-use crate::vector::RealVector;
 use crate::vector::VectorTarget;
 
 #[repr(C)]
@@ -29,11 +28,5 @@ impl<T: VectorTarget<T>> RustVec<T> {
 
     pub fn len(&self) -> usize {
         self.repr.len()
-    }
-
-    pub fn into_vector(&self, vec: &mut RealVector<T>) {
-        for item in &self.repr {
-            vec.push_back(item);
-        }
     }
 }

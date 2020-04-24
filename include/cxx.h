@@ -90,7 +90,6 @@ template <typename T>
 class Vec final {
 public:
   size_t size() const noexcept;
-  explicit operator std::vector<T>() const noexcept;
 
 private:
   Vec() noexcept;
