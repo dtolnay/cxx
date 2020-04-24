@@ -15,11 +15,19 @@ pub struct CxxVector<T> {
 
 impl<T: VectorElement> CxxVector<T> {
     /// Returns the number of elements in the vector.
+    ///
+    /// Matches the behavior of C++ [std::vector\<T\>::size][size].
+    ///
+    /// [size]: https://en.cppreference.com/w/cpp/container/vector/size
     pub fn len(&self) -> usize {
         T::__vector_size(self)
     }
 
     /// Returns true if the vector contains no elements.
+    ///
+    /// Matches the behavior of C++ [std::vector\<T\>::empty][empty].
+    ///
+    /// [empty]: https://en.cppreference.com/w/cpp/container/vector/empty
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
@@ -39,6 +47,11 @@ impl<T: VectorElement> CxxVector<T> {
     /// This is generally not recommended, use with caution! Calling this method
     /// with an out-of-bounds index is undefined behavior even if the resulting
     /// reference is not used.
+    ///
+    /// Matches the behavior of C++
+    /// [std::vector\<T\>::operator\[\]][operator_at].
+    ///
+    /// [operator_at]: https://en.cppreference.com/w/cpp/container/vector/operator_at
     pub unsafe fn get_unchecked(&self, pos: usize) -> &T {
         T::__get_unchecked(self, pos)
     }
