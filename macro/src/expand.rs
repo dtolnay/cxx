@@ -685,7 +685,7 @@ fn expand_vector(namespace: &Namespace, ty: &Type) -> TokenStream {
     }
 }
 
-pub fn expand_vector_builtin(ident: Ident) -> TokenStream {
+pub fn impl_vector_element_for_primitive(ident: Ident) -> TokenStream {
     let ty = Type::Ident(ident);
     let inner = &ty;
     let namespace = Namespace { segments: vec![] };

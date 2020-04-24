@@ -46,7 +46,7 @@ pub fn bridge(args: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro]
-pub fn vector_builtin(input: TokenStream) -> TokenStream {
+pub fn impl_vector_element_for_primitive(input: TokenStream) -> TokenStream {
     let ident = parse_macro_input!(input as Ident);
-    expand::expand_vector_builtin(ident).into()
+    expand::impl_vector_element_for_primitive(ident).into()
 }
