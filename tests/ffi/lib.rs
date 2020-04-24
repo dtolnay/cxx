@@ -13,6 +13,12 @@ pub mod ffi {
         z: usize,
     }
 
+    enum Enum {
+        AVal,
+        BVal = 2020,
+        CVal,
+    }
+
     extern "C" {
         include!("tests/ffi/tests.h");
 
@@ -36,6 +42,7 @@ pub mod ffi {
         fn c_return_ref_rust_vec(c: &C) -> &Vec<u8>;
         fn c_return_identity(_: usize) -> usize;
         fn c_return_sum(_: usize, _: usize) -> usize;
+        fn c_return_enum(n: u32) -> Enum;
 
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);
@@ -57,6 +64,7 @@ pub mod ffi {
         fn c_take_ref_rust_vec(v: &Vec<u8>);
         fn c_take_ref_rust_vec_copy(v: &Vec<u8>);
         fn c_take_callback(callback: fn(String) -> usize);
+        fn c_take_enum(e: Enum);
 
         fn c_try_return_void() -> Result<()>;
         fn c_try_return_primitive() -> Result<usize>;
@@ -92,6 +100,7 @@ pub mod ffi {
         fn r_return_ref_rust_vec(shared: &Shared) -> &Vec<u8>;
         fn r_return_identity(_: usize) -> usize;
         fn r_return_sum(_: usize, _: usize) -> usize;
+        fn r_return_enum(n: u32) -> Enum;
 
         fn r_take_primitive(n: usize);
         fn r_take_shared(shared: Shared);
@@ -105,6 +114,7 @@ pub mod ffi {
         fn r_take_unique_ptr_string(s: UniquePtr<CxxString>);
         fn r_take_rust_vec(v: Vec<u8>);
         fn r_take_ref_rust_vec(v: &Vec<u8>);
+        fn r_take_enum(e: Enum);
 
         fn r_try_return_void() -> Result<()>;
         fn r_try_return_primitive() -> Result<usize>;
@@ -198,6 +208,16 @@ fn r_return_sum(n1: usize, n2: usize) -> usize {
     n1 + n2
 }
 
+fn r_return_enum(n: u32) -> ffi::Enum {
+    if n <= 0 {
+        ffi::Enum::AVal
+    } else if n <= 2020 {
+        ffi::Enum::BVal
+    } else {
+        ffi::Enum::CVal
+    }
+}
+
 fn r_take_primitive(n: usize) {
     assert_eq!(n, 2020);
 }
@@ -245,6 +265,10 @@ fn r_take_rust_vec(v: Vec<u8>) {
 
 fn r_take_ref_rust_vec(v: &Vec<u8>) {
     let _ = v;
+}
+
+fn r_take_enum(e: ffi::Enum) {
+    let _ = e;
 }
 
 fn r_try_return_void() -> Result<(), Error> {

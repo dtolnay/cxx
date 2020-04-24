@@ -1,6 +1,6 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::set::OrderedSet as Set;
-use crate::syntax::{Api, Derive, ExternType, Struct, Type};
+use crate::syntax::{Api, Derive, Enum, ExternType, Struct, Type};
 use proc_macro2::Ident;
 use quote::quote;
 use std::collections::BTreeMap as Map;
@@ -9,6 +9,7 @@ use syn::{Error, Result};
 pub struct Types<'a> {
     pub all: Set<'a, Type>,
     pub structs: Map<Ident, &'a Struct>,
+    pub enums: Map<Ident, &'a Enum>,
     pub cxx: Set<'a, Ident>,
     pub rust: Set<'a, Ident>,
 }
@@ -17,6 +18,7 @@ impl<'a> Types<'a> {
     pub fn collect(apis: &'a [Api]) -> Result<Self> {
         let mut all = Set::new();
         let mut structs = Map::new();
+        let mut enums = Map::new();
         let mut cxx = Set::new();
         let mut rust = Set::new();
 
@@ -46,7 +48,11 @@ impl<'a> Types<'a> {
                 Api::Include(_) => {}
                 Api::Struct(strct) => {
                     let ident = &strct.ident;
-                    if structs.contains_key(ident) || cxx.contains(ident) || rust.contains(ident) {
+                    if structs.contains_key(ident)
+                        || enums.contains_key(ident)
+                        || cxx.contains(ident)
+                        || rust.contains(ident)
+                    {
                         return Err(duplicate_struct(strct));
                     }
                     structs.insert(strct.ident.clone(), strct);
@@ -54,16 +60,35 @@ impl<'a> Types<'a> {
                         visit(&mut all, &field.ty);
                     }
                 }
+                Api::Enum(enm) => {
+                    let ident = &enm.ident;
+                    if structs.contains_key(ident)
+                        || enums.contains_key(ident)
+                        || cxx.contains(ident)
+                        || rust.contains(ident)
+                    {
+                        return Err(duplicate_enum(enm));
+                    }
+                    enums.insert(enm.ident.clone(), enm);
+                }
                 Api::CxxType(ety) => {
                     let ident = &ety.ident;
-                    if structs.contains_key(ident) || cxx.contains(ident) || rust.contains(ident) {
+                    if structs.contains_key(ident)
+                        || enums.contains_key(ident)
+                        || cxx.contains(ident)
+                        || rust.contains(ident)
+                    {
                         return Err(duplicate_type(ety));
                     }
                     cxx.insert(ident);
                 }
                 Api::RustType(ety) => {
                     let ident = &ety.ident;
-                    if structs.contains_key(ident) || cxx.contains(ident) || rust.contains(ident) {
+                    if structs.contains_key(ident)
+                        || enums.contains_key(ident)
+                        || cxx.contains(ident)
+                        || rust.contains(ident)
+                    {
                         return Err(duplicate_type(ety));
                     }
                     rust.insert(ident);
@@ -82,6 +107,7 @@ impl<'a> Types<'a> {
         Ok(Types {
             all,
             structs,
+            enums,
             cxx,
             rust,
         })
@@ -123,6 +149,13 @@ fn duplicate_struct(strct: &Struct) -> Error {
     let struct_token = strct.struct_token;
     let ident = &strct.ident;
     let range = quote!(#struct_token #ident);
+    Error::new_spanned(range, "duplicate type")
+}
+
+fn duplicate_enum(enm: &Enum) -> Error {
+    let enum_token = enm.enum_token;
+    let ident = &enm.ident;
+    let range = quote!(#enum_token #ident);
     Error::new_spanned(range, "duplicate type")
 }
 

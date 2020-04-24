@@ -1,14 +1,15 @@
 use crate::syntax::Atom::*;
 use crate::syntax::{
-    attrs, error, Api, Doc, ExternFn, ExternType, Lang, Receiver, Ref, Signature, Slice, Struct,
-    Ty1, Type, Var,
+    attrs, error, Api, Doc, Enum, ExternFn, ExternType, Lang, Receiver, Ref, Signature, Slice,
+    Struct, Ty1, Type, Var, Variant,
 };
 use quote::{format_ident, quote};
 use syn::punctuated::Punctuated;
 use syn::{
-    Abi, Error, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType, GenericArgument, Ident,
-    Item, ItemForeignMod, ItemStruct, Pat, PathArguments, Result, ReturnType, Token,
-    Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
+    Abi, Error, Expr, ExprLit, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
+    GenericArgument, Ident, Item, ItemEnum, ItemForeignMod, ItemStruct, Lit, Pat, PathArguments,
+    Result, ReturnType, Token, Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
+    Variant as RustVariant,
 };
 
 pub mod kw {
@@ -22,6 +23,10 @@ pub fn parse_items(items: Vec<Item>) -> Result<Vec<Api>> {
             Item::Struct(item) => {
                 let strct = parse_struct(item)?;
                 apis.push(strct);
+            }
+            Item::Enum(item) => {
+                let enm = parse_enum(item)?;
+                apis.push(enm);
             }
             Item::ForeignMod(foreign_mod) => {
                 let functions = parse_foreign_mod(foreign_mod)?;
@@ -76,6 +81,75 @@ fn parse_struct(item: ItemStruct) -> Result<Api> {
             })
             .collect::<Result<_>>()?,
     }))
+}
+
+fn parse_enum(item: ItemEnum) -> Result<Api> {
+    let generics = &item.generics;
+    if !generics.params.is_empty() || generics.where_clause.is_some() {
+        let enum_token = item.enum_token;
+        let ident = &item.ident;
+        let where_clause = &generics.where_clause;
+        let span = quote!(#enum_token #ident #generics #where_clause);
+        return Err(Error::new_spanned(
+            span,
+            "enums with generic parameters are not allowed",
+        ));
+    }
+
+    let mut doc = Doc::new();
+    attrs::parse(&item.attrs, &mut doc, None)?;
+
+    for variant in &item.variants {
+        match &variant.fields {
+            Fields::Unit => {}
+            _ => {
+                return Err(Error::new_spanned(
+                    variant,
+                    "enums with data are not allowed",
+                ))
+            }
+        }
+    }
+
+    Ok(Api::Enum(Enum {
+        doc,
+        enum_token: item.enum_token,
+        ident: item.ident,
+        brace_token: item.brace_token,
+        variants: item
+            .variants
+            .into_iter()
+            .map(parse_variant)
+            .collect::<Result<_>>()?,
+    }))
+}
+
+fn parse_variant(variant: RustVariant) -> Result<Variant> {
+    match &variant.discriminant {
+        None => Ok(Variant {
+            ident: variant.ident,
+            discriminant: None,
+        }),
+        Some((
+            _,
+            Expr::Lit(ExprLit {
+                lit: Lit::Int(n), ..
+            }),
+        )) => match n.base10_digits().parse() {
+            Ok(val) => Ok(Variant {
+                ident: variant.ident,
+                discriminant: Some(val),
+            }),
+            Err(_) => Err(Error::new_spanned(
+                variant,
+                "cannot parse enum discriminant as an integer",
+            )),
+        },
+        _ => Err(Error::new_spanned(
+            variant,
+            "enums with non-integer literal discriminants are not supported",
+        )),
+    }
 }
 
 fn parse_foreign_mod(foreign_mod: ItemForeignMod) -> Result<Vec<Api>> {

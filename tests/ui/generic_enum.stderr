@@ -1,0 +1,5 @@
+error: enums with generic parameters are not allowed
+ --> $DIR/generic_enum.rs:3:5
+  |
+3 |     enum A<T> {
+  |     ^^^^^^^^^

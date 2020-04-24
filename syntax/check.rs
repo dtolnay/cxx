@@ -1,9 +1,11 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::{
-    error, ident, Api, ExternFn, ExternType, Lang, Receiver, Ref, Slice, Struct, Ty1, Type, Types,
+    error, ident, Api, Enum, ExternFn, ExternType, Lang, Receiver, Ref, Slice, Struct, Ty1, Type,
+    Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
+use std::collections::HashSet;
 use std::fmt::Display;
 use syn::{Error, Result};
 
@@ -41,6 +43,7 @@ fn do_typecheck(cx: &mut Check) {
     for api in cx.apis {
         match api {
             Api::Struct(strct) => check_api_struct(cx, strct),
+            Api::Enum(enm) => check_api_enum(cx, enm),
             Api::CxxType(ty) | Api::RustType(ty) => check_api_type(cx, ty),
             Api::CxxFunction(efn) | Api::RustFunction(efn) => check_api_fn(cx, efn),
             _ => {}
@@ -68,6 +71,7 @@ impl Check<'_> {
 fn check_type_ident(cx: &mut Check, ident: &Ident) {
     if Atom::from(ident).is_none()
         && !cx.types.structs.contains_key(ident)
+        && !cx.types.enums.contains_key(ident)
         && !cx.types.cxx.contains(ident)
         && !cx.types.rust.contains(ident)
     {
@@ -186,6 +190,28 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
             );
         }
     }
+}
+
+fn check_api_enum(cx: &mut Check, enm: &Enum) {
+    check_reserved_name(cx, &enm.ident);
+
+    if enm.variants.is_empty() {
+        let span = span_for_enum_error(enm);
+        cx.error(span, "enums without any variants are not supported");
+    }
+
+    let mut discriminants = HashSet::new();
+    enm.variants.iter().fold(0, |next_discriminant, variant| {
+        let discriminant = match variant.discriminant {
+            None => next_discriminant,
+            Some(val) => val,
+        };
+        if !discriminants.insert(discriminant) {
+            let msg = format!("discriminant value `{}` already exists", discriminant);
+            cx.error(span_for_enum_error(enm), msg);
+        }
+        discriminant + 1
+    });
 }
 
 fn check_api_type(cx: &mut Check, ty: &ExternType) {
@@ -318,6 +344,13 @@ fn span_for_struct_error(strct: &Struct) -> TokenStream {
     let mut brace_token = Group::new(Delimiter::Brace, TokenStream::new());
     brace_token.set_span(strct.brace_token.span);
     quote!(#struct_token #brace_token)
+}
+
+fn span_for_enum_error(enm: &Enum) -> TokenStream {
+    let enum_token = enm.enum_token;
+    let mut brace_token = Group::new(Delimiter::Brace, TokenStream::new());
+    brace_token.set_span(enm.brace_token.span);
+    quote!(#enum_token #brace_token)
 }
 
 fn span_for_receiver_error(receiver: &Receiver) -> TokenStream {

@@ -1,0 +1,10 @@
+error[E0004]: non-exhaustive patterns: `A(2u32..=std::u32::MAX)` not covered
+  --> $DIR/enum_match_without_wildcard.rs:12:11
+   |
+1  | #[cxx::bridge]
+   | -------------- `ffi::A` defined here
+...
+12 |     match a {
+   |           ^ pattern `A(2u32..=std::u32::MAX)` not covered
+   |
+   = help: ensure that all possible cases are being handled, possibly by adding wildcards or more match arms

@@ -23,6 +23,12 @@ pub(crate) fn check_all(apis: &[Api], errors: &mut Vec<Error>) {
                     errors.extend(check(&field.ident).err());
                 }
             }
+            Api::Enum(enm) => {
+                errors.extend(check(&enm.ident).err());
+                for variant in &enm.variants {
+                    errors.extend(check(&variant.ident).err());
+                }
+            }
             Api::CxxType(ety) | Api::RustType(ety) => {
                 errors.extend(check(&ety.ident).err());
             }

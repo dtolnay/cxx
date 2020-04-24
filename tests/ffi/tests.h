@@ -7,6 +7,7 @@ namespace tests {
 
 struct R;
 struct Shared;
+enum class Enum : uint32_t;
 
 class C {
 public:
@@ -40,6 +41,7 @@ rust::Vec<uint8_t> c_return_rust_vec();
 const rust::Vec<uint8_t> &c_return_ref_rust_vec(const C &c);
 size_t c_return_identity(size_t n);
 size_t c_return_sum(size_t n1, size_t n2);
+Enum c_return_enum(uint32_t n);
 
 void c_take_primitive(size_t n);
 void c_take_shared(Shared shared);
@@ -61,6 +63,7 @@ void c_take_rust_vec_shared_forward_iterator(rust::Vec<Shared> v);
 void c_take_ref_rust_vec(const rust::Vec<uint8_t> &v);
 void c_take_ref_rust_vec_copy(const rust::Vec<uint8_t> &v);
 void c_take_callback(rust::Fn<size_t(rust::String)> callback);
+void c_take_enum(Enum e);
 
 void c_try_return_void();
 size_t c_try_return_primitive();
