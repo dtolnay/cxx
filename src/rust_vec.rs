@@ -11,7 +11,7 @@ impl<T: VectorTarget<T>> RustVec<T> {
     }
 
     pub fn from_ref(v: &Vec<T>) -> &Self {
-        unsafe { std::mem::transmute::<&Vec<T>, &RustVec<T>>(v) }
+        unsafe { &*(v as *const Vec<T> as *const RustVec<T>) }
     }
 
     pub fn into_vec(self) -> Vec<T> {
