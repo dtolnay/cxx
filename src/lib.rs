@@ -378,7 +378,6 @@ mod vector;
 
 pub use crate::cxx_string::CxxString;
 pub use crate::exception::Exception;
-pub use crate::rust_vec::RustVec;
 pub use crate::unique_ptr::UniquePtr;
 pub use crate::vector::RealVector;
 pub use crate::vector::VectorIntoIterator;
@@ -393,6 +392,7 @@ pub mod private {
     pub use crate::rust_sliceu8::RustSliceU8;
     pub use crate::rust_str::RustStr;
     pub use crate::rust_string::RustString;
+    pub use crate::rust_vec::RustVec;
     pub use crate::unique_ptr::UniquePtrTarget;
     pub use crate::unwind::catch_unwind;
     pub use crate::vector::VectorTarget;

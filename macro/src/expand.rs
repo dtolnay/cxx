@@ -250,12 +250,12 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
             }
             Type::RustBox(_) => quote!(::std::boxed::Box::into_raw(#var)),
             Type::UniquePtr(_) => quote!(::cxx::UniquePtr::into_raw(#var)),
-            Type::RustVec(_) => quote!(::cxx::RustVec::from(#var)),
+            Type::RustVec(_) => quote!(::cxx::private::RustVec::from(#var)),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(ident) if ident == RustString => {
                     quote!(::cxx::private::RustString::from_ref(#var))
                 }
-                Type::RustVec(_) => quote!(::cxx::RustVec::from_ref(#var)),
+                Type::RustVec(_) => quote!(::cxx::private::RustVec::from_ref(#var)),
                 _ => quote!(#var),
             },
             Type::Str(_) => quote!(::cxx::private::RustStr::from(#var)),
@@ -593,12 +593,12 @@ fn expand_rust_vec(namespace: &Namespace, ty: &Type, ident: &Ident) -> TokenStre
     quote_spanned! {span=>
         #[doc(hidden)]
         #[export_name = #link_drop]
-        unsafe extern "C" fn #local_drop(this: *mut ::cxx::RustVec<#inner>) {
+        unsafe extern "C" fn #local_drop(this: *mut ::cxx::private::RustVec<#inner>) {
             ::std::ptr::drop_in_place(this);
         }
         #[doc(hidden)]
         #[export_name = #link_len]
-        unsafe extern "C" fn #local_len(this: *const ::cxx::RustVec<#inner>) -> usize {
+        unsafe extern "C" fn #local_len(this: *const ::cxx::private::RustVec<#inner>) -> usize {
             (*this).len()
         }
     }
@@ -782,12 +782,12 @@ fn expand_extern_type(ty: &Type) -> TokenStream {
             let inner = expand_extern_type(&ty.inner);
             quote!(*mut #inner)
         }
-        Type::RustVec(ty) => quote!(::cxx::RustVec<#ty>),
+        Type::RustVec(ty) => quote!(::cxx::private::RustVec<#ty>),
         Type::Ref(ty) => match &ty.inner {
             Type::Ident(ident) if ident == RustString => quote!(&::cxx::private::RustString),
             Type::RustVec(ty) => {
                 let inner = expand_extern_type(&ty.inner);
-                quote!(&::cxx::RustVec<#inner>)
+                quote!(&::cxx::private::RustVec<#inner>)
             }
             _ => quote!(#ty),
         },
