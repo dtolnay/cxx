@@ -666,9 +666,9 @@ fn expand_vector(namespace: &Namespace, ty: &Type) -> TokenStream {
             unsafe fn __get_unchecked(v: &::cxx::CxxVector<#inner>, pos: usize) -> &#inner {
                 extern "C" {
                     #[link_name = #link_get_unchecked]
-                    fn __get_unchecked(_: &::cxx::CxxVector<#inner>, _: usize) -> &#inner;
+                    fn __get_unchecked(_: &::cxx::CxxVector<#inner>, _: usize) -> *const #inner;
                 }
-                __get_unchecked(v, pos)
+                &*__get_unchecked(v, pos)
             }
             fn __push_back(v: &::cxx::CxxVector<#inner>, item: &#inner) {
                 extern "C" {
@@ -703,9 +703,9 @@ pub fn impl_vector_element_for_primitive(ident: Ident) -> TokenStream {
             unsafe fn __get_unchecked(v: &CxxVector<#inner>, pos: usize) -> &#inner {
                 extern "C" {
                     #[link_name = #link_get_unchecked]
-                    fn __get_unchecked(_: &CxxVector<#inner>, _: usize) -> &#inner;
+                    fn __get_unchecked(_: &CxxVector<#inner>, _: usize) -> *const #inner;
                 }
-                __get_unchecked(v, pos)
+                &*__get_unchecked(v, pos)
             }
             fn __push_back(v: &CxxVector<#inner>, item: &#inner) {
                 extern "C" {
