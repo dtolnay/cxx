@@ -1,11 +1,9 @@
-use crate::cxx_vector::VectorTarget;
-
 #[repr(C)]
-pub struct RustVec<T: VectorTarget<T>> {
+pub struct RustVec<T> {
     repr: Vec<T>,
 }
 
-impl<T: VectorTarget<T>> RustVec<T> {
+impl<T> RustVec<T> {
     pub fn from(v: Vec<T>) -> Self {
         RustVec { repr: v }
     }
