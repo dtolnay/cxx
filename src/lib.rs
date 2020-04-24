@@ -385,7 +385,7 @@ pub use cxxbridge_macro::bridge;
 // Not public API.
 #[doc(hidden)]
 pub mod private {
-    pub use crate::cxx_vector::VectorTarget;
+    pub use crate::cxx_vector::VectorElement;
     pub use crate::function::FatFunction;
     pub use crate::opaque::Opaque;
     pub use crate::result::{r#try, Result};

@@ -27,7 +27,7 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
     // traits on them.
     expanded.extend(quote! {
         pub struct Vector<T>(pub ::cxx::CxxVector<T>);
-        impl<T: cxx::private::VectorTarget<T>> Vector<T> {
+        impl<T: cxx::private::VectorElement<T>> Vector<T> {
             pub fn size(&self) -> usize {
                 self.0.size()
             }
@@ -44,7 +44,7 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
                 self.0.push_back(item)
             }
         }
-        impl<'a, T: cxx::private::VectorTarget<T>> IntoIterator for &'a Vector<T> {
+        impl<'a, T: cxx::private::VectorElement<T>> IntoIterator for &'a Vector<T> {
             type Item = &'a T;
             type IntoIter = <&'a ::cxx::CxxVector<T> as IntoIterator>::IntoIter;
 
@@ -686,7 +686,7 @@ fn expand_vector(namespace: &Namespace, ty: &Type) -> TokenStream {
     let link_push_back = format!("{}push_back", prefix);
 
     quote! {
-        impl ::cxx::private::VectorTarget<#inner> for #inner {
+        impl ::cxx::private::VectorElement<#inner> for #inner {
             fn get_unchecked(v: &::cxx::CxxVector<#inner>, pos: usize) -> &#inner {
                 extern "C" {
                     #[link_name = #link_get_unchecked]
@@ -729,7 +729,7 @@ pub fn expand_vector_builtin(ident: Ident) -> TokenStream {
     let link_push_back = format!("{}push_back", prefix);
 
     quote! {
-        impl VectorTarget<#inner> for #inner {
+        impl VectorElement<#inner> for #inner {
             fn get_unchecked(v: &CxxVector<#inner>, pos: usize) -> &#inner {
                 extern "C" {
                     #[link_name = #link_get_unchecked]

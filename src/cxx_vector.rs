@@ -1,6 +1,6 @@
 use std::mem;
 
-pub trait VectorTarget<T> {
+pub trait VectorElement<T> {
     fn get_unchecked(v: &CxxVector<T>, pos: usize) -> &T
     where
         Self: Sized;
@@ -25,7 +25,7 @@ pub struct CxxVector<T> {
     _private: [T; 0],
 }
 
-impl<T: VectorTarget<T>> CxxVector<T> {
+impl<T: VectorElement<T>> CxxVector<T> {
     /// Returns the length of the vector in bytes.
     pub fn size(&self) -> usize {
         T::vector_length(self)
@@ -58,7 +58,7 @@ pub struct VectorIntoIterator<'a, T> {
     index: usize,
 }
 
-impl<'a, T: VectorTarget<T>> IntoIterator for &'a CxxVector<T> {
+impl<'a, T: VectorElement<T>> IntoIterator for &'a CxxVector<T> {
     type Item = &'a T;
     type IntoIter = VectorIntoIterator<'a, T>;
 
@@ -67,7 +67,7 @@ impl<'a, T: VectorTarget<T>> IntoIterator for &'a CxxVector<T> {
     }
 }
 
-impl<'a, T: VectorTarget<T>> Iterator for VectorIntoIterator<'a, T> {
+impl<'a, T: VectorElement<T>> Iterator for VectorIntoIterator<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
