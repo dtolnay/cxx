@@ -17,11 +17,9 @@ pub trait VectorTarget<T> {
 /// # Invariants
 ///
 /// As an invariant of this API and the static analysis of the cxx::bridge
-/// macro, in Rust code we can never obtain a `Vector` by value. C++'s vector
-/// requires a move constructor and may hold internal pointers, which is not
-/// compatible with Rust's move behavior. Instead in Rust code we will only ever
-/// look at a Vector through a reference or smart pointer, as in `&Vector`
-/// or `UniquePtr<Vector>`.
+/// macro, in Rust code we can never obtain a `CxxVector` by value. Instead in
+/// Rust code we will only ever look at a vector behind a reference or smart
+/// pointer, as in `&CxxVector<T>` or `UniquePtr<CxxVector<T>>`.
 #[repr(C, packed)]
 pub struct CxxVector<T> {
     _private: [T; 0],
