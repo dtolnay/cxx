@@ -23,37 +23,6 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
     let mut expanded = TokenStream::new();
     let mut hidden = TokenStream::new();
 
-    // "Header" to define newtypes locally so we can implement
-    // traits on them.
-    expanded.extend(quote! {
-        pub struct Vector<T>(pub ::cxx::CxxVector<T>);
-        impl<T: ::cxx::private::VectorElement<T>> Vector<T> {
-            pub fn size(&self) -> usize {
-                self.0.size()
-            }
-            pub fn get(&self, pos: usize) -> ::std::option::Option<&T> {
-                self.0.get(pos)
-            }
-            pub fn get_unchecked(&self, pos: usize) -> &T {
-                self.0.get_unchecked(pos)
-            }
-            pub fn is_empty(&self) -> bool {
-                self.0.is_empty()
-            }
-            pub fn push_back(&mut self, item: &T) {
-                self.0.push_back(item)
-            }
-        }
-        impl<'a, T: ::cxx::private::VectorElement<T>> ::std::iter::IntoIterator for &'a Vector<T> {
-            type Item = &'a T;
-            type IntoIter = <&'a ::cxx::CxxVector<T> as ::std::iter::IntoIterator>::IntoIter;
-
-            fn into_iter(self) -> Self::IntoIter {
-                self.0.into_iter()
-            }
-        }
-    });
-
     for api in &apis {
         if let Api::RustType(ety) = api {
             expanded.extend(expand_rust_type(ety));
