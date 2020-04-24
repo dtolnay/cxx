@@ -1,3 +1,5 @@
+use std::mem;
+
 #[repr(C)]
 pub struct RustVec<T> {
     repr: Vec<T>,
@@ -28,3 +30,6 @@ impl<T> RustVec<T> {
         self.repr.len()
     }
 }
+
+const_assert_eq!(mem::size_of::<[usize; 3]>(), mem::size_of::<Vec<i32>>());
+const_assert_eq!(mem::align_of::<usize>(), mem::align_of::<Vec<i32>>());

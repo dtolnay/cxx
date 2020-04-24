@@ -97,10 +97,8 @@ private:
   Vec &operator=(Vec other) noexcept;
   void drop() noexcept;
 
-  // Repr
-  const T *ptr;
-  size_t len;
-  size_t capacity;
+  // Size and alignment statically verified by rust_vec.rs.
+  std::array<uintptr_t, 3> repr;
 };
 #endif // CXXBRIDGE02_RUST_VEC
 
