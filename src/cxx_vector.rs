@@ -16,11 +16,11 @@ pub struct CxxVector<T> {
 impl<T: VectorElement<T>> CxxVector<T> {
     /// Returns the length of the vector in bytes.
     pub fn size(&self) -> usize {
-        T::vector_length(self)
+        T::__vector_length(self)
     }
 
     pub fn get_unchecked(&self, pos: usize) -> &T {
-        T::get_unchecked(self, pos)
+        T::__get_unchecked(self, pos)
     }
 
     /// Returns true if `self` has a length of zero bytes.
@@ -37,7 +37,7 @@ impl<T: VectorElement<T>> CxxVector<T> {
     }
 
     pub fn push_back(&mut self, item: &T) {
-        T::push_back(self, item);
+        T::__push_back(self, item);
     }
 }
 
@@ -66,13 +66,13 @@ impl<'a, T: VectorElement<T>> Iterator for VectorIntoIterator<'a, T> {
 
 #[doc(hidden)]
 pub trait VectorElement<T> {
-    fn get_unchecked(v: &CxxVector<T>, pos: usize) -> &T
+    fn __get_unchecked(v: &CxxVector<T>, pos: usize) -> &T
     where
         Self: Sized;
-    fn vector_length(v: &CxxVector<T>) -> usize
+    fn __vector_length(v: &CxxVector<T>) -> usize
     where
         Self: Sized;
-    fn push_back(v: &CxxVector<T>, item: &T)
+    fn __push_back(v: &CxxVector<T>, item: &T)
     where
         Self: Sized;
 }

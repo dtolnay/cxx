@@ -656,7 +656,7 @@ fn expand_vector(namespace: &Namespace, ty: &Type) -> TokenStream {
 
     quote! {
         impl ::cxx::private::VectorElement<#inner> for #inner {
-            fn get_unchecked(v: &::cxx::CxxVector<#inner>, pos: usize) -> &#inner {
+            fn __get_unchecked(v: &::cxx::CxxVector<#inner>, pos: usize) -> &#inner {
                 extern "C" {
                     #[link_name = #link_get_unchecked]
                     fn __get_unchecked(_: &::cxx::CxxVector<#inner>, _: usize) -> &#inner;
@@ -665,7 +665,7 @@ fn expand_vector(namespace: &Namespace, ty: &Type) -> TokenStream {
                     __get_unchecked(v, pos)
                 }
             }
-            fn vector_length(v: &::cxx::CxxVector<#inner>) -> usize {
+            fn __vector_length(v: &::cxx::CxxVector<#inner>) -> usize {
                 unsafe {
                     extern "C" {
                         #[link_name = #link_length]
@@ -674,7 +674,7 @@ fn expand_vector(namespace: &Namespace, ty: &Type) -> TokenStream {
                     __vector_length(v)
                 }
             }
-            fn push_back(v: &::cxx::CxxVector<#inner>, item: &#inner) {
+            fn __push_back(v: &::cxx::CxxVector<#inner>, item: &#inner) {
                 unsafe {
                     extern "C" {
                         #[link_name = #link_push_back]
@@ -699,7 +699,7 @@ pub fn expand_vector_builtin(ident: Ident) -> TokenStream {
 
     quote! {
         impl VectorElement<#inner> for #inner {
-            fn get_unchecked(v: &CxxVector<#inner>, pos: usize) -> &#inner {
+            fn __get_unchecked(v: &CxxVector<#inner>, pos: usize) -> &#inner {
                 extern "C" {
                     #[link_name = #link_get_unchecked]
                     fn __get_unchecked(_: &CxxVector<#inner>, _: usize) -> &#inner;
@@ -708,7 +708,7 @@ pub fn expand_vector_builtin(ident: Ident) -> TokenStream {
                     __get_unchecked(v, pos)
                 }
             }
-            fn vector_length(v: &CxxVector<#inner>) -> usize {
+            fn __vector_length(v: &CxxVector<#inner>) -> usize {
                 unsafe {
                     extern "C" {
                         #[link_name = #link_length]
@@ -717,7 +717,7 @@ pub fn expand_vector_builtin(ident: Ident) -> TokenStream {
                     __vector_length(v)
                 }
             }
-            fn push_back(v: &CxxVector<#inner>, item: &#inner) {
+            fn __push_back(v: &CxxVector<#inner>, item: &#inner) {
                 unsafe {
                     extern "C" {
                         #[link_name = #link_push_back]
