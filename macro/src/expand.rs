@@ -656,19 +656,19 @@ fn expand_vector(namespace: &Namespace, ty: &Type) -> TokenStream {
 
     quote! {
         unsafe impl ::cxx::private::VectorElement for #inner {
-            unsafe fn __get_unchecked(v: &::cxx::CxxVector<#inner>, pos: usize) -> &#inner {
-                extern "C" {
-                    #[link_name = #link_get_unchecked]
-                    fn __get_unchecked(_: &::cxx::CxxVector<#inner>, _: usize) -> &#inner;
-                }
-                __get_unchecked(v, pos)
-            }
             fn __vector_size(v: &::cxx::CxxVector<#inner>) -> usize {
                 extern "C" {
                     #[link_name = #link_size]
                     fn __vector_size(_: &::cxx::CxxVector<#inner>) -> usize;
                 }
                 unsafe { __vector_size(v) }
+            }
+            unsafe fn __get_unchecked(v: &::cxx::CxxVector<#inner>, pos: usize) -> &#inner {
+                extern "C" {
+                    #[link_name = #link_get_unchecked]
+                    fn __get_unchecked(_: &::cxx::CxxVector<#inner>, _: usize) -> &#inner;
+                }
+                __get_unchecked(v, pos)
             }
             fn __push_back(v: &::cxx::CxxVector<#inner>, item: &#inner) {
                 extern "C" {
@@ -693,19 +693,19 @@ pub fn impl_vector_element_for_primitive(ident: Ident) -> TokenStream {
 
     quote! {
         unsafe impl VectorElement for #inner {
-            unsafe fn __get_unchecked(v: &CxxVector<#inner>, pos: usize) -> &#inner {
-                extern "C" {
-                    #[link_name = #link_get_unchecked]
-                    fn __get_unchecked(_: &CxxVector<#inner>, _: usize) -> &#inner;
-                }
-                __get_unchecked(v, pos)
-            }
             fn __vector_size(v: &CxxVector<#inner>) -> usize {
                 extern "C" {
                     #[link_name = #link_size]
                     fn __vector_size(_: &CxxVector<#inner>) -> usize;
                 }
                 unsafe { __vector_size(v) }
+            }
+            unsafe fn __get_unchecked(v: &CxxVector<#inner>, pos: usize) -> &#inner {
+                extern "C" {
+                    #[link_name = #link_get_unchecked]
+                    fn __get_unchecked(_: &CxxVector<#inner>, _: usize) -> &#inner;
+                }
+                __get_unchecked(v, pos)
             }
             fn __push_back(v: &CxxVector<#inner>, item: &#inner) {
                 extern "C" {

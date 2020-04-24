@@ -1136,21 +1136,19 @@ fn write_vector(out: &mut OutFile, ident: &Ident) {
     );
     writeln!(out, "  return s.size();");
     writeln!(out, "}}");
-
-    writeln!(
-        out,
-        "void cxxbridge02$std$vector${}$push_back(::std::vector<{}> &s, const {} &item) noexcept {{",
-        instance, inner, inner
-    );
-    writeln!(out, "  s.push_back(item);");
-    writeln!(out, "}}");
-
     writeln!(
         out,
         "const {} &cxxbridge02$std$vector${}$get_unchecked(const ::std::vector<{}> &s, size_t pos) noexcept {{",
         inner, instance, inner,
     );
     writeln!(out, "  return s[pos];");
+    writeln!(out, "}}");
+    writeln!(
+        out,
+        "void cxxbridge02$std$vector${}$push_back(::std::vector<{}> &s, const {} &item) noexcept {{",
+        instance, inner, inner
+    );
+    writeln!(out, "  s.push_back(item);");
     writeln!(out, "}}");
     writeln!(out, "#endif // CXXBRIDGE02_vector_{}", instance);
 }

@@ -77,8 +77,8 @@ impl<'a, T: VectorElement> Iterator for Iter<'a, T> {
 // codebase.
 #[doc(hidden)]
 pub unsafe trait VectorElement: Sized {
-    unsafe fn __get_unchecked(v: &CxxVector<Self>, pos: usize) -> &Self;
     fn __vector_size(v: &CxxVector<Self>) -> usize;
+    unsafe fn __get_unchecked(v: &CxxVector<Self>, pos: usize) -> &Self;
     fn __push_back(v: &CxxVector<Self>, item: &Self);
 }
 
