@@ -55,8 +55,6 @@ impl<T: VectorTarget<T>> CxxVector<T> {
     }
 }
 
-unsafe impl<T> Send for CxxVector<T> where T: Send + VectorTarget<T> {}
-
 pub struct VectorIntoIterator<'a, T> {
     v: &'a CxxVector<T>,
     index: usize,
