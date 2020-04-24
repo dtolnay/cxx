@@ -213,39 +213,39 @@ void cxxbridge02$unique_ptr$std$string$drop(
       std::vector<CXX_TYPE> &s, const CXX_TYPE &item) noexcept {               \
     s.push_back(item);                                                         \
   }                                                                            \
-  static_assert(sizeof(::std::unique_ptr<std::vector<CXX_TYPE>>) ==            \
+  static_assert(sizeof(std::unique_ptr<std::vector<CXX_TYPE>>) ==              \
                     sizeof(void *),                                            \
                 "");                                                           \
-  static_assert(alignof(::std::unique_ptr<std::vector<CXX_TYPE>>) ==           \
+  static_assert(alignof(std::unique_ptr<std::vector<CXX_TYPE>>) ==             \
                     alignof(void *),                                           \
                 "");                                                           \
   void cxxbridge02$unique_ptr$std$vector$##RUST_TYPE##$null(                   \
-      ::std::unique_ptr<std::vector<CXX_TYPE>> *ptr) noexcept {                \
-    new (ptr)::std::unique_ptr<std::vector<CXX_TYPE>>();                       \
+      std::unique_ptr<std::vector<CXX_TYPE>> *ptr) noexcept {                  \
+    new (ptr) std::unique_ptr<std::vector<CXX_TYPE>>();                        \
   }                                                                            \
   void cxxbridge02$unique_ptr$std$vector$##RUST_TYPE##$new(                    \
-      ::std::unique_ptr<std::vector<CXX_TYPE>> *ptr,                           \
+      std::unique_ptr<std::vector<CXX_TYPE>> *ptr,                             \
       std::vector<CXX_TYPE> *value) noexcept {                                 \
-    new (ptr)::std::unique_ptr<std::vector<CXX_TYPE>>(                         \
-        new std::vector<CXX_TYPE>(::std::move(*value)));                       \
+    new (ptr) std::unique_ptr<std::vector<CXX_TYPE>>(                          \
+        new std::vector<CXX_TYPE>(std::move(*value)));                         \
   }                                                                            \
   void cxxbridge02$unique_ptr$std$vector$##RUST_TYPE##$raw(                    \
-      ::std::unique_ptr<std::vector<CXX_TYPE>> *ptr,                           \
+      std::unique_ptr<std::vector<CXX_TYPE>> *ptr,                             \
       std::vector<CXX_TYPE> *raw) noexcept {                                   \
-    new (ptr)::std::unique_ptr<std::vector<CXX_TYPE>>(raw);                    \
+    new (ptr) std::unique_ptr<std::vector<CXX_TYPE>>(raw);                     \
   }                                                                            \
   const std::vector<CXX_TYPE> *                                                \
       cxxbridge02$unique_ptr$std$vector$##RUST_TYPE##$get(                     \
-          const ::std::unique_ptr<std::vector<CXX_TYPE>> &ptr) noexcept {      \
+          const std::unique_ptr<std::vector<CXX_TYPE>> &ptr) noexcept {        \
     return ptr.get();                                                          \
   }                                                                            \
   std::vector<CXX_TYPE> *                                                      \
       cxxbridge02$unique_ptr$std$vector$##RUST_TYPE##$release(                 \
-          ::std::unique_ptr<std::vector<CXX_TYPE>> &ptr) noexcept {            \
+          std::unique_ptr<std::vector<CXX_TYPE>> &ptr) noexcept {              \
     return ptr.release();                                                      \
   }                                                                            \
   void cxxbridge02$unique_ptr$std$vector$##RUST_TYPE##$drop(                   \
-      ::std::unique_ptr<std::vector<CXX_TYPE>> *ptr) noexcept {                \
+      std::unique_ptr<std::vector<CXX_TYPE>> *ptr) noexcept {                  \
     ptr->~unique_ptr();                                                        \
   }                                                                            \
   } // extern "C"
