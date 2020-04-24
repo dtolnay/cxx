@@ -1,17 +1,5 @@
 use std::mem;
 
-pub trait VectorElement<T> {
-    fn get_unchecked(v: &CxxVector<T>, pos: usize) -> &T
-    where
-        Self: Sized;
-    fn vector_length(v: &CxxVector<T>) -> usize
-    where
-        Self: Sized;
-    fn push_back(v: &CxxVector<T>, item: &T)
-    where
-        Self: Sized;
-}
-
 /// Binding to C++ `std::vector<T>`.
 ///
 /// # Invariants
@@ -74,6 +62,19 @@ impl<'a, T: VectorElement<T>> Iterator for VectorIntoIterator<'a, T> {
         self.index = self.index + 1;
         self.v.get(self.index - 1)
     }
+}
+
+#[doc(hidden)]
+pub trait VectorElement<T> {
+    fn get_unchecked(v: &CxxVector<T>, pos: usize) -> &T
+    where
+        Self: Sized;
+    fn vector_length(v: &CxxVector<T>) -> usize
+    where
+        Self: Sized;
+    fn push_back(v: &CxxVector<T>, item: &T)
+    where
+        Self: Sized;
 }
 
 cxxbridge_macro::vector_builtin!(u8);
