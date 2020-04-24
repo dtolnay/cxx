@@ -676,7 +676,7 @@ fn expand_vector(namespace: &Namespace, ty: &Type) -> TokenStream {
                 unsafe {
                     extern "C" {
                         #[link_name = #link_push_back]
-                        fn __push_back(_: &::cxx::CxxVector<#inner>, _: &#inner) -> usize;
+                        fn __push_back(_: &::cxx::CxxVector<#inner>, _: &#inner);
                     }
                     __push_back(v, item);
                 }
@@ -717,7 +717,7 @@ pub fn impl_vector_element_for_primitive(ident: Ident) -> TokenStream {
                 unsafe {
                     extern "C" {
                         #[link_name = #link_push_back]
-                        fn __push_back(_: &CxxVector<#inner>, _: &#inner) -> usize;
+                        fn __push_back(_: &CxxVector<#inner>, _: &#inner);
                     }
                     __push_back(v, item);
                 }
