@@ -14,7 +14,7 @@ impl ToTokens for Type {
                 }
                 ident.to_tokens(tokens);
             }
-            Type::RustBox(ty) | Type::UniquePtr(ty) | Type::Vector(ty) | Type::RustVec(ty) => {
+            Type::RustBox(ty) | Type::UniquePtr(ty) | Type::CxxVector(ty) | Type::RustVec(ty) => {
                 ty.to_tokens(tokens)
             }
             Type::Ref(r) | Type::Str(r) | Type::SliceRefU8(r) => r.to_tokens(tokens),

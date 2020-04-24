@@ -29,7 +29,7 @@ impl ToTypename for Type {
             Type::UniquePtr(ptr) => {
                 format!("::std::unique_ptr<{}>", ptr.inner.to_typename(namespace))
             }
-            Type::Vector(ptr) => format!("::std::vector<{}>", ptr.inner.to_typename(namespace)),
+            Type::CxxVector(ptr) => format!("::std::vector<{}>", ptr.inner.to_typename(namespace)),
             _ => unimplemented!(),
         }
     }

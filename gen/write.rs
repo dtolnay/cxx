@@ -125,7 +125,7 @@ fn write_includes(out: &mut OutFile, types: &Types) {
             },
             Type::RustBox(_) => out.include.type_traits = true,
             Type::UniquePtr(_) => out.include.memory = true,
-            Type::Vector(_) => out.include.vector = true,
+            Type::CxxVector(_) => out.include.vector = true,
             Type::SliceRefU8(_) => out.include.cstdint = true,
             _ => {}
         }
@@ -478,7 +478,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     match &efn.ret {
         Some(Type::RustBox(_)) => write!(out, ".into_raw()"),
         Some(Type::UniquePtr(_)) => write!(out, ".release()"),
-        Some(Type::Vector(_)) => write!(
+        Some(Type::CxxVector(_)) => write!(
             out,
             " /* Use RVO to convert to r-value and move construct */"
         ),
@@ -792,7 +792,7 @@ fn write_extern_return_type_space(out: &mut OutFile, ty: &Option<Type>, types: &
 
 fn write_extern_arg(out: &mut OutFile, arg: &Var, types: &Types) {
     match &arg.ty {
-        Type::RustBox(ty) | Type::UniquePtr(ty) | Type::Vector(ty) => {
+        Type::RustBox(ty) | Type::UniquePtr(ty) | Type::CxxVector(ty) => {
             write_type_space(out, &ty.inner);
             write!(out, "*");
         }
@@ -827,7 +827,7 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write_type(out, &ptr.inner);
             write!(out, ">");
         }
-        Type::Vector(ty) => {
+        Type::CxxVector(ty) => {
             write!(out, "::std::vector<");
             write_type(out, &ty.inner);
             write!(out, ">");
@@ -879,7 +879,7 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
         | Type::RustBox(_)
         | Type::UniquePtr(_)
         | Type::Str(_)
-        | Type::Vector(_)
+        | Type::CxxVector(_)
         | Type::RustVec(_)
         | Type::SliceRefU8(_)
         | Type::Fn(_) => write!(out, " "),
@@ -916,7 +916,7 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
                     out.next_section();
                     write_unique_ptr(out, &ptr.inner, types);
                 }
-            } else if let Type::Vector(ptr1) = &ptr.inner {
+            } else if let Type::CxxVector(ptr1) = &ptr.inner {
                 if let Type::Ident(inner) = &ptr1.inner {
                     if allow_vector(inner) {
                         out.next_section();
@@ -924,7 +924,7 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
                     }
                 }
             }
-        } else if let Type::Vector(ptr) = ty {
+        } else if let Type::CxxVector(ptr) = ty {
             if let Type::Ident(inner) = &ptr.inner {
                 if allow_vector(inner) {
                     out.next_section();

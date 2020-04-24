@@ -92,7 +92,7 @@ pub enum Type {
     UniquePtr(Box<Ty1>),
     Ref(Box<Ref>),
     Str(Box<Ref>),
-    Vector(Box<Ty1>),
+    CxxVector(Box<Ty1>),
     Fn(Box<Signature>),
     Void(Span),
     Slice(Box<Slice>),

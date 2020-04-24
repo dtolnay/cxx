@@ -31,7 +31,7 @@ fn do_typecheck(cx: &mut Check) {
             Type::RustBox(ptr) => check_type_box(cx, ptr),
             Type::RustVec(ptr) => check_type_vec(cx, ptr),
             Type::UniquePtr(ptr) => check_type_unique_ptr(cx, ptr),
-            Type::Vector(ptr) => check_type_vector(cx, ptr),
+            Type::CxxVector(ptr) => check_type_vector(cx, ptr),
             Type::Ref(ty) => check_type_ref(cx, ty),
             Type::Slice(ty) => check_type_slice(cx, ty),
             _ => {}
@@ -114,7 +114,7 @@ fn check_type_unique_ptr(cx: &mut Check, ptr: &Ty1) {
             None | Some(CxxString) => return,
             _ => {}
         }
-    } else if let Type::Vector(_) = &ptr.inner {
+    } else if let Type::CxxVector(_) = &ptr.inner {
         return;
     }
 
@@ -351,7 +351,7 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         Type::UniquePtr(_) => "unique_ptr".to_owned(),
         Type::Ref(_) => "reference".to_owned(),
         Type::Str(_) => "&str".to_owned(),
-        Type::Vector(_) => "vector".to_owned(),
+        Type::CxxVector(_) => "vector".to_owned(),
         Type::Slice(_) => "slice".to_owned(),
         Type::SliceRefU8(_) => "&[u8]".to_owned(),
         Type::Fn(_) => "function pointer".to_owned(),

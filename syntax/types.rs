@@ -24,9 +24,10 @@ impl<'a> Types<'a> {
             all.insert(ty);
             match ty {
                 Type::Ident(_) | Type::Str(_) | Type::Void(_) | Type::SliceRefU8(_) => {}
-                Type::RustBox(ty) | Type::UniquePtr(ty) | Type::Vector(ty) | Type::RustVec(ty) => {
-                    visit(all, &ty.inner)
-                }
+                Type::RustBox(ty)
+                | Type::UniquePtr(ty)
+                | Type::CxxVector(ty)
+                | Type::RustVec(ty) => visit(all, &ty.inner),
                 Type::Ref(r) => visit(all, &r.inner),
                 Type::Slice(s) => visit(all, &s.inner),
                 Type::Fn(f) => {

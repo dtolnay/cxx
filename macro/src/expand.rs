@@ -64,7 +64,7 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
                 if Atom::from(ident).is_none() {
                     expanded.extend(expand_unique_ptr(namespace, &ptr.inner, types));
                 }
-            } else if let Type::Vector(_) = &ptr.inner {
+            } else if let Type::CxxVector(_) = &ptr.inner {
                 // Generate code for unique_ptr<vector<T>> if T is not an atom
                 // or if T is a primitive.
                 // Code for primitives is already generated
@@ -77,7 +77,7 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
                     }
                 }
             }
-        } else if let Type::Vector(ptr) = ty {
+        } else if let Type::CxxVector(ptr) = ty {
             if let Type::Ident(ident) = &ptr.inner {
                 if Atom::from(ident).is_none() {
                     // Generate code for CxxVector<T> if T is not an atom
