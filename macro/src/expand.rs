@@ -26,7 +26,7 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
     // "Header" to define newtypes locally so we can implement
     // traits on them.
     expanded.extend(quote! {
-        pub struct Vector<T>(pub ::cxx::RealVector<T>);
+        pub struct Vector<T>(pub ::cxx::CxxVector<T>);
         impl<T: cxx::private::VectorTarget<T>> Vector<T> {
             pub fn size(&self) -> usize {
                 self.0.size()
@@ -46,7 +46,7 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
         }
         impl<'a, T: cxx::private::VectorTarget<T>> IntoIterator for &'a Vector<T> {
             type Item = &'a T;
-            type IntoIter = <&'a ::cxx::RealVector<T> as IntoIterator>::IntoIter;
+            type IntoIter = <&'a ::cxx::CxxVector<T> as IntoIterator>::IntoIter;
 
             fn into_iter(self) -> Self::IntoIter {
                 self.0.into_iter()
@@ -112,7 +112,7 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
         } else if let Type::Vector(ptr) = ty {
             if let Type::Ident(ident) = &ptr.inner {
                 if Atom::from(ident).is_none() {
-                    // Generate code for Vector<T> if T is not an atom
+                    // Generate code for CxxVector<T> if T is not an atom
                     // Code for atoms is already generated
                     expanded.extend(expand_vector(namespace, &ptr.inner));
                 }
@@ -688,29 +688,29 @@ fn expand_vector(namespace: &Namespace, ty: &Type) -> TokenStream {
 
     quote! {
         impl ::cxx::private::VectorTarget<#inner> for #inner {
-            fn get_unchecked(v: &::cxx::RealVector<#inner>, pos: usize) -> &#inner {
+            fn get_unchecked(v: &::cxx::CxxVector<#inner>, pos: usize) -> &#inner {
                 extern "C" {
                     #[link_name = #link_get_unchecked]
-                    fn __get_unchecked(_: &::cxx::RealVector<#inner>, _: usize) -> &#inner;
+                    fn __get_unchecked(_: &::cxx::CxxVector<#inner>, _: usize) -> &#inner;
                 }
                 unsafe {
                     __get_unchecked(v, pos)
                 }
             }
-            fn vector_length(v: &::cxx::RealVector<#inner>) -> usize {
+            fn vector_length(v: &::cxx::CxxVector<#inner>) -> usize {
                 unsafe {
                     extern "C" {
                         #[link_name = #link_length]
-                        fn __vector_length(_: &::cxx::RealVector<#inner>) -> usize;
+                        fn __vector_length(_: &::cxx::CxxVector<#inner>) -> usize;
                     }
                     __vector_length(v)
                 }
             }
-            fn push_back(v: &::cxx::RealVector<#inner>, item: &#inner) {
+            fn push_back(v: &::cxx::CxxVector<#inner>, item: &#inner) {
                 unsafe {
                     extern "C" {
                         #[link_name = #link_push_back]
-                        fn __push_back(_: &::cxx::RealVector<#inner>, _: &#inner) -> usize;
+                        fn __push_back(_: &::cxx::CxxVector<#inner>, _: &#inner) -> usize;
                     }
                     __push_back(v, item);
                 }
@@ -731,29 +731,29 @@ pub fn expand_vector_builtin(ident: Ident) -> TokenStream {
 
     quote! {
         impl VectorTarget<#inner> for #inner {
-            fn get_unchecked(v: &RealVector<#inner>, pos: usize) -> &#inner {
+            fn get_unchecked(v: &CxxVector<#inner>, pos: usize) -> &#inner {
                 extern "C" {
                     #[link_name = #link_get_unchecked]
-                    fn __get_unchecked(_: &RealVector<#inner>, _: usize) -> &#inner;
+                    fn __get_unchecked(_: &CxxVector<#inner>, _: usize) -> &#inner;
                 }
                 unsafe {
                     __get_unchecked(v, pos)
                 }
             }
-            fn vector_length(v: &RealVector<#inner>) -> usize {
+            fn vector_length(v: &CxxVector<#inner>) -> usize {
                 unsafe {
                     extern "C" {
                         #[link_name = #link_length]
-                        fn __vector_length(_: &RealVector<#inner>) -> usize;
+                        fn __vector_length(_: &CxxVector<#inner>) -> usize;
                     }
                     __vector_length(v)
                 }
             }
-            fn push_back(v: &RealVector<#inner>, item: &#inner) {
+            fn push_back(v: &CxxVector<#inner>, item: &#inner) {
                 unsafe {
                     extern "C" {
                         #[link_name = #link_push_back]
-                        fn __push_back(_: &RealVector<#inner>, _: &#inner) -> usize;
+                        fn __push_back(_: &CxxVector<#inner>, _: &#inner) -> usize;
                     }
                     __push_back(v, item);
                 }

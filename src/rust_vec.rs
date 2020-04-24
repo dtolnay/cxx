@@ -1,4 +1,4 @@
-use crate::vector::VectorTarget;
+use crate::cxx_vector::VectorTarget;
 
 #[repr(C)]
 pub struct RustVec<T: VectorTarget<T>> {

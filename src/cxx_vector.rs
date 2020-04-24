@@ -1,16 +1,16 @@
 pub trait VectorTarget<T> {
-    fn get_unchecked(v: &RealVector<T>, pos: usize) -> &T
+    fn get_unchecked(v: &CxxVector<T>, pos: usize) -> &T
     where
         Self: Sized;
-    fn vector_length(v: &RealVector<T>) -> usize
+    fn vector_length(v: &CxxVector<T>) -> usize
     where
         Self: Sized;
-    fn push_back(v: &RealVector<T>, item: &T)
+    fn push_back(v: &CxxVector<T>, item: &T)
     where
         Self: Sized;
 }
 
-/// Binding to C++ `std::vector`.
+/// Binding to C++ `std::vector<T>`.
 ///
 /// # Invariants
 ///
@@ -21,11 +21,11 @@ pub trait VectorTarget<T> {
 /// look at a Vector through a reference or smart pointer, as in `&Vector`
 /// or `UniquePtr<Vector>`.
 #[repr(C)]
-pub struct RealVector<T> {
+pub struct CxxVector<T> {
     _private: [T; 0],
 }
 
-impl<T: VectorTarget<T>> RealVector<T> {
+impl<T: VectorTarget<T>> CxxVector<T> {
     /// Returns the length of the vector in bytes.
     pub fn size(&self) -> usize {
         T::vector_length(self)
@@ -53,14 +53,14 @@ impl<T: VectorTarget<T>> RealVector<T> {
     }
 }
 
-unsafe impl<T> Send for RealVector<T> where T: Send + VectorTarget<T> {}
+unsafe impl<T> Send for CxxVector<T> where T: Send + VectorTarget<T> {}
 
 pub struct VectorIntoIterator<'a, T> {
-    v: &'a RealVector<T>,
+    v: &'a CxxVector<T>,
     index: usize,
 }
 
-impl<'a, T: VectorTarget<T>> IntoIterator for &'a RealVector<T> {
+impl<'a, T: VectorTarget<T>> IntoIterator for &'a CxxVector<T> {
     type Item = &'a T;
     type IntoIter = VectorIntoIterator<'a, T>;
 

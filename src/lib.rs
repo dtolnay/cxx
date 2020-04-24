@@ -360,6 +360,7 @@ extern crate link_cplusplus;
 mod assert;
 
 mod cxx_string;
+mod cxx_vector;
 mod error;
 mod exception;
 mod function;
@@ -374,18 +375,17 @@ mod rust_vec;
 mod syntax;
 mod unique_ptr;
 mod unwind;
-mod vector;
 
 pub use crate::cxx_string::CxxString;
+pub use crate::cxx_vector::CxxVector;
 pub use crate::exception::Exception;
 pub use crate::unique_ptr::UniquePtr;
-pub use crate::vector::RealVector;
-pub use crate::vector::VectorIntoIterator;
 pub use cxxbridge_macro::bridge;
 
 // Not public API.
 #[doc(hidden)]
 pub mod private {
+    pub use crate::cxx_vector::VectorTarget;
     pub use crate::function::FatFunction;
     pub use crate::opaque::Opaque;
     pub use crate::result::{r#try, Result};
@@ -395,7 +395,6 @@ pub mod private {
     pub use crate::rust_vec::RustVec;
     pub use crate::unique_ptr::UniquePtrTarget;
     pub use crate::unwind::catch_unwind;
-    pub use crate::vector::VectorTarget;
 }
 
 use crate::error::Result;
