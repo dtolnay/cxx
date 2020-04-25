@@ -32,6 +32,7 @@ pub mod ffi {
         fn c_return_unique_ptr_vector_shared() -> UniquePtr<CxxVector<Shared>>;
         fn c_return_unique_ptr_vector_opaque() -> UniquePtr<CxxVector<C>>;
         fn c_return_ref_vector(c: &C) -> &CxxVector<u8>;
+        fn c_return_rust_vec() -> Vec<u8>;
 
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);

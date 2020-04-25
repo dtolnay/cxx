@@ -36,6 +36,7 @@ std::unique_ptr<std::vector<double>> c_return_unique_ptr_vector_f64();
 std::unique_ptr<std::vector<Shared>> c_return_unique_ptr_vector_shared();
 std::unique_ptr<std::vector<C>> c_return_unique_ptr_vector_opaque();
 const std::vector<uint8_t> &c_return_ref_vector(const C &c);
+rust::Vec<uint8_t> c_return_rust_vec();
 
 void c_take_primitive(size_t n);
 void c_take_shared(Shared shared);

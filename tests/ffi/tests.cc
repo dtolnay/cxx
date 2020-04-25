@@ -93,6 +93,10 @@ const std::vector<uint8_t> &c_return_ref_vector(const C &c) {
   return c.get_v();
 }
 
+rust::Vec<uint8_t> c_return_rust_vec() {
+  throw std::runtime_error("unimplemented");
+}
+
 void c_take_primitive(size_t n) {
   if (n == 2020) {
     cxx_test_suite_set_correct();
