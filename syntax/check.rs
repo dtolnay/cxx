@@ -126,18 +126,19 @@ fn check_type_unique_ptr(cx: &mut Check, ptr: &Ty1) {
 fn check_type_cxx_vector(cx: &mut Check, ptr: &Ty1) {
     if let Type::Ident(ident) = &ptr.inner {
         if cx.types.rust.contains(ident) {
-            cx.error(ptr, "vector of a Rust type is not supported yet");
+            cx.error(
+                ptr,
+                "C++ vector containing a Rust type is not supported yet",
+            );
         }
 
         match Atom::from(ident) {
+            Some(atom) if is_valid_vector_element(atom) => return,
             None => return,
-            Some(atom) => {
-                if is_valid_vector_element(atom) {
-                    return;
-                }
-            }
+            _ => {}
         }
     }
+
     cx.error(ptr, "unsupported vector target type");
 }
 
