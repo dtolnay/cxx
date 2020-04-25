@@ -5,9 +5,9 @@
 #include <exception>
 #include <iosfwd>
 #include <string>
-#include <vector>
 #include <type_traits>
 #include <utility>
+#include <vector>
 #if defined(_WIN32)
 #include <BaseTsd.h>
 #endif
@@ -97,7 +97,7 @@ private:
   Vec(const Vec &other) noexcept;
   Vec &operator=(Vec other) noexcept;
   void drop() noexcept;
-  
+
   // Repr
   const T *ptr;
   size_t len;

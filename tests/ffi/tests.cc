@@ -1,7 +1,7 @@
-#include <numeric>
 #include "tests/ffi/tests.h"
 #include "tests/ffi/lib.rs.h"
 #include <cstring>
+#include <numeric>
 #include <stdexcept>
 
 extern "C" void cxx_test_suite_set_correct() noexcept;
@@ -59,7 +59,8 @@ std::unique_ptr<std::string> c_return_unique_ptr_string() {
 }
 
 std::unique_ptr<std::vector<uint8_t>> c_return_unique_ptr_vector_u8() {
-  auto retval = std::unique_ptr<std::vector<uint8_t>>(new std::vector<uint8_t>());
+  auto retval =
+      std::unique_ptr<std::vector<uint8_t>>(new std::vector<uint8_t>());
   retval->push_back(86);
   retval->push_back(75);
   retval->push_back(30);
@@ -162,7 +163,7 @@ void c_take_unique_ptr_vector_shared(std::unique_ptr<std::vector<Shared>> v) {
   }
 }
 
-void c_take_vec_u8(const ::rust::Vec<uint8_t>& v) {
+void c_take_vec_u8(const ::rust::Vec<uint8_t> &v) {
   auto cv = static_cast<std::vector<uint8_t>>(v);
   uint8_t sum = std::accumulate(cv.begin(), cv.end(), 0);
   if (sum == 200) {
@@ -170,10 +171,10 @@ void c_take_vec_u8(const ::rust::Vec<uint8_t>& v) {
   }
 }
 
-void c_take_vec_shared(const ::rust::Vec<Shared>& v) {
+void c_take_vec_shared(const ::rust::Vec<Shared> &v) {
   auto cv = static_cast<std::vector<Shared>>(v);
   uint32_t sum = 0;
-  for (auto i: cv) {
+  for (auto i : cv) {
     sum += i.z;
   }
   if (sum == 2021) {
@@ -195,8 +196,8 @@ std::unique_ptr<std::string> c_try_return_string() {
   return std::unique_ptr<std::string>(new std::string("ok"));
 }
 
-std::unique_ptr<std::string> c_fail_return_string() { 
-  throw std::logic_error("logic error getting string"); 
+std::unique_ptr<std::string> c_fail_return_string() {
+  throw std::logic_error("logic error getting string");
 }
 
 rust::Box<R> c_try_return_box() { return c_return_box(); }
