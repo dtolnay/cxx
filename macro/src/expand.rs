@@ -746,7 +746,10 @@ fn expand_extern_type(ty: &Type) -> TokenStream {
             let inner = expand_extern_type(&ty.inner);
             quote!(*mut #inner)
         }
-        Type::RustVec(ty) => quote!(::cxx::private::RustVec<#ty>),
+        Type::RustVec(ty) => {
+            let elem = expand_extern_type(&ty.inner);
+            quote!(::cxx::private::RustVec<#elem>)
+        }
         Type::Ref(ty) => match &ty.inner {
             Type::Ident(ident) if ident == RustString => quote!(&::cxx::private::RustString),
             Type::RustVec(ty) => {
