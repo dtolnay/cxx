@@ -14,7 +14,6 @@ mod parse;
 pub mod set;
 pub mod symbol;
 mod tokens;
-pub mod typename;
 pub mod types;
 
 use self::parse::kw;
