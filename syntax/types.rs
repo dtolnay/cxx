@@ -96,6 +96,7 @@ impl<'a> Types<'a> {
                     Atom::from(ident) == Some(RustString)
                 }
             }
+            Type::RustVec(_) => true,
             _ => false,
         }
     }

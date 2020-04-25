@@ -296,6 +296,7 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
         efn.ret.as_ref().and_then(|ret| match ret {
             Type::Ident(ident) if ident == RustString => Some(quote!(#call.into_string())),
             Type::RustBox(_) => Some(quote!(::std::boxed::Box::from_raw(#call))),
+            Type::RustVec(_) => Some(quote!(#call.into_vec())),
             Type::UniquePtr(_) => Some(quote!(::cxx::UniquePtr::from_raw(#call))),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(ident) if ident == RustString => Some(quote!(#call.as_string())),
