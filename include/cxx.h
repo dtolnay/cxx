@@ -205,6 +205,8 @@ private:
 template <typename T>
 class Vec final {
 public:
+  ~Vec() noexcept { this->drop(); }
+
   size_t size() const noexcept;
   bool empty() const noexcept { return size() == 0; }
 
