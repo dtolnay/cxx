@@ -97,9 +97,10 @@ fn check_type_rust_vec(cx: &mut Check, ty: &Ty1) {
         }
 
         match Atom::from(ident) {
-            Some(atom) if is_valid_vector_element(atom) => return,
-            None => return,
-            _ => {}
+            None | Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize) | Some(I8)
+            | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32) | Some(F64) => return,
+            Some(Bool) | Some(RustString) => { /* todo */ }
+            Some(CxxString) => {}
         }
     }
 
@@ -133,9 +134,10 @@ fn check_type_cxx_vector(cx: &mut Check, ptr: &Ty1) {
         }
 
         match Atom::from(ident) {
-            Some(atom) if is_valid_vector_element(atom) => return,
-            None => return,
-            _ => {}
+            None | Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize) | Some(I8)
+            | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32) | Some(F64) => return,
+            Some(CxxString) => { /* todo */ }
+            Some(Bool) | Some(RustString) => {}
         }
     }
 
@@ -300,13 +302,6 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
         _ => return false,
     };
     ident == CxxString || cx.types.cxx.contains(ident) || cx.types.rust.contains(ident)
-}
-
-fn is_valid_vector_element(atom: Atom) -> bool {
-    match atom {
-        U8 | U16 | U32 | U64 | Usize | I8 | I16 | I32 | I64 | Isize | F32 | F64 => true,
-        Bool | CxxString | RustString => false,
-    }
 }
 
 fn span_for_struct_error(strct: &Struct) -> TokenStream {
