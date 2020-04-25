@@ -147,7 +147,6 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
                 needs_rust_box = true;
             }
             Type::RustVec(_) => {
-                out.include.type_traits = true;
                 needs_rust_vec = true;
             }
             Type::Str(_) => {
