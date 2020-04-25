@@ -1,7 +1,6 @@
 use crate::gen::out::OutFile;
 use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
-use crate::syntax::mangled::to_mangled;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{mangle, Api, ExternFn, ExternType, Signature, Struct, Type, Types, Var};
@@ -918,6 +917,29 @@ fn to_typename(namespace: &Namespace, ty: &Type) -> String {
         }
         Type::CxxVector(ptr) => format!("::std::vector<{}>", to_typename(namespace, &ptr.inner)),
         _ => unreachable!(),
+    }
+}
+
+fn to_mangled(namespace: &Namespace, ty: &Type) -> String {
+    match ty {
+        Type::Ident(ident) => {
+            let mut instance = String::new();
+            // Do not apply namespace to built-in type
+            let is_user_type = Atom::from(ident).is_none();
+            if is_user_type {
+                for name in namespace {
+                    instance += name;
+                    instance += "$";
+                }
+            }
+            instance += &ident.to_string();
+            instance
+        }
+        Type::RustBox(ptr) => format!("rust_box${}", to_mangled(namespace, &ptr.inner)),
+        Type::RustVec(ptr) => format!("rust_vec${}", to_mangled(namespace, &ptr.inner)),
+        Type::UniquePtr(ptr) => format!("std$unique_ptr${}", to_mangled(namespace, &ptr.inner)),
+        Type::CxxVector(ptr) => format!("std$vector${}", to_mangled(namespace, &ptr.inner)),
+        _ => unimplemented!(),
     }
 }
 
