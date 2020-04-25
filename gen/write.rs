@@ -1046,11 +1046,14 @@ fn write_rust_vec_impl(out: &mut OutFile, ty: &Type) {
         "Vec<{}>::operator ::std::vector<{}>() const noexcept {{",
         inner, inner
     );
+    writeln!(out, "  ::std::vector<{}> v;", inner);
+    writeln!(out, "  v.reserve(this->size());");
     writeln!(
         out,
-        "  ::std::vector<{}> v; v.reserve(this->size()); cxxbridge02$rust_vec${}$vector_from(this, v); return v;",
-        inner, instance,
+        "  cxxbridge02$rust_vec${}$vector_from(this, v);",
+        instance,
     );
+    writeln!(out, "  return v;");
     writeln!(out, "}}");
 }
 
