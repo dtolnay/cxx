@@ -80,9 +80,10 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
         } else if let Type::CxxVector(ptr) = ty {
             if let Type::Ident(ident) = &ptr.inner {
                 if Atom::from(ident).is_none() {
-                    // Generate code for CxxVector<T> if T is not an atom
-                    // Code for atoms is already generated
-                    expanded.extend(expand_vector(namespace, &ptr.inner));
+                    // Generate impl for CxxVector<T> if T is a struct or opaque
+                    // C++ type. Impl for primitives is already provided by cxx
+                    // crate.
+                    expanded.extend(expand_cxx_vector(namespace, ident));
                 }
             }
         }
@@ -646,34 +647,32 @@ fn expand_unique_ptr(namespace: &Namespace, ty: &Type, types: &Types) -> TokenSt
     }
 }
 
-fn expand_vector(namespace: &Namespace, ty: &Type) -> TokenStream {
-    let inner = ty;
-    let mangled = to_mangled(namespace, ty) + "$";
-    let prefix = format!("cxxbridge02$std$vector${}", mangled);
+fn expand_cxx_vector(namespace: &Namespace, elem: &Ident) -> TokenStream {
+    let prefix = format!("cxxbridge02$std$vector${}{}$", namespace, elem);
     let link_size = format!("{}size", prefix);
     let link_get_unchecked = format!("{}get_unchecked", prefix);
     let link_push_back = format!("{}push_back", prefix);
 
     quote! {
-        unsafe impl ::cxx::private::VectorElement for #inner {
-            fn __vector_size(v: &::cxx::CxxVector<#inner>) -> usize {
+        unsafe impl ::cxx::private::VectorElement for #elem {
+            fn __vector_size(v: &::cxx::CxxVector<Self>) -> usize {
                 extern "C" {
                     #[link_name = #link_size]
-                    fn __vector_size(_: &::cxx::CxxVector<#inner>) -> usize;
+                    fn __vector_size(_: &::cxx::CxxVector<#elem>) -> usize;
                 }
                 unsafe { __vector_size(v) }
             }
-            unsafe fn __get_unchecked(v: &::cxx::CxxVector<#inner>, pos: usize) -> &#inner {
+            unsafe fn __get_unchecked(v: &::cxx::CxxVector<Self>, pos: usize) -> &Self {
                 extern "C" {
                     #[link_name = #link_get_unchecked]
-                    fn __get_unchecked(_: &::cxx::CxxVector<#inner>, _: usize) -> *const #inner;
+                    fn __get_unchecked(_: &::cxx::CxxVector<#elem>, _: usize) -> *const #elem;
                 }
                 &*__get_unchecked(v, pos)
             }
-            fn __push_back(v: &::cxx::CxxVector<#inner>, item: &#inner) {
+            fn __push_back(v: &::cxx::CxxVector<Self>, item: &Self) {
                 extern "C" {
                     #[link_name = #link_push_back]
-                    fn __push_back(_: &::cxx::CxxVector<#inner>, _: &#inner);
+                    fn __push_back(_: &::cxx::CxxVector<#elem>, _: &#elem);
                 }
                 unsafe { __push_back(v, item) }
             }
