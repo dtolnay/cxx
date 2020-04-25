@@ -1026,6 +1026,11 @@ fn write_rust_vec_extern(out: &mut OutFile, ty: &Type) {
         "const {} *cxxbridge02$rust_vec${}$data(const ::rust::Vec<{0}> *ptr) noexcept;",
         inner, instance,
     );
+    writeln!(
+        out,
+        "size_t cxxbridge02$rust_vec${}$stride() noexcept;",
+        instance,
+    );
     writeln!(out, "#endif // CXXBRIDGE02_RUST_VEC_{}", instance);
 }
 
@@ -1074,6 +1079,11 @@ fn write_rust_vec_impl(out: &mut OutFile, ty: &Type) {
         "  return cxxbridge02$rust_vec${}$data(this);",
         instance,
     );
+    writeln!(out, "}}");
+
+    writeln!(out, "template <>");
+    writeln!(out, "size_t Vec<{}>::stride() noexcept {{", inner);
+    writeln!(out, "  return cxxbridge02$rust_vec${}$stride();", instance);
     writeln!(out, "}}");
 }
 

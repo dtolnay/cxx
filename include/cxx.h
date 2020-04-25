@@ -212,6 +212,7 @@ public:
   const T *data() const noexcept;
 
 private:
+  static size_t stride() noexcept;
   void drop() noexcept;
 
   // Size and alignment statically verified by rust_vec.rs.
