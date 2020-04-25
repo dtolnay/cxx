@@ -1,5 +1,5 @@
 use crate::syntax::atom::Atom::{self, *};
-use crate::syntax::mangled::ToMangled;
+use crate::syntax::mangled::to_mangled;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::typename::to_typename;
@@ -548,7 +548,7 @@ fn expand_rust_box(namespace: &Namespace, ident: &Ident) -> TokenStream {
 
 fn expand_rust_vec(namespace: &Namespace, ty: &Type, ident: &Ident) -> TokenStream {
     let inner = ty;
-    let mangled = ty.to_mangled(namespace) + "$";
+    let mangled = to_mangled(namespace, ty) + "$";
     let link_prefix = format!("cxxbridge02$rust_vec${}", mangled);
     let link_drop = format!("{}drop", link_prefix);
     let link_len = format!("{}len", link_prefix);
@@ -575,7 +575,7 @@ fn expand_rust_vec(namespace: &Namespace, ty: &Type, ident: &Ident) -> TokenStre
 fn expand_unique_ptr(namespace: &Namespace, ty: &Type, types: &Types) -> TokenStream {
     let name = to_typename(namespace, ty);
     let inner = ty;
-    let mangled = ty.to_mangled(namespace) + "$";
+    let mangled = to_mangled(namespace, ty) + "$";
     let prefix = format!("cxxbridge02$unique_ptr${}", mangled);
     let link_null = format!("{}null", prefix);
     let link_new = format!("{}new", prefix);
@@ -648,7 +648,7 @@ fn expand_unique_ptr(namespace: &Namespace, ty: &Type, types: &Types) -> TokenSt
 
 fn expand_vector(namespace: &Namespace, ty: &Type) -> TokenStream {
     let inner = ty;
-    let mangled = ty.to_mangled(namespace) + "$";
+    let mangled = to_mangled(namespace, ty) + "$";
     let prefix = format!("cxxbridge02$std$vector${}", mangled);
     let link_size = format!("{}size", prefix);
     let link_get_unchecked = format!("{}get_unchecked", prefix);
