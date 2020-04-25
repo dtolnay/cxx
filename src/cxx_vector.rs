@@ -136,6 +136,8 @@ pub unsafe trait VectorElement: Sized {
 
 macro_rules! impl_vector_element_for_primitive {
     ($ty:ident) => {
+        const_assert_eq!(1, mem::align_of::<CxxVector<$ty>>());
+
         unsafe impl VectorElement for $ty {
             const __NAME: &'static dyn Display = &stringify!($ty);
             fn __vector_size(v: &CxxVector<$ty>) -> usize {
@@ -230,5 +232,3 @@ impl_vector_element_for_primitive!(i64);
 impl_vector_element_for_primitive!(isize);
 impl_vector_element_for_primitive!(f32);
 impl_vector_element_for_primitive!(f64);
-
-const_assert_eq!(1, mem::align_of::<CxxVector<usize>>());

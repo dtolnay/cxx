@@ -38,6 +38,9 @@ impl<T> RustVec<T> {
 
 macro_rules! rust_vec_shims_for_primitive {
     ($ty:ident) => {
+        const_assert_eq!(mem::size_of::<[usize; 3]>(), mem::size_of::<Vec<$ty>>());
+        const_assert_eq!(mem::align_of::<usize>(), mem::align_of::<Vec<$ty>>());
+
         const _: () = {
             attr! {
                 #[export_name = concat!("cxxbridge02$rust_vec$", stringify!($ty), "$drop")]
@@ -77,6 +80,3 @@ rust_vec_shims_for_primitive!(i32);
 rust_vec_shims_for_primitive!(i64);
 rust_vec_shims_for_primitive!(f32);
 rust_vec_shims_for_primitive!(f64);
-
-const_assert_eq!(mem::size_of::<[usize; 3]>(), mem::size_of::<Vec<i32>>());
-const_assert_eq!(mem::align_of::<usize>(), mem::align_of::<Vec<i32>>());
