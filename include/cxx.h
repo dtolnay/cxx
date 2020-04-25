@@ -209,6 +209,7 @@ public:
 
   size_t size() const noexcept;
   bool empty() const noexcept { return size() == 0; }
+  const T *data() const noexcept;
 
 private:
   void drop() noexcept;

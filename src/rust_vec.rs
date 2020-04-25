@@ -29,6 +29,10 @@ impl<T> RustVec<T> {
     pub fn len(&self) -> usize {
         self.repr.len()
     }
+
+    pub fn as_ptr(&self) -> *const T {
+        self.repr.as_ptr()
+    }
 }
 
 const_assert_eq!(mem::size_of::<[usize; 3]>(), mem::size_of::<Vec<i32>>());

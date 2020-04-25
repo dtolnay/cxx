@@ -540,10 +540,12 @@ fn expand_rust_vec(namespace: &Namespace, ty: &Type, ident: &Ident) -> TokenStre
     let link_prefix = format!("cxxbridge02$rust_vec${}", mangled);
     let link_drop = format!("{}drop", link_prefix);
     let link_len = format!("{}len", link_prefix);
+    let link_data = format!("{}data", link_prefix);
 
     let local_prefix = format_ident!("{}__vec_", ident);
     let local_drop = format_ident!("{}drop", local_prefix);
     let local_len = format_ident!("{}len", local_prefix);
+    let local_data = format_ident!("{}data", local_prefix);
 
     let span = ty.span();
     quote_spanned! {span=>
@@ -556,6 +558,11 @@ fn expand_rust_vec(namespace: &Namespace, ty: &Type, ident: &Ident) -> TokenStre
         #[export_name = #link_len]
         unsafe extern "C" fn #local_len(this: *const ::cxx::private::RustVec<#inner>) -> usize {
             (*this).len()
+        }
+        #[doc(hidden)]
+        #[export_name = #link_data]
+        unsafe extern "C" fn #local_data(this: *const ::cxx::private::RustVec<#inner>) -> *const #inner {
+            (*this).as_ptr()
         }
     }
 }
