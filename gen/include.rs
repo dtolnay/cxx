@@ -36,9 +36,9 @@ pub struct Includes {
     pub exception: bool,
     pub memory: bool,
     pub string: bool,
-    pub vector: bool,
     pub type_traits: bool,
     pub utility: bool,
+    pub vector: bool,
     pub base_tsd: bool,
 }
 
