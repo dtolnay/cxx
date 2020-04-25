@@ -20,7 +20,7 @@ struct JsonBlob;
 std::unique_ptr<ThingC> make_demo(rust::Str appname);
 const std::string &get_name(const ThingC &thing);
 std::unique_ptr<std::vector<uint8_t>> do_thing(SharedThing state);
-JsonBlob get_jb(const ::rust::Vec<uint8_t> &vec);
+JsonBlob get_jb(const rust::Vec<uint8_t> &vec);
 
 } // namespace example
 } // namespace org

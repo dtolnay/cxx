@@ -24,7 +24,7 @@ std::unique_ptr<std::vector<uint8_t>> do_thing(SharedThing state) {
   return vec;
 }
 
-JsonBlob get_jb(const ::rust::Vec<uint8_t> &vec) {
+JsonBlob get_jb(const rust::Vec<uint8_t> &vec) {
   JsonBlob retval;
 
   std::cout << "incoming vec length is " << vec.size() << "\n";
