@@ -209,9 +209,6 @@ public:
   bool empty() const noexcept { return size() == 0; }
 
 private:
-  Vec() noexcept;
-  Vec(const Vec &other) noexcept;
-  Vec &operator=(Vec other) noexcept;
   void drop() noexcept;
 
   // Size and alignment statically verified by rust_vec.rs.
