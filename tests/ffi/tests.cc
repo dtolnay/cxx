@@ -97,6 +97,11 @@ rust::Vec<uint8_t> c_return_rust_vec() {
   throw std::runtime_error("unimplemented");
 }
 
+const rust::Vec<uint8_t> &c_return_ref_rust_vec(const C &c) {
+  (void)c;
+  throw std::runtime_error("unimplemented");
+}
+
 void c_take_primitive(size_t n) {
   if (n == 2020) {
     cxx_test_suite_set_correct();
@@ -224,6 +229,11 @@ std::unique_ptr<std::string> c_try_return_unique_ptr_string() {
 }
 
 rust::Vec<uint8_t> c_try_return_rust_vec() {
+  throw std::runtime_error("unimplemented");
+}
+
+const rust::Vec<uint8_t> &c_try_return_ref_rust_vec(const C &c) {
+  (void)c;
   throw std::runtime_error("unimplemented");
 }
 

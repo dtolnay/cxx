@@ -287,6 +287,7 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
                 Type::Ident(ident) if ident == RustString => {
                     Some(quote!(#call.map(|r| r.as_string())))
                 }
+                Type::RustVec(_) => Some(quote!(#call.map(|r| r.as_vec()))),
                 _ => None,
             },
             Type::Str(_) => Some(quote!(#call.map(|r| r.as_str()))),
@@ -301,6 +302,7 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
             Type::UniquePtr(_) => Some(quote!(::cxx::UniquePtr::from_raw(#call))),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(ident) if ident == RustString => Some(quote!(#call.as_string())),
+                Type::RustVec(_) => Some(quote!(#call.as_vec())),
                 _ => None,
             },
             Type::Str(_) => Some(quote!(#call.as_str())),
