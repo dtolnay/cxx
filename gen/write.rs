@@ -990,7 +990,7 @@ fn write_rust_vec_extern(out: &mut OutFile, ty: &Type) {
     );
     writeln!(
         out,
-        "void cxxbridge02$rust_vec${}$vector_from(const ::rust::Vec<{}> *ptr, const std::vector<{}> &vector) noexcept;",
+        "void cxxbridge02$rust_vec${}$vector_from(const ::rust::Vec<{}> *ptr, const ::std::vector<{}> &vector) noexcept;",
         instance, inner, inner
     );
     writeln!(
@@ -1043,12 +1043,12 @@ fn write_rust_vec_impl(out: &mut OutFile, ty: &Type) {
     writeln!(out, "template <>");
     writeln!(
         out,
-        "Vec<{}>::operator std::vector<{}>() const noexcept {{",
+        "Vec<{}>::operator ::std::vector<{}>() const noexcept {{",
         inner, inner
     );
     writeln!(
         out,
-        "  std::vector<{}> v; v.reserve(this->size()); cxxbridge02$rust_vec${}$vector_from(this, v); return v;",
+        "  ::std::vector<{}> v; v.reserve(this->size()); cxxbridge02$rust_vec${}$vector_from(this, v); return v;",
         inner, instance,
     );
     writeln!(out, "}}");
@@ -1149,7 +1149,7 @@ fn write_vector(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "#define CXXBRIDGE02_vector_{}", instance);
     writeln!(
         out,
-        "size_t cxxbridge02$std$vector${}$length(const std::vector<{}> &s) noexcept {{",
+        "size_t cxxbridge02$std$vector${}$length(const ::std::vector<{}> &s) noexcept {{",
         instance, inner,
     );
     writeln!(out, "  return s.size();");
@@ -1157,7 +1157,7 @@ fn write_vector(out: &mut OutFile, ident: &Ident) {
 
     writeln!(
         out,
-        "void cxxbridge02$std$vector${}$push_back(std::vector<{}> &s, const {} &item) noexcept {{",
+        "void cxxbridge02$std$vector${}$push_back(::std::vector<{}> &s, const {} &item) noexcept {{",
         instance, inner, inner
     );
     writeln!(out, "  s.push_back(item);");
@@ -1165,7 +1165,7 @@ fn write_vector(out: &mut OutFile, ident: &Ident) {
 
     writeln!(
         out,
-        "const {} *cxxbridge02$std$vector${}$get_unchecked(const std::vector<{}> &s, size_t pos) noexcept {{",
+        "const {} *cxxbridge02$std$vector${}$get_unchecked(const ::std::vector<{}> &s, size_t pos) noexcept {{",
         inner, instance, inner,
     );
     writeln!(out, "  return &s[pos];");
