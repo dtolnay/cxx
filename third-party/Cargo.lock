@@ -54,15 +54,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "codespan"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "21094c000d5db8035900662bbfddec754e79f795324254ac0817f36e5ccfc3f5"
-dependencies = [
- "unicode-segmentation",
-]
-
-[[package]]
 name = "codespan-reporting"
 version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -78,7 +69,6 @@ version = "0.2.10"
 dependencies = [
  "anyhow",
  "cc",
- "codespan",
  "codespan-reporting",
  "cxx-test-suite",
  "cxxbridge-macro",

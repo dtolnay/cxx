@@ -256,11 +256,14 @@ private:
 };
 #endif // CXXBRIDGE02_RUST_ERROR
 
+#ifndef CXXBRIDGE02_RUST_ISIZE
+#define CXXBRIDGE02_RUST_ISIZE
 #if defined(_WIN32)
 using isize = SSIZE_T;
 #else
 using isize = ssize_t;
 #endif
+#endif // CXXBRIDGE02_RUST_ISIZE
 
 std::ostream &operator<<(std::ostream &, const String &);
 std::ostream &operator<<(std::ostream &, const Str &);

@@ -81,18 +81,6 @@ fn test_c_try_return() {
         "logic error",
         ffi::c_fail_return_primitive().unwrap_err().what(),
     );
-    assert_eq!(
-        "ok",
-        ffi::c_try_return_string()
-            .unwrap()
-            .as_ref()
-            .unwrap()
-            .to_string()
-    );
-    assert_eq!(
-        "logic error getting string",
-        ffi::c_fail_return_string().unwrap_err().what(),
-    );
     assert_eq!(2020, *ffi::c_try_return_box().unwrap());
     assert_eq!("2020", *ffi::c_try_return_ref(&"2020".to_owned()).unwrap());
     assert_eq!("2020", ffi::c_try_return_str("2020").unwrap());
@@ -125,9 +113,7 @@ fn test_c_take() {
     check!(ffi::c_take_unique_ptr_vector_shared(
         ffi::c_return_unique_ptr_vector_shared()
     ));
-
     check!(ffi::c_take_vec_u8(&[86_u8, 75_u8, 30_u8, 9_u8].to_vec()));
-
     check!(ffi::c_take_vec_shared(&vec![
         ffi::Shared { z: 1010 },
         ffi::Shared { z: 1011 }

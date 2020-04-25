@@ -192,14 +192,6 @@ size_t c_try_return_primitive() { return 2020; }
 
 size_t c_fail_return_primitive() { throw std::logic_error("logic error"); }
 
-std::unique_ptr<std::string> c_try_return_string() {
-  return std::unique_ptr<std::string>(new std::string("ok"));
-}
-
-std::unique_ptr<std::string> c_fail_return_string() {
-  throw std::logic_error("logic error getting string");
-}
-
 rust::Box<R> c_try_return_box() { return c_return_box(); }
 
 const rust::String &c_try_return_ref(const rust::String &s) { return s; }

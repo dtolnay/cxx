@@ -44,7 +44,6 @@ pub mod ffi {
         fn c_take_unique_ptr_vector_u8(s: UniquePtr<Vector<u8>>);
         fn c_take_unique_ptr_vector_f64(s: UniquePtr<Vector<f64>>);
         fn c_take_unique_ptr_vector_shared(s: UniquePtr<Vector<Shared>>);
-
         fn c_take_vec_u8(v: &Vec<u8>);
         fn c_take_vec_shared(v: &Vec<Shared>);
         fn c_take_callback(callback: fn(String) -> usize);
@@ -52,8 +51,6 @@ pub mod ffi {
         fn c_try_return_void() -> Result<()>;
         fn c_try_return_primitive() -> Result<usize>;
         fn c_fail_return_primitive() -> Result<usize>;
-        fn c_try_return_string() -> Result<UniquePtr<CxxString>>;
-        fn c_fail_return_string() -> Result<UniquePtr<CxxString>>;
         fn c_try_return_box() -> Result<Box<R>>;
         fn c_try_return_ref(s: &String) -> Result<&String>;
         fn c_try_return_str(s: &str) -> Result<&str>;
