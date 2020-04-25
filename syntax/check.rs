@@ -303,7 +303,7 @@ fn check_reserved_name(cx: &mut Check, ident: &Ident) {
 fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
     let ident = match ty {
         Type::Ident(ident) => ident,
-        Type::Slice(_) | Type::Void(_) => return true,
+        Type::CxxVector(_) | Type::Slice(_) | Type::Void(_) => return true,
         _ => return false,
     };
     ident == CxxString || cx.types.cxx.contains(ident) || cx.types.rust.contains(ident)
