@@ -300,18 +300,10 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
 }
 
 fn is_valid_vector_element(atom: Atom) -> bool {
-    atom == U8
-        || atom == U16
-        || atom == U32
-        || atom == U64
-        || atom == Usize
-        || atom == I8
-        || atom == I16
-        || atom == I32
-        || atom == I64
-        || atom == Isize
-        || atom == F32
-        || atom == F64
+    match atom {
+        U8 | U16 | U32 | U64 | Usize | I8 | I16 | I32 | I64 | Isize | F32 | F64 => true,
+        Bool | CxxString | RustString => false,
+    }
 }
 
 fn span_for_struct_error(strct: &Struct) -> TokenStream {
