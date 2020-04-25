@@ -91,6 +91,7 @@ fn test_c_take() {
     check!(ffi::c_take_unique_ptr_vector_shared(
         ffi::c_return_unique_ptr_vector_shared()
     ));
+    check!(ffi::c_take_ref_vector(&ffi::c_return_unique_ptr_vector_u8()));
     check!(ffi::c_take_vec_u8(&[86_u8, 75_u8, 30_u8, 9_u8].to_vec()));
     check!(ffi::c_take_vec_shared(&vec![
         ffi::Shared { z: 1010 },
