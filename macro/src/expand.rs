@@ -56,7 +56,9 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
             }
         } else if let Type::RustVec(ty) = ty {
             if let Type::Ident(ident) = &ty.inner {
-                hidden.extend(expand_rust_vec(namespace, &ty.inner, ident));
+                if Atom::from(ident).is_none() {
+                    hidden.extend(expand_rust_vec(namespace, &ty.inner, ident));
+                }
             }
         } else if let Type::UniquePtr(ptr) = ty {
             if let Type::Ident(ident) = &ptr.inner {
