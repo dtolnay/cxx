@@ -205,11 +205,49 @@ private:
 template <typename T>
 class Vec final {
 public:
+  using value_type = T;
+
   ~Vec() noexcept { this->drop(); }
 
   size_t size() const noexcept;
   bool empty() const noexcept { return size() == 0; }
   const T *data() const noexcept;
+
+  class const_iterator {
+  public:
+    using value_type = typename std::add_const<T>::type;
+    using reference = typename std::add_lvalue_reference<
+        typename std::add_const<T>::type>::type;
+
+    const T &operator*() const { return *static_cast<const T *>(this->pos); }
+    const_iterator &operator++() {
+      this->pos = static_cast<const uint8_t *>(this->pos) + this->stride;
+      return *this;
+    }
+    bool operator==(const const_iterator &other) const {
+      return this->pos == other.pos;
+    }
+    bool operator!=(const const_iterator &other) const {
+      return this->pos != other.pos;
+    }
+
+  private:
+    friend class Vec;
+    const void *pos;
+    size_t stride;
+  };
+
+  const_iterator begin() const noexcept {
+    const_iterator it;
+    it.pos = this->data();
+    it.stride = this->stride();
+    return it;
+  }
+  const_iterator end() const noexcept {
+    const_iterator it = this->begin();
+    it.pos = static_cast<const uint8_t *>(it.pos) + it.stride * this->size();
+    return it;
+  }
 
 private:
   static size_t stride() noexcept;

@@ -163,17 +163,15 @@ void c_take_unique_ptr_vector_shared(std::unique_ptr<std::vector<Shared>> v) {
 }
 
 void c_take_vec_u8(const rust::Vec<uint8_t> &v) {
-  auto cv = static_cast<std::vector<uint8_t>>(v);
-  uint8_t sum = std::accumulate(cv.begin(), cv.end(), 0);
+  uint8_t sum = std::accumulate(v.begin(), v.end(), 0);
   if (sum == 200) {
     cxx_test_suite_set_correct();
   }
 }
 
 void c_take_vec_shared(const rust::Vec<Shared> &v) {
-  auto cv = static_cast<std::vector<Shared>>(v);
   uint32_t sum = 0;
-  for (auto i : cv) {
+  for (auto i : v) {
     sum += i.z;
   }
   if (sum == 2021) {
