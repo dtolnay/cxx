@@ -1,5 +1,4 @@
 use crate::syntax::atom::Atom::{self, *};
-use crate::syntax::mangled::to_mangled;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
@@ -7,7 +6,7 @@ use crate::syntax::{
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
-use syn::{parse_quote, spanned::Spanned, Error, ItemMod, Result, Token};
+use syn::{parse_quote, Error, ItemMod, Result, Token};
 
 pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
     let ident = &ffi.ident;
@@ -57,7 +56,7 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
         } else if let Type::RustVec(ty) = ty {
             if let Type::Ident(ident) = &ty.inner {
                 if Atom::from(ident).is_none() {
-                    hidden.extend(expand_rust_vec(namespace, &ty.inner, ident));
+                    hidden.extend(expand_rust_vec(namespace, ident));
                 }
             }
         } else if let Type::UniquePtr(ptr) = ty {
@@ -536,42 +535,40 @@ fn expand_rust_box(namespace: &Namespace, ident: &Ident) -> TokenStream {
     }
 }
 
-fn expand_rust_vec(namespace: &Namespace, ty: &Type, ident: &Ident) -> TokenStream {
-    let inner = ty;
-    let mangled = to_mangled(namespace, ty) + "$";
-    let link_prefix = format!("cxxbridge02$rust_vec${}", mangled);
+fn expand_rust_vec(namespace: &Namespace, elem: &Ident) -> TokenStream {
+    let link_prefix = format!("cxxbridge02$rust_vec${}{}$", namespace, elem);
     let link_drop = format!("{}drop", link_prefix);
     let link_len = format!("{}len", link_prefix);
     let link_data = format!("{}data", link_prefix);
     let link_stride = format!("{}stride", link_prefix);
 
-    let local_prefix = format_ident!("{}__vec_", ident);
+    let local_prefix = format_ident!("{}__vec_", elem);
     let local_drop = format_ident!("{}drop", local_prefix);
     let local_len = format_ident!("{}len", local_prefix);
     let local_data = format_ident!("{}data", local_prefix);
     let local_stride = format_ident!("{}stride", local_prefix);
 
-    let span = ty.span();
+    let span = elem.span();
     quote_spanned! {span=>
         #[doc(hidden)]
         #[export_name = #link_drop]
-        unsafe extern "C" fn #local_drop(this: *mut ::cxx::private::RustVec<#inner>) {
+        unsafe extern "C" fn #local_drop(this: *mut ::cxx::private::RustVec<#elem>) {
             ::std::ptr::drop_in_place(this);
         }
         #[doc(hidden)]
         #[export_name = #link_len]
-        unsafe extern "C" fn #local_len(this: *const ::cxx::private::RustVec<#inner>) -> usize {
+        unsafe extern "C" fn #local_len(this: *const ::cxx::private::RustVec<#elem>) -> usize {
             (*this).len()
         }
         #[doc(hidden)]
         #[export_name = #link_data]
-        unsafe extern "C" fn #local_data(this: *const ::cxx::private::RustVec<#inner>) -> *const #inner {
+        unsafe extern "C" fn #local_data(this: *const ::cxx::private::RustVec<#elem>) -> *const #elem {
             (*this).as_ptr()
         }
         #[doc(hidden)]
         #[export_name = #link_stride]
         unsafe extern "C" fn #local_stride() -> usize {
-            ::std::mem::size_of::<#inner>()
+            ::std::mem::size_of::<#elem>()
         }
     }
 }
