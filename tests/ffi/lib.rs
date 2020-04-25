@@ -49,8 +49,9 @@ pub mod ffi {
         fn c_take_unique_ptr_vector_f64(v: UniquePtr<CxxVector<f64>>);
         fn c_take_unique_ptr_vector_shared(v: UniquePtr<CxxVector<Shared>>);
         fn c_take_ref_vector(v: &CxxVector<u8>);
-        fn c_take_vec_u8(v: &Vec<u8>);
-        fn c_take_vec_shared(v: &Vec<Shared>);
+        fn c_take_rust_vec(v: Vec<u8>);
+        fn c_take_rust_vec_shared(v: Vec<Shared>);
+        fn c_take_ref_rust_vec(v: &Vec<u8>);
         fn c_take_callback(callback: fn(String) -> usize);
 
         fn c_try_return_void() -> Result<()>;

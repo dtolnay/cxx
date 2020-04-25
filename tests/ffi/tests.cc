@@ -187,19 +187,21 @@ void c_take_ref_vector(const std::vector<uint8_t> &v) {
   }
 }
 
-void c_take_vec_u8(const rust::Vec<uint8_t> &v) {
-  uint8_t sum = std::accumulate(v.begin(), v.end(), 0);
-  if (sum == 200) {
-    cxx_test_suite_set_correct();
-  }
-}
+void c_take_rust_vec(rust::Vec<uint8_t> v) { c_take_ref_rust_vec(v); }
 
-void c_take_vec_shared(const rust::Vec<Shared> &v) {
+void c_take_rust_vec_shared(rust::Vec<Shared> v) {
   uint32_t sum = 0;
   for (auto i : v) {
     sum += i.z;
   }
   if (sum == 2021) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_ref_rust_vec(const rust::Vec<uint8_t> &v) {
+  uint8_t sum = std::accumulate(v.begin(), v.end(), 0);
+  if (sum == 200) {
     cxx_test_suite_set_correct();
   }
 }

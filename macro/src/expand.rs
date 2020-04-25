@@ -207,7 +207,7 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
             }
             Type::RustBox(_) => quote!(::std::boxed::Box::into_raw(#var)),
             Type::UniquePtr(_) => quote!(::cxx::UniquePtr::into_raw(#var)),
-            Type::RustVec(_) => quote!(::cxx::private::RustVec::from(#var)),
+            Type::RustVec(_) => quote!(#var.as_mut_ptr() as *mut ::cxx::private::RustVec<_>),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(ident) if ident == RustString => {
                     quote!(::cxx::private::RustString::from_ref(#var))
