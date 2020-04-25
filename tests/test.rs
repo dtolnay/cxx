@@ -32,44 +32,22 @@ fn test_c_return() {
     assert_eq!(b"2020\0", ffi::c_return_sliceu8(&shared));
     assert_eq!("2020", ffi::c_return_rust_string());
     assert_eq!("2020", ffi::c_return_unique_ptr_string().to_str().unwrap());
-    assert_eq!(
-        4,
-        ffi::c_return_unique_ptr_vector_u8()
-            .as_ref()
-            .unwrap()
-            .size()
-    );
+    assert_eq!(4, ffi::c_return_unique_ptr_vector_u8().size());
     assert_eq!(
         200_u8,
-        ffi::c_return_unique_ptr_vector_u8()
-            .as_ref()
-            .unwrap()
-            .into_iter()
-            .sum()
+        ffi::c_return_unique_ptr_vector_u8().into_iter().sum(),
     );
     assert_eq!(
         200.5_f64,
-        ffi::c_return_unique_ptr_vector_f64()
-            .as_ref()
-            .unwrap()
-            .into_iter()
-            .sum()
+        ffi::c_return_unique_ptr_vector_f64().into_iter().sum(),
     );
-    assert_eq!(
-        2,
-        ffi::c_return_unique_ptr_vector_shared()
-            .as_ref()
-            .unwrap()
-            .size()
-    );
+    assert_eq!(2, ffi::c_return_unique_ptr_vector_shared().size());
     assert_eq!(
         2021_usize,
         ffi::c_return_unique_ptr_vector_shared()
-            .as_ref()
-            .unwrap()
             .into_iter()
             .map(|o| o.z)
-            .sum()
+            .sum(),
     );
 }
 
