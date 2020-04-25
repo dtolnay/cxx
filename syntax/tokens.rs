@@ -35,9 +35,12 @@ impl ToTokens for Var {
 
 impl ToTokens for Ty1 {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        if let "UniquePtr" | "RustVec" | "CxxVector" = self.name.to_string().as_str() {
-            let span = self.name.span();
+        let span = self.name.span();
+        let name = self.name.to_string();
+        if let "UniquePtr" | "CxxVector" = name.as_str() {
             tokens.extend(quote_spanned!(span=> ::cxx::));
+        } else if name == "Vec" {
+            tokens.extend(quote_spanned!(span=> ::std::vec::));
         }
         self.name.to_tokens(tokens);
         self.langle.to_tokens(tokens);
