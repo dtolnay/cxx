@@ -28,6 +28,8 @@ size_t C::set2(size_t n) {
   return this->n;
 }
 
+const std::vector<uint8_t> &C::get_v() const { return this->v; }
+
 size_t c_return_primitive() { return 2020; }
 
 Shared c_return_shared() { return Shared{2020}; }
@@ -85,6 +87,10 @@ std::unique_ptr<std::vector<Shared>> c_return_unique_ptr_vector_shared() {
 
 std::unique_ptr<std::vector<C>> c_return_unique_ptr_vector_opaque() {
   return std::unique_ptr<std::vector<C>>(new std::vector<C>());
+}
+
+const std::vector<uint8_t> &c_return_ref_vector(const C &c) {
+  return c.get_v();
 }
 
 void c_take_primitive(size_t n) {

@@ -15,9 +15,11 @@ public:
   size_t set(size_t n);
   size_t get2() const;
   size_t set2(size_t n);
+  const std::vector<uint8_t> &get_v() const;
 
 private:
   size_t n;
+  std::vector<uint8_t> v;
 };
 
 size_t c_return_primitive();
@@ -33,6 +35,7 @@ std::unique_ptr<std::vector<uint8_t>> c_return_unique_ptr_vector_u8();
 std::unique_ptr<std::vector<double>> c_return_unique_ptr_vector_f64();
 std::unique_ptr<std::vector<Shared>> c_return_unique_ptr_vector_shared();
 std::unique_ptr<std::vector<C>> c_return_unique_ptr_vector_opaque();
+const std::vector<uint8_t> &c_return_ref_vector(const C &c);
 
 void c_take_primitive(size_t n);
 void c_take_shared(Shared shared);
