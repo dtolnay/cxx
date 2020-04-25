@@ -236,17 +236,54 @@ void cxxbridge02$unique_ptr$std$string$drop(
     ptr->~unique_ptr();                                                        \
   }
 
+#define RUST_VEC_EXTERNS(RUST_TYPE, CXX_TYPE)                                  \
+  void cxxbridge02$rust_vec$##RUST_TYPE##$drop(                                \
+      rust::Vec<CXX_TYPE> *ptr) noexcept;                                      \
+  size_t cxxbridge02$rust_vec$##RUST_TYPE##$len(                               \
+      const rust::Vec<CXX_TYPE> *ptr) noexcept;                                \
+  const CXX_TYPE *cxxbridge02$rust_vec$##RUST_TYPE##$data(                     \
+      const rust::Vec<CXX_TYPE> *ptr) noexcept;                                \
+  size_t cxxbridge02$rust_vec$##RUST_TYPE##$stride() noexcept;
+
+#define RUST_VEC_OPS(RUST_TYPE, CXX_TYPE)                                      \
+  template <>                                                                  \
+  void rust::Vec<CXX_TYPE>::drop() noexcept {                                  \
+    return cxxbridge02$rust_vec$##RUST_TYPE##$drop(this);                      \
+  }                                                                            \
+  template <>                                                                  \
+  size_t rust::Vec<CXX_TYPE>::size() const noexcept {                          \
+    return cxxbridge02$rust_vec$##RUST_TYPE##$len(this);                       \
+  }                                                                            \
+  template <>                                                                  \
+  const CXX_TYPE *rust::Vec<CXX_TYPE>::data() const noexcept {                 \
+    return cxxbridge02$rust_vec$##RUST_TYPE##$data(this);                      \
+  }                                                                            \
+  template <>                                                                  \
+  size_t rust::Vec<CXX_TYPE>::stride() noexcept {                              \
+    return cxxbridge02$rust_vec$##RUST_TYPE##$stride();                        \
+  }
+
+// Usize and isize are the same type as one of the below.
+#define FOR_EACH_SIZED_PRIMITIVE(MACRO)                                        \
+  MACRO(u8, uint8_t)                                                           \
+  MACRO(u16, uint16_t)                                                         \
+  MACRO(u32, uint32_t)                                                         \
+  MACRO(u64, uint64_t)                                                         \
+  MACRO(i8, int8_t)                                                            \
+  MACRO(i16, int16_t)                                                          \
+  MACRO(i32, int32_t)                                                          \
+  MACRO(i64, int64_t)                                                          \
+  MACRO(f32, float)                                                            \
+  MACRO(f64, double)
+
+#define FOR_EACH_PRIMITIVE(MACRO)                                              \
+  FOR_EACH_SIZED_PRIMITIVE(MACRO)                                              \
+  MACRO(usize, size_t)                                                         \
+  MACRO(isize, rust::isize)
+
 extern "C" {
-STD_VECTOR_OPS(u8, uint8_t)
-STD_VECTOR_OPS(u16, uint16_t)
-STD_VECTOR_OPS(u32, uint32_t)
-STD_VECTOR_OPS(u64, uint64_t)
-STD_VECTOR_OPS(usize, size_t)
-STD_VECTOR_OPS(i8, int8_t)
-STD_VECTOR_OPS(i16, int16_t)
-STD_VECTOR_OPS(i32, int32_t)
-STD_VECTOR_OPS(i64, int64_t)
-STD_VECTOR_OPS(isize, rust::isize)
-STD_VECTOR_OPS(f32, float)
-STD_VECTOR_OPS(f64, double)
+FOR_EACH_PRIMITIVE(STD_VECTOR_OPS)
+FOR_EACH_SIZED_PRIMITIVE(RUST_VEC_EXTERNS)
 } // extern "C"
+
+FOR_EACH_SIZED_PRIMITIVE(RUST_VEC_OPS)

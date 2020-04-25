@@ -934,9 +934,11 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
                 write_rust_box_extern(out, inner);
             }
         } else if let Type::RustVec(ty) = ty {
-            if let Type::Ident(_) = &ty.inner {
-                out.next_section();
-                write_rust_vec_extern(out, &ty.inner);
+            if let Type::Ident(inner) = &ty.inner {
+                if Atom::from(inner).is_none() {
+                    out.next_section();
+                    write_rust_vec_extern(out, inner);
+                }
             }
         } else if let Type::UniquePtr(ptr) = ty {
             if let Type::Ident(inner) = &ptr.inner {
@@ -964,8 +966,10 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
                 write_rust_box_impl(out, inner);
             }
         } else if let Type::RustVec(ty) = ty {
-            if let Type::Ident(_) = &ty.inner {
-                write_rust_vec_impl(out, &ty.inner);
+            if let Type::Ident(inner) = &ty.inner {
+                if Atom::from(inner).is_none() {
+                    write_rust_vec_impl(out, inner);
+                }
             }
         }
     }
@@ -997,9 +1001,10 @@ fn write_rust_box_extern(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "#endif // CXXBRIDGE02_RUST_BOX_{}", instance);
 }
 
-fn write_rust_vec_extern(out: &mut OutFile, ty: &Type) {
-    let inner = to_typename(&out.namespace, ty);
-    let instance = to_mangled(&out.namespace, ty);
+fn write_rust_vec_extern(out: &mut OutFile, element: &Ident) {
+    let element = Type::Ident(element.clone());
+    let inner = to_typename(&out.namespace, &element);
+    let instance = to_mangled(&out.namespace, &element);
 
     writeln!(out, "#ifndef CXXBRIDGE02_RUST_VEC_{}", instance);
     writeln!(out, "#define CXXBRIDGE02_RUST_VEC_{}", instance);
@@ -1046,9 +1051,10 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "}}");
 }
 
-fn write_rust_vec_impl(out: &mut OutFile, ty: &Type) {
-    let inner = to_typename(&out.namespace, ty);
-    let instance = to_mangled(&out.namespace, ty);
+fn write_rust_vec_impl(out: &mut OutFile, element: &Ident) {
+    let element = Type::Ident(element.clone());
+    let inner = to_typename(&out.namespace, &element);
+    let instance = to_mangled(&out.namespace, &element);
 
     writeln!(out, "template <>");
     writeln!(out, "void Vec<{}>::drop() noexcept {{", inner);
