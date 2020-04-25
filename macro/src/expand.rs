@@ -281,6 +281,7 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
                 Some(quote!(#call.map(|r| r.into_string())))
             }
             Type::RustBox(_) => Some(quote!(#call.map(|r| ::std::boxed::Box::from_raw(r)))),
+            Type::RustVec(_) => Some(quote!(#call.map(|r| r.into_vec()))),
             Type::UniquePtr(_) => Some(quote!(#call.map(|r| ::cxx::UniquePtr::from_raw(r)))),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(ident) if ident == RustString => {

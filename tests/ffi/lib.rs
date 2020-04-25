@@ -61,6 +61,7 @@ pub mod ffi {
         fn c_try_return_sliceu8(s: &[u8]) -> Result<&[u8]>;
         fn c_try_return_rust_string() -> Result<String>;
         fn c_try_return_unique_ptr_string() -> Result<UniquePtr<CxxString>>;
+        fn c_try_return_rust_vec() -> Result<Vec<u8>>;
 
         fn get(self: &C) -> usize;
         fn set(self: &mut C, n: usize) -> usize;

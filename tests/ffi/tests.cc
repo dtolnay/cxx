@@ -223,6 +223,10 @@ std::unique_ptr<std::string> c_try_return_unique_ptr_string() {
   return c_return_unique_ptr_string();
 }
 
+rust::Vec<uint8_t> c_try_return_rust_vec() {
+  throw std::runtime_error("unimplemented");
+}
+
 extern "C" C *cxx_test_suite_get_unique_ptr() noexcept {
   return std::unique_ptr<C>(new C{2020}).release();
 }
