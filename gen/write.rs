@@ -810,7 +810,21 @@ fn write_extern_arg(out: &mut OutFile, arg: &Var, types: &Types) {
 fn write_type(out: &mut OutFile, ty: &Type) {
     match ty {
         Type::Ident(ident) => match Atom::from(ident) {
-            Some(a) => write!(out, "{}", a.to_cxx()),
+            Some(Bool) => write!(out, "bool"),
+            Some(U8) => write!(out, "uint8_t"),
+            Some(U16) => write!(out, "uint16_t"),
+            Some(U32) => write!(out, "uint32_t"),
+            Some(U64) => write!(out, "uint64_t"),
+            Some(Usize) => write!(out, "size_t"),
+            Some(I8) => write!(out, "int8_t"),
+            Some(I16) => write!(out, "int16_t"),
+            Some(I32) => write!(out, "int32_t"),
+            Some(I64) => write!(out, "int64_t"),
+            Some(Isize) => write!(out, "::rust::isize"),
+            Some(F32) => write!(out, "float"),
+            Some(F64) => write!(out, "double"),
+            Some(CxxString) => write!(out, "::std::string"),
+            Some(RustString) => write!(out, "::rust::String"),
             None => write!(out, "{}", ident),
         },
         Type::RustBox(ty) => {
