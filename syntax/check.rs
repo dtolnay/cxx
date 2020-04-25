@@ -92,7 +92,7 @@ fn check_type_box(cx: &mut Check, ptr: &Ty1) {
 fn check_type_rust_vec(cx: &mut Check, ptr: &Ty1) {
     // Vec can contain either user-defined type or u8
     if let Type::Ident(ident) = &ptr.inner {
-        if Atom::from(ident).map(is_valid_vector_target) == Some(true) {
+        if Atom::from(ident).map(is_valid_vector_element) == Some(true) {
             return;
         } else if cx.types.cxx.contains(ident) {
             cx.error(ptr, error::VEC_CXX_TYPE.msg);
@@ -130,7 +130,7 @@ fn check_type_cxx_vector(cx: &mut Check, ptr: &Ty1) {
         match Atom::from(ident) {
             None => return,
             Some(atom) => {
-                if is_valid_vector_target(atom) {
+                if is_valid_vector_element(atom) {
                     return;
                 }
             }
@@ -299,7 +299,7 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
     ident == CxxString || cx.types.cxx.contains(ident) || cx.types.rust.contains(ident)
 }
 
-fn is_valid_vector_target(atom: Atom) -> bool {
+fn is_valid_vector_element(atom: Atom) -> bool {
     atom == U8
         || atom == U16
         || atom == U32
