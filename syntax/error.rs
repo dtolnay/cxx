@@ -15,7 +15,6 @@ impl Display for Error {
 
 pub static ERRORS: &[Error] = &[
     BOX_CXX_TYPE,
-    VEC_CXX_TYPE,
     CXXBRIDGE_RESERVED,
     CXX_STRING_BY_VALUE,
     CXX_TYPE_BY_VALUE,
@@ -26,12 +25,6 @@ pub static ERRORS: &[Error] = &[
 
 pub static BOX_CXX_TYPE: Error = Error {
     msg: "Box of a C++ type is not supported yet",
-    label: None,
-    note: Some("hint: use UniquePtr<>"),
-};
-
-pub static VEC_CXX_TYPE: Error = Error {
-    msg: "Vec of a C++ type is not supported yet",
     label: None,
     note: Some("hint: use UniquePtr<>"),
 };

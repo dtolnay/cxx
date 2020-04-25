@@ -29,7 +29,7 @@ fn do_typecheck(cx: &mut Check) {
         match ty {
             Type::Ident(ident) => check_type_ident(cx, ident),
             Type::RustBox(ptr) => check_type_box(cx, ptr),
-            Type::RustVec(ptr) => check_type_rust_vec(cx, ptr),
+            Type::RustVec(ty) => check_type_rust_vec(cx, ty),
             Type::UniquePtr(ptr) => check_type_unique_ptr(cx, ptr),
             Type::CxxVector(ptr) => check_type_cxx_vector(cx, ptr),
             Type::Ref(ty) => check_type_ref(cx, ty),
@@ -89,19 +89,21 @@ fn check_type_box(cx: &mut Check, ptr: &Ty1) {
     cx.error(ptr, "unsupported target type of Box");
 }
 
-fn check_type_rust_vec(cx: &mut Check, ptr: &Ty1) {
-    // Vec can contain either user-defined type or u8
-    if let Type::Ident(ident) = &ptr.inner {
-        if Atom::from(ident).map(is_valid_vector_element) == Some(true) {
+fn check_type_rust_vec(cx: &mut Check, ty: &Ty1) {
+    if let Type::Ident(ident) = &ty.inner {
+        if cx.types.cxx.contains(ident) {
+            cx.error(ty, "Rust Vec containing C++ type is not supported yet");
             return;
-        } else if cx.types.cxx.contains(ident) {
-            cx.error(ptr, error::VEC_CXX_TYPE.msg);
-        } else {
-            return;
+        }
+
+        match Atom::from(ident) {
+            Some(atom) if is_valid_vector_element(atom) => return,
+            None => return,
+            _ => {}
         }
     }
 
-    cx.error(ptr, "unsupported target type of Vec");
+    cx.error(ty, "unsupported element type of Vec");
 }
 
 fn check_type_unique_ptr(cx: &mut Check, ptr: &Ty1) {
