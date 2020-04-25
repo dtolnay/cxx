@@ -951,7 +951,7 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
             if let Type::Ident(inner) = &ptr.inner {
                 if Atom::from(inner).is_none() {
                     out.next_section();
-                    write_vector(out, ty, inner, types);
+                    write_cxx_vector(out, ty, inner, types);
                 }
             }
         }
@@ -1168,7 +1168,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: &Type, types: &Types) {
     writeln!(out, "}}");
 }
 
-fn write_vector(out: &mut OutFile, vector_ty: &Type, element: &Ident, types: &Types) {
+fn write_cxx_vector(out: &mut OutFile, vector_ty: &Type, element: &Ident, types: &Types) {
     let element = Type::Ident(element.clone());
     let inner = to_typename(&out.namespace, &element);
     let instance = to_mangled(&out.namespace, &element);
