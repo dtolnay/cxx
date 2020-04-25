@@ -30,6 +30,7 @@ pub mod ffi {
         fn c_return_unique_ptr_vector_u8() -> UniquePtr<CxxVector<u8>>;
         fn c_return_unique_ptr_vector_f64() -> UniquePtr<CxxVector<f64>>;
         fn c_return_unique_ptr_vector_shared() -> UniquePtr<CxxVector<Shared>>;
+        fn c_return_unique_ptr_vector_opaque() -> UniquePtr<CxxVector<C>>;
 
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);

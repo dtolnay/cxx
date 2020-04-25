@@ -83,6 +83,10 @@ std::unique_ptr<std::vector<Shared>> c_return_unique_ptr_vector_shared() {
   return vec;
 }
 
+std::unique_ptr<std::vector<C>> c_return_unique_ptr_vector_opaque() {
+  return std::unique_ptr<std::vector<C>>(new std::vector<C>());
+}
+
 void c_take_primitive(size_t n) {
   if (n == 2020) {
     cxx_test_suite_set_correct();
