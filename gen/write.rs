@@ -920,26 +920,13 @@ fn to_typename(namespace: &Namespace, ty: &Type) -> String {
     }
 }
 
+// Only called for legal referent types of unique_ptr and element types of
+// std::vector and Vec.
 fn to_mangled(namespace: &Namespace, ty: &Type) -> String {
     match ty {
-        Type::Ident(ident) => {
-            let mut instance = String::new();
-            // Do not apply namespace to built-in type
-            let is_user_type = Atom::from(ident).is_none();
-            if is_user_type {
-                for name in namespace {
-                    instance += name;
-                    instance += "$";
-                }
-            }
-            instance += &ident.to_string();
-            instance
-        }
-        Type::RustBox(ptr) => format!("rust_box${}", to_mangled(namespace, &ptr.inner)),
-        Type::RustVec(ptr) => format!("rust_vec${}", to_mangled(namespace, &ptr.inner)),
-        Type::UniquePtr(ptr) => format!("std$unique_ptr${}", to_mangled(namespace, &ptr.inner)),
+        Type::Ident(_) => to_typename(namespace, ty).replace("::", "$"),
         Type::CxxVector(ptr) => format!("std$vector${}", to_mangled(namespace, &ptr.inner)),
-        _ => unimplemented!(),
+        _ => unreachable!(),
     }
 }
 
