@@ -923,11 +923,6 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
         Atom::from(ident).is_none()
     }
 
-    fn allow_vector(ident: &Ident) -> bool {
-        // Note: built-in types such as u8 are already defined in cxx.cc
-        Atom::from(ident).is_none()
-    }
-
     out.begin_block("extern \"C\"");
     for ty in types {
         if let Type::RustBox(ty) = ty {
@@ -944,21 +939,14 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
             if let Type::Ident(inner) = &ptr.inner {
                 if allow_unique_ptr(inner) {
                     out.next_section();
-                    write_unique_ptr(out, &ptr.inner, types);
-                }
-            } else if let Type::CxxVector(ptr1) = &ptr.inner {
-                if let Type::Ident(inner) = &ptr1.inner {
-                    if allow_vector(inner) {
-                        out.next_section();
-                        write_unique_ptr(out, &ptr.inner, types);
-                    }
+                    write_unique_ptr(out, inner, types);
                 }
             }
         } else if let Type::CxxVector(ptr) = ty {
             if let Type::Ident(inner) = &ptr.inner {
-                if allow_vector(inner) {
+                if Atom::from(inner).is_none() {
                     out.next_section();
-                    write_vector(out, inner);
+                    write_vector(out, ty, inner, types);
                 }
             }
         }
@@ -1088,13 +1076,29 @@ fn write_rust_vec_impl(out: &mut OutFile, ty: &Type) {
     writeln!(out, "}}");
 }
 
-fn write_unique_ptr(out: &mut OutFile, ty: &Type, types: &Types) {
+fn write_unique_ptr(out: &mut OutFile, ident: &Ident, types: &Types) {
+    let ty = Type::Ident(ident.clone());
+    let instance = to_mangled(&out.namespace, &ty);
+
+    writeln!(out, "#ifndef CXXBRIDGE02_UNIQUE_PTR_{}", instance);
+    writeln!(out, "#define CXXBRIDGE02_UNIQUE_PTR_{}", instance);
+
+    write_unique_ptr_common(out, &ty, types);
+
+    writeln!(out, "#endif // CXXBRIDGE02_UNIQUE_PTR_{}", instance);
+}
+
+// Shared by UniquePtr<T> and UniquePtr<CxxVector<T>>.
+fn write_unique_ptr_common(out: &mut OutFile, ty: &Type, types: &Types) {
     out.include.utility = true;
     let inner = to_typename(&out.namespace, ty);
     let instance = to_mangled(&out.namespace, ty);
 
-    writeln!(out, "#ifndef CXXBRIDGE02_UNIQUE_PTR_{}", instance);
-    writeln!(out, "#define CXXBRIDGE02_UNIQUE_PTR_{}", instance);
+    let can_construct_from_value = match ty {
+        Type::Ident(ident) => types.structs.contains_key(ident),
+        _ => false,
+    };
+
     writeln!(
         out,
         "static_assert(sizeof(::std::unique_ptr<{}>) == sizeof(void *), \"\");",
@@ -1112,21 +1116,18 @@ fn write_unique_ptr(out: &mut OutFile, ty: &Type, types: &Types) {
     );
     writeln!(out, "  new (ptr) ::std::unique_ptr<{}>();", inner);
     writeln!(out, "}}");
-    match ty {
-        Type::Ident(ident) if types.structs.contains_key(ident) => {
-            writeln!(
+    if can_construct_from_value {
+        writeln!(
             out,
             "void cxxbridge02$unique_ptr${}$new(::std::unique_ptr<{}> *ptr, {} *value) noexcept {{",
             instance, inner, inner,
         );
-            writeln!(
-                out,
-                "  new (ptr) ::std::unique_ptr<{}>(new {}(::std::move(*value)));",
-                inner, inner,
-            );
-            writeln!(out, "}}");
-        }
-        _ => (),
+        writeln!(
+            out,
+            "  new (ptr) ::std::unique_ptr<{}>(new {}(::std::move(*value)));",
+            inner, inner,
+        );
+        writeln!(out, "}}");
     }
     writeln!(
         out,
@@ -1156,30 +1157,15 @@ fn write_unique_ptr(out: &mut OutFile, ty: &Type, types: &Types) {
     );
     writeln!(out, "  ptr->~unique_ptr();");
     writeln!(out, "}}");
-    writeln!(out, "#endif // CXXBRIDGE02_UNIQUE_PTR_{}", instance);
 }
 
-fn write_vector(out: &mut OutFile, ident: &Ident) {
-    let mut inner = String::new();
-    // Do not apply namespace to built-in type
-    let is_user_type = Atom::from(ident).is_none();
-    if is_user_type {
-        for name in &out.namespace {
-            inner += name;
-            inner += "::";
-        }
-    }
-    let mut instance = inner.clone();
-    if let Some(ti) = Atom::from(ident) {
-        inner += ti.to_cxx();
-    } else {
-        inner += &ident.to_string();
-    };
-    instance += &ident.to_string();
-    let instance = instance.replace("::", "$");
+fn write_vector(out: &mut OutFile, vector_ty: &Type, element: &Ident, types: &Types) {
+    let element = Type::Ident(element.clone());
+    let inner = to_typename(&out.namespace, &element);
+    let instance = to_mangled(&out.namespace, &element);
 
-    writeln!(out, "#ifndef CXXBRIDGE02_vector_{}", instance);
-    writeln!(out, "#define CXXBRIDGE02_vector_{}", instance);
+    writeln!(out, "#ifndef CXXBRIDGE02_VECTOR_{}", instance);
+    writeln!(out, "#define CXXBRIDGE02_VECTOR_{}", instance);
     writeln!(
         out,
         "size_t cxxbridge02$std$vector${}$size(const ::std::vector<{}> &s) noexcept {{",
@@ -1201,5 +1187,8 @@ fn write_vector(out: &mut OutFile, ident: &Ident) {
     );
     writeln!(out, "  s.push_back(item);");
     writeln!(out, "}}");
-    writeln!(out, "#endif // CXXBRIDGE02_vector_{}", instance);
+
+    write_unique_ptr_common(out, vector_ty, types);
+
+    writeln!(out, "#endif // CXXBRIDGE02_VECTOR_{}", instance);
 }
