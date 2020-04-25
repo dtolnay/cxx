@@ -290,7 +290,12 @@ fn check_multiple_arg_lifetimes(cx: &mut Check, efn: &ExternFn) {
 }
 
 fn check_reserved_name(cx: &mut Check, ident: &Ident) {
-    if ident == "Box" || ident == "UniquePtr" || Atom::from(ident).is_some() {
+    if ident == "Box"
+        || ident == "UniquePtr"
+        || ident == "Vec"
+        || ident == "CxxVector"
+        || Atom::from(ident).is_some()
+    {
         cx.error(ident, "reserved name");
     }
 }
