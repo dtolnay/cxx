@@ -978,9 +978,8 @@ fn write_rust_box_extern(out: &mut OutFile, ident: &Ident) {
 }
 
 fn write_rust_vec_extern(out: &mut OutFile, ty: &Type) {
-    let namespace = out.namespace.iter().cloned().collect::<Vec<String>>();
-    let inner = ty.to_typename(&namespace);
-    let instance = ty.to_mangled(&namespace);
+    let inner = ty.to_typename(&out.namespace);
+    let instance = ty.to_mangled(&out.namespace);
 
     writeln!(out, "#ifndef CXXBRIDGE02_RUST_VEC_{}", instance);
     writeln!(out, "#define CXXBRIDGE02_RUST_VEC_{}", instance);
@@ -1018,9 +1017,8 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
 }
 
 fn write_rust_vec_impl(out: &mut OutFile, ty: &Type) {
-    let namespace = out.namespace.iter().cloned().collect::<Vec<String>>();
-    let inner = ty.to_typename(&namespace);
-    let instance = ty.to_mangled(&namespace);
+    let inner = ty.to_typename(&out.namespace);
+    let instance = ty.to_mangled(&out.namespace);
 
     writeln!(out, "template <>");
     writeln!(out, "void Vec<{}>::drop() noexcept {{", inner);
@@ -1039,9 +1037,8 @@ fn write_rust_vec_impl(out: &mut OutFile, ty: &Type) {
 
 fn write_unique_ptr(out: &mut OutFile, ty: &Type, types: &Types) {
     out.include.utility = true;
-    let namespace = out.namespace.iter().cloned().collect::<Vec<String>>();
-    let inner = ty.to_typename(&namespace);
-    let instance = ty.to_mangled(&namespace);
+    let inner = ty.to_typename(&out.namespace);
+    let instance = ty.to_mangled(&out.namespace);
 
     writeln!(out, "#ifndef CXXBRIDGE02_UNIQUE_PTR_{}", instance);
     writeln!(out, "#define CXXBRIDGE02_UNIQUE_PTR_{}", instance);

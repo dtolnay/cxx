@@ -1,11 +1,12 @@
+use crate::syntax::namespace::Namespace;
 use crate::syntax::{Atom, Type};
 
 pub trait ToTypename {
-    fn to_typename(&self, namespace: &Vec<String>) -> String;
+    fn to_typename(&self, namespace: &Namespace) -> String;
 }
 
 impl ToTypename for Type {
-    fn to_typename(&self, namespace: &Vec<String>) -> String {
+    fn to_typename(&self, namespace: &Namespace) -> String {
         match self {
             Type::Ident(ident) => {
                 let mut inner = String::new();

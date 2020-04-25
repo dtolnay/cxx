@@ -1,11 +1,12 @@
+use crate::syntax::namespace::Namespace;
 use crate::syntax::{Atom, Type};
 
 pub trait ToMangled {
-    fn to_mangled(&self, namespace: &Vec<String>) -> String;
+    fn to_mangled(&self, namespace: &Namespace) -> String;
 }
 
 impl ToMangled for Type {
-    fn to_mangled(&self, namespace: &Vec<String>) -> String {
+    fn to_mangled(&self, namespace: &Namespace) -> String {
         match self {
             Type::Ident(ident) => {
                 let mut instance = String::new();
