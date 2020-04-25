@@ -13,7 +13,10 @@ pub struct CxxVector<T> {
     _private: [T; 0],
 }
 
-impl<T: VectorElement> CxxVector<T> {
+impl<T> CxxVector<T>
+where
+    T: VectorElement,
+{
     /// Returns the number of elements in the vector.
     ///
     /// Matches the behavior of C++ [std::vector\<T\>::size][size].
@@ -67,7 +70,10 @@ pub struct Iter<'a, T> {
     index: usize,
 }
 
-impl<'a, T: VectorElement> IntoIterator for &'a CxxVector<T> {
+impl<'a, T> IntoIterator for &'a CxxVector<T>
+where
+    T: VectorElement,
+{
     type Item = &'a T;
     type IntoIter = Iter<'a, T>;
 
@@ -76,7 +82,10 @@ impl<'a, T: VectorElement> IntoIterator for &'a CxxVector<T> {
     }
 }
 
-impl<'a, T: VectorElement> Iterator for Iter<'a, T> {
+impl<'a, T> Iterator for Iter<'a, T>
+where
+    T: VectorElement,
+{
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
