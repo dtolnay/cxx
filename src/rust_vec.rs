@@ -7,6 +7,10 @@ pub struct RustVec<T> {
 }
 
 impl<T> RustVec<T> {
+    pub fn new() -> Self {
+        RustVec { repr: Vec::new() }
+    }
+
     pub fn from(v: Vec<T>) -> Self {
         RustVec { repr: v }
     }
@@ -42,6 +46,12 @@ macro_rules! rust_vec_shims_for_primitive {
         const_assert_eq!(mem::align_of::<usize>(), mem::align_of::<Vec<$ty>>());
 
         const _: () = {
+            attr! {
+                #[export_name = concat!("cxxbridge02$rust_vec$", stringify!($ty), "$new")]
+                unsafe extern "C" fn __new(this: *mut RustVec<$ty>) {
+                    ptr::write(this, RustVec::new());
+                }
+            }
             attr! {
                 #[export_name = concat!("cxxbridge02$rust_vec$", stringify!($ty), "$drop")]
                 unsafe extern "C" fn __drop(this: *mut RustVec<$ty>) {

@@ -237,6 +237,8 @@ void cxxbridge02$unique_ptr$std$string$drop(
   }
 
 #define RUST_VEC_EXTERNS(RUST_TYPE, CXX_TYPE)                                  \
+  void cxxbridge02$rust_vec$##RUST_TYPE##$new(                                 \
+      rust::Vec<CXX_TYPE> *ptr) noexcept;                                      \
   void cxxbridge02$rust_vec$##RUST_TYPE##$drop(                                \
       rust::Vec<CXX_TYPE> *ptr) noexcept;                                      \
   size_t cxxbridge02$rust_vec$##RUST_TYPE##$len(                               \
@@ -246,6 +248,10 @@ void cxxbridge02$unique_ptr$std$string$drop(
   size_t cxxbridge02$rust_vec$##RUST_TYPE##$stride() noexcept;
 
 #define RUST_VEC_OPS(RUST_TYPE, CXX_TYPE)                                      \
+  template <>                                                                  \
+  rust::Vec<CXX_TYPE>::Vec() noexcept {                                        \
+    cxxbridge02$rust_vec$##RUST_TYPE##$new(this);                              \
+  }                                                                            \
   template <>                                                                  \
   void rust::Vec<CXX_TYPE>::drop() noexcept {                                  \
     return cxxbridge02$rust_vec$##RUST_TYPE##$drop(this);                      \

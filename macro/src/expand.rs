@@ -543,12 +543,14 @@ fn expand_rust_box(namespace: &Namespace, ident: &Ident) -> TokenStream {
 
 fn expand_rust_vec(namespace: &Namespace, elem: &Ident) -> TokenStream {
     let link_prefix = format!("cxxbridge02$rust_vec${}{}$", namespace, elem);
+    let link_new = format!("{}new", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
     let link_len = format!("{}len", link_prefix);
     let link_data = format!("{}data", link_prefix);
     let link_stride = format!("{}stride", link_prefix);
 
     let local_prefix = format_ident!("{}__vec_", elem);
+    let local_new = format_ident!("{}new", local_prefix);
     let local_drop = format_ident!("{}drop", local_prefix);
     let local_len = format_ident!("{}len", local_prefix);
     let local_data = format_ident!("{}data", local_prefix);
@@ -556,6 +558,11 @@ fn expand_rust_vec(namespace: &Namespace, elem: &Ident) -> TokenStream {
 
     let span = elem.span();
     quote_spanned! {span=>
+        #[doc(hidden)]
+        #[export_name = #link_new]
+        unsafe extern "C" fn #local_new(this: *mut ::cxx::private::RustVec<#elem>) {
+            ::std::ptr::write(this, ::cxx::private::RustVec::new());
+        }
         #[doc(hidden)]
         #[export_name = #link_drop]
         unsafe extern "C" fn #local_drop(this: *mut ::cxx::private::RustVec<#elem>) {

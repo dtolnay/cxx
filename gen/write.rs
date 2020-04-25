@@ -1028,6 +1028,11 @@ fn write_rust_vec_extern(out: &mut OutFile, element: &Ident) {
     writeln!(out, "#define CXXBRIDGE02_RUST_VEC_{}", instance);
     writeln!(
         out,
+        "void cxxbridge02$rust_vec${}$new(const ::rust::Vec<{}> *ptr) noexcept;",
+        instance, inner,
+    );
+    writeln!(
+        out,
         "void cxxbridge02$rust_vec${}$drop(::rust::Vec<{}> *ptr) noexcept;",
         instance, inner,
     );
@@ -1073,6 +1078,11 @@ fn write_rust_vec_impl(out: &mut OutFile, element: &Ident) {
     let element = Type::Ident(element.clone());
     let inner = to_typename(&out.namespace, &element);
     let instance = to_mangled(&out.namespace, &element);
+
+    writeln!(out, "template <>");
+    writeln!(out, "Vec<{}>::Vec() noexcept {{", inner);
+    writeln!(out, "  cxxbridge02$rust_vec${}$new(this);", instance);
+    writeln!(out, "}}");
 
     writeln!(out, "template <>");
     writeln!(out, "void Vec<{}>::drop() noexcept {{", inner);

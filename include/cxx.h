@@ -213,7 +213,21 @@ class Vec final {
 public:
   using value_type = T;
 
+  Vec() noexcept;
+  Vec(Vec &&other) noexcept {
+    this->repr = other.repr;
+    new (&other) Vec();
+  }
   ~Vec() noexcept { this->drop(); }
+
+  Vec &operator=(Vec &&other) noexcept {
+    if (this != &other) {
+      this->drop();
+      this->repr = other.repr;
+      new (&other) Vec();
+    }
+    return *this;
+  }
 
   size_t size() const noexcept;
   bool empty() const noexcept { return size() == 0; }
