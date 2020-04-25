@@ -92,7 +92,7 @@ fn check_type_box(cx: &mut Check, ptr: &Ty1) {
 fn check_type_vec(cx: &mut Check, ptr: &Ty1) {
     // Vec can contain either user-defined type or u8
     if let Type::Ident(ident) = &ptr.inner {
-        if Atom::from(ident).map(|a| a.is_valid_vector_target()) == Some(true) {
+        if Atom::from(ident).map(is_valid_vector_target) == Some(true) {
             return;
         } else if cx.types.cxx.contains(ident) {
             cx.error(ptr, error::VEC_CXX_TYPE.msg);
@@ -130,7 +130,7 @@ fn check_type_vector(cx: &mut Check, ptr: &Ty1) {
         match Atom::from(ident) {
             None => return,
             Some(atom) => {
-                if atom.is_valid_vector_target() {
+                if is_valid_vector_target(atom) {
                     return;
                 }
             }
@@ -297,6 +297,21 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
         _ => return false,
     };
     ident == CxxString || cx.types.cxx.contains(ident) || cx.types.rust.contains(ident)
+}
+
+fn is_valid_vector_target(atom: Atom) -> bool {
+    atom == U8
+        || atom == U16
+        || atom == U32
+        || atom == U64
+        || atom == Usize
+        || atom == I8
+        || atom == I16
+        || atom == I32
+        || atom == I64
+        || atom == Isize
+        || atom == F32
+        || atom == F64
 }
 
 fn span_for_struct_error(strct: &Struct) -> TokenStream {

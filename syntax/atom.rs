@@ -42,22 +42,6 @@ impl Atom {
             _ => None,
         }
     }
-
-    pub fn is_valid_vector_target(&self) -> bool {
-        use self::Atom::*;
-        *self == U8
-            || *self == U16
-            || *self == U32
-            || *self == U64
-            || *self == Usize
-            || *self == I8
-            || *self == I16
-            || *self == I32
-            || *self == I64
-            || *self == Isize
-            || *self == F32
-            || *self == F64
-    }
 }
 
 impl PartialEq<Atom> for Ident {
