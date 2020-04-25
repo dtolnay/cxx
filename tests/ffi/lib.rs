@@ -41,9 +41,9 @@ pub mod ffi {
         fn c_take_sliceu8(s: &[u8]);
         fn c_take_rust_string(s: String);
         fn c_take_unique_ptr_string(s: UniquePtr<CxxString>);
-        fn c_take_unique_ptr_vector_u8(s: UniquePtr<CxxVector<u8>>);
-        fn c_take_unique_ptr_vector_f64(s: UniquePtr<CxxVector<f64>>);
-        fn c_take_unique_ptr_vector_shared(s: UniquePtr<CxxVector<Shared>>);
+        fn c_take_unique_ptr_vector_u8(v: UniquePtr<CxxVector<u8>>);
+        fn c_take_unique_ptr_vector_f64(v: UniquePtr<CxxVector<f64>>);
+        fn c_take_unique_ptr_vector_shared(v: UniquePtr<CxxVector<Shared>>);
         fn c_take_vec_u8(v: &Vec<u8>);
         fn c_take_vec_shared(v: &Vec<Shared>);
         fn c_take_callback(callback: fn(String) -> usize);
