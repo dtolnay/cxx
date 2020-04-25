@@ -90,6 +90,9 @@ impl Display for Includes {
         if self.utility {
             writeln!(f, "#include <utility>")?;
         }
+        if self.vector {
+            writeln!(f, "#include <vector>")?;
+        }
         if self.base_tsd {
             writeln!(f, "#if defined(_WIN32)")?;
             writeln!(f, "#include <BaseTsd.h>")?;
