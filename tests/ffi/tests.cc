@@ -59,29 +59,28 @@ std::unique_ptr<std::string> c_return_unique_ptr_string() {
 }
 
 std::unique_ptr<std::vector<uint8_t>> c_return_unique_ptr_vector_u8() {
-  auto retval =
-      std::unique_ptr<std::vector<uint8_t>>(new std::vector<uint8_t>());
-  retval->push_back(86);
-  retval->push_back(75);
-  retval->push_back(30);
-  retval->push_back(9);
-  return retval;
+  auto vec = std::unique_ptr<std::vector<uint8_t>>(new std::vector<uint8_t>());
+  vec->push_back(86);
+  vec->push_back(75);
+  vec->push_back(30);
+  vec->push_back(9);
+  return vec;
 }
 
 std::unique_ptr<std::vector<double>> c_return_unique_ptr_vector_f64() {
-  auto retval = std::unique_ptr<std::vector<double>>(new std::vector<double>());
-  retval->push_back(86.0);
-  retval->push_back(75.0);
-  retval->push_back(30.0);
-  retval->push_back(9.5);
-  return retval;
+  auto vec = std::unique_ptr<std::vector<double>>(new std::vector<double>());
+  vec->push_back(86.0);
+  vec->push_back(75.0);
+  vec->push_back(30.0);
+  vec->push_back(9.5);
+  return vec;
 }
 
 std::unique_ptr<std::vector<Shared>> c_return_unique_ptr_vector_shared() {
-  auto retval = std::unique_ptr<std::vector<Shared>>(new std::vector<Shared>());
-  retval->push_back(Shared{1010});
-  retval->push_back(Shared{1011});
-  return retval;
+  auto vec = std::unique_ptr<std::vector<Shared>>(new std::vector<Shared>());
+  vec->push_back(Shared{1010});
+  vec->push_back(Shared{1011});
+  return vec;
 }
 
 void c_take_primitive(size_t n) {

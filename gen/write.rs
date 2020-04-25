@@ -1031,7 +1031,7 @@ fn write_rust_vec_impl(out: &mut OutFile, ty: &Type) {
     writeln!(
         out,
         "  return cxxbridge02$rust_vec${}$drop(this);",
-        instance
+        instance,
     );
     writeln!(out, "}}");
 
@@ -1044,7 +1044,7 @@ fn write_rust_vec_impl(out: &mut OutFile, ty: &Type) {
     writeln!(
         out,
         "Vec<{}>::operator ::std::vector<{}>() const noexcept {{",
-        inner, inner
+        inner, inner,
     );
     writeln!(out, "  ::std::vector<{}> v;", inner);
     writeln!(out, "  v.reserve(this->size());");

@@ -71,6 +71,7 @@ impl<'a, T: VectorTarget<T>> IntoIterator for &'a RealVector<T> {
 
 impl<'a, T: VectorTarget<T>> Iterator for VectorIntoIterator<'a, T> {
     type Item = &'a T;
+
     fn next(&mut self) -> Option<Self::Item> {
         self.index = self.index + 1;
         self.v.get(self.index - 1)
