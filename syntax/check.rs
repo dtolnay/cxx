@@ -361,7 +361,7 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         Type::UniquePtr(_) => "unique_ptr".to_owned(),
         Type::Ref(_) => "reference".to_owned(),
         Type::Str(_) => "&str".to_owned(),
-        Type::CxxVector(_) => "vector".to_owned(),
+        Type::CxxVector(_) => "C++ vector".to_owned(),
         Type::Slice(_) => "slice".to_owned(),
         Type::SliceRefU8(_) => "&[u8]".to_owned(),
         Type::Fn(_) => "function pointer".to_owned(),
