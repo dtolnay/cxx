@@ -2,7 +2,6 @@ use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::mangled::to_mangled;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::symbol::Symbol;
-use crate::syntax::typename::to_typename;
 use crate::syntax::{
     self, check, mangle, Api, ExternFn, ExternType, Signature, Struct, Type, Types,
 };
@@ -62,19 +61,7 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
         } else if let Type::UniquePtr(ptr) = ty {
             if let Type::Ident(ident) = &ptr.inner {
                 if Atom::from(ident).is_none() {
-                    expanded.extend(expand_unique_ptr(namespace, &ptr.inner, types));
-                }
-            } else if let Type::CxxVector(_) = &ptr.inner {
-                // Generate code for unique_ptr<vector<T>> if T is not an atom
-                // or if T is a primitive.
-                // Code for primitives is already generated
-                match Atom::from(ident) {
-                    None => expanded.extend(expand_unique_ptr(namespace, &ptr.inner, types)),
-                    Some(atom) => {
-                        if atom.is_valid_vector_target() {
-                            expanded.extend(expand_unique_ptr(namespace, &ptr.inner, types));
-                        }
-                    }
+                    expanded.extend(expand_unique_ptr(namespace, ident, types));
                 }
             }
         } else if let Type::CxxVector(ptr) = ty {
@@ -573,11 +560,9 @@ fn expand_rust_vec(namespace: &Namespace, ty: &Type, ident: &Ident) -> TokenStre
     }
 }
 
-fn expand_unique_ptr(namespace: &Namespace, ty: &Type, types: &Types) -> TokenStream {
-    let name = to_typename(namespace, ty);
-    let inner = ty;
-    let mangled = to_mangled(namespace, ty) + "$";
-    let prefix = format!("cxxbridge02$unique_ptr${}", mangled);
+fn expand_unique_ptr(namespace: &Namespace, ident: &Ident, types: &Types) -> TokenStream {
+    let name = ident.to_string();
+    let prefix = format!("cxxbridge02$unique_ptr${}{}$", namespace, ident);
     let link_null = format!("{}null", prefix);
     let link_new = format!("{}new", prefix);
     let link_raw = format!("{}raw", prefix);
@@ -585,8 +570,8 @@ fn expand_unique_ptr(namespace: &Namespace, ty: &Type, types: &Types) -> TokenSt
     let link_release = format!("{}release", prefix);
     let link_drop = format!("{}drop", prefix);
 
-    let new_method = match ty {
-        Type::Ident(ident) if types.structs.contains_key(ident) => Some(quote! {
+    let new_method = if types.structs.contains_key(ident) {
+        Some(quote! {
             fn __new(mut value: Self) -> *mut ::std::ffi::c_void {
                 extern "C" {
                     #[link_name = #link_new]
@@ -596,13 +581,14 @@ fn expand_unique_ptr(namespace: &Namespace, ty: &Type, types: &Types) -> TokenSt
                 unsafe { __new(&mut repr, &mut value) }
                 repr
             }
-        }),
-        _ => None,
+        })
+    } else {
+        None
     };
 
     quote! {
-        unsafe impl ::cxx::private::UniquePtrTarget for #inner {
-            const __NAME: &'static str = #name;
+        unsafe impl ::cxx::private::UniquePtrTarget for #ident {
+            const __NAME: &'static dyn ::std::fmt::Display = &#name;
             fn __null() -> *mut ::std::ffi::c_void {
                 extern "C" {
                     #[link_name = #link_null]
@@ -616,7 +602,7 @@ fn expand_unique_ptr(namespace: &Namespace, ty: &Type, types: &Types) -> TokenSt
             unsafe fn __raw(raw: *mut Self) -> *mut ::std::ffi::c_void {
                 extern "C" {
                     #[link_name = #link_raw]
-                    fn __raw(this: *mut *mut ::std::ffi::c_void, raw: *mut #inner);
+                    fn __raw(this: *mut *mut ::std::ffi::c_void, raw: *mut #ident);
                 }
                 let mut repr = ::std::ptr::null_mut::<::std::ffi::c_void>();
                 __raw(&mut repr, raw);
@@ -625,14 +611,14 @@ fn expand_unique_ptr(namespace: &Namespace, ty: &Type, types: &Types) -> TokenSt
             unsafe fn __get(repr: *mut ::std::ffi::c_void) -> *const Self {
                 extern "C" {
                     #[link_name = #link_get]
-                    fn __get(this: *const *mut ::std::ffi::c_void) -> *const #inner;
+                    fn __get(this: *const *mut ::std::ffi::c_void) -> *const #ident;
                 }
                 __get(&repr)
             }
             unsafe fn __release(mut repr: *mut ::std::ffi::c_void) -> *mut Self {
                 extern "C" {
                     #[link_name = #link_release]
-                    fn __release(this: *mut *mut ::std::ffi::c_void) -> *mut #inner;
+                    fn __release(this: *mut *mut ::std::ffi::c_void) -> *mut #ident;
                 }
                 __release(&mut repr)
             }
@@ -648,13 +634,21 @@ fn expand_unique_ptr(namespace: &Namespace, ty: &Type, types: &Types) -> TokenSt
 }
 
 fn expand_cxx_vector(namespace: &Namespace, elem: &Ident) -> TokenStream {
+    let name = elem.to_string();
     let prefix = format!("cxxbridge02$std$vector${}{}$", namespace, elem);
     let link_size = format!("{}size", prefix);
     let link_get_unchecked = format!("{}get_unchecked", prefix);
     let link_push_back = format!("{}push_back", prefix);
+    let unique_ptr_prefix = format!("cxxbridge02$unique_ptr$std$vector${}{}$", namespace, elem);
+    let link_unique_ptr_null = format!("{}null", unique_ptr_prefix);
+    let link_unique_ptr_raw = format!("{}raw", unique_ptr_prefix);
+    let link_unique_ptr_get = format!("{}get", unique_ptr_prefix);
+    let link_unique_ptr_release = format!("{}release", unique_ptr_prefix);
+    let link_unique_ptr_drop = format!("{}drop", unique_ptr_prefix);
 
     quote! {
         unsafe impl ::cxx::private::VectorElement for #elem {
+            const __NAME: &'static dyn ::std::fmt::Display = &#name;
             fn __vector_size(v: &::cxx::CxxVector<Self>) -> usize {
                 extern "C" {
                     #[link_name = #link_size]
@@ -675,6 +669,45 @@ fn expand_cxx_vector(namespace: &Namespace, elem: &Ident) -> TokenStream {
                     fn __push_back(_: &::cxx::CxxVector<#elem>, _: &#elem);
                 }
                 unsafe { __push_back(v, item) }
+            }
+            fn __unique_ptr_null() -> *mut ::std::ffi::c_void {
+                extern "C" {
+                    #[link_name = #link_unique_ptr_null]
+                    fn __unique_ptr_null(this: *mut *mut ::std::ffi::c_void);
+                }
+                let mut repr = ::std::ptr::null_mut::<::std::ffi::c_void>();
+                unsafe { __unique_ptr_null(&mut repr) }
+                repr
+            }
+            unsafe fn __unique_ptr_raw(raw: *mut ::cxx::CxxVector<Self>) -> *mut ::std::ffi::c_void {
+                extern "C" {
+                    #[link_name = #link_unique_ptr_raw]
+                    fn __unique_ptr_raw(this: *mut *mut ::std::ffi::c_void, raw: *mut ::cxx::CxxVector<#elem>);
+                }
+                let mut repr = ::std::ptr::null_mut::<::std::ffi::c_void>();
+                __unique_ptr_raw(&mut repr, raw);
+                repr
+            }
+            unsafe fn __unique_ptr_get(repr: *mut ::std::ffi::c_void) -> *const ::cxx::CxxVector<Self> {
+                extern "C" {
+                    #[link_name = #link_unique_ptr_get]
+                    fn __unique_ptr_get(this: *const *mut ::std::ffi::c_void) -> *const ::cxx::CxxVector<#elem>;
+                }
+                __unique_ptr_get(&repr)
+            }
+            unsafe fn __unique_ptr_release(mut repr: *mut ::std::ffi::c_void) -> *mut ::cxx::CxxVector<Self> {
+                extern "C" {
+                    #[link_name = #link_unique_ptr_release]
+                    fn __unique_ptr_release(this: *mut *mut ::std::ffi::c_void) -> *mut ::cxx::CxxVector<#elem>;
+                }
+                __unique_ptr_release(&mut repr)
+            }
+            unsafe fn __unique_ptr_drop(mut repr: *mut ::std::ffi::c_void) {
+                extern "C" {
+                    #[link_name = #link_unique_ptr_drop]
+                    fn __unique_ptr_drop(this: *mut *mut ::std::ffi::c_void);
+                }
+                __unique_ptr_drop(&mut repr);
             }
         }
     }

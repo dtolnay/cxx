@@ -1,4 +1,8 @@
+use std::ffi::c_void;
+use std::fmt::{self, Display};
+use std::marker::PhantomData;
 use std::mem;
+use std::ptr;
 
 /// Binding to C++ `std::vector<T, std::allocator<T>>`.
 ///
@@ -94,18 +98,46 @@ where
     }
 }
 
+pub struct TypeName<T> {
+    element: PhantomData<T>,
+}
+
+impl<T> TypeName<T> {
+    pub const fn new() -> Self {
+        TypeName {
+            element: PhantomData,
+        }
+    }
+}
+
+impl<T> Display for TypeName<T>
+where
+    T: VectorElement,
+{
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        write!(formatter, "CxxVector<{}>", T::__NAME)
+    }
+}
+
 // Methods are private; not intended to be implemented outside of cxxbridge
 // codebase.
 #[doc(hidden)]
 pub unsafe trait VectorElement: Sized {
+    const __NAME: &'static dyn Display;
     fn __vector_size(v: &CxxVector<Self>) -> usize;
     unsafe fn __get_unchecked(v: &CxxVector<Self>, pos: usize) -> &Self;
     fn __push_back(v: &CxxVector<Self>, item: &Self);
+    fn __unique_ptr_null() -> *mut c_void;
+    unsafe fn __unique_ptr_raw(raw: *mut CxxVector<Self>) -> *mut c_void;
+    unsafe fn __unique_ptr_get(repr: *mut c_void) -> *const CxxVector<Self>;
+    unsafe fn __unique_ptr_release(repr: *mut c_void) -> *mut CxxVector<Self>;
+    unsafe fn __unique_ptr_drop(repr: *mut c_void);
 }
 
 macro_rules! impl_vector_element_for_primitive {
     ($ty:ident) => {
         unsafe impl VectorElement for $ty {
+            const __NAME: &'static dyn Display = &stringify!($ty);
             fn __vector_size(v: &CxxVector<$ty>) -> usize {
                 extern "C" {
                     attr! {
@@ -132,6 +164,55 @@ macro_rules! impl_vector_element_for_primitive {
                     }
                 }
                 unsafe { __push_back(v, item) }
+            }
+            fn __unique_ptr_null() -> *mut c_void {
+                extern "C" {
+                    attr! {
+                        #[link_name = concat!("cxxbridge02$unique_ptr$std$vector$", stringify!($ty), "$null")]
+                        fn __unique_ptr_null(this: *mut *mut c_void);
+                    }
+                }
+                let mut repr = ptr::null_mut::<c_void>();
+                unsafe { __unique_ptr_null(&mut repr) }
+                repr
+            }
+            unsafe fn __unique_ptr_raw(raw: *mut CxxVector<Self>) -> *mut c_void {
+                extern "C" {
+                    attr! {
+                        #[link_name = concat!("cxxbridge02$unique_ptr$std$vector$", stringify!($ty), "$raw")]
+                        fn __unique_ptr_raw(this: *mut *mut c_void, raw: *mut CxxVector<$ty>);
+                    }
+                }
+                let mut repr = ptr::null_mut::<c_void>();
+                __unique_ptr_raw(&mut repr, raw);
+                repr
+            }
+            unsafe fn __unique_ptr_get(repr: *mut c_void) -> *const CxxVector<Self> {
+                extern "C" {
+                    attr! {
+                        #[link_name = concat!("cxxbridge02$unique_ptr$std$vector$", stringify!($ty), "$get")]
+                        fn __unique_ptr_get(this: *const *mut c_void) -> *const CxxVector<$ty>;
+                    }
+                }
+                __unique_ptr_get(&repr)
+            }
+            unsafe fn __unique_ptr_release(mut repr: *mut c_void) -> *mut CxxVector<Self> {
+                extern "C" {
+                    attr! {
+                        #[link_name = concat!("cxxbridge02$unique_ptr$std$vector$", stringify!($ty), "$release")]
+                        fn __unique_ptr_release(this: *mut *mut c_void) -> *mut CxxVector<$ty>;
+                    }
+                }
+                __unique_ptr_release(&mut repr)
+            }
+            unsafe fn __unique_ptr_drop(mut repr: *mut c_void) {
+                extern "C" {
+                    attr! {
+                        #[link_name = concat!("cxxbridge02$unique_ptr$std$vector$", stringify!($ty), "$drop")]
+                        fn __unique_ptr_drop(this: *mut *mut c_void);
+                    }
+                }
+                __unique_ptr_drop(&mut repr);
             }
         }
     };

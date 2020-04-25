@@ -1,4 +1,5 @@
 use crate::cxx_string::CxxString;
+use crate::cxx_vector::{self, CxxVector, VectorElement};
 use std::ffi::c_void;
 use std::fmt::{self, Debug, Display};
 use std::marker::PhantomData;
@@ -149,7 +150,7 @@ where
 // codebase.
 pub unsafe trait UniquePtrTarget {
     #[doc(hidden)]
-    const __NAME: &'static str;
+    const __NAME: &'static dyn Display;
     #[doc(hidden)]
     fn __null() -> *mut c_void;
     #[doc(hidden)]
@@ -186,7 +187,7 @@ extern "C" {
 }
 
 unsafe impl UniquePtrTarget for CxxString {
-    const __NAME: &'static str = "CxxString";
+    const __NAME: &'static dyn Display = &"CxxString";
     fn __null() -> *mut c_void {
         let mut repr = ptr::null_mut::<c_void>();
         unsafe { unique_ptr_std_string_null(&mut repr) }
@@ -205,5 +206,27 @@ unsafe impl UniquePtrTarget for CxxString {
     }
     unsafe fn __drop(mut repr: *mut c_void) {
         unique_ptr_std_string_drop(&mut repr);
+    }
+}
+
+unsafe impl<T> UniquePtrTarget for CxxVector<T>
+where
+    T: VectorElement + 'static,
+{
+    const __NAME: &'static dyn Display = &cxx_vector::TypeName::<T>::new();
+    fn __null() -> *mut c_void {
+        T::__unique_ptr_null()
+    }
+    unsafe fn __raw(raw: *mut Self) -> *mut c_void {
+        T::__unique_ptr_raw(raw)
+    }
+    unsafe fn __get(repr: *mut c_void) -> *const Self {
+        T::__unique_ptr_get(repr)
+    }
+    unsafe fn __release(repr: *mut c_void) -> *mut Self {
+        T::__unique_ptr_release(repr)
+    }
+    unsafe fn __drop(repr: *mut c_void) {
+        T::__unique_ptr_drop(repr);
     }
 }

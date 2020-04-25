@@ -212,19 +212,9 @@ void cxxbridge02$unique_ptr$std$string$drop(
       std::vector<CXX_TYPE> &s, const CXX_TYPE &item) noexcept {               \
     s.push_back(item);                                                         \
   }                                                                            \
-  static_assert(                                                               \
-      sizeof(std::unique_ptr<std::vector<CXX_TYPE>>) == sizeof(void *), "");   \
-  static_assert(                                                               \
-      alignof(std::unique_ptr<std::vector<CXX_TYPE>>) == alignof(void *), ""); \
   void cxxbridge02$unique_ptr$std$vector$##RUST_TYPE##$null(                   \
       std::unique_ptr<std::vector<CXX_TYPE>> *ptr) noexcept {                  \
     new (ptr) std::unique_ptr<std::vector<CXX_TYPE>>();                        \
-  }                                                                            \
-  void cxxbridge02$unique_ptr$std$vector$##RUST_TYPE##$new(                    \
-      std::unique_ptr<std::vector<CXX_TYPE>> *ptr,                             \
-      std::vector<CXX_TYPE> *value) noexcept {                                 \
-    new (ptr) std::unique_ptr<std::vector<CXX_TYPE>>(                          \
-        new std::vector<CXX_TYPE>(std::move(*value)));                         \
   }                                                                            \
   void cxxbridge02$unique_ptr$std$vector$##RUST_TYPE##$raw(                    \
       std::unique_ptr<std::vector<CXX_TYPE>> *ptr,                             \
