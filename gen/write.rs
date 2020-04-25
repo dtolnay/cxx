@@ -186,7 +186,11 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
                     needs_trycatch = true;
                 }
                 for arg in &efn.args {
-                    if arg.ty == RustString {
+                    let bitcopy = match arg.ty {
+                        Type::RustVec(_) => true,
+                        _ => arg.ty == RustString,
+                    };
+                    if bitcopy {
                         needs_unsafe_bitcopy = true;
                         break;
                     }
@@ -389,6 +393,8 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         }
         if arg.ty == RustString {
             write!(out, "const ");
+        } else if let Type::RustVec(_) = arg.ty {
+            write!(out, "const ");
         }
         write_extern_arg(out, arg, types);
     }
@@ -467,6 +473,9 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
                 "::rust::String(::rust::unsafe_bitcopy, *{})",
                 arg.ident,
             );
+        } else if let Type::RustVec(_) = arg.ty {
+            write_type(out, &arg.ty);
+            write!(out, "(::rust::unsafe_bitcopy, *{})", arg.ident);
         } else if types.needs_indirect_abi(&arg.ty) {
             out.include.utility = true;
             write!(out, "::std::move(*{})", arg.ident);

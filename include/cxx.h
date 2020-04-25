@@ -15,7 +15,13 @@
 namespace rust {
 inline namespace cxxbridge02 {
 
-struct unsafe_bitcopy_t;
+#ifndef CXXBRIDGE02_RUST_BITCOPY
+#define CXXBRIDGE02_RUST_BITCOPY
+struct unsafe_bitcopy_t {
+  explicit unsafe_bitcopy_t() = default;
+};
+constexpr unsafe_bitcopy_t unsafe_bitcopy{};
+#endif // CXXBRIDGE02_RUST_BITCOPY
 
 #ifndef CXXBRIDGE02_RUST_STRING
 #define CXXBRIDGE02_RUST_STRING
@@ -249,6 +255,9 @@ public:
     return it;
   }
 
+  // Internal API only intended for the cxxbridge code generator.
+  Vec(unsafe_bitcopy_t, const Vec &bits) noexcept : repr(bits.repr) {}
+
 private:
   static size_t stride() noexcept;
   void drop() noexcept;
@@ -315,14 +324,6 @@ template <typename Signature, bool Throws = false>
 using fn = Fn<Signature, Throws>;
 template <typename Signature>
 using try_fn = TryFn<Signature>;
-
-#ifndef CXXBRIDGE02_RUST_BITCOPY
-#define CXXBRIDGE02_RUST_BITCOPY
-struct unsafe_bitcopy_t {
-  explicit unsafe_bitcopy_t() = default;
-};
-constexpr unsafe_bitcopy_t unsafe_bitcopy{};
-#endif // CXXBRIDGE02_RUST_BITCOPY
 
 template <typename Ret, typename... Args, bool Throws>
 Ret Fn<Ret(Args...), Throws>::operator()(Args... args) const noexcept(!Throws) {

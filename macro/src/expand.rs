@@ -146,6 +146,8 @@ fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types
         let ty = expand_extern_type(&arg.ty);
         if arg.ty == RustString {
             quote!(#ident: *const #ty)
+        } else if let Type::RustVec(_) = arg.ty {
+            quote!(#ident: *const #ty)
         } else if let Type::Fn(_) = arg.ty {
             quote!(#ident: ::cxx::private::FatFunction)
         } else if types.needs_indirect_abi(&arg.ty) {
@@ -207,7 +209,7 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
             }
             Type::RustBox(_) => quote!(::std::boxed::Box::into_raw(#var)),
             Type::UniquePtr(_) => quote!(::cxx::UniquePtr::into_raw(#var)),
-            Type::RustVec(_) => quote!(#var.as_mut_ptr() as *mut ::cxx::private::RustVec<_>),
+            Type::RustVec(_) => quote!(#var.as_mut_ptr() as *const ::cxx::private::RustVec<_>),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(ident) if ident == RustString => {
                     quote!(::cxx::private::RustString::from_ref(#var))
