@@ -427,9 +427,11 @@ fn expand_rust_function_shim_impl(
                 quote!(::std::mem::take((*#ident).as_mut_string()))
             }
             Type::RustBox(_) => quote!(::std::boxed::Box::from_raw(#ident)),
+            Type::RustVec(_) => quote!(::std::mem::take((*#ident).as_mut_vec())),
             Type::UniquePtr(_) => quote!(::cxx::UniquePtr::from_raw(#ident)),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(i) if i == RustString => quote!(#ident.as_string()),
+                Type::RustVec(_) => quote!(#ident.as_vec()),
                 _ => quote!(#ident),
             },
             Type::Str(_) => quote!(#ident.as_str()),
@@ -460,11 +462,13 @@ fn expand_rust_function_shim_impl(
                 Some(quote!(::cxx::private::RustString::from(#call)))
             }
             Type::RustBox(_) => Some(quote!(::std::boxed::Box::into_raw(#call))),
+            Type::RustVec(_) => Some(quote!(::cxx::private::RustVec::from(#call))),
             Type::UniquePtr(_) => Some(quote!(::cxx::UniquePtr::into_raw(#call))),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(ident) if ident == RustString => {
                     Some(quote!(::cxx::private::RustString::from_ref(#call)))
                 }
+                Type::RustVec(_) => Some(quote!(::cxx::private::RustVec::from_ref(#call))),
                 _ => None,
             },
             Type::Str(_) => Some(quote!(::cxx::private::RustStr::from(#call))),
