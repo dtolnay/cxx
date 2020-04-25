@@ -2,7 +2,7 @@ use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::mangled::ToMangled;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::symbol::Symbol;
-use crate::syntax::typename::ToTypename;
+use crate::syntax::typename::to_typename;
 use crate::syntax::{
     self, check, mangle, Api, ExternFn, ExternType, Signature, Struct, Type, Types,
 };
@@ -573,7 +573,7 @@ fn expand_rust_vec(namespace: &Namespace, ty: &Type, ident: &Ident) -> TokenStre
 }
 
 fn expand_unique_ptr(namespace: &Namespace, ty: &Type, types: &Types) -> TokenStream {
-    let name = ty.to_typename(namespace);
+    let name = to_typename(namespace, ty);
     let inner = ty;
     let mangled = ty.to_mangled(namespace) + "$";
     let prefix = format!("cxxbridge02$unique_ptr${}", mangled);

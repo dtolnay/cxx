@@ -4,7 +4,7 @@ use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::mangled::ToMangled;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::symbol::Symbol;
-use crate::syntax::typename::ToTypename;
+use crate::syntax::typename::to_typename;
 use crate::syntax::{mangle, Api, ExternFn, ExternType, Signature, Struct, Type, Types, Var};
 use proc_macro2::Ident;
 use std::collections::HashMap;
@@ -978,7 +978,7 @@ fn write_rust_box_extern(out: &mut OutFile, ident: &Ident) {
 }
 
 fn write_rust_vec_extern(out: &mut OutFile, ty: &Type) {
-    let inner = ty.to_typename(&out.namespace);
+    let inner = to_typename(&out.namespace, ty);
     let instance = ty.to_mangled(&out.namespace);
 
     writeln!(out, "#ifndef CXXBRIDGE02_RUST_VEC_{}", instance);
@@ -1017,7 +1017,7 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
 }
 
 fn write_rust_vec_impl(out: &mut OutFile, ty: &Type) {
-    let inner = ty.to_typename(&out.namespace);
+    let inner = to_typename(&out.namespace, ty);
     let instance = ty.to_mangled(&out.namespace);
 
     writeln!(out, "template <>");
@@ -1037,7 +1037,7 @@ fn write_rust_vec_impl(out: &mut OutFile, ty: &Type) {
 
 fn write_unique_ptr(out: &mut OutFile, ty: &Type, types: &Types) {
     out.include.utility = true;
-    let inner = ty.to_typename(&out.namespace);
+    let inner = to_typename(&out.namespace, ty);
     let instance = ty.to_mangled(&out.namespace);
 
     writeln!(out, "#ifndef CXXBRIDGE02_UNIQUE_PTR_{}", instance);
