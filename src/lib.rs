@@ -370,13 +370,18 @@ mod result;
 mod rust_sliceu8;
 mod rust_str;
 mod rust_string;
+mod rust_vec;
 mod syntax;
 mod unique_ptr;
 mod unwind;
+mod vector;
 
 pub use crate::cxx_string::CxxString;
 pub use crate::exception::Exception;
+pub use crate::rust_vec::RustVec;
 pub use crate::unique_ptr::UniquePtr;
+pub use crate::vector::RealVector;
+pub use crate::vector::VectorIntoIterator;
 pub use cxxbridge_macro::bridge;
 
 // Not public API.
@@ -390,6 +395,7 @@ pub mod private {
     pub use crate::rust_string::RustString;
     pub use crate::unique_ptr::UniquePtrTarget;
     pub use crate::unwind::catch_unwind;
+    pub use crate::vector::VectorTarget;
 }
 
 use crate::error::Result;

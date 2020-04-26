@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <stdexcept>
+#include <vector>
 
 template <typename Exception>
 static void panic [[noreturn]] (const char *msg) {
@@ -197,3 +198,67 @@ void cxxbridge02$unique_ptr$std$string$drop(
   ptr->~unique_ptr();
 }
 } // extern "C"
+
+#define STD_VECTOR_OPS(RUST_TYPE, CXX_TYPE)                                    \
+  extern "C" {                                                                 \
+  size_t cxxbridge02$std$vector$##RUST_TYPE##$length(                          \
+      const std::vector<CXX_TYPE> &s) noexcept {                               \
+    return s.size();                                                           \
+  }                                                                            \
+  void cxxbridge02$std$vector$##RUST_TYPE##$push_back(                         \
+      std::vector<CXX_TYPE> &s, const CXX_TYPE &item) noexcept {               \
+    s.push_back(item);                                                         \
+  }                                                                            \
+  const CXX_TYPE *cxxbridge02$std$vector$##RUST_TYPE##$get_unchecked(          \
+      const std::vector<CXX_TYPE> &s, size_t pos) noexcept {                   \
+    return &s[pos];                                                            \
+  }                                                                            \
+  static_assert(sizeof(::std::unique_ptr<std::vector<CXX_TYPE>>) ==            \
+                    sizeof(void *),                                            \
+                "");                                                           \
+  static_assert(alignof(::std::unique_ptr<std::vector<CXX_TYPE>>) ==           \
+                    alignof(void *),                                           \
+                "");                                                           \
+  void cxxbridge02$unique_ptr$std$vector$##RUST_TYPE##$null(                   \
+      ::std::unique_ptr<std::vector<CXX_TYPE>> *ptr) noexcept {                \
+    new (ptr)::std::unique_ptr<std::vector<CXX_TYPE>>();                       \
+  }                                                                            \
+  void cxxbridge02$unique_ptr$std$vector$##RUST_TYPE##$new(                    \
+      ::std::unique_ptr<std::vector<CXX_TYPE>> *ptr,                           \
+      std::vector<CXX_TYPE> *value) noexcept {                                 \
+    new (ptr)::std::unique_ptr<std::vector<CXX_TYPE>>(                         \
+        new std::vector<CXX_TYPE>(::std::move(*value)));                       \
+  }                                                                            \
+  void cxxbridge02$unique_ptr$std$vector$##RUST_TYPE##$raw(                    \
+      ::std::unique_ptr<std::vector<CXX_TYPE>> *ptr,                           \
+      std::vector<CXX_TYPE> *raw) noexcept {                                   \
+    new (ptr)::std::unique_ptr<std::vector<CXX_TYPE>>(raw);                    \
+  }                                                                            \
+  const std::vector<CXX_TYPE> *                                                \
+      cxxbridge02$unique_ptr$std$vector$##RUST_TYPE##$get(                     \
+          const ::std::unique_ptr<std::vector<CXX_TYPE>> &ptr) noexcept {      \
+    return ptr.get();                                                          \
+  }                                                                            \
+  std::vector<CXX_TYPE> *                                                      \
+      cxxbridge02$unique_ptr$std$vector$##RUST_TYPE##$release(                 \
+          ::std::unique_ptr<std::vector<CXX_TYPE>> &ptr) noexcept {            \
+    return ptr.release();                                                      \
+  }                                                                            \
+  void cxxbridge02$unique_ptr$std$vector$##RUST_TYPE##$drop(                   \
+      ::std::unique_ptr<std::vector<CXX_TYPE>> *ptr) noexcept {                \
+    ptr->~unique_ptr();                                                        \
+  }                                                                            \
+  } // extern "C"
+
+STD_VECTOR_OPS(u8, uint8_t);
+STD_VECTOR_OPS(u16, uint16_t);
+STD_VECTOR_OPS(u32, uint32_t);
+STD_VECTOR_OPS(u64, uint64_t);
+STD_VECTOR_OPS(usize, size_t);
+STD_VECTOR_OPS(i8, int8_t);
+STD_VECTOR_OPS(i16, int16_t);
+STD_VECTOR_OPS(i32, int32_t);
+STD_VECTOR_OPS(i64, int64_t);
+STD_VECTOR_OPS(isize, rust::isize);
+STD_VECTOR_OPS(f32, float);
+STD_VECTOR_OPS(f64, double);

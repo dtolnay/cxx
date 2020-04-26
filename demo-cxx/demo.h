@@ -15,10 +15,12 @@ public:
 };
 
 struct SharedThing;
+struct JsonBlob;
 
 std::unique_ptr<ThingC> make_demo(rust::Str appname);
 const std::string &get_name(const ThingC &thing);
-void do_thing(SharedThing state);
+std::unique_ptr<std::vector<uint8_t>> do_thing(SharedThing state);
+JsonBlob get_jb(const ::rust::Vec<uint8_t> &vec);
 
 } // namespace example
 } // namespace org

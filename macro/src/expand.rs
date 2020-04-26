@@ -1,12 +1,14 @@
 use crate::syntax::atom::Atom::{self, *};
+use crate::syntax::mangled::ToMangled;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::symbol::Symbol;
+use crate::syntax::typename::ToTypename;
 use crate::syntax::{
     self, check, mangle, Api, ExternFn, ExternType, Signature, Struct, Type, Types,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
-use syn::{parse_quote, Error, ItemMod, Result, Token};
+use syn::{parse_quote, spanned::Spanned, Error, ItemMod, Result, Token};
 
 pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
     let ident = &ffi.ident;
@@ -20,6 +22,38 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
 
     let mut expanded = TokenStream::new();
     let mut hidden = TokenStream::new();
+
+    // "Header" to define newtypes locally so we can implement
+    // traits on them.
+    expanded.extend(quote! {
+        pub struct Vector<T>(pub ::cxx::RealVector<T>);
+        impl<T: cxx::private::VectorTarget<T>> Vector<T> {
+            pub fn size(&self) -> usize {
+                self.0.size()
+            }
+            pub fn get(&self, pos: usize) -> Option<&T> {
+                self.0.get(pos)
+            }
+            pub fn get_unchecked(&self, pos: usize) -> &T {
+                self.0.get_unchecked(pos)
+            }
+            pub fn is_empty(&self) -> bool {
+                self.0.is_empty()
+            }
+            pub fn push_back(&mut self, item: &T) {
+                self.0.push_back(item)
+            }
+        }
+        impl<'a, T: cxx::private::VectorTarget<T>> IntoIterator for &'a Vector<T> {
+            type Item = &'a T;
+            type IntoIter = <&'a ::cxx::RealVector<T> as IntoIterator>::IntoIter;
+
+            fn into_iter(self) -> Self::IntoIter {
+                self.0.into_iter()
+            }
+        }
+        unsafe impl<T> Send for Vector<T> where T: Send + cxx::private::VectorTarget<T> {}
+    });
 
     for api in &apis {
         if let Api::RustType(ety) = api {
@@ -53,10 +87,34 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
                     hidden.extend(expand_rust_box(namespace, ident));
                 }
             }
+        } else if let Type::RustVec(ty) = ty {
+            if let Type::Ident(ident) = &ty.inner {
+                hidden.extend(expand_rust_vec(namespace, &ty.inner, ident));
+            }
         } else if let Type::UniquePtr(ptr) = ty {
             if let Type::Ident(ident) = &ptr.inner {
                 if Atom::from(ident).is_none() {
-                    expanded.extend(expand_unique_ptr(namespace, ident, types));
+                    expanded.extend(expand_unique_ptr(namespace, &ptr.inner, types));
+                }
+            } else if let Type::Vector(_) = &ptr.inner {
+                // Generate code for unique_ptr<vector<T>> if T is not an atom
+                // or if T is a primitive.
+                // Code for primitives is already generated
+                match Atom::from(ident) {
+                    None => expanded.extend(expand_unique_ptr(namespace, &ptr.inner, types)),
+                    Some(atom) => {
+                        if atom.is_valid_vector_target() {
+                            expanded.extend(expand_unique_ptr(namespace, &ptr.inner, types));
+                        }
+                    }
+                }
+            }
+        } else if let Type::Vector(ptr) = ty {
+            if let Type::Ident(ident) = &ptr.inner {
+                if Atom::from(ident).is_none() {
+                    // Generate code for Vector<T> if T is not an atom
+                    // Code for atoms is already generated
+                    expanded.extend(expand_vector(namespace, &ptr.inner));
                 }
             }
         }
@@ -192,10 +250,12 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
             }
             Type::RustBox(_) => quote!(::std::boxed::Box::into_raw(#var)),
             Type::UniquePtr(_) => quote!(::cxx::UniquePtr::into_raw(#var)),
+            Type::RustVec(_) => quote!(::cxx::RustVec::from(#var)),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(ident) if ident == RustString => {
                     quote!(::cxx::private::RustString::from_ref(#var))
                 }
+                Type::RustVec(_) => quote!(::cxx::RustVec::from_ref(#var)),
                 _ => quote!(#var),
             },
             Type::Str(_) => quote!(::cxx::private::RustStr::from(#var)),
@@ -518,9 +578,42 @@ fn expand_rust_box(namespace: &Namespace, ident: &Ident) -> TokenStream {
     }
 }
 
-fn expand_unique_ptr(namespace: &Namespace, ident: &Ident, types: &Types) -> TokenStream {
-    let name = ident.to_string();
-    let prefix = format!("cxxbridge02$unique_ptr${}{}$", namespace, ident);
+fn expand_rust_vec(namespace: &Namespace, ty: &Type, ident: &Ident) -> TokenStream {
+    let inner = ty;
+    let mangled = ty.to_mangled(&namespace.segments) + "$";
+    let link_prefix = format!("cxxbridge02$rust_vec${}", mangled);
+    let link_drop = format!("{}drop", link_prefix);
+    let link_vector_from = format!("{}vector_from", link_prefix);
+    let link_len = format!("{}len", link_prefix);
+
+    let local_prefix = format_ident!("{}__vec_", ident);
+    let local_drop = format_ident!("{}drop", local_prefix);
+    let local_vector_from = format_ident!("{}vector_from", local_prefix);
+    let local_len = format_ident!("{}len", local_prefix);
+
+    let span = ty.span();
+    quote_spanned! {span=>
+        #[doc(hidden)]
+        #[export_name = #link_drop]
+        unsafe extern "C" fn #local_drop(this: *mut ::cxx::RustVec<#inner>) {
+            std::ptr::drop_in_place(this);
+        }
+        #[export_name = #link_vector_from]
+        unsafe extern "C" fn #local_vector_from(this: *mut ::cxx::RustVec<#inner>, vector: *mut ::cxx::RealVector<#inner>) {
+            this.as_ref().unwrap().into_vector(vector.as_mut().unwrap());
+        }
+        #[export_name = #link_len]
+        unsafe extern "C" fn #local_len(this: *const ::cxx::RustVec<#inner>) -> usize {
+            this.as_ref().unwrap().len()
+        }
+    }
+}
+
+fn expand_unique_ptr(namespace: &Namespace, ty: &Type, types: &Types) -> TokenStream {
+    let name = ty.to_typename(&namespace.segments);
+    let inner = ty;
+    let mangled = ty.to_mangled(&namespace.segments) + "$";
+    let prefix = format!("cxxbridge02$unique_ptr${}", mangled);
     let link_null = format!("{}null", prefix);
     let link_new = format!("{}new", prefix);
     let link_raw = format!("{}raw", prefix);
@@ -528,8 +621,8 @@ fn expand_unique_ptr(namespace: &Namespace, ident: &Ident, types: &Types) -> Tok
     let link_release = format!("{}release", prefix);
     let link_drop = format!("{}drop", prefix);
 
-    let new_method = if types.structs.contains_key(ident) {
-        Some(quote! {
+    let new_method = match ty {
+        Type::Ident(ident) if types.structs.contains_key(ident) => Some(quote! {
             fn __new(mut value: Self) -> *mut ::std::ffi::c_void {
                 extern "C" {
                     #[link_name = #link_new]
@@ -539,13 +632,12 @@ fn expand_unique_ptr(namespace: &Namespace, ident: &Ident, types: &Types) -> Tok
                 unsafe { __new(&mut repr, &mut value) }
                 repr
             }
-        })
-    } else {
-        None
+        }),
+        _ => None,
     };
 
     quote! {
-        unsafe impl ::cxx::private::UniquePtrTarget for #ident {
+        unsafe impl ::cxx::private::UniquePtrTarget for #inner {
             const __NAME: &'static str = #name;
             fn __null() -> *mut ::std::ffi::c_void {
                 extern "C" {
@@ -560,7 +652,7 @@ fn expand_unique_ptr(namespace: &Namespace, ident: &Ident, types: &Types) -> Tok
             unsafe fn __raw(raw: *mut Self) -> *mut ::std::ffi::c_void {
                 extern "C" {
                     #[link_name = #link_raw]
-                    fn __raw(this: *mut *mut ::std::ffi::c_void, raw: *mut #ident);
+                    fn __raw(this: *mut *mut ::std::ffi::c_void, raw: *mut #inner);
                 }
                 let mut repr = ::std::ptr::null_mut::<::std::ffi::c_void>();
                 __raw(&mut repr, raw);
@@ -569,14 +661,14 @@ fn expand_unique_ptr(namespace: &Namespace, ident: &Ident, types: &Types) -> Tok
             unsafe fn __get(repr: *mut ::std::ffi::c_void) -> *const Self {
                 extern "C" {
                     #[link_name = #link_get]
-                    fn __get(this: *const *mut ::std::ffi::c_void) -> *const #ident;
+                    fn __get(this: *const *mut ::std::ffi::c_void) -> *const #inner;
                 }
                 __get(&repr)
             }
             unsafe fn __release(mut repr: *mut ::std::ffi::c_void) -> *mut Self {
                 extern "C" {
                     #[link_name = #link_release]
-                    fn __release(this: *mut *mut ::std::ffi::c_void) -> *mut #ident;
+                    fn __release(this: *mut *mut ::std::ffi::c_void) -> *mut #inner;
                 }
                 __release(&mut repr)
             }
@@ -586,6 +678,90 @@ fn expand_unique_ptr(namespace: &Namespace, ident: &Ident, types: &Types) -> Tok
                     fn __drop(this: *mut *mut ::std::ffi::c_void);
                 }
                 __drop(&mut repr);
+            }
+        }
+    }
+}
+
+fn expand_vector(namespace: &Namespace, ty: &Type) -> TokenStream {
+    let inner = ty;
+    let mangled = ty.to_mangled(&namespace.segments) + "$";
+    let prefix = format!("cxxbridge02$std$vector${}", mangled);
+    let link_length = format!("{}length", prefix);
+    let link_get_unchecked = format!("{}get_unchecked", prefix);
+    let link_push_back = format!("{}push_back", prefix);
+
+    quote! {
+        impl ::cxx::private::VectorTarget<#inner> for #inner {
+            fn get_unchecked(v: &::cxx::RealVector<#inner>, pos: usize) -> &#inner {
+                extern "C" {
+                    #[link_name = #link_get_unchecked]
+                    fn __get_unchecked(_: &::cxx::RealVector<#inner>, _: usize) -> &#inner;
+                }
+                unsafe {
+                    __get_unchecked(v, pos)
+                }
+            }
+            fn vector_length(v: &::cxx::RealVector<#inner>) -> usize {
+                unsafe {
+                    extern "C" {
+                        #[link_name = #link_length]
+                        fn __vector_length(_: &::cxx::RealVector<#inner>) -> usize;
+                    }
+                    __vector_length(v)
+                }
+            }
+            fn push_back(v: &::cxx::RealVector<#inner>, item: &#inner) {
+                unsafe {
+                    extern "C" {
+                        #[link_name = #link_push_back]
+                        fn __push_back(_: &::cxx::RealVector<#inner>, _: &#inner) -> usize;
+                    }
+                    __push_back(v, item);
+                }
+            }
+        }
+    }
+}
+
+pub fn expand_vector_builtin(ident: Ident) -> TokenStream {
+    let ty = Type::Ident(ident);
+    let inner = &ty;
+    let namespace = Namespace { segments: vec![] };
+    let mangled = ty.to_mangled(&namespace.segments) + "$";
+    let prefix = format!("cxxbridge02$std$vector${}", mangled);
+    let link_length = format!("{}length", prefix);
+    let link_get_unchecked = format!("{}get_unchecked", prefix);
+    let link_push_back = format!("{}push_back", prefix);
+
+    quote! {
+        impl VectorTarget<#inner> for #inner {
+            fn get_unchecked(v: &RealVector<#inner>, pos: usize) -> &#inner {
+                extern "C" {
+                    #[link_name = #link_get_unchecked]
+                    fn __get_unchecked(_: &RealVector<#inner>, _: usize) -> &#inner;
+                }
+                unsafe {
+                    __get_unchecked(v, pos)
+                }
+            }
+            fn vector_length(v: &RealVector<#inner>) -> usize {
+                unsafe {
+                    extern "C" {
+                        #[link_name = #link_length]
+                        fn __vector_length(_: &RealVector<#inner>) -> usize;
+                    }
+                    __vector_length(v)
+                }
+            }
+            fn push_back(v: &RealVector<#inner>, item: &#inner) {
+                unsafe {
+                    extern "C" {
+                        #[link_name = #link_push_back]
+                        fn __push_back(_: &RealVector<#inner>, _: &#inner) -> usize;
+                    }
+                    __push_back(v, item);
+                }
             }
         }
     }
@@ -608,11 +784,16 @@ fn expand_extern_type(ty: &Type) -> TokenStream {
     match ty {
         Type::Ident(ident) if ident == RustString => quote!(::cxx::private::RustString),
         Type::RustBox(ty) | Type::UniquePtr(ty) => {
-            let inner = &ty.inner;
+            let inner = expand_extern_type(&ty.inner);
             quote!(*mut #inner)
         }
+        Type::RustVec(ty) => quote!(::cxx::RustVec<#ty>),
         Type::Ref(ty) => match &ty.inner {
             Type::Ident(ident) if ident == RustString => quote!(&::cxx::private::RustString),
+            Type::RustVec(ty) => {
+                let inner = expand_extern_type(&ty.inner);
+                quote!(&::cxx::RustVec<#inner>)
+            }
             _ => quote!(#ty),
         },
         Type::Str(_) => quote!(::cxx::private::RustStr),

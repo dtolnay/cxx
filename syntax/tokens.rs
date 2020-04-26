@@ -14,7 +14,9 @@ impl ToTokens for Type {
                 }
                 ident.to_tokens(tokens);
             }
-            Type::RustBox(ty) | Type::UniquePtr(ty) => ty.to_tokens(tokens),
+            Type::RustBox(ty) | Type::UniquePtr(ty) | Type::Vector(ty) | Type::RustVec(ty) => {
+                ty.to_tokens(tokens)
+            }
             Type::Ref(r) | Type::Str(r) | Type::SliceRefU8(r) => r.to_tokens(tokens),
             Type::Slice(s) => s.to_tokens(tokens),
             Type::Fn(f) => f.to_tokens(tokens),
@@ -33,7 +35,8 @@ impl ToTokens for Var {
 
 impl ToTokens for Ty1 {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        if self.name == "UniquePtr" {
+        // Do not add cxx namespace to Vector since we're defining it in the user crate
+        if self.name == "UniquePtr" || self.name == "RustVec" {
             let span = self.name.span();
             tokens.extend(quote_spanned!(span=> ::cxx::));
         }

@@ -7,6 +7,7 @@
 #include <string>
 #include <type_traits>
 #include <utility>
+#include <vector>
 #if defined(_WIN32)
 #include <BaseTsd.h>
 #endif
@@ -82,6 +83,27 @@ private:
   Repr repr;
 };
 #endif // CXXBRIDGE02_RUST_STR
+
+#ifndef CXXBRIDGE02_RUST_VEC
+#define CXXBRIDGE02_RUST_VEC
+template <typename T>
+class Vec final {
+public:
+  size_t size() const noexcept;
+  explicit operator std::vector<T>() const noexcept;
+
+private:
+  Vec() noexcept;
+  Vec(const Vec &other) noexcept;
+  Vec &operator=(Vec other) noexcept;
+  void drop() noexcept;
+
+  // Repr
+  const T *ptr;
+  size_t len;
+  size_t capacity;
+};
+#endif // CXXBRIDGE02_RUST_VEC
 
 #ifndef CXXBRIDGE02_RUST_SLICE
 #define CXXBRIDGE02_RUST_SLICE

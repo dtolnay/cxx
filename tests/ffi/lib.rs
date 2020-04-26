@@ -27,6 +27,9 @@ pub mod ffi {
         fn c_return_sliceu8(shared: &Shared) -> &[u8];
         fn c_return_rust_string() -> String;
         fn c_return_unique_ptr_string() -> UniquePtr<CxxString>;
+        fn c_return_unique_ptr_vector_u8() -> UniquePtr<Vector<u8>>;
+        fn c_return_unique_ptr_vector_f64() -> UniquePtr<Vector<f64>>;
+        fn c_return_unique_ptr_vector_shared() -> UniquePtr<Vector<Shared>>;
 
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);
@@ -38,6 +41,11 @@ pub mod ffi {
         fn c_take_sliceu8(s: &[u8]);
         fn c_take_rust_string(s: String);
         fn c_take_unique_ptr_string(s: UniquePtr<CxxString>);
+        fn c_take_unique_ptr_vector_u8(s: UniquePtr<Vector<u8>>);
+        fn c_take_unique_ptr_vector_f64(s: UniquePtr<Vector<f64>>);
+        fn c_take_unique_ptr_vector_shared(s: UniquePtr<Vector<Shared>>);
+        fn c_take_vec_u8(v: &Vec<u8>);
+        fn c_take_vec_shared(v: &Vec<Shared>);
         fn c_take_callback(callback: fn(String) -> usize);
 
         fn c_try_return_void() -> Result<()>;

@@ -29,7 +29,9 @@ fn do_typecheck(cx: &mut Check) {
         match ty {
             Type::Ident(ident) => check_type_ident(cx, ident),
             Type::RustBox(ptr) => check_type_box(cx, ptr),
+            Type::RustVec(ptr) => check_type_vec(cx, ptr),
             Type::UniquePtr(ptr) => check_type_unique_ptr(cx, ptr),
+            Type::Vector(ptr) => check_type_vector(cx, ptr),
             Type::Ref(ty) => check_type_ref(cx, ty),
             Type::Slice(ty) => check_type_slice(cx, ty),
             _ => {}
@@ -87,6 +89,21 @@ fn check_type_box(cx: &mut Check, ptr: &Ty1) {
     cx.error(ptr, "unsupported target type of Box");
 }
 
+fn check_type_vec(cx: &mut Check, ptr: &Ty1) {
+    // Vec can contain either user-defined type or u8
+    if let Type::Ident(ident) = &ptr.inner {
+        if Atom::from(ident).map(|a| a.is_valid_vector_target()) == Some(true) {
+            return;
+        } else if cx.types.cxx.contains(ident) {
+            cx.error(ptr, error::VEC_CXX_TYPE.msg);
+        } else {
+            return;
+        }
+    }
+
+    cx.error(ptr, "unsupported target type of Vec");
+}
+
 fn check_type_unique_ptr(cx: &mut Check, ptr: &Ty1) {
     if let Type::Ident(ident) = &ptr.inner {
         if cx.types.rust.contains(ident) {
@@ -97,9 +114,29 @@ fn check_type_unique_ptr(cx: &mut Check, ptr: &Ty1) {
             None | Some(CxxString) => return,
             _ => {}
         }
+    } else if let Type::Vector(_) = &ptr.inner {
+        return;
     }
 
     cx.error(ptr, "unsupported unique_ptr target type");
+}
+
+fn check_type_vector(cx: &mut Check, ptr: &Ty1) {
+    if let Type::Ident(ident) = &ptr.inner {
+        if cx.types.rust.contains(ident) {
+            cx.error(ptr, "vector of a Rust type is not supported yet");
+        }
+
+        match Atom::from(ident) {
+            None => return,
+            Some(atom) => {
+                if atom.is_valid_vector_target() {
+                    return;
+                }
+            }
+        }
+    }
+    cx.error(ptr, "unsupported vector target type");
 }
 
 fn check_type_ref(cx: &mut Check, ty: &Ref) {
@@ -310,9 +347,11 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
             }
         }
         Type::RustBox(_) => "Box".to_owned(),
+        Type::RustVec(_) => "Vec".to_owned(),
         Type::UniquePtr(_) => "unique_ptr".to_owned(),
         Type::Ref(_) => "reference".to_owned(),
         Type::Str(_) => "&str".to_owned(),
+        Type::Vector(_) => "vector".to_owned(),
         Type::Slice(_) => "slice".to_owned(),
         Type::SliceRefU8(_) => "&[u8]".to_owned(),
         Type::Fn(_) => "function pointer".to_owned(),

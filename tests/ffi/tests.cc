@@ -1,6 +1,7 @@
 #include "tests/ffi/tests.h"
 #include "tests/ffi/lib.rs.h"
 #include <cstring>
+#include <numeric>
 #include <stdexcept>
 
 extern "C" void cxx_test_suite_set_correct() noexcept;
@@ -55,6 +56,32 @@ rust::String c_return_rust_string() { return "2020"; }
 
 std::unique_ptr<std::string> c_return_unique_ptr_string() {
   return std::unique_ptr<std::string>(new std::string("2020"));
+}
+
+std::unique_ptr<std::vector<uint8_t>> c_return_unique_ptr_vector_u8() {
+  auto retval =
+      std::unique_ptr<std::vector<uint8_t>>(new std::vector<uint8_t>());
+  retval->push_back(86);
+  retval->push_back(75);
+  retval->push_back(30);
+  retval->push_back(9);
+  return retval;
+}
+
+std::unique_ptr<std::vector<double>> c_return_unique_ptr_vector_f64() {
+  auto retval = std::unique_ptr<std::vector<double>>(new std::vector<double>());
+  retval->push_back(86.0);
+  retval->push_back(75.0);
+  retval->push_back(30.0);
+  retval->push_back(9.5);
+  return retval;
+}
+
+std::unique_ptr<std::vector<Shared>> c_return_unique_ptr_vector_shared() {
+  auto retval = std::unique_ptr<std::vector<Shared>>(new std::vector<Shared>());
+  retval->push_back(Shared{1010});
+  retval->push_back(Shared{1011});
+  return retval;
 }
 
 void c_take_primitive(size_t n) {
@@ -114,6 +141,43 @@ void c_take_rust_string(rust::String s) {
 
 void c_take_unique_ptr_string(std::unique_ptr<std::string> s) {
   if (*s == "2020") {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_unique_ptr_vector_u8(std::unique_ptr<std::vector<uint8_t>> v) {
+  if (v->size() == 4) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_unique_ptr_vector_f64(std::unique_ptr<std::vector<double>> v) {
+  if (v->size() == 4) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_unique_ptr_vector_shared(std::unique_ptr<std::vector<Shared>> v) {
+  if (v->size() == 2) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_vec_u8(const ::rust::Vec<uint8_t> &v) {
+  auto cv = static_cast<std::vector<uint8_t>>(v);
+  uint8_t sum = std::accumulate(cv.begin(), cv.end(), 0);
+  if (sum == 200) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_vec_shared(const ::rust::Vec<Shared> &v) {
+  auto cv = static_cast<std::vector<Shared>>(v);
+  uint32_t sum = 0;
+  for (auto i : cv) {
+    sum += i.z;
+  }
+  if (sum == 2021) {
     cxx_test_suite_set_correct();
   }
 }

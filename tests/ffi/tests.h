@@ -29,6 +29,9 @@ rust::Str c_return_str(const Shared &shared);
 rust::Slice<uint8_t> c_return_sliceu8(const Shared &shared);
 rust::String c_return_rust_string();
 std::unique_ptr<std::string> c_return_unique_ptr_string();
+std::unique_ptr<std::vector<uint8_t>> c_return_unique_ptr_vector_u8();
+std::unique_ptr<std::vector<double>> c_return_unique_ptr_vector_f64();
+std::unique_ptr<std::vector<Shared>> c_return_unique_ptr_vector_shared();
 
 void c_take_primitive(size_t n);
 void c_take_shared(Shared shared);
@@ -40,6 +43,11 @@ void c_take_str(rust::Str s);
 void c_take_sliceu8(rust::Slice<uint8_t> s);
 void c_take_rust_string(rust::String s);
 void c_take_unique_ptr_string(std::unique_ptr<std::string> s);
+void c_take_unique_ptr_vector_u8(std::unique_ptr<std::vector<uint8_t>> v);
+void c_take_unique_ptr_vector_f64(std::unique_ptr<std::vector<double>> v);
+void c_take_unique_ptr_vector_shared(std::unique_ptr<std::vector<Shared>> v);
+void c_take_vec_u8(const ::rust::Vec<uint8_t> &v);
+void c_take_vec_shared(const ::rust::Vec<Shared> &v);
 void c_take_callback(rust::Fn<size_t(rust::String)> callback);
 
 void c_try_return_void();
