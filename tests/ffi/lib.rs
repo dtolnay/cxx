@@ -27,9 +27,13 @@ pub mod ffi {
         fn c_return_sliceu8(shared: &Shared) -> &[u8];
         fn c_return_rust_string() -> String;
         fn c_return_unique_ptr_string() -> UniquePtr<CxxString>;
-        fn c_return_unique_ptr_vector_u8() -> UniquePtr<Vector<u8>>;
-        fn c_return_unique_ptr_vector_f64() -> UniquePtr<Vector<f64>>;
-        fn c_return_unique_ptr_vector_shared() -> UniquePtr<Vector<Shared>>;
+        fn c_return_unique_ptr_vector_u8() -> UniquePtr<CxxVector<u8>>;
+        fn c_return_unique_ptr_vector_f64() -> UniquePtr<CxxVector<f64>>;
+        fn c_return_unique_ptr_vector_shared() -> UniquePtr<CxxVector<Shared>>;
+        fn c_return_unique_ptr_vector_opaque() -> UniquePtr<CxxVector<C>>;
+        fn c_return_ref_vector(c: &C) -> &CxxVector<u8>;
+        fn c_return_rust_vec() -> Vec<u8>;
+        fn c_return_ref_rust_vec(c: &C) -> &Vec<u8>;
 
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);
@@ -41,11 +45,13 @@ pub mod ffi {
         fn c_take_sliceu8(s: &[u8]);
         fn c_take_rust_string(s: String);
         fn c_take_unique_ptr_string(s: UniquePtr<CxxString>);
-        fn c_take_unique_ptr_vector_u8(s: UniquePtr<Vector<u8>>);
-        fn c_take_unique_ptr_vector_f64(s: UniquePtr<Vector<f64>>);
-        fn c_take_unique_ptr_vector_shared(s: UniquePtr<Vector<Shared>>);
-        fn c_take_vec_u8(v: &Vec<u8>);
-        fn c_take_vec_shared(v: &Vec<Shared>);
+        fn c_take_unique_ptr_vector_u8(v: UniquePtr<CxxVector<u8>>);
+        fn c_take_unique_ptr_vector_f64(v: UniquePtr<CxxVector<f64>>);
+        fn c_take_unique_ptr_vector_shared(v: UniquePtr<CxxVector<Shared>>);
+        fn c_take_ref_vector(v: &CxxVector<u8>);
+        fn c_take_rust_vec(v: Vec<u8>);
+        fn c_take_rust_vec_shared(v: Vec<Shared>);
+        fn c_take_ref_rust_vec(v: &Vec<u8>);
         fn c_take_callback(callback: fn(String) -> usize);
 
         fn c_try_return_void() -> Result<()>;
@@ -57,6 +63,8 @@ pub mod ffi {
         fn c_try_return_sliceu8(s: &[u8]) -> Result<&[u8]>;
         fn c_try_return_rust_string() -> Result<String>;
         fn c_try_return_unique_ptr_string() -> Result<UniquePtr<CxxString>>;
+        fn c_try_return_rust_vec() -> Result<Vec<u8>>;
+        fn c_try_return_ref_rust_vec(c: &C) -> Result<&Vec<u8>>;
 
         fn get(self: &C) -> usize;
         fn set(self: &mut C, n: usize) -> usize;
@@ -76,6 +84,8 @@ pub mod ffi {
         fn r_return_str(shared: &Shared) -> &str;
         fn r_return_rust_string() -> String;
         fn r_return_unique_ptr_string() -> UniquePtr<CxxString>;
+        fn r_return_rust_vec() -> Vec<u8>;
+        fn r_return_ref_rust_vec(shared: &Shared) -> &Vec<u8>;
 
         fn r_take_primitive(n: usize);
         fn r_take_shared(shared: Shared);
@@ -87,6 +97,8 @@ pub mod ffi {
         fn r_take_sliceu8(s: &[u8]);
         fn r_take_rust_string(s: String);
         fn r_take_unique_ptr_string(s: UniquePtr<CxxString>);
+        fn r_take_rust_vec(v: Vec<u8>);
+        fn r_take_ref_rust_vec(v: &Vec<u8>);
 
         fn r_try_return_void() -> Result<()>;
         fn r_try_return_primitive() -> Result<usize>;
@@ -163,6 +175,15 @@ fn r_return_unique_ptr_string() -> UniquePtr<CxxString> {
     unsafe { UniquePtr::from_raw(cxx_test_suite_get_unique_ptr_string()) }
 }
 
+fn r_return_rust_vec() -> Vec<u8> {
+    Vec::new()
+}
+
+fn r_return_ref_rust_vec(shared: &ffi::Shared) -> &Vec<u8> {
+    let _ = shared;
+    unimplemented!()
+}
+
 fn r_take_primitive(n: usize) {
     assert_eq!(n, 2020);
 }
@@ -202,6 +223,14 @@ fn r_take_sliceu8(s: &[u8]) {
 
 fn r_take_unique_ptr_string(s: UniquePtr<CxxString>) {
     assert_eq!(s.as_ref().unwrap().to_str().unwrap(), "2020");
+}
+
+fn r_take_rust_vec(v: Vec<u8>) {
+    let _ = v;
+}
+
+fn r_take_ref_rust_vec(v: &Vec<u8>) {
+    let _ = v;
 }
 
 fn r_try_return_void() -> Result<(), Error> {

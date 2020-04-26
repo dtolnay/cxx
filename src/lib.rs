@@ -311,6 +311,8 @@
 //! <tr><td><a href="struct.CxxString.html">CxxString</a></td><td>std::string</td><td><sup><i>cannot be passed by value</i></sup></td></tr>
 //! <tr><td>Box&lt;T&gt;</td><td>rust::Box&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
 //! <tr><td><a href="struct.UniquePtr.html">UniquePtr&lt;T&gt;</a></td><td>std::unique_ptr&lt;T&gt;</td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
+//! <tr><td>Vec&lt;T&gt;</td><td>rust::Vec&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
+//! <tr><td><a href="struct.CxxVector.html">CxxVector&lt;T&gt;</a></td><td>std::vector&lt;T&gt;</td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
 //! <tr><td>fn(T, U) -&gt; V</td><td>rust::Fn&lt;V(T, U)&gt;</td><td><sup><i>only passing from Rust to C++ is implemented so far</i></sup></td></tr>
 //! <tr><td>Result&lt;T&gt;</td><td>throw/catch</td><td><sup><i>allowed as return type only</i></sup></td></tr>
 //! </table>
@@ -325,11 +327,9 @@
 //!
 //! <table>
 //! <tr><th>name in Rust</th><th>name in C++</th></tr>
-//! <tr><td>Vec&lt;T&gt;</td><td><sup><i>tbd</i></sup></td></tr>
 //! <tr><td>BTreeMap&lt;K, V&gt;</td><td><sup><i>tbd</i></sup></td></tr>
 //! <tr><td>HashMap&lt;K, V&gt;</td><td><sup><i>tbd</i></sup></td></tr>
 //! <tr><td>Arc&lt;T&gt;</td><td><sup><i>tbd</i></sup></td></tr>
-//! <tr><td><sup><i>tbd</i></sup></td><td>std::vector&lt;T&gt;</td></tr>
 //! <tr><td><sup><i>tbd</i></sup></td><td>std::map&lt;K, V&gt;</td></tr>
 //! <tr><td><sup><i>tbd</i></sup></td><td>std::unordered_map&lt;K, V&gt;</td></tr>
 //! <tr><td><sup><i>tbd</i></sup></td><td>std::shared_ptr&lt;T&gt;</td></tr>
@@ -358,8 +358,11 @@ extern crate link_cplusplus;
 
 #[macro_use]
 mod assert;
+#[macro_use]
+mod concat;
 
 mod cxx_string;
+mod cxx_vector;
 mod error;
 mod exception;
 mod function;
@@ -374,28 +377,26 @@ mod rust_vec;
 mod syntax;
 mod unique_ptr;
 mod unwind;
-mod vector;
 
 pub use crate::cxx_string::CxxString;
+pub use crate::cxx_vector::CxxVector;
 pub use crate::exception::Exception;
-pub use crate::rust_vec::RustVec;
 pub use crate::unique_ptr::UniquePtr;
-pub use crate::vector::RealVector;
-pub use crate::vector::VectorIntoIterator;
 pub use cxxbridge_macro::bridge;
 
 // Not public API.
 #[doc(hidden)]
 pub mod private {
+    pub use crate::cxx_vector::VectorElement;
     pub use crate::function::FatFunction;
     pub use crate::opaque::Opaque;
     pub use crate::result::{r#try, Result};
     pub use crate::rust_sliceu8::RustSliceU8;
     pub use crate::rust_str::RustStr;
     pub use crate::rust_string::RustString;
+    pub use crate::rust_vec::RustVec;
     pub use crate::unique_ptr::UniquePtrTarget;
     pub use crate::unwind::catch_unwind;
-    pub use crate::vector::VectorTarget;
 }
 
 use crate::error::Result;

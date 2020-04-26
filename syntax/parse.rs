@@ -300,10 +300,10 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
                             rangle: generic.gt_token,
                         })));
                     }
-                } else if ident == "Vector" && generic.args.len() == 1 {
+                } else if ident == "CxxVector" && generic.args.len() == 1 {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
                         let inner = parse_type(arg)?;
-                        return Ok(Type::Vector(Box::new(Ty1 {
+                        return Ok(Type::CxxVector(Box::new(Ty1 {
                             name: ident,
                             langle: generic.lt_token,
                             inner,

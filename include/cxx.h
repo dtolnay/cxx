@@ -15,7 +15,13 @@
 namespace rust {
 inline namespace cxxbridge02 {
 
-struct unsafe_bitcopy_t;
+#ifndef CXXBRIDGE02_RUST_BITCOPY
+#define CXXBRIDGE02_RUST_BITCOPY
+struct unsafe_bitcopy_t {
+  explicit unsafe_bitcopy_t() = default;
+};
+constexpr unsafe_bitcopy_t unsafe_bitcopy{};
+#endif // CXXBRIDGE02_RUST_BITCOPY
 
 #ifndef CXXBRIDGE02_RUST_STRING
 #define CXXBRIDGE02_RUST_STRING
@@ -83,27 +89,6 @@ private:
   Repr repr;
 };
 #endif // CXXBRIDGE02_RUST_STR
-
-#ifndef CXXBRIDGE02_RUST_VEC
-#define CXXBRIDGE02_RUST_VEC
-template <typename T>
-class Vec final {
-public:
-  size_t size() const noexcept;
-  explicit operator std::vector<T>() const noexcept;
-
-private:
-  Vec() noexcept;
-  Vec(const Vec &other) noexcept;
-  Vec &operator=(Vec other) noexcept;
-  void drop() noexcept;
-
-  // Repr
-  const T *ptr;
-  size_t len;
-  size_t capacity;
-};
-#endif // CXXBRIDGE02_RUST_VEC
 
 #ifndef CXXBRIDGE02_RUST_SLICE
 #define CXXBRIDGE02_RUST_SLICE
@@ -221,6 +206,81 @@ private:
 };
 #endif // CXXBRIDGE02_RUST_BOX
 
+#ifndef CXXBRIDGE02_RUST_VEC
+#define CXXBRIDGE02_RUST_VEC
+template <typename T>
+class Vec final {
+public:
+  using value_type = T;
+
+  Vec() noexcept;
+  Vec(Vec &&other) noexcept {
+    this->repr = other.repr;
+    new (&other) Vec();
+  }
+  ~Vec() noexcept { this->drop(); }
+
+  Vec &operator=(Vec &&other) noexcept {
+    if (this != &other) {
+      this->drop();
+      this->repr = other.repr;
+      new (&other) Vec();
+    }
+    return *this;
+  }
+
+  size_t size() const noexcept;
+  bool empty() const noexcept { return size() == 0; }
+  const T *data() const noexcept;
+
+  class const_iterator {
+  public:
+    using value_type = typename std::add_const<T>::type;
+    using reference = typename std::add_lvalue_reference<
+        typename std::add_const<T>::type>::type;
+
+    const T &operator*() const { return *static_cast<const T *>(this->pos); }
+    const_iterator &operator++() {
+      this->pos = static_cast<const uint8_t *>(this->pos) + this->stride;
+      return *this;
+    }
+    bool operator==(const const_iterator &other) const {
+      return this->pos == other.pos;
+    }
+    bool operator!=(const const_iterator &other) const {
+      return this->pos != other.pos;
+    }
+
+  private:
+    friend class Vec;
+    const void *pos;
+    size_t stride;
+  };
+
+  const_iterator begin() const noexcept {
+    const_iterator it;
+    it.pos = this->data();
+    it.stride = this->stride();
+    return it;
+  }
+  const_iterator end() const noexcept {
+    const_iterator it = this->begin();
+    it.pos = static_cast<const uint8_t *>(it.pos) + it.stride * this->size();
+    return it;
+  }
+
+  // Internal API only intended for the cxxbridge code generator.
+  Vec(unsafe_bitcopy_t, const Vec &bits) noexcept : repr(bits.repr) {}
+
+private:
+  static size_t stride() noexcept;
+  void drop() noexcept;
+
+  // Size and alignment statically verified by rust_vec.rs.
+  std::array<uintptr_t, 3> repr;
+};
+#endif // CXXBRIDGE02_RUST_VEC
+
 #ifndef CXXBRIDGE02_RUST_FN
 #define CXXBRIDGE02_RUST_FN
 template <typename Signature, bool Throws = false>
@@ -278,14 +338,6 @@ template <typename Signature, bool Throws = false>
 using fn = Fn<Signature, Throws>;
 template <typename Signature>
 using try_fn = TryFn<Signature>;
-
-#ifndef CXXBRIDGE02_RUST_BITCOPY
-#define CXXBRIDGE02_RUST_BITCOPY
-struct unsafe_bitcopy_t {
-  explicit unsafe_bitcopy_t() = default;
-};
-constexpr unsafe_bitcopy_t unsafe_bitcopy{};
-#endif // CXXBRIDGE02_RUST_BITCOPY
 
 template <typename Ret, typename... Args, bool Throws>
 Ret Fn<Ret(Args...), Throws>::operator()(Args... args) const noexcept(!Throws) {

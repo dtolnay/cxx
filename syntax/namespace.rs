@@ -11,7 +11,7 @@ mod kw {
 
 #[derive(Clone)]
 pub struct Namespace {
-    pub segments: Vec<String>,
+    segments: Vec<String>,
 }
 
 impl Namespace {

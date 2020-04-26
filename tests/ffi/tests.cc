@@ -28,6 +28,8 @@ size_t C::set2(size_t n) {
   return this->n;
 }
 
+const std::vector<uint8_t> &C::get_v() const { return this->v; }
+
 size_t c_return_primitive() { return 2020; }
 
 Shared c_return_shared() { return Shared{2020}; }
@@ -59,29 +61,45 @@ std::unique_ptr<std::string> c_return_unique_ptr_string() {
 }
 
 std::unique_ptr<std::vector<uint8_t>> c_return_unique_ptr_vector_u8() {
-  auto retval =
-      std::unique_ptr<std::vector<uint8_t>>(new std::vector<uint8_t>());
-  retval->push_back(86);
-  retval->push_back(75);
-  retval->push_back(30);
-  retval->push_back(9);
-  return retval;
+  auto vec = std::unique_ptr<std::vector<uint8_t>>(new std::vector<uint8_t>());
+  vec->push_back(86);
+  vec->push_back(75);
+  vec->push_back(30);
+  vec->push_back(9);
+  return vec;
 }
 
 std::unique_ptr<std::vector<double>> c_return_unique_ptr_vector_f64() {
-  auto retval = std::unique_ptr<std::vector<double>>(new std::vector<double>());
-  retval->push_back(86.0);
-  retval->push_back(75.0);
-  retval->push_back(30.0);
-  retval->push_back(9.5);
-  return retval;
+  auto vec = std::unique_ptr<std::vector<double>>(new std::vector<double>());
+  vec->push_back(86.0);
+  vec->push_back(75.0);
+  vec->push_back(30.0);
+  vec->push_back(9.5);
+  return vec;
 }
 
 std::unique_ptr<std::vector<Shared>> c_return_unique_ptr_vector_shared() {
-  auto retval = std::unique_ptr<std::vector<Shared>>(new std::vector<Shared>());
-  retval->push_back(Shared{1010});
-  retval->push_back(Shared{1011});
-  return retval;
+  auto vec = std::unique_ptr<std::vector<Shared>>(new std::vector<Shared>());
+  vec->push_back(Shared{1010});
+  vec->push_back(Shared{1011});
+  return vec;
+}
+
+std::unique_ptr<std::vector<C>> c_return_unique_ptr_vector_opaque() {
+  return std::unique_ptr<std::vector<C>>(new std::vector<C>());
+}
+
+const std::vector<uint8_t> &c_return_ref_vector(const C &c) {
+  return c.get_v();
+}
+
+rust::Vec<uint8_t> c_return_rust_vec() {
+  throw std::runtime_error("unimplemented");
+}
+
+const rust::Vec<uint8_t> &c_return_ref_rust_vec(const C &c) {
+  (void)c;
+  throw std::runtime_error("unimplemented");
 }
 
 void c_take_primitive(size_t n) {
@@ -163,21 +181,27 @@ void c_take_unique_ptr_vector_shared(std::unique_ptr<std::vector<Shared>> v) {
   }
 }
 
-void c_take_vec_u8(const ::rust::Vec<uint8_t> &v) {
-  auto cv = static_cast<std::vector<uint8_t>>(v);
-  uint8_t sum = std::accumulate(cv.begin(), cv.end(), 0);
-  if (sum == 200) {
+void c_take_ref_vector(const std::vector<uint8_t> &v) {
+  if (v.size() == 4) {
     cxx_test_suite_set_correct();
   }
 }
 
-void c_take_vec_shared(const ::rust::Vec<Shared> &v) {
-  auto cv = static_cast<std::vector<Shared>>(v);
+void c_take_rust_vec(rust::Vec<uint8_t> v) { c_take_ref_rust_vec(v); }
+
+void c_take_rust_vec_shared(rust::Vec<Shared> v) {
   uint32_t sum = 0;
-  for (auto i : cv) {
+  for (auto i : v) {
     sum += i.z;
   }
   if (sum == 2021) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_ref_rust_vec(const rust::Vec<uint8_t> &v) {
+  uint8_t sum = std::accumulate(v.begin(), v.end(), 0);
+  if (sum == 200) {
     cxx_test_suite_set_correct();
   }
 }
@@ -204,6 +228,15 @@ rust::String c_try_return_rust_string() { return c_return_rust_string(); }
 
 std::unique_ptr<std::string> c_try_return_unique_ptr_string() {
   return c_return_unique_ptr_string();
+}
+
+rust::Vec<uint8_t> c_try_return_rust_vec() {
+  throw std::runtime_error("unimplemented");
+}
+
+const rust::Vec<uint8_t> &c_try_return_ref_rust_vec(const C &c) {
+  (void)c;
+  throw std::runtime_error("unimplemented");
 }
 
 extern "C" C *cxx_test_suite_get_unique_ptr() noexcept {

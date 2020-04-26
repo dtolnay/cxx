@@ -8,13 +8,11 @@ pub mod error;
 pub mod ident;
 mod impls;
 pub mod mangle;
-pub mod mangled;
 pub mod namespace;
 mod parse;
 pub mod set;
 pub mod symbol;
 mod tokens;
-pub mod typename;
 pub mod types;
 
 use self::parse::kw;
@@ -92,7 +90,7 @@ pub enum Type {
     UniquePtr(Box<Ty1>),
     Ref(Box<Ref>),
     Str(Box<Ref>),
-    Vector(Box<Ty1>),
+    CxxVector(Box<Ty1>),
     Fn(Box<Signature>),
     Void(Span),
     Slice(Box<Slice>),

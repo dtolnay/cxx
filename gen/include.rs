@@ -36,9 +36,9 @@ pub struct Includes {
     pub exception: bool,
     pub memory: bool,
     pub string: bool,
-    pub vector: bool,
     pub type_traits: bool,
     pub utility: bool,
+    pub vector: bool,
     pub base_tsd: bool,
 }
 
@@ -89,6 +89,9 @@ impl Display for Includes {
         }
         if self.utility {
             writeln!(f, "#include <utility>")?;
+        }
+        if self.vector {
+            writeln!(f, "#include <vector>")?;
         }
         if self.base_tsd {
             writeln!(f, "#if defined(_WIN32)")?;
