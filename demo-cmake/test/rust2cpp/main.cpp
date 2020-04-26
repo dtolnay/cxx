@@ -1,9 +1,6 @@
-extern "C" void rust_function(char const *name);
+#include "demo.h"
 
 int main(int argc, char **argv) {
-    if (argc < 2) {
-        rust_function("C++");
-    } else {
-        rust_function(argv[1]);
-    }
+    org::example::print_name(org::example::ThingC(argc < 2 ? "C++" : argv[1]));
+    return 0;
 }
