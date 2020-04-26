@@ -337,7 +337,7 @@
 //!
 //! [https://github.com/dtolnay/cxx]: https://github.com/dtolnay/cxx
 
-#![doc(html_root_url = "https://docs.rs/cxx/0.2.10")]
+#![doc(html_root_url = "https://docs.rs/cxx/0.2.11")]
 #![deny(improper_ctypes)]
 #![allow(
     clippy::cognitive_complexity,
