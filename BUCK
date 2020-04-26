@@ -12,7 +12,6 @@ rust_library(
         "//third-party:proc-macro2",
         "//third-party:quote",
         "//third-party:syn",
-        "//third-party:thiserror",
     ],
 )
 
@@ -30,7 +29,6 @@ rust_binary(
         "//third-party:quote",
         "//third-party:structopt",
         "//third-party:syn",
-        "//third-party:thiserror",
     ],
 )
 

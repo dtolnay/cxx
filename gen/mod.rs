@@ -6,29 +6,13 @@ pub(super) mod include;
 pub(super) mod out;
 mod write;
 
-use self::error::format_err;
+use self::error::{format_err, Error, Result};
 use crate::syntax::namespace::Namespace;
 use crate::syntax::{self, check, Types};
 use quote::quote;
 use std::fs;
-use std::io;
 use std::path::Path;
 use syn::{Attribute, File, Item};
-use thiserror::Error;
-
-pub(super) type Result<T, E = Error> = std::result::Result<T, E>;
-
-#[derive(Error, Debug)]
-pub(super) enum Error {
-    #[error("no #[cxx::bridge] module found")]
-    NoBridgeMod,
-    #[error("#[cxx::bridge] module must have inline contents")]
-    OutOfLineMod,
-    #[error(transparent)]
-    Io(#[from] io::Error),
-    #[error(transparent)]
-    Syn(#[from] syn::Error),
-}
 
 struct Input {
     namespace: Namespace,

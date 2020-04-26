@@ -1,14 +1,58 @@
-use crate::gen::Error;
 use crate::syntax;
 use anyhow::anyhow;
 use codespan_reporting::diagnostic::{Diagnostic, Label};
 use codespan_reporting::files::SimpleFiles;
 use codespan_reporting::term::termcolor::{ColorChoice, StandardStream, WriteColor};
 use codespan_reporting::term::{self, Config};
-use std::io::Write;
+use std::error::Error as StdError;
+use std::fmt::{self, Display};
+use std::io::{self, Write};
 use std::ops::Range;
 use std::path::Path;
 use std::process;
+
+pub(super) type Result<T, E = Error> = std::result::Result<T, E>;
+
+#[derive(Debug)]
+pub(super) enum Error {
+    NoBridgeMod,
+    OutOfLineMod,
+    Io(io::Error),
+    Syn(syn::Error),
+}
+
+impl Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Error::NoBridgeMod => write!(f, "no #[cxx::bridge] module found"),
+            Error::OutOfLineMod => write!(f, "#[cxx::bridge] module must have inline contents"),
+            Error::Io(err) => err.fmt(f),
+            Error::Syn(err) => err.fmt(f),
+        }
+    }
+}
+
+impl StdError for Error {
+    fn source(&self) -> Option<&(dyn StdError + 'static)> {
+        match self {
+            Error::Io(err) => Some(err),
+            Error::Syn(err) => Some(err),
+            _ => None,
+        }
+    }
+}
+
+impl From<io::Error> for Error {
+    fn from(err: io::Error) -> Self {
+        Error::Io(err)
+    }
+}
+
+impl From<syn::Error> for Error {
+    fn from(err: syn::Error) -> Self {
+        Error::Syn(err)
+    }
+}
 
 pub(super) fn format_err(path: &Path, source: &str, error: Error) -> ! {
     match error {
