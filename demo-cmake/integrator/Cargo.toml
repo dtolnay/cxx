@@ -6,3 +6,6 @@ license = "MIT"
 edition = "2018"
 
 [dependencies]
+
+[workspace]
+members = []
