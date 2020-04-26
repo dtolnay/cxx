@@ -1,0 +1,12 @@
+[package]
+name = "rust-exe"
+version = "0.1.0"
+authors = ["Andrew Gaspar <andrew.gaspar@outlook.com>"]
+license = "MIT"
+edition = "2018"
+build = "build.rs"
+
+[dependencies]
+
+[build-dependencies.cmake-cargo-build]
+path = "../../../integrator"
