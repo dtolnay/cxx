@@ -62,11 +62,6 @@ where
     pub unsafe fn get_unchecked(&self, pos: usize) -> &T {
         T::__get_unchecked(self, pos)
     }
-
-    /// Appends an element to the back of the vector.
-    pub fn push_back(&mut self, item: &T) {
-        T::__push_back(self, item);
-    }
 }
 
 pub struct Iter<'a, T> {
@@ -126,7 +121,6 @@ pub unsafe trait VectorElement: Sized {
     const __NAME: &'static dyn Display;
     fn __vector_size(v: &CxxVector<Self>) -> usize;
     unsafe fn __get_unchecked(v: &CxxVector<Self>, pos: usize) -> &Self;
-    fn __push_back(v: &mut CxxVector<Self>, item: &Self);
     fn __unique_ptr_null() -> *mut c_void;
     unsafe fn __unique_ptr_raw(raw: *mut CxxVector<Self>) -> *mut c_void;
     unsafe fn __unique_ptr_get(repr: *mut c_void) -> *const CxxVector<Self>;
@@ -157,15 +151,6 @@ macro_rules! impl_vector_element_for_primitive {
                     }
                 }
                 &*__get_unchecked(v, pos)
-            }
-            fn __push_back(v: &mut CxxVector<$ty>, item: &$ty) {
-                extern "C" {
-                    attr! {
-                        #[link_name = concat!("cxxbridge02$std$vector$", stringify!($ty), "$push_back")]
-                        fn __push_back(_: &mut CxxVector<$ty>, _: &$ty);
-                    }
-                }
-                unsafe { __push_back(v, item) }
             }
             fn __unique_ptr_null() -> *mut c_void {
                 extern "C" {

@@ -1217,13 +1217,6 @@ fn write_cxx_vector(out: &mut OutFile, vector_ty: &Type, element: &Ident, types:
     );
     writeln!(out, "  return s[pos];");
     writeln!(out, "}}");
-    writeln!(
-        out,
-        "void cxxbridge02$std$vector${}$push_back(::std::vector<{}> &s, const {} &item) noexcept {{",
-        instance, inner, inner
-    );
-    writeln!(out, "  s.push_back(item);");
-    writeln!(out, "}}");
 
     write_unique_ptr_common(out, vector_ty, types);
 

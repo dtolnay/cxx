@@ -208,10 +208,6 @@ void cxxbridge02$unique_ptr$std$string$drop(
       const std::vector<CXX_TYPE> &s, size_t pos) noexcept {                   \
     return &s[pos];                                                            \
   }                                                                            \
-  void cxxbridge02$std$vector$##RUST_TYPE##$push_back(                         \
-      std::vector<CXX_TYPE> &s, const CXX_TYPE &item) noexcept {               \
-    s.push_back(item);                                                         \
-  }                                                                            \
   void cxxbridge02$unique_ptr$std$vector$##RUST_TYPE##$null(                   \
       std::unique_ptr<std::vector<CXX_TYPE>> *ptr) noexcept {                  \
     new (ptr) std::unique_ptr<std::vector<CXX_TYPE>>();                        \

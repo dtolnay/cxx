@@ -668,7 +668,6 @@ fn expand_cxx_vector(namespace: &Namespace, elem: &Ident) -> TokenStream {
     let prefix = format!("cxxbridge02$std$vector${}{}$", namespace, elem);
     let link_size = format!("{}size", prefix);
     let link_get_unchecked = format!("{}get_unchecked", prefix);
-    let link_push_back = format!("{}push_back", prefix);
     let unique_ptr_prefix = format!("cxxbridge02$unique_ptr$std$vector${}{}$", namespace, elem);
     let link_unique_ptr_null = format!("{}null", unique_ptr_prefix);
     let link_unique_ptr_raw = format!("{}raw", unique_ptr_prefix);
@@ -692,13 +691,6 @@ fn expand_cxx_vector(namespace: &Namespace, elem: &Ident) -> TokenStream {
                     fn __get_unchecked(_: &::cxx::CxxVector<#elem>, _: usize) -> *const #elem;
                 }
                 &*__get_unchecked(v, pos)
-            }
-            fn __push_back(v: &mut ::cxx::CxxVector<Self>, item: &Self) {
-                extern "C" {
-                    #[link_name = #link_push_back]
-                    fn __push_back(_: &mut ::cxx::CxxVector<#elem>, _: &#elem);
-                }
-                unsafe { __push_back(v, item) }
             }
             fn __unique_ptr_null() -> *mut ::std::ffi::c_void {
                 extern "C" {
