@@ -14,6 +14,7 @@ matrix:
     - name: macOS
       os: macos
       rust: nightly
+
     - name: Windows (gnu)
       os: windows
       rust: nightly-x86_64-pc-windows-gnu
@@ -21,12 +22,14 @@ matrix:
         # windows is bad at symlinks
         - rm cmd/src/gen cmd/src/syntax gen/include macro/src/syntax src/gen src/syntax
         - cp -r include gen; cp -r gen cmd/src; cp -r syntax cmd/src; cp -r syntax macro/src; cp -r gen src; cp -r syntax src
+
     - name: Windows (msvc)
       os: windows
       rust: nightly-x86_64-pc-windows-msvc
       before_script:
         - rm cmd/src/gen cmd/src/syntax gen/include macro/src/syntax src/gen src/syntax
         - cp -r include gen; cp -r gen cmd/src; cp -r syntax cmd/src; cp -r syntax macro/src; cp -r gen src; cp -r syntax src
+
     - name: Buck
       rust: nightly
       before_install:
@@ -41,6 +44,7 @@ matrix:
         - buck build :cxx#check --verbose=0
         - buck run demo-rs --verbose=0
         - buck test ... --verbose=0
+
     - name: Bazel
       rust: nightly
       before_install:
@@ -53,6 +57,7 @@ matrix:
       script:
         - bazel run demo-rs --verbose_failures --noshow_progress
         - bazel test ... --verbose_failures --noshow_progress
+
     - name: Minimum rustc
       rust: 1.42.0
       script:
