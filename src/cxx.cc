@@ -249,23 +249,23 @@ void cxxbridge02$unique_ptr$std$string$drop(
 
 #define RUST_VEC_OPS(RUST_TYPE, CXX_TYPE)                                      \
   template <>                                                                  \
-  rust::Vec<CXX_TYPE>::Vec() noexcept {                                        \
+  Vec<CXX_TYPE>::Vec() noexcept {                                              \
     cxxbridge02$rust_vec$##RUST_TYPE##$new(this);                              \
   }                                                                            \
   template <>                                                                  \
-  void rust::Vec<CXX_TYPE>::drop() noexcept {                                  \
+  void Vec<CXX_TYPE>::drop() noexcept {                                        \
     return cxxbridge02$rust_vec$##RUST_TYPE##$drop(this);                      \
   }                                                                            \
   template <>                                                                  \
-  size_t rust::Vec<CXX_TYPE>::size() const noexcept {                          \
+  size_t Vec<CXX_TYPE>::size() const noexcept {                                \
     return cxxbridge02$rust_vec$##RUST_TYPE##$len(this);                       \
   }                                                                            \
   template <>                                                                  \
-  const CXX_TYPE *rust::Vec<CXX_TYPE>::data() const noexcept {                 \
+  const CXX_TYPE *Vec<CXX_TYPE>::data() const noexcept {                       \
     return cxxbridge02$rust_vec$##RUST_TYPE##$data(this);                      \
   }                                                                            \
   template <>                                                                  \
-  size_t rust::Vec<CXX_TYPE>::stride() noexcept {                              \
+  size_t Vec<CXX_TYPE>::stride() noexcept {                                    \
     return cxxbridge02$rust_vec$##RUST_TYPE##$stride();                        \
   }
 
@@ -292,4 +292,8 @@ FOR_EACH_PRIMITIVE(STD_VECTOR_OPS)
 FOR_EACH_SIZED_PRIMITIVE(RUST_VEC_EXTERNS)
 } // extern "C"
 
+namespace rust {
+inline namespace cxxbridge02 {
 FOR_EACH_SIZED_PRIMITIVE(RUST_VEC_OPS)
+} // namespace cxxbridge02
+} // namespace rust
