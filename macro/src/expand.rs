@@ -693,10 +693,10 @@ fn expand_cxx_vector(namespace: &Namespace, elem: &Ident) -> TokenStream {
                 }
                 &*__get_unchecked(v, pos)
             }
-            fn __push_back(v: &::cxx::CxxVector<Self>, item: &Self) {
+            fn __push_back(v: &mut ::cxx::CxxVector<Self>, item: &Self) {
                 extern "C" {
                     #[link_name = #link_push_back]
-                    fn __push_back(_: &::cxx::CxxVector<#elem>, _: &#elem);
+                    fn __push_back(_: &mut ::cxx::CxxVector<#elem>, _: &#elem);
                 }
                 unsafe { __push_back(v, item) }
             }
