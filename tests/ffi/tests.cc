@@ -200,6 +200,10 @@ void c_take_rust_vec_shared(rust::Vec<Shared> v) {
 }
 
 void c_take_ref_rust_vec(const rust::Vec<uint8_t> &v) {
+  // Test vector copy which was not compiling under gcc 7
+  std::vector<uint8_t> cxx_v;
+  std::copy(v.begin(), v.end(), back_inserter(cxx_v));
+
   uint8_t sum = std::accumulate(v.begin(), v.end(), 0);
   if (sum == 200) {
     cxx_test_suite_set_correct();
