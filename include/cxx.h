@@ -235,9 +235,13 @@ public:
 
   class const_iterator {
   public:
+    using difference_type = ptrdiff_t;
     using value_type = typename std::add_const<T>::type;
+    using pointer = typename std::add_pointer<
+        typename std::add_const<T>::type>::type;
     using reference = typename std::add_lvalue_reference<
         typename std::add_const<T>::type>::type;
+    using iterator_category = std::forward_iterator_tag;
 
     const T &operator*() const { return *static_cast<const T *>(this->pos); }
     const_iterator &operator++() {
