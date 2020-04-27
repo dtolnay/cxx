@@ -102,13 +102,9 @@ const rust::Vec<uint8_t> &c_return_ref_rust_vec(const C &c) {
   throw std::runtime_error("unimplemented");
 }
 
-size_t c_return_identity(size_t n) {
-  return n;
-}
+size_t c_return_identity(size_t n) { return n; }
 
-size_t c_return_sum(size_t n1, size_t n2) {
-  return n1 + n2;
-}
+size_t c_return_sum(size_t n1, size_t n2) { return n1 + n2; }
 
 void c_take_primitive(size_t n) {
   if (n == 2020) {
