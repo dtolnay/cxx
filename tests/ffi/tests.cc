@@ -102,6 +102,14 @@ const rust::Vec<uint8_t> &c_return_ref_rust_vec(const C &c) {
   throw std::runtime_error("unimplemented");
 }
 
+size_t c_return_identity(size_t n) {
+  return n;
+}
+
+size_t c_return_sum(size_t n1, size_t n2) {
+  return n1 + n2;
+}
+
 void c_take_primitive(size_t n) {
   if (n == 2020) {
     cxx_test_suite_set_correct();
@@ -265,6 +273,8 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(std::string(r_return_str(Shared{2020})) == "2020");
   ASSERT(std::string(r_return_rust_string()) == "2020");
   ASSERT(*r_return_unique_ptr_string() == "2020");
+  ASSERT(r_return_identity(2020) == 2020);
+  ASSERT(r_return_sum(2020, 1) == 2021);
 
   r_take_primitive(2020);
   r_take_shared(Shared{2020});
