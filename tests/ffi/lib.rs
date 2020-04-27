@@ -34,6 +34,8 @@ pub mod ffi {
         fn c_return_ref_vector(c: &C) -> &CxxVector<u8>;
         fn c_return_rust_vec() -> Vec<u8>;
         fn c_return_ref_rust_vec(c: &C) -> &Vec<u8>;
+        fn c_return_identity(_: usize) -> usize;
+        fn c_return_sum(_: usize, _: usize) -> usize;
 
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);
@@ -86,6 +88,8 @@ pub mod ffi {
         fn r_return_unique_ptr_string() -> UniquePtr<CxxString>;
         fn r_return_rust_vec() -> Vec<u8>;
         fn r_return_ref_rust_vec(shared: &Shared) -> &Vec<u8>;
+        fn r_return_identity(_: usize) -> usize;
+        fn r_return_sum(_: usize, _: usize) -> usize;
 
         fn r_take_primitive(n: usize);
         fn r_take_shared(shared: Shared);
@@ -182,6 +186,14 @@ fn r_return_rust_vec() -> Vec<u8> {
 fn r_return_ref_rust_vec(shared: &ffi::Shared) -> &Vec<u8> {
     let _ = shared;
     unimplemented!()
+}
+
+fn r_return_identity(n: usize) -> usize {
+    n
+}
+
+fn r_return_sum(n1: usize, n2: usize) -> usize {
+    n1 + n2
 }
 
 fn r_take_primitive(n: usize) {

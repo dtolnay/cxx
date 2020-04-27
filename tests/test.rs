@@ -49,6 +49,8 @@ fn test_c_return() {
             .map(|o| o.z)
             .sum(),
     );
+    assert_eq!(2020, ffi::c_return_identity(2020));
+    assert_eq!(2021, ffi::c_return_sum(2020, 1));
 }
 
 #[test]

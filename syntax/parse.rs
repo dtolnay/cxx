@@ -6,9 +6,9 @@ use crate::syntax::{
 use quote::{format_ident, quote};
 use syn::punctuated::Punctuated;
 use syn::{
-    Abi, Error, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType, GenericArgument, Item,
-    ItemForeignMod, ItemStruct, Pat, PathArguments, Result, ReturnType, Token, Type as RustType,
-    TypeBareFn, TypePath, TypeReference, TypeSlice,
+    Abi, Error, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType, GenericArgument, Ident,
+    Item, ItemForeignMod, ItemStruct, Pat, PathArguments, Result, ReturnType, Token,
+    Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
 };
 
 pub mod kw {
@@ -193,6 +193,9 @@ fn parse_extern_fn(foreign_fn: &ForeignItemFn, lang: Lang) -> Result<ExternFn> {
             FnArg::Typed(arg) => {
                 let ident = match arg.pat.as_ref() {
                     Pat::Ident(pat) => pat.ident.clone(),
+                    Pat::Wild(pat) => {
+                        Ident::new(&format!("_{}", args.len()), pat.underscore_token.span)
+                    }
                     _ => return Err(Error::new_spanned(arg, "unsupported signature")),
                 };
                 let ty = parse_type(&arg.ty)?;
