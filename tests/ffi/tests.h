@@ -56,6 +56,7 @@ void c_take_ref_vector(const std::vector<uint8_t> &v);
 void c_take_rust_vec(rust::Vec<uint8_t> v);
 void c_take_rust_vec_shared(rust::Vec<Shared> v);
 void c_take_ref_rust_vec(const rust::Vec<uint8_t> &v);
+void c_take_ref_rust_vec_copy(const rust::Vec<uint8_t> &v);
 void c_take_callback(rust::Fn<size_t(rust::String)> callback);
 
 void c_try_return_void();
