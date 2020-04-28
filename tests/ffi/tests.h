@@ -38,6 +38,8 @@ std::unique_ptr<std::vector<C>> c_return_unique_ptr_vector_opaque();
 const std::vector<uint8_t> &c_return_ref_vector(const C &c);
 rust::Vec<uint8_t> c_return_rust_vec();
 const rust::Vec<uint8_t> &c_return_ref_rust_vec(const C &c);
+size_t c_return_identity(size_t n);
+size_t c_return_sum(size_t n1, size_t n2);
 
 void c_take_primitive(size_t n);
 void c_take_shared(Shared shared);
