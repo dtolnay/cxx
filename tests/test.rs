@@ -94,14 +94,14 @@ fn test_c_take() {
         ffi::c_return_unique_ptr_vector_shared()
     ));
     check!(ffi::c_take_ref_vector(&ffi::c_return_unique_ptr_vector_u8()));
-    check!(ffi::c_take_rust_vec([86_u8, 75_u8, 30_u8, 9_u8].to_vec()));
+    let test_vec = [86_u8, 75_u8, 30_u8, 9_u8].to_vec();
+    check!(ffi::c_take_rust_vec(test_vec.clone()));
     check!(ffi::c_take_rust_vec_shared(vec![
         ffi::Shared { z: 1010 },
         ffi::Shared { z: 1011 }
     ]));
-    check!(ffi::c_take_ref_rust_vec(
-        &[86_u8, 75_u8, 30_u8, 9_u8].to_vec()
-    ));
+    check!(ffi::c_take_ref_rust_vec(&test_vec));
+    check!(ffi::c_take_ref_rust_vec_copy(&test_vec));
 }
 
 #[test]
