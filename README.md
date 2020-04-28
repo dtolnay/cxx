@@ -20,7 +20,8 @@ can be 100% safe.
 cxx = "0.2"
 ```
 
-*Compiler support: requires rustc 1.42+*
+*Compiler support: requires rustc 1.42+*<br>
+*[Release notes](https://github.com/dtolnay/cxx/releases)*
 
 <br>
 
