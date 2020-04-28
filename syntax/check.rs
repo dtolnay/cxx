@@ -230,6 +230,11 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
                 );
             }
         }
+        if let Type::Ref(ity) = &arg.ty {
+            if let Type::Ref(_) = &ity.inner {
+                cx.error(arg, "Passing a reference to a reference is not supported");
+            }
+        }
     }
 
     if let Some(ty) = &efn.ret {
