@@ -211,7 +211,7 @@ void c_take_ref_rust_vec(const rust::Vec<uint8_t> &v) {
 }
 
 void c_take_ref_rust_vec_copy(const rust::Vec<uint8_t> &v) {
-  // The std::copy() will make sure rust::Vec<>::const_iteerator satisfies the
+  // The std::copy() will make sure rust::Vec<>::const_iterator satisfies the
   // requirements for std::iterator_traits.
   // https://en.cppreference.com/w/cpp/iterator/iterator_traits
   std::vector<uint8_t> cxx_v;
