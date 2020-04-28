@@ -100,6 +100,10 @@ fn test_c_take() {
         ffi::Shared { z: 1010 },
         ffi::Shared { z: 1011 }
     ]));
+    check!(ffi::c_take_rust_vec_shared_forward_iterator(vec![
+        ffi::Shared { z: 1010 },
+        ffi::Shared { z: 1011 }
+    ]));
     check!(ffi::c_take_ref_rust_vec(&test_vec));
     check!(ffi::c_take_ref_rust_vec_copy(&test_vec));
 }
