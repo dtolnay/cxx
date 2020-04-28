@@ -207,7 +207,7 @@ void c_take_rust_vec_shared_forward_iterator(rust::Vec<Shared> v) {
   // Exercise requirements of ForwardIterator
   // https://en.cppreference.com/w/cpp/named_req/ForwardIterator
   uint32_t sum = 0;
-  for (auto it = v.begin(); it != v.end(); it++) {
+  for (auto it = v.begin(), it_end = v.end(); it != it_end; it++) {
     sum += it->z;
   }
   if (sum == 2021) {
