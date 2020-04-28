@@ -243,8 +243,6 @@ public:
         typename std::add_const<T>::type>::type;
     using iterator_category = std::forward_iterator_tag;
 
-    const_iterator(): pos(nullptr), stride(0) { }
-    const_iterator(const void *pos, size_t stride): pos(pos), stride(stride) { }
     const T &operator*() const { return *static_cast<const T *>(this->pos); }
     const T *operator->() const { return static_cast<const T *>(this->pos); }
     const_iterator &operator++() {
@@ -252,7 +250,7 @@ public:
       return *this;
     }
     const_iterator operator++(int) {
-      auto ret = const_iterator(this->pos, this->stride);
+      auto ret = const_iterator(*this);
       this->pos = static_cast<const uint8_t *>(this->pos) + this->stride;
       return ret;
     }
