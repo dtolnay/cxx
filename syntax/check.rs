@@ -151,6 +151,10 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
 
     match ty.inner {
         Type::Fn(_) | Type::Void(_) => {}
+        Type::Ref(_) => {
+            cx.error(ty, "C++ does not allow references to references");
+            return;
+        }
         _ => return,
     }
 
@@ -228,11 +232,6 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
                     arg,
                     "passing a function pointer from C++ to Rust is not implemented yet",
                 );
-            }
-        }
-        if let Type::Ref(ity) = &arg.ty {
-            if let Type::Ref(_) = &ity.inner {
-                cx.error(arg, "Passing a reference to a reference is not supported");
             }
         }
     }
