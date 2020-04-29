@@ -19,9 +19,6 @@ rust_binary(
     name = "codegen",
     srcs = glob(["cmd/src/**"]),
     visibility = ["PUBLIC"],
-    env = {
-        "CARGO_PKG_AUTHORS": "David Tolnay <dtolnay@gmail.com>",
-    },
     deps = [
         "//third-party:anyhow",
         "//third-party:codespan-reporting",
