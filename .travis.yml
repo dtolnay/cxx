@@ -20,15 +20,15 @@ matrix:
       rust: nightly-x86_64-pc-windows-gnu
       before_script:
         # windows is bad at symlinks
-        - rm cmd/src/gen cmd/src/syntax gen/include macro/src/syntax src/gen src/syntax
-        - cp -r include gen; cp -r gen cmd/src; cp -r syntax cmd/src; cp -r syntax macro/src; cp -r gen src; cp -r syntax src
+        - rm gen/build/src/gen gen/build/src/syntax gen/cmd/src/gen gen/cmd/src/syntax gen/src/include macro/src/syntax
+        - cp -r include gen/src; cp -r gen/src gen/build/src/gen; cp -r gen/src gen/cmd/src/gen; cp -r syntax gen/build/src; cp -r syntax gen/cmd/src; cp -r syntax macro/src
 
     - name: Windows (msvc)
       os: windows
       rust: nightly-x86_64-pc-windows-msvc
       before_script:
-        - rm cmd/src/gen cmd/src/syntax gen/include macro/src/syntax src/gen src/syntax
-        - cp -r include gen; cp -r gen cmd/src; cp -r syntax cmd/src; cp -r syntax macro/src; cp -r gen src; cp -r syntax src
+        - rm gen/build/src/gen gen/build/src/syntax gen/cmd/src/gen gen/cmd/src/syntax gen/src/include macro/src/syntax
+        - cp -r include gen/src; cp -r gen/src gen/build/src/gen; cp -r gen/src gen/cmd/src/gen; cp -r syntax gen/build/src; cp -r syntax gen/cmd/src; cp -r syntax macro/src
 
     - name: Buck
       rust: nightly

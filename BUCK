@@ -5,19 +5,13 @@ rust_library(
     deps = [
         ":core",
         ":macro",
-        "//third-party:anyhow",
-        "//third-party:cc",
-        "//third-party:codespan-reporting",
         "//third-party:link-cplusplus",
-        "//third-party:proc-macro2",
-        "//third-party:quote",
-        "//third-party:syn",
     ],
 )
 
 rust_binary(
     name = "codegen",
-    srcs = glob(["cmd/src/**"]),
+    srcs = glob(["gen/cmd/src/**"]),
     crate = "cxxbridge",
     visibility = ["PUBLIC"],
     deps = [
@@ -47,6 +41,20 @@ rust_library(
     proc_macro = True,
     crate = "cxxbridge_macro",
     deps = [
+        "//third-party:proc-macro2",
+        "//third-party:quote",
+        "//third-party:syn",
+    ],
+)
+
+rust_library(
+    name = "build",
+    srcs = glob(["gen/build/src/**"]),
+    visibility = ["PUBLIC"],
+    deps = [
+        "//third-party:anyhow",
+        "//third-party:cc",
+        "//third-party:codespan-reporting",
         "//third-party:proc-macro2",
         "//third-party:quote",
         "//third-party:syn",

@@ -9,4 +9,4 @@ publish = false
 cxx = { path = ".." }
 
 [build-dependencies]
-cxx = { path = ".." }
+cxx-build = { path = "../gen/build" }
