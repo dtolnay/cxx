@@ -18,6 +18,7 @@ rust_library(
 rust_binary(
     name = "codegen",
     srcs = glob(["cmd/src/**"]),
+    crate = "cxxbridge",
     visibility = ["PUBLIC"],
     deps = [
         "//third-party:anyhow",
