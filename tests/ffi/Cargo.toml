@@ -11,4 +11,4 @@ path = "lib.rs"
 cxx = { path = "../.." }
 
 [build-dependencies]
-cxx = { path = "../.." }
+cxx-build = { path = "../../gen/build" }

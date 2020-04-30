@@ -219,8 +219,7 @@ set up any additional source files and compiler flags as normal.
 // build.rs
 
 fn main() {
-    cxx::Build::new()
-        .bridge("src/main.rs")  // returns a cc::Build
+    cxx_build::bridge("src/main.rs")  // returns a cc::Build
         .file("../demo-cxx/demo.cc")
         .flag("-std=c++11")
         .compile("cxxbridge-demo");

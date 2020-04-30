@@ -67,17 +67,25 @@ dependencies = [
 name = "cxx"
 version = "0.2.12"
 dependencies = [
- "anyhow",
  "cc",
- "codespan-reporting",
+ "cxx-build",
  "cxx-test-suite",
  "cxxbridge-macro",
  "link-cplusplus",
+ "rustversion",
+ "trybuild",
+]
+
+[[package]]
+name = "cxx-build"
+version = "0.2.12"
+dependencies = [
+ "anyhow",
+ "cc",
+ "codespan-reporting",
  "proc-macro2",
  "quote",
- "rustversion",
  "syn",
- "trybuild",
 ]
 
 [[package]]
@@ -85,6 +93,7 @@ name = "cxx-test-suite"
 version = "0.0.0"
 dependencies = [
  "cxx",
+ "cxx-build",
 ]
 
 [[package]]
@@ -104,6 +113,7 @@ name = "cxxbridge-demo"
 version = "0.0.0"
 dependencies = [
  "cxx",
+ "cxx-build",
 ]
 
 [[package]]
