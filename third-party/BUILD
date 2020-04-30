@@ -36,7 +36,7 @@ rust_library(
 
 rust_library(
     name = "codespan-reporting",
-    srcs = glob(["vendor/codespan-reporting-0.9.2/src/**"]),
+    srcs = glob(["vendor/codespan-reporting-0.9.3/src/**"]),
     visibility = ["//visibility:public"],
     deps = [
         ":termcolor",
