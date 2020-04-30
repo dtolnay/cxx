@@ -363,9 +363,7 @@
 extern crate link_cplusplus;
 
 #[macro_use]
-mod assert;
-#[macro_use]
-mod concat;
+mod macros;
 
 mod cxx_string;
 mod cxx_vector;
@@ -379,6 +377,9 @@ mod rust_string;
 mod rust_vec;
 mod unique_ptr;
 mod unwind;
+
+#[cfg(not(no_export_symbols))]
+mod symbols;
 
 pub use crate::cxx_string::CxxString;
 pub use crate::cxx_vector::CxxVector;
