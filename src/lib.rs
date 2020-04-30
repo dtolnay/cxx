@@ -224,7 +224,7 @@
 //! # Cargo.toml
 //!
 //! [build-dependencies]
-//! cxx-build = "0.2"
+//! cxx-build = "0.3"
 //! ```
 //!
 //! ```no_run
@@ -343,7 +343,7 @@
 //!
 //! [https://github.com/dtolnay/cxx]: https://github.com/dtolnay/cxx
 
-#![doc(html_root_url = "https://docs.rs/cxx/0.2.12")]
+#![doc(html_root_url = "https://docs.rs/cxx/0.3.0")]
 #![deny(improper_ctypes)]
 #![allow(
     clippy::cognitive_complexity,

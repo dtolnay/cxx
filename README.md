@@ -17,7 +17,7 @@ can be 100% safe.
 
 ```toml
 [dependencies]
-cxx = "0.2"
+cxx = "0.3"
 ```
 
 *Compiler support: requires rustc 1.42+*<br>
@@ -219,7 +219,7 @@ set up any additional source files and compiler flags as normal.
 # Cargo.toml
 
 [build-dependencies]
-cxx-build = "0.2"
+cxx-build = "0.3"
 ```
 
 ```rust
@@ -307,11 +307,11 @@ returns of functions.
 <tr><td>String</td><td>rust::String</td><td></td></tr>
 <tr><td>&amp;str</td><td>rust::Str</td><td></td></tr>
 <tr><td>&amp;[u8]</td><td>rust::Slice&lt;uint8_t&gt;</td><td><sup><i>arbitrary &amp;[T] not implemented yet</i></sup></td></tr>
-<tr><td><a href="https://docs.rs/cxx/0.2/cxx/struct.CxxString.html">CxxString</a></td><td>std::string</td><td><sup><i>cannot be passed by value</i></sup></td></tr>
+<tr><td><a href="https://docs.rs/cxx/0.3/cxx/struct.CxxString.html">CxxString</a></td><td>std::string</td><td><sup><i>cannot be passed by value</i></sup></td></tr>
 <tr><td>Box&lt;T&gt;</td><td>rust::Box&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
-<tr><td><a href="https://docs.rs/cxx/0.2/cxx/struct.UniquePtr.html">UniquePtr&lt;T&gt;</a></td><td>std::unique_ptr&lt;T&gt;</td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
+<tr><td><a href="https://docs.rs/cxx/0.3/cxx/struct.UniquePtr.html">UniquePtr&lt;T&gt;</a></td><td>std::unique_ptr&lt;T&gt;</td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
 <tr><td>Vec&lt;T&gt;</td><td>rust::Vec&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
-<tr><td><a href="https://docs.rs/cxx/0.2/cxx/struct.CxxVector.html">CxxVector&lt;T&gt;</a></td><td>std::vector&lt;T&gt;</td><td><sup><i>cannot be passed by value, cannot hold opaque Rust type</i></sup></td></tr>
+<tr><td><a href="https://docs.rs/cxx/0.3/cxx/struct.CxxVector.html">CxxVector&lt;T&gt;</a></td><td>std::vector&lt;T&gt;</td><td><sup><i>cannot be passed by value, cannot hold opaque Rust type</i></sup></td></tr>
 <tr><td>fn(T, U) -&gt; V</td><td>rust::Fn&lt;V(T, U)&gt;</td><td><sup><i>only passing from Rust to C++ is implemented so far</i></sup></td></tr>
 <tr><td>Result&lt;T&gt;</td><td>throw/catch</td><td><sup><i>allowed as return type only</i></sup></td></tr>
 </table>
