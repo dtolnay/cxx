@@ -62,3 +62,7 @@ matrix:
       rust: 1.42.0
       script:
         - cargo run --manifest-path demo-rs/Cargo.toml
+
+  # https://github.com/dtolnay/cxx/pull/167
+  allow_failures:
+    - name: Buck
