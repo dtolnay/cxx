@@ -517,7 +517,7 @@ fn expand_rust_function_shim_impl(
 }
 
 fn expand_rust_box(namespace: &Namespace, ident: &Ident) -> TokenStream {
-    let link_prefix = format!("cxxbridge02$box${}{}$", namespace, ident);
+    let link_prefix = format!("cxxbridge03$box${}{}$", namespace, ident);
     let link_uninit = format!("{}uninit", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
 
@@ -546,7 +546,7 @@ fn expand_rust_box(namespace: &Namespace, ident: &Ident) -> TokenStream {
 }
 
 fn expand_rust_vec(namespace: &Namespace, elem: &Ident) -> TokenStream {
-    let link_prefix = format!("cxxbridge02$rust_vec${}{}$", namespace, elem);
+    let link_prefix = format!("cxxbridge03$rust_vec${}{}$", namespace, elem);
     let link_new = format!("{}new", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
     let link_len = format!("{}len", link_prefix);
@@ -592,7 +592,7 @@ fn expand_rust_vec(namespace: &Namespace, elem: &Ident) -> TokenStream {
 
 fn expand_unique_ptr(namespace: &Namespace, ident: &Ident, types: &Types) -> TokenStream {
     let name = ident.to_string();
-    let prefix = format!("cxxbridge02$unique_ptr${}{}$", namespace, ident);
+    let prefix = format!("cxxbridge03$unique_ptr${}{}$", namespace, ident);
     let link_null = format!("{}null", prefix);
     let link_new = format!("{}new", prefix);
     let link_raw = format!("{}raw", prefix);
@@ -665,10 +665,10 @@ fn expand_unique_ptr(namespace: &Namespace, ident: &Ident, types: &Types) -> Tok
 
 fn expand_cxx_vector(namespace: &Namespace, elem: &Ident) -> TokenStream {
     let name = elem.to_string();
-    let prefix = format!("cxxbridge02$std$vector${}{}$", namespace, elem);
+    let prefix = format!("cxxbridge03$std$vector${}{}$", namespace, elem);
     let link_size = format!("{}size", prefix);
     let link_get_unchecked = format!("{}get_unchecked", prefix);
-    let unique_ptr_prefix = format!("cxxbridge02$unique_ptr$std$vector${}{}$", namespace, elem);
+    let unique_ptr_prefix = format!("cxxbridge03$unique_ptr$std$vector${}{}$", namespace, elem);
     let link_unique_ptr_null = format!("{}null", unique_ptr_prefix);
     let link_unique_ptr_raw = format!("{}raw", unique_ptr_prefix);
     let link_unique_ptr_get = format!("{}get", unique_ptr_prefix);

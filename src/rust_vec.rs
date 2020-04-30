@@ -47,31 +47,31 @@ macro_rules! rust_vec_shims_for_primitive {
 
         const _: () = {
             attr! {
-                #[export_name = concat!("cxxbridge02$rust_vec$", stringify!($ty), "$new")]
+                #[export_name = concat!("cxxbridge03$rust_vec$", stringify!($ty), "$new")]
                 unsafe extern "C" fn __new(this: *mut RustVec<$ty>) {
                     ptr::write(this, RustVec::new());
                 }
             }
             attr! {
-                #[export_name = concat!("cxxbridge02$rust_vec$", stringify!($ty), "$drop")]
+                #[export_name = concat!("cxxbridge03$rust_vec$", stringify!($ty), "$drop")]
                 unsafe extern "C" fn __drop(this: *mut RustVec<$ty>) {
                     ptr::drop_in_place(this);
                 }
             }
             attr! {
-                #[export_name = concat!("cxxbridge02$rust_vec$", stringify!($ty), "$len")]
+                #[export_name = concat!("cxxbridge03$rust_vec$", stringify!($ty), "$len")]
                 unsafe extern "C" fn __len(this: *const RustVec<$ty>) -> usize {
                     (*this).len()
                 }
             }
             attr! {
-                #[export_name = concat!("cxxbridge02$rust_vec$", stringify!($ty), "$data")]
+                #[export_name = concat!("cxxbridge03$rust_vec$", stringify!($ty), "$data")]
                 unsafe extern "C" fn __data(this: *const RustVec<$ty>) -> *const $ty {
                     (*this).as_ptr()
                 }
             }
             attr! {
-                #[export_name = concat!("cxxbridge02$rust_vec$", stringify!($ty), "$stride")]
+                #[export_name = concat!("cxxbridge03$rust_vec$", stringify!($ty), "$stride")]
                 unsafe extern "C" fn __stride() -> usize {
                     mem::size_of::<$ty>()
                 }

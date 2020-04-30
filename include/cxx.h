@@ -13,18 +13,18 @@
 #endif
 
 namespace rust {
-inline namespace cxxbridge02 {
+inline namespace cxxbridge03 {
 
-#ifndef CXXBRIDGE02_RUST_BITCOPY
-#define CXXBRIDGE02_RUST_BITCOPY
+#ifndef CXXBRIDGE03_RUST_BITCOPY
+#define CXXBRIDGE03_RUST_BITCOPY
 struct unsafe_bitcopy_t {
   explicit unsafe_bitcopy_t() = default;
 };
 constexpr unsafe_bitcopy_t unsafe_bitcopy{};
-#endif // CXXBRIDGE02_RUST_BITCOPY
+#endif // CXXBRIDGE03_RUST_BITCOPY
 
-#ifndef CXXBRIDGE02_RUST_STRING
-#define CXXBRIDGE02_RUST_STRING
+#ifndef CXXBRIDGE03_RUST_STRING
+#define CXXBRIDGE03_RUST_STRING
 class String final {
 public:
   String() noexcept;
@@ -52,10 +52,10 @@ private:
   // Size and alignment statically verified by rust_string.rs.
   std::array<uintptr_t, 3> repr;
 };
-#endif // CXXBRIDGE02_RUST_STRING
+#endif // CXXBRIDGE03_RUST_STRING
 
-#ifndef CXXBRIDGE02_RUST_STR
-#define CXXBRIDGE02_RUST_STR
+#ifndef CXXBRIDGE03_RUST_STR
+#define CXXBRIDGE03_RUST_STR
 class Str final {
 public:
   Str() noexcept;
@@ -88,10 +88,10 @@ public:
 private:
   Repr repr;
 };
-#endif // CXXBRIDGE02_RUST_STR
+#endif // CXXBRIDGE03_RUST_STR
 
-#ifndef CXXBRIDGE02_RUST_SLICE
-#define CXXBRIDGE02_RUST_SLICE
+#ifndef CXXBRIDGE03_RUST_SLICE
+#define CXXBRIDGE03_RUST_SLICE
 template <typename T>
 class Slice final {
 public:
@@ -124,10 +124,10 @@ public:
 private:
   Repr repr;
 };
-#endif // CXXBRIDGE02_RUST_SLICE
+#endif // CXXBRIDGE03_RUST_SLICE
 
-#ifndef CXXBRIDGE02_RUST_BOX
-#define CXXBRIDGE02_RUST_BOX
+#ifndef CXXBRIDGE03_RUST_BOX
+#define CXXBRIDGE03_RUST_BOX
 template <typename T>
 class Box final {
 public:
@@ -204,10 +204,10 @@ private:
   void drop() noexcept;
   T *ptr;
 };
-#endif // CXXBRIDGE02_RUST_BOX
+#endif // CXXBRIDGE03_RUST_BOX
 
-#ifndef CXXBRIDGE02_RUST_VEC
-#define CXXBRIDGE02_RUST_VEC
+#ifndef CXXBRIDGE03_RUST_VEC
+#define CXXBRIDGE03_RUST_VEC
 template <typename T>
 class Vec final {
 public:
@@ -289,10 +289,10 @@ private:
   // Size and alignment statically verified by rust_vec.rs.
   std::array<uintptr_t, 3> repr;
 };
-#endif // CXXBRIDGE02_RUST_VEC
+#endif // CXXBRIDGE03_RUST_VEC
 
-#ifndef CXXBRIDGE02_RUST_FN
-#define CXXBRIDGE02_RUST_FN
+#ifndef CXXBRIDGE03_RUST_FN
+#define CXXBRIDGE03_RUST_FN
 template <typename Signature, bool Throws = false>
 class Fn;
 
@@ -309,10 +309,10 @@ private:
 
 template <typename Signature>
 using TryFn = Fn<Signature, true>;
-#endif // CXXBRIDGE02_RUST_FN
+#endif // CXXBRIDGE03_RUST_FN
 
-#ifndef CXXBRIDGE02_RUST_ERROR
-#define CXXBRIDGE02_RUST_ERROR
+#ifndef CXXBRIDGE03_RUST_ERROR
+#define CXXBRIDGE03_RUST_ERROR
 class Error final : std::exception {
 public:
   Error(const Error &);
@@ -324,16 +324,16 @@ public:
 private:
   Str::Repr msg;
 };
-#endif // CXXBRIDGE02_RUST_ERROR
+#endif // CXXBRIDGE03_RUST_ERROR
 
-#ifndef CXXBRIDGE02_RUST_ISIZE
-#define CXXBRIDGE02_RUST_ISIZE
+#ifndef CXXBRIDGE03_RUST_ISIZE
+#define CXXBRIDGE03_RUST_ISIZE
 #if defined(_WIN32)
 using isize = SSIZE_T;
 #else
 using isize = ssize_t;
 #endif
-#endif // CXXBRIDGE02_RUST_ISIZE
+#endif // CXXBRIDGE03_RUST_ISIZE
 
 std::ostream &operator<<(std::ostream &, const String &);
 std::ostream &operator<<(std::ostream &, const Str &);
@@ -359,5 +359,5 @@ Fn<Ret(Args...), Throws> Fn<Ret(Args...), Throws>::operator*() const noexcept {
   return *this;
 }
 
-} // namespace cxxbridge02
+} // namespace cxxbridge03
 } // namespace rust
