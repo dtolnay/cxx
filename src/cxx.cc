@@ -266,7 +266,7 @@ void cxxbridge03$unique_ptr$std$string$drop(
   }
 
 // Usize and isize are the same type as one of the below.
-#define FOR_EACH_SIZED_PRIMITIVE(MACRO)                                        \
+#define FOR_EACH_NUMERIC(MACRO)                                                \
   MACRO(u8, uint8_t)                                                           \
   MACRO(u16, uint16_t)                                                         \
   MACRO(u32, uint32_t)                                                         \
@@ -278,18 +278,22 @@ void cxxbridge03$unique_ptr$std$string$drop(
   MACRO(f32, float)                                                            \
   MACRO(f64, double)
 
-#define FOR_EACH_PRIMITIVE(MACRO)                                              \
-  FOR_EACH_SIZED_PRIMITIVE(MACRO)                                              \
+#define FOR_EACH_STD_VECTOR(MACRO)                                             \
+  FOR_EACH_NUMERIC(MACRO)                                                      \
   MACRO(usize, size_t)                                                         \
   MACRO(isize, rust::isize)
 
+#define FOR_EACH_RUST_VEC(MACRO)                                               \
+  FOR_EACH_NUMERIC(MACRO)                                                      \
+  MACRO(bool, bool)
+
 extern "C" {
-FOR_EACH_PRIMITIVE(STD_VECTOR_OPS)
-FOR_EACH_SIZED_PRIMITIVE(RUST_VEC_EXTERNS)
+FOR_EACH_STD_VECTOR(STD_VECTOR_OPS)
+FOR_EACH_RUST_VEC(RUST_VEC_EXTERNS)
 } // extern "C"
 
 namespace rust {
 inline namespace cxxbridge03 {
-FOR_EACH_SIZED_PRIMITIVE(RUST_VEC_OPS)
+FOR_EACH_RUST_VEC(RUST_VEC_OPS)
 } // namespace cxxbridge03
 } // namespace rust

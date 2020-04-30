@@ -53,6 +53,7 @@ macro_rules! rust_vec_shims_for_primitive {
     };
 }
 
+rust_vec_shims_for_primitive!(bool);
 rust_vec_shims_for_primitive!(u8);
 rust_vec_shims_for_primitive!(u16);
 rust_vec_shims_for_primitive!(u32);
