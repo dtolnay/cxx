@@ -215,6 +215,13 @@ set up any additional source files and compiler flags as normal.
 
 [`cc::Build`]: https://docs.rs/cc/1.0/cc/struct.Build.html
 
+```toml
+# Cargo.toml
+
+[build-dependencies]
+cxx-build = "0.2"
+```
+
 ```rust
 // build.rs
 

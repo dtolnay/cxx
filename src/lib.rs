@@ -220,6 +220,13 @@
 //!
 //! [`cc::Build`]: https://docs.rs/cc/1.0/cc/struct.Build.html
 //!
+//! ```toml
+//! # Cargo.toml
+//!
+//! [build-dependencies]
+//! cxx-build = "0.2"
+//! ```
+//!
 //! ```no_run
 //! // build.rs
 //!
