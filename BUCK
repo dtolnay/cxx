@@ -40,7 +40,7 @@ cxx_library(
 rust_library(
     name = "symbols",
     srcs = glob(["src/macros/**", "src/symbols/**"]),
-    crate_root = "src/symbols/lib.rs",
+    crate_root = "src/symbols/symbols.rs",
 )
 
 rust_library(
