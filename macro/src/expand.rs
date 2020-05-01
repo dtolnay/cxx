@@ -128,16 +128,12 @@ fn expand_enum(enm: &Enum) -> TokenStream {
     let ident = &enm.ident;
     let doc = &enm.doc;
     let variants = enm.variants.iter().scan(0, |next_discriminant, variant| {
-        // This span on the pub makes "private type in public interface" errors
-        // appear in the right place.
-        let vis = Token![pub](variant.ident.span());
         let variant_ident = &variant.ident;
-        let discriminant = match variant.discriminant {
-            None => *next_discriminant,
-            Some(val) => val,
-        };
+        let discriminant = variant.discriminant.unwrap_or(*next_discriminant);
         *next_discriminant = discriminant + 1;
-        Some(quote!(  #vis const #variant_ident: Self = #ident(#discriminant)))
+        Some(quote! {
+            pub const #variant_ident: Self = #ident(#discriminant);
+        })
     });
     quote! {
         #doc
@@ -147,7 +143,7 @@ fn expand_enum(enm: &Enum) -> TokenStream {
 
         #[allow(non_upper_case_globals)]
         impl #ident {
-            #(#variants;)*
+            #(#variants)*
         }
     }
 }

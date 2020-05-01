@@ -202,10 +202,7 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
 
     let mut discriminants = HashSet::new();
     enm.variants.iter().fold(0, |next_discriminant, variant| {
-        let discriminant = match variant.discriminant {
-            None => next_discriminant,
-            Some(val) => val,
-        };
+        let discriminant = variant.discriminant.unwrap_or(next_discriminant);
         if !discriminants.insert(discriminant) {
             let msg = format!("discriminant value `{}` already exists", discriminant);
             cx.error(span_for_enum_error(enm), msg);

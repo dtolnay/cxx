@@ -96,8 +96,7 @@ fn parse_enum(item: ItemEnum) -> Result<Api> {
         ));
     }
 
-    let mut doc = Doc::new();
-    attrs::parse(&item.attrs, &mut doc, None)?;
+    let doc = attrs::parse_doc(&item.attrs)?;
 
     for variant in &item.variants {
         match &variant.fields {
@@ -105,7 +104,7 @@ fn parse_enum(item: ItemEnum) -> Result<Api> {
             _ => {
                 return Err(Error::new_spanned(
                     variant,
-                    "enums with data are not allowed",
+                    "enums with data are not supported yet",
                 ))
             }
         }
@@ -135,7 +134,7 @@ fn parse_variant(variant: RustVariant) -> Result<Variant> {
             Expr::Lit(ExprLit {
                 lit: Lit::Int(n), ..
             }),
-        )) => match n.base10_digits().parse() {
+        )) => match n.base10_parse() {
             Ok(val) => Ok(Variant {
                 ident: variant.ident,
                 discriminant: Some(val),
@@ -147,7 +146,7 @@ fn parse_variant(variant: RustVariant) -> Result<Variant> {
         },
         _ => Err(Error::new_spanned(
             variant,
-            "enums with non-integer literal discriminants are not supported",
+            "enums with non-integer literal discriminants are not supported yet",
         )),
     }
 }
