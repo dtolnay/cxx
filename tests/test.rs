@@ -52,15 +52,15 @@ fn test_c_return() {
     assert_eq!(2020, ffi::c_return_identity(2020));
     assert_eq!(2021, ffi::c_return_sum(2020, 1));
     match ffi::c_return_enum(0) {
-        ffi::Enum::AVal => {}
+        enm @ ffi::Enum::AVal => assert_eq!(0, enm.repr),
         _ => assert!(false),
     }
     match ffi::c_return_enum(1) {
-        ffi::Enum::BVal => {}
+        enm @ ffi::Enum::BVal => assert_eq!(2020, enm.repr),
         _ => assert!(false),
     }
     match ffi::c_return_enum(2021) {
-        ffi::Enum::CVal => {}
+        enm @ ffi::Enum::CVal => assert_eq!(2021, enm.repr),
         _ => assert!(false),
     }
 }
@@ -158,6 +158,13 @@ fn test_c_method_calls() {
     assert_eq!(2021, unique_ptr.get());
     assert_eq!(old_value, unique_ptr.set2(old_value));
     assert_eq!(old_value, unique_ptr.get2())
+}
+
+#[test]
+fn test_enum_representations() {
+    assert_eq!(0, ffi::Enum::AVal.repr);
+    assert_eq!(2020, ffi::Enum::BVal.repr);
+    assert_eq!(2021, ffi::Enum::CVal.repr);
 }
 
 #[no_mangle]

@@ -137,14 +137,16 @@ fn expand_enum(enm: &Enum) -> TokenStream {
                 .unwrap_or_else(|| prev_discriminant.map_or(0, |n| n + 1));
             *prev_discriminant = Some(discriminant);
             Some(quote! {
-                pub const #variant_ident: Self = #ident(#discriminant);
+                pub const #variant_ident: Self = #ident { repr: #discriminant };
             })
         });
     quote! {
         #doc
         #[derive(Copy, Clone, PartialEq, Eq)]
         #[repr(transparent)]
-        pub struct #ident(u32);
+        pub struct #ident {
+            pub repr: u32,
+        }
 
         #[allow(non_upper_case_globals)]
         impl #ident {
