@@ -8,6 +8,7 @@ use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
 use std::collections::HashSet;
 use std::fmt::Display;
+use std::u32;
 use syn::{Error, Result};
 
 pub(crate) struct Check<'a> {
