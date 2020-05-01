@@ -237,7 +237,7 @@ void c_take_ref_rust_vec_copy(const rust::Vec<uint8_t> &v) {
   // requirements for std::iterator_traits.
   // https://en.cppreference.com/w/cpp/iterator/iterator_traits
   std::vector<uint8_t> cxx_v;
-  std::copy(v.begin(), v.end(), back_inserter(cxx_v));
+  std::copy(v.begin(), v.end(), std::back_inserter(cxx_v));
   uint8_t sum = std::accumulate(cxx_v.begin(), cxx_v.end(), 0);
   if (sum == 200) {
     cxx_test_suite_set_correct();
