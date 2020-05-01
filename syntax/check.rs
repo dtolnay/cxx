@@ -10,7 +10,7 @@ use std::collections::HashSet;
 use std::fmt::Display;
 use syn::{Error, Result};
 
-struct Check<'a> {
+pub(crate) struct Check<'a> {
     namespace: &'a Namespace,
     apis: &'a [Api],
     types: &'a Types<'a>,
@@ -31,8 +31,9 @@ pub(crate) fn typecheck(namespace: &Namespace, apis: &[Api], types: &Types) -> R
 
 fn do_typecheck(cx: &mut Check) {
     for segment in cx.namespace {
-        cx.errors.extend(ident::check(segment).err());
+        ident::check(cx, segment);
     }
+    ident::check_all(cx, cx.apis);
 
     for ty in cx.types {
         match ty {
@@ -65,12 +66,10 @@ fn do_typecheck(cx: &mut Check) {
             check_multiple_arg_lifetimes(cx, efn);
         }
     }
-
-    ident::check_all(cx.apis, cx.errors);
 }
 
 impl Check<'_> {
-    fn error(&mut self, sp: impl ToTokens, msg: impl Display) {
+    pub(crate) fn error(&mut self, sp: impl ToTokens, msg: impl Display) {
         self.errors.push(Error::new_spanned(sp, msg));
     }
 }
