@@ -30,17 +30,10 @@ function(_add_cargo_build package_name target_name path_to_toml)
         set (build_dir .)
     endif()
 
-    set(link_libs "$<GENEX_EVAL:$<TARGET_PROPERTY:cargo-build_${target_name},CARGO_LINK_LIBRARIES>>")
-    set(search_dirs "$<GENEX_EVAL:$<TARGET_PROPERTY:cargo-build_${target_name},CARGO_LINK_DIRECTORIES>>")
-
     add_custom_target(
         cargo-build_${target_name}
         COMMAND
-            ${CMAKE_COMMAND} -E env
-                CMAKECARGO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-                CMAKECARGO_LINK_LIBRARIES=${link_libs}
-                CMAKECARGO_LINK_DIRECTORIES=${search_dirs}
-            ${CARGO_BUILD} -p ${package_name} --manifest-path ${path_to_toml}
+            ${CMAKE_COMMAND} -E env ${CARGO_BUILD} -p ${package_name} --manifest-path ${path_to_toml}
         # The build is conducted in root build directory so that cargo
         # dependencies are shared
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/${build_dir}
