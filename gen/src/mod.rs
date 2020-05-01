@@ -41,6 +41,7 @@ fn generate(path: &Path, opt: Opt, header: bool) -> Vec<u8> {
         Err(err) => format_err(path, "", Error::Io(err)),
     };
     match (|| -> Result<_> {
+        proc_macro2::fallback::force();
         let syntax = syn::parse_file(&source)?;
         let bridge = find_bridge_mod(syntax)?;
         let namespace = bridge.namespace;
