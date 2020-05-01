@@ -1,0 +1,9 @@
+error: overflowed on value after 4294967295
+  --> $DIR/enum_overflows.rs:10:5
+   |
+10 | /     enum Bad {
+11 | |         D = 0xfffffffe,
+12 | |         E,
+13 | |         F,
+14 | |     }
+   | |_____^
