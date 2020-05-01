@@ -57,6 +57,7 @@ impl From<syn::Error> for Error {
 pub(super) fn format_err(path: &Path, source: &str, error: Error) -> ! {
     match error {
         Error::Syn(syn_error) => {
+            let syn_error = sort_syn_errors(syn_error);
             let writer = StandardStream::stderr(ColorChoice::Auto);
             let ref mut stderr = writer.lock();
             for error in syn_error {
@@ -67,6 +68,15 @@ pub(super) fn format_err(path: &Path, source: &str, error: Error) -> ! {
         _ => eprintln!("cxxbridge: {:?}", anyhow!(error)),
     }
     process::exit(1);
+}
+
+fn sort_syn_errors(error: syn::Error) -> Vec<syn::Error> {
+    let mut errors: Vec<_> = error.into_iter().collect();
+    errors.sort_by_key(|e| {
+        let start = e.span().start();
+        (start.line, start.column)
+    });
+    errors
 }
 
 fn display_syn_error(stderr: &mut dyn WriteColor, path: &Path, source: &str, error: syn::Error) {
