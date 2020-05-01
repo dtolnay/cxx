@@ -3,7 +3,7 @@ use quote::IdentFragment;
 use std::fmt::{self, Display};
 use std::slice::Iter;
 use syn::parse::{Parse, ParseStream, Result};
-use syn::{Path, Token};
+use syn::{Ident, Path, Token};
 
 mod kw {
     syn::custom_keyword!(namespace);
@@ -11,7 +11,7 @@ mod kw {
 
 #[derive(Clone)]
 pub struct Namespace {
-    segments: Vec<String>,
+    segments: Vec<Ident>,
 }
 
 impl Namespace {
@@ -21,7 +21,7 @@ impl Namespace {
         }
     }
 
-    pub fn iter(&self) -> Iter<String> {
+    pub fn iter(&self) -> Iter<Ident> {
         self.segments.iter()
     }
 }
@@ -35,7 +35,7 @@ impl Parse for Namespace {
             let path = input.call(Path::parse_mod_style)?;
             for segment in path.segments {
                 ident::check(&segment.ident)?;
-                segments.push(segment.ident.to_string());
+                segments.push(segment.ident);
             }
             input.parse::<Option<Token![,]>>()?;
         }
@@ -46,8 +46,7 @@ impl Parse for Namespace {
 impl Display for Namespace {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for segment in self {
-            f.write_str(segment)?;
-            f.write_str("$")?;
+            write!(f, "{}$", segment)?;
         }
         Ok(())
     }
@@ -60,8 +59,8 @@ impl IdentFragment for Namespace {
 }
 
 impl<'a> IntoIterator for &'a Namespace {
-    type Item = &'a String;
-    type IntoIter = Iter<'a, String>;
+    type Item = &'a Ident;
+    type IntoIter = Iter<'a, Ident>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
     }

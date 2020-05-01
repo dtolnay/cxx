@@ -938,7 +938,7 @@ fn to_typename(namespace: &Namespace, ty: &Type) -> String {
         Type::Ident(ident) => {
             let mut path = String::new();
             for name in namespace {
-                path += name;
+                path += &name.to_string();
                 path += "::";
             }
             path += &ident.to_string();
@@ -1018,7 +1018,7 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
 fn write_rust_box_extern(out: &mut OutFile, ident: &Ident) {
     let mut inner = String::new();
     for name in &out.namespace {
-        inner += name;
+        inner += &name.to_string();
         inner += "::";
     }
     inner += &ident.to_string();
@@ -1077,7 +1077,7 @@ fn write_rust_vec_extern(out: &mut OutFile, element: &Ident) {
 fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
     let mut inner = String::new();
     for name in &out.namespace {
-        inner += name;
+        inner += &name.to_string();
         inner += "::";
     }
     inner += &ident.to_string();
