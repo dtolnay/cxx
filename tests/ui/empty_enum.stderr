@@ -1,0 +1,7 @@
+error: enums without any variants are not supported
+ --> $DIR/empty_enum.rs:3:5
+  |
+3 | /     enum A {
+4 | |
+5 | |     }
+  | |_____^

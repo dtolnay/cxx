@@ -106,6 +106,16 @@ size_t c_return_identity(size_t n) { return n; }
 
 size_t c_return_sum(size_t n1, size_t n2) { return n1 + n2; }
 
+Enum c_return_enum(uint32_t n) {
+  if (n <= static_cast<uint32_t>(Enum::AVal)) {
+    return Enum::AVal;
+  } else if (n <= static_cast<uint32_t>(Enum::BVal)) {
+    return Enum::BVal;
+  } else {
+    return Enum::CVal;
+  }
+}
+
 void c_take_primitive(size_t n) {
   if (n == 2020) {
     cxx_test_suite_set_correct();
@@ -238,6 +248,12 @@ void c_take_callback(rust::Fn<size_t(rust::String)> callback) {
   callback("2020");
 }
 
+void c_take_enum(Enum e) {
+  if (e == Enum::AVal) {
+    cxx_test_suite_set_correct();
+  }
+}
+
 void c_try_return_void() {}
 
 size_t c_try_return_primitive() { return 2020; }
@@ -295,6 +311,9 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(*r_return_unique_ptr_string() == "2020");
   ASSERT(r_return_identity(2020) == 2020);
   ASSERT(r_return_sum(2020, 1) == 2021);
+  ASSERT(r_return_enum(0) == Enum::AVal);
+  ASSERT(r_return_enum(1) == Enum::BVal);
+  ASSERT(r_return_enum(2021) == Enum::CVal);
 
   r_take_primitive(2020);
   r_take_shared(Shared{2020});
@@ -306,6 +325,7 @@ extern "C" const char *cxx_run_test() noexcept {
   r_take_rust_string(rust::String("2020"));
   r_take_unique_ptr_string(
       std::unique_ptr<std::string>(new std::string("2020")));
+  r_take_enum(Enum::AVal);
 
   ASSERT(r_try_return_primitive() == 2020);
   try {

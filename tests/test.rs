@@ -51,6 +51,18 @@ fn test_c_return() {
     );
     assert_eq!(2020, ffi::c_return_identity(2020));
     assert_eq!(2021, ffi::c_return_sum(2020, 1));
+    match ffi::c_return_enum(0) {
+        ffi::Enum::AVal => {}
+        _ => assert!(false),
+    }
+    match ffi::c_return_enum(1) {
+        ffi::Enum::BVal => {}
+        _ => assert!(false),
+    }
+    match ffi::c_return_enum(2021) {
+        ffi::Enum::CVal => {}
+        _ => assert!(false),
+    }
 }
 
 #[test]
@@ -106,6 +118,7 @@ fn test_c_take() {
     ]));
     check!(ffi::c_take_ref_rust_vec(&test_vec));
     check!(ffi::c_take_ref_rust_vec_copy(&test_vec));
+    check!(ffi::c_take_enum(ffi::Enum::AVal));
 }
 
 #[test]

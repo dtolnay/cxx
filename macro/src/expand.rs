@@ -2,7 +2,7 @@ use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::namespace::Namespace;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    self, check, mangle, Api, ExternFn, ExternType, Signature, Struct, Type, Types,
+    self, check, mangle, Api, Enum, ExternFn, ExternType, Signature, Struct, Type, Types,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
@@ -36,6 +36,7 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
         match api {
             Api::Include(_) | Api::RustType(_) => {}
             Api::Struct(strct) => expanded.extend(expand_struct(strct)),
+            Api::Enum(enm) => expanded.extend(expand_enum(enm)),
             Api::CxxType(ety) => expanded.extend(expand_cxx_type(ety)),
             Api::CxxFunction(efn) => {
                 expanded.extend(expand_cxx_function_shim(namespace, efn, types));
@@ -119,6 +120,34 @@ fn expand_struct(strct: &Struct) -> TokenStream {
         #[repr(C)]
         pub struct #ident {
             #(#fields,)*
+        }
+    }
+}
+
+fn expand_enum(enm: &Enum) -> TokenStream {
+    let ident = &enm.ident;
+    let doc = &enm.doc;
+    let variants = enm.variants.iter().scan(0, |next_discriminant, variant| {
+        // This span on the pub makes "private type in public interface" errors
+        // appear in the right place.
+        let vis = Token![pub](variant.ident.span());
+        let variant_ident = &variant.ident;
+        let discriminant = match variant.discriminant {
+            None => *next_discriminant,
+            Some(val) => val,
+        };
+        *next_discriminant = discriminant + 1;
+        Some(quote!(  #vis const #variant_ident: Self = #ident(#discriminant)))
+    });
+    quote! {
+        #doc
+        #[derive(Copy, Clone, PartialEq, Eq)]
+        #[repr(transparent)]
+        pub struct #ident(u32);
+
+        #[allow(non_upper_case_globals)]
+        impl #ident {
+            #(#variants;)*
         }
     }
 }

@@ -3,7 +3,7 @@ use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::namespace::Namespace;
 use crate::syntax::symbol::Symbol;
-use crate::syntax::{mangle, Api, ExternFn, ExternType, Signature, Struct, Type, Types, Var};
+use crate::syntax::{mangle, Api, Enum, ExternFn, ExternType, Signature, Struct, Type, Types, Var};
 use proc_macro2::Ident;
 use std::collections::HashMap;
 
@@ -63,6 +63,10 @@ pub(super) fn gen(
             Api::Struct(strct) => {
                 out.next_section();
                 write_struct(out, strct);
+            }
+            Api::Enum(enm) => {
+                out.next_section();
+                write_enum(out, enm);
             }
             Api::RustType(ety) => {
                 if let Some(methods) = methods_for_type.get(&ety.ident) {
@@ -349,6 +353,22 @@ fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &[&Ex
         let local_name = method.ident.to_string();
         write_rust_function_shim_decl(out, &local_name, sig, false);
         writeln!(out, ";");
+    }
+    writeln!(out, "}};");
+}
+
+fn write_enum(out: &mut OutFile, enm: &Enum) {
+    for line in enm.doc.to_string().lines() {
+        writeln!(out, "//{}", line);
+    }
+    writeln!(out, "enum class {} : uint32_t {{", enm.ident);
+    for variant in &enm.variants {
+        write!(out, "  ");
+        write!(out, "{}", variant.ident);
+        if let Some(discriminant) = &variant.discriminant {
+            write!(out, " = {}", discriminant);
+        }
+        writeln!(out, ",");
     }
     writeln!(out, "}};");
 }

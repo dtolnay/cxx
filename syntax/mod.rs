@@ -29,6 +29,7 @@ pub use self::types::Types;
 pub enum Api {
     Include(LitStr),
     Struct(Struct),
+    Enum(Enum),
     CxxType(ExternType),
     CxxFunction(ExternFn),
     RustType(ExternType),
@@ -48,6 +49,14 @@ pub struct Struct {
     pub ident: Ident,
     pub brace_token: Brace,
     pub fields: Vec<Var>,
+}
+
+pub struct Enum {
+    pub doc: Doc,
+    pub enum_token: Token![enum],
+    pub ident: Ident,
+    pub brace_token: Brace,
+    pub variants: Vec<Variant>,
 }
 
 pub struct ExternFn {
@@ -81,6 +90,11 @@ pub struct Receiver {
     pub var: Token![self],
     pub ty: Ident,
     pub shorthand: bool,
+}
+
+pub struct Variant {
+    pub ident: Ident,
+    pub discriminant: Option<u32>,
 }
 
 pub enum Type {

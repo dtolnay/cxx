@@ -1,0 +1,18 @@
+error: discriminant value `10` already exists
+ --> $DIR/duplicate_enum_discriminants.rs:3:5
+  |
+3 | /     enum A {
+4 | |         V1 = 10,
+5 | |         V2 = 10,
+6 | |     }
+  | |_____^
+
+error: discriminant value `11` already exists
+  --> $DIR/duplicate_enum_discriminants.rs:8:5
+   |
+8  | /     enum B {
+9  | |         V1 = 10,
+10 | |         V2,
+11 | |         V3 = 11,
+12 | |     }
+   | |_____^
