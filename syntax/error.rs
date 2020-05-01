@@ -44,7 +44,7 @@ pub static CXX_STRING_BY_VALUE: Error = Error {
 pub static CXX_TYPE_BY_VALUE: Error = Error {
     msg: "C++ type by value is not supported",
     label: None,
-    note: Some("hint: wrap it in a Box<> or UniquePtr<>"),
+    note: Some("hint: wrap it in a UniquePtr<>"),
 };
 
 pub static DOUBLE_UNDERSCORE: Error = Error {
