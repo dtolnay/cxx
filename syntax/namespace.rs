@@ -1,4 +1,3 @@
-use crate::syntax::ident;
 use quote::IdentFragment;
 use std::fmt::{self, Display};
 use std::slice::Iter;
@@ -34,7 +33,6 @@ impl Parse for Namespace {
             input.parse::<Token![=]>()?;
             let path = input.call(Path::parse_mod_style)?;
             for segment in path.segments {
-                ident::check(&segment.ident)?;
                 segments.push(segment.ident);
             }
             input.parse::<Option<Token![,]>>()?;

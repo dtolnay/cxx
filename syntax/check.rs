@@ -1,4 +1,5 @@
 use crate::syntax::atom::Atom::{self, *};
+use crate::syntax::namespace::Namespace;
 use crate::syntax::{
     error, ident, Api, Enum, ExternFn, ExternType, Lang, Receiver, Ref, Slice, Struct, Ty1, Type,
     Types,
@@ -10,14 +11,16 @@ use std::fmt::Display;
 use syn::{Error, Result};
 
 struct Check<'a> {
+    namespace: &'a Namespace,
     apis: &'a [Api],
     types: &'a Types<'a>,
     errors: &'a mut Vec<Error>,
 }
 
-pub(crate) fn typecheck(apis: &[Api], types: &Types) -> Result<()> {
+pub(crate) fn typecheck(namespace: &Namespace, apis: &[Api], types: &Types) -> Result<()> {
     let mut errors = Vec::new();
     let mut cx = Check {
+        namespace,
         apis,
         types,
         errors: &mut errors,
@@ -27,6 +30,10 @@ pub(crate) fn typecheck(apis: &[Api], types: &Types) -> Result<()> {
 }
 
 fn do_typecheck(cx: &mut Check) {
+    for segment in cx.namespace {
+        cx.errors.extend(ident::check(segment).err());
+    }
+
     for ty in cx.types {
         match ty {
             Type::Ident(ident) => check_type_ident(cx, ident),

@@ -16,7 +16,7 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
     ))?;
     let apis = syntax::parse_items(content.1)?;
     let ref types = Types::collect(&apis)?;
-    check::typecheck(&apis, types)?;
+    check::typecheck(namespace, &apis, types)?;
 
     let mut expanded = TokenStream::new();
     let mut hidden = TokenStream::new();
