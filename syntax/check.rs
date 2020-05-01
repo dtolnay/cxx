@@ -30,10 +30,7 @@ pub(crate) fn typecheck(namespace: &Namespace, apis: &[Api], types: &Types) -> R
 }
 
 fn do_typecheck(cx: &mut Check) {
-    for segment in cx.namespace {
-        ident::check(cx, segment);
-    }
-    ident::check_all(cx, cx.apis);
+    ident::check_all(cx, cx.namespace, cx.apis);
 
     for ty in cx.types {
         match ty {

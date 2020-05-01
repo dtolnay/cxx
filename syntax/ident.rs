@@ -1,8 +1,9 @@
 use crate::syntax::check::Check;
+use crate::syntax::namespace::Namespace;
 use crate::syntax::{error, Api};
 use proc_macro2::Ident;
 
-pub(crate) fn check(cx: &mut Check, ident: &Ident) {
+fn check(cx: &mut Check, ident: &Ident) {
     let s = ident.to_string();
     if s.starts_with("cxxbridge") {
         cx.error(ident, error::CXXBRIDGE_RESERVED.msg);
@@ -12,7 +13,11 @@ pub(crate) fn check(cx: &mut Check, ident: &Ident) {
     }
 }
 
-pub(crate) fn check_all(cx: &mut Check, apis: &[Api]) {
+pub(crate) fn check_all(cx: &mut Check, namespace: &Namespace, apis: &[Api]) {
+    for segment in namespace {
+        check(cx, segment);
+    }
+
     for api in apis {
         match api {
             Api::Include(_) => {}
