@@ -7,9 +7,6 @@ license = "MIT OR Apache-2.0"
 description = "C++ code generator for integrating `cxx` crate into a Cargo build."
 repository = "https://github.com/dtolnay/cxx"
 
-[badges]
-travis-ci = { repository = "dtolnay/cxx" }
-
 [dependencies]
 anyhow = "1.0"
 cc = "1.0.49"

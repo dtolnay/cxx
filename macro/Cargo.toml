@@ -11,9 +11,6 @@ exclude = ["README.md"]
 [lib]
 proc-macro = true
 
-[badges]
-travis-ci = { repository = "dtolnay/cxx" }
-
 [dependencies]
 proc-macro2 = "1.0"
 quote = "1.0"

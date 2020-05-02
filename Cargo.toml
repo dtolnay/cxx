@@ -11,9 +11,6 @@ documentation = "https://docs.rs/cxx"
 readme = "README.md"
 exclude = ["/demo-cxx", "/gen", "/syntax", "/third-party"]
 
-[badges]
-travis-ci = { repository = "dtolnay/cxx" }
-
 [dependencies]
 cxxbridge-macro = { version = "=0.3.0", path = "macro" }
 link-cplusplus = "1.0"

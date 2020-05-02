@@ -11,9 +11,6 @@ repository = "https://github.com/dtolnay/cxx"
 name = "cxxbridge"
 path = "src/main.rs"
 
-[badges]
-travis-ci = { repository = "dtolnay/cxx" }
-
 [dependencies]
 anyhow = "1.0"
 codespan-reporting = "0.9"
