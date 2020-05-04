@@ -1,10 +1,10 @@
 use crate::syntax::atom::Atom::{self, *};
+use crate::syntax::report::Errors;
 use crate::syntax::set::OrderedSet as Set;
 use crate::syntax::{Api, Derive, Enum, Struct, Type};
 use proc_macro2::Ident;
 use quote::ToTokens;
 use std::collections::{BTreeMap as Map, HashSet as UnorderedSet};
-use syn::{Error, Result};
 
 pub struct Types<'a> {
     pub all: Set<'a, Type>,
@@ -15,7 +15,7 @@ pub struct Types<'a> {
 }
 
 impl<'a> Types<'a> {
-    pub fn collect(apis: &'a [Api]) -> Result<Self> {
+    pub fn collect(cx: &mut Errors, apis: &'a [Api]) -> Self {
         let mut all = Set::new();
         let mut structs = Map::new();
         let mut enums = Map::new();
@@ -50,39 +50,41 @@ impl<'a> Types<'a> {
                 Api::Include(_) => {}
                 Api::Struct(strct) => {
                     let ident = &strct.ident;
-                    if !type_names.insert(ident) {
-                        return Err(duplicate_name(strct, ident));
+                    if type_names.insert(ident) {
+                        structs.insert(ident.clone(), strct);
+                    } else {
+                        duplicate_name(cx, strct, ident);
                     }
-                    structs.insert(ident.clone(), strct);
                     for field in &strct.fields {
                         visit(&mut all, &field.ty);
                     }
                 }
                 Api::Enum(enm) => {
                     let ident = &enm.ident;
-                    if !type_names.insert(ident) {
-                        return Err(duplicate_name(enm, ident));
+                    if type_names.insert(ident) {
+                        enums.insert(ident.clone(), enm);
+                    } else {
+                        duplicate_name(cx, enm, ident);
                     }
-                    enums.insert(ident.clone(), enm);
                 }
                 Api::CxxType(ety) => {
                     let ident = &ety.ident;
                     if !type_names.insert(ident) {
-                        return Err(duplicate_name(ety, ident));
+                        duplicate_name(cx, ety, ident);
                     }
                     cxx.insert(ident);
                 }
                 Api::RustType(ety) => {
                     let ident = &ety.ident;
                     if !type_names.insert(ident) {
-                        return Err(duplicate_name(ety, ident));
+                        duplicate_name(cx, ety, ident);
                     }
                     rust.insert(ident);
                 }
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
                     let ident = &efn.ident;
                     if !function_names.insert((&efn.receiver, ident)) {
-                        return Err(duplicate_name(efn, ident));
+                        duplicate_name(cx, efn, ident);
                     }
                     for arg in &efn.args {
                         visit(&mut all, &arg.ty);
@@ -94,13 +96,13 @@ impl<'a> Types<'a> {
             }
         }
 
-        Ok(Types {
+        Types {
             all,
             structs,
             enums,
             cxx,
             rust,
-        })
+        }
     }
 
     pub fn needs_indirect_abi(&self, ty: &Type) -> bool {
@@ -135,7 +137,7 @@ impl<'t, 'a> IntoIterator for &'t Types<'a> {
     }
 }
 
-fn duplicate_name(sp: impl ToTokens, ident: &Ident) -> Error {
+fn duplicate_name(cx: &mut Errors, sp: impl ToTokens, ident: &Ident) {
     let msg = format!("the name `{}` is defined multiple times", ident);
-    Error::new_spanned(sp, msg)
+    cx.error(sp, msg);
 }

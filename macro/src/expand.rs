@@ -15,8 +15,9 @@ pub fn bridge(namespace: &Namespace, mut ffi: ItemMod) -> Result<TokenStream> {
         Span::call_site(),
         "#[cxx::bridge] module must have inline contents",
     ))?;
-    let ref apis = syntax::parse_items(content.1)?;
-    let ref types = Types::collect(apis)?;
+    let ref apis = syntax::parse_items(errors, content.1);
+    let ref types = Types::collect(errors, apis);
+    errors.propagate()?;
     check::typecheck(errors, namespace, apis, types);
     errors.propagate()?;
 

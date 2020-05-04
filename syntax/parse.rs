@@ -1,3 +1,4 @@
+use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
     attrs, error, Api, Doc, Enum, ExternFn, ExternType, Lang, Receiver, Ref, Signature, Slice,
@@ -16,27 +17,24 @@ pub mod kw {
     syn::custom_keyword!(Result);
 }
 
-pub fn parse_items(items: Vec<Item>) -> Result<Vec<Api>> {
+pub fn parse_items(cx: &mut Errors, items: Vec<Item>) -> Vec<Api> {
     let mut apis = Vec::new();
     for item in items {
         match item {
-            Item::Struct(item) => {
-                let strct = parse_struct(item)?;
-                apis.push(strct);
-            }
-            Item::Enum(item) => {
-                let enm = parse_enum(item)?;
-                apis.push(enm);
-            }
-            Item::ForeignMod(foreign_mod) => {
-                let functions = parse_foreign_mod(foreign_mod)?;
-                apis.extend(functions);
-            }
-            Item::Use(item) => return Err(Error::new_spanned(item, error::USE_NOT_ALLOWED)),
-            _ => return Err(Error::new_spanned(item, "unsupported item")),
+            Item::Struct(item) => match parse_struct(item) {
+                Ok(strct) => apis.push(strct),
+                Err(err) => cx.push(err),
+            },
+            Item::Enum(item) => match parse_enum(item) {
+                Ok(enm) => apis.push(enm),
+                Err(err) => cx.push(err),
+            },
+            Item::ForeignMod(foreign_mod) => parse_foreign_mod(cx, foreign_mod, &mut apis),
+            Item::Use(item) => cx.error(item, error::USE_NOT_ALLOWED),
+            _ => cx.error(item, "unsupported item"),
         }
     }
-    Ok(apis)
+    apis
 }
 
 fn parse_struct(item: ItemStruct) -> Result<Api> {
@@ -151,8 +149,11 @@ fn parse_variant(variant: RustVariant) -> Result<Variant> {
     }
 }
 
-fn parse_foreign_mod(foreign_mod: ItemForeignMod) -> Result<Vec<Api>> {
-    let lang = parse_lang(foreign_mod.abi)?;
+fn parse_foreign_mod(cx: &mut Errors, foreign_mod: ItemForeignMod, out: &mut Vec<Api>) {
+    let lang = match parse_lang(foreign_mod.abi) {
+        Ok(lang) => lang,
+        Err(err) => return cx.push(err),
+    };
     let api_type = match lang {
         Lang::Cxx => Api::CxxType,
         Lang::Rust => Api::RustType,
@@ -165,19 +166,21 @@ fn parse_foreign_mod(foreign_mod: ItemForeignMod) -> Result<Vec<Api>> {
     let mut items = Vec::new();
     for foreign in &foreign_mod.items {
         match foreign {
-            ForeignItem::Type(foreign) => {
-                let ety = parse_extern_type(foreign)?;
-                items.push(api_type(ety));
-            }
-            ForeignItem::Fn(foreign) => {
-                let efn = parse_extern_fn(foreign, lang)?;
-                items.push(api_function(efn));
-            }
+            ForeignItem::Type(foreign) => match parse_extern_type(foreign) {
+                Ok(ety) => items.push(api_type(ety)),
+                Err(err) => cx.push(err),
+            },
+            ForeignItem::Fn(foreign) => match parse_extern_fn(foreign, lang) {
+                Ok(efn) => items.push(api_function(efn)),
+                Err(err) => cx.push(err),
+            },
             ForeignItem::Macro(foreign) if foreign.mac.path.is_ident("include") => {
-                let include = foreign.mac.parse_body()?;
-                items.push(Api::Include(include));
+                match foreign.mac.parse_body() {
+                    Ok(include) => items.push(Api::Include(include)),
+                    Err(err) => cx.push(err),
+                }
             }
-            _ => return Err(Error::new_spanned(foreign, "unsupported foreign item")),
+            _ => cx.error(foreign, "unsupported foreign item"),
         }
     }
 
@@ -198,7 +201,7 @@ fn parse_foreign_mod(foreign_mod: ItemForeignMod) -> Result<Vec<Api>> {
         }
     }
 
-    Ok(items)
+    out.extend(items);
 }
 
 fn parse_lang(abi: Abi) -> Result<Lang> {

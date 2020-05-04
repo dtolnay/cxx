@@ -15,6 +15,10 @@ impl Errors {
         self.errors.push(Error::new_spanned(sp, msg));
     }
 
+    pub fn push(&mut self, error: Error) {
+        self.errors.push(error);
+    }
+
     pub fn propagate(&mut self) -> Result<()> {
         let mut iter = self.errors.drain(..);
         let mut all_errors = match iter.next() {

@@ -47,8 +47,9 @@ fn generate(path: &Path, opt: Opt, header: bool) -> Vec<u8> {
         let syntax = syn::parse_file(&source)?;
         let bridge = find_bridge_mod(syntax)?;
         let ref namespace = bridge.namespace;
-        let ref apis = syntax::parse_items(bridge.module)?;
-        let ref types = Types::collect(apis)?;
+        let ref apis = syntax::parse_items(errors, bridge.module);
+        let ref types = Types::collect(errors, apis);
+        errors.propagate()?;
         check::typecheck(errors, namespace, apis, types);
         errors.propagate()?;
         let out = write::gen(namespace, apis, types, opt, header);
