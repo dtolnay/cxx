@@ -1,5 +1,6 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::namespace::Namespace;
+use crate::syntax::report::Errors;
 use crate::syntax::{
     error, ident, Api, Enum, ExternFn, ExternType, Lang, Receiver, Ref, Slice, Struct, Ty1, Type,
     Types,
@@ -9,25 +10,21 @@ use quote::{quote, ToTokens};
 use std::collections::HashSet;
 use std::fmt::Display;
 use std::u32;
-use syn::{Error, Result};
 
 pub(crate) struct Check<'a> {
     namespace: &'a Namespace,
     apis: &'a [Api],
     types: &'a Types<'a>,
-    errors: &'a mut Vec<Error>,
+    errors: &'a mut Errors,
 }
 
-pub(crate) fn typecheck(namespace: &Namespace, apis: &[Api], types: &Types) -> Result<()> {
-    let mut errors = Vec::new();
-    let mut cx = Check {
+pub(crate) fn typecheck(cx: &mut Errors, namespace: &Namespace, apis: &[Api], types: &Types) {
+    do_typecheck(&mut Check {
         namespace,
         apis,
         types,
-        errors: &mut errors,
-    };
-    do_typecheck(&mut cx);
-    combine_errors(errors)
+        errors: cx,
+    });
 }
 
 fn do_typecheck(cx: &mut Check) {
@@ -59,7 +56,7 @@ fn do_typecheck(cx: &mut Check) {
 
 impl Check<'_> {
     pub(crate) fn error(&mut self, sp: impl ToTokens, msg: impl Display) {
-        self.errors.push(Error::new_spanned(sp, msg));
+        self.errors.error(sp, msg);
     }
 }
 
@@ -371,18 +368,6 @@ fn span_for_receiver_error(receiver: &Receiver) -> TokenStream {
         let ty = &receiver.ty;
         quote!(#ampersand #lifetime #mutability #ty)
     }
-}
-
-fn combine_errors(errors: Vec<Error>) -> Result<()> {
-    let mut iter = errors.into_iter();
-    let mut all_errors = match iter.next() {
-        Some(err) => err,
-        None => return Ok(()),
-    };
-    for err in iter {
-        all_errors.combine(err);
-    }
-    Err(all_errors)
 }
 
 fn describe(cx: &mut Check, ty: &Type) -> String {

@@ -1,0 +1,11 @@
+error: struct with generic parameters is not supported yet
+ --> $DIR/multiple_parse_error.rs:3:5
+  |
+3 |     struct Monad<T>;
+  |     ^^^^^^^^^^^^^^^
+
+error: unrecognized ABI
+ --> $DIR/multiple_parse_error.rs:5:5
+  |
+5 |     extern "Haskell" {
+  |     ^^^^^^^^^^^^^^^^
