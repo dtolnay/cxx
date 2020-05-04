@@ -3,7 +3,7 @@ use crate::syntax::set::OrderedSet as Set;
 use crate::syntax::{Api, Derive, Enum, ExternType, Struct, Type};
 use proc_macro2::Ident;
 use quote::quote;
-use std::collections::BTreeMap as Map;
+use std::collections::{BTreeMap as Map, HashSet as UnorderedSet};
 use syn::{Error, Result};
 
 pub struct Types<'a> {
@@ -43,16 +43,12 @@ impl<'a> Types<'a> {
             }
         }
 
+        let mut type_names = UnorderedSet::new();
         for api in apis {
             match api {
                 Api::Include(_) => {}
                 Api::Struct(strct) => {
-                    let ident = &strct.ident;
-                    if structs.contains_key(ident)
-                        || enums.contains_key(ident)
-                        || cxx.contains(ident)
-                        || rust.contains(ident)
-                    {
+                    if !type_names.insert(&strct.ident) {
                         return Err(duplicate_struct(strct));
                     }
                     structs.insert(strct.ident.clone(), strct);
@@ -61,37 +57,22 @@ impl<'a> Types<'a> {
                     }
                 }
                 Api::Enum(enm) => {
-                    let ident = &enm.ident;
-                    if structs.contains_key(ident)
-                        || enums.contains_key(ident)
-                        || cxx.contains(ident)
-                        || rust.contains(ident)
-                    {
+                    if !type_names.insert(&enm.ident) {
                         return Err(duplicate_enum(enm));
                     }
                     enums.insert(enm.ident.clone(), enm);
                 }
                 Api::CxxType(ety) => {
-                    let ident = &ety.ident;
-                    if structs.contains_key(ident)
-                        || enums.contains_key(ident)
-                        || cxx.contains(ident)
-                        || rust.contains(ident)
-                    {
+                    if !type_names.insert(&ety.ident) {
                         return Err(duplicate_type(ety));
                     }
-                    cxx.insert(ident);
+                    cxx.insert(&ety.ident);
                 }
                 Api::RustType(ety) => {
-                    let ident = &ety.ident;
-                    if structs.contains_key(ident)
-                        || enums.contains_key(ident)
-                        || cxx.contains(ident)
-                        || rust.contains(ident)
-                    {
+                    if !type_names.insert(&ety.ident) {
                         return Err(duplicate_type(ety));
                     }
-                    rust.insert(ident);
+                    rust.insert(&ety.ident);
                 }
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
                     for arg in &efn.args {

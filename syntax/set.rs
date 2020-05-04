@@ -18,10 +18,12 @@ where
         }
     }
 
-    pub fn insert(&mut self, value: &'a T) {
-        if self.set.insert(value) {
+    pub fn insert(&mut self, value: &'a T) -> bool {
+        let new = self.set.insert(value);
+        if new {
             self.vec.push(value);
         }
+        new
     }
 
     pub fn contains(&self, value: &T) -> bool {
