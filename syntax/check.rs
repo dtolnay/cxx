@@ -55,15 +55,6 @@ fn do_typecheck(cx: &mut Check) {
             _ => {}
         }
     }
-
-    for api in cx.apis {
-        if let Api::CxxFunction(efn) = api {
-            check_mut_return_restriction(cx, efn);
-        }
-        if let Api::CxxFunction(efn) | Api::RustFunction(efn) = api {
-            check_multiple_arg_lifetimes(cx, efn);
-        }
-    }
 }
 
 impl Check<'_> {
@@ -282,6 +273,12 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
             cx.error(ty, "returning a function pointer is not implemented yet");
         }
     }
+
+    if efn.lang == Lang::Cxx {
+        check_mut_return_restriction(cx, efn);
+    }
+
+    check_multiple_arg_lifetimes(cx, efn);
 }
 
 fn check_mut_return_restriction(cx: &mut Check, efn: &ExternFn) {
