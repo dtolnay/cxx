@@ -1,6 +1,6 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::set::OrderedSet as Set;
-use crate::syntax::{Api, Derive, Enum, ExternType, Struct, Type};
+use crate::syntax::{Api, Derive, Enum, ExternFn, ExternType, Struct, Type};
 use proc_macro2::Ident;
 use quote::quote;
 use std::collections::{BTreeMap as Map, HashSet as UnorderedSet};
@@ -44,6 +44,7 @@ impl<'a> Types<'a> {
         }
 
         let mut type_names = UnorderedSet::new();
+        let mut function_names = UnorderedSet::new();
         for api in apis {
             match api {
                 Api::Include(_) => {}
@@ -75,6 +76,9 @@ impl<'a> Types<'a> {
                     rust.insert(&ety.ident);
                 }
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
+                    if !function_names.insert((&efn.receiver, &efn.ident)) {
+                        return Err(duplicate_function(efn));
+                    }
                     for arg in &efn.args {
                         visit(&mut all, &arg.ty);
                     }
@@ -145,4 +149,8 @@ fn duplicate_type(ety: &ExternType) -> Error {
     let ident = &ety.ident;
     let range = quote!(#type_token #ident);
     Error::new_spanned(range, "duplicate type")
+}
+
+fn duplicate_function(efn: &ExternFn) -> Error {
+    Error::new_spanned(efn, "duplicate function")
 }
