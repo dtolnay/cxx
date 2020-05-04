@@ -14,14 +14,14 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
         Span::call_site(),
         "#[cxx::bridge] module must have inline contents",
     ))?;
-    let apis = syntax::parse_items(content.1)?;
-    let ref types = Types::collect(&apis)?;
-    check::typecheck(namespace, &apis, types)?;
+    let ref apis = syntax::parse_items(content.1)?;
+    let ref types = Types::collect(apis)?;
+    check::typecheck(namespace, apis, types)?;
 
     let mut expanded = TokenStream::new();
     let mut hidden = TokenStream::new();
 
-    for api in &apis {
+    for api in apis {
         if let Api::RustType(ety) = api {
             expanded.extend(expand_rust_type(ety));
             let ident = &ety.ident;
@@ -32,7 +32,7 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
         }
     }
 
-    for api in &apis {
+    for api in apis {
         match api {
             Api::Include(_) | Api::RustType(_) => {}
             Api::Struct(strct) => expanded.extend(expand_struct(strct)),

@@ -8,7 +8,7 @@ use proc_macro2::Ident;
 use std::collections::HashMap;
 
 pub(super) fn gen(
-    namespace: Namespace,
+    namespace: &Namespace,
     apis: &[Api],
     types: &Types,
     opt: Opt,
@@ -32,7 +32,7 @@ pub(super) fn gen(
     write_include_cxxbridge(out, apis, types);
 
     out.next_section();
-    for name in &namespace {
+    for name in namespace {
         writeln!(out, "namespace {} {{", name);
     }
 

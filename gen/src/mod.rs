@@ -44,11 +44,11 @@ fn generate(path: &Path, opt: Opt, header: bool) -> Vec<u8> {
         proc_macro2::fallback::force();
         let syntax = syn::parse_file(&source)?;
         let bridge = find_bridge_mod(syntax)?;
-        let namespace = bridge.namespace;
-        let apis = syntax::parse_items(bridge.module)?;
-        let types = Types::collect(&apis)?;
-        check::typecheck(&namespace, &apis, &types)?;
-        let out = write::gen(namespace, &apis, &types, opt, header);
+        let ref namespace = bridge.namespace;
+        let ref apis = syntax::parse_items(bridge.module)?;
+        let ref types = Types::collect(apis)?;
+        check::typecheck(namespace, apis, types)?;
+        let out = write::gen(namespace, apis, types, opt, header);
         Ok(out)
     })() {
         Ok(out) => out.content(),
