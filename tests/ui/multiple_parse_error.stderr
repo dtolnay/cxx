@@ -1,0 +1,5 @@
+error: struct with generic parameters is not supported yet
+ --> $DIR/multiple_parse_error.rs:3:5
+  |
+3 |     struct Monad<T>;
+  |     ^^^^^^^^^^^^^^^
