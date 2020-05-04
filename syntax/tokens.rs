@@ -1,5 +1,7 @@
 use crate::syntax::atom::Atom::*;
-use crate::syntax::{Derive, ExternFn, Receiver, Ref, Signature, Slice, Ty1, Type, Var};
+use crate::syntax::{
+    Derive, Enum, ExternFn, ExternType, Receiver, Ref, Signature, Slice, Struct, Ty1, Type, Var,
+};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote_spanned, ToTokens};
 use syn::Token;
@@ -73,6 +75,30 @@ impl ToTokens for Derive {
             Derive::Copy => "Copy",
         };
         Ident::new(name, Span::call_site()).to_tokens(tokens);
+    }
+}
+
+impl ToTokens for ExternType {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        // Notional token range for error reporting purposes.
+        self.type_token.to_tokens(tokens);
+        self.ident.to_tokens(tokens);
+    }
+}
+
+impl ToTokens for Struct {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        // Notional token range for error reporting purposes.
+        self.struct_token.to_tokens(tokens);
+        self.ident.to_tokens(tokens);
+    }
+}
+
+impl ToTokens for Enum {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        // Notional token range for error reporting purposes.
+        self.enum_token.to_tokens(tokens);
+        self.ident.to_tokens(tokens);
     }
 }
 

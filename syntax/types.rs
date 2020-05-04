@@ -2,7 +2,6 @@ use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::set::OrderedSet as Set;
 use crate::syntax::{Api, Derive, Enum, ExternFn, ExternType, Struct, Type};
 use proc_macro2::Ident;
-use quote::quote;
 use std::collections::{BTreeMap as Map, HashSet as UnorderedSet};
 use syn::{Error, Result};
 
@@ -131,24 +130,15 @@ impl<'t, 'a> IntoIterator for &'t Types<'a> {
 }
 
 fn duplicate_struct(strct: &Struct) -> Error {
-    let struct_token = strct.struct_token;
-    let ident = &strct.ident;
-    let range = quote!(#struct_token #ident);
-    Error::new_spanned(range, "duplicate type")
+    Error::new_spanned(strct, "duplicate type")
 }
 
 fn duplicate_enum(enm: &Enum) -> Error {
-    let enum_token = enm.enum_token;
-    let ident = &enm.ident;
-    let range = quote!(#enum_token #ident);
-    Error::new_spanned(range, "duplicate type")
+    Error::new_spanned(enm, "duplicate type")
 }
 
 fn duplicate_type(ety: &ExternType) -> Error {
-    let type_token = ety.type_token;
-    let ident = &ety.ident;
-    let range = quote!(#type_token #ident);
-    Error::new_spanned(range, "duplicate type")
+    Error::new_spanned(ety, "duplicate type")
 }
 
 fn duplicate_function(efn: &ExternFn) -> Error {
