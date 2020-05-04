@@ -10,7 +10,6 @@ use quote::{quote, ToTokens};
 use std::collections::HashSet;
 use std::fmt::Display;
 use std::u32;
-use syn::Result;
 
 pub(crate) struct Check<'a> {
     namespace: &'a Namespace,
@@ -19,16 +18,13 @@ pub(crate) struct Check<'a> {
     errors: &'a mut Errors,
 }
 
-pub(crate) fn typecheck(namespace: &Namespace, apis: &[Api], types: &Types) -> Result<()> {
-    let mut errors = Errors::new();
-    let mut cx = Check {
+pub(crate) fn typecheck(cx: &mut Errors, namespace: &Namespace, apis: &[Api], types: &Types) {
+    do_typecheck(&mut Check {
         namespace,
         apis,
         types,
-        errors: &mut errors,
-    };
-    do_typecheck(&mut cx);
-    errors.propagate()
+        errors: cx,
+    });
 }
 
 fn do_typecheck(cx: &mut Check) {

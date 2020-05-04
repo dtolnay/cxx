@@ -8,6 +8,7 @@ mod write;
 
 use self::error::{format_err, Error, Result};
 use crate::syntax::namespace::Namespace;
+use crate::syntax::report::Errors;
 use crate::syntax::{self, check, Types};
 use quote::quote;
 use std::fs;
@@ -42,12 +43,14 @@ fn generate(path: &Path, opt: Opt, header: bool) -> Vec<u8> {
     };
     match (|| -> Result<_> {
         proc_macro2::fallback::force();
+        let ref mut errors = Errors::new();
         let syntax = syn::parse_file(&source)?;
         let bridge = find_bridge_mod(syntax)?;
         let ref namespace = bridge.namespace;
         let ref apis = syntax::parse_items(bridge.module)?;
         let ref types = Types::collect(apis)?;
-        check::typecheck(namespace, apis, types)?;
+        check::typecheck(errors, namespace, apis, types);
+        errors.propagate()?;
         let out = write::gen(namespace, apis, types, opt, header);
         Ok(out)
     })() {

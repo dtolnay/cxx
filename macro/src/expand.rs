@@ -1,5 +1,6 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::namespace::Namespace;
+use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
     self, check, mangle, Api, Enum, ExternFn, ExternType, Signature, Struct, Type, Types,
@@ -9,6 +10,7 @@ use quote::{format_ident, quote, quote_spanned, ToTokens};
 use syn::{parse_quote, Error, ItemMod, Result, Token};
 
 pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
+    let ref mut errors = Errors::new();
     let ident = &ffi.ident;
     let content = ffi.content.ok_or(Error::new(
         Span::call_site(),
@@ -16,7 +18,8 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
     ))?;
     let ref apis = syntax::parse_items(content.1)?;
     let ref types = Types::collect(apis)?;
-    check::typecheck(namespace, apis, types)?;
+    check::typecheck(errors, namespace, apis, types);
+    errors.propagate()?;
 
     let mut expanded = TokenStream::new();
     let mut hidden = TokenStream::new();
