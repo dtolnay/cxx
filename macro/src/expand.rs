@@ -55,6 +55,7 @@ fn expand(namespace: &Namespace, ffi: ItemMod, apis: &[Api], types: &Types) -> T
             Api::RustFunction(efn) => {
                 hidden.extend(expand_rust_function_shim(namespace, efn, types))
             }
+            Api::TypeAlias(_alias) => unimplemented!(),
         }
     }
 

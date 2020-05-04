@@ -96,6 +96,7 @@ impl<'a> Types<'a> {
                         visit(&mut all, ret);
                     }
                 }
+                Api::TypeAlias(_alias) => unimplemented!(),
             }
         }
 
