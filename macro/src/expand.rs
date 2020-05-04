@@ -9,10 +9,9 @@ use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
 use syn::{parse_quote, Error, ItemMod, Result, Token};
 
-pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
+pub fn bridge(namespace: &Namespace, mut ffi: ItemMod) -> Result<TokenStream> {
     let ref mut errors = Errors::new();
-    let ident = &ffi.ident;
-    let content = ffi.content.ok_or(Error::new(
+    let content = ffi.content.take().ok_or(Error::new(
         Span::call_site(),
         "#[cxx::bridge] module must have inline contents",
     ))?;
@@ -21,6 +20,10 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
     check::typecheck(errors, namespace, apis, types);
     errors.propagate()?;
 
+    Ok(expand(namespace, ffi, apis, types))
+}
+
+fn expand(namespace: &Namespace, ffi: ItemMod, apis: &[Api], types: &Types) -> TokenStream {
     let mut expanded = TokenStream::new();
     let mut hidden = TokenStream::new();
 
@@ -96,15 +99,16 @@ pub fn bridge(namespace: &Namespace, ffi: ItemMod) -> Result<TokenStream> {
         .into_iter()
         .filter(|attr| attr.path.is_ident("doc"));
     let vis = &ffi.vis;
+    let ident = &ffi.ident;
 
-    Ok(quote! {
+    quote! {
         #(#attrs)*
         #[deny(improper_ctypes)]
         #[allow(non_snake_case)]
         #vis mod #ident {
             #expanded
         }
-    })
+    }
 }
 
 fn expand_struct(strct: &Struct) -> TokenStream {
