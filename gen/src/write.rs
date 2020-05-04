@@ -5,7 +5,7 @@ use crate::syntax::namespace::Namespace;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{mangle, Api, Enum, ExternFn, ExternType, Signature, Struct, Type, Types, Var};
 use proc_macro2::Ident;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 pub(super) fn gen(
     namespace: &Namespace,
@@ -46,6 +46,7 @@ pub(super) fn gen(
         }
     }
 
+    let mut cxx_types = HashSet::new();
     let mut methods_for_type = HashMap::new();
     for api in apis {
         if let Api::RustFunction(efn) = api {
@@ -55,6 +56,9 @@ pub(super) fn gen(
                     .or_insert_with(Vec::new)
                     .push(efn);
             }
+        }
+        if let Api::CxxType(enm) = api {
+            cxx_types.insert(&enm.ident);
         }
     }
 
@@ -66,7 +70,11 @@ pub(super) fn gen(
             }
             Api::Enum(enm) => {
                 out.next_section();
-                write_enum(out, enm);
+                if cxx_types.contains(&enm.ident) {
+                    check_enum(out, enm);
+                } else {
+                    write_enum(out, enm);
+                }
             }
             Api::RustType(ety) => {
                 if let Some(methods) = methods_for_type.get(&ety.ident) {
@@ -371,6 +379,34 @@ fn write_enum(out: &mut OutFile, enm: &Enum) {
         writeln!(out, ",");
     }
     writeln!(out, "}};");
+}
+
+fn check_enum(out: &mut OutFile, enm: &Enum) {
+    let discriminants = enm
+        .variants
+        .iter()
+        .scan(None, |prev_discriminant, variant| {
+            let discriminant = variant
+                .discriminant
+                .unwrap_or_else(|| prev_discriminant.map_or(0, |n| n + 1));
+            *prev_discriminant = Some(discriminant);
+            Some(discriminant)
+        });
+    writeln!(
+        out,
+        "static_assert(sizeof({}) == sizeof(uint32_t));",
+        enm.ident
+    );
+    enm.variants
+        .iter()
+        .zip(discriminants)
+        .for_each(|(variant, discriminant)| {
+            writeln!(
+                out,
+                "static_assert({}::{} == {});",
+                enm.ident, variant.ident, discriminant
+            );
+        });
 }
 
 fn write_exception_glue(out: &mut OutFile, apis: &[Api]) {

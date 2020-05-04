@@ -69,7 +69,9 @@ impl<'a> Types<'a> {
                 }
                 Api::CxxType(ety) => {
                     let ident = &ety.ident;
-                    if !type_names.insert(ident) {
+                    // We allow declaring the same type as a shared enum and as a Cxxtype, as this
+                    // means not to emit the C++ enum definition.
+                    if !type_names.insert(ident) && !enums.contains_key(ident) {
                         duplicate_name(cx, ety, ident);
                     }
                     cxx.insert(ident);
