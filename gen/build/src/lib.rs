@@ -45,6 +45,13 @@
 //! $ cxxbridge src/main.rs > path/to/mybridge.cc
 //! ```
 
+#![allow(
+    clippy::inherent_to_string,
+    clippy::needless_doctest_main,
+    clippy::new_without_default,
+    clippy::toplevel_ref_arg
+)]
+
 mod error;
 mod gen;
 mod paths;
