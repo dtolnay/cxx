@@ -88,8 +88,9 @@ where
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.index = self.index + 1;
-        self.v.get(self.index - 1)
+        let next = self.v.get(self.index);
+        self.index += 1;
+        next
     }
 }
 
