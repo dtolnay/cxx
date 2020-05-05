@@ -522,10 +522,6 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     match &efn.ret {
         Some(Type::RustBox(_)) => write!(out, ".into_raw()"),
         Some(Type::UniquePtr(_)) => write!(out, ".release()"),
-        Some(Type::CxxVector(_)) => write!(
-            out,
-            " /* Use RVO to convert to r-value and move construct */"
-        ),
         Some(Type::Str(_)) | Some(Type::SliceRefU8(_)) if !indirect_return => write!(out, ")"),
         _ => {}
     }
