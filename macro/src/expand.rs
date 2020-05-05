@@ -7,7 +7,6 @@ use crate::syntax::{
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
-use std::collections::HashSet;
 use syn::{parse_quote, Error, ItemMod, Result, Token};
 
 pub fn bridge(namespace: &Namespace, mut ffi: ItemMod) -> Result<TokenStream> {
@@ -40,19 +39,13 @@ fn expand(namespace: &Namespace, ffi: ItemMod, apis: &[Api], types: &Types) -> T
         }
     }
 
-    let mut enums = HashSet::new();
-    for api in apis {
-        if let Api::Enum(enm) = api {
-            enums.insert(&enm.ident);
-        }
-    }
     for api in apis {
         match api {
             Api::Include(_) | Api::RustType(_) => {}
             Api::Struct(strct) => expanded.extend(expand_struct(strct)),
             Api::Enum(enm) => expanded.extend(expand_enum(enm)),
             Api::CxxType(ety) => {
-                if !enums.contains(&ety.ident) {
+                if !types.enums.contains_key(&ety.ident) {
                     expanded.extend(expand_cxx_type(ety));
                 }
             }
