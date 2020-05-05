@@ -6,6 +6,7 @@ use crate::syntax::{
 };
 use quote::{format_ident, quote};
 use std::collections::HashSet;
+use std::u32;
 use syn::punctuated::Punctuated;
 use syn::{
     Abi, Error, Expr, ExprLit, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
