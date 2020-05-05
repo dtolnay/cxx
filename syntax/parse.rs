@@ -5,6 +5,7 @@ use crate::syntax::{
     Struct, Ty1, Type, Var, Variant,
 };
 use quote::{format_ident, quote};
+use std::collections::HashSet;
 use syn::punctuated::Punctuated;
 use syn::{
     Abi, Error, Expr, ExprLit, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
@@ -96,16 +97,33 @@ fn parse_enum(item: ItemEnum) -> Result<Api> {
 
     let doc = attrs::parse_doc(&item.attrs)?;
 
-    for variant in &item.variants {
-        match &variant.fields {
+    let mut variants = Vec::new();
+    let mut discriminants = HashSet::new();
+    let mut prev_discriminant = None;
+    for variant in item.variants {
+        match variant.fields {
             Fields::Unit => {}
             _ => {
                 return Err(Error::new_spanned(
                     variant,
                     "enums with data are not supported yet",
-                ))
+                ));
             }
         }
+        if variant.discriminant.is_none() && prev_discriminant.unwrap_or(0) == u32::MAX {
+            return Err(Error::new_spanned(variant, "overflowed on value"));
+        }
+        let discriminant =
+            parse_discriminant(&variant)?.unwrap_or_else(|| prev_discriminant.map_or(0, |n| n + 1));
+        if !discriminants.insert(discriminant) {
+            let msg = format!("discriminant value `{}` already exists", discriminant);
+            return Err(Error::new_spanned(variant, msg));
+        }
+        variants.push(Variant {
+            ident: variant.ident,
+            discriminant: discriminant,
+        });
+        prev_discriminant = Some(discriminant);
     }
 
     Ok(Api::Enum(Enum {
@@ -113,30 +131,20 @@ fn parse_enum(item: ItemEnum) -> Result<Api> {
         enum_token: item.enum_token,
         ident: item.ident,
         brace_token: item.brace_token,
-        variants: item
-            .variants
-            .into_iter()
-            .map(parse_variant)
-            .collect::<Result<_>>()?,
+        variants: variants,
     }))
 }
 
-fn parse_variant(variant: RustVariant) -> Result<Variant> {
+fn parse_discriminant(variant: &RustVariant) -> Result<Option<u32>> {
     match &variant.discriminant {
-        None => Ok(Variant {
-            ident: variant.ident,
-            discriminant: None,
-        }),
+        None => Ok(None),
         Some((
             _,
             Expr::Lit(ExprLit {
                 lit: Lit::Int(n), ..
             }),
         )) => match n.base10_parse() {
-            Ok(val) => Ok(Variant {
-                ident: variant.ident,
-                discriminant: Some(val),
-            }),
+            Ok(val) => Ok(Some(val)),
             Err(_) => Err(Error::new_spanned(
                 variant,
                 "cannot parse enum discriminant as an integer",

@@ -7,9 +7,7 @@ use crate::syntax::{
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
-use std::collections::HashSet;
 use std::fmt::Display;
-use std::u32;
 
 pub(crate) struct Check<'a> {
     namespace: &'a Namespace,
@@ -191,25 +189,6 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
         let span = span_for_enum_error(enm);
         cx.error(span, "enums without any variants are not supported");
     }
-
-    let mut discriminants = HashSet::new();
-    enm.variants
-        .iter()
-        .fold(None, |prev_discriminant, variant| {
-            if variant.discriminant.is_none() && prev_discriminant.unwrap_or(0) == u32::MAX {
-                let msg = format!("overflowed on value after {}", prev_discriminant.unwrap());
-                cx.error(span_for_enum_error(enm), msg);
-                return None;
-            }
-            let discriminant = variant
-                .discriminant
-                .unwrap_or_else(|| prev_discriminant.map_or(0, |n| n + 1));
-            if !discriminants.insert(discriminant) {
-                let msg = format!("discriminant value `{}` already exists", discriminant);
-                cx.error(span_for_enum_error(enm), msg);
-            }
-            Some(discriminant)
-        });
 }
 
 fn check_api_type(cx: &mut Check, ty: &ExternType) {

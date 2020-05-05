@@ -367,12 +367,7 @@ fn write_enum(out: &mut OutFile, enm: &Enum) {
     }
     writeln!(out, "enum class {} : uint32_t {{", enm.ident);
     for variant in &enm.variants {
-        write!(out, "  ");
-        write!(out, "{}", variant.ident);
-        if let Some(discriminant) = &variant.discriminant {
-            write!(out, " = {}", discriminant);
-        }
-        writeln!(out, ",");
+        writeln!(out, "  {} = {},", variant.ident, variant.discriminant);
     }
     writeln!(out, "}};");
 }
@@ -383,18 +378,13 @@ fn check_enum(out: &mut OutFile, enm: &Enum) {
         "static_assert(sizeof({}) == sizeof(uint32_t), \"incorrect size\");",
         enm.ident
     );
-    let mut prev_discriminant = None;
     for variant in &enm.variants {
-        let discriminant = variant
-            .discriminant
-            .unwrap_or_else(|| prev_discriminant.map_or(0, |n| n + 1));
         writeln!(
             out,
             "static_assert(static_cast<uint32_t>({}::{}) == {},
               \"disagrees with the value in #[cxx::bridge]\");",
-            enm.ident, variant.ident, discriminant,
+            enm.ident, variant.ident, variant.discriminant,
         );
-        prev_discriminant = Some(discriminant);
     }
 }
 
