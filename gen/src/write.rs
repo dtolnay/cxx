@@ -380,7 +380,7 @@ fn write_enum(out: &mut OutFile, enm: &Enum) {
 fn check_enum(out: &mut OutFile, enm: &Enum) {
     writeln!(
         out,
-        "static_assert(sizeof({}) == sizeof(uint32_t));",
+        "static_assert(sizeof({}) == sizeof(uint32_t), \"incorrect size\");",
         enm.ident
     );
     let mut prev_discriminant = None;
