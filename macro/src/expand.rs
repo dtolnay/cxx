@@ -44,7 +44,11 @@ fn expand(namespace: &Namespace, ffi: ItemMod, apis: &[Api], types: &Types) -> T
             Api::Include(_) | Api::RustType(_) => {}
             Api::Struct(strct) => expanded.extend(expand_struct(strct)),
             Api::Enum(enm) => expanded.extend(expand_enum(enm)),
-            Api::CxxType(ety) => expanded.extend(expand_cxx_type(ety)),
+            Api::CxxType(ety) => {
+                if !types.enums.contains_key(&ety.ident) {
+                    expanded.extend(expand_cxx_type(ety));
+                }
+            }
             Api::CxxFunction(efn) => {
                 expanded.extend(expand_cxx_function_shim(namespace, efn, types));
             }

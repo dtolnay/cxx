@@ -23,6 +23,11 @@ private:
   std::vector<uint8_t> v;
 };
 
+enum COwnedEnum {
+  CVal1,
+  CVal2,
+};
+
 size_t c_return_primitive();
 Shared c_return_shared();
 rust::Box<R> c_return_box();

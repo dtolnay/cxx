@@ -84,6 +84,15 @@ pub mod ffi {
         fn set2(&mut self, n: usize) -> usize;
     }
 
+    extern "C" {
+        type COwnedEnum;
+    }
+
+    enum COwnedEnum {
+        CVal1,
+        CVal2,
+    }
+
     extern "Rust" {
         type R;
         type R2;

@@ -61,15 +61,18 @@ impl<'a> Types<'a> {
                 }
                 Api::Enum(enm) => {
                     let ident = &enm.ident;
-                    if type_names.insert(ident) {
-                        enums.insert(ident.clone(), enm);
-                    } else {
+                    // We allow declaring the same type as a shared enum and as a Cxxtype, as this
+                    // means not to emit the C++ enum definition.
+                    if !type_names.insert(ident) && !cxx.contains(ident) {
                         duplicate_name(cx, enm, ident);
                     }
+                    enums.insert(ident.clone(), enm);
                 }
                 Api::CxxType(ety) => {
                     let ident = &ety.ident;
-                    if !type_names.insert(ident) {
+                    // We allow declaring the same type as a shared enum and as a Cxxtype, as this
+                    // means not to emit the C++ enum definition.
+                    if !type_names.insert(ident) && !enums.contains_key(ident) {
                         duplicate_name(cx, ety, ident);
                     }
                     cxx.insert(ident);
