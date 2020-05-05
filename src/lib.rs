@@ -350,6 +350,7 @@
     clippy::declare_interior_mutable_const,
     clippy::inherent_to_string,
     clippy::large_enum_variant,
+    clippy::len_without_is_empty,
     clippy::missing_safety_doc,
     clippy::module_inception,
     clippy::needless_doctest_main,
