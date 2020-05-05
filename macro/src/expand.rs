@@ -139,19 +139,13 @@ fn expand_struct(strct: &Struct) -> TokenStream {
 fn expand_enum(enm: &Enum) -> TokenStream {
     let ident = &enm.ident;
     let doc = &enm.doc;
-    let variants = enm
-        .variants
-        .iter()
-        .scan(None, |prev_discriminant, variant| {
-            let variant_ident = &variant.ident;
-            let discriminant = variant
-                .discriminant
-                .unwrap_or_else(|| prev_discriminant.map_or(0, |n| n + 1));
-            *prev_discriminant = Some(discriminant);
-            Some(quote! {
-                pub const #variant_ident: Self = #ident { repr: #discriminant };
-            })
-        });
+    let variants = enm.variants.iter().map(|variant| {
+        let variant_ident = &variant.ident;
+        let discriminant = &variant.discriminant;
+        Some(quote! {
+            pub const #variant_ident: Self = #ident { repr: #discriminant };
+        })
+    });
     quote! {
         #doc
         #[derive(Copy, Clone, PartialEq, Eq)]

@@ -95,7 +95,7 @@ pub struct Receiver {
 
 pub struct Variant {
     pub ident: Ident,
-    pub discriminant: Option<u32>,
+    pub discriminant: u32,
 }
 
 pub enum Type {
