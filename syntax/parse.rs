@@ -122,7 +122,7 @@ fn parse_enum(item: ItemEnum) -> Result<Api> {
         }
         variants.push(Variant {
             ident: variant.ident,
-            discriminant: discriminant,
+            discriminant,
         });
         prev_discriminant = Some(discriminant);
     }
@@ -132,7 +132,7 @@ fn parse_enum(item: ItemEnum) -> Result<Api> {
         enum_token: item.enum_token,
         ident: item.ident,
         brace_token: item.brace_token,
-        variants: variants,
+        variants,
     }))
 }
 
