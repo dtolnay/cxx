@@ -218,7 +218,7 @@ fn r_return_sum(n1: usize, n2: usize) -> usize {
 }
 
 fn r_return_enum(n: u32) -> ffi::Enum {
-    if n <= 0 {
+    if n == 0 {
         ffi::Enum::AVal
     } else if n <= 2020 {
         ffi::Enum::BVal
