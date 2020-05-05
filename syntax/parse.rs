@@ -111,7 +111,7 @@ fn parse_enum(item: ItemEnum) -> Result<Api> {
                 ));
             }
         }
-        if variant.discriminant.is_none() && prev_discriminant.unwrap_or(0) == u32::MAX {
+        if variant.discriminant.is_none() && prev_discriminant == Some(u32::MAX) {
             let msg = format!("discriminant overflow on value after {}", u32::MAX);
             return Err(Error::new_spanned(variant, msg));
         }
