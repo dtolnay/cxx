@@ -1,4 +1,4 @@
-error: overflowed on value
+error: discriminant overflow on value after 4294967295
   --> $DIR/enum_overflows.rs:13:9
    |
 13 |         F,

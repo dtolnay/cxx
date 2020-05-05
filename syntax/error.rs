@@ -18,6 +18,7 @@ pub static ERRORS: &[Error] = &[
     CXXBRIDGE_RESERVED,
     CXX_STRING_BY_VALUE,
     CXX_TYPE_BY_VALUE,
+    DISCRIMINANT_OVERFLOW,
     DOUBLE_UNDERSCORE,
     RUST_TYPE_BY_VALUE,
     USE_NOT_ALLOWED,
@@ -45,6 +46,12 @@ pub static CXX_TYPE_BY_VALUE: Error = Error {
     msg: "C++ type by value is not supported",
     label: None,
     note: Some("hint: wrap it in a UniquePtr<>"),
+};
+
+pub static DISCRIMINANT_OVERFLOW: Error = Error {
+    msg: "discriminant overflow on value after ",
+    label: Some("discriminant overflow"),
+    note: Some("note: explicitly set `= 0` if that is desired outcome"),
 };
 
 pub static DOUBLE_UNDERSCORE: Error = Error {
