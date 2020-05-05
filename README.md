@@ -1,7 +1,7 @@
 CXX &mdash; safe FFI between Rust and C++
 =========================================
 
-[![Build Status](https://api.travis-ci.com/dtolnay/cxx.svg?branch=master)](https://travis-ci.com/dtolnay/cxx)
+[![Build Status](https://img.shields.io/github/workflow/status/dtolnay/cxx/CI/master)](https://github.com/dtolnay/cxx/actions?query=branch%3Amaster)
 [![Latest Version](https://img.shields.io/crates/v/cxx.svg)](https://crates.io/crates/cxx)
 [![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/cxx)
 
