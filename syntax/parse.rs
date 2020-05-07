@@ -164,24 +164,16 @@ fn parse_foreign_mod(cx: &mut Errors, foreign_mod: ItemForeignMod, out: &mut Vec
         Ok(lang) => lang,
         Err(err) => return cx.push(err),
     };
-    let api_type = match lang {
-        Lang::Cxx => Api::CxxType,
-        Lang::Rust => Api::RustType,
-    };
-    let api_function = match lang {
-        Lang::Cxx => Api::CxxFunction,
-        Lang::Rust => Api::RustFunction,
-    };
 
     let mut items = Vec::new();
     for foreign in &foreign_mod.items {
         match foreign {
-            ForeignItem::Type(foreign) => match parse_extern_type(foreign) {
-                Ok(ety) => items.push(api_type(ety)),
+            ForeignItem::Type(foreign) => match parse_extern_type(foreign, lang) {
+                Ok(ety) => items.push(ety),
                 Err(err) => cx.push(err),
             },
             ForeignItem::Fn(foreign) => match parse_extern_fn(foreign, lang) {
-                Ok(efn) => items.push(api_function(efn)),
+                Ok(efn) => items.push(efn),
                 Err(err) => cx.push(err),
             },
             ForeignItem::Macro(foreign) if foreign.mac.path.is_ident("include") => {
@@ -231,18 +223,22 @@ fn parse_lang(abi: Abi) -> Result<Lang> {
     }
 }
 
-fn parse_extern_type(foreign_type: &ForeignItemType) -> Result<ExternType> {
+fn parse_extern_type(foreign_type: &ForeignItemType, lang: Lang) -> Result<Api> {
     let doc = attrs::parse_doc(&foreign_type.attrs)?;
     let type_token = foreign_type.type_token;
     let ident = foreign_type.ident.clone();
-    Ok(ExternType {
+    let api_type = match lang {
+        Lang::Cxx => Api::CxxType,
+        Lang::Rust => Api::RustType,
+    };
+    Ok(api_type(ExternType {
         doc,
         type_token,
         ident,
-    })
+    }))
 }
 
-fn parse_extern_fn(foreign_fn: &ForeignItemFn, lang: Lang) -> Result<ExternFn> {
+fn parse_extern_fn(foreign_fn: &ForeignItemFn, lang: Lang) -> Result<Api> {
     let generics = &foreign_fn.sig.generics;
     if !generics.params.is_empty() || generics.where_clause.is_some() {
         return Err(Error::new_spanned(
@@ -318,8 +314,12 @@ fn parse_extern_fn(foreign_fn: &ForeignItemFn, lang: Lang) -> Result<ExternFn> {
     let ident = foreign_fn.sig.ident.clone();
     let paren_token = foreign_fn.sig.paren_token;
     let semi_token = foreign_fn.semi_token;
+    let api_function = match lang {
+        Lang::Cxx => Api::CxxFunction,
+        Lang::Rust => Api::RustFunction,
+    };
 
-    Ok(ExternFn {
+    Ok(api_function(ExternFn {
         lang,
         doc,
         ident,
@@ -333,7 +333,7 @@ fn parse_extern_fn(foreign_fn: &ForeignItemFn, lang: Lang) -> Result<ExternFn> {
             throws_tokens,
         },
         semi_token,
-    })
+    }))
 }
 
 fn parse_type(ty: &RustType) -> Result<Type> {
