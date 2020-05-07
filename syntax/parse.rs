@@ -2,17 +2,19 @@ use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
     attrs, error, Api, Doc, Enum, ExternFn, ExternType, Lang, Receiver, Ref, Signature, Slice,
-    Struct, Ty1, Type, Var, Variant,
+    Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
+use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use std::collections::HashSet;
 use std::u32;
+use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::{
-    Abi, Error, Expr, ExprLit, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
-    GenericArgument, Ident, Item, ItemEnum, ItemForeignMod, ItemStruct, Lit, Pat, PathArguments,
-    Result, ReturnType, Token, Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
-    Variant as RustVariant,
+    Abi, Attribute, Error, Expr, ExprLit, Fields, FnArg, ForeignItem, ForeignItemFn,
+    ForeignItemType, GenericArgument, Ident, Item, ItemEnum, ItemForeignMod, ItemStruct, Lit, Pat,
+    PathArguments, Result, ReturnType, Token, Type as RustType, TypeBareFn, TypePath,
+    TypeReference, TypeSlice, Variant as RustVariant,
 };
 
 pub mod kw {
@@ -182,6 +184,10 @@ fn parse_foreign_mod(cx: &mut Errors, foreign_mod: ItemForeignMod, out: &mut Vec
                     Err(err) => cx.push(err),
                 }
             }
+            ForeignItem::Verbatim(tokens) => match parse_extern_verbatim(tokens, lang) {
+                Ok(api) => items.push(api),
+                Err(err) => cx.push(err),
+            },
             _ => cx.error(foreign, "unsupported foreign item"),
         }
     }
@@ -334,6 +340,44 @@ fn parse_extern_fn(foreign_fn: &ForeignItemFn, lang: Lang) -> Result<Api> {
         },
         semi_token,
     }))
+}
+
+fn parse_extern_verbatim(tokens: &TokenStream, lang: Lang) -> Result<Api> {
+    // type Alias = crate::path::to::Type;
+    fn parse(input: ParseStream) -> Result<TypeAlias> {
+        let attrs = input.call(Attribute::parse_outer)?;
+        let type_token: Token![type] = match input.parse()? {
+            Some(type_token) => type_token,
+            None => {
+                let span = input.cursor().token_stream();
+                return Err(Error::new_spanned(span, "unsupported foreign item"));
+            }
+        };
+        let ident: Ident = input.parse()?;
+        let eq_token: Token![=] = input.parse()?;
+        let ty: RustType = input.parse()?;
+        let semi_token: Token![;] = input.parse()?;
+        attrs::parse_doc(&attrs)?;
+
+        Ok(TypeAlias {
+            type_token,
+            ident,
+            eq_token,
+            ty,
+            semi_token,
+        })
+    }
+
+    let type_alias = parse.parse2(tokens.clone())?;
+    match lang {
+        Lang::Cxx => Ok(Api::TypeAlias(type_alias)),
+        Lang::Rust => {
+            let (type_token, semi_token) = (type_alias.type_token, type_alias.semi_token);
+            let span = quote!(#type_token #semi_token);
+            let msg = "type alias in extern \"Rust\" block is not supported";
+            Err(Error::new_spanned(span, msg))
+        }
+    }
 }
 
 fn parse_type(ty: &RustType) -> Result<Type> {
