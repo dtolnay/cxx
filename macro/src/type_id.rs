@@ -14,11 +14,11 @@ pub fn expand(arg: LitStr) -> TokenStream {
             ids.push(match ch {
                 'A'..='Z' | 'a'..='z' => {
                     let t = format_ident!("{}", ch);
-                    quote!(::cxx::private::#t)
+                    quote!(::cxx::#t)
                 }
                 '0'..='9' | '_' => {
                     let t = format_ident!("_{}", ch);
-                    quote!(::cxx::private::#t)
+                    quote!(::cxx::#t)
                 }
                 _ => quote!([(); #ch as _]),
             });
