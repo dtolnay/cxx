@@ -389,7 +389,7 @@ pub use crate::cxx_vector::CxxVector;
 pub use crate::exception::Exception;
 pub use crate::extern_type::ExternType;
 pub use crate::unique_ptr::UniquePtr;
-pub use cxxbridge_macro::{bridge};
+pub use cxxbridge_macro::bridge;
 
 /// For use in impls of the `ExternType` trait. See [`ExternType`].
 pub use cxxbridge_macro::type_id;
