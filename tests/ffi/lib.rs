@@ -4,6 +4,8 @@
     clippy::trivially_copy_pass_by_ref
 )]
 
+pub mod module;
+
 use cxx::{CxxString, UniquePtr};
 use std::fmt::{self, Display};
 
@@ -47,7 +49,6 @@ pub mod ffi {
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);
         fn c_take_box(r: Box<R>);
-        fn c_take_unique_ptr(c: UniquePtr<C>);
         fn c_take_ref_r(r: &R);
         fn c_take_ref_c(c: &C);
         fn c_take_str(s: &str);
