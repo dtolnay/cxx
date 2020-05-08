@@ -88,12 +88,16 @@ pub fn bridge(rust_source_file: impl AsRef<Path>) -> cc::Build {
 /// ```
 pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) -> cc::Build {
     let mut build = paths::cc_build();
+    build.cpp(true);
+    build.cpp_link_stdlib(None); // linked via link-cplusplus crate
+
     for path in rust_source_files {
         if let Err(err) = try_generate_bridge(&mut build, path.as_ref()) {
             let _ = writeln!(io::stderr(), "\n\ncxxbridge error: {:?}\n\n", anyhow!(err));
             process::exit(1);
         }
     }
+
     build
 }
 
