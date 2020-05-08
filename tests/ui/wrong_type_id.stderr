@@ -1,0 +1,14 @@
+error[E0271]: type mismatch resolving `<here::StringPiece as cxx::extern_type::ExternType>::Id == (cxx::type_id::f, cxx::type_id::o, cxx::type_id::l, cxx::type_id::l, cxx::type_id::y, (), cxx::type_id::B, cxx::type_id::y, cxx::type_id::t, cxx::type_id::e, cxx::type_id::R, cxx::type_id::a, cxx::type_id::n, cxx::type_id::g, cxx::type_id::e)`
+ --> $DIR/wrong_type_id.rs:8:1
+  |
+8 | #[cxx::bridge(namespace = folly)]
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected a tuple with 15 elements, found one with 17 elements
+  | 
+ ::: $WORKSPACE/src/extern_type.rs:6:41
+  |
+6 | pub fn verify_extern_type<T: ExternType<Id = Id>, Id>() {}
+  |                                         ------- required by this bound in `cxx::extern_type::verify_extern_type`
+  |
+  = note: expected tuple `(cxx::type_id::f, cxx::type_id::o, cxx::type_id::l, cxx::type_id::l, cxx::type_id::y, (), cxx::type_id::B, cxx::type_id::y, cxx::type_id::t, cxx::type_id::e, cxx::type_id::R, cxx::type_id::a, cxx::type_id::n, cxx::type_id::g, cxx::type_id::e)`
+             found tuple `(cxx::type_id::f, cxx::type_id::o, cxx::type_id::l, cxx::type_id::l, cxx::type_id::y, (), cxx::type_id::S, cxx::type_id::t, cxx::type_id::r, cxx::type_id::i, cxx::type_id::n, cxx::type_id::g, cxx::type_id::P, cxx::type_id::i, cxx::type_id::e, cxx::type_id::c, cxx::type_id::e)`
+  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
