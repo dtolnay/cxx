@@ -193,11 +193,12 @@ fn parse_foreign_mod(cx: &mut Errors, foreign_mod: ItemForeignMod, out: &mut Vec
     }
 
     let mut types = items.iter().filter_map(|item| match item {
-        Api::CxxType(ty) | Api::RustType(ty) => Some(ty),
+        Api::CxxType(ty) | Api::RustType(ty) => Some(&ty.ident),
+        Api::TypeAlias(alias) => Some(&alias.ident),
         _ => None,
     });
     if let (Some(single_type), None) = (types.next(), types.next()) {
-        let single_type = single_type.ident.clone();
+        let single_type = single_type.clone();
         for item in &mut items {
             if let Api::CxxFunction(efn) | Api::RustFunction(efn) = item {
                 if let Some(receiver) = &mut efn.receiver {
