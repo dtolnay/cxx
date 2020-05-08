@@ -575,8 +575,13 @@ fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
 fn expand_type_alias_verify(namespace: &Namespace, alias: &TypeAlias) -> TokenStream {
     let ident = &alias.ident;
     let type_id = type_id(namespace, ident);
+    let begin_span = alias.type_token.span;
+    let end_span = alias.semi_token.span;
+    let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_type::<);
+    let end = quote_spanned!(end_span=> >);
+
     quote! {
-        const _: fn() = ::cxx::private::verify_extern_type::<#ident, #type_id>;
+        const _: fn() = #begin #ident, #type_id #end;
     }
 }
 
