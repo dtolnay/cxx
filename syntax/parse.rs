@@ -1,3 +1,4 @@
+use crate::syntax::discriminant::DiscriminantSet;
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
@@ -6,15 +7,12 @@ use crate::syntax::{
 };
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
-use std::collections::HashSet;
-use std::u32;
 use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::{
-    Abi, Attribute, Error, Expr, ExprLit, Fields, FnArg, ForeignItem, ForeignItemFn,
-    ForeignItemType, GenericArgument, Ident, Item, ItemEnum, ItemForeignMod, ItemStruct, Lit, Pat,
-    PathArguments, Result, ReturnType, Token, Type as RustType, TypeBareFn, TypePath,
-    TypeReference, TypeSlice, Variant as RustVariant,
+    Abi, Attribute, Error, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
+    GenericArgument, Ident, Item, ItemEnum, ItemForeignMod, ItemStruct, Pat, PathArguments, Result,
+    ReturnType, Token, Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
 };
 
 pub mod kw {
@@ -108,8 +106,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum) -> Result<Api> {
     let doc = attrs::parse_doc(cx, &item.attrs);
 
     let mut variants = Vec::new();
-    let mut discriminants = HashSet::new();
-    let mut prev_discriminant = None;
+    let mut discriminants = DiscriminantSet::new();
     for variant in item.variants {
         match variant.fields {
             Fields::Unit => {}
@@ -120,21 +117,19 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum) -> Result<Api> {
                 ));
             }
         }
-        if variant.discriminant.is_none() && prev_discriminant == Some(u32::MAX) {
-            let msg = format!("discriminant overflow on value after {}", u32::MAX);
-            return Err(Error::new_spanned(variant, msg));
-        }
-        let discriminant =
-            parse_discriminant(&variant)?.unwrap_or_else(|| prev_discriminant.map_or(0, |n| n + 1));
-        if !discriminants.insert(discriminant) {
-            let msg = format!("discriminant value `{}` already exists", discriminant);
-            return Err(Error::new_spanned(variant, msg));
-        }
+        let expr = variant.discriminant.as_ref().map(|(_, expr)| expr);
+        let try_discriminant = match &expr {
+            Some(lit) => discriminants.insert(lit),
+            None => discriminants.insert_next(),
+        };
+        let discriminant = match try_discriminant {
+            Ok(discriminant) => discriminant,
+            Err(err) => return Err(Error::new_spanned(variant, err)),
+        };
         variants.push(Variant {
             ident: variant.ident,
             discriminant,
         });
-        prev_discriminant = Some(discriminant);
     }
 
     Ok(Api::Enum(Enum {
@@ -144,28 +139,6 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum) -> Result<Api> {
         brace_token: item.brace_token,
         variants,
     }))
-}
-
-fn parse_discriminant(variant: &RustVariant) -> Result<Option<u32>> {
-    match &variant.discriminant {
-        None => Ok(None),
-        Some((
-            _,
-            Expr::Lit(ExprLit {
-                lit: Lit::Int(n), ..
-            }),
-        )) => match n.base10_parse() {
-            Ok(val) => Ok(Some(val)),
-            Err(_) => Err(Error::new_spanned(
-                variant,
-                "cannot parse enum discriminant as an integer",
-            )),
-        },
-        _ => Err(Error::new_spanned(
-            variant,
-            "enums with non-integer literal discriminants are not supported yet",
-        )),
-    }
 }
 
 fn parse_foreign_mod(cx: &mut Errors, foreign_mod: ItemForeignMod, out: &mut Vec<Api>) {

@@ -4,6 +4,7 @@ pub mod atom;
 mod attrs;
 pub mod check;
 mod derive;
+mod discriminant;
 mod doc;
 pub mod error;
 pub mod ident;
@@ -17,6 +18,7 @@ pub mod symbol;
 mod tokens;
 pub mod types;
 
+use self::discriminant::Discriminant;
 use self::parse::kw;
 use proc_macro2::{Ident, Span};
 use syn::punctuated::Punctuated;
@@ -106,7 +108,7 @@ pub struct Receiver {
 
 pub struct Variant {
     pub ident: Ident,
-    pub discriminant: u32,
+    pub discriminant: Discriminant,
 }
 
 pub enum Type {
