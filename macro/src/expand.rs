@@ -3,7 +3,7 @@ use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    self, check, mangle, Api, Enum, ExternFn, ExternType, Signature, Struct, Type, Types,
+    self, check, mangle, Api, Enum, ExternFn, ExternType, Signature, Struct, Type, TypeAlias, Types,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
@@ -46,7 +46,7 @@ fn expand(namespace: &Namespace, ffi: ItemMod, apis: &[Api], types: &Types) -> T
             Api::Enum(enm) => expanded.extend(expand_enum(enm)),
             Api::CxxType(ety) => {
                 if !types.enums.contains_key(&ety.ident) {
-                    expanded.extend(expand_cxx_type(ety));
+                    expanded.extend(expand_cxx_type(namespace, ety));
                 }
             }
             Api::CxxFunction(efn) => {
@@ -54,6 +54,10 @@ fn expand(namespace: &Namespace, ffi: ItemMod, apis: &[Api], types: &Types) -> T
             }
             Api::RustFunction(efn) => {
                 hidden.extend(expand_rust_function_shim(namespace, efn, types))
+            }
+            Api::TypeAlias(alias) => {
+                expanded.extend(expand_type_alias(alias));
+                hidden.extend(expand_type_alias_verify(namespace, alias));
             }
         }
     }
@@ -73,13 +77,13 @@ fn expand(namespace: &Namespace, ffi: ItemMod, apis: &[Api], types: &Types) -> T
             }
         } else if let Type::UniquePtr(ptr) = ty {
             if let Type::Ident(ident) = &ptr.inner {
-                if Atom::from(ident).is_none() {
+                if Atom::from(ident).is_none() && !types.aliases.contains_key(ident) {
                     expanded.extend(expand_unique_ptr(namespace, ident, types));
                 }
             }
         } else if let Type::CxxVector(ptr) = ty {
             if let Type::Ident(ident) = &ptr.inner {
-                if Atom::from(ident).is_none() {
+                if Atom::from(ident).is_none() && !types.aliases.contains_key(ident) {
                     // Generate impl for CxxVector<T> if T is a struct or opaque
                     // C++ type. Impl for primitives is already provided by cxx
                     // crate.
@@ -161,14 +165,20 @@ fn expand_enum(enm: &Enum) -> TokenStream {
     }
 }
 
-fn expand_cxx_type(ety: &ExternType) -> TokenStream {
+fn expand_cxx_type(namespace: &Namespace, ety: &ExternType) -> TokenStream {
     let ident = &ety.ident;
     let doc = &ety.doc;
+    let type_id = type_id(namespace, ident);
+
     quote! {
         #doc
         #[repr(C)]
         pub struct #ident {
             _private: ::cxx::private::Opaque,
+        }
+
+        unsafe impl ::cxx::ExternType for #ident {
+            type Id = #type_id;
         }
     }
 }
@@ -551,6 +561,40 @@ fn expand_rust_function_shim_impl(
             let __fn = concat!(module_path!(), #catch_unwind_label);
             #expr
         }
+    }
+}
+
+fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
+    let ident = &alias.ident;
+    let ty = &alias.ty;
+    quote! {
+        pub type #ident = #ty;
+    }
+}
+
+fn expand_type_alias_verify(namespace: &Namespace, alias: &TypeAlias) -> TokenStream {
+    let ident = &alias.ident;
+    let type_id = type_id(namespace, ident);
+    let begin_span = alias.type_token.span;
+    let end_span = alias.semi_token.span;
+    let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_type::<);
+    let end = quote_spanned!(end_span=> >);
+
+    quote! {
+        const _: fn() = #begin #ident, #type_id #end;
+    }
+}
+
+fn type_id(namespace: &Namespace, ident: &Ident) -> TokenStream {
+    let mut path = String::new();
+    for name in namespace {
+        path += &name.to_string();
+        path += "::";
+    }
+    path += &ident.to_string();
+
+    quote! {
+        ::cxx::type_id!(#path)
     }
 }
 

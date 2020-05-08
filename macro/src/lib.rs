@@ -11,10 +11,11 @@ extern crate proc_macro;
 
 mod expand;
 mod syntax;
+mod type_id;
 
 use crate::syntax::namespace::Namespace;
 use proc_macro::TokenStream;
-use syn::{parse_macro_input, ItemMod};
+use syn::{parse_macro_input, ItemMod, LitStr};
 
 /// `#[cxx::bridge] mod ffi { ... }`
 ///
@@ -43,4 +44,10 @@ pub fn bridge(args: TokenStream, input: TokenStream) -> TokenStream {
     expand::bridge(&namespace, ffi)
         .unwrap_or_else(|err| err.to_compile_error())
         .into()
+}
+
+#[proc_macro]
+pub fn type_id(input: TokenStream) -> TokenStream {
+    let arg = parse_macro_input!(input as LitStr);
+    type_id::expand(arg).into()
 }

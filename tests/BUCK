@@ -6,7 +6,10 @@ rust_test(
 
 rust_library(
     name = "ffi",
-    srcs = ["ffi/lib.rs"],
+    srcs = [
+        "ffi/lib.rs",
+        "ffi/module.rs",
+    ],
     crate = "cxx_test_suite",
     deps = [
         ":impl",
@@ -18,25 +21,33 @@ cxx_library(
     name = "impl",
     srcs = [
         "ffi/tests.cc",
-        ":gen-source",
+        ":gen-lib-source",
+        ":gen-module-source",
     ],
     headers = {
-        "ffi/lib.rs.h": ":gen-header",
+        "ffi/lib.rs.h": ":gen-lib-header",
         "ffi/tests.h": "ffi/tests.h",
     },
     deps = ["//:core"],
 )
 
 genrule(
-    name = "gen-header",
+    name = "gen-lib-header",
     srcs = ["ffi/lib.rs"],
     cmd = "$(exe //:codegen) --header ${SRCS} > ${OUT}",
-    out = "generated.h",
+    out = "lib.rs.h",
 )
 
 genrule(
-    name = "gen-source",
+    name = "gen-lib-source",
     srcs = ["ffi/lib.rs"],
     cmd = "$(exe //:codegen) ${SRCS} > ${OUT}",
-    out = "generated.cc",
+    out = "lib.rs.cc",
+)
+
+genrule(
+    name = "gen-module-source",
+    srcs = ["ffi/module.rs"],
+    cmd = "$(exe //:codegen) ${SRCS} > ${OUT}",
+    out = "module.rs.cc",
 )

@@ -1,7 +1,7 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::set::OrderedSet as Set;
-use crate::syntax::{Api, Derive, Enum, Struct, Type};
+use crate::syntax::{Api, Derive, Enum, Struct, Type, TypeAlias};
 use proc_macro2::Ident;
 use quote::ToTokens;
 use std::collections::{BTreeMap as Map, HashSet as UnorderedSet};
@@ -12,6 +12,7 @@ pub struct Types<'a> {
     pub enums: Map<Ident, &'a Enum>,
     pub cxx: Set<'a, Ident>,
     pub rust: Set<'a, Ident>,
+    pub aliases: Map<Ident, &'a TypeAlias>,
 }
 
 impl<'a> Types<'a> {
@@ -21,6 +22,7 @@ impl<'a> Types<'a> {
         let mut enums = Map::new();
         let mut cxx = Set::new();
         let mut rust = Set::new();
+        let mut aliases = Map::new();
 
         fn visit<'a>(all: &mut Set<'a, Type>, ty: &'a Type) {
             all.insert(ty);
@@ -96,6 +98,14 @@ impl<'a> Types<'a> {
                         visit(&mut all, ret);
                     }
                 }
+                Api::TypeAlias(alias) => {
+                    let ident = &alias.ident;
+                    if !type_names.insert(ident) {
+                        duplicate_name(cx, alias, ident);
+                    }
+                    cxx.insert(ident);
+                    aliases.insert(ident.clone(), alias);
+                }
             }
         }
 
@@ -105,6 +115,7 @@ impl<'a> Types<'a> {
             enums,
             cxx,
             rust,
+            aliases,
         }
     }
 

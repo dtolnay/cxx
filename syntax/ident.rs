@@ -42,6 +42,9 @@ pub(crate) fn check_all(cx: &mut Check, namespace: &Namespace, apis: &[Api]) {
                     check(cx, &arg.ident);
                 }
             }
+            Api::TypeAlias(alias) => {
+                check(cx, &alias.ident);
+            }
         }
     }
 }

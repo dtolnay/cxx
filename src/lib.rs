@@ -345,6 +345,7 @@
 
 #![doc(html_root_url = "https://docs.rs/cxx/0.3.0")]
 #![deny(improper_ctypes)]
+#![allow(non_camel_case_types)]
 #![allow(
     clippy::cognitive_complexity,
     clippy::declare_interior_mutable_const,
@@ -369,6 +370,7 @@ mod macros;
 mod cxx_string;
 mod cxx_vector;
 mod exception;
+mod extern_type;
 mod function;
 mod opaque;
 mod result;
@@ -385,13 +387,18 @@ mod symbols;
 pub use crate::cxx_string::CxxString;
 pub use crate::cxx_vector::CxxVector;
 pub use crate::exception::Exception;
+pub use crate::extern_type::ExternType;
 pub use crate::unique_ptr::UniquePtr;
-pub use cxxbridge_macro::bridge;
+pub use cxxbridge_macro::{bridge};
+
+/// For use in impls of the `ExternType` trait. See [`ExternType`].
+pub use cxxbridge_macro::type_id;
 
 // Not public API.
 #[doc(hidden)]
 pub mod private {
     pub use crate::cxx_vector::VectorElement;
+    pub use crate::extern_type::verify_extern_type;
     pub use crate::function::FatFunction;
     pub use crate::opaque::Opaque;
     pub use crate::result::{r#try, Result};
@@ -401,4 +408,20 @@ pub mod private {
     pub use crate::rust_vec::RustVec;
     pub use crate::unique_ptr::UniquePtrTarget;
     pub use crate::unwind::catch_unwind;
+}
+
+macro_rules! chars {
+    ($($ch:ident)*) => {
+        $(
+            #[doc(hidden)]
+            pub enum $ch {}
+        )*
+    };
+}
+
+chars! {
+    _0 _1 _2 _3 _4 _5 _6 _7 _8 _9
+    A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+    a b c d e f g h i j k l m n o p q r s t u v w x y z
+    __ // underscore
 }

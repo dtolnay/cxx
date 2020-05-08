@@ -20,7 +20,7 @@ use self::parse::kw;
 use proc_macro2::{Ident, Span};
 use syn::punctuated::Punctuated;
 use syn::token::{Brace, Bracket, Paren};
-use syn::{Lifetime, LitStr, Token};
+use syn::{Lifetime, LitStr, Token, Type as RustType};
 
 pub use self::atom::Atom;
 pub use self::doc::Doc;
@@ -35,6 +35,7 @@ pub enum Api {
     CxxFunction(ExternFn),
     RustType(ExternType),
     RustFunction(ExternFn),
+    TypeAlias(TypeAlias),
 }
 
 pub struct ExternType {
@@ -65,6 +66,14 @@ pub struct ExternFn {
     pub doc: Doc,
     pub ident: Ident,
     pub sig: Signature,
+    pub semi_token: Token![;],
+}
+
+pub struct TypeAlias {
+    pub type_token: Token![type],
+    pub ident: Ident,
+    pub eq_token: Token![=],
+    pub ty: RustType,
     pub semi_token: Token![;],
 }
 
