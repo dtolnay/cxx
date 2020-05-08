@@ -1,6 +1,6 @@
 [package]
 name = "cxx"
-version = "0.3.1" # remember to update html_root_url
+version = "0.3.2" # remember to update html_root_url
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 edition = "2018"
 links = "cxxbridge03"
@@ -12,14 +12,14 @@ readme = "README.md"
 exclude = ["/demo-cxx", "/gen", "/syntax", "/third-party"]
 
 [dependencies]
-cxxbridge-macro = { version = "=0.3.1", path = "macro" }
+cxxbridge-macro = { version = "=0.3.2", path = "macro" }
 link-cplusplus = "1.0"
 
 [build-dependencies]
 cc = "1.0.49"
 
 [dev-dependencies]
-cxx-build = { version = "=0.3.1", path = "gen/build" }
+cxx-build = { version = "=0.3.2", path = "gen/build" }
 cxx-test-suite = { version = "0", path = "tests/ffi" }
 rustversion = "1.0"
 trybuild = { version = "1.0.27", features = ["diff"] }
