@@ -369,6 +369,7 @@ mod macros;
 mod cxx_string;
 mod cxx_vector;
 mod exception;
+mod extern_type;
 mod function;
 mod opaque;
 mod result;
@@ -386,6 +387,7 @@ mod symbols;
 pub use crate::cxx_string::CxxString;
 pub use crate::cxx_vector::CxxVector;
 pub use crate::exception::Exception;
+pub use crate::extern_type::ExternType;
 pub use crate::unique_ptr::UniquePtr;
 pub use cxxbridge_macro::{bridge, type_id};
 
@@ -393,6 +395,7 @@ pub use cxxbridge_macro::{bridge, type_id};
 #[doc(hidden)]
 pub mod private {
     pub use crate::cxx_vector::VectorElement;
+    pub use crate::extern_type::verify_extern_type;
     pub use crate::function::FatFunction;
     pub use crate::opaque::Opaque;
     pub use crate::result::{r#try, Result};
