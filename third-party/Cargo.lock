@@ -65,7 +65,7 @@ dependencies = [
 
 [[package]]
 name = "cxx"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "cc",
  "cxx-build",
@@ -78,7 +78,7 @@ dependencies = [
 
 [[package]]
 name = "cxx-build"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "anyhow",
  "cc",
@@ -98,7 +98,7 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-cmd"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "anyhow",
  "codespan-reporting",
@@ -118,7 +118,7 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-macro"
-version = "0.3.0"
+version = "0.3.1"
 dependencies = [
  "cxx",
  "proc-macro2",
@@ -389,9 +389,9 @@ checksum = "826e7639553986605ec5979c7dd957c7895e93eabed50ab2ffa7f6128a75097c"
 
 [[package]]
 name = "vec_map"
-version = "0.8.1"
+version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "05c78687fb1a80548ae3250346c3db86a80a7cdd77bda190189f2d0a0987c81a"
+checksum = "f1bddf1187be692e79c5ffeab891132dfb0f236ed36a43c7ed39f1165ee20191"
 
 [[package]]
 name = "version_check"
