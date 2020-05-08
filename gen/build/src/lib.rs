@@ -62,6 +62,7 @@ use crate::gen::Opt;
 use anyhow::anyhow;
 use std::fs;
 use std::io::{self, Write};
+use std::iter;
 use std::path::Path;
 use std::process;
 
@@ -72,16 +73,31 @@ use std::process;
 /// [`compile`]: https://docs.rs/cc/1.0.49/cc/struct.Build.html#method.compile
 #[must_use]
 pub fn bridge(rust_source_file: impl AsRef<Path>) -> cc::Build {
-    match try_generate_bridge(rust_source_file.as_ref()) {
-        Ok(build) => build,
-        Err(err) => {
+    bridges(iter::once(rust_source_file))
+}
+
+/// `cxx_build::bridge` but for when more than one file contains a
+/// #\[cxx::bridge\] module.
+///
+/// ```no_run
+/// let source_files = vec!["src/main.rs", "src/path/to/other.rs"];
+/// cxx_build::bridges(source_files)
+///     .file("../demo-cxx/demo.cc")
+///     .flag("-std=c++11")
+///     .compile("cxxbridge-demo");
+/// ```
+pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) -> cc::Build {
+    let mut build = paths::cc_build();
+    for path in rust_source_files {
+        if let Err(err) = try_generate_bridge(&mut build, path.as_ref()) {
             let _ = writeln!(io::stderr(), "\n\ncxxbridge error: {:?}\n\n", anyhow!(err));
             process::exit(1);
         }
     }
+    build
 }
 
-fn try_generate_bridge(rust_source_file: &Path) -> Result<cc::Build> {
+fn try_generate_bridge(build: &mut cc::Build, rust_source_file: &Path) -> Result<()> {
     let header = gen::do_generate_header(rust_source_file, Opt::default());
     let header_path = paths::out_with_extension(rust_source_file, ".h")?;
     fs::create_dir_all(header_path.parent().unwrap())?;
@@ -91,7 +107,6 @@ fn try_generate_bridge(rust_source_file: &Path) -> Result<cc::Build> {
     let bridge = gen::do_generate_bridge(rust_source_file, Opt::default());
     let bridge_path = paths::out_with_extension(rust_source_file, ".cc")?;
     fs::write(&bridge_path, bridge)?;
-    let mut build = paths::cc_build();
     build.file(&bridge_path);
 
     let ref cxx_h = paths::include_dir()?.join("rust").join("cxx.h");
@@ -99,5 +114,5 @@ fn try_generate_bridge(rust_source_file: &Path) -> Result<cc::Build> {
     let _ = fs::remove_file(cxx_h);
     let _ = fs::write(cxx_h, gen::include::HEADER);
 
-    Ok(build)
+    Ok(())
 }
