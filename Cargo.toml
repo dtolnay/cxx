@@ -16,7 +16,7 @@ cxxbridge-macro = { version = "=0.3.0", path = "macro" }
 link-cplusplus = "1.0"
 
 [build-dependencies]
-cc = "1.0.49"
+cc = "1.0.52"
 
 [dev-dependencies]
 cxx-build = { version = "=0.3.0", path = "gen/build" }
