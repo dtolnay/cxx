@@ -8,7 +8,10 @@ rust_test(
 
 rust_library(
     name = "cxx_test_suite",
-    srcs = ["ffi/lib.rs"],
+    srcs = [
+        "ffi/lib.rs",
+        "ffi/module.rs",
+    ],
     deps = [
         ":impl",
         "//:cxx",
@@ -19,17 +22,18 @@ cc_library(
     name = "impl",
     srcs = [
         "ffi/tests.cc",
-        ":gen-source",
+        ":gen-lib-source",
+        ":gen-module-source",
     ],
     hdrs = ["ffi/tests.h"],
     deps = [
-        ":include",
+        ":lib-include",
         "//:core",
     ],
 )
 
 genrule(
-    name = "gen-header",
+    name = "gen-lib-header",
     srcs = ["ffi/lib.rs"],
     outs = ["lib.rs.h"],
     cmd = "$(location //:codegen) --header $< > $@",
@@ -37,15 +41,23 @@ genrule(
 )
 
 genrule(
-    name = "gen-source",
+    name = "gen-lib-source",
     srcs = ["ffi/lib.rs"],
-    outs = ["generated.cc"],
+    outs = ["lib.rs.cc"],
     cmd = "$(location //:codegen) $< > $@",
     tools = ["//:codegen"],
 )
 
 cc_library(
-    name = "include",
-    hdrs = [":gen-header"],
+    name = "lib-include",
+    hdrs = [":gen-lib-header"],
     include_prefix = "tests/ffi",
+)
+
+genrule(
+    name = "gen-module-source",
+    srcs = ["ffi/module.rs"],
+    outs = ["module.rs.cc"],
+    cmd = "$(location //:codegen) $< > $@",
+    tools = ["//:codegen"],
 )
