@@ -96,7 +96,13 @@ impl<'a> Types<'a> {
                         visit(&mut all, ret);
                     }
                 }
-                Api::TypeAlias(_alias) => unimplemented!(),
+                Api::TypeAlias(alias) => {
+                    let ident = &alias.ident;
+                    if !type_names.insert(ident) {
+                        duplicate_name(cx, alias, ident);
+                    }
+                    cxx.insert(ident);
+                }
             }
         }
 
