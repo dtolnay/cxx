@@ -971,10 +971,6 @@ fn to_mangled(namespace: &Namespace, ty: &Type) -> String {
 }
 
 fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
-    fn allow_unique_ptr(ident: &Ident) -> bool {
-        Atom::from(ident).is_none()
-    }
-
     out.begin_block("extern \"C\"");
     for ty in types {
         if let Type::RustBox(ty) = ty {
@@ -991,14 +987,14 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
             }
         } else if let Type::UniquePtr(ptr) = ty {
             if let Type::Ident(inner) = &ptr.inner {
-                if allow_unique_ptr(inner) {
+                if Atom::from(inner).is_none() && !types.aliases.contains_key(inner) {
                     out.next_section();
                     write_unique_ptr(out, inner, types);
                 }
             }
         } else if let Type::CxxVector(ptr) = ty {
             if let Type::Ident(inner) = &ptr.inner {
-                if Atom::from(inner).is_none() {
+                if Atom::from(inner).is_none() && !types.aliases.contains_key(inner) {
                     out.next_section();
                     write_cxx_vector(out, ty, inner, types);
                 }

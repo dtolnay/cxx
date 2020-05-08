@@ -77,13 +77,13 @@ fn expand(namespace: &Namespace, ffi: ItemMod, apis: &[Api], types: &Types) -> T
             }
         } else if let Type::UniquePtr(ptr) = ty {
             if let Type::Ident(ident) = &ptr.inner {
-                if Atom::from(ident).is_none() {
+                if Atom::from(ident).is_none() && !types.aliases.contains_key(ident) {
                     expanded.extend(expand_unique_ptr(namespace, ident, types));
                 }
             }
         } else if let Type::CxxVector(ptr) = ty {
             if let Type::Ident(ident) = &ptr.inner {
-                if Atom::from(ident).is_none() {
+                if Atom::from(ident).is_none() && !types.aliases.contains_key(ident) {
                     // Generate impl for CxxVector<T> if T is a struct or opaque
                     // C++ type. Impl for primitives is already provided by cxx
                     // crate.
