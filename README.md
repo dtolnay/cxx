@@ -120,7 +120,7 @@ generators:
 $ cargo expand --manifest-path demo-rs/Cargo.toml
 
    # run C++ code generator and print to stdout
-$ cargo run --manifest-path cmd/Cargo.toml -- demo-rs/src/main.rs
+$ cargo run --manifest-path gen/cmd/Cargo.toml -- demo-rs/src/main.rs
 ```
 
 <br>
