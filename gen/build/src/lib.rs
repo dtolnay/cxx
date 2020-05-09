@@ -16,7 +16,7 @@
 //! fn main() {
 //!     cxx_build::bridge("src/main.rs")
 //!         .file("../demo-cxx/demo.cc")
-//!         .flag("-std=c++11")
+//!         .flag_if_supported("-std=c++11")
 //!         .compile("cxxbridge-demo");
 //!
 //!     println!("cargo:rerun-if-changed=src/main.rs");
@@ -83,7 +83,7 @@ pub fn bridge(rust_source_file: impl AsRef<Path>) -> cc::Build {
 /// let source_files = vec!["src/main.rs", "src/path/to/other.rs"];
 /// cxx_build::bridges(source_files)
 ///     .file("../demo-cxx/demo.cc")
-///     .flag("-std=c++11")
+///     .flag_if_supported("-std=c++11")
 ///     .compile("cxxbridge-demo");
 /// ```
 pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) -> cc::Build {
