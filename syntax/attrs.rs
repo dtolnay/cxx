@@ -13,7 +13,7 @@ pub(super) fn parse_doc(attrs: &[Attribute]) -> Result<Doc> {
 pub(super) fn parse(
     attrs: &[Attribute],
     doc: &mut Doc,
-    mut derives: Option<&mut Vec<Ident>>,
+    mut derives: Option<&mut Vec<Derive>>,
 ) -> Result<()> {
     for attr in attrs {
         if attr.path.is_ident("doc") {
@@ -37,13 +37,17 @@ fn parse_doc_attribute(input: ParseStream) -> Result<LitStr> {
     Ok(lit)
 }
 
-fn parse_derive_attribute(input: ParseStream) -> Result<Vec<Ident>> {
+fn parse_derive_attribute(input: ParseStream) -> Result<Vec<Derive>> {
     input
         .parse_terminated::<Path, Token![,]>(Path::parse_mod_style)?
         .into_iter()
-        .map(|path| match path.get_ident() {
-            Some(ident) if Derive::from(ident).is_some() => Ok(ident.clone()),
-            _ => Err(Error::new_spanned(path, "unsupported derive")),
+        .map(|path| {
+            if let Some(ident) = path.get_ident() {
+                if let Some(derive) = Derive::from(ident) {
+                    return Ok(derive);
+                }
+            }
+            Err(Error::new_spanned(path, "unsupported derive"))
         })
         .collect()
 }

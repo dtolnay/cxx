@@ -46,7 +46,7 @@ pub struct ExternType {
 
 pub struct Struct {
     pub doc: Doc,
-    pub derives: Vec<Ident>,
+    pub derives: Vec<Derive>,
     pub struct_token: Token![struct],
     pub ident: Ident,
     pub brace_token: Brace,

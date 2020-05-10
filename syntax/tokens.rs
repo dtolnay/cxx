@@ -71,11 +71,7 @@ impl ToTokens for Slice {
 
 impl ToTokens for Derive {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let name = match self {
-            Derive::Clone => "Clone",
-            Derive::Copy => "Copy",
-        };
-        Ident::new(name, Span::call_site()).to_tokens(tokens);
+        Ident::new(self.as_ref(), Span::call_site()).to_tokens(tokens);
     }
 }
 
