@@ -25,11 +25,11 @@ pub fn parse_items(cx: &mut Errors, items: Vec<Item>) -> Vec<Api> {
     let mut apis = Vec::new();
     for item in items {
         match item {
-            Item::Struct(item) => match parse_struct(item) {
+            Item::Struct(item) => match parse_struct(cx, item) {
                 Ok(strct) => apis.push(strct),
                 Err(err) => cx.push(err),
             },
-            Item::Enum(item) => match parse_enum(item) {
+            Item::Enum(item) => match parse_enum(cx, item) {
                 Ok(enm) => apis.push(enm),
                 Err(err) => cx.push(err),
             },
@@ -41,7 +41,7 @@ pub fn parse_items(cx: &mut Errors, items: Vec<Item>) -> Vec<Api> {
     apis
 }
 
-fn parse_struct(item: ItemStruct) -> Result<Api> {
+fn parse_struct(cx: &mut Errors, item: ItemStruct) -> Result<Api> {
     let generics = &item.generics;
     if !generics.params.is_empty() || generics.where_clause.is_some() {
         let struct_token = item.struct_token;
@@ -57,12 +57,13 @@ fn parse_struct(item: ItemStruct) -> Result<Api> {
     let mut doc = Doc::new();
     let mut derives = Vec::new();
     attrs::parse(
+        cx,
         &item.attrs,
         attrs::Parser {
             doc: Some(&mut doc),
             derives: Some(&mut derives),
         },
-    )?;
+    );
 
     let fields = match item.fields {
         Fields::Named(fields) => fields,
@@ -91,7 +92,7 @@ fn parse_struct(item: ItemStruct) -> Result<Api> {
     }))
 }
 
-fn parse_enum(item: ItemEnum) -> Result<Api> {
+fn parse_enum(cx: &mut Errors, item: ItemEnum) -> Result<Api> {
     let generics = &item.generics;
     if !generics.params.is_empty() || generics.where_clause.is_some() {
         let enum_token = item.enum_token;
@@ -104,7 +105,7 @@ fn parse_enum(item: ItemEnum) -> Result<Api> {
         ));
     }
 
-    let doc = attrs::parse_doc(&item.attrs)?;
+    let doc = attrs::parse_doc(cx, &item.attrs);
 
     let mut variants = Vec::new();
     let mut discriminants = HashSet::new();
@@ -176,11 +177,11 @@ fn parse_foreign_mod(cx: &mut Errors, foreign_mod: ItemForeignMod, out: &mut Vec
     let mut items = Vec::new();
     for foreign in &foreign_mod.items {
         match foreign {
-            ForeignItem::Type(foreign) => match parse_extern_type(foreign, lang) {
+            ForeignItem::Type(foreign) => match parse_extern_type(cx, foreign, lang) {
                 Ok(ety) => items.push(ety),
                 Err(err) => cx.push(err),
             },
-            ForeignItem::Fn(foreign) => match parse_extern_fn(foreign, lang) {
+            ForeignItem::Fn(foreign) => match parse_extern_fn(cx, foreign, lang) {
                 Ok(efn) => items.push(efn),
                 Err(err) => cx.push(err),
             },
@@ -190,7 +191,7 @@ fn parse_foreign_mod(cx: &mut Errors, foreign_mod: ItemForeignMod, out: &mut Vec
                     Err(err) => cx.push(err),
                 }
             }
-            ForeignItem::Verbatim(tokens) => match parse_extern_verbatim(tokens, lang) {
+            ForeignItem::Verbatim(tokens) => match parse_extern_verbatim(cx, tokens, lang) {
                 Ok(api) => items.push(api),
                 Err(err) => cx.push(err),
             },
@@ -236,8 +237,8 @@ fn parse_lang(abi: Abi) -> Result<Lang> {
     }
 }
 
-fn parse_extern_type(foreign_type: &ForeignItemType, lang: Lang) -> Result<Api> {
-    let doc = attrs::parse_doc(&foreign_type.attrs)?;
+fn parse_extern_type(cx: &mut Errors, foreign_type: &ForeignItemType, lang: Lang) -> Result<Api> {
+    let doc = attrs::parse_doc(cx, &foreign_type.attrs);
     let type_token = foreign_type.type_token;
     let ident = foreign_type.ident.clone();
     let api_type = match lang {
@@ -251,7 +252,7 @@ fn parse_extern_type(foreign_type: &ForeignItemType, lang: Lang) -> Result<Api> 
     }))
 }
 
-fn parse_extern_fn(foreign_fn: &ForeignItemFn, lang: Lang) -> Result<Api> {
+fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> Result<Api> {
     let generics = &foreign_fn.sig.generics;
     if !generics.params.is_empty() || generics.where_clause.is_some() {
         return Err(Error::new_spanned(
@@ -322,7 +323,7 @@ fn parse_extern_fn(foreign_fn: &ForeignItemFn, lang: Lang) -> Result<Api> {
     let mut throws_tokens = None;
     let ret = parse_return_type(&foreign_fn.sig.output, &mut throws_tokens)?;
     let throws = throws_tokens.is_some();
-    let doc = attrs::parse_doc(&foreign_fn.attrs)?;
+    let doc = attrs::parse_doc(cx, &foreign_fn.attrs);
     let fn_token = foreign_fn.sig.fn_token;
     let ident = foreign_fn.sig.ident.clone();
     let paren_token = foreign_fn.sig.paren_token;
@@ -349,9 +350,9 @@ fn parse_extern_fn(foreign_fn: &ForeignItemFn, lang: Lang) -> Result<Api> {
     }))
 }
 
-fn parse_extern_verbatim(tokens: &TokenStream, lang: Lang) -> Result<Api> {
+fn parse_extern_verbatim(cx: &mut Errors, tokens: &TokenStream, lang: Lang) -> Result<Api> {
     // type Alias = crate::path::to::Type;
-    fn parse(input: ParseStream) -> Result<TypeAlias> {
+    let parse = |input: ParseStream| -> Result<TypeAlias> {
         let attrs = input.call(Attribute::parse_outer)?;
         let type_token: Token![type] = match input.parse()? {
             Some(type_token) => type_token,
@@ -364,7 +365,7 @@ fn parse_extern_verbatim(tokens: &TokenStream, lang: Lang) -> Result<Api> {
         let eq_token: Token![=] = input.parse()?;
         let ty: RustType = input.parse()?;
         let semi_token: Token![;] = input.parse()?;
-        attrs::parse_doc(&attrs)?;
+        attrs::parse_doc(cx, &attrs);
 
         Ok(TypeAlias {
             type_token,
@@ -373,7 +374,7 @@ fn parse_extern_verbatim(tokens: &TokenStream, lang: Lang) -> Result<Api> {
             ty,
             semi_token,
         })
-    }
+    };
 
     let type_alias = parse.parse2(tokens.clone())?;
     match lang {
