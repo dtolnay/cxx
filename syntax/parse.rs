@@ -56,7 +56,13 @@ fn parse_struct(item: ItemStruct) -> Result<Api> {
 
     let mut doc = Doc::new();
     let mut derives = Vec::new();
-    attrs::parse(&item.attrs, &mut doc, Some(&mut derives))?;
+    attrs::parse(
+        &item.attrs,
+        attrs::Parser {
+            doc: Some(&mut doc),
+            derives: Some(&mut derives),
+        },
+    )?;
 
     let fields = match item.fields {
         Fields::Named(fields) => fields,

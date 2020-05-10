@@ -1,27 +1,36 @@
 use crate::syntax::{Derive, Doc};
 use proc_macro2::Ident;
-use syn::parse::{ParseStream, Parser};
+use syn::parse::{ParseStream, Parser as _};
 use syn::{Attribute, Error, LitStr, Path, Result, Token};
+
+#[derive(Default)]
+pub struct Parser<'a> {
+    pub doc: Option<&'a mut Doc>,
+    pub derives: Option<&'a mut Vec<Derive>>,
+}
 
 pub(super) fn parse_doc(attrs: &[Attribute]) -> Result<Doc> {
     let mut doc = Doc::new();
-    let derives = None;
-    parse(attrs, &mut doc, derives)?;
+    parse(
+        attrs,
+        Parser {
+            doc: Some(&mut doc),
+            ..Parser::default()
+        },
+    )?;
     Ok(doc)
 }
 
-pub(super) fn parse(
-    attrs: &[Attribute],
-    doc: &mut Doc,
-    mut derives: Option<&mut Vec<Derive>>,
-) -> Result<()> {
+pub(super) fn parse(attrs: &[Attribute], mut parser: Parser) -> Result<()> {
     for attr in attrs {
         if attr.path.is_ident("doc") {
-            let lit = parse_doc_attribute.parse2(attr.tokens.clone())?;
-            doc.push(lit);
-            continue;
+            if let Some(doc) = &mut parser.doc {
+                let lit = parse_doc_attribute.parse2(attr.tokens.clone())?;
+                doc.push(lit);
+                continue;
+            }
         } else if attr.path.is_ident("derive") {
-            if let Some(derives) = &mut derives {
+            if let Some(derives) = &mut parser.derives {
                 derives.extend(attr.parse_args_with(parse_derive_attribute)?);
                 continue;
             }
