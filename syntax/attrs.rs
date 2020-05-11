@@ -88,7 +88,9 @@ fn parse_repr_attribute(input: ParseStream) -> Result<Atom> {
     let ident: Ident = input.parse()?;
     if let Some(atom) = Atom::from(&ident) {
         match atom {
-            U8 | U16 | U32 | U64 | Usize | I8 | I16 | I32 | I64 | Isize => return Ok(atom),
+            U8 | U16 | U32 | U64 | Usize | I8 | I16 | I32 | I64 | Isize if input.is_empty() => {
+                return Ok(atom);
+            }
             _ => {}
         }
     }
