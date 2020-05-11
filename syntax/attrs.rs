@@ -1,5 +1,7 @@
 use crate::syntax::report::Errors;
+use crate::syntax::Atom::{self, *};
 use crate::syntax::{Derive, Doc};
+use proc_macro2::Ident;
 use syn::parse::{ParseStream, Parser as _};
 use syn::{Attribute, Error, LitStr, Path, Result, Token};
 
@@ -7,6 +9,7 @@ use syn::{Attribute, Error, LitStr, Path, Result, Token};
 pub struct Parser<'a> {
     pub doc: Option<&'a mut Doc>,
     pub derives: Option<&'a mut Vec<Derive>>,
+    pub repr: Option<&'a mut Option<Atom>>,
 }
 
 pub(super) fn parse_doc(cx: &mut Errors, attrs: &[Attribute]) -> Doc {
@@ -44,6 +47,16 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
                 }
                 Err(err) => return cx.push(err),
             }
+        } else if attr.path.is_ident("repr") {
+            match attr.parse_args_with(parse_repr_attribute) {
+                Ok(attr) => {
+                    if let Some(repr) = &mut parser.repr {
+                        **repr = Some(attr);
+                        continue;
+                    }
+                }
+                Err(err) => return cx.push(err),
+            }
         }
         return cx.error(attr, "unsupported attribute");
     }
@@ -68,4 +81,19 @@ fn parse_derive_attribute(input: ParseStream) -> Result<Vec<Derive>> {
             Err(Error::new_spanned(path, "unsupported derive"))
         })
         .collect()
+}
+
+fn parse_repr_attribute(input: ParseStream) -> Result<Atom> {
+    let begin = input.cursor();
+    let ident: Ident = input.parse()?;
+    if let Some(atom) = Atom::from(&ident) {
+        match atom {
+            U8 | U16 | U32 | U64 | Usize | I8 | I16 | I32 | I64 | Isize => return Ok(atom),
+            _ => {}
+        }
+    }
+    Err(Error::new_spanned(
+        begin.token_stream(),
+        "unrecognized repr",
+    ))
 }

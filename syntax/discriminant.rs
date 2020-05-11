@@ -20,9 +20,9 @@ pub struct Discriminant {
 }
 
 impl DiscriminantSet {
-    pub fn new() -> Self {
+    pub fn new(repr: Option<Atom>) -> Self {
         DiscriminantSet {
-            repr: None,
+            repr,
             values: BTreeSet::new(),
             previous: None,
         }

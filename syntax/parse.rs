@@ -60,6 +60,7 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct) -> Result<Api> {
         attrs::Parser {
             doc: Some(&mut doc),
             derives: Some(&mut derives),
+            ..Default::default()
         },
     );
 
@@ -103,10 +104,20 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum) -> Result<Api> {
         ));
     }
 
-    let doc = attrs::parse_doc(cx, &item.attrs);
+    let mut doc = Doc::new();
+    let mut repr = None;
+    attrs::parse(
+        cx,
+        &item.attrs,
+        attrs::Parser {
+            doc: Some(&mut doc),
+            repr: Some(&mut repr),
+            ..Default::default()
+        },
+    );
 
     let mut variants = Vec::new();
-    let mut discriminants = DiscriminantSet::new();
+    let mut discriminants = DiscriminantSet::new(repr);
     for variant in item.variants {
         match variant.fields {
             Fields::Unit => {}
