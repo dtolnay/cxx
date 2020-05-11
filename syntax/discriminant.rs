@@ -73,9 +73,9 @@ impl DiscriminantSet {
         }
         let min = *self.values.iter().next().unwrap();
         let max = *self.values.iter().next_back().unwrap();
-        for bounds in &BOUNDS {
-            if bounds.min <= min && max <= bounds.max {
-                return Ok(bounds.repr);
+        for limits in &LIMITS {
+            if limits.min <= min && max <= limits.max {
+                return Ok(limits.repr);
             }
         }
         let msg = "these discriminant values do not fit in any supported enum repr type";
@@ -109,11 +109,11 @@ fn expr_to_discriminant(expr: &Expr) -> Result<(Discriminant, Option<Atom>)> {
 
 fn insert(set: &mut DiscriminantSet, discriminant: Discriminant) -> Result<Discriminant> {
     if let Some(expected_repr) = set.repr {
-        for bounds in &BOUNDS {
-            if bounds.repr != expected_repr {
+        for limits in &LIMITS {
+            if limits.repr != expected_repr {
                 continue;
             }
-            if bounds.min <= discriminant && discriminant <= bounds.max {
+            if limits.min <= discriminant && discriminant <= limits.max {
                 break;
             }
             let msg = format!(
@@ -230,49 +230,49 @@ fn parse_int_suffix(suffix: &str) -> Result<Option<Atom>> {
     Err(Error::new(Span::call_site(), msg))
 }
 
-struct Bounds {
+struct Limits {
     repr: Atom,
     min: Discriminant,
     max: Discriminant,
 }
 
-const BOUNDS: [Bounds; 8] = [
-    Bounds {
+const LIMITS: [Limits; 8] = [
+    Limits {
         repr: U8,
         min: Discriminant::zero(),
         max: Discriminant::pos(std::u8::MAX as u64),
     },
-    Bounds {
+    Limits {
         repr: I8,
         min: Discriminant::neg(std::i8::MIN as i64),
         max: Discriminant::pos(std::i8::MAX as u64),
     },
-    Bounds {
+    Limits {
         repr: U16,
         min: Discriminant::zero(),
         max: Discriminant::pos(std::u16::MAX as u64),
     },
-    Bounds {
+    Limits {
         repr: I16,
         min: Discriminant::neg(std::i16::MIN as i64),
         max: Discriminant::pos(std::i16::MAX as u64),
     },
-    Bounds {
+    Limits {
         repr: U32,
         min: Discriminant::zero(),
         max: Discriminant::pos(std::u32::MAX as u64),
     },
-    Bounds {
+    Limits {
         repr: I32,
         min: Discriminant::neg(std::i32::MIN as i64),
         max: Discriminant::pos(std::i32::MAX as u64),
     },
-    Bounds {
+    Limits {
         repr: U64,
         min: Discriminant::zero(),
         max: Discriminant::pos(std::u64::MAX),
     },
-    Bounds {
+    Limits {
         repr: I64,
         min: Discriminant::neg(std::i64::MIN),
         max: Discriminant::pos(std::i64::MAX as u64),
