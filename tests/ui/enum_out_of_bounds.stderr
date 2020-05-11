@@ -1,0 +1,5 @@
+error: discriminant value `18446744073709551615` is outside the limits of u32
+ --> $DIR/enum_out_of_bounds.rs:5:9
+  |
+5 |         A = 0xFFFF_FFFF_FFFF_FFFF,
+  |         ^^^^^^^^^^^^^^^^^^^^^^^^^
