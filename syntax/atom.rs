@@ -1,5 +1,6 @@
 use crate::syntax::Type;
 use proc_macro2::Ident;
+use std::fmt::{self, Display};
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum Atom {
@@ -41,6 +42,12 @@ impl Atom {
             "String" => Some(RustString),
             _ => None,
         }
+    }
+}
+
+impl Display for Atom {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str(self.as_ref())
     }
 }
 
