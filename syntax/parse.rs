@@ -111,10 +111,8 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum) -> Result<Api> {
         match variant.fields {
             Fields::Unit => {}
             _ => {
-                return Err(Error::new_spanned(
-                    variant,
-                    "enums with data are not supported yet",
-                ));
+                cx.error(variant, "enums with data are not supported yet");
+                break;
             }
         }
         let expr = variant.discriminant.as_ref().map(|(_, expr)| expr);
@@ -124,7 +122,10 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum) -> Result<Api> {
         };
         let discriminant = match try_discriminant {
             Ok(discriminant) => discriminant,
-            Err(err) => return Err(Error::new_spanned(variant, err)),
+            Err(err) => {
+                cx.error(variant, err);
+                break;
+            }
         };
         let expr = variant.discriminant.map(|(_, expr)| expr);
         variants.push(Variant {
@@ -137,13 +138,15 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum) -> Result<Api> {
     let enum_token = item.enum_token;
     let brace_token = item.brace_token;
 
-    let repr = match discriminants.inferred_repr() {
-        Ok(repr) => repr,
+    let mut repr = U8;
+    match discriminants.inferred_repr() {
+        Ok(inferred) => repr = inferred,
         Err(err) => {
             let span = quote_spanned!(brace_token.span=> #enum_token {});
-            return Err(Error::new_spanned(span, err));
+            cx.error(span, err);
+            variants.clear();
         }
-    };
+    }
 
     Ok(Api::Enum(Enum {
         doc,
