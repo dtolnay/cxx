@@ -30,7 +30,14 @@ impl DiscriminantSet {
 
     pub fn insert(&mut self, expr: &Expr) -> Result<Discriminant> {
         let (discriminant, repr) = expr_to_discriminant(expr)?;
-        self.repr = self.repr.or(repr);
+        match (self.repr, repr) {
+            (None, _) => self.repr = repr,
+            (Some(prev), Some(repr)) if prev != repr => {
+                let msg = format!("expected {}, found {}", prev, repr);
+                return Err(Error::new(Span::call_site(), msg));
+            }
+            _ => {}
+        }
         insert(self, discriminant)
     }
 
