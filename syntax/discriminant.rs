@@ -5,6 +5,7 @@ use std::cmp::Ordering;
 use std::collections::BTreeSet;
 use std::fmt::{self, Display};
 use std::str::FromStr;
+use std::u64;
 use syn::{Error, Expr, Lit, Result, Token, UnOp};
 
 pub struct DiscriminantSet {
@@ -239,41 +240,41 @@ const BOUNDS: [Bounds; 8] = [
     Bounds {
         repr: U8,
         min: Discriminant::zero(),
-        max: Discriminant::pos(u8::MAX as u64),
+        max: Discriminant::pos(std::u8::MAX as u64),
     },
     Bounds {
         repr: I8,
-        min: Discriminant::neg(i8::MIN as i64),
-        max: Discriminant::pos(i8::MAX as u64),
+        min: Discriminant::neg(std::i8::MIN as i64),
+        max: Discriminant::pos(std::i8::MAX as u64),
     },
     Bounds {
         repr: U16,
         min: Discriminant::zero(),
-        max: Discriminant::pos(u16::MAX as u64),
+        max: Discriminant::pos(std::u16::MAX as u64),
     },
     Bounds {
         repr: I16,
-        min: Discriminant::neg(i16::MIN as i64),
-        max: Discriminant::pos(i16::MAX as u64),
+        min: Discriminant::neg(std::i16::MIN as i64),
+        max: Discriminant::pos(std::i16::MAX as u64),
     },
     Bounds {
         repr: U32,
         min: Discriminant::zero(),
-        max: Discriminant::pos(u32::MAX as u64),
+        max: Discriminant::pos(std::u32::MAX as u64),
     },
     Bounds {
         repr: I32,
-        min: Discriminant::neg(i32::MIN as i64),
-        max: Discriminant::pos(i32::MAX as u64),
+        min: Discriminant::neg(std::i32::MIN as i64),
+        max: Discriminant::pos(std::i32::MAX as u64),
     },
     Bounds {
         repr: U64,
         min: Discriminant::zero(),
-        max: Discriminant::pos(u64::MAX),
+        max: Discriminant::pos(std::u64::MAX),
     },
     Bounds {
         repr: I64,
-        min: Discriminant::neg(i64::MIN),
-        max: Discriminant::pos(i64::MAX as u64),
+        min: Discriminant::neg(std::i64::MIN),
+        max: Discriminant::pos(std::i64::MAX as u64),
     },
 ];
