@@ -1,3 +1,4 @@
+use crate::syntax::Atom::{self, *};
 use proc_macro2::{Literal, Span, TokenStream};
 use quote::ToTokens;
 use std::collections::HashSet;
@@ -6,6 +7,7 @@ use std::str::FromStr;
 use syn::{Error, Expr, Lit, Result, Token, UnOp};
 
 pub struct DiscriminantSet {
+    repr: Option<Atom>,
     values: HashSet<Discriminant>,
     previous: Option<Discriminant>,
 }
@@ -19,13 +21,15 @@ pub struct Discriminant {
 impl DiscriminantSet {
     pub fn new() -> Self {
         DiscriminantSet {
+            repr: None,
             values: HashSet::new(),
             previous: None,
         }
     }
 
     pub fn insert(&mut self, expr: &Expr) -> Result<Discriminant> {
-        let discriminant = expr_to_discriminant(expr)?;
+        let (discriminant, repr) = expr_to_discriminant(expr)?;
+        self.repr = self.repr.or(repr);
         insert(self, discriminant)
     }
 
@@ -52,18 +56,20 @@ impl DiscriminantSet {
     }
 }
 
-fn expr_to_discriminant(expr: &Expr) -> Result<Discriminant> {
+fn expr_to_discriminant(expr: &Expr) -> Result<(Discriminant, Option<Atom>)> {
     match expr {
         Expr::Lit(expr) => {
             if let Lit::Int(lit) = &expr.lit {
-                return lit.base10_parse::<Discriminant>();
+                let discriminant = lit.base10_parse::<Discriminant>()?;
+                let repr = parse_int_suffix(lit.suffix())?;
+                return Ok((discriminant, repr));
             }
         }
         Expr::Unary(unary) => {
             if let UnOp::Neg(_) = unary.op {
-                let mut discriminant = expr_to_discriminant(&unary.expr)?;
+                let (mut discriminant, repr) = expr_to_discriminant(&unary.expr)?;
                 discriminant.negative ^= true;
-                return Ok(discriminant);
+                return Ok((discriminant, repr));
             }
         }
         _ => {}
@@ -130,4 +136,18 @@ impl FromStr for Discriminant {
             )),
         }
     }
+}
+
+fn parse_int_suffix(suffix: &str) -> Result<Option<Atom>> {
+    if suffix.is_empty() {
+        return Ok(None);
+    }
+    if let Some(atom) = Atom::from_str(suffix) {
+        match atom {
+            U8 | U16 | U32 | U64 | Usize | I8 | I16 | I32 | I64 | Isize => return Ok(Some(atom)),
+            _ => {}
+        }
+    }
+    let msg = format!("unrecognized integer suffix: `{}`", suffix);
+    Err(Error::new(Span::call_site(), msg))
 }

@@ -23,8 +23,12 @@ pub enum Atom {
 
 impl Atom {
     pub fn from(ident: &Ident) -> Option<Self> {
+        Self::from_str(ident.to_string().as_str())
+    }
+
+    pub fn from_str(s: &str) -> Option<Self> {
         use self::Atom::*;
-        match ident.to_string().as_str() {
+        match s {
             "bool" => Some(Bool),
             "u8" => Some(U8),
             "u16" => Some(U16),
