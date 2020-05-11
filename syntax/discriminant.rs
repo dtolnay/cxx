@@ -3,7 +3,7 @@ use quote::ToTokens;
 use std::collections::HashSet;
 use std::fmt::{self, Display};
 use std::str::FromStr;
-use syn::{Error, Expr, Lit, Result};
+use syn::{Error, Expr, Lit, Result, Token, UnOp};
 
 pub struct DiscriminantSet {
     values: HashSet<Discriminant>,
@@ -12,6 +12,7 @@ pub struct DiscriminantSet {
 
 #[derive(Copy, Clone, Hash, Eq, PartialEq)]
 pub struct Discriminant {
+    negative: bool,
     magnitude: u32,
 }
 
@@ -31,6 +32,13 @@ impl DiscriminantSet {
     pub fn insert_next(&mut self) -> Result<Discriminant> {
         let discriminant = match self.previous {
             None => Discriminant::zero(),
+            Some(mut discriminant) if discriminant.negative => {
+                discriminant.magnitude -= 1;
+                if discriminant.magnitude == 0 {
+                    discriminant.negative = false;
+                }
+                discriminant
+            }
             Some(mut discriminant) => {
                 if discriminant.magnitude == u32::MAX {
                     let msg = format!("discriminant overflow on value after {}", u32::MAX);
@@ -45,10 +53,20 @@ impl DiscriminantSet {
 }
 
 fn expr_to_discriminant(expr: &Expr) -> Result<Discriminant> {
-    if let Expr::Lit(expr) = expr {
-        if let Lit::Int(lit) = &expr.lit {
-            return lit.base10_parse::<Discriminant>();
+    match expr {
+        Expr::Lit(expr) => {
+            if let Lit::Int(lit) = &expr.lit {
+                return lit.base10_parse::<Discriminant>();
+            }
         }
+        Expr::Unary(unary) => {
+            if let UnOp::Neg(_) = unary.op {
+                let mut discriminant = expr_to_discriminant(&unary.expr)?;
+                discriminant.negative ^= true;
+                return Ok(discriminant);
+            }
+        }
+        _ => {}
     }
     Err(Error::new_spanned(
         expr,
@@ -68,18 +86,27 @@ fn insert(set: &mut DiscriminantSet, discriminant: Discriminant) -> Result<Discr
 
 impl Discriminant {
     fn zero() -> Self {
-        Discriminant { magnitude: 0 }
+        Discriminant {
+            negative: false,
+            magnitude: 0,
+        }
     }
 }
 
 impl Display for Discriminant {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if self.negative {
+            f.write_str("-")?;
+        }
         Display::fmt(&self.magnitude, f)
     }
 }
 
 impl ToTokens for Discriminant {
     fn to_tokens(&self, tokens: &mut TokenStream) {
+        if self.negative {
+            Token![-](Span::call_site()).to_tokens(tokens);
+        }
         Literal::u32_unsuffixed(self.magnitude).to_tokens(tokens);
     }
 }
@@ -87,9 +114,16 @@ impl ToTokens for Discriminant {
 impl FromStr for Discriminant {
     type Err = Error;
 
-    fn from_str(s: &str) -> Result<Self> {
+    fn from_str(mut s: &str) -> Result<Self> {
+        let negative = s.starts_with('-');
+        if negative {
+            s = &s[1..];
+        }
         match s.parse::<u32>() {
-            Ok(magnitude) => Ok(Discriminant { magnitude }),
+            Ok(magnitude) => Ok(Discriminant {
+                negative,
+                magnitude,
+            }),
             Err(_) => Err(Error::new(
                 Span::call_site(),
                 "discriminant value outside of supported range",
