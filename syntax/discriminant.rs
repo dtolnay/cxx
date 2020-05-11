@@ -32,7 +32,21 @@ impl DiscriminantSet {
     pub fn insert(&mut self, expr: &Expr) -> Result<Discriminant> {
         let (discriminant, repr) = expr_to_discriminant(expr)?;
         match (self.repr, repr) {
-            (None, _) => self.repr = repr,
+            (None, Some(new_repr)) => {
+                if let Some(limits) = Limits::of(new_repr) {
+                    for &past in &self.values {
+                        if limits.min <= past && past <= limits.max {
+                            continue;
+                        }
+                        let msg = format!(
+                            "discriminant value `{}` is outside the limits of {}",
+                            past, new_repr,
+                        );
+                        return Err(Error::new(Span::call_site(), msg));
+                    }
+                }
+                self.repr = Some(new_repr);
+            }
             (Some(prev), Some(repr)) if prev != repr => {
                 let msg = format!("expected {}, found {}", prev, repr);
                 return Err(Error::new(Span::call_site(), msg));
@@ -109,18 +123,14 @@ fn expr_to_discriminant(expr: &Expr) -> Result<(Discriminant, Option<Atom>)> {
 
 fn insert(set: &mut DiscriminantSet, discriminant: Discriminant) -> Result<Discriminant> {
     if let Some(expected_repr) = set.repr {
-        for limits in &LIMITS {
-            if limits.repr != expected_repr {
-                continue;
+        if let Some(limits) = Limits::of(expected_repr) {
+            if discriminant < limits.min || limits.max < discriminant {
+                let msg = format!(
+                    "discriminant value `{}` is outside the limits of {}",
+                    discriminant, expected_repr,
+                );
+                return Err(Error::new(Span::call_site(), msg));
             }
-            if limits.min <= discriminant && discriminant <= limits.max {
-                break;
-            }
-            let msg = format!(
-                "discriminant value `{}` is outside the limits of {}",
-                discriminant, expected_repr,
-            );
-            return Err(Error::new(Span::call_site(), msg));
         }
     }
     if set.values.insert(discriminant) {
@@ -230,10 +240,22 @@ fn parse_int_suffix(suffix: &str) -> Result<Option<Atom>> {
     Err(Error::new(Span::call_site(), msg))
 }
 
+#[derive(Copy, Clone)]
 struct Limits {
     repr: Atom,
     min: Discriminant,
     max: Discriminant,
+}
+
+impl Limits {
+    fn of(repr: Atom) -> Option<Limits> {
+        for limits in &LIMITS {
+            if limits.repr == repr {
+                return Some(*limits);
+            }
+        }
+        None
+    }
 }
 
 const LIMITS: [Limits; 8] = [
