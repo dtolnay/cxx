@@ -44,9 +44,26 @@ impl Atom {
     }
 }
 
-impl PartialEq<Atom> for Ident {
-    fn eq(&self, atom: &Atom) -> bool {
-        Atom::from(self) == Some(*atom)
+impl AsRef<str> for Atom {
+    fn as_ref(&self) -> &str {
+        use self::Atom::*;
+        match self {
+            Bool => "bool",
+            U8 => "u8",
+            U16 => "u16",
+            U32 => "u32",
+            U64 => "u64",
+            Usize => "usize",
+            I8 => "i8",
+            I16 => "i16",
+            I32 => "i32",
+            I64 => "i64",
+            Isize => "isize",
+            F32 => "f32",
+            F64 => "f64",
+            CxxString => "CxxString",
+            RustString => "String",
+        }
     }
 }
 
