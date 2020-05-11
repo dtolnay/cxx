@@ -1,6 +1,6 @@
 use crate::syntax::atom::Atom::*;
 use crate::syntax::{
-    Derive, Enum, ExternFn, ExternType, Receiver, Ref, Signature, Slice, Struct, Ty1, Type,
+    Atom, Derive, Enum, ExternFn, ExternType, Receiver, Ref, Signature, Slice, Struct, Ty1, Type,
     TypeAlias, Var,
 };
 use proc_macro2::{Ident, Span, TokenStream};
@@ -70,6 +70,12 @@ impl ToTokens for Slice {
 }
 
 impl ToTokens for Derive {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        Ident::new(self.as_ref(), Span::call_site()).to_tokens(tokens);
+    }
+}
+
+impl ToTokens for Atom {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         Ident::new(self.as_ref(), Span::call_site()).to_tokens(tokens);
     }

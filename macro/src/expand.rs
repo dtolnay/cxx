@@ -143,6 +143,7 @@ fn expand_struct(strct: &Struct) -> TokenStream {
 fn expand_enum(enm: &Enum) -> TokenStream {
     let ident = &enm.ident;
     let doc = &enm.doc;
+    let repr = enm.repr;
     let variants = enm.variants.iter().map(|variant| {
         let variant_ident = &variant.ident;
         let discriminant = &variant.discriminant;
@@ -155,7 +156,7 @@ fn expand_enum(enm: &Enum) -> TokenStream {
         #[derive(Copy, Clone, PartialEq, Eq)]
         #[repr(transparent)]
         pub struct #ident {
-            pub repr: u32,
+            pub repr: #repr,
         }
 
         #[allow(non_upper_case_globals)]
