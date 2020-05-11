@@ -6,7 +6,7 @@ use crate::syntax::{
     Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
+use quote::{format_ident, quote, quote_spanned};
 use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::{
@@ -134,12 +134,24 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum) -> Result<Api> {
         });
     }
 
+    let enum_token = item.enum_token;
+    let brace_token = item.brace_token;
+
+    let repr = match discriminants.inferred_repr() {
+        Ok(repr) => repr,
+        Err(err) => {
+            let span = quote_spanned!(brace_token.span=> #enum_token {});
+            return Err(Error::new_spanned(span, err));
+        }
+    };
+
     Ok(Api::Enum(Enum {
         doc,
-        enum_token: item.enum_token,
+        enum_token,
         ident: item.ident,
-        brace_token: item.brace_token,
+        brace_token,
         variants,
+        repr,
     }))
 }
 

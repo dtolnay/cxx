@@ -1,18 +1,19 @@
 use crate::syntax::Atom::{self, *};
 use proc_macro2::{Literal, Span, TokenStream};
 use quote::ToTokens;
-use std::collections::HashSet;
+use std::cmp::Ordering;
+use std::collections::BTreeSet;
 use std::fmt::{self, Display};
 use std::str::FromStr;
 use syn::{Error, Expr, Lit, Result, Token, UnOp};
 
 pub struct DiscriminantSet {
     repr: Option<Atom>,
-    values: HashSet<Discriminant>,
+    values: BTreeSet<Discriminant>,
     previous: Option<Discriminant>,
 }
 
-#[derive(Copy, Clone, Hash, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Discriminant {
     negative: bool,
     magnitude: u32,
@@ -22,7 +23,7 @@ impl DiscriminantSet {
     pub fn new() -> Self {
         DiscriminantSet {
             repr: None,
-            values: HashSet::new(),
+            values: BTreeSet::new(),
             previous: None,
         }
     }
@@ -53,6 +54,24 @@ impl DiscriminantSet {
             }
         };
         insert(self, discriminant)
+    }
+
+    pub fn inferred_repr(&self) -> Result<Atom> {
+        if let Some(repr) = self.repr {
+            return Ok(repr);
+        }
+        if self.values.is_empty() {
+            return Ok(U8);
+        }
+        let min = *self.values.iter().next().unwrap();
+        let max = *self.values.iter().next_back().unwrap();
+        for bounds in &BOUNDS {
+            if bounds.min <= min && max <= bounds.max {
+                return Ok(bounds.repr);
+            }
+        }
+        let msg = "these discriminant values do not fit in any supported enum repr type";
+        Err(Error::new(Span::call_site(), msg))
     }
 }
 
@@ -154,6 +173,23 @@ impl FromStr for Discriminant {
                 "discriminant value outside of supported range",
             )),
         }
+    }
+}
+
+impl Ord for Discriminant {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (self.negative, other.negative) {
+            (true, true) => self.magnitude.cmp(&other.magnitude).reverse(),
+            (true, false) => Ordering::Less, // negative < positive
+            (false, true) => Ordering::Greater, // positive > negative
+            (false, false) => self.magnitude.cmp(&other.magnitude),
+        }
+    }
+}
+
+impl PartialOrd for Discriminant {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
     }
 }
 
