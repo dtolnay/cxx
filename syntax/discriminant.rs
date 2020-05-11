@@ -91,10 +91,29 @@ fn insert(set: &mut DiscriminantSet, discriminant: Discriminant) -> Result<Discr
 }
 
 impl Discriminant {
-    fn zero() -> Self {
+    const fn zero() -> Self {
         Discriminant {
             negative: false,
             magnitude: 0,
+        }
+    }
+
+    const fn pos(u: u32) -> Self {
+        Discriminant {
+            negative: false,
+            magnitude: u,
+        }
+    }
+
+    const fn neg(i: i32) -> Self {
+        Discriminant {
+            negative: i < 0,
+            // This is `i.abs() as u32` but without overflow on MIN. Uses the
+            // fact that MIN.wrapping_abs() wraps back to MIN whose binary
+            // representation is 1<<31, and thus the `as u32` conversion
+            // produces 1<<31 too which happens to be the correct unsigned
+            // magnitude.
+            magnitude: i.wrapping_abs() as u32,
         }
     }
 }
@@ -151,3 +170,42 @@ fn parse_int_suffix(suffix: &str) -> Result<Option<Atom>> {
     let msg = format!("unrecognized integer suffix: `{}`", suffix);
     Err(Error::new(Span::call_site(), msg))
 }
+
+struct Bounds {
+    repr: Atom,
+    min: Discriminant,
+    max: Discriminant,
+}
+
+const BOUNDS: [Bounds; 6] = [
+    Bounds {
+        repr: U8,
+        min: Discriminant::zero(),
+        max: Discriminant::pos(u8::MAX as u32),
+    },
+    Bounds {
+        repr: I8,
+        min: Discriminant::neg(i8::MIN as i32),
+        max: Discriminant::pos(i8::MAX as u32),
+    },
+    Bounds {
+        repr: U16,
+        min: Discriminant::zero(),
+        max: Discriminant::pos(u16::MAX as u32),
+    },
+    Bounds {
+        repr: I16,
+        min: Discriminant::neg(i16::MIN as i32),
+        max: Discriminant::pos(i16::MAX as u32),
+    },
+    Bounds {
+        repr: U32,
+        min: Discriminant::zero(),
+        max: Discriminant::pos(u32::MAX),
+    },
+    Bounds {
+        repr: I32,
+        min: Discriminant::neg(i32::MIN),
+        max: Discriminant::pos(i32::MAX as u32),
+    },
+];
