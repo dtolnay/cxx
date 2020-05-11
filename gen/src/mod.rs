@@ -1,5 +1,5 @@
-// Functionality that is shared between the cxx::generate_bridge entry point and
-// the cmd.
+// Functionality that is shared between the cxx_build::bridge entry point and
+// the cxxbridge CLI command.
 
 mod error;
 mod find;
