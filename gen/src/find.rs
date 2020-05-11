@@ -4,7 +4,14 @@ use quote::quote;
 use syn::{Attribute, File, Item};
 
 pub(super) fn find_bridge_mod(syntax: File) -> Result<Input> {
-    for item in syntax.items {
+    match scan(syntax.items)? {
+        Some(input) => Ok(input),
+        None => Err(Error::NoBridgeMod),
+    }
+}
+
+fn scan(items: Vec<Item>) -> Result<Option<Input>> {
+    for item in items {
         if let Item::Mod(item) = item {
             for attr in &item.attrs {
                 let path = &attr.path;
@@ -19,12 +26,17 @@ pub(super) fn find_bridge_mod(syntax: File) -> Result<Input> {
                         }
                     };
                     let namespace = parse_args(attr)?;
-                    return Ok(Input { namespace, module });
+                    return Ok(Some(Input { namespace, module }));
+                }
+            }
+            if let Some(module) = item.content {
+                if let Some(input) = scan(module.1)? {
+                    return Ok(Some(input));
                 }
             }
         }
     }
-    Err(Error::NoBridgeMod)
+    Ok(None)
 }
 
 fn parse_args(attr: &Attribute) -> syn::Result<Namespace> {
