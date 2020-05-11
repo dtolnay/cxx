@@ -1,6 +1,5 @@
 use crate::syntax::report::Errors;
 use crate::syntax::{Derive, Doc};
-use proc_macro2::Ident;
 use syn::parse::{ParseStream, Parser as _};
 use syn::{Attribute, Error, LitStr, Path, Result, Token};
 
@@ -69,23 +68,4 @@ fn parse_derive_attribute(input: ParseStream) -> Result<Vec<Derive>> {
             Err(Error::new_spanned(path, "unsupported derive"))
         })
         .collect()
-}
-
-impl Derive {
-    pub fn from(ident: &Ident) -> Option<Self> {
-        match ident.to_string().as_str() {
-            "Clone" => Some(Derive::Clone),
-            "Copy" => Some(Derive::Copy),
-            _ => None,
-        }
-    }
-}
-
-impl AsRef<str> for Derive {
-    fn as_ref(&self) -> &str {
-        match self {
-            Derive::Clone => "Clone",
-            Derive::Copy => "Copy",
-        }
-    }
 }

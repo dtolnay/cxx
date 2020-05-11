@@ -3,6 +3,7 @@
 pub mod atom;
 mod attrs;
 pub mod check;
+mod derive;
 mod doc;
 pub mod error;
 pub mod ident;
@@ -23,6 +24,7 @@ use syn::token::{Brace, Bracket, Paren};
 use syn::{Lifetime, LitStr, Token, Type as RustType};
 
 pub use self::atom::Atom;
+pub use self::derive::Derive;
 pub use self::doc::Doc;
 pub use self::parse::parse_items;
 pub use self::types::Types;
@@ -144,10 +146,4 @@ pub struct Slice {
 pub enum Lang {
     Cxx,
     Rust,
-}
-
-#[derive(Copy, Clone, PartialEq)]
-pub enum Derive {
-    Clone,
-    Copy,
 }
