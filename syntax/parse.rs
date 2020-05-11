@@ -126,9 +126,11 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum) -> Result<Api> {
             Ok(discriminant) => discriminant,
             Err(err) => return Err(Error::new_spanned(variant, err)),
         };
+        let expr = variant.discriminant.map(|(_, expr)| expr);
         variants.push(Variant {
             ident: variant.ident,
             discriminant,
+            expr,
         });
     }
 

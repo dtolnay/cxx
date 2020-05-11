@@ -23,7 +23,7 @@ use self::parse::kw;
 use proc_macro2::{Ident, Span};
 use syn::punctuated::Punctuated;
 use syn::token::{Brace, Bracket, Paren};
-use syn::{Lifetime, LitStr, Token, Type as RustType};
+use syn::{Expr, Lifetime, LitStr, Token, Type as RustType};
 
 pub use self::atom::Atom;
 pub use self::derive::Derive;
@@ -109,6 +109,7 @@ pub struct Receiver {
 pub struct Variant {
     pub ident: Ident,
     pub discriminant: Discriminant,
+    pub expr: Option<Expr>,
 }
 
 pub enum Type {
