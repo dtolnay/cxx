@@ -10,6 +10,8 @@ repository = "https://github.com/dtolnay/cxx"
 documentation = "https://docs.rs/cxx"
 readme = "README.md"
 exclude = ["/demo-cxx", "/gen", "/syntax", "/third-party"]
+keywords = ["ffi"]
+categories = ["development-tools::ffi", "api-bindings"]
 
 [dependencies]
 cxxbridge-macro = { version = "=0.3.2", path = "macro" }
