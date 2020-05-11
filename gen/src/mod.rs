@@ -2,6 +2,7 @@
 // the cmd.
 
 mod error;
+mod find;
 pub(super) mod include;
 pub(super) mod out;
 mod write;
@@ -10,10 +11,9 @@ use self::error::{format_err, Error, Result};
 use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::{self, check, Types};
-use quote::quote;
 use std::fs;
 use std::path::Path;
-use syn::{Attribute, File, Item};
+use syn::Item;
 
 struct Input {
     namespace: Namespace,
@@ -45,7 +45,7 @@ fn generate(path: &Path, opt: Opt, header: bool) -> Vec<u8> {
         proc_macro2::fallback::force();
         let ref mut errors = Errors::new();
         let syntax = syn::parse_file(&source)?;
-        let bridge = find_bridge_mod(syntax)?;
+        let bridge = find::find_bridge_mod(syntax)?;
         let ref namespace = bridge.namespace;
         let ref apis = syntax::parse_items(errors, bridge.module);
         let ref types = Types::collect(errors, apis);
@@ -57,37 +57,5 @@ fn generate(path: &Path, opt: Opt, header: bool) -> Vec<u8> {
     })() {
         Ok(out) => out.content(),
         Err(err) => format_err(path, &source, err),
-    }
-}
-
-fn find_bridge_mod(syntax: File) -> Result<Input> {
-    for item in syntax.items {
-        if let Item::Mod(item) = item {
-            for attr in &item.attrs {
-                let path = &attr.path;
-                if quote!(#path).to_string() == "cxx :: bridge" {
-                    let module = match item.content {
-                        Some(module) => module.1,
-                        None => {
-                            return Err(Error::Syn(syn::Error::new_spanned(
-                                item,
-                                Error::OutOfLineMod,
-                            )));
-                        }
-                    };
-                    let namespace = parse_args(attr)?;
-                    return Ok(Input { namespace, module });
-                }
-            }
-        }
-    }
-    Err(Error::NoBridgeMod)
-}
-
-fn parse_args(attr: &Attribute) -> syn::Result<Namespace> {
-    if attr.tokens.is_empty() {
-        Ok(Namespace::none())
-    } else {
-        attr.parse_args()
     }
 }
