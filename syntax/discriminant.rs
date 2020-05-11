@@ -16,7 +16,7 @@ pub struct DiscriminantSet {
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Discriminant {
     negative: bool,
-    magnitude: u32,
+    magnitude: u64,
 }
 
 impl DiscriminantSet {
@@ -52,8 +52,8 @@ impl DiscriminantSet {
                 discriminant
             }
             Some(mut discriminant) => {
-                if discriminant.magnitude == u32::MAX {
-                    let msg = format!("discriminant overflow on value after {}", u32::MAX);
+                if discriminant.magnitude == u64::MAX {
+                    let msg = format!("discriminant overflow on value after {}", u64::MAX);
                     return Err(Error::new(Span::call_site(), msg));
                 }
                 discriminant.magnitude += 1;
@@ -139,22 +139,22 @@ impl Discriminant {
         }
     }
 
-    const fn pos(u: u32) -> Self {
+    const fn pos(u: u64) -> Self {
         Discriminant {
             negative: false,
             magnitude: u,
         }
     }
 
-    const fn neg(i: i32) -> Self {
+    const fn neg(i: i64) -> Self {
         Discriminant {
             negative: i < 0,
-            // This is `i.abs() as u32` but without overflow on MIN. Uses the
+            // This is `i.abs() as u64` but without overflow on MIN. Uses the
             // fact that MIN.wrapping_abs() wraps back to MIN whose binary
-            // representation is 1<<31, and thus the `as u32` conversion
-            // produces 1<<31 too which happens to be the correct unsigned
+            // representation is 1<<63, and thus the `as u64` conversion
+            // produces 1<<63 too which happens to be the correct unsigned
             // magnitude.
-            magnitude: i.wrapping_abs() as u32,
+            magnitude: i.wrapping_abs() as u64,
         }
     }
 }
@@ -173,7 +173,7 @@ impl ToTokens for Discriminant {
         if self.negative {
             Token![-](Span::call_site()).to_tokens(tokens);
         }
-        Literal::u32_unsuffixed(self.magnitude).to_tokens(tokens);
+        Literal::u64_unsuffixed(self.magnitude).to_tokens(tokens);
     }
 }
 
@@ -185,7 +185,7 @@ impl FromStr for Discriminant {
         if negative {
             s = &s[1..];
         }
-        match s.parse::<u32>() {
+        match s.parse::<u64>() {
             Ok(magnitude) => Ok(Discriminant {
                 negative,
                 magnitude,
@@ -235,35 +235,45 @@ struct Bounds {
     max: Discriminant,
 }
 
-const BOUNDS: [Bounds; 6] = [
+const BOUNDS: [Bounds; 8] = [
     Bounds {
         repr: U8,
         min: Discriminant::zero(),
-        max: Discriminant::pos(u8::MAX as u32),
+        max: Discriminant::pos(u8::MAX as u64),
     },
     Bounds {
         repr: I8,
-        min: Discriminant::neg(i8::MIN as i32),
-        max: Discriminant::pos(i8::MAX as u32),
+        min: Discriminant::neg(i8::MIN as i64),
+        max: Discriminant::pos(i8::MAX as u64),
     },
     Bounds {
         repr: U16,
         min: Discriminant::zero(),
-        max: Discriminant::pos(u16::MAX as u32),
+        max: Discriminant::pos(u16::MAX as u64),
     },
     Bounds {
         repr: I16,
-        min: Discriminant::neg(i16::MIN as i32),
-        max: Discriminant::pos(i16::MAX as u32),
+        min: Discriminant::neg(i16::MIN as i64),
+        max: Discriminant::pos(i16::MAX as u64),
     },
     Bounds {
         repr: U32,
         min: Discriminant::zero(),
-        max: Discriminant::pos(u32::MAX),
+        max: Discriminant::pos(u32::MAX as u64),
     },
     Bounds {
         repr: I32,
-        min: Discriminant::neg(i32::MIN),
-        max: Discriminant::pos(i32::MAX as u32),
+        min: Discriminant::neg(i32::MIN as i64),
+        max: Discriminant::pos(i32::MAX as u64),
+    },
+    Bounds {
+        repr: U64,
+        min: Discriminant::zero(),
+        max: Discriminant::pos(u64::MAX),
+    },
+    Bounds {
+        repr: I64,
+        min: Discriminant::neg(i64::MIN),
+        max: Discriminant::pos(i64::MAX as u64),
     },
 ];
