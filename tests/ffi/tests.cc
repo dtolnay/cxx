@@ -107,10 +107,10 @@ size_t c_return_identity(size_t n) { return n; }
 
 size_t c_return_sum(size_t n1, size_t n2) { return n1 + n2; }
 
-Enum c_return_enum(uint32_t n) {
-  if (n <= static_cast<uint32_t>(Enum::AVal)) {
+Enum c_return_enum(uint16_t n) {
+  if (n <= static_cast<uint16_t>(Enum::AVal)) {
     return Enum::AVal;
-  } else if (n <= static_cast<uint32_t>(Enum::BVal)) {
+  } else if (n <= static_cast<uint16_t>(Enum::BVal)) {
     return Enum::BVal;
   } else {
     return Enum::CVal;

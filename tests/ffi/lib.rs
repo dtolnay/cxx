@@ -44,7 +44,7 @@ pub mod ffi {
         fn c_return_ref_rust_vec(c: &C) -> &Vec<u8>;
         fn c_return_identity(_: usize) -> usize;
         fn c_return_sum(_: usize, _: usize) -> usize;
-        fn c_return_enum(n: u32) -> Enum;
+        fn c_return_enum(n: u16) -> Enum;
 
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);
@@ -89,6 +89,7 @@ pub mod ffi {
         type COwnedEnum;
     }
 
+    #[repr(u32)]
     enum COwnedEnum {
         CVal1,
         CVal2,

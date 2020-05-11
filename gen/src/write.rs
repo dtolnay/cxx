@@ -365,7 +365,9 @@ fn write_enum(out: &mut OutFile, enm: &Enum) {
     for line in enm.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
-    writeln!(out, "enum class {} : uint32_t {{", enm.ident);
+    write!(out, "enum class {} : ", enm.ident);
+    write_atom(out, enm.repr);
+    writeln!(out, " {{");
     for variant in &enm.variants {
         writeln!(out, "  {} = {},", variant.ident, variant.discriminant);
     }
@@ -373,16 +375,15 @@ fn write_enum(out: &mut OutFile, enm: &Enum) {
 }
 
 fn check_enum(out: &mut OutFile, enm: &Enum) {
-    writeln!(
-        out,
-        "static_assert(sizeof({}) == sizeof(uint32_t), \"incorrect size\");",
-        enm.ident
-    );
+    write!(out, "static_assert(sizeof({}) == sizeof(", enm.ident);
+    write_atom(out, enm.repr);
+    writeln!(out, "), \"incorrect size\");");
     for variant in &enm.variants {
+        write!(out, "static_assert(static_cast<");
+        write_atom(out, enm.repr);
         writeln!(
             out,
-            "static_assert(static_cast<uint32_t>({}::{}) == {},
-              \"disagrees with the value in #[cxx::bridge]\");",
+            ">({}::{}) == {}, \"disagrees with the value in #[cxx::bridge]\");",
             enm.ident, variant.ident, variant.discriminant,
         );
     }
@@ -849,21 +850,7 @@ fn write_extern_arg(out: &mut OutFile, arg: &Var, types: &Types) {
 fn write_type(out: &mut OutFile, ty: &Type) {
     match ty {
         Type::Ident(ident) => match Atom::from(ident) {
-            Some(Bool) => write!(out, "bool"),
-            Some(U8) => write!(out, "uint8_t"),
-            Some(U16) => write!(out, "uint16_t"),
-            Some(U32) => write!(out, "uint32_t"),
-            Some(U64) => write!(out, "uint64_t"),
-            Some(Usize) => write!(out, "size_t"),
-            Some(I8) => write!(out, "int8_t"),
-            Some(I16) => write!(out, "int16_t"),
-            Some(I32) => write!(out, "int32_t"),
-            Some(I64) => write!(out, "int64_t"),
-            Some(Isize) => write!(out, "::rust::isize"),
-            Some(F32) => write!(out, "float"),
-            Some(F64) => write!(out, "double"),
-            Some(CxxString) => write!(out, "::std::string"),
-            Some(RustString) => write!(out, "::rust::String"),
+            Some(atom) => write_atom(out, atom),
             None => write!(out, "{}", ident),
         },
         Type::RustBox(ty) => {
@@ -919,6 +906,26 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write!(out, ")>");
         }
         Type::Void(_) => unreachable!(),
+    }
+}
+
+fn write_atom(out: &mut OutFile, atom: Atom) {
+    match atom {
+        Bool => write!(out, "bool"),
+        U8 => write!(out, "uint8_t"),
+        U16 => write!(out, "uint16_t"),
+        U32 => write!(out, "uint32_t"),
+        U64 => write!(out, "uint64_t"),
+        Usize => write!(out, "size_t"),
+        I8 => write!(out, "int8_t"),
+        I16 => write!(out, "int16_t"),
+        I32 => write!(out, "int32_t"),
+        I64 => write!(out, "int64_t"),
+        Isize => write!(out, "::rust::isize"),
+        F32 => write!(out, "float"),
+        F64 => write!(out, "double"),
+        CxxString => write!(out, "::std::string"),
+        RustString => write!(out, "::rust::String"),
     }
 }
 
