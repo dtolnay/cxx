@@ -61,7 +61,11 @@ impl Extend<String> for Includes {
 impl Display for Includes {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for include in &self.custom {
-            writeln!(f, "#include \"{}\"", include.escape_default())?;
+            if include.starts_with('<') && include.ends_with('>') {
+                writeln!(f, "#include {}", include)?;
+            } else {
+                writeln!(f, "#include \"{}\"", include.escape_default())?;
+            }
         }
         if self.array {
             writeln!(f, "#include <array>")?;
