@@ -13,6 +13,11 @@ exclude = ["/demo-cxx", "/gen", "/syntax", "/third-party"]
 keywords = ["ffi"]
 categories = ["development-tools::ffi", "api-bindings"]
 
+[features]
+default = [] # c++11
+"c++14" = []
+"c++17" = []
+
 [dependencies]
 cxxbridge-macro = { version = "=0.3.2", path = "macro" }
 link-cplusplus = "1.0"
