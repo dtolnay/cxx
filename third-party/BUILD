@@ -136,7 +136,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.19/src/**"]),
+    srcs = glob(["vendor/syn-1.0.20/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
