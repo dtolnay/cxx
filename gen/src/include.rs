@@ -47,8 +47,8 @@ impl Includes {
         Includes::default()
     }
 
-    pub fn insert(&mut self, include: String) {
-        self.custom.push(include);
+    pub fn insert(&mut self, include: impl AsRef<str>) {
+        self.custom.push(include.as_ref().to_owned());
     }
 }
 
