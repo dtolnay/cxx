@@ -1,6 +1,7 @@
 cxx_library(
     name = "demo-cxx",
     srcs = ["demo.cc"],
+    compiler_flags = ["-std=c++14"],
     visibility = ["PUBLIC"],
     deps = [
         ":include",

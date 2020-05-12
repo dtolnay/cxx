@@ -1,6 +1,7 @@
 cc_library(
     name = "demo-cxx",
     srcs = ["demo.cc"],
+    copts = ["-std=c++14"],
     visibility = ["//visibility:public"],
     deps = [
         ":include",
