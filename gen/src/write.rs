@@ -24,7 +24,7 @@ pub(super) fn gen(
     out.include.extend(opt.include);
     for api in apis {
         if let Api::Include(include) = api {
-            out.include.insert(include.value());
+            out.include.insert(include);
         }
     }
 

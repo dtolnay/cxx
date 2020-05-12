@@ -23,7 +23,7 @@ use self::parse::kw;
 use proc_macro2::{Ident, Span};
 use syn::punctuated::Punctuated;
 use syn::token::{Brace, Bracket, Paren};
-use syn::{Expr, Lifetime, LitStr, Token, Type as RustType};
+use syn::{Expr, Lifetime, Token, Type as RustType};
 
 pub use self::atom::Atom;
 pub use self::derive::Derive;
@@ -32,7 +32,7 @@ pub use self::parse::parse_items;
 pub use self::types::Types;
 
 pub enum Api {
-    Include(LitStr),
+    Include(String),
     Struct(Struct),
     Enum(Enum),
     CxxType(ExternType),

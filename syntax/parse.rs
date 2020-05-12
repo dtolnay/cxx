@@ -5,14 +5,14 @@ use crate::syntax::{
     attrs, error, Api, Doc, Enum, ExternFn, ExternType, Lang, Receiver, Ref, Signature, Slice,
     Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
-use proc_macro2::TokenStream;
+use proc_macro2::{TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
 use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::{
     Abi, Attribute, Error, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
-    GenericArgument, Ident, Item, ItemEnum, ItemForeignMod, ItemStruct, Pat, PathArguments, Result,
-    ReturnType, Token, Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
+    GenericArgument, Ident, Item, ItemEnum, ItemForeignMod, ItemStruct, LitStr, Pat, PathArguments,
+    Result, ReturnType, Token, Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
 };
 
 pub mod kw {
@@ -187,7 +187,7 @@ fn parse_foreign_mod(cx: &mut Errors, foreign_mod: ItemForeignMod, out: &mut Vec
                 Err(err) => cx.push(err),
             },
             ForeignItem::Macro(foreign) if foreign.mac.path.is_ident("include") => {
-                match foreign.mac.parse_body() {
+                match foreign.mac.parse_body_with(parse_include) {
                     Ok(include) => items.push(Api::Include(include)),
                     Err(err) => cx.push(err),
                 }
@@ -387,6 +387,38 @@ fn parse_extern_verbatim(cx: &mut Errors, tokens: &TokenStream, lang: Lang) -> R
             Err(Error::new_spanned(span, msg))
         }
     }
+}
+
+fn parse_include(input: ParseStream) -> Result<String> {
+    if input.peek(LitStr) {
+        return Ok(input.parse::<LitStr>()?.value());
+    }
+
+    if input.peek(Token![<]) {
+        let mut path = String::new();
+        input.parse::<Token![<]>()?;
+        path.push('<');
+        while !input.is_empty() && !input.peek(Token![>]) {
+            let token: TokenTree = input.parse()?;
+            match token {
+                TokenTree::Ident(token) => path += &token.to_string(),
+                TokenTree::Literal(token)
+                    if token
+                        .to_string()
+                        .starts_with(|ch: char| ch.is_ascii_digit()) =>
+                {
+                    path += &token.to_string();
+                }
+                TokenTree::Punct(token) => path.push(token.as_char()),
+                _ => return Err(Error::new(token.span(), "unexpected token in include path")),
+            }
+        }
+        input.parse::<Token![>]>()?;
+        path.push('>');
+        return Ok(path);
+    }
+
+    Err(input.error("expected \"quoted/path/to\" or <bracketed/path/to>"))
 }
 
 fn parse_type(ty: &RustType) -> Result<Type> {
