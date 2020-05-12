@@ -25,7 +25,7 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-2.33.0/src/**"]),
+    srcs = glob(["vendor/clap-2.33.1/src/**"]),
     edition = "2015",
     deps = [
         ":bitflags",
