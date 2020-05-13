@@ -98,7 +98,7 @@ public:
   Slice() noexcept : repr(Repr{reinterpret_cast<const T *>(this), 0}) {}
   Slice(const Slice<T> &) noexcept = default;
 
-  Slice(const T *s, size_t size) : repr(Repr{s, size}) {}
+  Slice(const T *s, size_t size) noexcept : repr(Repr{s, size}) {}
 
   Slice &operator=(Slice<T> other) noexcept {
     this->repr = other.repr;
