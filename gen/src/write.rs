@@ -249,15 +249,15 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
         writeln!(out, "struct unsafe_bitcopy_t;");
     }
 
-    write_header_section(out, needs_rust_string, "CXXBRIDGE03_RUST_STRING");
-    write_header_section(out, needs_rust_str, "CXXBRIDGE03_RUST_STR");
-    write_header_section(out, needs_rust_slice, "CXXBRIDGE03_RUST_SLICE");
-    write_header_section(out, needs_rust_box, "CXXBRIDGE03_RUST_BOX");
-    write_header_section(out, needs_rust_vec, "CXXBRIDGE03_RUST_VEC");
-    write_header_section(out, needs_rust_fn, "CXXBRIDGE03_RUST_FN");
-    write_header_section(out, needs_rust_error, "CXXBRIDGE03_RUST_ERROR");
-    write_header_section(out, needs_rust_isize, "CXXBRIDGE03_RUST_ISIZE");
-    write_header_section(out, needs_unsafe_bitcopy, "CXXBRIDGE03_RUST_BITCOPY");
+    include::write(out, needs_rust_string, "CXXBRIDGE03_RUST_STRING");
+    include::write(out, needs_rust_str, "CXXBRIDGE03_RUST_STR");
+    include::write(out, needs_rust_slice, "CXXBRIDGE03_RUST_SLICE");
+    include::write(out, needs_rust_box, "CXXBRIDGE03_RUST_BOX");
+    include::write(out, needs_rust_vec, "CXXBRIDGE03_RUST_VEC");
+    include::write(out, needs_rust_fn, "CXXBRIDGE03_RUST_FN");
+    include::write(out, needs_rust_error, "CXXBRIDGE03_RUST_ERROR");
+    include::write(out, needs_rust_isize, "CXXBRIDGE03_RUST_ISIZE");
+    include::write(out, needs_unsafe_bitcopy, "CXXBRIDGE03_RUST_BITCOPY");
 
     if needs_manually_drop {
         out.next_section();
@@ -309,18 +309,6 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
     }
 
     out.end_block("namespace rust");
-}
-
-fn write_header_section(out: &mut OutFile, needed: bool, section: &str) {
-    let section = include::get(section);
-    if needed {
-        out.next_section();
-        for line in section.lines() {
-            if !line.trim_start().starts_with("//") {
-                writeln!(out, "{}", line);
-            }
-        }
-    }
 }
 
 fn write_struct(out: &mut OutFile, strct: &Struct) {
