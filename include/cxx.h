@@ -15,13 +15,7 @@
 namespace rust {
 inline namespace cxxbridge03 {
 
-#ifndef CXXBRIDGE03_RUST_BITCOPY
-#define CXXBRIDGE03_RUST_BITCOPY
-struct unsafe_bitcopy_t {
-  explicit unsafe_bitcopy_t() = default;
-};
-constexpr unsafe_bitcopy_t unsafe_bitcopy{};
-#endif // CXXBRIDGE03_RUST_BITCOPY
+struct unsafe_bitcopy_t;
 
 #ifndef CXXBRIDGE03_RUST_STRING
 #define CXXBRIDGE03_RUST_STRING
@@ -91,23 +85,18 @@ private:
 #endif // CXXBRIDGE03_RUST_STR
 
 #ifndef CXXBRIDGE03_RUST_SLICE
-#define CXXBRIDGE03_RUST_SLICE
 template <typename T>
 class Slice final {
 public:
-  Slice() noexcept : repr(Repr{reinterpret_cast<const T *>(this), 0}) {}
-  Slice(const Slice<T> &) noexcept = default;
+  Slice() noexcept;
+  Slice(const Slice<T> &) noexcept;
+  Slice(const T *, size_t count) noexcept;
 
-  Slice(const T *s, size_t size) noexcept : repr(Repr{s, size}) {}
+  Slice &operator=(Slice<T>) noexcept;
 
-  Slice &operator=(Slice<T> other) noexcept {
-    this->repr = other.repr;
-    return *this;
-  }
-
-  const T *data() const noexcept { return this->repr.ptr; }
-  size_t size() const noexcept { return this->repr.len; }
-  size_t length() const noexcept { return this->repr.len; }
+  const T *data() const noexcept;
+  size_t size() const noexcept;
+  size_t length() const noexcept;
 
   // Repr is PRIVATE; must not be used other than by our generated code.
   //
@@ -118,8 +107,8 @@ public:
     const T *ptr;
     size_t len;
   };
-  Slice(Repr repr_) noexcept : repr(repr_) {}
-  explicit operator Repr() noexcept { return this->repr; }
+  Slice(Repr) noexcept;
+  explicit operator Repr() noexcept;
 
 private:
   Repr repr;
@@ -127,7 +116,6 @@ private:
 #endif // CXXBRIDGE03_RUST_SLICE
 
 #ifndef CXXBRIDGE03_RUST_BOX
-#define CXXBRIDGE03_RUST_BOX
 template <typename T>
 class Box final {
 public:
@@ -136,70 +124,32 @@ public:
       typename std::add_pointer<typename std::add_const<T>::type>::type;
   using pointer = typename std::add_pointer<T>::type;
 
-  Box(const Box &other) : Box(*other) {}
-  Box(Box &&other) noexcept : ptr(other.ptr) { other.ptr = nullptr; }
-  explicit Box(const T &val) {
-    this->uninit();
-    ::new (this->ptr) T(val);
-  }
-  explicit Box(T &&val) {
-    this->uninit();
-    ::new (this->ptr) T(std::move(val));
-  }
-  Box &operator=(const Box &other) {
-    if (this != &other) {
-      if (this->ptr) {
-        **this = *other;
-      } else {
-        this->uninit();
-        ::new (this->ptr) T(*other);
-      }
-    }
-    return *this;
-  }
-  Box &operator=(Box &&other) noexcept {
-    if (this->ptr) {
-      this->drop();
-    }
-    this->ptr = other.ptr;
-    other.ptr = nullptr;
-    return *this;
-  }
-  ~Box() noexcept {
-    if (this->ptr) {
-      this->drop();
-    }
-  }
+  Box(const Box &);
+  Box(Box &&) noexcept;
+  ~Box() noexcept;
 
-  const T *operator->() const noexcept { return this->ptr; }
-  const T &operator*() const noexcept { return *this->ptr; }
-  T *operator->() noexcept { return this->ptr; }
-  T &operator*() noexcept { return *this->ptr; }
+  explicit Box(const T &);
+  explicit Box(T &&);
+
+  Box &operator=(const Box &);
+  Box &operator=(Box &&) noexcept;
+
+  const T *operator->() const noexcept;
+  const T &operator*() const noexcept;
+  T *operator->() noexcept;
+  T &operator*() noexcept;
 
   template <typename... Fields>
-  static Box in_place(Fields &&... fields) {
-    Box box;
-    box.uninit();
-    ::new (box.ptr) T{std::forward<Fields>(fields)...};
-    return box;
-  }
+  static Box in_place(Fields &&...);
 
   // Important: requires that `raw` came from an into_raw call. Do not pass a
   // pointer from `new` or any other source.
-  static Box from_raw(T *raw) noexcept {
-    Box box;
-    box.ptr = raw;
-    return box;
-  }
+  static Box from_raw(T *) noexcept;
 
-  T *into_raw() noexcept {
-    T *raw = this->ptr;
-    this->ptr = nullptr;
-    return raw;
-  }
+  T *into_raw() noexcept;
 
 private:
-  Box() noexcept {}
+  Box() noexcept;
   void uninit() noexcept;
   void drop() noexcept;
   T *ptr;
@@ -207,30 +157,19 @@ private:
 #endif // CXXBRIDGE03_RUST_BOX
 
 #ifndef CXXBRIDGE03_RUST_VEC
-#define CXXBRIDGE03_RUST_VEC
 template <typename T>
 class Vec final {
 public:
   using value_type = T;
 
   Vec() noexcept;
-  Vec(Vec &&other) noexcept {
-    this->repr = other.repr;
-    new (&other) Vec();
-  }
-  ~Vec() noexcept { this->drop(); }
+  Vec(Vec &&) noexcept;
+  ~Vec() noexcept;
 
-  Vec &operator=(Vec &&other) noexcept {
-    if (this != &other) {
-      this->drop();
-      this->repr = other.repr;
-      new (&other) Vec();
-    }
-    return *this;
-  }
+  Vec &operator=(Vec &&) noexcept;
 
   size_t size() const noexcept;
-  bool empty() const noexcept { return size() == 0; }
+  bool empty() const noexcept;
   const T *data() const noexcept;
 
   class const_iterator {
@@ -243,27 +182,12 @@ public:
         typename std::add_const<T>::type>::type;
     using iterator_category = std::forward_iterator_tag;
 
-    const T &operator*() const noexcept {
-      return *static_cast<const T *>(this->pos);
-    }
-    const T *operator->() const noexcept {
-      return static_cast<const T *>(this->pos);
-    }
-    const_iterator &operator++() noexcept {
-      this->pos = static_cast<const uint8_t *>(this->pos) + this->stride;
-      return *this;
-    }
-    const_iterator operator++(int) noexcept {
-      auto ret = const_iterator(*this);
-      this->pos = static_cast<const uint8_t *>(this->pos) + this->stride;
-      return ret;
-    }
-    bool operator==(const const_iterator &other) const noexcept {
-      return this->pos == other.pos;
-    }
-    bool operator!=(const const_iterator &other) const noexcept {
-      return this->pos != other.pos;
-    }
+    const T &operator*() const noexcept;
+    const T *operator->() const noexcept;
+    const_iterator &operator++() noexcept;
+    const_iterator operator++(int) noexcept;
+    bool operator==(const const_iterator &) const noexcept;
+    bool operator!=(const const_iterator &) const noexcept;
 
   private:
     friend class Vec;
@@ -271,20 +195,11 @@ public:
     size_t stride;
   };
 
-  const_iterator begin() const noexcept {
-    const_iterator it;
-    it.pos = this->data();
-    it.stride = this->stride();
-    return it;
-  }
-  const_iterator end() const noexcept {
-    const_iterator it = this->begin();
-    it.pos = static_cast<const uint8_t *>(it.pos) + it.stride * this->size();
-    return it;
-  }
+  const_iterator begin() const noexcept;
+  const_iterator end() const noexcept;
 
   // Internal API only intended for the cxxbridge code generator.
-  Vec(unsafe_bitcopy_t, const Vec &bits) noexcept : repr(bits.repr) {}
+  Vec(unsafe_bitcopy_t, const Vec &) noexcept;
 
 private:
   static size_t stride() noexcept;
@@ -353,6 +268,11 @@ using fn = Fn<Signature, Throws>;
 template <typename Signature>
 using try_fn = TryFn<Signature>;
 
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// end public API, begin implementation details
+
 template <typename Ret, typename... Args, bool Throws>
 Ret Fn<Ret(Args...), Throws>::operator()(Args... args) const noexcept(!Throws) {
   return (*this->trampoline)(std::move(args)..., this->fn);
@@ -362,6 +282,239 @@ template <typename Ret, typename... Args, bool Throws>
 Fn<Ret(Args...), Throws> Fn<Ret(Args...), Throws>::operator*() const noexcept {
   return *this;
 }
+
+#ifndef CXXBRIDGE03_RUST_BITCOPY
+#define CXXBRIDGE03_RUST_BITCOPY
+struct unsafe_bitcopy_t {
+  explicit unsafe_bitcopy_t() = default;
+};
+
+constexpr unsafe_bitcopy_t unsafe_bitcopy{};
+#endif // CXXBRIDGE03_RUST_BITCOPY
+
+#ifndef CXXBRIDGE03_RUST_SLICE
+#define CXXBRIDGE03_RUST_SLICE
+template <typename T>
+Slice<T>::Slice() noexcept : repr(Repr{reinterpret_cast<const T *>(this), 0}) {}
+
+template <typename T>
+Slice<T>::Slice(const Slice<T> &) noexcept = default;
+
+template <typename T>
+Slice<T>::Slice(const T *s, size_t count) noexcept : repr(Repr{s, count}) {}
+
+template <typename T>
+Slice<T> &Slice<T>::operator=(Slice<T> other) noexcept {
+  this->repr = other.repr;
+  return *this;
+}
+
+template <typename T>
+const T *Slice<T>::data() const noexcept {
+  return this->repr.ptr;
+}
+
+template <typename T>
+size_t Slice<T>::size() const noexcept {
+  return this->repr.len;
+}
+
+template <typename T>
+size_t Slice<T>::length() const noexcept {
+  return this->repr.len;
+}
+
+template <typename T>
+Slice<T>::Slice(Repr repr_) noexcept : repr(repr_) {}
+
+template <typename T>
+Slice<T>::operator Repr() noexcept {
+  return this->repr;
+}
+#endif // CXXBRIDGE03_RUST_SLICE
+
+#ifndef CXXBRIDGE03_RUST_BOX
+#define CXXBRIDGE03_RUST_BOX
+template <typename T>
+Box<T>::Box(const Box &other) : Box(*other) {}
+
+template <typename T>
+Box<T>::Box(Box &&other) noexcept : ptr(other.ptr) {
+  other.ptr = nullptr;
+}
+
+template <typename T>
+Box<T>::Box(const T &val) {
+  this->uninit();
+  ::new (this->ptr) T(val);
+}
+
+template <typename T>
+Box<T>::Box(T &&val) {
+  this->uninit();
+  ::new (this->ptr) T(std::move(val));
+}
+
+template <typename T>
+Box<T>::~Box() noexcept {
+  if (this->ptr) {
+    this->drop();
+  }
+}
+
+template <typename T>
+Box<T> &Box<T>::operator=(const Box &other) {
+  if (this != &other) {
+    if (this->ptr) {
+      **this = *other;
+    } else {
+      this->uninit();
+      ::new (this->ptr) T(*other);
+    }
+  }
+  return *this;
+}
+
+template <typename T>
+Box<T> &Box<T>::operator=(Box &&other) noexcept {
+  if (this->ptr) {
+    this->drop();
+  }
+  this->ptr = other.ptr;
+  other.ptr = nullptr;
+  return *this;
+}
+
+template <typename T>
+const T *Box<T>::operator->() const noexcept {
+  return this->ptr;
+}
+
+template <typename T>
+const T &Box<T>::operator*() const noexcept {
+  return *this->ptr;
+}
+
+template <typename T>
+T *Box<T>::operator->() noexcept {
+  return this->ptr;
+}
+
+template <typename T>
+T &Box<T>::operator*() noexcept {
+  return *this->ptr;
+}
+
+template <typename T>
+template <typename... Fields>
+Box<T> Box<T>::in_place(Fields &&... fields) {
+  Box box;
+  box.uninit();
+  ::new (box.ptr) T{std::forward<Fields>(fields)...};
+  return box;
+}
+
+template <typename T>
+Box<T> Box<T>::from_raw(T *raw) noexcept {
+  Box box;
+  box.ptr = raw;
+  return box;
+}
+
+template <typename T>
+T *Box<T>::into_raw() noexcept {
+  T *raw = this->ptr;
+  this->ptr = nullptr;
+  return raw;
+}
+
+template <typename T>
+Box<T>::Box() noexcept {}
+#endif // CXXBRIDGE03_RUST_BOX
+
+#ifndef CXXBRIDGE03_RUST_VEC
+#define CXXBRIDGE03_RUST_VEC
+template <typename T>
+Vec<T>::Vec(Vec &&other) noexcept {
+  this->repr = other.repr;
+  new (&other) Vec();
+}
+
+template <typename T>
+Vec<T>::~Vec() noexcept {
+  this->drop();
+}
+
+template <typename T>
+Vec<T> &Vec<T>::operator=(Vec &&other) noexcept {
+  if (this != &other) {
+    this->drop();
+    this->repr = other.repr;
+    new (&other) Vec();
+  }
+  return *this;
+}
+
+template <typename T>
+bool Vec<T>::empty() const noexcept {
+  return size() == 0;
+}
+
+template <typename T>
+const T &Vec<T>::const_iterator::operator*() const noexcept {
+  return *static_cast<const T *>(this->pos);
+}
+
+template <typename T>
+const T *Vec<T>::const_iterator::operator->() const noexcept {
+  return static_cast<const T *>(this->pos);
+}
+
+template <typename T>
+typename Vec<T>::const_iterator &Vec<T>::const_iterator::operator++() noexcept {
+  this->pos = static_cast<const uint8_t *>(this->pos) + this->stride;
+  return *this;
+}
+
+template <typename T>
+typename Vec<T>::const_iterator
+Vec<T>::const_iterator::operator++(int) noexcept {
+  auto ret = const_iterator(*this);
+  this->pos = static_cast<const uint8_t *>(this->pos) + this->stride;
+  return ret;
+}
+
+template <typename T>
+bool Vec<T>::const_iterator::operator==(const const_iterator &other) const
+    noexcept {
+  return this->pos == other.pos;
+}
+
+template <typename T>
+bool Vec<T>::const_iterator::operator!=(const const_iterator &other) const
+    noexcept {
+  return this->pos != other.pos;
+}
+
+template <typename T>
+typename Vec<T>::const_iterator Vec<T>::begin() const noexcept {
+  const_iterator it;
+  it.pos = this->data();
+  it.stride = this->stride();
+  return it;
+}
+
+template <typename T>
+typename Vec<T>::const_iterator Vec<T>::end() const noexcept {
+  const_iterator it = this->begin();
+  it.pos = static_cast<const uint8_t *>(it.pos) + it.stride * this->size();
+  return it;
+}
+
+// Internal API only intended for the cxxbridge code generator.
+template <typename T>
+Vec<T>::Vec(unsafe_bitcopy_t, const Vec &bits) noexcept : repr(bits.repr) {}
+#endif // CXXBRIDGE03_RUST_VEC
 
 } // namespace cxxbridge03
 } // namespace rust
