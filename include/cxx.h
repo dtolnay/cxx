@@ -243,21 +243,25 @@ public:
         typename std::add_const<T>::type>::type;
     using iterator_category = std::forward_iterator_tag;
 
-    const T &operator*() const { return *static_cast<const T *>(this->pos); }
-    const T *operator->() const { return static_cast<const T *>(this->pos); }
-    const_iterator &operator++() {
+    const T &operator*() const noexcept {
+      return *static_cast<const T *>(this->pos);
+    }
+    const T *operator->() const noexcept {
+      return static_cast<const T *>(this->pos);
+    }
+    const_iterator &operator++() noexcept {
       this->pos = static_cast<const uint8_t *>(this->pos) + this->stride;
       return *this;
     }
-    const_iterator operator++(int) {
+    const_iterator operator++(int) noexcept {
       auto ret = const_iterator(*this);
       this->pos = static_cast<const uint8_t *>(this->pos) + this->stride;
       return ret;
     }
-    bool operator==(const const_iterator &other) const {
+    bool operator==(const const_iterator &other) const noexcept {
       return this->pos == other.pos;
     }
-    bool operator!=(const const_iterator &other) const {
+    bool operator!=(const const_iterator &other) const noexcept {
       return this->pos != other.pos;
     }
 
