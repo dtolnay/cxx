@@ -141,7 +141,7 @@ fn test_c_call_r() {
         }
         let failure = unsafe { cxx_run_test() };
         if !failure.is_null() {
-            let msg = unsafe { CStr::from_ptr(failure) };
+            let msg = unsafe { CStr::from_ptr(failure as *mut std::os::raw::c_char) };
             eprintln!("{}", msg.to_string_lossy());
         }
     }
