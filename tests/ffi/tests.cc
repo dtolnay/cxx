@@ -28,6 +28,10 @@ size_t C::set2(size_t n) {
   return this->n;
 }
 
+size_t C::set_succeed(size_t n) { return this->set2(n); }
+
+size_t C::get_fail() { throw std::runtime_error("unimplemented"); }
+
 const std::vector<uint8_t> &C::get_v() const { return this->v; }
 
 size_t c_return_primitive() { return 2020; }

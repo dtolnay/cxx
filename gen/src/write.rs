@@ -424,7 +424,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     }
     let indirect_return = indirect_return(efn, types);
     if indirect_return {
-        if !efn.args.is_empty() {
+        if !efn.args.is_empty() || efn.receiver.is_some() {
             write!(out, ", ");
         }
         write_indirect_return_type_space(out, efn.ret.as_ref().unwrap());
