@@ -1,7 +1,7 @@
 use std::fmt::{self, Debug, Display};
 
 /// Exception thrown from an `extern "C"` function.
-#[derive(Debug, PartialEq)]
+#[derive(Debug)]
 pub struct Exception {
     pub(crate) what: Box<str>,
 }
