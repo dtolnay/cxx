@@ -88,17 +88,26 @@ fn display_syn_error(stderr: &mut dyn WriteColor, path: &Path, source: &str, err
     for _ in 1..start.line {
         start_offset += source[start_offset..].find('\n').unwrap() + 1;
     }
-    start_offset += start.column;
+    let start_column = source[start_offset..]
+        .chars()
+        .take(start.column)
+        .map(char::len_utf8)
+        .sum::<usize>();
+    start_offset += start_column;
 
     let mut end_offset = start_offset;
     if start.line == end.line {
-        end_offset -= start.column;
+        end_offset -= start_column;
     } else {
         for _ in 0..end.line - start.line {
             end_offset += source[end_offset..].find('\n').unwrap() + 1;
         }
     }
-    end_offset += end.column;
+    end_offset += source[end_offset..]
+        .chars()
+        .take(end.column)
+        .map(char::len_utf8)
+        .sum::<usize>();
 
     let mut files = SimpleFiles::new();
     let file = files.add(path.to_string_lossy(), source);

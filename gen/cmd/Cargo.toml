@@ -16,7 +16,7 @@ path = "src/main.rs"
 [dependencies]
 anyhow = "1.0"
 codespan-reporting = "0.9"
-proc-macro2 = { version = "1.0.12", features = ["span-locations"] }
+proc-macro2 = { version = "1.0.14", features = ["span-locations"] }
 quote = "1.0"
 structopt = "0.3"
 syn = { version = "1.0.20", features = ["full"] }

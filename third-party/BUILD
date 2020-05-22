@@ -88,7 +88,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.12/src/**"]),
+    srcs = glob(["vendor/proc-macro2-1.0.14/src/**"]),
     crate_features = [
         "proc-macro",
         "span-locations",
