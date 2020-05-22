@@ -2,7 +2,7 @@
 
 rust_library(
     name = "anyhow",
-    srcs = glob(["vendor/anyhow-1.0.28/src/**"]),
+    srcs = glob(["vendor/anyhow-1.0.31/src/**"]),
     visibility = ["PUBLIC"],
     features = ["std"],
 )
@@ -14,7 +14,7 @@ rust_library(
 
 rust_library(
     name = "cc",
-    srcs = glob(["vendor/cc-1.0.52/src/**"]),
+    srcs = glob(["vendor/cc-1.0.54/src/**"]),
     visibility = ["PUBLIC"],
 )
 
@@ -31,7 +31,7 @@ rust_library(
 
 rust_library(
     name = "codespan-reporting",
-    srcs = glob(["vendor/codespan-reporting-0.9.3/src/**"]),
+    srcs = glob(["vendor/codespan-reporting-0.9.4/src/**"]),
     visibility = ["PUBLIC"],
     deps = [
         ":termcolor",
@@ -83,7 +83,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.14/src/**"]),
+    srcs = glob(["vendor/proc-macro2-1.0.15/src/**"]),
     visibility = ["PUBLIC"],
     features = [
         "proc-macro",
@@ -99,7 +99,7 @@ rust_library(
 
 rust_library(
     name = "quote",
-    srcs = glob(["vendor/quote-1.0.4/src/**"]),
+    srcs = glob(["vendor/quote-1.0.6/src/**"]),
     visibility = ["PUBLIC"],
     features = ["proc-macro"],
     deps = [":proc-macro2"],
@@ -131,7 +131,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.20/src/**"]),
+    srcs = glob(["vendor/syn-1.0.23/src/**"]),
     visibility = ["PUBLIC"],
     features = [
         "clone-impls",

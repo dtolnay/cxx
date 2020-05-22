@@ -11,9 +11,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.28"
+version = "1.0.31"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d9a60d744a80c30fcb657dfe2c1b22bcb3e814c1a1e3674f32bf5820b570fbff"
+checksum = "85bb70cc08ec97ca5450e6eba421deeea5f172c0fc61f78b5357b2a8e8be195f"
 
 [[package]]
 name = "atty"
@@ -34,9 +34,9 @@ checksum = "cf1de2fe8c75bc145a2f577add951f8134889b4795d47466a54a5c846d691693"
 
 [[package]]
 name = "cc"
-version = "1.0.52"
+version = "1.0.54"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3d87b23d6a92cd03af510a5ade527033f6aa6fa92161e2d5863a907d4c5e31d"
+checksum = "7bbb73db36c1246e9034e307d0fba23f9a2e251faa47ade70c1bd252220c8311"
 
 [[package]]
 name = "clap"
@@ -55,9 +55,9 @@ dependencies = [
 
 [[package]]
 name = "codespan-reporting"
-version = "0.9.3"
+version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5680df8512a0e825b9edc41b619ec88b367644d394b4d862a04b4d6387c65da"
+checksum = "2ceface2475f2f57a7ece9ba239b96e06bda8323ee68aa6df539752f13a74f60"
 dependencies = [
  "termcolor",
  "unicode-width",
@@ -149,9 +149,9 @@ dependencies = [
 
 [[package]]
 name = "hermit-abi"
-version = "0.1.12"
+version = "0.1.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61565ff7aaace3525556587bd2dc31d4a07071957be715e63ce7b1eccf51a8f4"
+checksum = "91780f809e750b0a89f5544be56617ff6b1227ee485bcb06ebe10cdf89bd3b71"
 dependencies = [
  "libc",
 ]
@@ -170,9 +170,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.69"
+version = "0.2.70"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "99e85c08494b21a9054e7fe1374a732aeadaff3980b6990b94bfd3a70f690005"
+checksum = "3baa92041a6fec78c687fa0cc2b3fae8884f743d672cf551bed1d6dac6988d0f"
 
 [[package]]
 name = "link-cplusplus"
@@ -211,18 +211,18 @@ dependencies = [
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.14"
+version = "1.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "de40dd4ff82d9c9bab6dae29dbab1167e515f8df9ed17d2987cb6012db206933"
+checksum = "70a50b9351bfa8d65a7d93ce712dc63d2fd15ddbf2c36990fc7cac344859c04f"
 dependencies = [
  "unicode-xid",
 ]
 
 [[package]]
 name = "quote"
-version = "1.0.4"
+version = "1.0.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c1f4b0efa5fc5e8ceb705136bfee52cfdb6a4e3509f770b478cd6ed434232a7"
+checksum = "54a21852a652ad6f610c9510194f398ff6f8692e334fd1145fed931f7fbe44ea"
 dependencies = [
  "proc-macro2",
 ]
@@ -307,9 +307,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "1.0.20"
+version = "1.0.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd1b5e337360b1fae433c59fcafa0c6b77c605e92540afa5221a7b81a9eca91d"
+checksum = "95b5f192649e48a5302a13f2feb224df883b98933222369e4b3b0fe2a5447269"
 dependencies = [
  "proc-macro2",
  "quote",
