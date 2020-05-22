@@ -83,6 +83,8 @@ pub mod ffi {
         fn set(self: &mut C, n: usize) -> usize;
         fn get2(&self) -> usize;
         fn set2(&mut self, n: usize) -> usize;
+        fn set_succeed(&mut self, n: usize) -> Result<usize>;
+        fn get_fail(&mut self) -> Result<usize>;
     }
 
     extern "C" {
