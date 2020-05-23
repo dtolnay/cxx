@@ -83,7 +83,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.15/src/**"]),
+    srcs = glob(["vendor/proc-macro2-1.0.17/src/**"]),
     visibility = ["PUBLIC"],
     features = [
         "proc-macro",
