@@ -53,7 +53,7 @@ CXX guarantees an ABI-compatible signature that both sides understand, based on
 builtin bindings for key standard library types to expose an idiomatic API on
 those types to the other language. For example when manipulating a C++ string
 from Rust, its `len()` method becomes a call of the `size()` member function
-defined by C++; when manipulation a Rust string from C++, its `size()` member
+defined by C++; when manipulating a Rust string from C++, its `size()` member
 function calls Rust's `len()`.
 
 <br>
