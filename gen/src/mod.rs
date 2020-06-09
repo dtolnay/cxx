@@ -6,6 +6,7 @@ mod find;
 pub(super) mod include;
 pub(super) mod out;
 mod write;
+mod write_type;
 
 use self::error::{format_err, Error, Result};
 use crate::syntax::namespace::Namespace;
