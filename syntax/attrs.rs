@@ -10,6 +10,7 @@ pub struct Parser<'a> {
     pub doc: Option<&'a mut Doc>,
     pub derives: Option<&'a mut Vec<Derive>>,
     pub repr: Option<&'a mut Option<Atom>>,
+    pub alias: Option<&'a mut Option<Ident>>,
 }
 
 pub(super) fn parse_doc(cx: &mut Errors, attrs: &[Attribute]) -> Doc {
@@ -57,8 +58,19 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
                 }
                 Err(err) => return cx.push(err),
             }
+        } else if attr.path.is_ident("alias") {
+            match attr.parse_args_with(|input: ParseStream| input.parse()) {
+                Ok(alias) => {
+                    if let Some(a) = &mut parser.alias {
+                        **a = Some(alias);
+                        continue;
+                    }
+                }
+                Err(err) => return cx.push(err),
+            }
+        } else {
+            return cx.error(attr, "unsupported attribute");
         }
-        return cx.error(attr, "unsupported attribute");
     }
 }
 

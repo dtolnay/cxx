@@ -70,6 +70,7 @@ pub struct ExternFn {
     pub lang: Lang,
     pub doc: Doc,
     pub ident: Ident,
+    pub alias: Option<Ident>,
     pub sig: Signature,
     pub semi_token: Token![;],
 }

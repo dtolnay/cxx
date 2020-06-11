@@ -9,9 +9,13 @@ ThingC::ThingC(std::string appname) : appname(std::move(appname)) {}
 
 ThingC::~ThingC() { std::cout << "done with ThingC" << std::endl; }
 
+void ThingC::camelCaseMethod() const { std::cout << "camelCaseMethod" << std::endl; }
+
 std::unique_ptr<ThingC> make_demo(rust::Str appname) {
   return std::make_unique<ThingC>(std::string(appname));
 }
+
+void camelCaseFunction() { std::cout << "camelCaseFunction" << std::endl; }
 
 const std::string &get_name(const ThingC &thing) { return thing.appname; }
 

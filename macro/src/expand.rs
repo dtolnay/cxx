@@ -362,6 +362,7 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
         })
     }
     .unwrap_or(call);
+    let ident = if let Some(alias) = &efn.alias { alias } else { ident };
     let function_shim = quote! {
         #doc
         pub fn #ident(#(#all_args,)*) #ret {
