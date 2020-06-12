@@ -12,6 +12,8 @@ public:
   ~ThingC();
 
   void camelCaseMethod() const;
+  void overloadedMethod(int x) const;
+  void overloadedMethod(float x) const;
     
   std::string appname;
 };
@@ -19,6 +21,8 @@ public:
 struct SharedThing;
 
 void camelCaseFunction();
+void overloadedFunction(int x);
+void overloadedFunction(float x);
 std::unique_ptr<ThingC> make_demo(rust::Str appname);
 const std::string &get_name(const ThingC &thing);
 void do_thing(SharedThing state);

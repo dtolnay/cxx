@@ -433,9 +433,10 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     writeln!(out, ") noexcept {{");
     write!(out, "  ");
     write_return_type(out, &efn.ret);
+    let ident = if let Some(alias) = &efn.alias { alias } else { &efn.ident };
     match &efn.receiver {
-        None => write!(out, "(*{}$)(", efn.ident),
-        Some(receiver) => write!(out, "({}::*{}$)(", receiver.ty, efn.ident),
+        None => write!(out, "(*{}$)(", ident),
+        Some(receiver) => write!(out, "({}::*{}$)(", receiver.ty, ident),
     }
     for (i, arg) in efn.args.iter().enumerate() {
         if i > 0 {
@@ -478,8 +479,8 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         _ => {}
     }
     match &efn.receiver {
-        None => write!(out, "{}$(", efn.ident),
-        Some(_) => write!(out, "(self.*{}$)(", efn.ident),
+        None => write!(out, "{}$(", ident),
+        Some(_) => write!(out, "(self.*{}$)(", ident),
     }
     for (i, arg) in efn.args.iter().enumerate() {
         if i > 0 {
@@ -612,9 +613,10 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     for line in efn.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
+    let ident = if let Some(alias) = &efn.alias { alias } else { &efn.ident };
     let local_name = match &efn.sig.receiver {
-        None => efn.ident.to_string(),
-        Some(receiver) => format!("{}::{}", receiver.ty, efn.ident),
+        None => ident.to_string(),
+        Some(receiver) => format!("{}::{}", receiver.ty, ident),
     };
     let invoke = mangle::extern_fn(&out.namespace, efn);
     let indirect_call = false;

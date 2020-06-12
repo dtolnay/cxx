@@ -185,7 +185,7 @@ fn expand_cxx_type(namespace: &Namespace, ety: &ExternType) -> TokenStream {
 }
 
 fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types) -> TokenStream {
-    let ident = &efn.ident;
+    let ident = if let Some(alias) = &efn.alias { alias } else { &efn.ident };
     let receiver = efn.receiver.iter().map(|receiver| {
         let receiver_type = receiver.ty();
         quote!(_: #receiver_type)
@@ -225,7 +225,7 @@ fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types
 }
 
 fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types) -> TokenStream {
-    let ident = &efn.ident;
+    let ident = if let Some(alias) = &efn.alias { alias } else { &efn.ident };
     let doc = &efn.doc;
     let decl = expand_cxx_function_decl(namespace, efn, types);
     let receiver = efn.receiver.iter().map(|receiver| {
@@ -362,7 +362,6 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
         })
     }
     .unwrap_or(call);
-    let ident = if let Some(alias) = &efn.alias { alias } else { ident };
     let function_shim = quote! {
         #doc
         pub fn #ident(#(#all_args,)*) #ret {
@@ -395,7 +394,8 @@ fn expand_function_pointer_trampoline(
     let c_trampoline = mangle::c_trampoline(namespace, efn, var);
     let r_trampoline = mangle::r_trampoline(namespace, efn, var);
     let local_name = parse_quote!(__);
-    let catch_unwind_label = format!("::{}::{}", efn.ident, var);
+    let ident = if let Some(alias) = &efn.alias { alias } else { &efn.ident };
+    let catch_unwind_label = format!("::{}::{}", ident, var);
     let shim = expand_rust_function_shim_impl(
         sig,
         types,

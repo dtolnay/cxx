@@ -87,7 +87,7 @@ impl<'a> Types<'a> {
                     rust.insert(ident);
                 }
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
-                    let ident = &efn.ident;
+                    let ident = if let Some(alias) = &efn.alias { alias } else { &efn.ident };
                     if !function_names.insert((&efn.receiver, ident)) {
                         duplicate_name(cx, efn, ident);
                     }
