@@ -296,6 +296,22 @@ extern "C" std::string *cxx_test_suite_get_unique_ptr_string() noexcept {
   return std::unique_ptr<std::string>(new std::string("2020")).release();
 }
 
+rust::String C::cOverloadedMethod(int32_t x) const {
+    return rust::String(std::to_string(x));
+}
+
+rust::String C::cOverloadedMethod(rust::Str x) const {
+    return rust::String(std::string(x));
+}
+
+rust::String cOverloadedFunction(int x) {
+    return rust::String(std::to_string(x));
+}
+
+rust::String cOverloadedFunction(rust::Str x) {
+    return rust::String(std::string(x));
+}
+
 extern "C" const char *cxx_run_test() noexcept {
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)

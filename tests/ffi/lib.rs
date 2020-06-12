@@ -85,6 +85,15 @@ pub mod ffi {
         fn set2(&mut self, n: usize) -> usize;
         fn set_succeed(&mut self, n: usize) -> Result<usize>;
         fn get_fail(&mut self) -> Result<usize>;
+        
+        #[rust_name = "i32_overloaded_method"]
+        fn cOverloadedMethod(&self, x: i32) -> String;
+        #[rust_name = "str_overloaded_method"]
+        fn cOverloadedMethod(&self, x: &str) -> String;
+        #[rust_name = "i32_overloaded_function"]
+        fn cOverloadedFunction(x: i32) -> String;
+        #[rust_name = "str_overloaded_function"]
+        fn cOverloadedFunction(x: &str) -> String;
     }
 
     extern "C" {

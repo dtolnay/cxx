@@ -178,3 +178,12 @@ extern "C" fn cxx_test_suite_get_box() -> *mut cxx_test_suite::R {
 unsafe extern "C" fn cxx_test_suite_r_is_correct(r: *const cxx_test_suite::R) -> bool {
     *r == 2020
 }
+
+#[test]
+fn test_rust_name_attribute() {
+    assert_eq!("2020".to_string(), ffi::i32_overloaded_function(2020));
+    assert_eq!("2020".to_string(), ffi::str_overloaded_function("2020"));
+    let unique_ptr = ffi::c_return_unique_ptr();
+    assert_eq!("2020".to_string(), unique_ptr.i32_overloaded_method(2020));
+    assert_eq!("2020".to_string(), unique_ptr.str_overloaded_method("2020"));
+}

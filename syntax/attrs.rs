@@ -58,8 +58,8 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
                 }
                 Err(err) => return cx.push(err),
             }
-        } else if attr.path.is_ident("alias") {
-            match attr.parse_args_with(|input: ParseStream| input.parse()) {
+        } else if attr.path.is_ident("rust_name") {
+            match parse_rust_name_attribute.parse2(attr.tokens.clone()) {
                 Ok(alias) => {
                     if let Some(a) = &mut parser.alias {
                         **a = Some(alias);
@@ -72,6 +72,12 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
             return cx.error(attr, "unsupported attribute");
         }
     }
+}
+
+fn parse_rust_name_attribute(input: ParseStream) -> Result<Ident> {
+    input.parse::<Token![=]>()?;
+    let lit: LitStr = input.parse()?;
+    Ok(lit.parse::<Ident>()?)
 }
 
 fn parse_doc_attribute(input: ParseStream) -> Result<LitStr> {
