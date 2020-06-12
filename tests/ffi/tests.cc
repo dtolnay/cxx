@@ -362,6 +362,8 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(r2->get() == 2021);
   ASSERT(r2->set(2020) == 2020);
   ASSERT(r2->get() == 2020);
+  
+  ASSERT(std::string(rAliasedFunction(2020)) == "2020");
 
   cxx_test_suite_set_correct();
   return nullptr;

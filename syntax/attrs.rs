@@ -58,7 +58,7 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
                 }
                 Err(err) => return cx.push(err),
             }
-        } else if attr.path.is_ident("rust_name") {
+        } else if attr.path.is_ident("rust_name") || attr.path.is_ident("cxx_name") {
             match parse_rust_name_attribute.parse2(attr.tokens.clone()) {
                 Ok(alias) => {
                     if let Some(a) = &mut parser.alias {

@@ -145,6 +145,9 @@ pub mod ffi {
         fn r_return_r2(n: usize) -> Box<R2>;
         fn get(self: &R2) -> usize;
         fn set(self: &mut R2, n: usize) -> usize;
+        
+        #[cxx_name = "rAliasedFunction"]
+        fn r_aliased_function(x: i32) -> String;
     }
 }
 
@@ -307,4 +310,8 @@ fn r_fail_return_primitive() -> Result<usize, Error> {
 
 fn r_return_r2(n: usize) -> Box<R2> {
     Box::new(R2(n))
+}
+
+fn r_aliased_function(x: i32) -> String {
+    x.to_string()
 }

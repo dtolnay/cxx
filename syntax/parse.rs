@@ -328,9 +328,7 @@ fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> R
     let fn_token = foreign_fn.sig.fn_token;
     let ident = foreign_fn.sig.ident.clone();
     let mut alias = None;
-    if let Lang::Cxx = lang {
-        attrs::parse(cx, &foreign_fn.attrs, attrs::Parser { alias: Some(&mut alias), ..Default::default() });
-    }
+    attrs::parse(cx, &foreign_fn.attrs, attrs::Parser { alias: Some(&mut alias), ..Default::default() });
     let paren_token = foreign_fn.sig.paren_token;
     let semi_token = foreign_fn.semi_token;
     let api_function = match lang {
