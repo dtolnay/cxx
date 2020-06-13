@@ -3,7 +3,7 @@ use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::namespace::Namespace;
 use crate::syntax::symbol::Symbol;
-use crate::syntax::{mangle, Api, Enum, ExternFn, ExternType, Signature, Struct, Type, Types, Var};
+use crate::syntax::{mangle, Api, Enum, ExternFn, ExternType, Signature, Struct, Type, Types, Var, CxxSide};
 use proc_macro2::Ident;
 use std::collections::HashMap;
 
@@ -52,6 +52,11 @@ pub(super) fn gen(
             if let Some(receiver) = &efn.sig.receiver {
                 methods_for_type
                     .entry(&receiver.ty)
+                    .or_insert_with(Vec::new)
+                    .push(efn);
+            } else if let Some(CxxSide { class: Some(class @ _), .. }) = &efn.cxx_side {
+                methods_for_type
+                    .entry(class)
                     .or_insert_with(Vec::new)
                     .push(efn);
             }
@@ -342,7 +347,15 @@ fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &[&Ex
     for method in methods {
         write!(out, "  ");
         let sig = &method.sig;
-        let local_name = method.ident.to_string();
+        let mut local_name = method.ident.to_string();
+        if let Some(cxx_side) = &method.cxx_side {
+            if cxx_side.is_static {
+                write!(out, "static ");
+            }
+            if let Some(name) = &cxx_side.name {
+                local_name = name.clone();
+            }
+        }
         write_rust_function_shim_decl(out, &local_name, sig, false);
         writeln!(out, ";");
     }
@@ -450,9 +463,17 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         }
     }
     write!(out, " = ");
-    match &efn.receiver {
-        None => write!(out, "{}", efn.ident),
-        Some(receiver) => write!(out, "&{}::{}", receiver.ty, efn.ident),
+    let name = efn.cxx_side
+        .as_ref()
+        .and_then(|s| s.name.as_ref().map(|n| n.clone()))
+        .unwrap_or_else(|| efn.ident.to_string());
+    if let Some(CxxSide { class: Some(class @ _), is_static: true, .. }) = &efn.cxx_side {
+        write!(out, "&{}::{}", class, name);
+    } else {
+        match &efn.receiver {
+            None => write!(out, "{}", name),
+            Some(receiver) => write!(out, "&{}::{}", receiver.ty, name),
+        }
     }
     writeln!(out, ";");
     write!(out, "  ");
@@ -554,7 +575,8 @@ fn write_function_pointer_trampoline(
 
     out.next_section();
     let c_trampoline = mangle::c_trampoline(&out.namespace, efn, var).to_string();
-    write_rust_function_shim_impl(out, &c_trampoline, f, types, &r_trampoline, indirect_call);
+    let is_static = efn.cxx_side.as_ref().map(|s| s.is_static).unwrap_or_default();
+    write_rust_function_shim_impl(out, &c_trampoline, f, types, &r_trampoline, indirect_call, is_static);
 }
 
 fn write_rust_function_decl(out: &mut OutFile, efn: &ExternFn, types: &Types) {
@@ -612,13 +634,29 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     for line in efn.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
-    let local_name = match &efn.sig.receiver {
-        None => efn.ident.to_string(),
-        Some(receiver) => format!("{}::{}", receiver.ty, efn.ident),
+    let mut is_static = false;
+    let local_name = if let Some(cxx_side) = &efn.cxx_side {
+        is_static = cxx_side.is_static;
+        let name = cxx_side.name
+            .as_ref()
+            .map(|n| n.clone())
+            .unwrap_or_else(|| efn.ident.to_string());
+        match &efn.sig.receiver {
+            None => cxx_side.class
+                .as_ref()
+                .map(|c| format!("{}::{}", c, name))
+                .unwrap_or_else(|| name),
+            Some(receiver) => format!("{}::{}", receiver.ty, name),
+        }
+    } else {
+        match &efn.sig.receiver {
+            None => efn.ident.to_string(),
+            Some(receiver) => format!("{}::{}", receiver.ty, efn.ident),
+        }
     };
     let invoke = mangle::extern_fn(&out.namespace, efn);
     let indirect_call = false;
-    write_rust_function_shim_impl(out, &local_name, efn, types, &invoke, indirect_call);
+    write_rust_function_shim_impl(out, &local_name, efn, types, &invoke, indirect_call, is_static);
 }
 
 fn write_rust_function_shim_decl(
@@ -660,8 +698,9 @@ fn write_rust_function_shim_impl(
     types: &Types,
     invoke: &Symbol,
     indirect_call: bool,
+    is_static: bool,
 ) {
-    if out.header && sig.receiver.is_some() {
+    if (out.header && sig.receiver.is_some()) || (is_static && out.header) {
         // We've already defined this inside the struct.
         return;
     }

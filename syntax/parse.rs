@@ -17,6 +17,8 @@ use syn::{
 
 pub mod kw {
     syn::custom_keyword!(Result);
+    syn::custom_keyword!(name);
+    syn::custom_keyword!(class);
 }
 
 pub fn parse_items(cx: &mut Errors, items: Vec<Item>) -> Vec<Api> {
@@ -333,11 +335,13 @@ fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> R
         Lang::Cxx => Api::CxxFunction,
         Lang::Rust => Api::RustFunction,
     };
-
+    let mut cxx_side = None;
+    attrs::parse(cx, &foreign_fn.attrs, attrs::Parser { cxx_side: Some(&mut cxx_side), ..Default::default() });
     Ok(api_function(ExternFn {
         lang,
         doc,
         ident,
+        cxx_side,
         sig: Signature {
             fn_token,
             receiver,

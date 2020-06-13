@@ -375,6 +375,9 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
             }
         }
     };
+    if let Some(crate::syntax::CxxSide { class: Some(class @ _), .. }) = &efn.cxx_side {
+        return quote!(impl #class { #function_shim });
+    }
     match &efn.receiver {
         None => function_shim,
         Some(receiver) => {
@@ -396,6 +399,7 @@ fn expand_function_pointer_trampoline(
     let local_name = parse_quote!(__);
     let catch_unwind_label = format!("::{}::{}", efn.ident, var);
     let shim = expand_rust_function_shim_impl(
+        efn,
         sig,
         types,
         &r_trampoline,
@@ -434,6 +438,7 @@ fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Type
     let invoke = Some(ident);
     expand_rust_function_shim_impl(
         efn,
+        efn,
         types,
         &link_name,
         local_name,
@@ -443,6 +448,7 @@ fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Type
 }
 
 fn expand_rust_function_shim_impl(
+    efn: &ExternFn,
     sig: &Signature,
     types: &Types,
     link_name: &Symbol,
@@ -490,10 +496,15 @@ fn expand_rust_function_shim_impl(
         }
     });
     let vars = receiver_var.into_iter().chain(arg_vars);
-
     let mut call = match invoke {
         Some(ident) => match &sig.receiver {
-            None => quote!(super::#ident),
+            None => {
+                efn.cxx_side
+                    .as_ref()
+                    .and_then(|s| Some((s.class.as_ref()?, s.is_static)))
+                    .map(|(class, _)| quote!(#class::#ident))
+                    .unwrap_or_else(|| quote!(super::#ident))
+            }
             Some(receiver) => {
                 let receiver_type = &receiver.ty;
                 quote!(#receiver_type::#ident)

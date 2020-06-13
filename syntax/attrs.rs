@@ -1,6 +1,6 @@
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::{self, *};
-use crate::syntax::{Derive, Doc};
+use crate::syntax::{Derive, Doc, CxxSide};
 use proc_macro2::Ident;
 use syn::parse::{ParseStream, Parser as _};
 use syn::{Attribute, Error, LitStr, Path, Result, Token};
@@ -10,6 +10,7 @@ pub struct Parser<'a> {
     pub doc: Option<&'a mut Doc>,
     pub derives: Option<&'a mut Vec<Derive>>,
     pub repr: Option<&'a mut Option<Atom>>,
+    pub cxx_side: Option<&'a mut Option<CxxSide>>,
 }
 
 pub(super) fn parse_doc(cx: &mut Errors, attrs: &[Attribute]) -> Doc {
@@ -57,8 +58,19 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
                 }
                 Err(err) => return cx.push(err),
             }
+        } else if attr.path.is_ident("cxx_side") {
+            match attr.parse_args_with(|input: ParseStream| input.parse::<CxxSide>()) {
+                Ok(attr) => {
+                    if let Some(cxx_side) = &mut parser.cxx_side {
+                        **cxx_side = Some(attr);
+                        continue;
+                    }
+                }
+                Err(err) => return cx.push(err),
+            }
+        } else {
+            return cx.error(attr, "unsupported attribute");
         }
-        return cx.error(attr, "unsupported attribute");
     }
 }
 

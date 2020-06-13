@@ -1,7 +1,12 @@
-use crate::syntax::{ExternFn, Receiver, Ref, Signature, Slice, Ty1, Type};
+use crate::syntax::{ExternFn, Receiver, Ref, Signature, Slice, Ty1, Type, CxxSideItem, CxxSide};
 use std::hash::{Hash, Hasher};
 use std::mem;
 use std::ops::{Deref, DerefMut};
+use syn::{Error, Token};
+use syn::parse::{Parse, ParseStream, Result};
+use syn::punctuated::Punctuated;
+use proc_macro2::Ident;
+use super::kw;
 
 impl Deref for ExternFn {
     type Target = Signature;
@@ -14,6 +19,39 @@ impl Deref for ExternFn {
 impl DerefMut for ExternFn {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.sig
+    }
+}
+
+impl Parse for CxxSideItem {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let begin = input.cursor();
+        if let Ok(_) = input.parse::<kw::name>() {
+            input.parse::<Token![=]>()?;
+            return Ok(Self::Name(input.parse::<syn::LitStr>()?.value()));
+        }
+        if let Ok(_) = input.parse::<kw::class>() {
+            input.parse::<Token![=]>()?;
+            return Ok(Self::Class(input.parse::<syn::LitStr>()?.parse::<Ident>()?));
+        }
+        if let Ok(_) = input.parse::<Token![static]>() {
+            return Ok(Self::IsStatic);
+        }
+        Err(Error::new(begin.span(), "unknown cxx_side item"))
+    }
+}
+
+impl Parse for CxxSide {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let mut result = CxxSide::default();
+        let items: Punctuated<CxxSideItem, Token![,]> = input.parse_terminated(CxxSideItem::parse)?;
+        for item in &items {
+            match item {
+                CxxSideItem::Name(name) => result.name = Some(name.clone()),
+                CxxSideItem::Class(class) => result.class = Some(class.clone()),
+                CxxSideItem::IsStatic => result.is_static = true,
+            }
+        }
+        Ok(result)
     }
 }
 

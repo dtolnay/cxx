@@ -85,6 +85,19 @@ pub mod ffi {
         fn set2(&mut self, n: usize) -> usize;
         fn set_succeed(&mut self, n: usize) -> Result<usize>;
         fn get_fail(&mut self) -> Result<usize>;
+                
+        #[cxx_side(name = "cOverloadedMethod")]
+        fn i32_overloaded_method(&self, x: i32) -> String;
+        #[cxx_side(name = "cOverloadedMethod")]
+        fn str_overloaded_method(&self, x: &str) -> String;
+        
+        #[cxx_side(name = "cOverloadedFunction")]
+        fn i32_overloaded_function(x: i32) -> String;
+        #[cxx_side(name = "cOverloadedFunction")]
+        fn str_overloaded_function(x: &str) -> String;
+
+        #[cxx_side(name = "cStaticMethod", class = "C", static)]
+        fn static_method() -> String;
     }
 
     extern "C" {
@@ -136,6 +149,12 @@ pub mod ffi {
         fn r_return_r2(n: usize) -> Box<R2>;
         fn get(self: &R2) -> usize;
         fn set(self: &mut R2, n: usize) -> usize;
+                
+        #[cxx_side(name = "rAliasedFunction")]
+        fn r_aliased_function(x: i32) -> String;
+                
+        #[cxx_side(name = "rStaticMethod", class = "R2", static)]
+        fn r_static_method() -> String;
     }
 }
 
@@ -151,6 +170,10 @@ impl R2 {
     fn set(&mut self, n: usize) -> usize {
         self.0 = n;
         n
+    }
+    
+    fn r_static_method() -> String {
+        "Rust static method".into()
     }
 }
 
@@ -298,4 +321,8 @@ fn r_fail_return_primitive() -> Result<usize, Error> {
 
 fn r_return_r2(n: usize) -> Box<R2> {
     Box::new(R2(n))
+}
+
+fn r_aliased_function(x: i32) -> String {
+    x.to_string()
 }

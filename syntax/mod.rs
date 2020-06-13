@@ -70,8 +70,22 @@ pub struct ExternFn {
     pub lang: Lang,
     pub doc: Doc,
     pub ident: Ident,
+    pub cxx_side: Option<CxxSide>,
     pub sig: Signature,
     pub semi_token: Token![;],
+}
+
+pub enum CxxSideItem {
+    Name(String),
+    Class(Ident),
+    IsStatic,
+}
+
+#[derive(Debug, Default)]
+pub struct CxxSide {
+    pub name: Option<String>,
+    pub class: Option<Ident>,
+    pub is_static: bool,
 }
 
 pub struct TypeAlias {
