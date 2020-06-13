@@ -49,7 +49,7 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct) -> Result<Api> {
         let span = quote!(#struct_token #ident #generics #where_clause);
         return Err(Error::new_spanned(
             span,
-            "struct with generic parameters are not supported yet",
+            "struct with generic parameters is not supported yet",
         ));
     }
 

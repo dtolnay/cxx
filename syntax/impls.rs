@@ -52,7 +52,7 @@ impl Parse for CxxSide {
                 if name.contains("::") {
                     let parts: Vec<&str> = name.split("::").collect();
                     if parts.len() > 2 {
-                        return Err(Error::new(begin.span(), "namespaces and subclasses is not supported yet"));
+                        return Err(Error::new(begin.span(), "namespaces and subclasses are not supported yet"));
                     }
                     result.name = parts.last().map(|p| p.to_string());
                     result.class = parts.first().map(|p| Ident::new(p, Span::call_site()));
