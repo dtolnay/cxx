@@ -96,7 +96,7 @@ pub mod ffi {
         #[cxx_side(name = "cOverloadedFunction")]
         fn str_overloaded_function(x: &str) -> String;
 
-        #[cxx_side(name = "cStaticMethod", class = "C", static)]
+        #[cxx_side(name = "C::cStaticMethod", static)]
         fn static_method() -> String;
     }
 
@@ -153,7 +153,7 @@ pub mod ffi {
         #[cxx_side(name = "rAliasedFunction")]
         fn r_aliased_function(x: i32) -> String;
                 
-        #[cxx_side(name = "rStaticMethod", class = "R2", static)]
+        #[cxx_side(name = "R2::rStaticMethod", static)]
         fn r_static_method() -> String;
     }
 }

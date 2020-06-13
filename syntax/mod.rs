@@ -77,7 +77,6 @@ pub struct ExternFn {
 
 pub enum CxxSideItem {
     Name(String),
-    Class(Ident),
     IsStatic,
 }
 

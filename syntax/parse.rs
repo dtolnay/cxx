@@ -18,7 +18,6 @@ use syn::{
 pub mod kw {
     syn::custom_keyword!(Result);
     syn::custom_keyword!(name);
-    syn::custom_keyword!(class);
 }
 
 pub fn parse_items(cx: &mut Errors, items: Vec<Item>) -> Vec<Api> {

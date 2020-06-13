@@ -5,7 +5,7 @@ use std::ops::{Deref, DerefMut};
 use syn::{Error, Token};
 use syn::parse::{Parse, ParseStream, Result};
 use syn::punctuated::Punctuated;
-use proc_macro2::Ident;
+use proc_macro2::{Ident, Span};
 use super::kw;
 
 impl Deref for ExternFn {
@@ -29,10 +29,6 @@ impl Parse for CxxSideItem {
             input.parse::<Token![=]>()?;
             return Ok(Self::Name(input.parse::<syn::LitStr>()?.value()));
         }
-        if let Ok(_) = input.parse::<kw::class>() {
-            input.parse::<Token![=]>()?;
-            return Ok(Self::Class(input.parse::<syn::LitStr>()?.parse::<Ident>()?));
-        }
         if let Ok(_) = input.parse::<Token![static]>() {
             return Ok(Self::IsStatic);
         }
@@ -42,13 +38,27 @@ impl Parse for CxxSideItem {
 
 impl Parse for CxxSide {
     fn parse(input: ParseStream) -> Result<Self> {
+        let begin = input.cursor();
         let mut result = CxxSide::default();
         let items: Punctuated<CxxSideItem, Token![,]> = input.parse_terminated(CxxSideItem::parse)?;
         for item in &items {
             match item {
                 CxxSideItem::Name(name) => result.name = Some(name.clone()),
-                CxxSideItem::Class(class) => result.class = Some(class.clone()),
                 CxxSideItem::IsStatic => result.is_static = true,
+            }
+        }
+        if result.is_static {
+            if let Some(name) = result.name.clone() {
+                if name.contains("::") {
+                    let parts: Vec<&str> = name.split("::").collect();
+                    if parts.len() > 2 {
+                        return Err(Error::new(begin.span(), "namespaces and subclasses is not supported yet"));
+                    }
+                    result.name = parts.last().map(|p| p.to_string());
+                    result.class = parts.first().map(|p| Ident::new(p, Span::call_site()));
+                } else {
+                    return Err(Error::new(begin.span(), "static method without class prefix"));
+                }
             }
         }
         Ok(result)
