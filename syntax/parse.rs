@@ -327,8 +327,20 @@ fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> R
     let doc = attrs::parse_doc(cx, &foreign_fn.attrs);
     let fn_token = foreign_fn.sig.fn_token;
     let ident = foreign_fn.sig.ident.clone();
+    let mut attr = None;
+    attrs::parse(cx, &foreign_fn.attrs, attrs::Parser { alias: Some(&mut attr), ..Default::default() });
     let mut alias = None;
-    attrs::parse(cx, &foreign_fn.attrs, attrs::Parser { alias: Some(&mut alias), ..Default::default() });
+    if let Some((ident, is_rust)) = attr {
+        match lang { 
+            Lang::Cxx if !is_rust => {
+                return Err(Error::new_spanned(foreign_fn, "C/C++ functions with 'cxx_name' are not allowed"));
+            },
+            Lang::Rust if is_rust => {
+                return Err(Error::new_spanned(foreign_fn, "Rust functions with 'rust_name' are not allowed"));
+            },
+            _ => alias = Some(ident),
+        }
+    }
     let paren_token = foreign_fn.sig.paren_token;
     let semi_token = foreign_fn.semi_token;
     let api_function = match lang {

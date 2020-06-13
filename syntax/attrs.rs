@@ -10,7 +10,7 @@ pub struct Parser<'a> {
     pub doc: Option<&'a mut Doc>,
     pub derives: Option<&'a mut Vec<Derive>>,
     pub repr: Option<&'a mut Option<Atom>>,
-    pub alias: Option<&'a mut Option<Ident>>,
+    pub alias: Option<&'a mut Option<(Ident, bool)>>,
 }
 
 pub(super) fn parse_doc(cx: &mut Errors, attrs: &[Attribute]) -> Doc {
@@ -62,7 +62,7 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
             match parse_function_alias_attribute.parse2(attr.tokens.clone()) {
                 Ok(alias) => {
                     if let Some(a) = &mut parser.alias {
-                        **a = Some(alias);
+                        **a = Some((alias, attr.path.is_ident("rust_name")));
                         continue;
                     }
                 }
