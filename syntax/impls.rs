@@ -1,12 +1,9 @@
-use crate::syntax::{ExternFn, Receiver, Ref, Signature, Slice, Ty1, Type, CxxSideItem, CxxSide};
+use crate::syntax::{ExternFn, Receiver, Ref, Signature, Slice, Ty1, Type, CxxSide};
 use std::hash::{Hash, Hasher};
 use std::mem;
 use std::ops::{Deref, DerefMut};
-use syn::{Error, Token};
+use syn::{LitStr, Error, Token, Path};
 use syn::parse::{Parse, ParseStream, Result};
-use syn::punctuated::Punctuated;
-use proc_macro2::{Ident, Span};
-use super::kw;
 
 impl Deref for ExternFn {
     type Target = Signature;
@@ -22,46 +19,20 @@ impl DerefMut for ExternFn {
     }
 }
 
-impl Parse for CxxSideItem {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let begin = input.cursor();
-        if let Ok(_) = input.parse::<kw::name>() {
-            input.parse::<Token![=]>()?;
-            return Ok(Self::Name(input.parse::<syn::LitStr>()?.value()));
-        }
-        if let Ok(_) = input.parse::<Token![static]>() {
-            return Ok(Self::IsStatic);
-        }
-        Err(Error::new(begin.span(), "unknown cxx_side item"))
-    }
-}
-
 impl Parse for CxxSide {
     fn parse(input: ParseStream) -> Result<Self> {
+        input.parse::<Token![=]>()?;
         let begin = input.cursor();
-        let mut result = CxxSide::default();
-        let items: Punctuated<CxxSideItem, Token![,]> = input.parse_terminated(CxxSideItem::parse)?;
-        for item in &items {
-            match item {
-                CxxSideItem::Name(name) => result.name = Some(name.clone()),
-                CxxSideItem::IsStatic => result.is_static = true,
-            }
+        let name = input.parse::<LitStr>()?.parse_with(Path::parse_mod_style)?;
+        match name.segments.len() {
+            2 => Ok(CxxSide {
+                name: name.segments.last().map(|p| p.ident.clone()),
+                class: name.segments.first().map(|p| p.ident.clone()),
+                is_static: true
+            }),
+            1 => Ok(CxxSide { name: name.segments.first().map(|p| p.ident.clone()), .. Default::default() }),
+            _ => Err(Error::new(begin.span(), "incorrect name")),
         }
-        if result.is_static {
-            if let Some(name) = result.name.clone() {
-                if name.contains("::") {
-                    let parts: Vec<&str> = name.split("::").collect();
-                    if parts.len() > 2 {
-                        return Err(Error::new(begin.span(), "namespaces and subclasses are not supported yet"));
-                    }
-                    result.name = parts.last().map(|p| p.to_string());
-                    result.class = parts.first().map(|p| Ident::new(p, Span::call_site()));
-                } else {
-                    return Err(Error::new(begin.span(), "static method without class prefix"));
-                }
-            }
-        }
-        Ok(result)
     }
 }
 

@@ -75,14 +75,9 @@ pub struct ExternFn {
     pub semi_token: Token![;],
 }
 
-pub enum CxxSideItem {
-    Name(String),
-    IsStatic,
-}
-
 #[derive(Debug, Default)]
 pub struct CxxSide {
-    pub name: Option<String>,
+    pub name: Option<Ident>,
     pub class: Option<Ident>,
     pub is_static: bool,
 }

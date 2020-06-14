@@ -353,7 +353,7 @@ fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &[&Ex
                 write!(out, "static ");
             }
             if let Some(name) = &cxx_side.name {
-                local_name = name.clone();
+                local_name = name.to_string();
             }
         }
         write_rust_function_shim_decl(out, &local_name, sig, false);
@@ -465,8 +465,8 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     write!(out, " = ");
     let name = efn.cxx_side
         .as_ref()
-        .and_then(|s| s.name.as_ref().map(|n| n.clone()))
-        .unwrap_or_else(|| efn.ident.to_string());
+        .and_then(|s| s.name.as_ref())
+        .unwrap_or_else(|| &efn.ident);
     if let Some(CxxSide { class: Some(class @ _), is_static: true, .. }) = &efn.cxx_side {
         write!(out, "&{}::{}", class, name);
     } else {
@@ -639,13 +639,12 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         is_static = cxx_side.is_static;
         let name = cxx_side.name
             .as_ref()
-            .map(|n| n.clone())
-            .unwrap_or_else(|| efn.ident.to_string());
+            .unwrap_or_else(|| &efn.ident);
         match &efn.sig.receiver {
             None => cxx_side.class
                 .as_ref()
                 .map(|c| format!("{}::{}", c, name))
-                .unwrap_or_else(|| name),
+                .unwrap_or_else(|| name.to_string()),
             Some(receiver) => format!("{}::{}", receiver.ty, name),
         }
     } else {

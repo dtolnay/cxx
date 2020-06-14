@@ -58,8 +58,8 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
                 }
                 Err(err) => return cx.push(err),
             }
-        } else if attr.path.is_ident("cxx_side") {
-            match attr.parse_args_with(|input: ParseStream| input.parse::<CxxSide>()) {
+        } else if attr.path.is_ident("cxx_name") {
+            match (|input: ParseStream| input.parse::<CxxSide>()).parse2(attr.tokens.clone()) {
                 Ok(attr) => {
                     if let Some(cxx_side) = &mut parser.cxx_side {
                         **cxx_side = Some(attr);

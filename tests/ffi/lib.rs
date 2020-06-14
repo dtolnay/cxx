@@ -86,17 +86,17 @@ pub mod ffi {
         fn set_succeed(&mut self, n: usize) -> Result<usize>;
         fn get_fail(&mut self) -> Result<usize>;
                 
-        #[cxx_side(name = "cOverloadedMethod")]
+        #[cxx_name = "cOverloadedMethod"]
         fn i32_overloaded_method(&self, x: i32) -> String;
-        #[cxx_side(name = "cOverloadedMethod")]
+        #[cxx_name = "cOverloadedMethod"]
         fn str_overloaded_method(&self, x: &str) -> String;
         
-        #[cxx_side(name = "cOverloadedFunction")]
+        #[cxx_name = "cOverloadedFunction"]
         fn i32_overloaded_function(x: i32) -> String;
-        #[cxx_side(name = "cOverloadedFunction")]
+        #[cxx_name = "cOverloadedFunction"]
         fn str_overloaded_function(x: &str) -> String;
 
-        #[cxx_side(name = "C::cStaticMethod", static)]
+        #[cxx_name = "C::cStaticMethod"]
         fn static_method() -> String;
     }
 
@@ -150,10 +150,10 @@ pub mod ffi {
         fn get(self: &R2) -> usize;
         fn set(self: &mut R2, n: usize) -> usize;
                 
-        #[cxx_side(name = "rAliasedFunction")]
+        #[cxx_name = "rAliasedFunction"]
         fn r_aliased_function(x: i32) -> String;
                 
-        #[cxx_side(name = "R2::rStaticMethod", static)]
+        #[cxx_name = "R2::rStaticMethod"]
         fn r_static_method() -> String;
     }
 }
