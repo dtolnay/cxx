@@ -28,9 +28,11 @@ impl Parse for CxxSide {
             2 => Ok(CxxSide {
                 name: name.segments.last().map(|p| p.ident.clone()),
                 class: name.segments.first().map(|p| p.ident.clone()),
-                is_static: true
             }),
-            1 => Ok(CxxSide { name: name.segments.first().map(|p| p.ident.clone()), .. Default::default() }),
+            1 => Ok(CxxSide { 
+                name: name.segments.first().map(|p| p.ident.clone()), 
+                class: None,
+            }),
             _ => Err(Error::new(begin.span(), "incorrect name")),
         }
     }

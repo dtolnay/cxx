@@ -501,8 +501,8 @@ fn expand_rust_function_shim_impl(
             None => {
                 efn.cxx_side
                     .as_ref()
-                    .and_then(|s| Some((s.class.as_ref()?, s.is_static)))
-                    .map(|(class, _)| quote!(#class::#ident))
+                    .and_then(|s| s.class.as_ref())
+                    .map(|class| quote!(#class::#ident))
                     .unwrap_or_else(|| quote!(super::#ident))
             }
             Some(receiver) => {

@@ -349,7 +349,7 @@ fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &[&Ex
         let sig = &method.sig;
         let mut local_name = method.ident.to_string();
         if let Some(cxx_side) = &method.cxx_side {
-            if cxx_side.is_static {
+            if cxx_side.class.is_some() {
                 write!(out, "static ");
             }
             if let Some(name) = &cxx_side.name {
@@ -467,7 +467,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         .as_ref()
         .and_then(|s| s.name.as_ref())
         .unwrap_or_else(|| &efn.ident);
-    if let Some(CxxSide { class: Some(class @ _), is_static: true, .. }) = &efn.cxx_side {
+    if let Some(CxxSide { class: Some(class @ _), .. }) = &efn.cxx_side {
         write!(out, "&{}::{}", class, name);
     } else {
         match &efn.receiver {
@@ -575,7 +575,7 @@ fn write_function_pointer_trampoline(
 
     out.next_section();
     let c_trampoline = mangle::c_trampoline(&out.namespace, efn, var).to_string();
-    let is_static = efn.cxx_side.as_ref().map(|s| s.is_static).unwrap_or_default();
+    let is_static = efn.cxx_side.as_ref().map(|s| s.class.is_some()).unwrap_or_default();
     write_rust_function_shim_impl(out, &c_trampoline, f, types, &r_trampoline, indirect_call, is_static);
 }
 
@@ -636,7 +636,7 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     }
     let mut is_static = false;
     let local_name = if let Some(cxx_side) = &efn.cxx_side {
-        is_static = cxx_side.is_static;
+        is_static = cxx_side.class.is_some();
         let name = cxx_side.name
             .as_ref()
             .unwrap_or_else(|| &efn.ident);

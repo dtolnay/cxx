@@ -79,7 +79,6 @@ pub struct ExternFn {
 pub struct CxxSide {
     pub name: Option<Ident>,
     pub class: Option<Ident>,
-    pub is_static: bool,
 }
 
 pub struct TypeAlias {
