@@ -575,8 +575,7 @@ fn write_function_pointer_trampoline(
 
     out.next_section();
     let c_trampoline = mangle::c_trampoline(&out.namespace, efn, var).to_string();
-    let is_static = efn.cxx_side.as_ref().map(|s| s.class.is_some()).unwrap_or_default();
-    write_rust_function_shim_impl(out, &c_trampoline, f, types, &r_trampoline, indirect_call, is_static);
+    write_rust_function_shim_impl(out, &c_trampoline, f, types, &r_trampoline, indirect_call);
 }
 
 fn write_rust_function_decl(out: &mut OutFile, efn: &ExternFn, types: &Types) {
@@ -634,9 +633,7 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     for line in efn.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
-    let mut is_static = false;
     let local_name = if let Some(cxx_side) = &efn.cxx_side {
-        is_static = cxx_side.class.is_some();
         let name = cxx_side.name
             .as_ref()
             .unwrap_or_else(|| &efn.ident);
@@ -655,7 +652,7 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
     };
     let invoke = mangle::extern_fn(&out.namespace, efn);
     let indirect_call = false;
-    write_rust_function_shim_impl(out, &local_name, efn, types, &invoke, indirect_call, is_static);
+    write_rust_function_shim_impl(out, &local_name, efn, types, &invoke, indirect_call);
 }
 
 fn write_rust_function_shim_decl(
@@ -697,9 +694,8 @@ fn write_rust_function_shim_impl(
     types: &Types,
     invoke: &Symbol,
     indirect_call: bool,
-    is_static: bool,
 ) {
-    if (out.header && sig.receiver.is_some()) || (is_static && out.header) {
+    if out.header && (sig.receiver.is_some() || local_name.contains("::")) {
         // We've already defined this inside the struct.
         return;
     }
