@@ -6,7 +6,9 @@
     clippy::toplevel_ref_arg
 )]
 
+#[path = "../../src/mod.rs"]
 mod gen;
+#[path = "../../../syntax/mod.rs"]
 mod syntax;
 
 use gen::include;

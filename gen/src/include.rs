@@ -1,7 +1,7 @@
 use crate::gen::out::OutFile;
 use std::fmt::{self, Display};
 
-pub static HEADER: &str = include_str!("include/cxx.h");
+pub static HEADER: &str = include_str!("../../include/cxx.h");
 
 pub(super) fn write(out: &mut OutFile, needed: bool, guard: &str) {
     let ifndef = format!("#ifndef {}", guard);

@@ -10,6 +10,7 @@
 extern crate proc_macro;
 
 mod expand;
+#[path = "../../syntax/mod.rs"]
 mod syntax;
 mod type_id;
 

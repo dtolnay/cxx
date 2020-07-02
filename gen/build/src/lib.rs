@@ -53,8 +53,10 @@
 )]
 
 mod error;
+#[path = "../../src/mod.rs"]
 mod gen;
 mod paths;
+#[path = "../../../syntax/mod.rs"]
 mod syntax;
 
 use crate::error::Result;
