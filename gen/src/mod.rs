@@ -24,6 +24,9 @@ struct Input {
 pub(super) struct Opt {
     /// Any additional headers to #include
     pub include: Vec<String>,
+    /// Whether to set __attribute__((visibility("default")))
+    /// or similar annotations on function implementations.
+    pub cxx_impl_annotations: Option<String>,
 }
 
 pub(super) fn do_generate_bridge(path: &Path, opt: Opt) -> Vec<u8> {
