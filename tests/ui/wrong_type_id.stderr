@@ -1,4 +1,4 @@
-error[E0271]: type mismatch resolving `<here::StringPiece as cxx::extern_type::ExternType>::Id == (cxx::f, cxx::o, cxx::l, cxx::l, cxx::y, (), cxx::B, cxx::y, cxx::t, cxx::e, cxx::R, cxx::a, cxx::n, cxx::g, cxx::e)`
+error[E0271]: type mismatch resolving `<here::StringPiece as cxx::ExternType>::Id == (cxx::f, cxx::o, cxx::l, cxx::l, cxx::y, (), cxx::B, cxx::y, cxx::t, cxx::e, cxx::R, cxx::a, cxx::n, cxx::g, cxx::e)`
    --> $DIR/wrong_type_id.rs:11:9
     |
 11  |         type ByteRange = crate::here::StringPiece;
@@ -7,7 +7,7 @@ error[E0271]: type mismatch resolving `<here::StringPiece as cxx::extern_type::E
    ::: $WORKSPACE/src/extern_type.rs:110:41
     |
 110 | pub fn verify_extern_type<T: ExternType<Id = Id>, Id>() {}
-    |                                         ------- required by this bound in `cxx::extern_type::verify_extern_type`
+    |                                         ------- required by this bound in `cxx::private::verify_extern_type`
     |
     = note: expected tuple `(cxx::f, cxx::o, cxx::l, cxx::l, cxx::y, (), cxx::B, cxx::y, cxx::t, cxx::e, cxx::R, cxx::a, cxx::n, cxx::g, cxx::e)`
                found tuple `(cxx::f, cxx::o, cxx::l, cxx::l, cxx::y, (), cxx::S, cxx::t, cxx::r, cxx::i, cxx::n, cxx::g, cxx::P, cxx::i, cxx::e, cxx::c, cxx::e)`
