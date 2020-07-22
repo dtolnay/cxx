@@ -69,7 +69,10 @@ void c_take_rust_vec_shared(rust::Vec<Shared> v);
 void c_take_rust_vec_shared_forward_iterator(rust::Vec<Shared> v);
 void c_take_ref_rust_vec(const rust::Vec<uint8_t> &v);
 void c_take_ref_rust_vec_copy(const rust::Vec<uint8_t> &v);
+/*
+// https://github.com/dtolnay/cxx/issues/232
 void c_take_callback(rust::Fn<size_t(rust::String)> callback);
+*/
 void c_take_enum(Enum e);
 
 void c_try_return_void();

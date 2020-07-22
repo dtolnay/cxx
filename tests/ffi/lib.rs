@@ -64,7 +64,10 @@ pub mod ffi {
         fn c_take_rust_vec_shared_forward_iterator(v: Vec<Shared>);
         fn c_take_ref_rust_vec(v: &Vec<u8>);
         fn c_take_ref_rust_vec_copy(v: &Vec<u8>);
+        /*
+        // https://github.com/dtolnay/cxx/issues/232
         fn c_take_callback(callback: fn(String) -> usize);
+        */
         fn c_take_enum(e: Enum);
 
         fn c_try_return_void() -> Result<()>;

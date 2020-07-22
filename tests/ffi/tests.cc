@@ -249,9 +249,12 @@ void c_take_ref_rust_vec_copy(const rust::Vec<uint8_t> &v) {
   }
 }
 
+/*
+// https://github.com/dtolnay/cxx/issues/232
 void c_take_callback(rust::Fn<size_t(rust::String)> callback) {
   callback("2020");
 }
+*/
 
 void c_take_enum(Enum e) {
   if (e == Enum::AVal) {
