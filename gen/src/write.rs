@@ -149,11 +149,13 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
     for ty in types {
         match ty {
             Type::RustBox(_) => {
+                out.include.new = true;
                 out.include.type_traits = true;
                 needs_rust_box = true;
             }
             Type::RustVec(_) => {
                 out.include.array = true;
+                out.include.new = true;
                 out.include.type_traits = true;
                 needs_rust_vec = true;
             }
@@ -463,6 +465,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         write!(out, "        ");
     }
     if indirect_return {
+        out.include.new = true;
         write!(out, "new (return$) ");
         write_indirect_return_type(out, efn.ret.as_ref().unwrap());
         write!(out, "(");
@@ -1149,6 +1152,7 @@ fn write_unique_ptr(out: &mut OutFile, ident: &Ident, types: &Types) {
 
 // Shared by UniquePtr<T> and UniquePtr<CxxVector<T>>.
 fn write_unique_ptr_common(out: &mut OutFile, ty: &Type, types: &Types) {
+    out.include.new = true;
     out.include.utility = true;
     let inner = to_typename(&out.namespace, ty);
     let instance = to_mangled(&out.namespace, ty);

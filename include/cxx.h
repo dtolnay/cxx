@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <exception>
 #include <iosfwd>
+#include <new>
 #include <string>
 #include <type_traits>
 #include <utility>
