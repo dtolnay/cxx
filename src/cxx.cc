@@ -106,13 +106,11 @@ Str::Str() noexcept : repr(Repr{reinterpret_cast<const char *>(this), 0}) {}
 
 Str::Str(const Str &) noexcept = default;
 
-Str::Str(const std::string &s) : repr(Repr{s.data(), s.length()}) {
-  if (!cxxbridge03$str$valid(this->repr.ptr, this->repr.len)) {
-    panic<std::invalid_argument>("data for rust::Str is not utf-8");
-  }
-}
+Str::Str(const std::string &s) : Str(s.data(), s.length()) {}
 
-Str::Str(const char *s) : repr(Repr{s, std::strlen(s)}) {
+Str::Str(const char *s) : Str(s, std::strlen(s)) {}
+
+Str::Str(const char *s, size_t len) : repr(Repr{s, len}) {
   if (!cxxbridge03$str$valid(this->repr.ptr, this->repr.len)) {
     panic<std::invalid_argument>("data for rust::Str is not utf-8");
   }
