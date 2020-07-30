@@ -29,6 +29,7 @@ public:
 
   String(const std::string &);
   String(const char *);
+  String(const char *, size_t);
 
   String &operator=(const String &) noexcept;
   String &operator=(String &&) noexcept;
@@ -58,6 +59,7 @@ public:
 
   Str(const std::string &);
   Str(const char *);
+  Str(const char *, size_t);
   Str(std::string &&) = delete;
 
   Str &operator=(Str) noexcept;
