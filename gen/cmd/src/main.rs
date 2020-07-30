@@ -35,6 +35,15 @@ struct Opt {
     #[structopt(long)]
     header: bool,
 
+    /// Optional annotation for implementations of C++ function
+    /// wrappers that may be exposed to Rust. You may for example
+    /// need to provide __declspec(dllexport) or
+    /// __attribute__((visibility("default"))) if Rust code from
+    /// one shared object or executable depends on these C++ functions
+    /// in another.
+    #[structopt(long)]
+    cxx_impl_annotations: Option<String>,
+
     /// Any additional headers to #include
     #[structopt(short, long)]
     include: Vec<String>,
@@ -49,6 +58,7 @@ fn main() {
 
     let gen = gen::Opt {
         include: opt.include,
+        cxx_impl_annotations: opt.cxx_impl_annotations,
     };
 
     match (opt.input, opt.header) {

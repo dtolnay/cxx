@@ -86,13 +86,13 @@ pub(super) fn gen(
         out.begin_block("extern \"C\"");
         write_exception_glue(out, apis);
         for api in apis {
-            let (efn, write): (_, fn(_, _, _)) = match api {
+            let (efn, write): (_, fn(_, _, _, _)) = match api {
                 Api::CxxFunction(efn) => (efn, write_cxx_function_shim),
                 Api::RustFunction(efn) => (efn, write_rust_function_decl),
                 _ => continue,
             };
             out.next_section();
-            write(out, efn, types);
+            write(out, efn, types, &opt.cxx_impl_annotations);
         }
         out.end_block("extern \"C\"");
     }
@@ -399,7 +399,17 @@ fn write_exception_glue(out: &mut OutFile, apis: &[Api]) {
     }
 }
 
-fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
+fn write_cxx_function_shim(
+    out: &mut OutFile,
+    efn: &ExternFn,
+    types: &Types,
+    impl_annotations: &Option<String>,
+) {
+    if !out.header {
+        if let Some(annotation) = impl_annotations {
+            write!(out, "{} ", annotation);
+        }
+    }
     if efn.throws {
         write!(out, "::rust::Str::Repr ");
     } else {
@@ -560,7 +570,7 @@ fn write_function_pointer_trampoline(
     write_rust_function_shim_impl(out, &c_trampoline, f, types, &r_trampoline, indirect_call);
 }
 
-fn write_rust_function_decl(out: &mut OutFile, efn: &ExternFn, types: &Types) {
+fn write_rust_function_decl(out: &mut OutFile, efn: &ExternFn, types: &Types, _: &Option<String>) {
     let link_name = mangle::extern_fn(&out.namespace, efn);
     let indirect_call = false;
     write_rust_function_decl_impl(out, &link_name, efn, types, indirect_call);
