@@ -55,16 +55,11 @@ String::String(String &&other) noexcept {
 
 String::~String() noexcept { cxxbridge03$string$drop(this); }
 
-String::String(const std::string &s) {
-  auto ptr = s.data();
-  auto len = s.length();
-  if (!cxxbridge03$string$from(this, ptr, len)) {
-    panic<std::invalid_argument>("data for rust::String is not utf-8");
-  }
-}
+String::String(const std::string &s) : String(s.data(), s.length()) {}
 
-String::String(const char *s) {
-  auto len = std::strlen(s);
+String::String(const char *s) : String(s, std::strlen(s)) {}
+
+String::String(const char *s, size_t len) {
   if (!cxxbridge03$string$from(this, s, len)) {
     panic<std::invalid_argument>("data for rust::String is not utf-8");
   }
