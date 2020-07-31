@@ -51,14 +51,13 @@ impl OutFile {
         }
     }
 
-    pub fn prepend(&mut self, section: String) {
-        let content = self.content.get_mut();
-        content.bytes.splice(..0, section.into_bytes());
-    }
-
     pub fn write_fmt(&self, args: Arguments) {
         let content = &mut *self.content.borrow_mut();
         Write::write_fmt(content, args).unwrap();
+    }
+
+    pub fn extend(&self, other: &Self) {
+        self.content.borrow_mut().write_bytes(&other.content.borrow().bytes);
     }
 
     pub fn content(&self) -> Vec<u8> {
@@ -68,7 +67,14 @@ impl OutFile {
 
 impl Write for Content {
     fn write_str(&mut self, s: &str) -> fmt::Result {
-        if !s.is_empty() {
+        self.write_bytes(s.as_bytes());
+        Ok(())
+    }
+}
+
+impl Content {
+    fn write_bytes(&mut self, b: &[u8]) {
+        if !b.is_empty() {
             if !self.blocks_pending.is_empty() {
                 if !self.bytes.is_empty() {
                     self.bytes.push(b'\n');
@@ -84,8 +90,7 @@ impl Write for Content {
                 }
                 self.section_pending = false;
             }
-            self.bytes.extend_from_slice(s.as_bytes());
+            self.bytes.extend_from_slice(b);
         }
-        Ok(())
     }
 }

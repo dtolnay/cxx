@@ -17,10 +17,6 @@ pub(super) fn gen(
     let mut out_file = OutFile::new(namespace.clone(), header);
     let out = &mut out_file;
 
-    if header {
-        writeln!(out, "#pragma once");
-    }
-
     out.include.extend(opt.include);
     for api in apis {
         if let Api::Include(include) = api {
@@ -114,9 +110,17 @@ pub(super) fn gen(
         write_generic_instantiations(out, types);
     }
 
-    out.prepend(out.include.to_string());
-
-    out_file
+    // We collected necessary includes lazily while generating the above. Now
+    // put it all together.
+    let mut full_file = OutFile::new(namespace.clone(), header);
+    let full = &mut full_file;
+    if header {
+        writeln!(full, "#pragma once");
+    }
+    write!(full, "{}", out.include);
+    full.next_section();
+    full.extend(out);
+    full_file
 }
 
 fn write_includes(out: &mut OutFile, types: &Types) {
