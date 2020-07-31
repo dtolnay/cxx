@@ -65,9 +65,11 @@ rust_library(
 rust_library(
     name = "proc-macro-error",
     srcs = glob(["vendor/proc-macro-error-1.0.3/src/**"]),
+    proc_macro_deps = [
+        ":proc-macro-error-attr",
+    ],
     rustc_flags = ["--cfg=use_fallback"],
     deps = [
-        ":proc-macro-error-attr",
         ":proc-macro2",
         ":quote",
         ":syn",
@@ -113,11 +115,13 @@ rust_library(
 rust_library(
     name = "structopt",
     srcs = glob(["vendor/structopt-0.3.15/src/**"]),
+    proc_macro_deps = [
+        ":structopt-derive",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         ":clap",
         ":lazy_static",
-        ":structopt-derive",
     ],
 )
 
