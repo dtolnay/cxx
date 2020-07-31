@@ -27,6 +27,7 @@ rust_library(
     name = "clap",
     srcs = glob(["vendor/clap-2.33.1/src/**"]),
     edition = "2015",
+    visibility = ["//visibility:public"],
     deps = [
         ":bitflags",
         ":textwrap",
@@ -45,13 +46,6 @@ rust_library(
 )
 
 rust_library(
-    name = "heck",
-    srcs = glob(["vendor/heck-0.3.1/src/**"]),
-    edition = "2015",
-    deps = [":unicode-segmentation"],
-)
-
-rust_library(
     name = "lazy_static",
     srcs = glob(["vendor/lazy_static-1.4.0/src/**"]),
 )
@@ -60,32 +54,6 @@ rust_library(
     name = "link-cplusplus",
     srcs = glob(["vendor/link-cplusplus-1.0.2/src/**"]),
     visibility = ["//visibility:public"],
-)
-
-rust_library(
-    name = "proc-macro-error",
-    srcs = glob(["vendor/proc-macro-error-1.0.3/src/**"]),
-    proc_macro_deps = [
-        ":proc-macro-error-attr",
-    ],
-    rustc_flags = ["--cfg=use_fallback"],
-    deps = [
-        ":proc-macro2",
-        ":quote",
-        ":syn",
-    ],
-)
-
-rust_library(
-    name = "proc-macro-error-attr",
-    srcs = glob(["vendor/proc-macro-error-attr-1.0.3/src/**"]),
-    crate_type = "proc-macro",
-    deps = [
-        ":proc-macro2",
-        ":quote",
-        ":syn",
-        ":syn-mid",
-    ],
 )
 
 rust_library(
@@ -113,32 +81,6 @@ rust_library(
 )
 
 rust_library(
-    name = "structopt",
-    srcs = glob(["vendor/structopt-0.3.15/src/**"]),
-    proc_macro_deps = [
-        ":structopt-derive",
-    ],
-    visibility = ["//visibility:public"],
-    deps = [
-        ":clap",
-        ":lazy_static",
-    ],
-)
-
-rust_library(
-    name = "structopt-derive",
-    srcs = glob(["vendor/structopt-derive-0.4.8/src/**"]),
-    crate_type = "proc-macro",
-    deps = [
-        ":heck",
-        ":proc-macro-error",
-        ":proc-macro2",
-        ":quote",
-        ":syn",
-    ],
-)
-
-rust_library(
     name = "syn",
     srcs = glob(["vendor/syn-1.0.36/src/**"]),
     crate_features = [
@@ -158,16 +100,6 @@ rust_library(
 )
 
 rust_library(
-    name = "syn-mid",
-    srcs = glob(["vendor/syn-mid-0.5.0/src/**"]),
-    deps = [
-        ":proc-macro2",
-        ":quote",
-        ":syn",
-    ],
-)
-
-rust_library(
     name = "termcolor",
     srcs = glob(["vendor/termcolor-1.1.0/src/**"]),
 )
@@ -176,12 +108,6 @@ rust_library(
     name = "textwrap",
     srcs = glob(["vendor/textwrap-0.11.0/src/**"]),
     deps = [":unicode-width"],
-)
-
-rust_library(
-    name = "unicode-segmentation",
-    srcs = glob(["vendor/unicode-segmentation-1.6.0/src/**"]),
-    edition = "2015",
 )
 
 rust_library(
