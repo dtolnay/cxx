@@ -127,9 +127,6 @@ impl Display for Includes {
             writeln!(f, "#include <BaseTsd.h>")?;
             writeln!(f, "#endif")?;
         }
-        if *self != Self::default() {
-            writeln!(f)?;
-        }
         Ok(())
     }
 }
