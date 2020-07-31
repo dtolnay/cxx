@@ -44,6 +44,13 @@ struct Opt {
     #[structopt(long)]
     cxx_impl_annotations: Option<String>,
 
+    /// If generating the .cc file, omit definitions which would also
+    /// be included in the .h file. If you choose to do this, you should
+    /// ensure that the .h file is included within the .cc file either
+    /// directly or indirectly. The include option may help here.
+    #[structopt(long, conflicts_with("header"))]
+    skip_definitions: bool,
+
     /// Any additional headers to #include
     #[structopt(short, long)]
     include: Vec<String>,
@@ -59,6 +66,7 @@ fn main() {
     let gen = gen::Opt {
         include: opt.include,
         cxx_impl_annotations: opt.cxx_impl_annotations,
+        skip_definitions: opt.skip_definitions,
     };
 
     match (opt.input, opt.header) {

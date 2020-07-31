@@ -23,13 +23,16 @@ struct Input {
     module: Vec<Item>,
 }
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub(super) struct Opt {
     /// Any additional headers to #include
     pub include: Vec<String>,
     /// Whether to set __attribute__((visibility("default")))
     /// or similar annotations on function implementations.
     pub cxx_impl_annotations: Option<String>,
+    /// Whether to skip definitions of things also defined in the
+    /// header file (applies only when generating the .cc file)
+    pub skip_definitions: bool,
 }
 
 pub(super) fn do_generate_bridge(path: &Path, opt: Opt) -> Vec<u8> {

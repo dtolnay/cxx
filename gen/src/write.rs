@@ -58,27 +58,29 @@ pub(super) fn gen(
         }
     }
 
-    for api in apis {
-        match api {
-            Api::Struct(strct) => {
-                out.next_section();
-                write_struct(out, strct);
-            }
-            Api::Enum(enm) => {
-                out.next_section();
-                if types.cxx.contains(&enm.ident) {
-                    check_enum(out, enm);
-                } else {
-                    write_enum(out, enm);
-                }
-            }
-            Api::RustType(ety) => {
-                if let Some(methods) = methods_for_type.get(&ety.ident) {
+    if header || !opt.skip_definitions {
+        for api in apis {
+            match api {
+                Api::Struct(strct) => {
                     out.next_section();
-                    write_struct_with_methods(out, ety, methods);
+                    write_struct(out, strct);
                 }
+                Api::Enum(enm) => {
+                    out.next_section();
+                    if types.cxx.contains(&enm.ident) {
+                        check_enum(out, enm);
+                    } else {
+                        write_enum(out, enm);
+                    }
+                }
+                Api::RustType(ety) => {
+                    if let Some(methods) = methods_for_type.get(&ety.ident) {
+                        out.next_section();
+                        write_struct_with_methods(out, ety, methods);
+                    }
+                }
+                _ => {}
             }
-            _ => {}
         }
     }
 
