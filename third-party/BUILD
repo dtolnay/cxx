@@ -7,7 +7,7 @@ load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 
 rust_library(
     name = "anyhow",
-    srcs = glob(["vendor/anyhow-1.0.31/src/**"]),
+    srcs = glob(["vendor/anyhow-1.0.32/src/**"]),
     crate_features = ["std"],
     visibility = ["//visibility:public"],
 )
@@ -19,7 +19,7 @@ rust_library(
 
 rust_library(
     name = "cc",
-    srcs = glob(["vendor/cc-1.0.54/src/**"]),
+    srcs = glob(["vendor/cc-1.0.58/src/**"]),
     visibility = ["//visibility:public"],
 )
 
@@ -36,7 +36,7 @@ rust_library(
 
 rust_library(
     name = "codespan-reporting",
-    srcs = glob(["vendor/codespan-reporting-0.9.4/src/**"]),
+    srcs = glob(["vendor/codespan-reporting-0.9.5/src/**"]),
     visibility = ["//visibility:public"],
     deps = [
         ":termcolor",
@@ -58,13 +58,13 @@ rust_library(
 
 rust_library(
     name = "link-cplusplus",
-    srcs = glob(["vendor/link-cplusplus-1.0.1/src/**"]),
+    srcs = glob(["vendor/link-cplusplus-1.0.2/src/**"]),
     visibility = ["//visibility:public"],
 )
 
 rust_library(
     name = "proc-macro-error",
-    srcs = glob(["vendor/proc-macro-error-1.0.2/src/**"]),
+    srcs = glob(["vendor/proc-macro-error-1.0.3/src/**"]),
     rustc_flags = ["--cfg=use_fallback"],
     deps = [
         ":proc-macro-error-attr",
@@ -76,7 +76,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro-error-attr",
-    srcs = glob(["vendor/proc-macro-error-attr-1.0.2/src/**"]),
+    srcs = glob(["vendor/proc-macro-error-attr-1.0.3/src/**"]),
     crate_type = "proc-macro",
     deps = [
         ":proc-macro2",
@@ -88,7 +88,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.17/src/**"]),
+    srcs = glob(["vendor/proc-macro2-1.0.19/src/**"]),
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -104,7 +104,7 @@ rust_library(
 
 rust_library(
     name = "quote",
-    srcs = glob(["vendor/quote-1.0.6/src/**"]),
+    srcs = glob(["vendor/quote-1.0.7/src/**"]),
     crate_features = ["proc-macro"],
     visibility = ["//visibility:public"],
     deps = [":proc-macro2"],
@@ -112,7 +112,7 @@ rust_library(
 
 rust_library(
     name = "structopt",
-    srcs = glob(["vendor/structopt-0.3.14/src/**"]),
+    srcs = glob(["vendor/structopt-0.3.15/src/**"]),
     visibility = ["//visibility:public"],
     deps = [
         ":clap",
@@ -123,7 +123,7 @@ rust_library(
 
 rust_library(
     name = "structopt-derive",
-    srcs = glob(["vendor/structopt-derive-0.4.7/src/**"]),
+    srcs = glob(["vendor/structopt-derive-0.4.8/src/**"]),
     crate_type = "proc-macro",
     deps = [
         ":heck",
@@ -136,7 +136,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.23/src/**"]),
+    srcs = glob(["vendor/syn-1.0.36/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
@@ -182,10 +182,10 @@ rust_library(
 
 rust_library(
     name = "unicode-width",
-    srcs = glob(["vendor/unicode-width-0.1.7/src/**"]),
+    srcs = glob(["vendor/unicode-width-0.1.8/src/**"]),
 )
 
 rust_library(
     name = "unicode-xid",
-    srcs = glob(["vendor/unicode-xid-0.2.0/src/**"]),
+    srcs = glob(["vendor/unicode-xid-0.2.1/src/**"]),
 )
