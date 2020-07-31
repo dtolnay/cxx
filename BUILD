@@ -3,10 +3,12 @@ load("//tools/bazel:rust.bzl", "rust_binary", "rust_library")
 rust_library(
     name = "cxx",
     srcs = glob(["src/**/*.rs"]),
+    proc_macro_deps = [
+        ":cxxbridge-macro",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         ":core-lib",
-        ":cxxbridge-macro",
         "//third-party:link-cplusplus",
     ],
 )
