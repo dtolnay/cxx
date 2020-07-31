@@ -7,10 +7,11 @@ pub(crate) struct OutFile {
     pub namespace: Namespace,
     pub header: bool,
     pub include: Includes,
+    pub front: Content,
     content: RefCell<Content>,
 }
 
-struct Content {
+pub struct Content {
     bytes: Vec<u8>,
     section_pending: bool,
     blocks_pending: Vec<&'static str>,
@@ -22,11 +23,8 @@ impl OutFile {
             namespace,
             header,
             include: Includes::new(),
-            content: RefCell::new(Content {
-                bytes: Vec::new(),
-                section_pending: false,
-                blocks_pending: Vec::new(),
-            }),
+            front: Content::new(),
+            content: RefCell::new(Content::new()),
         }
     }
 
@@ -56,12 +54,17 @@ impl OutFile {
         Write::write_fmt(content, args).unwrap();
     }
 
-    pub fn extend(&self, other: &Self) {
-        self.content.borrow_mut().write_bytes(&other.content.borrow().bytes);
-    }
-
     pub fn content(&self) -> Vec<u8> {
-        self.content.borrow().bytes.clone()
+        let front = &self.front.bytes;
+        let content = &self.content.borrow().bytes;
+        let len = front.len() + !front.is_empty() as usize + content.len();
+        let mut out = Vec::with_capacity(len);
+        out.extend_from_slice(front);
+        if !front.is_empty() {
+            out.push(b'\n');
+        }
+        out.extend_from_slice(content);
+        out
     }
 }
 
@@ -73,6 +76,18 @@ impl Write for Content {
 }
 
 impl Content {
+    pub fn write_fmt(&mut self, args: Arguments) {
+        Write::write_fmt(self, args).unwrap();
+    }
+
+    fn new() -> Self {
+        Content {
+            bytes: Vec::new(),
+            section_pending: false,
+            blocks_pending: Vec::new(),
+        }
+    }
+
     fn write_bytes(&mut self, b: &[u8]) {
         if !b.is_empty() {
             if !self.blocks_pending.is_empty() {
