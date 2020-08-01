@@ -58,20 +58,20 @@ pub(super) fn gen(
         match api {
             Api::Struct(strct) => {
                 out.next_section();
-                write_struct(out, strct, namespace);
+                write_struct(out, strct);
             }
             Api::Enum(enm) => {
                 out.next_section();
                 if types.cxx.contains(&enm.ident) {
                     check_enum(out, enm);
                 } else {
-                    write_enum(out, enm, namespace);
+                    write_enum(out, enm);
                 }
             }
             Api::RustType(ety) => {
                 if let Some(methods) = methods_for_type.get(&ety.ident) {
                     out.next_section();
-                    write_struct_with_methods(out, ety, methods, namespace);
+                    write_struct_with_methods(out, ety, methods);
                 }
             }
             _ => {}
@@ -317,8 +317,8 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
     out.end_block("namespace rust");
 }
 
-fn write_struct(out: &mut OutFile, strct: &Struct, namespace: &Namespace) {
-    write_include_guard_start(out, namespace, &strct.ident);
+fn write_struct(out: &mut OutFile, strct: &Struct) {
+    write_include_guard_start(out, &strct.ident);
     for line in strct.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
@@ -329,7 +329,7 @@ fn write_struct(out: &mut OutFile, strct: &Struct, namespace: &Namespace) {
         writeln!(out, "{};", field.ident);
     }
     writeln!(out, "}};");
-    write_include_guard_end(out, namespace, &strct.ident);
+    write_include_guard_end(out, &strct.ident);
 }
 
 fn write_struct_decl(out: &mut OutFile, ident: &Ident) {
@@ -342,34 +342,29 @@ fn write_struct_using(out: &mut OutFile, ident: &Ident) {
 
 const INCLUDE_GUARD_PREFIX: &'static str = "CXXBRIDGE03_TYPE_";
 
-fn write_include_guard_start(out: &mut OutFile, namespace: &Namespace, ident: &Ident) {
+fn write_include_guard_start(out: &mut OutFile, ident: &Ident) {
     writeln!(
         out,
         "#ifndef {}{}{}",
-        INCLUDE_GUARD_PREFIX, namespace, ident
+        INCLUDE_GUARD_PREFIX, out.namespace, ident
     );
     writeln!(
         out,
         "#define {}{}{}",
-        INCLUDE_GUARD_PREFIX, namespace, ident
+        INCLUDE_GUARD_PREFIX, out.namespace, ident
     );
 }
 
-fn write_include_guard_end(out: &mut OutFile, namespace: &Namespace, ident: &Ident) {
+fn write_include_guard_end(out: &mut OutFile, ident: &Ident) {
     writeln!(
         out,
         "#endif // {}{}{}",
-        INCLUDE_GUARD_PREFIX, namespace, ident
+        INCLUDE_GUARD_PREFIX, out.namespace, ident
     );
 }
 
-fn write_struct_with_methods(
-    out: &mut OutFile,
-    ety: &ExternType,
-    methods: &[&ExternFn],
-    namespace: &Namespace,
-) {
-    write_include_guard_start(out, namespace, &ety.ident);
+fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &[&ExternFn]) {
+    write_include_guard_start(out, &ety.ident);
     for line in ety.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
@@ -384,11 +379,11 @@ fn write_struct_with_methods(
         writeln!(out, ";");
     }
     writeln!(out, "}};");
-    write_include_guard_end(out, namespace, &ety.ident);
+    write_include_guard_end(out, &ety.ident);
 }
 
-fn write_enum(out: &mut OutFile, enm: &Enum, namespace: &Namespace) {
-    write_include_guard_start(out, namespace, &enm.ident);
+fn write_enum(out: &mut OutFile, enm: &Enum) {
+    write_include_guard_start(out, &enm.ident);
     for line in enm.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
@@ -399,7 +394,7 @@ fn write_enum(out: &mut OutFile, enm: &Enum, namespace: &Namespace) {
         writeln!(out, "  {} = {},", variant.ident, variant.discriminant);
     }
     writeln!(out, "}};");
-    write_include_guard_end(out, namespace, &enm.ident);
+    write_include_guard_end(out, &enm.ident);
 }
 
 fn check_enum(out: &mut OutFile, enm: &Enum) {
