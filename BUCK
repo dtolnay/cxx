@@ -17,10 +17,10 @@ rust_binary(
     visibility = ["PUBLIC"],
     deps = [
         "//third-party:anyhow",
+        "//third-party:clap",
         "//third-party:codespan-reporting",
         "//third-party:proc-macro2",
         "//third-party:quote",
-        "//third-party:structopt",
         "//third-party:syn",
     ],
 )

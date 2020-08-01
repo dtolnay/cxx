@@ -6,46 +6,19 @@
     clippy::toplevel_ref_arg
 )]
 
+mod app;
 mod gen;
 mod syntax;
 
 use gen::include;
 use std::io::{self, Write};
 use std::path::PathBuf;
-use structopt::StructOpt;
 
-#[derive(StructOpt, Debug)]
-#[structopt(
-    name = "cxxbridge",
-    author = "David Tolnay <dtolnay@gmail.com>",
-    about = "https://github.com/dtolnay/cxx",
-    usage = "\
-    cxxbridge <input>.rs              Emit .cc file for bridge to stdout
-    cxxbridge <input>.rs --header     Emit .h file for bridge to stdout
-    cxxbridge --header                Emit rust/cxx.h header to stdout",
-    help_message = "Print help information",
-    version_message = "Print version information"
-)]
+#[derive(Debug)]
 struct Opt {
-    /// Input Rust source file containing #[cxx::bridge]
-    #[structopt(parse(from_os_str), required_unless = "header")]
     input: Option<PathBuf>,
-
-    /// Emit header with declarations only
-    #[structopt(long)]
     header: bool,
-
-    /// Optional annotation for implementations of C++ function
-    /// wrappers that may be exposed to Rust. You may for example
-    /// need to provide __declspec(dllexport) or
-    /// __attribute__((visibility("default"))) if Rust code from
-    /// one shared object or executable depends on these C++ functions
-    /// in another.
-    #[structopt(long)]
     cxx_impl_annotations: Option<String>,
-
-    /// Any additional headers to #include
-    #[structopt(short, long)]
     include: Vec<String>,
 }
 
@@ -54,7 +27,7 @@ fn write(content: impl AsRef<[u8]>) {
 }
 
 fn main() {
-    let opt = Opt::from_args();
+    let opt = app::from_args();
 
     let gen = gen::Opt {
         include: opt.include,
