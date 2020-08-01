@@ -314,7 +314,16 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
 }
 
 fn write_struct(out: &mut OutFile, strct: &Struct) {
-    write_include_guard_start(out, &strct.ident);
+    writeln!(
+        out,
+        "#ifndef CXXBRIDGE03_STRUCT_{}{}",
+        out.namespace, strct.ident,
+    );
+    writeln!(
+        out,
+        "#define CXXBRIDGE03_STRUCT_{}{}",
+        out.namespace, strct.ident,
+    );
     for line in strct.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
@@ -325,7 +334,11 @@ fn write_struct(out: &mut OutFile, strct: &Struct) {
         writeln!(out, "{};", field.ident);
     }
     writeln!(out, "}};");
-    write_include_guard_end(out, &strct.ident);
+    writeln!(
+        out,
+        "#endif // CXXBRIDGE03_STRUCT_{}{}",
+        out.namespace, strct.ident,
+    );
 }
 
 fn write_struct_decl(out: &mut OutFile, ident: &Ident) {
@@ -336,31 +349,17 @@ fn write_struct_using(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "using {} = {};", ident, ident);
 }
 
-const INCLUDE_GUARD_PREFIX: &'static str = "CXXBRIDGE03_TYPE_";
-
-fn write_include_guard_start(out: &mut OutFile, ident: &Ident) {
-    writeln!(
-        out,
-        "#ifndef {}{}{}",
-        INCLUDE_GUARD_PREFIX, out.namespace, ident
-    );
-    writeln!(
-        out,
-        "#define {}{}{}",
-        INCLUDE_GUARD_PREFIX, out.namespace, ident
-    );
-}
-
-fn write_include_guard_end(out: &mut OutFile, ident: &Ident) {
-    writeln!(
-        out,
-        "#endif // {}{}{}",
-        INCLUDE_GUARD_PREFIX, out.namespace, ident
-    );
-}
-
 fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &[&ExternFn]) {
-    write_include_guard_start(out, &ety.ident);
+    writeln!(
+        out,
+        "#ifndef CXXBRIDGE03_STRUCT_{}{}",
+        out.namespace, ety.ident,
+    );
+    writeln!(
+        out,
+        "#define CXXBRIDGE03_STRUCT_{}{}",
+        out.namespace, ety.ident,
+    );
     for line in ety.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
@@ -375,11 +374,24 @@ fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &[&Ex
         writeln!(out, ";");
     }
     writeln!(out, "}};");
-    write_include_guard_end(out, &ety.ident);
+    writeln!(
+        out,
+        "#endif // CXXBRIDGE03_STRUCT_{}{}",
+        out.namespace, ety.ident,
+    );
 }
 
 fn write_enum(out: &mut OutFile, enm: &Enum) {
-    write_include_guard_start(out, &enm.ident);
+    writeln!(
+        out,
+        "#ifndef CXXBRIDGE03_ENUM_{}{}",
+        out.namespace, enm.ident,
+    );
+    writeln!(
+        out,
+        "#define CXXBRIDGE03_ENUM_{}{}",
+        out.namespace, enm.ident,
+    );
     for line in enm.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
@@ -390,7 +402,11 @@ fn write_enum(out: &mut OutFile, enm: &Enum) {
         writeln!(out, "  {} = {},", variant.ident, variant.discriminant);
     }
     writeln!(out, "}};");
-    write_include_guard_end(out, &enm.ident);
+    writeln!(
+        out,
+        "#endif // CXXBRIDGE03_ENUM_{}{}",
+        out.namespace, enm.ident,
+    );
 }
 
 fn check_enum(out: &mut OutFile, enm: &Enum) {
