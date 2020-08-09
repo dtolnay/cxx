@@ -29,7 +29,7 @@ cc = "1.0.49"
 cxx-build = { version = "=0.3.4", path = "gen/build" }
 cxx-test-suite = { version = "0", path = "tests/ffi" }
 rustversion = "1.0"
-trybuild = { version = "1.0.27", features = ["diff"] }
+trybuild = { version = "1.0.32", features = ["diff"] }
 
 [workspace]
 members = ["demo-rs", "gen/build", "gen/cmd", "macro", "tests/ffi"]

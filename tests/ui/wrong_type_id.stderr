@@ -4,9 +4,9 @@ error[E0271]: type mismatch resolving `<here::StringPiece as cxx::ExternType>::I
 11  |         type ByteRange = crate::here::StringPiece;
     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected a tuple with 15 elements, found one with 17 elements
     |
-   ::: $WORKSPACE/src/extern_type.rs:110:41
+   ::: $WORKSPACE/src/extern_type.rs
     |
-110 | pub fn verify_extern_type<T: ExternType<Id = Id>, Id>() {}
+    | pub fn verify_extern_type<T: ExternType<Id = Id>, Id>() {}
     |                                         ------- required by this bound in `cxx::private::verify_extern_type`
     |
     = note: expected tuple `(cxx::f, cxx::o, cxx::l, cxx::l, cxx::y, (), cxx::B, cxx::y, cxx::t, cxx::e, cxx::R, cxx::a, cxx::n, cxx::g, cxx::e)`
