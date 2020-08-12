@@ -106,7 +106,6 @@ fn try_generate_bridge(build: &mut cc::Build, rust_source_file: &Path) -> Result
     let header_path = paths::out_with_extension(rust_source_file, ".h")?;
     fs::create_dir_all(header_path.parent().unwrap())?;
     fs::write(&header_path, header)?;
-    paths::symlink_header(&header_path, rust_source_file);
 
     let bridge = gen::do_generate_bridge(rust_source_file, Opt::default());
     let bridge_path = paths::out_with_extension(rust_source_file, ".cc")?;
