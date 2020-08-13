@@ -35,7 +35,7 @@ fn workspace_dir() -> Result<PathBuf> {
     while workspace_dir.pop() {
         let cargo = workspace_dir.join("Cargo.toml");
         if cargo.exists() {
-            if let Ok(workspace) = std::fs::read_to_string(cargo) {
+            if let Ok(workspace) = fs::read_to_string(cargo) {
                 let workspace = workspace.to_lowercase();
                 if workspace.contains("[workspace]")
                     && workspace.contains(&format!(
