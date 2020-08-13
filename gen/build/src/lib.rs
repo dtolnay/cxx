@@ -86,7 +86,13 @@ pub fn bridge(rust_source_file: impl AsRef<Path>) -> cc::Build {
 ///     .flag_if_supported("-std=c++11")
 ///     .compile("cxxbridge-demo");
 /// ```
+#[must_use]
 pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) -> cc::Build {
+    // try to clean up everything so that we don't end up with dangling files if things get moved around
+    if let Ok(out_dir) = paths::out_dir() {
+        std::fs::remove_dir_all(&out_dir).ok();
+        std::fs::create_dir(out_dir).ok();
+    }
     let mut build = paths::cc_build();
     build.cpp(true);
     build.cpp_link_stdlib(None); // linked via link-cplusplus crate
@@ -97,25 +103,41 @@ pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) ->
             process::exit(1);
         }
     }
-
+    if let Err(err) = write_header_file() {
+        writeln!(io::stderr(), "\n\ncxxbridge error: {:?}\n\n", anyhow!(err)).ok();
+        process::exit(1);
+    }
     build
 }
 
 fn try_generate_bridge(build: &mut cc::Build, rust_source_file: &Path) -> Result<()> {
     let header = gen::do_generate_header(rust_source_file, Opt::default());
-    let header_path = paths::out_with_extension(rust_source_file, ".h")?;
-    fs::create_dir_all(header_path.parent().unwrap())?;
-    fs::write(&header_path, header)?;
+    let manifest_header_path =
+        paths::out_with_extension(rust_source_file, ".h", paths::RelativeToDir::Manifest)?;
+
+    fs::create_dir_all(manifest_header_path.parent().unwrap())?;
+    fs::write(&manifest_header_path, &header)?;
 
     let bridge = gen::do_generate_bridge(rust_source_file, Opt::default());
-    let bridge_path = paths::out_with_extension(rust_source_file, ".cc")?;
+    let bridge_path =
+        paths::out_with_extension(rust_source_file, ".cc", paths::RelativeToDir::Manifest)?;
     fs::write(&bridge_path, bridge)?;
     build.file(&bridge_path);
 
-    let ref cxx_h = paths::include_dir()?.join("rust").join("cxx.h");
-    let _ = fs::create_dir_all(cxx_h.parent().unwrap());
-    let _ = fs::remove_file(cxx_h);
-    let _ = fs::write(cxx_h, gen::include::HEADER);
+    // Write out headers relative to the workspace path as well so that includes relative to there work.
+    let workspace_header_path =
+        paths::out_with_extension(rust_source_file, ".h", paths::RelativeToDir::Workspace)?;
 
+    fs::create_dir_all(workspace_header_path.parent().unwrap())?;
+    fs::write(&workspace_header_path, &header)?;
+
+    Ok(())
+}
+
+fn write_header_file() -> Result<()> {
+    let ref cxx_h = paths::include_dir()?.join("rust").join("cxx.h");
+    fs::create_dir_all(cxx_h.parent().unwrap()).ok();
+    fs::remove_file(cxx_h).ok();
+    fs::write(cxx_h, gen::include::HEADER)?;
     Ok(())
 }

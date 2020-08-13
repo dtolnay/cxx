@@ -22,7 +22,8 @@ pub mod ffi {
     }
 
     extern "C" {
-        include!("tests.h");
+        // tests includes relative to workspace
+        include!("tests/ffi/tests.h");
 
         type C;
 

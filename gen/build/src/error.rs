@@ -9,7 +9,7 @@ pub(super) type Result<T, E = Error> = std::result::Result<T, E>;
 pub(super) enum Error {
     MissingOutDir,
     MissingManifestDir,
-    CargoManifestDirNotParent {
+    CargoDirNotParent {
         manifest_dir: PathBuf,
         child: PathBuf,
     },
@@ -23,7 +23,7 @@ impl Display for Error {
             Error::MissingManifestDir => {
                 write!(f, "missing CARGO_MANIFEST_DIR environment variable")
             }
-            Error::CargoManifestDirNotParent {
+            Error::CargoDirNotParent {
                 manifest_dir,
                 child,
             } => write!(

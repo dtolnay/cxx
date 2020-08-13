@@ -1,7 +1,6 @@
 fn main() {
     cxx_build::bridge("src/main.rs")
         .file("../demo-cxx/demo.cc")
-        .include("..")
         .flag_if_supported("-std=c++14")
         .compile("cxxbridge-demo");
 

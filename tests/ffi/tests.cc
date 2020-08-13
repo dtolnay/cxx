@@ -1,5 +1,5 @@
-#include "tests.h"
-#include "lib.rs.h"
+#include "tests/ffi/tests.h"
+#include "tests/ffi/lib.rs.h"
 #include <cstring>
 #include <numeric>
 #include <stdexcept>
