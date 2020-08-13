@@ -4,8 +4,7 @@
 #[cxx::bridge(namespace = tests)]
 pub mod ffi {
     extern "C" {
-        // tests includes relative to cargo manifest
-        include!("tests.h");
+        include!("tests/ffi/tests.h");
 
         type C = crate::ffi::C;
 
