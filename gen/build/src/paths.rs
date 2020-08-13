@@ -31,29 +31,29 @@ fn manifest_dir() -> Result<PathBuf> {
 
 fn workspace_dir() -> Result<PathBuf> {
     let manifest_dir = manifest_dir()?;
-    let mut workspace_dir = manifest_dir.clone();
-    while workspace_dir.pop() {
+    for workspace_dir in manifest_dir.ancestors() {
         let cargo = workspace_dir.join("Cargo.toml");
         if cargo.exists() {
             if let Ok(workspace) = fs::read_to_string(cargo) {
                 let workspace = workspace.to_lowercase();
+                let path_to_manifest = manifest_dir
+                    .strip_prefix(workspace_dir)
+                    .unwrap()
+                    .to_string_lossy();
+                // Leaving this so that it is clear that this needs to be handled differently on windows.
+                let path_to_manifest = if cfg!(windows) {
+                    path_to_manifest.replace("\\", "/")
+                } else {
+                    path_to_manifest.into_owned()
+                };
                 if workspace.contains("[workspace]")
-                    && workspace.contains(&format!(
-                        r#""{}""#,
-                        manifest_dir
-                            .strip_prefix(&workspace_dir)
-                            .unwrap()
-                            .to_string_lossy()
-                            .replace("\\", "/")
-                    ))
+                    && workspace.contains(&format!(r#""{}""#, path_to_manifest))
                 {
-                    println!("Workspace dir: {}", workspace_dir.display());
-                    return Ok(workspace_dir);
+                    return Ok(workspace_dir.to_path_buf());
                 }
             }
         }
     }
-    println!("Not in workspace: {}", workspace_dir.display());
     return Ok(manifest_dir);
 }
 
