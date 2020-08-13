@@ -44,7 +44,7 @@ fn workspace_dir() -> Result<PathBuf> {
                             .strip_prefix(&workspace_dir)
                             .unwrap()
                             .to_string_lossy()
-                            .as_ref()
+                            .replace("\\", "/")
                     ))
                 {
                     println!("Workspace dir: {}", workspace_dir.display());
