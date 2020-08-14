@@ -11,13 +11,18 @@ use std::ops::Range;
 use std::path::Path;
 use std::process;
 
-pub(super) type Result<T, E = Error> = std::result::Result<T, E>;
+pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 #[derive(Debug)]
-pub(super) enum Error {
+pub enum Error {
+    /// No `#[cxx::bridge]` module could be found.
     NoBridgeMod,
+    /// `#[cxx::bridge]` was attached to something other than
+    /// an inline module.
     OutOfLineMod,
+    /// An IO error occurred when reading Rust code.
     Io(io::Error),
+    /// A syntax error occurred when parsing Rust code.
     Syn(syn::Error),
 }
 
