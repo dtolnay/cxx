@@ -208,6 +208,8 @@ void c_take_ref_vector(const std::vector<uint8_t> &v) {
 
 void c_take_rust_vec(rust::Vec<uint8_t> v) { c_take_ref_rust_vec(v); }
 
+void c_take_rust_vec_index(rust::Vec<uint8_t> v) { c_take_ref_rust_vec_index(v); }
+
 void c_take_rust_vec_shared(rust::Vec<Shared> v) {
   uint32_t sum = 0;
   for (auto i : v) {
@@ -230,9 +232,33 @@ void c_take_rust_vec_shared_forward_iterator(rust::Vec<Shared> v) {
   }
 }
 
+void c_take_rust_vec_shared_index(rust::Vec<Shared> v) {
+  if (v[0].z == 1010 &&
+      v.at(0).z == 1010 &&
+      v.front().z == 1010 &&
+      v[1].z == 1011 &&
+      v.at(1).z == 1011 &&
+      v.back().z == 1011) {
+    cxx_test_suite_set_correct();
+  }
+}
+
 void c_take_ref_rust_vec(const rust::Vec<uint8_t> &v) {
   uint8_t sum = std::accumulate(v.begin(), v.end(), 0);
   if (sum == 200) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_ref_rust_vec_index(const rust::Vec<uint8_t> &v) {
+  if (v[0] == 86 &&
+      v.at(0) == 86 &&
+      v.front() == 86 &&
+      v[1] == 75 &&
+      v.at(1) == 75 &&
+      v[3] == 9 &&
+      v.at(3) == 9 &&
+      v.back() == 9) {
     cxx_test_suite_set_correct();
   }
 }

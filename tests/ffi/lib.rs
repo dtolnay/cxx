@@ -11,6 +11,7 @@ use std::fmt::{self, Display};
 
 #[cxx::bridge(namespace = tests)]
 pub mod ffi {
+    #[derive(Clone)]
     struct Shared {
         z: usize,
     }
@@ -61,8 +62,11 @@ pub mod ffi {
         fn c_take_ref_vector(v: &CxxVector<u8>);
         fn c_take_rust_vec(v: Vec<u8>);
         fn c_take_rust_vec_shared(v: Vec<Shared>);
+        fn c_take_rust_vec_index(v: Vec<u8>);
+        fn c_take_rust_vec_shared_index(v: Vec<Shared>);
         fn c_take_rust_vec_shared_forward_iterator(v: Vec<Shared>);
         fn c_take_ref_rust_vec(v: &Vec<u8>);
+        fn c_take_ref_rust_vec_index(v: &Vec<u8>);
         fn c_take_ref_rust_vec_copy(v: &Vec<u8>);
         /*
         // https://github.com/dtolnay/cxx/issues/232
