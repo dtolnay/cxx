@@ -59,7 +59,7 @@ pub(super) fn do_generate_from_tokens(
 ) -> std::result::Result<GeneratedCode, Error> {
     let syntax = syn::parse2::<File>(tokens)?;
     match generate(syntax, opt, true, true) {
-        Ok((Some(header), Some(cxx))) => Ok(GeneratedCode { header, cxx } ),
+        Ok((Some(header), Some(cxx))) => Ok(GeneratedCode { header, cxx }),
         Err(err) => Err(err),
         _ => panic!("Unexpected generation"),
     }
@@ -70,14 +70,18 @@ fn generate_from_path(path: &Path, opt: Opt, header: bool) -> Vec<u8> {
         Ok(source) => source,
         Err(err) => format_err(path, "", Error::Io(err)),
     };
-    let syntax = match syn::parse_file(&source) {
+    match generate_from_string(&source, opt, header) {
         Ok(out) => out,
-        Err(err) => format_err(path, "", Error::Syn(err)),
-    };
-    match generate(syntax, opt, header, !header) {
-        Ok((Some(hdr), None)) => hdr,
-        Ok((None, Some(cxx))) => cxx,
         Err(err) => format_err(path, &source, err),
+    }
+}
+
+fn generate_from_string(source: &str, opt: Opt, header: bool) -> Result<Vec<u8>> {
+    let syntax = syn::parse_file(&source).map_err(Error::Syn)?;
+    let results = generate(syntax, opt, header, !header)?;
+    match results {
+        (Some(hdr), None) => Ok(hdr),
+        (None, Some(cxx)) => Ok(cxx),
         _ => panic!("Unexpected generation"),
     }
 }
