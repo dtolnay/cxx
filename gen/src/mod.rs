@@ -34,6 +34,8 @@ pub struct Opt {
     /// Whether to set __attribute__((visibility("default")))
     /// or similar annotations on function implementations.
     pub cxx_impl_annotations: Option<String>,
+    /// Whether to omit definitions of types.
+    pub omit_type_definitions: bool,
 }
 
 /// Results of code generation.
