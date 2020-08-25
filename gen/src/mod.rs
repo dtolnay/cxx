@@ -26,8 +26,9 @@ struct Input {
     module: Vec<Item>,
 }
 
+/// Options for C++ code generation.
 #[derive(Default, Clone)]
-pub(super) struct Opt {
+pub struct Opt {
     /// Any additional headers to #include
     pub include: Vec<String>,
     /// Whether to set __attribute__((visibility("default")))

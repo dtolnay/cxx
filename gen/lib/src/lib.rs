@@ -5,15 +5,15 @@
 mod gen;
 mod syntax;
 
-use crate::gen::Opt;
+pub use crate::gen::Opt;
 use proc_macro2::TokenStream;
 
 pub use crate::gen::{Error, GeneratedCode, Result};
 
 /// Generate C++ bindings code from a Rust token stream. This should be a Rust
 /// token stream which somewhere contains a `#[cxx::bridge] mod {}`.
-pub fn generate_header_and_cc(rust_source: TokenStream) -> Result<GeneratedCode> {
-    gen::do_generate_from_tokens(rust_source, Opt::default())
+pub fn generate_header_and_cc(rust_source: TokenStream, opt: Opt) -> Result<GeneratedCode> {
+    gen::do_generate_from_tokens(rust_source, opt)
 }
 
 #[cfg(test)]
