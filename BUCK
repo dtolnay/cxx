@@ -68,3 +68,17 @@ rust_library(
         "//third-party:syn",
     ],
 )
+
+rust_library(
+    name = "lib",
+    srcs = glob(["gen/lib/src/**"]),
+    visibility = ["PUBLIC"],
+    deps = [
+        "//third-party:anyhow",
+        "//third-party:cc",
+        "//third-party:codespan-reporting",
+        "//third-party:proc-macro2",
+        "//third-party:quote",
+        "//third-party:syn",
+    ],
+)
