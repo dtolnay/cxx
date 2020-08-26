@@ -19,13 +19,13 @@ rust_library(
 
 rust_library(
     name = "cc",
-    srcs = glob(["vendor/cc-1.0.58/src/**"]),
+    srcs = glob(["vendor/cc-1.0.59/src/**"]),
     visibility = ["//visibility:public"],
 )
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-2.33.1/src/**"]),
+    srcs = glob(["vendor/clap-2.33.3/src/**"]),
     edition = "2015",
     visibility = ["//visibility:public"],
     deps = [
@@ -82,7 +82,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.36/src/**"]),
+    srcs = glob(["vendor/syn-1.0.39/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
