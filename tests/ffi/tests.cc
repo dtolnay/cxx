@@ -1,6 +1,7 @@
 #include "tests/ffi/tests.h"
 #include "tests/ffi/lib.rs.h"
 #include <cstring>
+#include <iterator>
 #include <numeric>
 #include <stdexcept>
 
