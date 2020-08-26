@@ -242,6 +242,7 @@ fn parse_extern_type(cx: &mut Errors, foreign_type: &ForeignItemType, lang: Lang
     let doc = attrs::parse_doc(cx, &foreign_type.attrs);
     let type_token = foreign_type.type_token;
     let ident = foreign_type.ident.clone();
+    let semi_token = foreign_type.semi_token;
     let api_type = match lang {
         Lang::Cxx => Api::CxxType,
         Lang::Rust => Api::RustType,
@@ -250,6 +251,7 @@ fn parse_extern_type(cx: &mut Errors, foreign_type: &ForeignItemType, lang: Lang
         doc,
         type_token,
         ident,
+        semi_token,
     }))
 }
 

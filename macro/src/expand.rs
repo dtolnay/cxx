@@ -31,11 +31,7 @@ fn expand(namespace: &Namespace, ffi: ItemMod, apis: &[Api], types: &Types) -> T
     for api in apis {
         if let Api::RustType(ety) = api {
             expanded.extend(expand_rust_type(ety));
-            let ident = &ety.ident;
-            let span = ident.span();
-            hidden.extend(quote_spanned! {span=>
-                let _ = ::std::ptr::read::<#ident>;
-            });
+            hidden.extend(expand_rust_type_assert_sized(ety));
         }
     }
 
@@ -423,6 +419,28 @@ fn expand_rust_type(ety: &ExternType) -> TokenStream {
     let ident = &ety.ident;
     quote! {
         use super::#ident;
+    }
+}
+
+fn expand_rust_type_assert_sized(ety: &ExternType) -> TokenStream {
+    // Rustc will render as follows if not sized:
+    //
+    //     type TheirType;
+    //     -----^^^^^^^^^-
+    //     |    |
+    //     |    doesn't have a size known at compile-time
+    //     required by this bound in `ffi::_::__AssertSized`
+
+    let ident = &ety.ident;
+    let begin_span = Token![::](ety.type_token.span);
+    let sized = quote_spanned! {ety.semi_token.span=>
+        #begin_span std::marker::Sized
+    };
+    quote_spanned! {ident.span()=>
+        let _ = {
+            fn __AssertSized<T: ?#sized + #sized>() {}
+            __AssertSized::<#ident>
+        };
     }
 }
 
