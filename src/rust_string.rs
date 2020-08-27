@@ -14,6 +14,10 @@ impl RustString {
         unsafe { &*(s as *const String as *const RustString) }
     }
 
+    pub fn from_mut(s: &mut String) -> &mut Self {
+        unsafe { &mut *(s as *mut String as *mut RustString) }
+    }
+
     pub fn into_string(self) -> String {
         self.repr
     }

@@ -16,6 +16,10 @@ impl<T> RustVec<T> {
         unsafe { &*(v as *const Vec<T> as *const RustVec<T>) }
     }
 
+    pub fn from_mut(v: &mut Vec<T>) -> &mut Self {
+        unsafe { &mut *(v as *mut Vec<T> as *mut RustVec<T>) }
+    }
+
     pub fn into_vec(self) -> Vec<T> {
         self.repr
     }
