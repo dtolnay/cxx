@@ -14,26 +14,6 @@
 #include <BaseTsd.h>
 #endif
 
-#ifndef __has_feature
-#define __has_feature(__x) 0
-#endif
-
-#if !__has_feature(cxx_exceptions)
-#  define _CXXBRIDGE03_NO_EXCEPTIONS
-#endif
-#if !__EXCEPTIONS
-#  define _CXXBRIDGE03_NO_EXCEPTIONS
-#endif
-
-[[noreturn]] inline static void throw_out_of_range(const char *msg) {
-#ifndef _CXXBRIDGE03_NO_EXCEPTIONS
-  throw std::out_of_range(msg);
-#else
-  ((void)msg);
-  std::abort();
-#endif
-}
-
 namespace rust {
 inline namespace cxxbridge03 {
 
@@ -303,6 +283,9 @@ using try_fn = TryFn<Signature>;
 ////////////////////////////////////////////////////////////////////////////////
 /// end public API, begin implementation details
 
+template <typename Exception>
+void panic [[noreturn]] (const char *msg);
+
 template <typename Ret, typename... Args, bool Throws>
 Ret Fn<Ret(Args...), Throws>::operator()(Args... args) const noexcept(!Throws) {
   return (*this->trampoline)(std::move(args)..., this->fn);
@@ -499,7 +482,7 @@ const T &Vec<T>::operator[](size_t n) const noexcept {
 template <typename T>
 const T &Vec<T>::at(size_t n) const {
   if (n >= this->size())
-    throw_out_of_range("Vec");
+    panic<std::out_of_range>("Vec");
   return (*this)[n];
 }
 

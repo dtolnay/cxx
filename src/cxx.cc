@@ -6,16 +6,6 @@
 #include <stdexcept>
 #include <vector>
 
-template <typename Exception>
-static void panic [[noreturn]] (const char *msg) {
-#if defined(RUST_CXX_NO_EXCEPTIONS)
-  std::cerr << "Error: " << msg << ". Aborting." << std::endl;
-  std::terminate();
-#else
-  throw Exception(msg);
-#endif
-}
-
 extern "C" {
 const char *cxxbridge03$cxx_string$data(const std::string &s) noexcept {
   return s.data();
@@ -41,6 +31,18 @@ bool cxxbridge03$str$valid(const char *ptr, size_t len) noexcept;
 
 namespace rust {
 inline namespace cxxbridge03 {
+
+template <typename Exception>
+void panic [[noreturn]] (const char *msg) {
+#if defined(RUST_CXX_NO_EXCEPTIONS)
+  std::cerr << "Error: " << msg << ". Aborting." << std::endl;
+  std::terminate();
+#else
+  throw Exception(msg);
+#endif
+}
+
+template void panic<std::out_of_range>(const char *msg);
 
 String::String() noexcept { cxxbridge03$string$new(this); }
 
