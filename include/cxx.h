@@ -5,6 +5,7 @@
 #include <exception>
 #include <iosfwd>
 #include <new>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -12,6 +13,26 @@
 #if defined(_WIN32)
 #include <BaseTsd.h>
 #endif
+
+#ifndef __has_feature
+#define __has_feature(__x) 0
+#endif
+
+#if !__has_feature(cxx_exceptions)
+#  define _CXXBRIDGE03_NO_EXCEPTIONS
+#endif
+#if !__EXCEPTIONS
+#  define _CXXBRIDGE03_NO_EXCEPTIONS
+#endif
+
+[[noreturn]] inline static void throw_out_of_range(const char *msg) {
+#ifndef _CXXBRIDGE03_NO_EXCEPTIONS
+  throw std::out_of_range(msg);
+#else
+  ((void)msg);
+  std::abort();
+#endif
+}
 
 namespace rust {
 inline namespace cxxbridge03 {
@@ -174,6 +195,12 @@ public:
   size_t size() const noexcept;
   bool empty() const noexcept;
   const T *data() const noexcept;
+
+  const T &operator[](size_t n) const noexcept;
+  const T &at(size_t n) const;
+
+  const T &front() const;
+  const T &back() const;
 
   class const_iterator {
   public:
@@ -461,6 +488,29 @@ Vec<T> &Vec<T>::operator=(Vec &&other) noexcept {
 template <typename T>
 bool Vec<T>::empty() const noexcept {
   return size() == 0;
+}
+
+template <typename T>
+const T &Vec<T>::operator[](size_t n) const noexcept {
+  auto data = reinterpret_cast<const char *>(this->data());
+  return *reinterpret_cast<const T *>(data + n * this->stride());
+}
+
+template <typename T>
+const T &Vec<T>::at(size_t n) const {
+  if (n >= this->size())
+    throw_out_of_range("Vec");
+  return (*this)[n];
+}
+
+template <typename T>
+const T &Vec<T>::front() const {
+  return (*this)[0];
+}
+
+template <typename T>
+const T &Vec<T>::back() const {
+  return (*this)[this->size()-1];
 }
 
 template <typename T>

@@ -65,9 +65,12 @@ void c_take_unique_ptr_vector_f64(std::unique_ptr<std::vector<double>> v);
 void c_take_unique_ptr_vector_shared(std::unique_ptr<std::vector<Shared>> v);
 void c_take_ref_vector(const std::vector<uint8_t> &v);
 void c_take_rust_vec(rust::Vec<uint8_t> v);
+void c_take_rust_vec_index(rust::Vec<uint8_t> v);
 void c_take_rust_vec_shared(rust::Vec<Shared> v);
+void c_take_rust_vec_shared_index(rust::Vec<Shared> v);
 void c_take_rust_vec_shared_forward_iterator(rust::Vec<Shared> v);
 void c_take_ref_rust_vec(const rust::Vec<uint8_t> &v);
+void c_take_ref_rust_vec_index(const rust::Vec<uint8_t> &v);
 void c_take_ref_rust_vec_copy(const rust::Vec<uint8_t> &v);
 /*
 // https://github.com/dtolnay/cxx/issues/232
