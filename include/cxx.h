@@ -494,7 +494,7 @@ const T &Vec<T>::front() const {
 
 template <typename T>
 const T &Vec<T>::back() const {
-  return (*this)[this->size()-1];
+  return (*this)[this->size() - 1];
 }
 
 template <typename T>
@@ -522,14 +522,14 @@ Vec<T>::const_iterator::operator++(int) noexcept {
 }
 
 template <typename T>
-bool Vec<T>::const_iterator::operator==(const const_iterator &other) const
-    noexcept {
+bool Vec<T>::const_iterator::operator==(
+    const const_iterator &other) const noexcept {
   return this->pos == other.pos;
 }
 
 template <typename T>
-bool Vec<T>::const_iterator::operator!=(const const_iterator &other) const
-    noexcept {
+bool Vec<T>::const_iterator::operator!=(
+    const const_iterator &other) const noexcept {
   return this->pos != other.pos;
 }
 
