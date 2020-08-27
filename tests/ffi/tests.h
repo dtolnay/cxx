@@ -19,6 +19,7 @@ public:
   size_t set_succeed(size_t n);
   size_t get_fail();
   const std::vector<uint8_t> &get_v() const;
+  std::vector<uint8_t> &get_v();
 
 private:
   size_t n;
@@ -35,6 +36,7 @@ Shared c_return_shared();
 rust::Box<R> c_return_box();
 std::unique_ptr<C> c_return_unique_ptr();
 const size_t &c_return_ref(const Shared &shared);
+size_t &c_return_mut(Shared &shared);
 rust::Str c_return_str(const Shared &shared);
 rust::Slice<uint8_t> c_return_sliceu8(const Shared &shared);
 rust::String c_return_rust_string();
@@ -44,8 +46,10 @@ std::unique_ptr<std::vector<double>> c_return_unique_ptr_vector_f64();
 std::unique_ptr<std::vector<Shared>> c_return_unique_ptr_vector_shared();
 std::unique_ptr<std::vector<C>> c_return_unique_ptr_vector_opaque();
 const std::vector<uint8_t> &c_return_ref_vector(const C &c);
+std::vector<uint8_t> &c_return_mut_vector(C &c);
 rust::Vec<uint8_t> c_return_rust_vec();
 const rust::Vec<uint8_t> &c_return_ref_rust_vec(const C &c);
+rust::Vec<uint8_t> &c_return_mut_rust_vec(C &c);
 size_t c_return_identity(size_t n);
 size_t c_return_sum(size_t n1, size_t n2);
 Enum c_return_enum(uint16_t n);

@@ -32,6 +32,7 @@ pub mod ffi {
         fn c_return_box() -> Box<R>;
         fn c_return_unique_ptr() -> UniquePtr<C>;
         fn c_return_ref(shared: &Shared) -> &usize;
+        fn c_return_mut(shared: &mut Shared) -> &mut usize;
         fn c_return_str(shared: &Shared) -> &str;
         fn c_return_sliceu8(shared: &Shared) -> &[u8];
         fn c_return_rust_string() -> String;
@@ -41,8 +42,10 @@ pub mod ffi {
         fn c_return_unique_ptr_vector_shared() -> UniquePtr<CxxVector<Shared>>;
         fn c_return_unique_ptr_vector_opaque() -> UniquePtr<CxxVector<C>>;
         fn c_return_ref_vector(c: &C) -> &CxxVector<u8>;
+        fn c_return_mut_vector(c: &mut C) -> &mut CxxVector<u8>;
         fn c_return_rust_vec() -> Vec<u8>;
         fn c_return_ref_rust_vec(c: &C) -> &Vec<u8>;
+        fn c_return_mut_rust_vec(c: &mut C) -> &mut Vec<u8>;
         fn c_return_identity(_: usize) -> usize;
         fn c_return_sum(_: usize, _: usize) -> usize;
         fn c_return_enum(n: u16) -> Enum;
@@ -113,11 +116,13 @@ pub mod ffi {
         fn r_return_box() -> Box<R>;
         fn r_return_unique_ptr() -> UniquePtr<C>;
         fn r_return_ref(shared: &Shared) -> &usize;
+        fn r_return_mut(shared: &mut Shared) -> &mut usize;
         fn r_return_str(shared: &Shared) -> &str;
         fn r_return_rust_string() -> String;
         fn r_return_unique_ptr_string() -> UniquePtr<CxxString>;
         fn r_return_rust_vec() -> Vec<u8>;
         fn r_return_ref_rust_vec(shared: &Shared) -> &Vec<u8>;
+        fn r_return_mut_rust_vec(shared: &mut Shared) -> &mut Vec<u8>;
         fn r_return_identity(_: usize) -> usize;
         fn r_return_sum(_: usize, _: usize) -> usize;
         fn r_return_enum(n: u32) -> Enum;
@@ -195,6 +200,10 @@ fn r_return_ref(shared: &ffi::Shared) -> &usize {
     &shared.z
 }
 
+fn r_return_mut(shared: &mut ffi::Shared) -> &mut usize {
+    &mut shared.z
+}
+
 fn r_return_str(shared: &ffi::Shared) -> &str {
     let _ = shared;
     "2020"
@@ -216,6 +225,11 @@ fn r_return_rust_vec() -> Vec<u8> {
 }
 
 fn r_return_ref_rust_vec(shared: &ffi::Shared) -> &Vec<u8> {
+    let _ = shared;
+    unimplemented!()
+}
+
+fn r_return_mut_rust_vec(shared: &mut ffi::Shared) -> &mut Vec<u8> {
     let _ = shared;
     unimplemented!()
 }
