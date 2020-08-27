@@ -209,7 +209,16 @@ void c_take_ref_vector(const std::vector<uint8_t> &v) {
 
 void c_take_rust_vec(rust::Vec<uint8_t> v) { c_take_ref_rust_vec(v); }
 
-void c_take_rust_vec_index(rust::Vec<uint8_t> v) { c_take_ref_rust_vec_index(v); }
+void c_take_rust_vec_index(rust::Vec<uint8_t> v) {
+  try {
+    v.at(100);
+  } catch (const std::out_of_range &ex) {
+    std::string expected = "Vec";
+    if (ex.what() == expected) {
+      cxx_test_suite_set_correct();
+    }
+  }
+}
 
 void c_take_rust_vec_shared(rust::Vec<Shared> v) {
   uint32_t sum = 0;
