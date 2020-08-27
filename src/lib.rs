@@ -349,7 +349,7 @@
 //!
 //! [https://github.com/dtolnay/cxx]: https://github.com/dtolnay/cxx
 
-#![doc(html_root_url = "https://docs.rs/cxx/0.3.4")]
+#![doc(html_root_url = "https://docs.rs/cxx/0.3.5")]
 #![deny(improper_ctypes)]
 #![allow(non_camel_case_types)]
 #![allow(
