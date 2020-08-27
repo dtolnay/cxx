@@ -213,7 +213,7 @@ void c_take_rust_vec_index(rust::Vec<uint8_t> v) {
   try {
     v.at(100);
   } catch (const std::out_of_range &ex) {
-    std::string expected = "Vec";
+    std::string expected = "rust::Vec index out of range";
     if (ex.what() == expected) {
       cxx_test_suite_set_correct();
     }

@@ -481,8 +481,9 @@ const T &Vec<T>::operator[](size_t n) const noexcept {
 
 template <typename T>
 const T &Vec<T>::at(size_t n) const {
-  if (n >= this->size())
-    panic<std::out_of_range>("Vec");
+  if (n >= this->size()) {
+    panic<std::out_of_range>("rust::Vec index out of range");
+  }
   return (*this)[n];
 }
 
