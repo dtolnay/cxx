@@ -35,6 +35,8 @@ size_t C::get_fail() { throw std::runtime_error("unimplemented"); }
 
 const std::vector<uint8_t> &C::get_v() const { return this->v; }
 
+std::vector<uint8_t> &C::get_v() { return this->v; }
+
 size_t c_return_primitive() { return 2020; }
 
 Shared c_return_shared() { return Shared{2020}; }
@@ -48,6 +50,8 @@ std::unique_ptr<C> c_return_unique_ptr() {
 }
 
 const size_t &c_return_ref(const Shared &shared) { return shared.z; }
+
+size_t &c_return_mut(Shared &shared) { return shared.z; }
 
 rust::Str c_return_str(const Shared &shared) {
   (void)shared;
@@ -99,11 +103,18 @@ const std::vector<uint8_t> &c_return_ref_vector(const C &c) {
   return c.get_v();
 }
 
+std::vector<uint8_t> &c_return_mut_vector(C &c) { return c.get_v(); }
+
 rust::Vec<uint8_t> c_return_rust_vec() {
   throw std::runtime_error("unimplemented");
 }
 
 const rust::Vec<uint8_t> &c_return_ref_rust_vec(const C &c) {
+  (void)c;
+  throw std::runtime_error("unimplemented");
+}
+
+rust::Vec<uint8_t> &c_return_mut_rust_vec(C &c) {
   (void)c;
   throw std::runtime_error("unimplemented");
 }
