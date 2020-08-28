@@ -314,16 +314,9 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
 }
 
 fn write_struct(out: &mut OutFile, strct: &Struct) {
-    writeln!(
-        out,
-        "#ifndef CXXBRIDGE03_STRUCT_{}{}",
-        out.namespace, strct.ident,
-    );
-    writeln!(
-        out,
-        "#define CXXBRIDGE03_STRUCT_{}{}",
-        out.namespace, strct.ident,
-    );
+    let guard = format!("CXXBRIDGE03_STRUCT_{}{}", out.namespace, strct.ident);
+    writeln!(out, "#ifndef {}", guard);
+    writeln!(out, "#define {}", guard);
     for line in strct.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
@@ -334,11 +327,7 @@ fn write_struct(out: &mut OutFile, strct: &Struct) {
         writeln!(out, "{};", field.ident);
     }
     writeln!(out, "}};");
-    writeln!(
-        out,
-        "#endif // CXXBRIDGE03_STRUCT_{}{}",
-        out.namespace, strct.ident,
-    );
+    writeln!(out, "#endif // {}", guard);
 }
 
 fn write_struct_decl(out: &mut OutFile, ident: &Ident) {
@@ -350,16 +339,9 @@ fn write_struct_using(out: &mut OutFile, ident: &Ident) {
 }
 
 fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &[&ExternFn]) {
-    writeln!(
-        out,
-        "#ifndef CXXBRIDGE03_STRUCT_{}{}",
-        out.namespace, ety.ident,
-    );
-    writeln!(
-        out,
-        "#define CXXBRIDGE03_STRUCT_{}{}",
-        out.namespace, ety.ident,
-    );
+    let guard = format!("CXXBRIDGE03_STRUCT_{}{}", out.namespace, ety.ident);
+    writeln!(out, "#ifndef {}", guard);
+    writeln!(out, "#define {}", guard);
     for line in ety.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
@@ -374,24 +356,13 @@ fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &[&Ex
         writeln!(out, ";");
     }
     writeln!(out, "}};");
-    writeln!(
-        out,
-        "#endif // CXXBRIDGE03_STRUCT_{}{}",
-        out.namespace, ety.ident,
-    );
+    writeln!(out, "#endif // {}", guard);
 }
 
 fn write_enum(out: &mut OutFile, enm: &Enum) {
-    writeln!(
-        out,
-        "#ifndef CXXBRIDGE03_ENUM_{}{}",
-        out.namespace, enm.ident,
-    );
-    writeln!(
-        out,
-        "#define CXXBRIDGE03_ENUM_{}{}",
-        out.namespace, enm.ident,
-    );
+    let guard = format!("CXXBRIDGE03_ENUM_{}{}", out.namespace, enm.ident);
+    writeln!(out, "#ifndef {}", guard);
+    writeln!(out, "#define {}", guard);
     for line in enm.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
@@ -402,11 +373,7 @@ fn write_enum(out: &mut OutFile, enm: &Enum) {
         writeln!(out, "  {} = {},", variant.ident, variant.discriminant);
     }
     writeln!(out, "}};");
-    writeln!(
-        out,
-        "#endif // CXXBRIDGE03_ENUM_{}{}",
-        out.namespace, enm.ident,
-    );
+    writeln!(out, "#endif // {}", guard);
 }
 
 fn check_enum(out: &mut OutFile, enm: &Enum) {
