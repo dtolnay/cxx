@@ -280,7 +280,8 @@ void cxxbridge03$unique_ptr$std$string$drop(
 
 #define FOR_EACH_RUST_VEC(MACRO)                                               \
   FOR_EACH_NUMERIC(MACRO)                                                      \
-  MACRO(bool, bool)
+  MACRO(bool, bool)                                                            \
+  MACRO(string, rust::String)
 
 extern "C" {
 FOR_EACH_STD_VECTOR(STD_VECTOR_OPS)

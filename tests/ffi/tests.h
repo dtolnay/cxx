@@ -50,6 +50,7 @@ std::vector<uint8_t> &c_return_mut_vector(C &c);
 rust::Vec<uint8_t> c_return_rust_vec();
 const rust::Vec<uint8_t> &c_return_ref_rust_vec(const C &c);
 rust::Vec<uint8_t> &c_return_mut_rust_vec(C &c);
+rust::Vec<rust::String> c_return_rust_vec_string();
 size_t c_return_identity(size_t n);
 size_t c_return_sum(size_t n1, size_t n2);
 Enum c_return_enum(uint16_t n);
@@ -71,9 +72,11 @@ void c_take_ref_vector(const std::vector<uint8_t> &v);
 void c_take_rust_vec(rust::Vec<uint8_t> v);
 void c_take_rust_vec_index(rust::Vec<uint8_t> v);
 void c_take_rust_vec_shared(rust::Vec<Shared> v);
+void c_take_rust_vec_string(rust::Vec<rust::String> v);
 void c_take_rust_vec_shared_index(rust::Vec<Shared> v);
 void c_take_rust_vec_shared_forward_iterator(rust::Vec<Shared> v);
 void c_take_ref_rust_vec(const rust::Vec<uint8_t> &v);
+void c_take_ref_rust_vec_string(const rust::Vec<rust::String> &v);
 void c_take_ref_rust_vec_index(const rust::Vec<uint8_t> &v);
 void c_take_ref_rust_vec_copy(const rust::Vec<uint8_t> &v);
 /*
@@ -92,6 +95,7 @@ rust::Slice<uint8_t> c_try_return_sliceu8(rust::Slice<uint8_t>);
 rust::String c_try_return_rust_string();
 std::unique_ptr<std::string> c_try_return_unique_ptr_string();
 rust::Vec<uint8_t> c_try_return_rust_vec();
+rust::Vec<rust::String> c_try_return_rust_vec_string();
 const rust::Vec<uint8_t> &c_try_return_ref_rust_vec(const C &c);
 
 } // namespace tests

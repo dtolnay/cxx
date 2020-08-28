@@ -46,6 +46,7 @@ pub mod ffi {
         fn c_return_rust_vec() -> Vec<u8>;
         fn c_return_ref_rust_vec(c: &C) -> &Vec<u8>;
         fn c_return_mut_rust_vec(c: &mut C) -> &mut Vec<u8>;
+        fn c_return_rust_vec_string() -> Vec<String>;
         fn c_return_identity(_: usize) -> usize;
         fn c_return_sum(_: usize, _: usize) -> usize;
         fn c_return_enum(n: u16) -> Enum;
@@ -65,10 +66,12 @@ pub mod ffi {
         fn c_take_ref_vector(v: &CxxVector<u8>);
         fn c_take_rust_vec(v: Vec<u8>);
         fn c_take_rust_vec_shared(v: Vec<Shared>);
+        fn c_take_rust_vec_string(v: Vec<String>);
         fn c_take_rust_vec_index(v: Vec<u8>);
         fn c_take_rust_vec_shared_index(v: Vec<Shared>);
         fn c_take_rust_vec_shared_forward_iterator(v: Vec<Shared>);
         fn c_take_ref_rust_vec(v: &Vec<u8>);
+        fn c_take_ref_rust_vec_string(v: &Vec<String>);
         fn c_take_ref_rust_vec_index(v: &Vec<u8>);
         fn c_take_ref_rust_vec_copy(v: &Vec<u8>);
         /*
@@ -87,6 +90,7 @@ pub mod ffi {
         fn c_try_return_rust_string() -> Result<String>;
         fn c_try_return_unique_ptr_string() -> Result<UniquePtr<CxxString>>;
         fn c_try_return_rust_vec() -> Result<Vec<u8>>;
+        fn c_try_return_rust_vec_string() -> Result<Vec<String>>;
         fn c_try_return_ref_rust_vec(c: &C) -> Result<&Vec<u8>>;
 
         fn get(self: &C) -> usize;
@@ -121,6 +125,7 @@ pub mod ffi {
         fn r_return_rust_string() -> String;
         fn r_return_unique_ptr_string() -> UniquePtr<CxxString>;
         fn r_return_rust_vec() -> Vec<u8>;
+        fn r_return_rust_vec_string() -> Vec<String>;
         fn r_return_ref_rust_vec(shared: &Shared) -> &Vec<u8>;
         fn r_return_mut_rust_vec(shared: &mut Shared) -> &mut Vec<u8>;
         fn r_return_identity(_: usize) -> usize;
@@ -138,7 +143,9 @@ pub mod ffi {
         fn r_take_rust_string(s: String);
         fn r_take_unique_ptr_string(s: UniquePtr<CxxString>);
         fn r_take_rust_vec(v: Vec<u8>);
+        fn r_take_rust_vec_string(v: Vec<String>);
         fn r_take_ref_rust_vec(v: &Vec<u8>);
+        fn r_take_ref_rust_vec_string(v: &Vec<String>);
         fn r_take_enum(e: Enum);
 
         fn r_try_return_void() -> Result<()>;
@@ -224,6 +231,10 @@ fn r_return_rust_vec() -> Vec<u8> {
     Vec::new()
 }
 
+fn r_return_rust_vec_string() -> Vec<String> {
+    Vec::new()
+}
+
 fn r_return_ref_rust_vec(shared: &ffi::Shared) -> &Vec<u8> {
     let _ = shared;
     unimplemented!()
@@ -297,7 +308,15 @@ fn r_take_rust_vec(v: Vec<u8>) {
     let _ = v;
 }
 
+fn r_take_rust_vec_string(v: Vec<String>) {
+    let _ = v;
+}
+
 fn r_take_ref_rust_vec(v: &Vec<u8>) {
+    let _ = v;
+}
+
+fn r_take_ref_rust_vec_string(v: &Vec<String>) {
     let _ = v;
 }
 

@@ -119,6 +119,10 @@ rust::Vec<uint8_t> &c_return_mut_rust_vec(C &c) {
   throw std::runtime_error("unimplemented");
 }
 
+rust::Vec<rust::String> c_return_rust_vec_string() {
+  throw std::runtime_error("unimplemented");
+}
+
 size_t c_return_identity(size_t n) { return n; }
 
 size_t c_return_sum(size_t n1, size_t n2) { return n1 + n2; }
@@ -241,6 +245,11 @@ void c_take_rust_vec_shared(rust::Vec<Shared> v) {
   }
 }
 
+void c_take_rust_vec_string(rust::Vec<rust::String> v) {
+  (void)v;
+  cxx_test_suite_set_correct();
+}
+
 void c_take_rust_vec_shared_forward_iterator(rust::Vec<Shared> v) {
   // Exercise requirements of ForwardIterator
   // https://en.cppreference.com/w/cpp/named_req/ForwardIterator
@@ -265,6 +274,11 @@ void c_take_ref_rust_vec(const rust::Vec<uint8_t> &v) {
   if (sum == 200) {
     cxx_test_suite_set_correct();
   }
+}
+
+void c_take_ref_rust_vec_string(const rust::Vec<rust::String> &v) {
+  (void)v;
+  cxx_test_suite_set_correct();
 }
 
 void c_take_ref_rust_vec_index(const rust::Vec<uint8_t> &v) {
@@ -320,6 +334,10 @@ std::unique_ptr<std::string> c_try_return_unique_ptr_string() {
 }
 
 rust::Vec<uint8_t> c_try_return_rust_vec() {
+  throw std::runtime_error("unimplemented");
+}
+
+rust::Vec<rust::String> c_try_return_rust_vec_string() {
   throw std::runtime_error("unimplemented");
 }
 

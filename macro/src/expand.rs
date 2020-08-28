@@ -260,6 +260,10 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
                     None => quote!(::cxx::private::RustString::from_ref(#var)),
                     Some(_) => quote!(::cxx::private::RustString::from_mut(#var)),
                 },
+                Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
+                    None => quote!(::cxx::private::RustVec::from_ref_vec_string(#var)),
+                    Some(_) => quote!(::cxx::private::RustVec::from_mut_vec_string(#var)),
+                },
                 Type::RustVec(_) => match ty.mutability {
                     None => quote!(::cxx::private::RustVec::from_ref(#var)),
                     Some(_) => quote!(::cxx::private::RustVec::from_mut(#var)),
@@ -332,12 +336,22 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
                 Some(quote!(#call.map(|r| r.into_string())))
             }
             Type::RustBox(_) => Some(quote!(#call.map(|r| ::std::boxed::Box::from_raw(r)))),
-            Type::RustVec(_) => Some(quote!(#call.map(|r| r.into_vec()))),
+            Type::RustVec(vec) => {
+                if vec.inner == RustString {
+                    Some(quote!(#call.map(|r| r.into_vec_string())))
+                } else {
+                    Some(quote!(#call.map(|r| r.into_vec())))
+                }
+            }
             Type::UniquePtr(_) => Some(quote!(#call.map(|r| ::cxx::UniquePtr::from_raw(r)))),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(ident) if ident == RustString => match ty.mutability {
                     None => Some(quote!(#call.map(|r| r.as_string()))),
                     Some(_) => Some(quote!(#call.map(|r| r.as_mut_string()))),
+                },
+                Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
+                    None => Some(quote!(#call.map(|r| r.as_vec_string()))),
+                    Some(_) => Some(quote!(#call.map(|r| r.as_mut_vec_string()))),
                 },
                 Type::RustVec(_) => match ty.mutability {
                     None => Some(quote!(#call.map(|r| r.as_vec()))),
@@ -353,12 +367,22 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
         efn.ret.as_ref().and_then(|ret| match ret {
             Type::Ident(ident) if ident == RustString => Some(quote!(#call.into_string())),
             Type::RustBox(_) => Some(quote!(::std::boxed::Box::from_raw(#call))),
-            Type::RustVec(_) => Some(quote!(#call.into_vec())),
+            Type::RustVec(vec) => {
+                if vec.inner == RustString {
+                    Some(quote!(#call.into_vec_string()))
+                } else {
+                    Some(quote!(#call.into_vec()))
+                }
+            }
             Type::UniquePtr(_) => Some(quote!(::cxx::UniquePtr::from_raw(#call))),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(ident) if ident == RustString => match ty.mutability {
                     None => Some(quote!(#call.as_string())),
                     Some(_) => Some(quote!(#call.as_mut_string())),
+                },
+                Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
+                    None => Some(quote!(#call.as_vec_string())),
+                    Some(_) => Some(quote!(#call.as_mut_vec_string())),
                 },
                 Type::RustVec(_) => match ty.mutability {
                     None => Some(quote!(#call.as_vec())),
@@ -508,12 +532,22 @@ fn expand_rust_function_shim_impl(
                 quote!(::std::mem::take((*#ident).as_mut_string()))
             }
             Type::RustBox(_) => quote!(::std::boxed::Box::from_raw(#ident)),
-            Type::RustVec(_) => quote!(::std::mem::take((*#ident).as_mut_vec())),
+            Type::RustVec(vec) => {
+                if vec.inner == RustString {
+                    quote!(::std::mem::take((*#ident).as_mut_vec_string()))
+                } else {
+                    quote!(::std::mem::take((*#ident).as_mut_vec()))
+                }
+            }
             Type::UniquePtr(_) => quote!(::cxx::UniquePtr::from_raw(#ident)),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(i) if i == RustString => match ty.mutability {
                     None => quote!(#ident.as_string()),
                     Some(_) => quote!(#ident.as_mut_string()),
+                },
+                Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
+                    None => quote!(#ident.as_vec_string()),
+                    Some(_) => quote!(#ident.as_mut_vec_string()),
                 },
                 Type::RustVec(_) => match ty.mutability {
                     None => quote!(#ident.as_vec()),
@@ -549,12 +583,22 @@ fn expand_rust_function_shim_impl(
                 Some(quote!(::cxx::private::RustString::from(#call)))
             }
             Type::RustBox(_) => Some(quote!(::std::boxed::Box::into_raw(#call))),
-            Type::RustVec(_) => Some(quote!(::cxx::private::RustVec::from(#call))),
+            Type::RustVec(vec) => {
+                if vec.inner == RustString {
+                    Some(quote!(::cxx::private::RustVec::from_vec_string(#call)))
+                } else {
+                    Some(quote!(::cxx::private::RustVec::from(#call)))
+                }
+            }
             Type::UniquePtr(_) => Some(quote!(::cxx::UniquePtr::into_raw(#call))),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(ident) if ident == RustString => match ty.mutability {
                     None => Some(quote!(::cxx::private::RustString::from_ref(#call))),
                     Some(_) => Some(quote!(::cxx::private::RustString::from_mut(#call))),
+                },
+                Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
+                    None => Some(quote!(::cxx::private::RustVec::from_ref_vec_string(#call))),
+                    Some(_) => Some(quote!(::cxx::private::RustVec::from_mut_vec_string(#call))),
                 },
                 Type::RustVec(_) => match ty.mutability {
                     None => Some(quote!(::cxx::private::RustVec::from_ref(#call))),
