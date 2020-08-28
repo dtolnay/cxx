@@ -3,6 +3,11 @@ use std::ptr;
 use std::slice;
 use std::str;
 
+#[repr(C)]
+pub(crate) struct RustString {
+    repr: String,
+}
+
 #[export_name = "cxxbridge03$string$new"]
 unsafe extern "C" fn string_new(this: &mut MaybeUninit<String>) {
     ptr::write(this.as_mut_ptr(), String::new());
