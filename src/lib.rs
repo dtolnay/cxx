@@ -398,6 +398,8 @@ pub use crate::unique_ptr::UniquePtr;
 pub use cxxbridge_macro::bridge;
 
 /// For use in impls of the `ExternType` trait. See [`ExternType`].
+///
+/// [`ExternType`]: trait.ExternType.html
 pub use cxxbridge_macro::type_id;
 
 // Not public API.
