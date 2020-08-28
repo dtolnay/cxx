@@ -39,6 +39,7 @@ pub mod ffi {
         fn c_return_unique_ptr_string() -> UniquePtr<CxxString>;
         fn c_return_unique_ptr_vector_u8() -> UniquePtr<CxxVector<u8>>;
         fn c_return_unique_ptr_vector_f64() -> UniquePtr<CxxVector<f64>>;
+        fn c_return_unique_ptr_vector_string() -> UniquePtr<CxxVector<CxxString>>;
         fn c_return_unique_ptr_vector_shared() -> UniquePtr<CxxVector<Shared>>;
         fn c_return_unique_ptr_vector_opaque() -> UniquePtr<CxxVector<C>>;
         fn c_return_ref_vector(c: &C) -> &CxxVector<u8>;
@@ -62,6 +63,7 @@ pub mod ffi {
         fn c_take_unique_ptr_string(s: UniquePtr<CxxString>);
         fn c_take_unique_ptr_vector_u8(v: UniquePtr<CxxVector<u8>>);
         fn c_take_unique_ptr_vector_f64(v: UniquePtr<CxxVector<f64>>);
+        fn c_take_unique_ptr_vector_string(v: UniquePtr<CxxVector<CxxString>>);
         fn c_take_unique_ptr_vector_shared(v: UniquePtr<CxxVector<Shared>>);
         fn c_take_ref_vector(v: &CxxVector<u8>);
         fn c_take_rust_vec(v: Vec<u8>);

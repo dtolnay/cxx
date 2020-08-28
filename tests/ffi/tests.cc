@@ -88,6 +88,11 @@ std::unique_ptr<std::vector<double>> c_return_unique_ptr_vector_f64() {
   return vec;
 }
 
+std::unique_ptr<std::vector<std::string>> c_return_unique_ptr_vector_string() {
+  return std::unique_ptr<std::vector<std::string>>(
+      new std::vector<std::string>());
+}
+
 std::unique_ptr<std::vector<Shared>> c_return_unique_ptr_vector_shared() {
   auto vec = std::unique_ptr<std::vector<Shared>>(new std::vector<Shared>());
   vec->push_back(Shared{1010});
@@ -208,6 +213,12 @@ void c_take_unique_ptr_vector_f64(std::unique_ptr<std::vector<double>> v) {
   if (v->size() == 4) {
     cxx_test_suite_set_correct();
   }
+}
+
+void c_take_unique_ptr_vector_string(
+    std::unique_ptr<std::vector<std::string>> v) {
+  (void)v;
+  cxx_test_suite_set_correct();
 }
 
 void c_take_unique_ptr_vector_shared(std::unique_ptr<std::vector<Shared>> v) {
