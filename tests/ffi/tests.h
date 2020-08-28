@@ -43,6 +43,7 @@ rust::String c_return_rust_string();
 std::unique_ptr<std::string> c_return_unique_ptr_string();
 std::unique_ptr<std::vector<uint8_t>> c_return_unique_ptr_vector_u8();
 std::unique_ptr<std::vector<double>> c_return_unique_ptr_vector_f64();
+std::unique_ptr<std::vector<std::string>> c_return_unique_ptr_vector_string();
 std::unique_ptr<std::vector<Shared>> c_return_unique_ptr_vector_shared();
 std::unique_ptr<std::vector<C>> c_return_unique_ptr_vector_opaque();
 const std::vector<uint8_t> &c_return_ref_vector(const C &c);
@@ -67,6 +68,8 @@ void c_take_rust_string(rust::String s);
 void c_take_unique_ptr_string(std::unique_ptr<std::string> s);
 void c_take_unique_ptr_vector_u8(std::unique_ptr<std::vector<uint8_t>> v);
 void c_take_unique_ptr_vector_f64(std::unique_ptr<std::vector<double>> v);
+void c_take_unique_ptr_vector_string(
+    std::unique_ptr<std::vector<std::string>> v);
 void c_take_unique_ptr_vector_shared(std::unique_ptr<std::vector<Shared>> v);
 void c_take_ref_vector(const std::vector<uint8_t> &v);
 void c_take_rust_vec(rust::Vec<uint8_t> v);

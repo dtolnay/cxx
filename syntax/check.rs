@@ -130,8 +130,8 @@ fn check_type_cxx_vector(cx: &mut Check, ptr: &Ty1) {
 
         match Atom::from(ident) {
             None | Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize) | Some(I8)
-            | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32) | Some(F64) => return,
-            Some(CxxString) => { /* todo */ }
+            | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32) | Some(F64)
+            | Some(CxxString) => return,
             Some(Bool) | Some(RustString) => {}
         }
     }

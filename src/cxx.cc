@@ -276,7 +276,8 @@ void cxxbridge03$unique_ptr$std$string$drop(
 #define FOR_EACH_STD_VECTOR(MACRO)                                             \
   FOR_EACH_NUMERIC(MACRO)                                                      \
   MACRO(usize, size_t)                                                         \
-  MACRO(isize, rust::isize)
+  MACRO(isize, rust::isize)                                                    \
+  MACRO(string, std::string)
 
 #define FOR_EACH_RUST_VEC(MACRO)                                               \
   FOR_EACH_NUMERIC(MACRO)                                                      \
