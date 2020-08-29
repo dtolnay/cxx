@@ -49,9 +49,14 @@ fn generate_from_path(path: &Path, opt: Opt, header: bool) -> Vec<u8> {
         Ok(source) => source,
         Err(err) => format_err(path, "", Error::Io(err)),
     };
-    match generate(&source, opt, header) {
+    let mut source = source.as_str();
+    if source.starts_with("#!") && !source.starts_with("#![") {
+        let shebang_end = source.find('\n').unwrap_or(source.len());
+        source = &source[shebang_end..];
+    }
+    match generate(source, opt, header) {
         Ok(out) => out,
-        Err(err) => format_err(path, &source, err),
+        Err(err) => format_err(path, source, err),
     }
 }
 
