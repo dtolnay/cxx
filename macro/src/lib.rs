@@ -13,9 +13,10 @@ mod expand;
 mod syntax;
 mod type_id;
 
+use crate::syntax::file::Module;
 use crate::syntax::namespace::Namespace;
 use proc_macro::TokenStream;
-use syn::{parse_macro_input, ItemMod, LitStr};
+use syn::{parse_macro_input, LitStr};
 
 /// `#[cxx::bridge] mod ffi { ... }`
 ///
@@ -39,9 +40,10 @@ pub fn bridge(args: TokenStream, input: TokenStream) -> TokenStream {
     let _ = syntax::error::ERRORS;
 
     let namespace = parse_macro_input!(args as Namespace);
-    let ffi = parse_macro_input!(input as ItemMod);
+    let mut ffi = parse_macro_input!(input as Module);
+    ffi.namespace = namespace;
 
-    expand::bridge(&namespace, ffi)
+    expand::bridge(ffi)
         .unwrap_or_else(|err| err.to_compile_error())
         .into()
 }

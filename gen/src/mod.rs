@@ -2,7 +2,7 @@
 // the cxxbridge CLI command.
 
 mod error;
-mod find;
+mod file;
 pub(super) mod include;
 pub(super) mod out;
 mod write;
@@ -11,17 +11,11 @@ mod write;
 mod tests;
 
 use self::error::{format_err, Error, Result};
-use crate::syntax::namespace::Namespace;
+use self::file::File;
 use crate::syntax::report::Errors;
 use crate::syntax::{self, check, Types};
 use std::fs;
 use std::path::Path;
-use syn::Item;
-
-struct Input {
-    namespace: Namespace,
-    module: Vec<Item>,
-}
 
 #[derive(Default)]
 pub(super) struct Opt {
@@ -47,19 +41,28 @@ fn generate_from_path(path: &Path, opt: Opt, header: bool) -> Vec<u8> {
         Ok(source) => source,
         Err(err) => format_err(path, "", Error::Io(err)),
     };
-    match generate(&source, opt, header) {
+    let mut source = source.as_str();
+    if source.starts_with("#!") && !source.starts_with("#![") {
+        let shebang_end = source.find('\n').unwrap_or(source.len());
+        source = &source[shebang_end..];
+    }
+    match generate(source, opt, header) {
         Ok(out) => out,
-        Err(err) => format_err(path, &source, err),
+        Err(err) => format_err(path, source, err),
     }
 }
 
 fn generate(source: &str, opt: Opt, header: bool) -> Result<Vec<u8>> {
     proc_macro2::fallback::force();
     let ref mut errors = Errors::new();
-    let syntax = syn::parse_file(&source)?;
-    let bridge = find::find_bridge_mod(syntax)?;
+    let syntax: File = syn::parse_str(source)?;
+    let bridge = syntax
+        .modules
+        .into_iter()
+        .next()
+        .ok_or(Error::NoBridgeMod)?;
     let ref namespace = bridge.namespace;
-    let ref apis = syntax::parse_items(errors, bridge.module);
+    let ref apis = syntax::parse_items(errors, bridge.content);
     let ref types = Types::collect(errors, apis);
     errors.propagate()?;
     check::typecheck(errors, namespace, apis, types);

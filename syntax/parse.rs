@@ -1,4 +1,5 @@
 use crate::syntax::discriminant::DiscriminantSet;
+use crate::syntax::file::{Item, ItemForeignMod};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
@@ -11,8 +12,8 @@ use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::{
     Abi, Attribute, Error, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
-    GenericArgument, Ident, Item, ItemEnum, ItemForeignMod, ItemStruct, LitStr, Pat, PathArguments,
-    Result, ReturnType, Token, Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
+    GenericArgument, Ident, ItemEnum, ItemStruct, LitStr, Pat, PathArguments, Result, ReturnType,
+    Token, Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
 };
 
 pub mod kw {
@@ -33,7 +34,7 @@ pub fn parse_items(cx: &mut Errors, items: Vec<Item>) -> Vec<Api> {
             },
             Item::ForeignMod(foreign_mod) => parse_foreign_mod(cx, foreign_mod, &mut apis),
             Item::Use(item) => cx.error(item, error::USE_NOT_ALLOWED),
-            _ => cx.error(item, "unsupported item"),
+            Item::Other(item) => cx.error(item, "unsupported item"),
         }
     }
     apis

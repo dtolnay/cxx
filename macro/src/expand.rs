@@ -1,32 +1,33 @@
 use crate::syntax::atom::Atom::{self, *};
+use crate::syntax::file::Module;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
     self, check, mangle, Api, Enum, ExternFn, ExternType, Signature, Struct, Type, TypeAlias, Types,
 };
-use proc_macro2::{Ident, Span, TokenStream};
+use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
-use syn::{parse_quote, Error, ItemMod, Result, Token};
+use std::mem;
+use syn::{parse_quote, Result, Token};
 
-pub fn bridge(namespace: &Namespace, mut ffi: ItemMod) -> Result<TokenStream> {
+pub fn bridge(mut ffi: Module) -> Result<TokenStream> {
     let ref mut errors = Errors::new();
-    let content = ffi.content.take().ok_or(Error::new(
-        Span::call_site(),
-        "#[cxx::bridge] module must have inline contents",
-    ))?;
-    let ref apis = syntax::parse_items(errors, content.1);
+    let content = mem::take(&mut ffi.content);
+    let ref apis = syntax::parse_items(errors, content);
     let ref types = Types::collect(errors, apis);
     errors.propagate()?;
+    let namespace = &ffi.namespace;
     check::typecheck(errors, namespace, apis, types);
     errors.propagate()?;
 
-    Ok(expand(namespace, ffi, apis, types))
+    Ok(expand(ffi, apis, types))
 }
 
-fn expand(namespace: &Namespace, ffi: ItemMod, apis: &[Api], types: &Types) -> TokenStream {
+fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
     let mut expanded = TokenStream::new();
     let mut hidden = TokenStream::new();
+    let namespace = &ffi.namespace;
 
     for api in apis {
         if let Api::RustType(ety) = api {
