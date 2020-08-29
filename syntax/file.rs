@@ -7,7 +7,7 @@ pub struct Module {
     pub namespace: Namespace,
     pub attrs: Vec<Attribute>,
     pub vis: Visibility,
-    // TODO: unsafety
+    pub unsafety: Option<Token![unsafe]>,
     pub mod_token: Token![mod],
     pub ident: Ident,
     pub brace_token: token::Brace,
@@ -19,6 +19,7 @@ impl Parse for Module {
         let namespace = Namespace::none();
         let mut attrs = input.call(Attribute::parse_outer)?;
         let vis: Visibility = input.parse()?;
+        let unsafety: Option<Token![unsafe]> = input.parse()?;
         let mod_token: Token![mod] = input.parse()?;
         let ident: Ident = input.parse()?;
 
@@ -44,6 +45,7 @@ impl Parse for Module {
             namespace,
             attrs,
             vis,
+            unsafety,
             mod_token,
             ident,
             brace_token,
