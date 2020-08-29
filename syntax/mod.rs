@@ -7,6 +7,7 @@ mod derive;
 mod discriminant;
 mod doc;
 pub mod error;
+pub mod file;
 pub mod ident;
 mod impls;
 pub mod mangle;
