@@ -71,7 +71,10 @@ fn check_type_ident(cx: &mut Check, ident: &Ident) {
 
 fn check_type_box(cx: &mut Check, ptr: &Ty1) {
     if let Type::Ident(ident) = &ptr.inner {
-        if cx.types.cxx.contains(ident) && !cx.types.enums.contains_key(ident) {
+        if cx.types.cxx.contains(ident)
+            && !cx.types.structs.contains_key(ident)
+            && !cx.types.enums.contains_key(ident)
+        {
             cx.error(ptr, error::BOX_CXX_TYPE.msg);
         }
 
@@ -85,7 +88,10 @@ fn check_type_box(cx: &mut Check, ptr: &Ty1) {
 
 fn check_type_rust_vec(cx: &mut Check, ty: &Ty1) {
     if let Type::Ident(ident) = &ty.inner {
-        if cx.types.cxx.contains(ident) && !cx.types.enums.contains_key(ident) {
+        if cx.types.cxx.contains(ident)
+            && !cx.types.structs.contains_key(ident)
+            && !cx.types.enums.contains_key(ident)
+        {
             cx.error(ty, "Rust Vec containing C++ type is not supported yet");
             return;
         }
@@ -166,6 +172,11 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
     if strct.fields.is_empty() {
         let span = span_for_struct_error(strct);
         cx.error(span, "structs without any fields are not supported");
+    }
+
+    if cx.types.cxx.contains(&strct.ident) {
+        let span = span_for_struct_error(strct);
+        cx.error(span, "extern C++ structs are not implemented yet");
     }
 
     for field in &strct.fields {
@@ -321,7 +332,9 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
         _ => return false,
     };
     ident == CxxString
-        || cx.types.cxx.contains(ident) && !cx.types.enums.contains_key(ident)
+        || cx.types.cxx.contains(ident)
+            && !cx.types.structs.contains_key(ident)
+            && !cx.types.enums.contains_key(ident)
         || cx.types.rust.contains(ident)
 }
 

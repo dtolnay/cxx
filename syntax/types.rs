@@ -48,33 +48,54 @@ impl<'a> Types<'a> {
         let mut type_names = UnorderedSet::new();
         let mut function_names = UnorderedSet::new();
         for api in apis {
+            // The same identifier is permitted to be declared as both a shared
+            // enum and extern C++ type, or shared struct and extern C++ type.
+            // That indicates to not emit the C++ enum/struct definition because
+            // it's defined by the included headers already.
+            //
+            // All other cases of duplicate identifiers are reported as an error.
             match api {
                 Api::Include(_) => {}
                 Api::Struct(strct) => {
                     let ident = &strct.ident;
-                    if type_names.insert(ident) {
-                        structs.insert(ident, strct);
-                    } else {
+                    if !type_names.insert(ident)
+                        && (!cxx.contains(ident)
+                            || structs.contains_key(ident)
+                            || enums.contains_key(ident))
+                    {
+                        // If already declared as a struct or enum, or if
+                        // colliding with something other than an extern C++
+                        // type, then error.
                         duplicate_name(cx, strct, ident);
                     }
+                    structs.insert(ident, strct);
                     for field in &strct.fields {
                         visit(&mut all, &field.ty);
                     }
                 }
                 Api::Enum(enm) => {
                     let ident = &enm.ident;
-                    // We allow declaring the same type as a shared enum and as a Cxxtype, as this
-                    // means not to emit the C++ enum definition.
-                    if !type_names.insert(ident) && !cxx.contains(ident) {
+                    if !type_names.insert(ident)
+                        && (!cxx.contains(ident)
+                            || structs.contains_key(ident)
+                            || enums.contains_key(ident))
+                    {
+                        // If already declared as a struct or enum, or if
+                        // colliding with something other than an extern C++
+                        // type, then error.
                         duplicate_name(cx, enm, ident);
                     }
                     enums.insert(ident, enm);
                 }
                 Api::CxxType(ety) => {
                     let ident = &ety.ident;
-                    // We allow declaring the same type as a shared enum and as a Cxxtype, as this
-                    // means not to emit the C++ enum definition.
-                    if !type_names.insert(ident) && !enums.contains_key(ident) {
+                    if !type_names.insert(ident)
+                        && (cxx.contains(ident)
+                            || !structs.contains_key(ident) && !enums.contains_key(ident))
+                    {
+                        // If already declared as an extern C++ type, or if
+                        // colliding with something which is neither struct nor
+                        // enum, then error.
                         duplicate_name(cx, ety, ident);
                     }
                     cxx.insert(ident);
