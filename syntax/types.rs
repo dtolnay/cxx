@@ -8,11 +8,11 @@ use std::collections::{BTreeMap as Map, HashSet as UnorderedSet};
 
 pub struct Types<'a> {
     pub all: Set<'a, Type>,
-    pub structs: Map<Ident, &'a Struct>,
-    pub enums: Map<Ident, &'a Enum>,
+    pub structs: Map<&'a Ident, &'a Struct>,
+    pub enums: Map<&'a Ident, &'a Enum>,
     pub cxx: Set<'a, Ident>,
     pub rust: Set<'a, Ident>,
-    pub aliases: Map<Ident, &'a TypeAlias>,
+    pub aliases: Map<&'a Ident, &'a TypeAlias>,
 }
 
 impl<'a> Types<'a> {
@@ -53,7 +53,7 @@ impl<'a> Types<'a> {
                 Api::Struct(strct) => {
                     let ident = &strct.ident;
                     if type_names.insert(ident) {
-                        structs.insert(ident.clone(), strct);
+                        structs.insert(ident, strct);
                     } else {
                         duplicate_name(cx, strct, ident);
                     }
@@ -68,7 +68,7 @@ impl<'a> Types<'a> {
                     if !type_names.insert(ident) && !cxx.contains(ident) {
                         duplicate_name(cx, enm, ident);
                     }
-                    enums.insert(ident.clone(), enm);
+                    enums.insert(ident, enm);
                 }
                 Api::CxxType(ety) => {
                     let ident = &ety.ident;
@@ -104,7 +104,7 @@ impl<'a> Types<'a> {
                         duplicate_name(cx, alias, ident);
                     }
                     cxx.insert(ident);
-                    aliases.insert(ident.clone(), alias);
+                    aliases.insert(ident, alias);
                 }
             }
         }
