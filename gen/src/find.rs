@@ -1,6 +1,6 @@
-use crate::gen::{Error, Input, Result};
+use crate::gen::{Error, File, Input, Result};
 use crate::syntax::namespace::Namespace;
-use syn::{Attribute, File, Item};
+use syn::{Attribute, Item};
 
 pub(super) fn find_bridge_mod(syntax: File) -> Result<Input> {
     match scan(syntax.items)? {
