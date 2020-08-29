@@ -16,7 +16,6 @@ pub(super) type Result<T, E = Error> = std::result::Result<T, E>;
 #[derive(Debug)]
 pub(super) enum Error {
     NoBridgeMod,
-    OutOfLineMod,
     Io(io::Error),
     Syn(syn::Error),
 }
@@ -25,7 +24,6 @@ impl Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Error::NoBridgeMod => write!(f, "no #[cxx::bridge] module found"),
-            Error::OutOfLineMod => write!(f, "#[cxx::bridge] module must have inline contents"),
             Error::Io(err) => err.fmt(f),
             Error::Syn(err) => err.fmt(f),
         }

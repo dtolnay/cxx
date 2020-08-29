@@ -3,7 +3,6 @@
 
 mod error;
 mod file;
-mod find;
 pub(super) mod include;
 pub(super) mod out;
 mod write;
@@ -13,17 +12,10 @@ mod tests;
 
 use self::error::{format_err, Error, Result};
 use self::file::File;
-use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::{self, check, Types};
 use std::fs;
 use std::path::Path;
-use syn::Item;
-
-struct Input {
-    namespace: Namespace,
-    module: Vec<Item>,
-}
 
 #[derive(Default)]
 pub(super) struct Opt {
@@ -64,9 +56,13 @@ fn generate(source: &str, opt: Opt, header: bool) -> Result<Vec<u8>> {
     proc_macro2::fallback::force();
     let ref mut errors = Errors::new();
     let syntax: File = syn::parse_str(source)?;
-    let bridge = find::find_bridge_mod(syntax)?;
+    let bridge = syntax
+        .modules
+        .into_iter()
+        .next()
+        .ok_or(Error::NoBridgeMod)?;
     let ref namespace = bridge.namespace;
-    let ref apis = syntax::parse_items(errors, bridge.module);
+    let ref apis = syntax::parse_items(errors, bridge.content);
     let ref types = Types::collect(errors, apis);
     errors.propagate()?;
     check::typecheck(errors, namespace, apis, types);

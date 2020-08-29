@@ -40,9 +40,10 @@ pub fn bridge(args: TokenStream, input: TokenStream) -> TokenStream {
     let _ = syntax::error::ERRORS;
 
     let namespace = parse_macro_input!(args as Namespace);
-    let ffi = parse_macro_input!(input as Module);
+    let mut ffi = parse_macro_input!(input as Module);
+    ffi.namespace = namespace;
 
-    expand::bridge(&namespace, ffi)
+    expand::bridge(ffi)
         .unwrap_or_else(|err| err.to_compile_error())
         .into()
 }

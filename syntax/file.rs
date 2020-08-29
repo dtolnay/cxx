@@ -1,8 +1,10 @@
-use proc_macro2::Span;
+use crate::syntax::namespace::Namespace;
+use quote::quote;
 use syn::parse::{Error, Parse, ParseStream, Result};
 use syn::{braced, token, Attribute, Ident, Item, Token, Visibility};
 
 pub struct Module {
+    pub namespace: Namespace,
     pub attrs: Vec<Attribute>,
     pub vis: Visibility,
     // TODO: unsafety
@@ -14,14 +16,17 @@ pub struct Module {
 
 impl Parse for Module {
     fn parse(input: ParseStream) -> Result<Self> {
+        let namespace = Namespace::none();
         let mut attrs = input.call(Attribute::parse_outer)?;
         let vis: Visibility = input.parse()?;
         let mod_token: Token![mod] = input.parse()?;
         let ident: Ident = input.parse()?;
 
-        if input.peek(Token![;]) {
-            return Err(Error::new(
-                Span::call_site(),
+        let semi: Option<Token![;]> = input.parse()?;
+        if let Some(semi) = semi {
+            let span = quote!(#vis #mod_token #semi);
+            return Err(Error::new_spanned(
+                span,
                 "#[cxx::bridge] module must have inline contents",
             ))?;
         }
@@ -36,6 +41,7 @@ impl Parse for Module {
         }
 
         Ok(Module {
+            namespace,
             attrs,
             vis,
             mod_token,
