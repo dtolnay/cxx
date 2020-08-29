@@ -2,7 +2,7 @@ use crate::syntax::namespace::Namespace;
 use quote::quote;
 use syn::parse::{Error, Parse, ParseStream, Result};
 use syn::{
-    braced, token, Attribute, Ident, Item as RustItem, ItemEnum, ItemForeignMod, ItemStruct,
+    braced, token, Abi, Attribute, ForeignItem, Ident, Item as RustItem, ItemEnum, ItemStruct,
     ItemUse, Token, Visibility,
 };
 
@@ -23,6 +23,14 @@ pub enum Item {
     ForeignMod(ItemForeignMod),
     Use(ItemUse),
     Other(RustItem),
+}
+
+pub struct ItemForeignMod {
+    pub attrs: Vec<Attribute>,
+    pub unsafety: Option<Token![unsafe]>,
+    pub abi: Abi,
+    pub brace_token: token::Brace,
+    pub items: Vec<ForeignItem>,
 }
 
 impl Parse for Module {
@@ -71,7 +79,13 @@ impl Parse for Item {
         match item {
             RustItem::Struct(item) => Ok(Item::Struct(item)),
             RustItem::Enum(item) => Ok(Item::Enum(item)),
-            RustItem::ForeignMod(item) => Ok(Item::ForeignMod(item)),
+            RustItem::ForeignMod(item) => Ok(Item::ForeignMod(ItemForeignMod {
+                attrs: item.attrs,
+                unsafety: None,
+                abi: item.abi,
+                brace_token: item.brace_token,
+                items: item.items,
+            })),
             RustItem::Use(item) => Ok(Item::Use(item)),
             other => Ok(Item::Other(other)),
         }

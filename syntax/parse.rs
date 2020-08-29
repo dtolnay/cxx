@@ -1,5 +1,5 @@
 use crate::syntax::discriminant::DiscriminantSet;
-use crate::syntax::file::Item;
+use crate::syntax::file::{Item, ItemForeignMod};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
@@ -12,8 +12,8 @@ use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::{
     Abi, Attribute, Error, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
-    GenericArgument, Ident, ItemEnum, ItemForeignMod, ItemStruct, LitStr, Pat, PathArguments,
-    Result, ReturnType, Token, Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
+    GenericArgument, Ident, ItemEnum, ItemStruct, LitStr, Pat, PathArguments, Result, ReturnType,
+    Token, Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
 };
 
 pub mod kw {
