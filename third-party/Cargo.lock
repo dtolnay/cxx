@@ -70,6 +70,7 @@ dependencies = [
  "cc",
  "cxx-build",
  "cxx-test-suite",
+ "cxxbridge-flags",
  "cxxbridge-macro",
  "link-cplusplus",
  "rustversion",
@@ -94,6 +95,7 @@ version = "0.0.0"
 dependencies = [
  "cxx",
  "cxx-build",
+ "cxxbridge-flags",
 ]
 
 [[package]]
@@ -115,6 +117,10 @@ dependencies = [
  "cxx",
  "cxx-build",
 ]
+
+[[package]]
+name = "cxxbridge-flags"
+version = "0.3.6"
 
 [[package]]
 name = "cxxbridge-macro"

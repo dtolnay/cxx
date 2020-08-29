@@ -12,3 +12,4 @@ cxx = { path = "../.." }
 
 [build-dependencies]
 cxx-build = { path = "../../gen/build" }
+cxxbridge-flags = { path = "../../flags" }
