@@ -12,7 +12,7 @@ pub(crate) struct OutFile {
 }
 
 pub struct Content {
-    bytes: Vec<u8>,
+    bytes: String,
     section_pending: bool,
     blocks_pending: Vec<&'static str>,
 }
@@ -42,9 +42,9 @@ impl OutFile {
     pub fn end_block(&mut self, block: &'static str) {
         let content = self.content.get_mut();
         if content.blocks_pending.pop().is_none() {
-            content.bytes.extend_from_slice(b"} // ");
-            content.bytes.extend_from_slice(block.as_bytes());
-            content.bytes.push(b'\n');
+            content.bytes.push_str("} // ");
+            content.bytes.push_str(block);
+            content.bytes.push('\n');
             content.section_pending = true;
         }
     }
@@ -58,19 +58,19 @@ impl OutFile {
         let front = &self.front.bytes;
         let content = &self.content.borrow().bytes;
         let len = front.len() + !front.is_empty() as usize + content.len();
-        let mut out = Vec::with_capacity(len);
-        out.extend_from_slice(front);
+        let mut out = String::with_capacity(len);
+        out.push_str(front);
         if !front.is_empty() {
-            out.push(b'\n');
+            out.push('\n');
         }
-        out.extend_from_slice(content);
-        out
+        out.push_str(content);
+        out.into_bytes()
     }
 }
 
 impl Write for Content {
     fn write_str(&mut self, s: &str) -> fmt::Result {
-        self.write_bytes(s.as_bytes());
+        self.write(s);
         Ok(())
     }
 }
@@ -82,30 +82,30 @@ impl Content {
 
     fn new() -> Self {
         Content {
-            bytes: Vec::new(),
+            bytes: String::new(),
             section_pending: false,
             blocks_pending: Vec::new(),
         }
     }
 
-    fn write_bytes(&mut self, b: &[u8]) {
+    fn write(&mut self, b: &str) {
         if !b.is_empty() {
             if !self.blocks_pending.is_empty() {
                 if !self.bytes.is_empty() {
-                    self.bytes.push(b'\n');
+                    self.bytes.push('\n');
                 }
                 for block in self.blocks_pending.drain(..) {
-                    self.bytes.extend_from_slice(block.as_bytes());
-                    self.bytes.extend_from_slice(b" {\n");
+                    self.bytes.push_str(block);
+                    self.bytes.push_str(" {\n");
                 }
                 self.section_pending = false;
             } else if self.section_pending {
                 if !self.bytes.is_empty() {
-                    self.bytes.push(b'\n');
+                    self.bytes.push('\n');
                 }
                 self.section_pending = false;
             }
-            self.bytes.extend_from_slice(b);
+            self.bytes.push_str(b);
         }
     }
 }
