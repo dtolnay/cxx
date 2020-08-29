@@ -2,8 +2,7 @@
 mod ffi {
     struct Monad<T>;
 
-    extern "Haskell" {
-    }
+    extern "Haskell" {}
 }
 
 fn main() {}

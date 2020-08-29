@@ -1,8 +1,6 @@
 #[cxx::bridge]
 mod ffi {
-    enum A {
-
-    }
+    enum A {}
 }
 
 fn main() {}

@@ -7,5 +7,5 @@ error: struct with generic parameters is not supported yet
 error: unrecognized ABI
  --> $DIR/multiple_parse_error.rs:5:5
   |
-5 |     extern "Haskell" {
+5 |     extern "Haskell" {}
   |     ^^^^^^^^^^^^^^^^
