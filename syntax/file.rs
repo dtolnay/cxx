@@ -3,7 +3,7 @@ use quote::quote;
 use syn::parse::{Error, Parse, ParseStream, Result};
 use syn::{
     braced, token, Abi, Attribute, ForeignItem, Ident, Item as RustItem, ItemEnum, ItemStruct,
-    ItemUse, Token, Visibility,
+    ItemUse, LitStr, Token, Visibility,
 };
 
 pub struct Module {
@@ -75,18 +75,31 @@ impl Parse for Module {
 
 impl Parse for Item {
     fn parse(input: ParseStream) -> Result<Self> {
+        let attrs = input.call(Attribute::parse_outer)?;
+
+        let ahead = input.fork();
+        let unsafety = if ahead.parse::<Option<Token![unsafe]>>()?.is_some()
+            && ahead.parse::<Option<Token![extern]>>()?.is_some()
+            && ahead.parse::<Option<LitStr>>().is_ok()
+            && ahead.peek(token::Brace)
+        {
+            Some(input.parse()?)
+        } else {
+            None
+        };
+
         let item = input.parse()?;
         match item {
-            RustItem::Struct(item) => Ok(Item::Struct(item)),
-            RustItem::Enum(item) => Ok(Item::Enum(item)),
+            RustItem::Struct(item) => Ok(Item::Struct(ItemStruct { attrs, ..item })),
+            RustItem::Enum(item) => Ok(Item::Enum(ItemEnum { attrs, ..item })),
             RustItem::ForeignMod(item) => Ok(Item::ForeignMod(ItemForeignMod {
                 attrs: item.attrs,
-                unsafety: None,
+                unsafety,
                 abi: item.abi,
                 brace_token: item.brace_token,
                 items: item.items,
             })),
-            RustItem::Use(item) => Ok(Item::Use(item)),
+            RustItem::Use(item) => Ok(Item::Use(ItemUse { attrs, ..item })),
             other => Ok(Item::Other(other)),
         }
     }
