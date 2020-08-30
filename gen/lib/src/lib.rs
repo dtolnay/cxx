@@ -7,18 +7,10 @@
 mod gen;
 mod syntax;
 
-pub use crate::gen::Opt;
+pub use crate::gen::{GeneratedCode, Opt};
 use proc_macro2::TokenStream;
 use std::error::Error as StdError;
 use std::fmt::{self, Debug, Display};
-
-/// Results of code generation.
-pub struct GeneratedCode {
-    /// The bytes of a C++ header file.
-    pub header: Vec<u8>,
-    /// The bytes of a C++ implementation file (e.g. .cc, cpp etc.)
-    pub cxx: Vec<u8>,
-}
 
 pub struct Error(crate::gen::Error);
 
@@ -28,10 +20,7 @@ pub fn generate_header_and_cc(rust_source: TokenStream, opt: &Opt) -> Result<Gen
     let syntax = syn::parse2(rust_source)
         .map_err(crate::gen::Error::from)
         .map_err(Error)?;
-    match gen::generate(syntax, opt, true, true).map_err(Error)? {
-        (Some(header), Some(cxx)) => Ok(GeneratedCode { header, cxx }),
-        _ => panic!("Unexpected generation"),
-    }
+    gen::generate(syntax, opt, true, true).map_err(Error)
 }
 
 impl Display for Error {

@@ -47,6 +47,14 @@ pub struct Opt {
     pub cxx_impl_annotations: Option<String>,
 }
 
+/// Results of code generation.
+pub struct GeneratedCode {
+    /// The bytes of a C++ header file.
+    pub header: Vec<u8>,
+    /// The bytes of a C++ implementation file (e.g. .cc, cpp etc.)
+    pub cxx: Vec<u8>,
+}
+
 pub(super) fn do_generate_bridge(path: &Path, opt: &Opt) -> Vec<u8> {
     let header = false;
     generate_from_path(path, opt, header)
@@ -75,12 +83,8 @@ fn generate_from_string(source: &str, opt: &Opt, header: bool) -> Result<Vec<u8>
         source = &source[shebang_end..];
     }
     let syntax: File = syn::parse_str(source)?;
-    let results = generate(syntax, opt, header, !header)?;
-    match results {
-        (Some(hdr), None) => Ok(hdr),
-        (None, Some(cxx)) => Ok(cxx),
-        _ => panic!("Unexpected generation"),
-    }
+    let generated = generate(syntax, opt, header, !header)?;
+    Ok(if header { generated.header } else { generated.cxx })
 }
 
 pub(super) fn generate(
@@ -88,7 +92,7 @@ pub(super) fn generate(
     opt: &Opt,
     gen_header: bool,
     gen_cxx: bool,
-) -> Result<(Option<Vec<u8>>, Option<Vec<u8>>)> {
+) -> Result<GeneratedCode> {
     proc_macro2::fallback::force();
     let ref mut errors = Errors::new();
     let bridge = syntax
@@ -106,15 +110,16 @@ pub(super) fn generate(
     // Some callers may wish to generate both header and C++
     // from the same token stream to avoid parsing twice. But others
     // only need to generate one or the other.
-    let hdr = if gen_header {
-        Some(write::gen(namespace, apis, types, opt, true).content())
-    } else {
-        None
-    };
-    let cxx = if gen_cxx {
-        Some(write::gen(namespace, apis, types, opt, false).content())
-    } else {
-        None
-    };
-    Ok((hdr, cxx))
+    Ok(GeneratedCode {
+        header: if gen_header {
+            write::gen(namespace, apis, types, opt, true).content()
+        } else {
+            Vec::new()
+        },
+        cxx: if gen_cxx {
+            write::gen(namespace, apis, types, opt, false).content()
+        } else {
+            Vec::new()
+        },
+    })
 }
