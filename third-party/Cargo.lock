@@ -65,7 +65,7 @@ dependencies = [
 
 [[package]]
 name = "cxx"
-version = "0.3.6"
+version = "0.3.7"
 dependencies = [
  "cc",
  "cxx-build",
@@ -79,7 +79,7 @@ dependencies = [
 
 [[package]]
 name = "cxx-build"
-version = "0.3.6"
+version = "0.3.7"
 dependencies = [
  "anyhow",
  "cc",
@@ -113,7 +113,7 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-cmd"
-version = "0.3.6"
+version = "0.3.7"
 dependencies = [
  "anyhow",
  "clap",
@@ -133,11 +133,11 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-flags"
-version = "0.3.6"
+version = "0.3.7"
 
 [[package]]
 name = "cxxbridge-macro"
-version = "0.3.6"
+version = "0.3.7"
 dependencies = [
  "cxx",
  "proc-macro2",
