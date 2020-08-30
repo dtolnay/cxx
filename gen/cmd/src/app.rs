@@ -4,11 +4,11 @@ mod test;
 
 use super::Opt;
 use clap::AppSettings;
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsStr;
 use std::path::PathBuf;
 
-type App = clap::App<'static, 'static>;
-type Arg = clap::Arg<'static, 'static>;
+type App = clap::App<'static>;
+type Arg = clap::Arg<'static>;
 
 const USAGE: &str = "\
     cxxbridge <input>.rs              Emit .cc file for bridge to stdout
@@ -32,15 +32,15 @@ OPTIONS:
 
 fn app() -> App {
     let mut app = App::new("cxxbridge")
-        .usage(USAGE)
-        .template(TEMPLATE)
+        .override_usage(USAGE)
+        .help_template(TEMPLATE)
         .setting(AppSettings::NextLineHelp)
         .arg(arg_input())
         .arg(arg_cxx_impl_annotations())
         .arg(arg_header())
         .arg(arg_include())
-        .help_message("Print help information.")
-        .version_message("Print version information.");
+        .arg(arg_help())
+        .arg(arg_version());
     if let Some(version) = option_env!("CARGO_PKG_VERSION") {
         app = app.version(version);
     }
@@ -51,6 +51,8 @@ const INPUT: &str = "input";
 const CXX_IMPL_ANNOTATIONS: &str = "cxx-impl-annotations";
 const HEADER: &str = "header";
 const INCLUDE: &str = "include";
+const HELP: &str = "help";
+const VERSION: &str = "version";
 
 pub(super) fn from_args() -> Opt {
     let matches = app().get_matches();
@@ -64,53 +66,65 @@ pub(super) fn from_args() -> Opt {
     }
 }
 
-fn validate_utf8(arg: &OsStr) -> Result<(), OsString> {
+fn validate_utf8(arg: &OsStr) -> Result<(), String> {
     if arg.to_str().is_some() {
         Ok(())
     } else {
-        Err(OsString::from("invalid utf-8 sequence"))
+        Err("invalid utf-8 sequence".to_owned())
     }
 }
 
 fn arg_input() -> Arg {
-    Arg::with_name(INPUT)
-        .help("Input Rust source file containing #[cxx::bridge].")
-        .required_unless(HEADER)
+    Arg::new(INPUT)
+        .about("Input Rust source file containing #[cxx::bridge].")
+        .required_unless_present(HEADER)
 }
 
 fn arg_cxx_impl_annotations() -> Arg {
-    const HELP: &str = "\
+    const ABOUT: &str = "\
 Optional annotation for implementations of C++ function wrappers
 that may be exposed to Rust. You may for example need to provide
 __declspec(dllexport) or __attribute__((visibility(\"default\")))
 if Rust code from one shared object or executable depends on
-these C++ functions in another.
-    ";
-    Arg::with_name(CXX_IMPL_ANNOTATIONS)
+these C++ functions in another.";
+    Arg::new(CXX_IMPL_ANNOTATIONS)
         .long(CXX_IMPL_ANNOTATIONS)
         .takes_value(true)
         .value_name("annotation")
         .validator_os(validate_utf8)
-        .help(HELP)
+        .about(ABOUT)
 }
 
 fn arg_header() -> Arg {
-    Arg::with_name(HEADER)
+    Arg::new(HEADER)
         .long(HEADER)
-        .help("Emit header with declarations only.")
+        .about("Emit header with declarations only.")
 }
 
 fn arg_include() -> Arg {
-    const HELP: &str = "\
+    const ABOUT: &str = "\
 Any additional headers to #include. The cxxbridge tool does not
 parse or even require the given paths to exist; they simply go
-into the generated C++ code as #include lines.
-    ";
-    Arg::with_name(INCLUDE)
+into the generated C++ code as #include lines.";
+    Arg::new(INCLUDE)
         .long(INCLUDE)
-        .short("i")
+        .short('i')
         .takes_value(true)
         .multiple(true)
         .validator_os(validate_utf8)
-        .help(HELP)
+        .about(ABOUT)
+}
+
+fn arg_help() -> Arg {
+    Arg::new(HELP)
+        .long(HELP)
+        .short('h')
+        .about("Print help information.")
+}
+
+fn arg_version() -> Arg {
+    Arg::new(VERSION)
+        .long(VERSION)
+        .short('V')
+        .about("Print version information.")
 }

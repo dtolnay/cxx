@@ -40,6 +40,6 @@ fn main() {
         (Some(input), true) => write(gen::generate_from_path(&input, &gen).header),
         (Some(input), false) => write(gen::generate_from_path(&input, &gen).implementation),
         (None, true) => write(include::HEADER),
-        (None, false) => unreachable!(), // enforced by required_unless
+        (None, false) => unreachable!(), // enforced by required_unless_present
     }
 }
