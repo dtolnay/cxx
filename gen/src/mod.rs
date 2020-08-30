@@ -44,6 +44,9 @@ pub struct Opt {
     /// Rust code from one shared object or executable depends on these C++
     /// functions in another.
     pub cxx_impl_annotations: Option<String>,
+
+    pub(super) gen_header: bool,
+    pub(super) gen_implementation: bool,
 }
 
 /// Results of code generation.
@@ -59,52 +62,34 @@ impl Default for Opt {
         Opt {
             include: Vec::new(),
             cxx_impl_annotations: None,
+            gen_header: true,
+            gen_implementation: true,
         }
     }
 }
 
-pub(super) fn do_generate_bridge(path: &Path, opt: &Opt) -> Vec<u8> {
-    let header = false;
-    generate_from_path(path, opt, header)
-}
-
-pub(super) fn do_generate_header(path: &Path, opt: &Opt) -> Vec<u8> {
-    let header = true;
-    generate_from_path(path, opt, header)
-}
-
-fn generate_from_path(path: &Path, opt: &Opt, header: bool) -> Vec<u8> {
+pub(super) fn generate_from_path(path: &Path, opt: &Opt) -> GeneratedCode {
     let source = match fs::read_to_string(path) {
         Ok(source) => source,
         Err(err) => format_err(path, "", Error::Io(err)),
     };
-    match generate_from_string(&source, opt, header) {
+    match generate_from_string(&source, opt) {
         Ok(out) => out,
         Err(err) => format_err(path, &source, err),
     }
 }
 
-fn generate_from_string(source: &str, opt: &Opt, header: bool) -> Result<Vec<u8>> {
+fn generate_from_string(source: &str, opt: &Opt) -> Result<GeneratedCode> {
     let mut source = source;
     if source.starts_with("#!") && !source.starts_with("#![") {
         let shebang_end = source.find('\n').unwrap_or(source.len());
         source = &source[shebang_end..];
     }
     let syntax: File = syn::parse_str(source)?;
-    let generated = generate(syntax, opt, header, !header)?;
-    Ok(if header {
-        generated.header
-    } else {
-        generated.implementation
-    })
+    generate(syntax, opt)
 }
 
-pub(super) fn generate(
-    syntax: File,
-    opt: &Opt,
-    gen_header: bool,
-    gen_implementation: bool,
-) -> Result<GeneratedCode> {
+pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
     proc_macro2::fallback::force();
     let ref mut errors = Errors::new();
     let bridge = syntax
@@ -123,12 +108,12 @@ pub(super) fn generate(
     // from the same token stream to avoid parsing twice. But others
     // only need to generate one or the other.
     Ok(GeneratedCode {
-        header: if gen_header {
+        header: if opt.gen_header {
             write::gen(namespace, apis, types, opt, true).content()
         } else {
             Vec::new()
         },
-        implementation: if gen_implementation {
+        implementation: if opt.gen_implementation {
             write::gen(namespace, apis, types, opt, false).content()
         } else {
             Vec::new()

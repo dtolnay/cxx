@@ -103,16 +103,16 @@ pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) ->
 
 fn try_generate_bridge(build: &mut cc::Build, rust_source_file: &Path) -> Result<()> {
     let opt = Opt::default();
-    let header = gen::do_generate_header(rust_source_file, &opt);
+    let generated = gen::generate_from_path(rust_source_file, &opt);
+
     let header_path = paths::out_with_extension(rust_source_file, ".h")?;
     fs::create_dir_all(header_path.parent().unwrap())?;
-    fs::write(&header_path, header)?;
+    fs::write(&header_path, generated.header)?;
     paths::symlink_header(&header_path, rust_source_file);
 
-    let bridge = gen::do_generate_bridge(rust_source_file, &opt);
-    let bridge_path = paths::out_with_extension(rust_source_file, ".cc")?;
-    fs::write(&bridge_path, bridge)?;
-    build.file(&bridge_path);
+    let implementation_path = paths::out_with_extension(rust_source_file, ".cc")?;
+    fs::write(&implementation_path, generated.implementation)?;
+    build.file(&implementation_path);
 
     let ref cxx_h = paths::include_dir()?.join("rust").join("cxx.h");
     let _ = fs::create_dir_all(cxx_h.parent().unwrap());

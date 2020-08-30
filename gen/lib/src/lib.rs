@@ -20,7 +20,7 @@ pub fn generate_header_and_cc(rust_source: TokenStream, opt: &Opt) -> Result<Gen
     let syntax = syn::parse2(rust_source)
         .map_err(crate::gen::Error::from)
         .map_err(Error)?;
-    gen::generate(syntax, opt, true, true).map_err(Error)
+    gen::generate(syntax, opt).map_err(Error)
 }
 
 impl Display for Error {
