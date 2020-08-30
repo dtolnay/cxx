@@ -20,7 +20,7 @@ pub mod kw {
     syn::custom_keyword!(Result);
 }
 
-pub fn parse_items(cx: &mut Errors, items: Vec<Item>) -> Vec<Api> {
+pub fn parse_items(cx: &mut Errors, items: Vec<Item>, trusted: bool) -> Vec<Api> {
     let mut apis = Vec::new();
     for item in items {
         match item {
@@ -32,7 +32,7 @@ pub fn parse_items(cx: &mut Errors, items: Vec<Item>) -> Vec<Api> {
                 Ok(enm) => apis.push(enm),
                 Err(err) => cx.push(err),
             },
-            Item::ForeignMod(foreign_mod) => parse_foreign_mod(cx, foreign_mod, &mut apis),
+            Item::ForeignMod(foreign_mod) => parse_foreign_mod(cx, foreign_mod, &mut apis, trusted),
             Item::Use(item) => cx.error(item, error::USE_NOT_ALLOWED),
             Item::Other(item) => cx.error(item, "unsupported item"),
         }
@@ -170,16 +170,20 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum) -> Result<Api> {
     }))
 }
 
-fn parse_foreign_mod(cx: &mut Errors, foreign_mod: ItemForeignMod, out: &mut Vec<Api>) {
+fn parse_foreign_mod(
+    cx: &mut Errors,
+    foreign_mod: ItemForeignMod,
+    out: &mut Vec<Api>,
+    trusted: bool,
+) {
     let lang = match parse_lang(&foreign_mod.abi) {
         Ok(lang) => lang,
         Err(err) => return cx.push(err),
     };
 
-    let trusted = foreign_mod.unsafety.is_some();
     match lang {
         Lang::Rust => {
-            if trusted {
+            if foreign_mod.unsafety.is_some() {
                 let unsafety = foreign_mod.unsafety;
                 let abi = foreign_mod.abi;
                 let span = quote!(#unsafety #abi);
@@ -188,6 +192,8 @@ fn parse_foreign_mod(cx: &mut Errors, foreign_mod: ItemForeignMod, out: &mut Vec
         }
         Lang::Cxx => {}
     }
+
+    let trusted = trusted || foreign_mod.unsafety.is_some();
 
     let mut items = Vec::new();
     for foreign in &foreign_mod.items {

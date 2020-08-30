@@ -14,7 +14,8 @@ use syn::{parse_quote, Result, Token};
 pub fn bridge(mut ffi: Module) -> Result<TokenStream> {
     let ref mut errors = Errors::new();
     let content = mem::take(&mut ffi.content);
-    let ref apis = syntax::parse_items(errors, content);
+    let trusted = ffi.unsafety.is_some();
+    let ref apis = syntax::parse_items(errors, content, trusted);
     let ref types = Types::collect(errors, apis);
     errors.propagate()?;
     let namespace = &ffi.namespace;

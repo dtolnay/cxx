@@ -62,7 +62,8 @@ fn generate(source: &str, opt: Opt, header: bool) -> Result<Vec<u8>> {
         .next()
         .ok_or(Error::NoBridgeMod)?;
     let ref namespace = bridge.namespace;
-    let ref apis = syntax::parse_items(errors, bridge.content);
+    let trusted = bridge.unsafety.is_some();
+    let ref apis = syntax::parse_items(errors, bridge.content, trusted);
     let ref types = Types::collect(errors, apis);
     errors.propagate()?;
     check::typecheck(errors, namespace, apis, types);
