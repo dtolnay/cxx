@@ -28,35 +28,3 @@ pub fn generate_header_and_cc(rust_source: TokenStream, opt: Opt) -> Result<Gene
         _ => panic!("Unexpected generation"),
     }
 }
-
-#[cfg(test)]
-mod test {
-    use crate::Opt;
-    use quote::quote;
-
-    #[test]
-    fn test_positive() {
-        let rs = quote! {
-            #[cxx::bridge]
-            mod ffi {
-                extern "C" {
-                    fn in_C();
-                }
-                extern "Rust" {
-                    fn in_rs();
-                }
-            }
-        };
-        let opt = Opt::default();
-        let code = crate::generate_header_and_cc(rs, opt).unwrap();
-        assert!(code.cxx.len() > 0);
-        assert!(code.header.len() > 0);
-    }
-
-    #[test]
-    fn test_negative() {
-        let rs = quote! {};
-        let opt = Opt::default();
-        assert!(crate::generate_header_and_cc(rs, opt).is_err())
-    }
-}
