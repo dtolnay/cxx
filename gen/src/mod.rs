@@ -15,7 +15,6 @@ pub use self::error::{Error, Result};
 use self::file::File;
 use crate::syntax::report::Errors;
 use crate::syntax::{self, check, Types};
-use proc_macro2::TokenStream;
 use std::clone::Clone;
 use std::fs;
 use std::path::Path;
@@ -30,14 +29,6 @@ pub struct Opt {
     pub cxx_impl_annotations: Option<String>,
 }
 
-/// Results of code generation.
-pub struct GeneratedCode {
-    /// The bytes of a C++ header file.
-    pub header: Vec<u8>,
-    /// The bytes of a C++ implementation file (e.g. .cc, cpp etc.)
-    pub cxx: Vec<u8>,
-}
-
 pub(super) fn do_generate_bridge(path: &Path, opt: Opt) -> Vec<u8> {
     let header = false;
     generate_from_path(path, opt, header)
@@ -46,18 +37,6 @@ pub(super) fn do_generate_bridge(path: &Path, opt: Opt) -> Vec<u8> {
 pub(super) fn do_generate_header(path: &Path, opt: Opt) -> Vec<u8> {
     let header = true;
     generate_from_path(path, opt, header)
-}
-
-pub(super) fn do_generate_from_tokens(
-    tokens: TokenStream,
-    opt: Opt,
-) -> std::result::Result<GeneratedCode, Error> {
-    let syntax = syn::parse2::<File>(tokens)?;
-    match generate(syntax, opt, true, true) {
-        Ok((Some(header), Some(cxx))) => Ok(GeneratedCode { header, cxx }),
-        Err(err) => Err(err),
-        _ => panic!("Unexpected generation"),
-    }
 }
 
 fn generate_from_path(path: &Path, opt: Opt, header: bool) -> Vec<u8> {
@@ -86,7 +65,7 @@ fn generate_from_string(source: &str, opt: Opt, header: bool) -> Result<Vec<u8>>
     }
 }
 
-fn generate(
+pub(super) fn generate(
     syntax: File,
     opt: Opt,
     gen_header: bool,
