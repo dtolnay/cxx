@@ -13,6 +13,12 @@ rust_library(
 )
 
 rust_library(
+    name = "atty",
+    srcs = glob(["vendor/atty-0.2.14/src/**"]),
+    deps = [":libc"],
+)
+
+rust_library(
     name = "bitflags",
     srcs = glob(["vendor/bitflags-1.2.1/src/**"]),
 )
@@ -25,13 +31,25 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-2.33.3/src/**"]),
-    edition = "2015",
+    srcs = glob(["vendor/clap-3.0.0-beta.1/src/**"]),
+    crate_features = [
+        "cargo",
+        "color",
+        "std",
+        "suggestions",
+    ],
     visibility = ["//visibility:public"],
     deps = [
+        ":atty",
         ":bitflags",
+        ":indexmap",
+        ":lazy_static",
+        ":os_str_bytes",
+        ":strsim",
+        ":termcolor",
         ":textwrap",
         ":unicode-width",
+        ":vec_map",
     ],
 )
 
@@ -46,14 +64,49 @@ rust_library(
 )
 
 rust_library(
+    name = "hashbrown",
+    srcs = glob(["vendor/hashbrown-0.8.2/src/**"]),
+    crate_features = ["raw"],
+)
+
+rust_library(
+    name = "indexmap",
+    srcs = glob(["vendor/indexmap-1.5.1/src/**"]),
+    rustc_flags = ["--cfg=has_std"],
+    deps = [":hashbrown"],
+)
+
+rust_library(
     name = "lazy_static",
     srcs = glob(["vendor/lazy_static-1.4.0/src/**"]),
+)
+
+rust_library(
+    name = "libc",
+    srcs = glob(["vendor/libc-0.2.76/src/**"]),
+    crate_features = ["std"],
+    edition = "2015",
+    rustc_flags = [
+        "--cfg=libc_packedN",
+        "--cfg=libc_cfg_target_vendor",
+        "--cfg=libc_core_cvoid",
+        "--cfg=libc_align",
+        "--cfg=libc_const_size_of",
+        "--cfg=libc_union",
+        "--cfg=libc_priv_mod_use",
+    ],
 )
 
 rust_library(
     name = "link-cplusplus",
     srcs = glob(["vendor/link-cplusplus-1.0.2/src/**"]),
     visibility = ["//visibility:public"],
+)
+
+rust_library(
+    name = "os_str_bytes",
+    srcs = glob(["vendor/os_str_bytes-2.3.2/src/**"]),
+    crate_features = ["raw"],
 )
 
 rust_library(
@@ -78,6 +131,11 @@ rust_library(
     crate_features = ["proc-macro"],
     visibility = ["//visibility:public"],
     deps = [":proc-macro2"],
+)
+
+rust_library(
+    name = "strsim",
+    srcs = glob(["vendor/strsim-0.10.0/src/**"]),
 )
 
 rust_library(
@@ -106,7 +164,7 @@ rust_library(
 
 rust_library(
     name = "textwrap",
-    srcs = glob(["vendor/textwrap-0.11.0/src/**"]),
+    srcs = glob(["vendor/textwrap-0.12.1/src/**"]),
     deps = [":unicode-width"],
 )
 
@@ -118,4 +176,9 @@ rust_library(
 rust_library(
     name = "unicode-xid",
     srcs = glob(["vendor/unicode-xid-0.2.1/src/**"]),
+)
+
+rust_library(
+    name = "vec_map",
+    srcs = glob(["vendor/vec_map-0.8.2/src/**"]),
 )
