@@ -171,10 +171,22 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum) -> Result<Api> {
 }
 
 fn parse_foreign_mod(cx: &mut Errors, foreign_mod: ItemForeignMod, out: &mut Vec<Api>) {
-    let lang = match parse_lang(foreign_mod.abi) {
+    let lang = match parse_lang(&foreign_mod.abi) {
         Ok(lang) => lang,
         Err(err) => return cx.push(err),
     };
+
+    match lang {
+        Lang::Rust => {
+            if foreign_mod.unsafety.is_some() {
+                let unsafety = foreign_mod.unsafety;
+                let abi = foreign_mod.abi;
+                let span = quote!(#unsafety #abi);
+                cx.error(span, "extern \"Rust\" block does not need to be unsafe");
+            }
+        }
+        Lang::Cxx => {}
+    }
 
     let mut items = Vec::new();
     for foreign in &foreign_mod.items {
@@ -222,7 +234,7 @@ fn parse_foreign_mod(cx: &mut Errors, foreign_mod: ItemForeignMod, out: &mut Vec
     out.extend(items);
 }
 
-fn parse_lang(abi: Abi) -> Result<Lang> {
+fn parse_lang(abi: &Abi) -> Result<Lang> {
     let name = match &abi.name {
         Some(name) => name,
         None => {
