@@ -2,6 +2,8 @@
 //!
 //! This is intended to be embedded into higher-level code generators.
 
+#![allow(dead_code)]
+
 mod gen;
 mod syntax;
 
