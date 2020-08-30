@@ -48,6 +48,7 @@ pub struct ExternType {
     pub type_token: Token![type],
     pub ident: Ident,
     pub semi_token: Token![;],
+    pub trusted: bool,
 }
 
 pub struct Struct {

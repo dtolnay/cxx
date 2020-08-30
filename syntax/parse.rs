@@ -176,9 +176,10 @@ fn parse_foreign_mod(cx: &mut Errors, foreign_mod: ItemForeignMod, out: &mut Vec
         Err(err) => return cx.push(err),
     };
 
+    let trusted = foreign_mod.unsafety.is_some();
     match lang {
         Lang::Rust => {
-            if foreign_mod.unsafety.is_some() {
+            if trusted {
                 let unsafety = foreign_mod.unsafety;
                 let abi = foreign_mod.abi;
                 let span = quote!(#unsafety #abi);
@@ -191,7 +192,7 @@ fn parse_foreign_mod(cx: &mut Errors, foreign_mod: ItemForeignMod, out: &mut Vec
     let mut items = Vec::new();
     for foreign in &foreign_mod.items {
         match foreign {
-            ForeignItem::Type(foreign) => match parse_extern_type(cx, foreign, lang) {
+            ForeignItem::Type(foreign) => match parse_extern_type(cx, foreign, lang, trusted) {
                 Ok(ety) => items.push(ety),
                 Err(err) => cx.push(err),
             },
@@ -251,7 +252,12 @@ fn parse_lang(abi: &Abi) -> Result<Lang> {
     }
 }
 
-fn parse_extern_type(cx: &mut Errors, foreign_type: &ForeignItemType, lang: Lang) -> Result<Api> {
+fn parse_extern_type(
+    cx: &mut Errors,
+    foreign_type: &ForeignItemType,
+    lang: Lang,
+    trusted: bool,
+) -> Result<Api> {
     let doc = attrs::parse_doc(cx, &foreign_type.attrs);
     let type_token = foreign_type.type_token;
     let ident = foreign_type.ident.clone();
@@ -265,6 +271,7 @@ fn parse_extern_type(cx: &mut Errors, foreign_type: &ForeignItemType, lang: Lang
         type_token,
         ident,
         semi_token,
+        trusted,
     }))
 }
 
