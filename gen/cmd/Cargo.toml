@@ -15,7 +15,7 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow = "1.0"
-clap = { git = "https://github.com/clap-rs/clap" }
+clap = { git = "https://github.com/clap-rs/clap", default-features = false, features = ["suggestions", "color", "std", "cargo"] }
 codespan-reporting = "0.9"
 proc-macro2 = { version = "1.0.17", default-features = false, features = ["span-locations"] }
 quote = { version = "1.0", default-features = false }
