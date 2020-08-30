@@ -31,6 +31,7 @@ pub fn generate_header_and_cc(rust_source: TokenStream, opt: Opt) -> Result<Gene
 
 #[cfg(test)]
 mod test {
+    use crate::Opt;
     use quote::quote;
 
     #[test]
@@ -46,7 +47,8 @@ mod test {
                 }
             }
         };
-        let code = crate::generate_header_and_cc(rs).unwrap();
+        let opt = Opt::default();
+        let code = crate::generate_header_and_cc(rs, opt).unwrap();
         assert!(code.cxx.len() > 0);
         assert!(code.header.len() > 0);
     }
@@ -54,6 +56,7 @@ mod test {
     #[test]
     fn test_negative() {
         let rs = quote! {};
-        assert!(crate::generate_header_and_cc(rs).is_err())
+        let opt = Opt::default();
+        assert!(crate::generate_header_and_cc(rs, opt).is_err())
     }
 }
