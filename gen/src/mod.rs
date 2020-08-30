@@ -10,7 +10,7 @@ mod write;
 #[cfg(test)]
 mod tests;
 
-pub use self::error::Error;
+pub(super) use self::error::Error;
 use self::error::{format_err, Result};
 use self::file::File;
 use crate::syntax::report::Errors;

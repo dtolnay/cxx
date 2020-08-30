@@ -14,12 +14,9 @@ use std::process;
 pub(crate) type Result<T, E = Error> = std::result::Result<T, E>;
 
 #[derive(Debug)]
-pub enum Error {
-    /// No `#[cxx::bridge]` module could be found.
+pub(crate) enum Error {
     NoBridgeMod,
-    /// An IO error occurred when reading Rust code.
     Io(io::Error),
-    /// A syntax error occurred when parsing Rust code.
     Syn(syn::Error),
 }
 
