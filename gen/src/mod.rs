@@ -15,7 +15,6 @@ use self::error::{format_err, Result};
 use self::file::File;
 use crate::syntax::report::Errors;
 use crate::syntax::{self, check, Types};
-use std::clone::Clone;
 use std::fs;
 use std::path::Path;
 
