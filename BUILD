@@ -71,7 +71,7 @@ rust_library(
 rust_library(
     name = "lib",
     srcs = glob(["gen/lib/src/**/*.rs"]),
-    data = ["gen/build/src/gen/include/cxx.h"],
+    data = ["gen/lib/src/gen/include/cxx.h"],
     visibility = ["//visibility:public"],
     deps = [
         "//third-party:anyhow",
