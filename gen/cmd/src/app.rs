@@ -1,3 +1,7 @@
+#[cfg(test)]
+#[path = "test.rs"]
+mod test;
+
 use super::Opt;
 use clap::AppSettings;
 use std::ffi::{OsStr, OsString};
