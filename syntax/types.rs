@@ -1,7 +1,7 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::set::OrderedSet as Set;
-use crate::syntax::{Api, Derive, Enum, Struct, Type, TypeAlias};
+use crate::syntax::{Api, Derive, Enum, ExternType, Struct, Type, TypeAlias};
 use proc_macro2::Ident;
 use quote::ToTokens;
 use std::collections::{BTreeMap as Map, HashSet as UnorderedSet};
@@ -13,7 +13,7 @@ pub struct Types<'a> {
     pub cxx: Set<&'a Ident>,
     pub rust: Set<&'a Ident>,
     pub aliases: Map<&'a Ident, &'a TypeAlias>,
-    pub trusted: Set<&'a Ident>,
+    pub untrusted: Map<&'a Ident, &'a ExternType>,
 }
 
 impl<'a> Types<'a> {
@@ -24,7 +24,7 @@ impl<'a> Types<'a> {
         let mut cxx = Set::new();
         let mut rust = Set::new();
         let mut aliases = Map::new();
-        let mut trusted = Set::new();
+        let mut untrusted = Map::new();
 
         fn visit<'a>(all: &mut Set<&'a Type>, ty: &'a Type) {
             all.insert(ty);
@@ -101,8 +101,8 @@ impl<'a> Types<'a> {
                         duplicate_name(cx, ety, ident);
                     }
                     cxx.insert(ident);
-                    if ety.trusted {
-                        trusted.insert(ident);
+                    if !ety.trusted {
+                        untrusted.insert(ident, ety);
                     }
                 }
                 Api::RustType(ety) => {
@@ -142,7 +142,7 @@ impl<'a> Types<'a> {
             cxx,
             rust,
             aliases,
-            trusted,
+            untrusted,
         }
     }
 

@@ -167,16 +167,22 @@ fn check_type_slice(cx: &mut Check, ty: &Slice) {
 }
 
 fn check_api_struct(cx: &mut Check, strct: &Struct) {
-    check_reserved_name(cx, &strct.ident);
+    let ident = &strct.ident;
+    check_reserved_name(cx, ident);
 
     if strct.fields.is_empty() {
         let span = span_for_struct_error(strct);
         cx.error(span, "structs without any fields are not supported");
     }
 
-    if cx.types.cxx.contains(&strct.ident) {
-        let span = span_for_struct_error(strct);
-        cx.error(span, "extern C++ structs are not implemented yet");
+    if cx.types.cxx.contains(ident) {
+        if let Some(ety) = cx.types.untrusted.get(ident) {
+            let msg = "extern shared struct must be declared in an `unsafe extern` block";
+            cx.error(ety, msg);
+        } else {
+            let span = span_for_struct_error(strct);
+            cx.error(span, "extern C++ structs are not implemented yet");
+        }
     }
 
     for field in &strct.fields {
