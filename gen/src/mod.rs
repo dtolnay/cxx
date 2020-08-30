@@ -32,7 +32,6 @@ use std::path::Path;
 /// let mut opt = Opt::default();
 /// opt.cxx_impl_annotations = Some(impl_annotations);
 /// ```
-#[derive(Default)]
 #[non_exhaustive]
 pub struct Opt {
     /// Any additional headers to #include. The cxxbridge tool does not parse or
@@ -53,6 +52,15 @@ pub struct GeneratedCode {
     pub header: Vec<u8>,
     /// The bytes of a C++ implementation file (e.g. .cc, cpp etc.)
     pub implementation: Vec<u8>,
+}
+
+impl Default for Opt {
+    fn default() -> Self {
+        Opt {
+            include: Vec::new(),
+            cxx_impl_annotations: None,
+        }
+    }
 }
 
 pub(super) fn do_generate_bridge(path: &Path, opt: &Opt) -> Vec<u8> {
