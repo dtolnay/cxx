@@ -52,7 +52,7 @@ pub struct GeneratedCode {
     /// The bytes of a C++ header file.
     pub header: Vec<u8>,
     /// The bytes of a C++ implementation file (e.g. .cc, cpp etc.)
-    pub cxx: Vec<u8>,
+    pub implementation: Vec<u8>,
 }
 
 pub(super) fn do_generate_bridge(path: &Path, opt: &Opt) -> Vec<u8> {
@@ -84,14 +84,18 @@ fn generate_from_string(source: &str, opt: &Opt, header: bool) -> Result<Vec<u8>
     }
     let syntax: File = syn::parse_str(source)?;
     let generated = generate(syntax, opt, header, !header)?;
-    Ok(if header { generated.header } else { generated.cxx })
+    Ok(if header {
+        generated.header
+    } else {
+        generated.implementation
+    })
 }
 
 pub(super) fn generate(
     syntax: File,
     opt: &Opt,
     gen_header: bool,
-    gen_cxx: bool,
+    gen_implementation: bool,
 ) -> Result<GeneratedCode> {
     proc_macro2::fallback::force();
     let ref mut errors = Errors::new();
@@ -116,7 +120,7 @@ pub(super) fn generate(
         } else {
             Vec::new()
         },
-        cxx: if gen_cxx {
+        implementation: if gen_implementation {
             write::gen(namespace, apis, types, opt, false).content()
         } else {
             Vec::new()

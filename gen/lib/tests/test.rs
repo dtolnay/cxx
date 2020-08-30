@@ -16,8 +16,8 @@ fn test_positive() {
     };
     let opt = Opt::default();
     let code = cxx_gen::generate_header_and_cc(rs, &opt).unwrap();
-    assert!(code.cxx.len() > 0);
     assert!(code.header.len() > 0);
+    assert!(code.implementation.len() > 0);
 }
 
 #[test]
