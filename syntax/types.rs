@@ -7,11 +7,11 @@ use quote::ToTokens;
 use std::collections::{BTreeMap as Map, HashSet as UnorderedSet};
 
 pub struct Types<'a> {
-    pub all: Set<'a, Type>,
+    pub all: Set<&'a Type>,
     pub structs: Map<&'a Ident, &'a Struct>,
     pub enums: Map<&'a Ident, &'a Enum>,
-    pub cxx: Set<'a, Ident>,
-    pub rust: Set<'a, Ident>,
+    pub cxx: Set<&'a Ident>,
+    pub rust: Set<&'a Ident>,
     pub aliases: Map<&'a Ident, &'a TypeAlias>,
 }
 
@@ -24,7 +24,7 @@ impl<'a> Types<'a> {
         let mut rust = Set::new();
         let mut aliases = Map::new();
 
-        fn visit<'a>(all: &mut Set<'a, Type>, ty: &'a Type) {
+        fn visit<'a>(all: &mut Set<&'a Type>, ty: &'a Type) {
             all.insert(ty);
             match ty {
                 Type::Ident(_) | Type::Str(_) | Type::Void(_) | Type::SliceRefU8(_) => {}

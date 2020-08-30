@@ -2,12 +2,12 @@ use std::collections::HashSet;
 use std::hash::Hash;
 use std::slice;
 
-pub struct OrderedSet<'a, T> {
-    set: HashSet<&'a T>,
-    vec: Vec<&'a T>,
+pub struct OrderedSet<T> {
+    set: HashSet<T>,
+    vec: Vec<T>,
 }
 
-impl<'a, T> OrderedSet<'a, T>
+impl<'a, T> OrderedSet<&'a T>
 where
     T: Hash + Eq,
 {
@@ -31,7 +31,7 @@ where
     }
 }
 
-impl<'s, 'a, T> IntoIterator for &'s OrderedSet<'a, T> {
+impl<'s, 'a, T> IntoIterator for &'s OrderedSet<&'a T> {
     type Item = &'a T;
     type IntoIter = Iter<'s, 'a, T>;
     fn into_iter(self) -> Self::IntoIter {
