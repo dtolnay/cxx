@@ -22,6 +22,6 @@ use proc_macro2::TokenStream;
 pub fn generate_header_and_cc(rust_source: TokenStream, opt: &Opt) -> Result<GeneratedCode, Error> {
     let syntax = syn::parse2(rust_source)
         .map_err(crate::gen::Error::from)
-        .map_err(Error)?;
-    gen::generate(syntax, opt).map_err(Error)
+        .map_err(Error::from)?;
+    gen::generate(syntax, opt).map_err(Error::from)
 }
