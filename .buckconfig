@@ -3,6 +3,7 @@
   # publish` and `cargo vendor` so this allow_symlinks setting should not be
   # required downstream.
   allow_symlinks = allow
+  ignore = target
 
 [cxx]
   cxxflags = -std=c++11
