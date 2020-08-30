@@ -11,7 +11,7 @@ use std::ops::Range;
 use std::path::Path;
 use std::process;
 
-pub type Result<T, E = Error> = std::result::Result<T, E>;
+pub(crate) type Result<T, E = Error> = std::result::Result<T, E>;
 
 #[derive(Debug)]
 pub enum Error {
