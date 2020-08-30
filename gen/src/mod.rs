@@ -36,10 +36,15 @@ use std::path::Path;
 #[derive(Default, Clone)]
 #[non_exhaustive]
 pub struct Opt {
-    /// Any additional headers to #include
+    /// Any additional headers to #include. The cxxbridge tool does not parse or
+    /// even require the given paths to exist; they simply go into the generated
+    /// C++ code as #include lines.
     pub include: Vec<String>,
-    /// Whether to set __attribute__((visibility("default")))
-    /// or similar annotations on function implementations.
+    /// Optional annotation for implementations of C++ function wrappers that
+    /// may be exposed to Rust. You may for example need to provide
+    /// `__declspec(dllexport)` or `__attribute__((visibility("default")))` if
+    /// Rust code from one shared object or executable depends on these C++
+    /// functions in another.
     pub cxx_impl_annotations: Option<String>,
 }
 
