@@ -20,7 +20,21 @@ use std::fs;
 use std::path::Path;
 
 /// Options for C++ code generation.
+///
+/// We expect options to be added over time, so this is a non-exhaustive struct.
+/// To instantiate one you need to crate a default value and mutate those fields
+/// that you want to modify.
+///
+/// ```
+/// # use cxx_gen::Opt;
+/// #
+/// let impl_annotations = r#"__attribute__((visibility("default")))"#.to_owned();
+///
+/// let mut opt = Opt::default();
+/// opt.cxx_impl_annotations = Some(impl_annotations);
+/// ```
 #[derive(Default, Clone)]
+#[non_exhaustive]
 pub struct Opt {
     /// Any additional headers to #include
     pub include: Vec<String>,
