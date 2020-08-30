@@ -48,7 +48,7 @@ impl Parse for Module {
             return Err(Error::new_spanned(
                 span,
                 "#[cxx::bridge] module must have inline contents",
-            ))?;
+            ));
         }
 
         let content;
