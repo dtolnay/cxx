@@ -35,7 +35,7 @@ jobs:
         with:
           toolchain: ${{matrix.rust}}
       - run: cargo run --manifest-path demo-rs/Cargo.toml
-      - run: cargo test --all
+      - run: cargo test --all --exclude cxx-test-suite
 
   msrv:
     name: Rust 1.42.0
