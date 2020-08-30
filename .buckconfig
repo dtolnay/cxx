@@ -3,6 +3,10 @@
   # publish` and `cargo vendor` so this allow_symlinks setting should not be
   # required downstream.
   allow_symlinks = allow
+
+  # Hide BUCK files under target/package/ from `buck build ...`. Otherwise:
+  #   $ buck build ...
+  #   //target/package/cxx-0.3.0/tests:ffi references non-existing file or directory 'target/package/cxx-0.3.0/tests/ffi/lib.rs'
   ignore = target
 
 [cxx]
