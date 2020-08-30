@@ -19,7 +19,7 @@ OPTIONS:
             __declspec(dllexport) or __attribute__((visibility(\"default\")))
             if Rust code from one shared object or executable depends on
             these C++ functions in another.
-                
+               \x20
     -h, --help
             Print help information.
 
@@ -30,7 +30,7 @@ OPTIONS:
             Any additional headers to #include. The cxxbridge tool does not
             parse or even require the given paths to exist; they simply go
             into the generated C++ code as #include lines.
-                
+               \x20
     -V, --version
             Print version information.
 ";
