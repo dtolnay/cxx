@@ -355,6 +355,8 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         Type::Ident(ident) => {
             if cx.types.structs.contains_key(ident) {
                 "struct".to_owned()
+            } else if cx.types.enums.contains_key(ident) {
+                "enum".to_owned()
             } else if cx.types.cxx.contains(ident) {
                 "C++ type".to_owned()
             } else if cx.types.rust.contains(ident) {
