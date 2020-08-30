@@ -84,6 +84,7 @@ dependencies = [
  "anyhow",
  "cc",
  "codespan-reporting",
+ "cxx-gen",
  "proc-macro2",
  "quote",
  "syn",
