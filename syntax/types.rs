@@ -13,6 +13,7 @@ pub struct Types<'a> {
     pub cxx: Set<&'a Ident>,
     pub rust: Set<&'a Ident>,
     pub aliases: Map<&'a Ident, &'a TypeAlias>,
+    pub trusted: Set<&'a Ident>,
 }
 
 impl<'a> Types<'a> {
@@ -23,6 +24,7 @@ impl<'a> Types<'a> {
         let mut cxx = Set::new();
         let mut rust = Set::new();
         let mut aliases = Map::new();
+        let mut trusted = Set::new();
 
         fn visit<'a>(all: &mut Set<&'a Type>, ty: &'a Type) {
             all.insert(ty);
@@ -99,6 +101,9 @@ impl<'a> Types<'a> {
                         duplicate_name(cx, ety, ident);
                     }
                     cxx.insert(ident);
+                    if ety.trusted {
+                        trusted.insert(ident);
+                    }
                 }
                 Api::RustType(ety) => {
                     let ident = &ety.ident;
@@ -137,6 +142,7 @@ impl<'a> Types<'a> {
             cxx,
             rust,
             aliases,
+            trusted,
         }
     }
 
