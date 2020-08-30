@@ -24,7 +24,7 @@ pub struct Error(crate::gen::Error);
 
 /// Generate C++ bindings code from a Rust token stream. This should be a Rust
 /// token stream which somewhere contains a `#[cxx::bridge] mod {}`.
-pub fn generate_header_and_cc(rust_source: TokenStream, opt: Opt) -> Result<GeneratedCode, Error> {
+pub fn generate_header_and_cc(rust_source: TokenStream, opt: &Opt) -> Result<GeneratedCode, Error> {
     let syntax = syn::parse2(rust_source)
         .map_err(crate::gen::Error::from)
         .map_err(Error)?;

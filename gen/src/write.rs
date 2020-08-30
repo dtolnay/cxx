@@ -11,7 +11,7 @@ pub(super) fn gen(
     namespace: &Namespace,
     apis: &[Api],
     types: &Types,
-    opt: Opt,
+    opt: &Opt,
     header: bool,
 ) -> OutFile {
     let mut out_file = OutFile::new(namespace.clone(), header);
@@ -21,7 +21,7 @@ pub(super) fn gen(
         writeln!(out.front, "#pragma once");
     }
 
-    out.include.extend(opt.include);
+    out.include.extend(opt.include.clone());
     for api in apis {
         if let Api::Include(include) = api {
             out.include.insert(include);

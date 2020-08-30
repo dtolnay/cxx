@@ -35,8 +35,8 @@ fn main() {
     };
 
     match (opt.input, opt.header) {
-        (Some(input), true) => write(gen::do_generate_header(&input, gen)),
-        (Some(input), false) => write(gen::do_generate_bridge(&input, gen)),
+        (Some(input), true) => write(gen::do_generate_header(&input, &gen)),
+        (Some(input), false) => write(gen::do_generate_bridge(&input, &gen)),
         (None, true) => write(include::HEADER),
         (None, false) => unreachable!(), // enforced by required_unless
     }

@@ -32,7 +32,7 @@ use std::path::Path;
 /// let mut opt = Opt::default();
 /// opt.cxx_impl_annotations = Some(impl_annotations);
 /// ```
-#[derive(Default, Clone)]
+#[derive(Default)]
 #[non_exhaustive]
 pub struct Opt {
     /// Any additional headers to #include. The cxxbridge tool does not parse or
@@ -47,17 +47,17 @@ pub struct Opt {
     pub cxx_impl_annotations: Option<String>,
 }
 
-pub(super) fn do_generate_bridge(path: &Path, opt: Opt) -> Vec<u8> {
+pub(super) fn do_generate_bridge(path: &Path, opt: &Opt) -> Vec<u8> {
     let header = false;
     generate_from_path(path, opt, header)
 }
 
-pub(super) fn do_generate_header(path: &Path, opt: Opt) -> Vec<u8> {
+pub(super) fn do_generate_header(path: &Path, opt: &Opt) -> Vec<u8> {
     let header = true;
     generate_from_path(path, opt, header)
 }
 
-fn generate_from_path(path: &Path, opt: Opt, header: bool) -> Vec<u8> {
+fn generate_from_path(path: &Path, opt: &Opt, header: bool) -> Vec<u8> {
     let source = match fs::read_to_string(path) {
         Ok(source) => source,
         Err(err) => format_err(path, "", Error::Io(err)),
@@ -68,7 +68,7 @@ fn generate_from_path(path: &Path, opt: Opt, header: bool) -> Vec<u8> {
     }
 }
 
-fn generate_from_string(source: &str, opt: Opt, header: bool) -> Result<Vec<u8>> {
+fn generate_from_string(source: &str, opt: &Opt, header: bool) -> Result<Vec<u8>> {
     let mut source = source;
     if source.starts_with("#!") && !source.starts_with("#![") {
         let shebang_end = source.find('\n').unwrap_or(source.len());
@@ -85,7 +85,7 @@ fn generate_from_string(source: &str, opt: Opt, header: bool) -> Result<Vec<u8>>
 
 pub(super) fn generate(
     syntax: File,
-    opt: Opt,
+    opt: &Opt,
     gen_header: bool,
     gen_cxx: bool,
 ) -> Result<(Option<Vec<u8>>, Option<Vec<u8>>)> {
@@ -107,7 +107,7 @@ pub(super) fn generate(
     // from the same token stream to avoid parsing twice. But others
     // only need to generate one or the other.
     let hdr = if gen_header {
-        Some(write::gen(namespace, apis, types, opt.clone(), true).content())
+        Some(write::gen(namespace, apis, types, opt, true).content())
     } else {
         None
     };
