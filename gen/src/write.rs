@@ -60,7 +60,7 @@ pub(super) fn gen(
 
     for api in apis {
         match api {
-            Api::Struct(strct) if !opt.omit_type_definitions => {
+            Api::Struct(strct) => {
                 out.next_section();
                 write_struct(out, strct);
             }
@@ -68,7 +68,7 @@ pub(super) fn gen(
                 out.next_section();
                 if types.cxx.contains(&enm.ident) {
                     check_enum(out, enm);
-                } else if !opt.omit_type_definitions {
+                } else {
                     write_enum(out, enm);
                 }
             }
