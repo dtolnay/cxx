@@ -179,9 +179,6 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
         if let Some(ety) = cx.types.untrusted.get(ident) {
             let msg = "extern shared struct must be declared in an `unsafe extern` block";
             cx.error(ety, msg);
-        } else {
-            let span = span_for_struct_error(strct);
-            cx.error(span, "extern C++ structs are not implemented yet");
         }
     }
 

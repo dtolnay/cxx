@@ -43,7 +43,8 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
             Api::Struct(strct) => expanded.extend(expand_struct(strct)),
             Api::Enum(enm) => expanded.extend(expand_enum(enm)),
             Api::CxxType(ety) => {
-                if !types.enums.contains_key(&ety.ident) {
+                let ident = &ety.ident;
+                if !types.structs.contains_key(ident) && !types.enums.contains_key(ident) {
                     expanded.extend(expand_cxx_type(namespace, ety));
                 }
             }

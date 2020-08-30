@@ -62,7 +62,9 @@ pub(super) fn gen(
         match api {
             Api::Struct(strct) => {
                 out.next_section();
-                write_struct(out, strct);
+                if !types.cxx.contains(&strct.ident) {
+                    write_struct(out, strct);
+                }
             }
             Api::Enum(enm) => {
                 out.next_section();
