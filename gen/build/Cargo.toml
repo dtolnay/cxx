@@ -18,7 +18,7 @@ quote = { version = "1.0", default-features = false }
 syn = { version = "1.0.20", default-features = false, features = ["parsing", "printing", "clone-impls", "full"] }
 
 [dev-dependencies]
-cxx-gen = { version = "=0.0.0", path = "../lib" }
+cxx-gen = { version = "=0.0.1", path = "../lib" }
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
