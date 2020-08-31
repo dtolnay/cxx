@@ -24,13 +24,13 @@ bazel_version(name = "bazel_version")
 load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repository_set")
 
 rust_repository_set(
-    name = "rust_1_45_linux",
+    name = "rust_1_46_linux",
     exec_triple = "x86_64-unknown-linux-gnu",
-    version = "1.45.0",
+    version = "1.46.0",
 )
 
 rust_repository_set(
-    name = "rust_1_45_darwin",
+    name = "rust_1_46_darwin",
     exec_triple = "x86_64-apple-darwin",
-    version = "1.45.0",
+    version = "1.46.0",
 )
