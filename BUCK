@@ -16,7 +16,6 @@ rust_binary(
     crate = "cxxbridge",
     visibility = ["PUBLIC"],
     deps = [
-        "//third-party:anyhow",
         "//third-party:clap",
         "//third-party:codespan-reporting",
         "//third-party:proc-macro2",
@@ -60,7 +59,6 @@ rust_library(
     srcs = glob(["gen/build/src/**"]),
     visibility = ["PUBLIC"],
     deps = [
-        "//third-party:anyhow",
         "//third-party:cc",
         "//third-party:codespan-reporting",
         "//third-party:proc-macro2",
@@ -74,7 +72,6 @@ rust_library(
     srcs = glob(["gen/lib/src/**"]),
     visibility = ["PUBLIC"],
     deps = [
-        "//third-party:anyhow",
         "//third-party:cc",
         "//third-party:codespan-reporting",
         "//third-party:proc-macro2",

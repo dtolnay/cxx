@@ -58,8 +58,8 @@ mod paths;
 mod syntax;
 
 use crate::error::Result;
+use crate::gen::error::report;
 use crate::gen::Opt;
-use anyhow::anyhow;
 use std::fs;
 use std::io::{self, Write};
 use std::iter;
@@ -93,7 +93,7 @@ pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) ->
 
     for path in rust_source_files {
         if let Err(err) = try_generate_bridge(&mut build, path.as_ref()) {
-            let _ = writeln!(io::stderr(), "\n\ncxxbridge error: {:?}\n\n", anyhow!(err));
+            let _ = writeln!(io::stderr(), "\n\ncxxbridge error: {}\n\n", report(err));
             process::exit(1);
         }
     }

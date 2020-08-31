@@ -19,7 +19,6 @@ rust_binary(
     data = ["gen/cmd/src/gen/include/cxx.h"],
     visibility = ["//visibility:public"],
     deps = [
-        "//third-party:anyhow",
         "//third-party:clap",
         "//third-party:codespan-reporting",
         "//third-party:proc-macro2",
@@ -59,7 +58,6 @@ rust_library(
     data = ["gen/build/src/gen/include/cxx.h"],
     visibility = ["//visibility:public"],
     deps = [
-        "//third-party:anyhow",
         "//third-party:cc",
         "//third-party:codespan-reporting",
         "//third-party:proc-macro2",
@@ -74,7 +72,6 @@ rust_library(
     data = ["gen/lib/src/gen/include/cxx.h"],
     visibility = ["//visibility:public"],
     deps = [
-        "//third-party:anyhow",
         "//third-party:cc",
         "//third-party:codespan-reporting",
         "//third-party:proc-macro2",

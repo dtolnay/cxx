@@ -1,5 +1,4 @@
 use crate::syntax;
-use anyhow::anyhow;
 use codespan_reporting::diagnostic::{Diagnostic, Label};
 use codespan_reporting::files::SimpleFiles;
 use codespan_reporting::term::termcolor::{ColorChoice, StandardStream, WriteColor};
@@ -63,9 +62,32 @@ pub(super) fn format_err(path: &Path, source: &str, error: Error) -> ! {
                 display_syn_error(stderr, path, source, error);
             }
         }
-        _ => eprintln!("cxxbridge: {:?}", anyhow!(error)),
+        _ => {
+            let _ = writeln!(io::stderr(), "cxxbridge: {}", report(error));
+        }
     }
     process::exit(1);
+}
+
+pub(crate) fn report(error: impl StdError) -> impl Display {
+    struct Report<E>(E);
+
+    impl<E: StdError> Display for Report<E> {
+        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            Display::fmt(&self.0, formatter)?;
+            let mut error: &dyn StdError = &self.0;
+
+            while let Some(cause) = error.source() {
+                formatter.write_str("\n\nCaused by:\n    ")?;
+                Display::fmt(cause, formatter)?;
+                error = cause;
+            }
+
+            Ok(())
+        }
+    }
+
+    Report(error)
 }
 
 fn sort_syn_errors(error: syn::Error) -> Vec<syn::Error> {

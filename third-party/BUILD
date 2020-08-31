@@ -6,13 +6,6 @@ load(
 load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 
 rust_library(
-    name = "anyhow",
-    srcs = glob(["vendor/anyhow-1.0.32/src/**"]),
-    crate_features = ["std"],
-    visibility = ["//visibility:public"],
-)
-
-rust_library(
     name = "bitflags",
     srcs = glob(["vendor/bitflags-1.2.1/src/**"]),
 )

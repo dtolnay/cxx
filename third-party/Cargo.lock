@@ -10,12 +10,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "anyhow"
-version = "1.0.32"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b602bfe940d21c130f3895acd65221e8a61270debe89d628b9cb4e3ccb8569b"
-
-[[package]]
 name = "atty"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -81,7 +75,6 @@ dependencies = [
 name = "cxx-build"
 version = "0.3.7"
 dependencies = [
- "anyhow",
  "cc",
  "codespan-reporting",
  "cxx-gen",
@@ -94,7 +87,6 @@ dependencies = [
 name = "cxx-gen"
 version = "0.0.1"
 dependencies = [
- "anyhow",
  "cc",
  "codespan-reporting",
  "proc-macro2",
@@ -115,7 +107,6 @@ dependencies = [
 name = "cxxbridge-cmd"
 version = "0.3.7"
 dependencies = [
- "anyhow",
  "clap",
  "codespan-reporting",
  "proc-macro2",

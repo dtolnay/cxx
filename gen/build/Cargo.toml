@@ -10,7 +10,6 @@ keywords = ["ffi"]
 categories = ["development-tools::ffi"]
 
 [dependencies]
-anyhow = "1.0"
 cc = "1.0.49"
 codespan-reporting = "0.9"
 proc-macro2 = { version = "1.0.17", default-features = false, features = ["span-locations"] }
