@@ -59,8 +59,7 @@ mod syntax;
 
 use crate::error::Result;
 use crate::gen::error::report;
-use crate::gen::Opt;
-use std::fs;
+use crate::gen::{fs, Opt};
 use std::io::{self, Write};
 use std::iter;
 use std::path::Path;

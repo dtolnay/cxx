@@ -1,6 +1,6 @@
 use crate::error::{Error, Result};
+use crate::gen::fs;
 use std::env;
-use std::fs;
 use std::path::{Path, PathBuf};
 
 fn out_dir() -> Result<PathBuf> {
@@ -94,23 +94,21 @@ fn canonicalize(path: impl AsRef<Path>) -> Result<PathBuf> {
     // unable to handle in includes. Use a poor approximation instead.
     // https://github.com/rust-lang/rust/issues/42869
     // https://github.com/alexcrichton/cc-rs/issues/169
-    Ok(env::current_dir()?.join(path))
+    Ok(fs::current_dir()?.join(path))
 }
 
 #[cfg(unix)]
-use std::os::unix::fs::symlink as symlink_or_copy;
+use self::fs::symlink as symlink_or_copy;
 
 #[cfg(windows)]
 fn symlink_or_copy(src: &Path, dst: &Path) -> Result<()> {
-    use std::os::windows::fs::symlink_file;
-
     // Pre-Windows 10, symlinks require admin privileges. Since Windows 10, they
     // require Developer Mode. If it fails, fall back to copying the file.
-    if symlink_file(src, dst).is_err() {
+    if fs::symlink_file(src, dst).is_err() {
         fs::copy(src, dst)?;
     }
     Ok(())
 }
 
 #[cfg(not(any(unix, windows)))]
-use std::fs::copy as symlink_or_copy;
+use self::fs::copy as symlink_or_copy;

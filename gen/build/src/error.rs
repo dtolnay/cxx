@@ -1,6 +1,6 @@
+use crate::gen::fs;
 use std::error::Error as StdError;
 use std::fmt::{self, Display};
-use std::io;
 
 pub(super) type Result<T, E = Error> = std::result::Result<T, E>;
 
@@ -8,7 +8,7 @@ pub(super) type Result<T, E = Error> = std::result::Result<T, E>;
 pub(super) enum Error {
     MissingOutDir,
     TargetDir,
-    Io(io::Error),
+    Fs(fs::Error),
 }
 
 impl Display for Error {
@@ -16,7 +16,7 @@ impl Display for Error {
         match self {
             Error::MissingOutDir => write!(f, "missing OUT_DIR environment variable"),
             Error::TargetDir => write!(f, "failed to locate target dir"),
-            Error::Io(err) => err.fmt(f),
+            Error::Fs(err) => err.fmt(f),
         }
     }
 }
@@ -24,14 +24,14 @@ impl Display for Error {
 impl StdError for Error {
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
         match self {
-            Error::Io(err) => err.source(),
+            Error::Fs(err) => err.source(),
             _ => None,
         }
     }
 }
 
-impl From<io::Error> for Error {
-    fn from(err: io::Error) -> Self {
-        Error::Io(err)
+impl From<fs::Error> for Error {
+    fn from(err: fs::Error) -> Self {
+        Error::Fs(err)
     }
 }
