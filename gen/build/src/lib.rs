@@ -109,9 +109,7 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
 
 fn write_header() -> Result<()> {
     let ref cxx_h = paths::include_dir()?.join("rust").join("cxx.h");
-    let _ = fs::create_dir_all(cxx_h.parent().unwrap());
-    let _ = fs::remove_file(cxx_h);
-    let _ = fs::write(cxx_h, gen::include::HEADER);
+    let _ = write(cxx_h, gen::include::HEADER.as_bytes());
     Ok(())
 }
 
@@ -121,11 +119,27 @@ fn generate_bridge(build: &mut Build, rust_source_file: &Path) -> Result<()> {
 
     let header_path = paths::out_with_extension(rust_source_file, ".h")?;
     fs::create_dir_all(header_path.parent().unwrap())?;
-    fs::write(&header_path, generated.header)?;
+    write(&header_path, &generated.header)?;
     paths::symlink_header(&header_path, rust_source_file);
 
     let implementation_path = paths::out_with_extension(rust_source_file, ".cc")?;
-    fs::write(&implementation_path, generated.implementation)?;
+    write(&implementation_path, &generated.implementation)?;
     build.file(&implementation_path);
+    Ok(())
+}
+
+fn write(path: &Path, content: &[u8]) -> Result<()> {
+    if path.exists() {
+        if let Ok(existing) = fs::read(path) {
+            if existing == content {
+                // Avoid bumping modified time with unchanged contents.
+                return Ok(());
+            }
+        }
+        let _ = fs::remove_file(path);
+    } else {
+        let _ = fs::create_dir_all(path.parent().unwrap());
+    }
+    fs::write(path, content)?;
     Ok(())
 }
