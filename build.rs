@@ -7,4 +7,5 @@ fn main() {
         .compile("cxxbridge03");
     println!("cargo:rerun-if-changed=src/cxx.cc");
     println!("cargo:rerun-if-changed=include/cxx.h");
+    println!("cargo:rustc-cfg=built_with_cargo");
 }

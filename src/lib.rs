@@ -368,6 +368,7 @@
     clippy::useless_let_if_seq
 )]
 
+#[cfg(built_with_cargo)]
 extern crate link_cplusplus;
 
 #[macro_use]

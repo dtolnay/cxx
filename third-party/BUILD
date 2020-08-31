@@ -44,12 +44,6 @@ rust_library(
 )
 
 rust_library(
-    name = "link-cplusplus",
-    srcs = glob(["vendor/link-cplusplus-1.0.2/src/**"]),
-    visibility = ["//visibility:public"],
-)
-
-rust_library(
     name = "proc-macro2",
     srcs = glob(["vendor/proc-macro2-1.0.19/src/**"]),
     crate_features = [
