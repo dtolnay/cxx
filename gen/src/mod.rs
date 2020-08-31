@@ -3,6 +3,7 @@
 
 pub(super) mod error;
 mod file;
+pub(super) mod fs;
 pub(super) mod include;
 pub(super) mod out;
 mod write;
@@ -15,7 +16,6 @@ use self::error::{format_err, Result};
 use self::file::File;
 use crate::syntax::report::Errors;
 use crate::syntax::{self, check, Types};
-use std::fs;
 use std::path::Path;
 
 /// Options for C++ code generation.
@@ -71,7 +71,7 @@ impl Default for Opt {
 pub(super) fn generate_from_path(path: &Path, opt: &Opt) -> GeneratedCode {
     let source = match fs::read_to_string(path) {
         Ok(source) => source,
-        Err(err) => format_err(path, "", Error::Io(err)),
+        Err(err) => format_err(path, "", Error::Fs(err)),
     };
     match generate_from_string(&source, opt) {
         Ok(out) => out,

@@ -1,3 +1,4 @@
+use crate::gen::fs;
 use crate::syntax;
 use codespan_reporting::diagnostic::{Diagnostic, Label};
 use codespan_reporting::files::SimpleFiles;
@@ -15,7 +16,7 @@ pub(crate) type Result<T, E = Error> = std::result::Result<T, E>;
 #[derive(Debug)]
 pub(crate) enum Error {
     NoBridgeMod,
-    Io(io::Error),
+    Fs(fs::Error),
     Syn(syn::Error),
 }
 
@@ -23,7 +24,7 @@ impl Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             Error::NoBridgeMod => write!(f, "no #[cxx::bridge] module found"),
-            Error::Io(err) => err.fmt(f),
+            Error::Fs(err) => err.fmt(f),
             Error::Syn(err) => err.fmt(f),
         }
     }
@@ -32,16 +33,16 @@ impl Display for Error {
 impl StdError for Error {
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
         match self {
-            Error::Io(err) => err.source(),
+            Error::Fs(err) => err.source(),
             Error::Syn(err) => err.source(),
             _ => None,
         }
     }
 }
 
-impl From<io::Error> for Error {
-    fn from(err: io::Error) -> Self {
-        Error::Io(err)
+impl From<fs::Error> for Error {
+    fn from(err: fs::Error) -> Self {
+        Error::Fs(err)
     }
 }
 
