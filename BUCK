@@ -6,7 +6,6 @@ rust_library(
     deps = [
         ":core",
         ":macro",
-        "//third-party:link-cplusplus",
     ],
 )
 

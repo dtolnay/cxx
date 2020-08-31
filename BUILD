@@ -7,10 +7,7 @@ rust_library(
         ":cxxbridge-macro",
     ],
     visibility = ["//visibility:public"],
-    deps = [
-        ":core-lib",
-        "//third-party:link-cplusplus",
-    ],
+    deps = [":core-lib"],
 )
 
 rust_binary(
