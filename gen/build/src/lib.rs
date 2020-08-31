@@ -60,6 +60,7 @@ mod syntax;
 use crate::error::Result;
 use crate::gen::error::report;
 use crate::gen::{fs, Opt};
+use cc::Build;
 use std::io::{self, Write};
 use std::iter;
 use std::path::Path;
@@ -71,7 +72,7 @@ use std::process;
 ///
 /// [`compile`]: https://docs.rs/cc/1.0.49/cc/struct.Build.html#method.compile
 #[must_use]
-pub fn bridge(rust_source_file: impl AsRef<Path>) -> cc::Build {
+pub fn bridge(rust_source_file: impl AsRef<Path>) -> Build {
     bridges(iter::once(rust_source_file))
 }
 
@@ -85,7 +86,7 @@ pub fn bridge(rust_source_file: impl AsRef<Path>) -> cc::Build {
 ///     .flag_if_supported("-std=c++11")
 ///     .compile("cxxbridge-demo");
 /// ```
-pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) -> cc::Build {
+pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) -> Build {
     let mut build = paths::cc_build();
     build.cpp(true);
     build.cpp_link_stdlib(None); // linked via link-cplusplus crate
@@ -100,7 +101,7 @@ pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) ->
     build
 }
 
-fn try_generate_bridge(build: &mut cc::Build, rust_source_file: &Path) -> Result<()> {
+fn try_generate_bridge(build: &mut Build, rust_source_file: &Path) -> Result<()> {
     let opt = Opt::default();
     let generated = gen::generate_from_path(rust_source_file, &opt);
 
