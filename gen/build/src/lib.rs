@@ -98,15 +98,24 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
     let mut build = paths::cc_build();
     build.cpp(true);
     build.cpp_link_stdlib(None); // linked via link-cplusplus crate
+    write_header()?;
 
     for path in rust_source_files {
-        try_generate_bridge(&mut build, path.as_ref())?;
+        generate_bridge(&mut build, path.as_ref())?;
     }
 
     Ok(build)
 }
 
-fn try_generate_bridge(build: &mut Build, rust_source_file: &Path) -> Result<()> {
+fn write_header() -> Result<()> {
+    let ref cxx_h = paths::include_dir()?.join("rust").join("cxx.h");
+    let _ = fs::create_dir_all(cxx_h.parent().unwrap());
+    let _ = fs::remove_file(cxx_h);
+    let _ = fs::write(cxx_h, gen::include::HEADER);
+    Ok(())
+}
+
+fn generate_bridge(build: &mut Build, rust_source_file: &Path) -> Result<()> {
     let opt = Opt::default();
     let generated = gen::generate_from_path(rust_source_file, &opt);
 
@@ -118,11 +127,5 @@ fn try_generate_bridge(build: &mut Build, rust_source_file: &Path) -> Result<()>
     let implementation_path = paths::out_with_extension(rust_source_file, ".cc")?;
     fs::write(&implementation_path, generated.implementation)?;
     build.file(&implementation_path);
-
-    let ref cxx_h = paths::include_dir()?.join("rust").join("cxx.h");
-    let _ = fs::create_dir_all(cxx_h.parent().unwrap());
-    let _ = fs::remove_file(cxx_h);
-    let _ = fs::write(cxx_h, gen::include::HEADER);
-
     Ok(())
 }
