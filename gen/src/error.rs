@@ -33,8 +33,8 @@ impl Display for Error {
 impl StdError for Error {
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
         match self {
-            Error::Io(err) => Some(err),
-            Error::Syn(err) => Some(err),
+            Error::Io(err) => err.source(),
+            Error::Syn(err) => err.source(),
             _ => None,
         }
     }
