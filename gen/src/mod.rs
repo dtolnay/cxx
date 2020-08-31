@@ -69,13 +69,21 @@ impl Default for Opt {
 }
 
 pub(super) fn generate_from_path(path: &Path, opt: &Opt) -> GeneratedCode {
-    let source = match fs::read_to_string(path) {
+    let source = match read_to_string(path) {
         Ok(source) => source,
-        Err(err) => format_err(path, "", Error::Fs(err)),
+        Err(err) => format_err(path, "", err),
     };
     match generate_from_string(&source, opt) {
         Ok(out) => out,
         Err(err) => format_err(path, &source, err),
+    }
+}
+
+fn read_to_string(path: &Path) -> Result<String> {
+    let bytes = fs::read(path)?;
+    match String::from_utf8(bytes) {
+        Ok(string) => Ok(string),
+        Err(err) => Err(Error::Utf8(path.to_owned(), err.utf8_error())),
     }
 }
 

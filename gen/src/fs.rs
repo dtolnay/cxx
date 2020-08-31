@@ -66,9 +66,9 @@ pub(crate) fn current_dir() -> Result<PathBuf> {
     }
 }
 
-pub(crate) fn read_to_string(path: impl AsRef<Path>) -> Result<String> {
+pub(crate) fn read(path: impl AsRef<Path>) -> Result<Vec<u8>> {
     let path = path.as_ref();
-    match std::fs::read_to_string(path) {
+    match std::fs::read(path) {
         Ok(string) => Ok(string),
         Err(e) => err!(e, "Failed to read file `{}`", path),
     }

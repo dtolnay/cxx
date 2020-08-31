@@ -8,8 +8,9 @@ use std::error::Error as StdError;
 use std::fmt::{self, Display};
 use std::io::{self, Write};
 use std::ops::Range;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process;
+use std::str::Utf8Error;
 
 pub(crate) type Result<T, E = Error> = std::result::Result<T, E>;
 
@@ -17,6 +18,7 @@ pub(crate) type Result<T, E = Error> = std::result::Result<T, E>;
 pub(crate) enum Error {
     NoBridgeMod,
     Fs(fs::Error),
+    Utf8(PathBuf, Utf8Error),
     Syn(syn::Error),
 }
 
@@ -25,6 +27,7 @@ impl Display for Error {
         match self {
             Error::NoBridgeMod => write!(f, "no #[cxx::bridge] module found"),
             Error::Fs(err) => err.fmt(f),
+            Error::Utf8(path, _) => write!(f, "Failed to read file `{}`", path.display()),
             Error::Syn(err) => err.fmt(f),
         }
     }
@@ -34,6 +37,7 @@ impl StdError for Error {
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
         match self {
             Error::Fs(err) => err.source(),
+            Error::Utf8(_, err) => Some(err),
             Error::Syn(err) => err.source(),
             _ => None,
         }
