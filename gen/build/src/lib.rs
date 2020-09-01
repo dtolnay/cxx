@@ -59,7 +59,7 @@ mod gen;
 mod paths;
 mod syntax;
 
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::gen::error::report;
 use crate::gen::{fs, Opt};
 use crate::paths::TargetDir;
@@ -154,6 +154,7 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
 }
 
 fn write(path: &Path, content: &[u8]) -> Result<()> {
+    let mut create_dir_error = None;
     if path.exists() {
         if let Ok(existing) = fs::read(path) {
             if existing == content {
@@ -163,8 +164,14 @@ fn write(path: &Path, content: &[u8]) -> Result<()> {
         }
         let _ = fs::remove_file(path);
     } else {
-        let _ = fs::create_dir_all(path.parent().unwrap());
+        let parent = path.parent().unwrap();
+        create_dir_error = fs::create_dir_all(parent).err();
     }
-    fs::write(path, content)?;
-    Ok(())
+
+    match fs::write(path, content) {
+        // As long as write succeeded, ignore any create_dir_all error.
+        Ok(()) => Ok(()),
+        // If create_dir_all and write both failed, prefer the first error.
+        Err(err) => Err(Error::Fs(create_dir_error.unwrap_or(err))),
+    }
 }
