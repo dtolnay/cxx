@@ -9,7 +9,7 @@ pub(crate) enum TargetDir {
     Unknown,
 }
 
-fn out_dir() -> Result<PathBuf> {
+pub(crate) fn out_dir() -> Result<PathBuf> {
     env::var_os("OUT_DIR")
         .map(PathBuf::from)
         .ok_or(Error::MissingOutDir)

@@ -66,7 +66,7 @@ use crate::paths::TargetDir;
 use cc::Build;
 use std::io::{self, Write};
 use std::iter;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process;
 
 /// This returns a [`cc::Build`] on which you should continue to set up any
@@ -99,23 +99,29 @@ pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) ->
 }
 
 struct Project {
+    out_dir: PathBuf,
     target_dir: TargetDir,
 }
 
 impl Project {
-    fn init() -> Self {
-        Project {
-            target_dir: match cargo::target_dir() {
-                target_dir @ TargetDir::Path(_) => target_dir,
-                // Fallback if Cargo did not work.
-                TargetDir::Unknown => paths::search_parents_for_target_dir(),
-            },
-        }
+    fn init() -> Result<Self> {
+        let out_dir = paths::out_dir()?;
+
+        let target_dir = match cargo::target_dir() {
+            target_dir @ TargetDir::Path(_) => target_dir,
+            // Fallback if Cargo did not work.
+            TargetDir::Unknown => paths::search_parents_for_target_dir(),
+        };
+
+        Ok(Project {
+            out_dir,
+            target_dir,
+        })
     }
 }
 
 fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Result<Build> {
-    let ref prj = Project::init();
+    let ref prj = Project::init()?;
     let mut build = paths::cc_build(prj);
     build.cpp(true);
     build.cpp_link_stdlib(None); // linked via link-cplusplus crate
