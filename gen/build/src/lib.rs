@@ -49,6 +49,7 @@
     clippy::inherent_to_string,
     clippy::needless_doctest_main,
     clippy::new_without_default,
+    clippy::or_fun_call,
     clippy::toplevel_ref_arg
 )]
 
