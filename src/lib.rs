@@ -57,10 +57,9 @@
 //!
 //! # Example
 //!
-//! A runnable version of this example is provided under the *demo-rs* directory
-//! of [https://github.com/dtolnay/cxx] (with the C++ side of the implementation
-//! in the *demo-cxx* directory). To try it out, jump into demo-rs and run
-//! `cargo run`.
+//! A runnable version of this example is provided under the *demo* directory of
+//! [https://github.com/dtolnay/cxx]. To try it out, run `cargo run` from that
+//! directory.
 //!
 //! ```no_run
 //! #[cxx::bridge]
@@ -76,7 +75,7 @@
 //!         // One or more headers with the matching C++ declarations. Our code
 //!         // generators don't read it but it gets #include'd and used in static
 //!         // assertions to ensure our picture of the FFI boundary is accurate.
-//!         include!("demo-cxx/demo.h");
+//!         include!("demo/include/demo.h");
 //!
 //!         // Zero or more opaque types which both languages can pass around but
 //!         // only C++ can see the fields.
@@ -113,10 +112,10 @@
 //!
 //! Here are links to the complete set of source files involved in the demo:
 //!
-//! - [demo-rs/src/main.rs](https://github.com/dtolnay/cxx/blob/master/demo-rs/src/main.rs)
-//! - [demo-rs/build.rs](https://github.com/dtolnay/cxx/blob/master/demo-rs/build.rs)
-//! - [demo-cxx/demo.h](https://github.com/dtolnay/cxx/blob/master/demo-cxx/demo.h)
-//! - [demo-cxx/demo.cc](https://github.com/dtolnay/cxx/blob/master/demo-cxx/demo.cc)
+//! - [demo/src/main.rs](https://github.com/dtolnay/cxx/blob/master/demo/src/main.rs)
+//! - [demo/build.rs](https://github.com/dtolnay/cxx/blob/master/demo/build.rs)
+//! - [demo/include/demo.h](https://github.com/dtolnay/cxx/blob/master/demo/include/demo.h)
+//! - [demo/src/demo.cc](https://github.com/dtolnay/cxx/blob/master/demo/src/demo.cc)
 //!
 //! To look at the code generated in both languages for the example by the CXX
 //! code generators:
@@ -124,10 +123,10 @@
 //! ```console
 //!    # run Rust code generator and print to stdout
 //!    # (requires https://github.com/dtolnay/cargo-expand)
-//! $ cargo expand --manifest-path demo-rs/Cargo.toml
+//! $ cargo expand --manifest-path demo/Cargo.toml
 //!
 //!    # run C++ code generator and print to stdout
-//! $ cargo run --manifest-path gen/cmd/Cargo.toml -- demo-rs/src/main.rs
+//! $ cargo run --manifest-path gen/cmd/Cargo.toml -- demo/src/main.rs
 //! ```
 //!
 //! <br>
@@ -237,13 +236,13 @@
 //!
 //! fn main() {
 //!     cxx_build::bridge("src/main.rs")  // returns a cc::Build
-//!         .file("../demo-cxx/demo.cc")
+//!         .file("src/demo.cc")
 //!         .flag_if_supported("-std=c++11")
 //!         .compile("cxxbridge-demo");
 //!
 //!     println!("cargo:rerun-if-changed=src/main.rs");
-//!     println!("cargo:rerun-if-changed=../demo-cxx/demo.h");
-//!     println!("cargo:rerun-if-changed=../demo-cxx/demo.cc");
+//!     println!("cargo:rerun-if-changed=src/demo.cc");
+//!     println!("cargo:rerun-if-changed=include/demo.h");
 //! }
 //! ```
 //!

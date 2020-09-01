@@ -60,9 +60,8 @@ function calls Rust's `len()`.
 
 ## Example
 
-A runnable version of this example is provided under the *demo-rs* directory of
-this repo (with the C++ side of the implementation in the *demo-cxx* directory).
-To try it out, jump into demo-rs and run `cargo run`.
+A runnable version of this example is provided under the *demo* directory of
+this repo. To try it out, run `cargo run` from that directory.
 
 ```rust
 #[cxx::bridge]
@@ -78,7 +77,7 @@ mod ffi {
         // One or more headers with the matching C++ declarations. Our code
         // generators don't read it but it gets #include'd and used in static
         // assertions to ensure our picture of the FFI boundary is accurate.
-        include!("demo-cxx/demo.h");
+        include!("demo/include/demo.h");
 
         // Zero or more opaque types which both languages can pass around but
         // only C++ can see the fields.
@@ -107,10 +106,10 @@ get to call back and forth safely.
 
 Here are links to the complete set of source files involved in the demo:
 
-- [demo-rs/src/main.rs](demo-rs/src/main.rs)
-- [demo-rs/build.rs](demo-rs/build.rs)
-- [demo-cxx/demo.h](demo-cxx/demo.h)
-- [demo-cxx/demo.cc](demo-cxx/demo.cc)
+- [demo/src/main.rs](demo/src/main.rs)
+- [demo/build.rs](demo/build.rs)
+- [demo/include/demo.h](demo/include/demo.h)
+- [demo/src/demo.cc](demo/src/demo.cc)
 
 To look at the code generated in both languages for the example by the CXX code
 generators:
@@ -118,10 +117,10 @@ generators:
 ```console
    # run Rust code generator and print to stdout
    # (requires https://github.com/dtolnay/cargo-expand)
-$ cargo expand --manifest-path demo-rs/Cargo.toml
+$ cargo expand --manifest-path demo/Cargo.toml
 
    # run C++ code generator and print to stdout
-$ cargo run --manifest-path gen/cmd/Cargo.toml -- demo-rs/src/main.rs
+$ cargo run --manifest-path gen/cmd/Cargo.toml -- demo/src/main.rs
 ```
 
 <br>
@@ -228,13 +227,13 @@ cxx-build = "0.3"
 
 fn main() {
     cxx_build::bridge("src/main.rs")  // returns a cc::Build
-        .file("../demo-cxx/demo.cc")
+        .file("src/demo.cc")
         .flag_if_supported("-std=c++11")
         .compile("cxxbridge-demo");
 
     println!("cargo:rerun-if-changed=src/main.rs");
-    println!("cargo:rerun-if-changed=../demo-cxx/demo.h");
-    println!("cargo:rerun-if-changed=../demo-cxx/demo.cc");
+    println!("cargo:rerun-if-changed=src/demo.cc");
+    println!("cargo:rerun-if-changed=include/demo.h");
 }
 ```
 
