@@ -86,6 +86,7 @@ pub fn bridge(rust_source_file: impl AsRef<Path>) -> Build {
 ///     .flag_if_supported("-std=c++11")
 ///     .compile("cxxbridge-demo");
 /// ```
+#[must_use]
 pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) -> Build {
     let ref mut rust_source_files = rust_source_files.into_iter();
     build(rust_source_files).unwrap_or_else(|err| {
