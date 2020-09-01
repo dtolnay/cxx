@@ -62,6 +62,7 @@ mod syntax;
 use crate::error::Result;
 use crate::gen::error::report;
 use crate::gen::{fs, Opt};
+use crate::paths::TargetDir;
 use cc::Build;
 use std::io::{self, Write};
 use std::iter;
@@ -98,34 +99,39 @@ pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) ->
 }
 
 fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Result<Build> {
-    let mut build = paths::cc_build();
+    let ref target_dir = paths::target_dir()?;
+    let mut build = paths::cc_build(target_dir);
     build.cpp(true);
     build.cpp_link_stdlib(None); // linked via link-cplusplus crate
-    write_header()?;
+    write_header(target_dir)?;
 
     for path in rust_source_files {
-        generate_bridge(&mut build, path.as_ref())?;
+        generate_bridge(&mut build, path.as_ref(), target_dir)?;
     }
 
     Ok(build)
 }
 
-fn write_header() -> Result<()> {
-    let ref cxx_h = paths::include_dir()?.join("rust").join("cxx.h");
+fn write_header(target_dir: &TargetDir) -> Result<()> {
+    let ref cxx_h = paths::include_dir(target_dir)?.join("rust").join("cxx.h");
     let _ = write(cxx_h, gen::include::HEADER.as_bytes());
     Ok(())
 }
 
-fn generate_bridge(build: &mut Build, rust_source_file: &Path) -> Result<()> {
+fn generate_bridge(
+    build: &mut Build,
+    rust_source_file: &Path,
+    target_dir: &TargetDir,
+) -> Result<()> {
     let opt = Opt::default();
     let generated = gen::generate_from_path(rust_source_file, &opt);
 
-    let header_path = paths::out_with_extension(rust_source_file, ".h")?;
+    let header_path = paths::out_with_extension(rust_source_file, ".h", target_dir)?;
     fs::create_dir_all(header_path.parent().unwrap())?;
     write(&header_path, &generated.header)?;
-    paths::symlink_header(&header_path, rust_source_file);
+    paths::symlink_header(&header_path, rust_source_file, target_dir);
 
-    let implementation_path = paths::out_with_extension(rust_source_file, ".cc")?;
+    let implementation_path = paths::out_with_extension(rust_source_file, ".cc", target_dir)?;
     write(&implementation_path, &generated.implementation)?;
     build.file(&implementation_path);
     Ok(())
