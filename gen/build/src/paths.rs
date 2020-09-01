@@ -2,7 +2,17 @@ use crate::cargo;
 use crate::error::{Error, Result};
 use crate::gen::fs;
 use std::env;
+use std::ops::Deref;
 use std::path::{Path, PathBuf};
+
+pub(crate) struct TargetDir(pub PathBuf);
+
+impl Deref for TargetDir {
+    type Target = Path;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
 
 fn out_dir() -> Result<PathBuf> {
     env::var_os("OUT_DIR")
@@ -72,7 +82,7 @@ pub(crate) fn include_dir() -> Result<PathBuf> {
     Ok(target_dir.join("cxxbridge"))
 }
 
-fn target_dir() -> Result<PathBuf> {
+fn target_dir() -> Result<TargetDir> {
     let fallback_err = match cargo::target_dir() {
         Ok(target_dir) => return Ok(target_dir),
         Err(err) => Error::TargetDir(err),
@@ -82,7 +92,7 @@ fn target_dir() -> Result<PathBuf> {
     let mut dir = out_dir().and_then(canonicalize)?;
     loop {
         if dir.ends_with("target") {
-            return Ok(dir);
+            return Ok(TargetDir(dir));
         }
         if !dir.pop() {
             return Err(fallback_err);

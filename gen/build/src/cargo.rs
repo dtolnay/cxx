@@ -1,9 +1,10 @@
 use crate::error::TargetDirError;
+use crate::paths::TargetDir;
 use std::path::PathBuf;
 use std::process::Command;
 use std::str;
 
-pub(crate) fn target_dir() -> Result<PathBuf, TargetDirError> {
+pub(crate) fn target_dir() -> Result<TargetDir, TargetDirError> {
     let cargo = option_env!("CARGO").unwrap_or("cargo");
     let output = Command::new(cargo)
         .arg("metadata")
@@ -24,7 +25,7 @@ pub(crate) fn target_dir() -> Result<PathBuf, TargetDirError> {
         let close_quote_index = metadata.find('"')?;
         let string = &metadata[..close_quote_index];
         let target_directory = string.replace("\\\\", "\\");
-        Some(PathBuf::from(target_directory))
+        Some(TargetDir(PathBuf::from(target_directory)))
     })()
     .ok_or(TargetDirError::NotFound)
 }
