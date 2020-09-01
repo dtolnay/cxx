@@ -113,7 +113,7 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
 }
 
 fn write_header(target_dir: &TargetDir) -> Result<()> {
-    let ref cxx_h = paths::include_dir(target_dir)?.join("rust").join("cxx.h");
+    let ref cxx_h = paths::include_dir(target_dir).join("rust").join("cxx.h");
     let _ = write(cxx_h, gen::include::HEADER.as_bytes());
     Ok(())
 }

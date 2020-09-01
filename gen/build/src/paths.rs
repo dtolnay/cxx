@@ -26,7 +26,7 @@ pub(crate) fn cc_build(target_dir: &TargetDir) -> cc::Build {
 
 fn try_cc_build(target_dir: &TargetDir) -> Result<cc::Build> {
     let mut build = cc::Build::new();
-    build.include(include_dir(target_dir)?);
+    build.include(include_dir(target_dir));
     build.include(target_dir.parent().unwrap());
     Ok(build)
 }
@@ -39,7 +39,7 @@ pub(crate) fn symlink_header(path: &Path, original: &Path, target_dir: &TargetDi
 
 fn try_symlink_header(path: &Path, original: &Path, target_dir: &TargetDir) -> Result<()> {
     let suffix = relative_to_parent_of_target_dir(original, target_dir)?;
-    let ref dst = include_dir(target_dir)?.join(suffix);
+    let ref dst = include_dir(target_dir).join(suffix);
 
     fs::create_dir_all(dst.parent().unwrap())?;
     let _ = fs::remove_file(dst);
@@ -80,8 +80,8 @@ pub(crate) fn out_with_extension(
     Ok(out_dir.join(rel).with_file_name(file_name))
 }
 
-pub(crate) fn include_dir(target_dir: &TargetDir) -> Result<PathBuf> {
-    Ok(target_dir.join("cxxbridge"))
+pub(crate) fn include_dir(target_dir: &TargetDir) -> PathBuf {
+    target_dir.join("cxxbridge")
 }
 
 pub(crate) fn target_dir() -> Result<TargetDir> {
