@@ -34,20 +34,20 @@ cxx_library(
 genrule(
     name = "gen-lib-header",
     srcs = ["ffi/lib.rs"],
-    cmd = "$(exe //:codegen) --header ${SRCS} > ${OUT}",
     out = "lib.rs.h",
+    cmd = "$(exe //:codegen) --header ${SRCS} > ${OUT}",
 )
 
 genrule(
     name = "gen-lib-source",
     srcs = ["ffi/lib.rs"],
-    cmd = "$(exe //:codegen) ${SRCS} > ${OUT}",
     out = "lib.rs.cc",
+    cmd = "$(exe //:codegen) ${SRCS} > ${OUT}",
 )
 
 genrule(
     name = "gen-module-source",
     srcs = ["ffi/module.rs"],
-    cmd = "$(exe //:codegen) ${SRCS} > ${OUT}",
     out = "module.rs.cc",
+    cmd = "$(exe //:codegen) ${SRCS} > ${OUT}",
 )
