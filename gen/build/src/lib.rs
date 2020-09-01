@@ -103,7 +103,7 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
     let mut build = paths::cc_build(target_dir);
     build.cpp(true);
     build.cpp_link_stdlib(None); // linked via link-cplusplus crate
-    write_header(target_dir)?;
+    write_header(target_dir);
 
     for path in rust_source_files {
         generate_bridge(&mut build, path.as_ref(), target_dir)?;
@@ -112,10 +112,9 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
     Ok(build)
 }
 
-fn write_header(target_dir: &TargetDir) -> Result<()> {
+fn write_header(target_dir: &TargetDir) {
     let ref cxx_h = paths::include_dir(target_dir).join("rust").join("cxx.h");
     let _ = write(cxx_h, gen::include::HEADER.as_bytes());
-    Ok(())
 }
 
 fn generate_bridge(
