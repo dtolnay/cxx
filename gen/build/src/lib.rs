@@ -52,6 +52,7 @@
     clippy::toplevel_ref_arg
 )]
 
+mod cargo;
 mod error;
 mod gen;
 mod paths;

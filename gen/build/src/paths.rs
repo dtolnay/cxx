@@ -1,3 +1,4 @@
+use crate::cargo;
 use crate::error::{Error, Result};
 use crate::gen::fs;
 use std::env;
@@ -72,13 +73,19 @@ pub(crate) fn include_dir() -> Result<PathBuf> {
 }
 
 fn target_dir() -> Result<PathBuf> {
+    let fallback_err = match cargo::target_dir() {
+        Ok(target_dir) => return Ok(target_dir),
+        Err(err) => Error::TargetDir(err),
+    };
+
+    // Fallback if Cargo did not work.
     let mut dir = out_dir().and_then(canonicalize)?;
     loop {
         if dir.ends_with("target") {
             return Ok(dir);
         }
         if !dir.pop() {
-            return Err(Error::TargetDir);
+            return Err(fallback_err);
         }
     }
 }
