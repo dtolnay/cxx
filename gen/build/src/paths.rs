@@ -82,19 +82,25 @@ pub(crate) fn include_dir(prj: &Project) -> PathBuf {
 }
 
 pub(crate) fn search_parents_for_target_dir(out_dir: &Path) -> TargetDir {
-    let mut dir = match out_dir.canonicalize() {
-        Ok(dir) => dir,
-        Err(_) => return TargetDir::Unknown,
-    };
+    let mut dir = out_dir.to_owned();
+    let mut also_try_canonical = true;
     loop {
         let is_target = dir.ends_with("target");
         let parent_contains_cargo_toml = dir.with_file_name("Cargo.toml").exists();
         if is_target && parent_contains_cargo_toml {
             return TargetDir::Path(dir);
         }
-        if !dir.pop() {
-            return TargetDir::Unknown;
+        if dir.pop() {
+            continue;
         }
+        if also_try_canonical {
+            if let Ok(canonical_dir) = out_dir.canonicalize() {
+                dir = canonical_dir;
+                also_try_canonical = false;
+                continue;
+            }
+        }
+        return TargetDir::Unknown;
     }
 }
 
