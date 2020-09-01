@@ -1,4 +1,3 @@
-use crate::cargo;
 use crate::error::{Error, Result};
 use crate::gen::fs;
 use std::env;
@@ -80,20 +79,14 @@ pub(crate) fn include_dir(target_dir: &TargetDir) -> PathBuf {
     target_dir.join("cxxbridge")
 }
 
-pub(crate) fn target_dir() -> Result<TargetDir> {
-    let fallback_err = match cargo::target_dir() {
-        Ok(target_dir) => return Ok(target_dir),
-        Err(err) => Error::TargetDir(err),
-    };
-
-    // Fallback if Cargo did not work.
-    let mut dir = out_dir().and_then(canonicalize)?;
+pub(crate) fn search_parents_for_target_dir() -> Option<TargetDir> {
+    let mut dir = out_dir().and_then(canonicalize).ok()?;
     loop {
         if dir.ends_with("target") {
-            return Ok(TargetDir(dir));
+            return Some(TargetDir(dir));
         }
         if !dir.pop() {
-            return Err(fallback_err);
+            return None;
         }
     }
 }
