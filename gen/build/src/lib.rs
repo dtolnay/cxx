@@ -144,7 +144,6 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
     let generated = gen::generate_from_path(rust_source_file, &opt);
 
     let header_path = paths::out_with_extension(prj, rust_source_file, ".h")?;
-    fs::create_dir_all(header_path.parent().unwrap())?;
     write(&header_path, &generated.header)?;
     paths::symlink_header(prj, &header_path, rust_source_file);
 
