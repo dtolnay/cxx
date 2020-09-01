@@ -1,5 +1,5 @@
 const EXPECTED: &str = "\
-cxxbridge 0.3.7
+cxxbridge $VERSION
 David Tolnay <dtolnay@gmail.com>
 https://github.com/dtolnay/cxx
 
@@ -41,5 +41,7 @@ fn test_help() {
     let mut out = Vec::new();
     app.write_long_help(&mut out).unwrap();
     let help = String::from_utf8(out).unwrap();
-    assert_eq!(help, EXPECTED);
+    let version = option_env!("CARGO_PKG_VERSION").unwrap_or_default();
+    let expected = EXPECTED.replace("$VERSION", version);
+    assert_eq!(help, expected);
 }
