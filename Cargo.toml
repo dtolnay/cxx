@@ -9,7 +9,7 @@ description = "Safe interop between Rust and C++"
 repository = "https://github.com/dtolnay/cxx"
 documentation = "https://docs.rs/cxx"
 readme = "README.md"
-exclude = ["/demo-cxx", "/gen", "/syntax", "/third-party"]
+exclude = ["/demo", "/gen", "/syntax", "/third-party"]
 keywords = ["ffi"]
 categories = ["development-tools::ffi", "api-bindings"]
 
@@ -34,7 +34,7 @@ rustversion = "1.0"
 trybuild = { version = "1.0.33", features = ["diff"] }
 
 [workspace]
-members = ["demo-rs", "flags", "gen/build", "gen/cmd", "gen/lib", "macro", "tests/ffi"]
+members = ["demo", "flags", "gen/build", "gen/cmd", "gen/lib", "macro", "tests/ffi"]
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]

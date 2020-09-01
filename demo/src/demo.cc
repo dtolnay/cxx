@@ -1,5 +1,5 @@
-#include "demo-cxx/demo.h"
-#include "demo-rs/src/main.rs.h"
+#include "demo/include/demo.h"
+#include "demo/src/main.rs.h"
 #include <iostream>
 
 namespace org {
