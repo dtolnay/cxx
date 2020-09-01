@@ -1,5 +1,6 @@
 use crate::error::{Error, Result};
 use crate::gen::fs;
+use crate::Project;
 use std::env;
 use std::path::{Path, PathBuf};
 
@@ -14,10 +15,10 @@ fn out_dir() -> Result<PathBuf> {
         .ok_or(Error::MissingOutDir)
 }
 
-pub(crate) fn cc_build(target_dir: &TargetDir) -> cc::Build {
+pub(crate) fn cc_build(prj: &Project) -> cc::Build {
     let mut build = cc::Build::new();
-    build.include(include_dir(target_dir));
-    if let TargetDir::Path(target_dir) = target_dir {
+    build.include(include_dir(prj));
+    if let TargetDir::Path(target_dir) = &prj.target_dir {
         build.include(target_dir.parent().unwrap());
     }
     build
@@ -25,16 +26,16 @@ pub(crate) fn cc_build(target_dir: &TargetDir) -> cc::Build {
 
 // Symlink the header file into a predictable place. The header generated from
 // path/to/mod.rs gets linked to target/cxxbridge/path/to/mod.rs.h.
-pub(crate) fn symlink_header(path: &Path, original: &Path, target_dir: &TargetDir) {
-    if let TargetDir::Unknown = target_dir {
+pub(crate) fn symlink_header(prj: &Project, path: &Path, original: &Path) {
+    if let TargetDir::Unknown = prj.target_dir {
         return;
     }
-    let _ = try_symlink_header(path, original, target_dir);
+    let _ = try_symlink_header(prj, path, original);
 }
 
-fn try_symlink_header(path: &Path, original: &Path, target_dir: &TargetDir) -> Result<()> {
-    let suffix = relative_to_parent_of_target_dir(original, target_dir)?;
-    let ref dst = include_dir(target_dir).join(suffix);
+fn try_symlink_header(prj: &Project, path: &Path, original: &Path) -> Result<()> {
+    let suffix = relative_to_parent_of_target_dir(prj, original)?;
+    let ref dst = include_dir(prj).join(suffix);
 
     fs::create_dir_all(dst.parent().unwrap())?;
     let _ = fs::remove_file(dst);
@@ -48,8 +49,8 @@ fn try_symlink_header(path: &Path, original: &Path, target_dir: &TargetDir) -> R
     Ok(())
 }
 
-fn relative_to_parent_of_target_dir(original: &Path, target_dir: &TargetDir) -> Result<PathBuf> {
-    let mut outer = match target_dir {
+fn relative_to_parent_of_target_dir(prj: &Project, original: &Path) -> Result<PathBuf> {
+    let mut outer = match &prj.target_dir {
         TargetDir::Path(target_dir) => target_dir.parent().unwrap(),
         TargetDir::Unknown => unimplemented!(), // FIXME
     };
@@ -65,21 +66,17 @@ fn relative_to_parent_of_target_dir(original: &Path, target_dir: &TargetDir) -> 
     }
 }
 
-pub(crate) fn out_with_extension(
-    path: &Path,
-    ext: &str,
-    target_dir: &TargetDir,
-) -> Result<PathBuf> {
+pub(crate) fn out_with_extension(prj: &Project, path: &Path, ext: &str) -> Result<PathBuf> {
     let mut file_name = path.file_name().unwrap().to_owned();
     file_name.push(ext);
 
     let out_dir = out_dir()?;
-    let rel = relative_to_parent_of_target_dir(path, target_dir)?;
+    let rel = relative_to_parent_of_target_dir(prj, path)?;
     Ok(out_dir.join(rel).with_file_name(file_name))
 }
 
-pub(crate) fn include_dir(target_dir: &TargetDir) -> PathBuf {
-    match target_dir {
+pub(crate) fn include_dir(prj: &Project) -> PathBuf {
+    match &prj.target_dir {
         TargetDir::Path(target_dir) => target_dir.join("cxxbridge"),
         TargetDir::Unknown => out_dir().unwrap().join("cxxbridge"), // FIXME no unwrap
     }

@@ -98,39 +98,51 @@ pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) ->
     })
 }
 
+struct Project {
+    target_dir: TargetDir,
+}
+
+impl Project {
+    fn init() -> Self {
+        Project {
+            target_dir: match cargo::target_dir() {
+                target_dir @ TargetDir::Path(_) => target_dir,
+                // Fallback if Cargo did not work.
+                TargetDir::Unknown => paths::search_parents_for_target_dir(),
+            },
+        }
+    }
+}
+
 fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Result<Build> {
-    let ref target_dir = target_dir();
-    let mut build = paths::cc_build(target_dir);
+    let ref prj = Project::init();
+    let mut build = paths::cc_build(prj);
     build.cpp(true);
     build.cpp_link_stdlib(None); // linked via link-cplusplus crate
-    write_header(target_dir);
+    write_header(prj);
 
     for path in rust_source_files {
-        generate_bridge(&mut build, path.as_ref(), target_dir)?;
+        generate_bridge(prj, &mut build, path.as_ref())?;
     }
 
     Ok(build)
 }
 
-fn write_header(target_dir: &TargetDir) {
-    let ref cxx_h = paths::include_dir(target_dir).join("rust").join("cxx.h");
+fn write_header(prj: &Project) {
+    let ref cxx_h = paths::include_dir(prj).join("rust").join("cxx.h");
     let _ = write(cxx_h, gen::include::HEADER.as_bytes());
 }
 
-fn generate_bridge(
-    build: &mut Build,
-    rust_source_file: &Path,
-    target_dir: &TargetDir,
-) -> Result<()> {
+fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) -> Result<()> {
     let opt = Opt::default();
     let generated = gen::generate_from_path(rust_source_file, &opt);
 
-    let header_path = paths::out_with_extension(rust_source_file, ".h", target_dir)?;
+    let header_path = paths::out_with_extension(prj, rust_source_file, ".h")?;
     fs::create_dir_all(header_path.parent().unwrap())?;
     write(&header_path, &generated.header)?;
-    paths::symlink_header(&header_path, rust_source_file, target_dir);
+    paths::symlink_header(prj, &header_path, rust_source_file);
 
-    let implementation_path = paths::out_with_extension(rust_source_file, ".cc", target_dir)?;
+    let implementation_path = paths::out_with_extension(prj, rust_source_file, ".cc")?;
     write(&implementation_path, &generated.implementation)?;
     build.file(&implementation_path);
     Ok(())
@@ -150,12 +162,4 @@ fn write(path: &Path, content: &[u8]) -> Result<()> {
     }
     fs::write(path, content)?;
     Ok(())
-}
-
-fn target_dir() -> TargetDir {
-    match cargo::target_dir() {
-        target_dir @ TargetDir::Path(_) => target_dir,
-        // Fallback if Cargo did not work.
-        TargetDir::Unknown => paths::search_parents_for_target_dir(),
-    }
 }
