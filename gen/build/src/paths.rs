@@ -70,20 +70,19 @@ pub(crate) fn out_with_extension(prj: &Project, path: &Path, ext: &str) -> Resul
     let mut file_name = path.file_name().unwrap().to_owned();
     file_name.push(ext);
 
-    let out_dir = out_dir()?;
     let rel = relative_to_parent_of_target_dir(prj, path)?;
-    Ok(out_dir.join(rel).with_file_name(file_name))
+    Ok(prj.out_dir.join(rel).with_file_name(file_name))
 }
 
 pub(crate) fn include_dir(prj: &Project) -> PathBuf {
     match &prj.target_dir {
         TargetDir::Path(target_dir) => target_dir.join("cxxbridge"),
-        TargetDir::Unknown => out_dir().unwrap().join("cxxbridge"), // FIXME no unwrap
+        TargetDir::Unknown => prj.out_dir.join("cxxbridge"),
     }
 }
 
-pub(crate) fn search_parents_for_target_dir() -> TargetDir {
-    let mut dir = match out_dir().and_then(canonicalize) {
+pub(crate) fn search_parents_for_target_dir(out_dir: &Path) -> TargetDir {
+    let mut dir = match out_dir.canonicalize() {
         Ok(dir) => dir,
         Err(_) => return TargetDir::Unknown,
     };

@@ -110,7 +110,7 @@ impl Project {
         let target_dir = match cargo::target_dir() {
             target_dir @ TargetDir::Path(_) => target_dir,
             // Fallback if Cargo did not work.
-            TargetDir::Unknown => paths::search_parents_for_target_dir(),
+            TargetDir::Unknown => paths::search_parents_for_target_dir(&out_dir),
         };
 
         Ok(Project {
