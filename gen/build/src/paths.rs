@@ -21,14 +21,10 @@ fn out_dir() -> Result<PathBuf> {
 }
 
 pub(crate) fn cc_build(target_dir: &TargetDir) -> cc::Build {
-    try_cc_build(target_dir).unwrap_or_default()
-}
-
-fn try_cc_build(target_dir: &TargetDir) -> Result<cc::Build> {
     let mut build = cc::Build::new();
     build.include(include_dir(target_dir));
     build.include(target_dir.parent().unwrap());
-    Ok(build)
+    build
 }
 
 // Symlink the header file into a predictable place. The header generated from
