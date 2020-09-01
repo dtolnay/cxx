@@ -1,16 +1,11 @@
 use crate::error::{Error, Result};
 use crate::gen::fs;
 use std::env;
-use std::ops::Deref;
 use std::path::{Path, PathBuf};
 
-pub(crate) struct TargetDir(pub PathBuf);
-
-impl Deref for TargetDir {
-    type Target = Path;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+pub(crate) enum TargetDir {
+    Path(PathBuf),
+    Unknown,
 }
 
 fn out_dir() -> Result<PathBuf> {
@@ -22,13 +17,18 @@ fn out_dir() -> Result<PathBuf> {
 pub(crate) fn cc_build(target_dir: &TargetDir) -> cc::Build {
     let mut build = cc::Build::new();
     build.include(include_dir(target_dir));
-    build.include(target_dir.parent().unwrap());
+    if let TargetDir::Path(target_dir) = target_dir {
+        build.include(target_dir.parent().unwrap());
+    }
     build
 }
 
 // Symlink the header file into a predictable place. The header generated from
-// path/to/mod.rs gets linked to targets/cxxbridge/path/to/mod.rs.h.
+// path/to/mod.rs gets linked to target/cxxbridge/path/to/mod.rs.h.
 pub(crate) fn symlink_header(path: &Path, original: &Path, target_dir: &TargetDir) {
+    if let TargetDir::Unknown = target_dir {
+        return;
+    }
     let _ = try_symlink_header(path, original, target_dir);
 }
 
@@ -49,7 +49,10 @@ fn try_symlink_header(path: &Path, original: &Path, target_dir: &TargetDir) -> R
 }
 
 fn relative_to_parent_of_target_dir(original: &Path, target_dir: &TargetDir) -> Result<PathBuf> {
-    let mut outer = target_dir.parent().unwrap();
+    let mut outer = match target_dir {
+        TargetDir::Path(target_dir) => target_dir.parent().unwrap(),
+        TargetDir::Unknown => unimplemented!(), // FIXME
+    };
     let original = canonicalize(original)?;
     loop {
         if let Ok(suffix) = original.strip_prefix(outer) {
@@ -76,17 +79,23 @@ pub(crate) fn out_with_extension(
 }
 
 pub(crate) fn include_dir(target_dir: &TargetDir) -> PathBuf {
-    target_dir.join("cxxbridge")
+    match target_dir {
+        TargetDir::Path(target_dir) => target_dir.join("cxxbridge"),
+        TargetDir::Unknown => out_dir().unwrap().join("cxxbridge"), // FIXME no unwrap
+    }
 }
 
-pub(crate) fn search_parents_for_target_dir() -> Option<TargetDir> {
-    let mut dir = out_dir().and_then(canonicalize).ok()?;
+pub(crate) fn search_parents_for_target_dir() -> TargetDir {
+    let mut dir = match out_dir().and_then(canonicalize) {
+        Ok(dir) => dir,
+        Err(_) => return TargetDir::Unknown,
+    };
     loop {
         if dir.ends_with("target") {
-            return Some(TargetDir(dir));
+            return TargetDir::Path(dir);
         }
         if !dir.pop() {
-            return None;
+            return TargetDir::Unknown;
         }
     }
 }

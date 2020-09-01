@@ -59,7 +59,7 @@ mod gen;
 mod paths;
 mod syntax;
 
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::gen::error::report;
 use crate::gen::{fs, Opt};
 use crate::paths::TargetDir;
@@ -99,7 +99,7 @@ pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) ->
 }
 
 fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Result<Build> {
-    let ref target_dir = target_dir()?;
+    let ref target_dir = target_dir();
     let mut build = paths::cc_build(target_dir);
     build.cpp(true);
     build.cpp_link_stdlib(None); // linked via link-cplusplus crate
@@ -152,15 +152,10 @@ fn write(path: &Path, content: &[u8]) -> Result<()> {
     Ok(())
 }
 
-fn target_dir() -> Result<TargetDir> {
-    let fallback_err = match cargo::target_dir() {
-        Ok(target_dir) => return Ok(target_dir),
-        Err(err) => Error::TargetDir(err),
-    };
-
-    // Fallback if Cargo did not work.
-    match paths::search_parents_for_target_dir() {
-        Some(target_dir) => Ok(target_dir),
-        None => Err(fallback_err),
+fn target_dir() -> TargetDir {
+    match cargo::target_dir() {
+        target_dir @ TargetDir::Path(_) => target_dir,
+        // Fallback if Cargo did not work.
+        TargetDir::Unknown => paths::search_parents_for_target_dir(),
     }
 }
