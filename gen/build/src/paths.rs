@@ -87,7 +87,9 @@ pub(crate) fn search_parents_for_target_dir(out_dir: &Path) -> TargetDir {
         Err(_) => return TargetDir::Unknown,
     };
     loop {
-        if dir.ends_with("target") {
+        let is_target = dir.ends_with("target");
+        let parent_contains_cargo_toml = dir.with_file_name("Cargo.toml").exists();
+        if is_target && parent_contains_cargo_toml {
             return TargetDir::Path(dir);
         }
         if !dir.pop() {
