@@ -74,6 +74,14 @@ pub(crate) fn remove_file(path: impl AsRef<Path>) -> Result<()> {
     }
 }
 
+pub(crate) fn remove_dir(path: impl AsRef<Path>) -> Result<()> {
+    let path = path.as_ref();
+    match std::fs::remove_dir(path) {
+        Ok(()) => Ok(()),
+        Err(e) => err!(e, "Failed to remove directory `{}`", path),
+    }
+}
+
 fn symlink<'a>(
     src: &'a Path,
     dst: &'a Path,

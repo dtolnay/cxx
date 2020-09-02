@@ -120,3 +120,11 @@ pub(crate) use self::fs::symlink_dir;
 pub(crate) fn symlink_dir(_src: impl AsRef<Path>, _dst: impl AsRef<Path>) -> fs::Result<()> {
     Ok(())
 }
+
+#[cfg(not(windows))]
+pub(crate) use self::fs::remove_file as remove_symlink_dir;
+
+// On Windows, trying to use remove_file to remove a symlink which points to a
+// directory fails with "Access is denied".
+#[cfg(windows)]
+pub(crate) use self::fs::remove_dir as remove_symlink_dir;

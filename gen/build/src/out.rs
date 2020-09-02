@@ -54,7 +54,7 @@ pub(crate) fn symlink_dir(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> Resul
 
     let mut create_dir_error = None;
     if dst.exists() {
-        let _ = fs::remove_file(dst).unwrap();
+        let _ = paths::remove_symlink_dir(dst).unwrap();
     } else {
         let parent = dst.parent().unwrap();
         create_dir_error = fs::create_dir_all(parent).err();
