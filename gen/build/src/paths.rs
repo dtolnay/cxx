@@ -2,6 +2,7 @@ use crate::error::{Error, Result};
 use crate::gen::fs;
 use crate::Project;
 use std::env;
+use std::ffi::OsString;
 use std::path::{Path, PathBuf};
 
 pub(crate) enum TargetDir {
@@ -34,11 +35,14 @@ pub(crate) fn symlink_header(prj: &Project, path: &Path, original: &Path) {
 }
 
 fn try_symlink_header(prj: &Project, path: &Path, original: &Path) -> Result<()> {
-    let ref dst = include_dir(prj).join(original);
+    let mut dst = include_dir(prj);
+    dst.extend(package_name());
+    dst.push(original);
 
-    fs::create_dir_all(dst.parent().unwrap())?;
-    let _ = fs::remove_file(dst);
-    symlink_or_copy(path, dst)?;
+    let parent = dst.parent().unwrap();
+    fs::create_dir_all(parent)?;
+    let _ = fs::remove_file(&dst);
+    symlink_or_copy(path, &dst)?;
 
     let mut file_name = dst.file_name().unwrap().to_os_string();
     file_name.push(".h");
@@ -52,10 +56,11 @@ pub(crate) fn out_with_extension(prj: &Project, rel_path: &Path, ext: &str) -> P
     let mut file_name = rel_path.file_name().unwrap().to_owned();
     file_name.push(ext);
 
-    prj.out_dir
-        .join("cxxbridge")
-        .join(rel_path)
-        .with_file_name(file_name)
+    let mut res = prj.out_dir.clone();
+    res.push("cxxbridge");
+    res.extend(package_name());
+    res.push(rel_path);
+    res.with_file_name(file_name)
 }
 
 pub(crate) fn include_dir(prj: &Project) -> PathBuf {
@@ -63,6 +68,10 @@ pub(crate) fn include_dir(prj: &Project) -> PathBuf {
         TargetDir::Path(target_dir) => target_dir.join("cxxbridge"),
         TargetDir::Unknown => prj.out_dir.join("cxxbridge"),
     }
+}
+
+fn package_name() -> Option<OsString> {
+    env::var_os("CARGO_PKG_NAME")
 }
 
 pub(crate) fn search_parents_for_target_dir(out_dir: &Path) -> TargetDir {
