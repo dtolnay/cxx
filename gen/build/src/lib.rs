@@ -122,9 +122,10 @@ impl Project {
 
 fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Result<Build> {
     let ref prj = Project::init()?;
-    let mut build = paths::cc_build(prj);
+    let mut build = Build::new();
     build.cpp(true);
     build.cpp_link_stdlib(None); // linked via link-cplusplus crate
+    build.include(paths::include_dir(prj));
     write_header(prj);
     symlink_crate(prj, &mut build);
 

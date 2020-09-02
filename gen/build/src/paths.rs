@@ -16,12 +16,6 @@ pub(crate) fn out_dir() -> Result<PathBuf> {
         .ok_or(Error::MissingOutDir)
 }
 
-pub(crate) fn cc_build(prj: &Project) -> cc::Build {
-    let mut build = cc::Build::new();
-    build.include(include_dir(prj));
-    build
-}
-
 // Symlink the header file into a predictable place. The header generated from
 // path/to/mod.rs gets linked to target/cxxbridge/path/to/mod.rs.h.
 pub(crate) fn symlink_header(prj: &Project, path: &Path, original: &Path) {
