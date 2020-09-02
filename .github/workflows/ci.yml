@@ -34,7 +34,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{matrix.rust}}
-      - run: cargo run --manifest-path demo-rs/Cargo.toml
+      - run: cargo run --manifest-path demo/Cargo.toml
       - run: cargo test --workspace --exclude cxx-test-suite
 
   msrv:
@@ -43,7 +43,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@1.42.0
-      - run: cargo run --manifest-path demo-rs/Cargo.toml
+      - run: cargo run --manifest-path demo/Cargo.toml
 
   buck:
     name: Buck
@@ -66,7 +66,7 @@ jobs:
           cp third-party/Cargo.lock .
           cargo vendor --versioned-dirs --locked third-party/vendor
       - run: buck build :cxx#check --verbose=0
-      - run: buck run demo-rs --verbose=0
+      - run: buck run demo --verbose=0
       - run: buck test ... --verbose=0
 
   bazel:
@@ -84,5 +84,5 @@ jobs:
         run: |
           cp third-party/Cargo.lock .
           cargo vendor --versioned-dirs --locked third-party/vendor
-      - run: bazel run demo-rs --verbose_failures --noshow_progress
+      - run: bazel run demo --verbose_failures --noshow_progress
       - run: bazel test ... --verbose_failures --noshow_progress
