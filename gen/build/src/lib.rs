@@ -62,7 +62,7 @@ mod syntax;
 use crate::error::{Error, Result};
 use crate::gen::error::report;
 use crate::gen::{fs, Opt};
-use crate::paths::TargetDir;
+use crate::paths::{PathExt, TargetDir};
 use cc::Build;
 use std::io::{self, Write};
 use std::iter;
@@ -162,14 +162,21 @@ fn symlink_crate(prj: &Project, build: &mut Build) {
 fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) -> Result<()> {
     let opt = Opt::default();
     let generated = gen::generate_from_path(rust_source_file, &opt);
+    let ref rel_path = paths::local_relative_path(rust_source_file);
 
-    let header_path = paths::out_with_extension(prj, rust_source_file, ".h");
-    write(&header_path, &generated.header)?;
-    paths::symlink_header(prj, &header_path, rust_source_file);
+    let ref rel_path_h = rel_path.with_appended_extension(".h");
+    let ref header_path = paths::namespaced(&prj.out_dir, rel_path_h);
+    write(header_path, &generated.header)?;
+    paths::symlink_namespaced(header_path, &prj.out_dir, rel_path);
+    if let TargetDir::Path(target_dir) = &prj.target_dir {
+        paths::symlink_namespaced(header_path, target_dir, rel_path);
+        paths::symlink_namespaced(header_path, target_dir, rel_path_h);
+    }
 
-    let implementation_path = paths::out_with_extension(prj, rust_source_file, ".cc");
-    write(&implementation_path, &generated.implementation)?;
-    build.file(&implementation_path);
+    let ref rel_path_cc = rel_path.with_appended_extension(".cc");
+    let ref implementation_path = paths::namespaced(&prj.out_dir, rel_path_cc);
+    write(implementation_path, &generated.implementation)?;
+    build.file(implementation_path);
     Ok(())
 }
 

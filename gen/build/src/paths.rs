@@ -2,8 +2,8 @@ use crate::error::{Error, Result};
 use crate::gen::fs;
 use crate::Project;
 use std::env;
-use std::ffi::OsString;
-use std::path::{Path, PathBuf};
+use std::ffi::{OsStr, OsString};
+use std::path::{Component, Path, PathBuf};
 
 pub(crate) enum TargetDir {
     Path(PathBuf),
@@ -16,42 +16,44 @@ pub(crate) fn out_dir() -> Result<PathBuf> {
         .ok_or(Error::MissingOutDir)
 }
 
-// Symlink the header file into a predictable place. The header generated from
-// path/to/mod.rs gets linked to target/cxxbridge/path/to/mod.rs.h.
-pub(crate) fn symlink_header(prj: &Project, path: &Path, original: &Path) {
-    if let TargetDir::Unknown = prj.target_dir {
-        return;
+// Given a path provided by the user, determines where generated files related
+// to that path should go in our out dir. In particular we don't want to
+// accidentally write generated code upward of our out dir, even if the user
+// passed a path containing lots of `..` or an absolute path.
+pub(crate) fn local_relative_path(path: &Path) -> PathBuf {
+    let mut rel_path = PathBuf::new();
+    for component in path.components() {
+        match component {
+            Component::Prefix(_) | Component::RootDir | Component::CurDir => {}
+            Component::ParentDir => drop(rel_path.pop()), // noop if empty
+            Component::Normal(name) => rel_path.push(name),
+        }
     }
-    let _ = try_symlink_header(prj, path, original);
+    rel_path
 }
 
-fn try_symlink_header(prj: &Project, path: &Path, original: &Path) -> Result<()> {
-    let mut dst = include_dir(prj);
-    dst.extend(package_name());
-    dst.push(original);
-
-    let parent = dst.parent().unwrap();
-    fs::create_dir_all(parent)?;
-    let _ = fs::remove_file(&dst);
-    symlink_or_copy(path, &dst)?;
-
-    let mut file_name = dst.file_name().unwrap().to_os_string();
-    file_name.push(".h");
-    let ref dst2 = dst.with_file_name(file_name);
-    symlink_or_copy(path, dst2)?;
-
-    Ok(())
+pub(crate) fn namespaced(base: &Path, rel_path: &Path) -> PathBuf {
+    let mut path = base.to_owned();
+    path.push("cxxbridge");
+    path.extend(package_name());
+    path.push(rel_path);
+    path
 }
 
-pub(crate) fn out_with_extension(prj: &Project, rel_path: &Path, ext: &str) -> PathBuf {
-    let mut file_name = rel_path.file_name().unwrap().to_owned();
-    file_name.push(ext);
+pub(crate) fn symlink_namespaced(src: &Path, base: &Path, rel_path: &Path) {
+    let _ = symlink_or_copy(src, namespaced(base, rel_path));
+}
 
-    let mut res = prj.out_dir.clone();
-    res.push("cxxbridge");
-    res.extend(package_name());
-    res.push(rel_path);
-    res.with_file_name(file_name)
+pub(crate) trait PathExt {
+    fn with_appended_extension(&self, suffix: impl AsRef<OsStr>) -> PathBuf;
+}
+
+impl PathExt for Path {
+    fn with_appended_extension(&self, suffix: impl AsRef<OsStr>) -> PathBuf {
+        let mut file_name = self.file_name().unwrap().to_owned();
+        file_name.push(suffix);
+        self.with_file_name(file_name)
+    }
 }
 
 pub(crate) fn include_dir(prj: &Project) -> PathBuf {
