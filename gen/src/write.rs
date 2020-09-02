@@ -148,6 +148,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
     let mut needs_rust_vec = false;
     let mut needs_rust_fn = false;
     let mut needs_rust_isize = false;
+    let mut needs_unsafe_bitcopy = false;
     for ty in types {
         match ty {
             Type::RustBox(_) => {
@@ -160,6 +161,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
                 out.include.new = true;
                 out.include.type_traits = true;
                 needs_rust_vec = true;
+                needs_unsafe_bitcopy = true;
             }
             Type::Str(_) => {
                 out.include.cstdint = true;
@@ -187,7 +189,6 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
     }
 
     let mut needs_rust_error = false;
-    let mut needs_unsafe_bitcopy = false;
     let mut needs_manually_drop = false;
     let mut needs_maybe_uninit = false;
     let mut needs_trycatch = false;
@@ -248,7 +249,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
         writeln!(out, "// #include \"rust/cxx.h\"");
     }
 
-    if needs_rust_string || needs_rust_vec {
+    if needs_rust_string {
         out.next_section();
         writeln!(out, "struct unsafe_bitcopy_t;");
     }
@@ -257,11 +258,11 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
     include::write(out, needs_rust_str, "CXXBRIDGE04_RUST_STR");
     include::write(out, needs_rust_slice, "CXXBRIDGE04_RUST_SLICE");
     include::write(out, needs_rust_box, "CXXBRIDGE04_RUST_BOX");
+    include::write(out, needs_unsafe_bitcopy, "CXXBRIDGE04_RUST_BITCOPY");
     include::write(out, needs_rust_vec, "CXXBRIDGE04_RUST_VEC");
     include::write(out, needs_rust_fn, "CXXBRIDGE04_RUST_FN");
     include::write(out, needs_rust_error, "CXXBRIDGE04_RUST_ERROR");
     include::write(out, needs_rust_isize, "CXXBRIDGE04_RUST_ISIZE");
-    include::write(out, needs_unsafe_bitcopy, "CXXBRIDGE04_RUST_BITCOPY");
 
     if needs_manually_drop {
         out.next_section();
