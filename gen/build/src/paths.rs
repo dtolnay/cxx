@@ -40,10 +40,6 @@ pub(crate) fn namespaced(base: &Path, rel_path: &Path) -> PathBuf {
     path
 }
 
-pub(crate) fn symlink_namespaced(src: &Path, base: &Path, rel_path: &Path) {
-    let _ = symlink_or_copy(src, namespaced(base, rel_path));
-}
-
 pub(crate) trait PathExt {
     fn with_appended_extension(&self, suffix: impl AsRef<OsStr>) -> PathBuf;
 }
