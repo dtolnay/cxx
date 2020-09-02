@@ -19,9 +19,6 @@ pub(crate) fn out_dir() -> Result<PathBuf> {
 pub(crate) fn cc_build(prj: &Project) -> cc::Build {
     let mut build = cc::Build::new();
     build.include(include_dir(prj));
-    if let TargetDir::Path(target_dir) = &prj.target_dir {
-        build.include(target_dir.parent().unwrap());
-    }
     build
 }
 
