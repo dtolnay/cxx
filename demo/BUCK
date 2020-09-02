@@ -1,10 +1,10 @@
 rust_binary(
-    name = "demo-rs",
-    srcs = glob(["src/**"]),
+    name = "demo",
+    srcs = glob(["src/**/*.rs"]),
     deps = [
+        ":demo-sys",
         ":gen",
         "//:cxx",
-        "//demo-cxx:demo-cxx",
     ],
 )
 
@@ -12,8 +12,8 @@ cxx_library(
     name = "gen",
     srcs = [":gen-source"],
     deps = [
+        ":demo-include",
         ":include",
-        "//demo-cxx:include",
     ],
 )
 
@@ -38,5 +38,20 @@ cxx_library(
     exported_headers = {
         "src/main.rs.h": ":gen-header",
     },
-    visibility = ["PUBLIC"],
+)
+
+cxx_library(
+    name = "demo-sys",
+    srcs = ["src/demo.cc"],
+    compiler_flags = ["-std=c++14"],
+    deps = [
+        ":demo-include",
+        ":include",
+    ],
+)
+
+cxx_library(
+    name = "demo-include",
+    exported_headers = ["include/demo.h"],
+    deps = ["//:core"],
 )

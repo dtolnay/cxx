@@ -15,18 +15,18 @@
 //!
 //! fn main() {
 //!     cxx_build::bridge("src/main.rs")
-//!         .file("../demo-cxx/demo.cc")
+//!         .file("src/demo.cc")
 //!         .flag_if_supported("-std=c++11")
 //!         .compile("cxxbridge-demo");
 //!
 //!     println!("cargo:rerun-if-changed=src/main.rs");
-//!     println!("cargo:rerun-if-changed=../demo-cxx/demo.h");
-//!     println!("cargo:rerun-if-changed=../demo-cxx/demo.cc");
+//!     println!("cargo:rerun-if-changed=src/demo.cc");
+//!     println!("cargo:rerun-if-changed=include/demo.h");
 //! }
 //! ```
 //!
-//! A runnable working setup with this build script is shown in the
-//! *demo-rs* and *demo-cxx* directories of [https://github.com/dtolnay/cxx].
+//! A runnable working setup with this build script is shown in the *demo*
+//! directory of [https://github.com/dtolnay/cxx].
 //!
 //! [https://github.com/dtolnay/cxx]: https://github.com/dtolnay/cxx
 //!
@@ -83,7 +83,7 @@ pub fn bridge(rust_source_file: impl AsRef<Path>) -> Build {
 /// ```no_run
 /// let source_files = vec!["src/main.rs", "src/path/to/other.rs"];
 /// cxx_build::bridges(source_files)
-///     .file("../demo-cxx/demo.cc")
+///     .file("src/demo.cc")
 ///     .flag_if_supported("-std=c++11")
 ///     .compile("cxxbridge-demo");
 /// ```

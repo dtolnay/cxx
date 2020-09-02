@@ -7,7 +7,7 @@ mod ffi {
     }
 
     extern "C" {
-        include!("demo-cxx/demo.h");
+        include!("demo/include/demo.h");
 
         type ThingC;
         fn make_demo(appname: &str) -> UniquePtr<ThingC>;
