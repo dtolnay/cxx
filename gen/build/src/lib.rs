@@ -137,9 +137,14 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
 }
 
 fn write_header(prj: &Project) {
-    let include_dir = paths::include_dir(prj);
-    let ref cxx_h = include_dir.join("rust").join("cxx.h");
+    let ref cxx_h = prj.out_dir.join("cxxbridge").join("rust").join("cxx.h");
     let _ = write(cxx_h, gen::include::HEADER.as_bytes());
+    if let TargetDir::Path(target_dir) = &prj.target_dir {
+        let ref header_dir = target_dir.join("cxxbridge").join("rust");
+        let _ = fs::create_dir_all(header_dir);
+        let ref cxx_h = header_dir.join("cxx.h");
+        let _ = write(cxx_h, gen::include::HEADER.as_bytes());
+    }
 }
 
 fn symlink_crate(prj: &Project, build: &mut Build) {
