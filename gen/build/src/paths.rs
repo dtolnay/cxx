@@ -82,8 +82,13 @@ pub(crate) fn include_dir(prj: &Project) -> PathBuf {
 }
 
 pub(crate) fn search_parents_for_target_dir(out_dir: &Path) -> TargetDir {
+    // fs::canonicalize on Windows produces UNC paths which cl.exe is unable to
+    // handle in includes.
+    // https://github.com/rust-lang/rust/issues/42869
+    // https://github.com/alexcrichton/cc-rs/issues/169
+    let mut also_try_canonical = cfg!(not(windows));
+
     let mut dir = out_dir.to_owned();
-    let mut also_try_canonical = true;
     loop {
         let is_target = dir.ends_with("target");
         let parent_contains_cargo_toml = dir.with_file_name("Cargo.toml").exists();
