@@ -115,14 +115,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cxxbridge-demo"
-version = "0.0.0"
-dependencies = [
- "cxx",
- "cxx-build",
-]
-
-[[package]]
 name = "cxxbridge-flags"
 version = "0.3.9"
 
@@ -134,6 +126,14 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
+]
+
+[[package]]
+name = "demo"
+version = "0.0.0"
+dependencies = [
+ "cxx",
+ "cxx-build",
 ]
 
 [[package]]
