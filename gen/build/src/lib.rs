@@ -56,10 +56,11 @@
 mod cargo;
 mod error;
 mod gen;
+mod out;
 mod paths;
 mod syntax;
 
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::gen::error::report;
 use crate::gen::{fs, Opt};
 use crate::paths::{PathExt, TargetDir};
@@ -138,12 +139,12 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
 
 fn write_header(prj: &Project) {
     let ref cxx_h = prj.out_dir.join("cxxbridge").join("rust").join("cxx.h");
-    let _ = write(cxx_h, gen::include::HEADER.as_bytes());
+    let _ = out::write(cxx_h, gen::include::HEADER.as_bytes());
     if let TargetDir::Path(target_dir) = &prj.target_dir {
         let ref header_dir = target_dir.join("cxxbridge").join("rust");
         let _ = fs::create_dir_all(header_dir);
         let ref cxx_h = header_dir.join("cxx.h");
-        let _ = write(cxx_h, gen::include::HEADER.as_bytes());
+        let _ = out::write(cxx_h, gen::include::HEADER.as_bytes());
     }
 }
 
@@ -171,7 +172,7 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
 
     let ref rel_path_h = rel_path.with_appended_extension(".h");
     let ref header_path = paths::namespaced(&prj.out_dir, rel_path_h);
-    write(header_path, &generated.header)?;
+    out::write(header_path, &generated.header)?;
 
     let ref link_path = paths::namespaced(&prj.out_dir, rel_path);
     let _ = paths::symlink_or_copy(header_path, link_path);
@@ -184,30 +185,7 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
 
     let ref rel_path_cc = rel_path.with_appended_extension(".cc");
     let ref implementation_path = paths::namespaced(&prj.out_dir, rel_path_cc);
-    write(implementation_path, &generated.implementation)?;
+    out::write(implementation_path, &generated.implementation)?;
     build.file(implementation_path);
     Ok(())
-}
-
-fn write(path: &Path, content: &[u8]) -> Result<()> {
-    let mut create_dir_error = None;
-    if path.exists() {
-        if let Ok(existing) = fs::read(path) {
-            if existing == content {
-                // Avoid bumping modified time with unchanged contents.
-                return Ok(());
-            }
-        }
-        let _ = fs::remove_file(path);
-    } else {
-        let parent = path.parent().unwrap();
-        create_dir_error = fs::create_dir_all(parent).err();
-    }
-
-    match fs::write(path, content) {
-        // As long as write succeeded, ignore any create_dir_all error.
-        Ok(()) => Ok(()),
-        // If create_dir_all and write both failed, prefer the first error.
-        Err(err) => Err(Error::Fs(create_dir_error.unwrap_or(err))),
-    }
 }
