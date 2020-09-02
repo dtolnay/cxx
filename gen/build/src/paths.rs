@@ -100,10 +100,10 @@ pub(crate) fn search_parents_for_target_dir(out_dir: &Path) -> TargetDir {
 }
 
 #[cfg(unix)]
-use self::fs::symlink_file as symlink_or_copy;
+pub(crate) use self::fs::symlink_file as symlink_or_copy;
 
 #[cfg(windows)]
-fn symlink_or_copy(src: &Path, dst: &Path) -> Result<()> {
+pub(crate) fn symlink_or_copy(src: &Path, dst: &Path) -> Result<()> {
     // Pre-Windows 10, symlinks require admin privileges. Since Windows 10, they
     // require Developer Mode. If it fails, fall back to copying the file.
     if fs::symlink_file(src, dst).is_err() {
@@ -113,7 +113,7 @@ fn symlink_or_copy(src: &Path, dst: &Path) -> Result<()> {
 }
 
 #[cfg(not(any(unix, windows)))]
-use self::fs::copy as symlink_or_copy;
+pub(crate) use self::fs::copy as symlink_or_copy;
 
 #[cfg(any(unix, windows))]
 pub(crate) use self::fs::symlink_dir;

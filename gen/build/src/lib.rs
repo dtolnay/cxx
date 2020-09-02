@@ -174,8 +174,10 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
     write(header_path, &generated.header)?;
     paths::symlink_namespaced(header_path, &prj.out_dir, rel_path);
     if let TargetDir::Path(target_dir) = &prj.target_dir {
-        paths::symlink_namespaced(header_path, target_dir, rel_path);
-        paths::symlink_namespaced(header_path, target_dir, rel_path_h);
+        let ref link_path = paths::namespaced(target_dir, rel_path);
+        let _ = fs::create_dir_all(link_path.parent().unwrap());
+        let _ = paths::symlink_or_copy(header_path, link_path);
+        let _ = paths::symlink_or_copy(header_path, link_path.with_appended_extension(".h"));
     }
 
     let ref rel_path_cc = rel_path.with_appended_extension(".cc");
