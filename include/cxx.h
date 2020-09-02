@@ -283,8 +283,11 @@ using try_fn = TryFn<Signature>;
 ////////////////////////////////////////////////////////////////////////////////
 /// end public API, begin implementation details
 
+#ifndef CXXBRIDGE04_PANIC
+#define CXXBRIDGE04_PANIC
 template <typename Exception>
 void panic [[noreturn]] (const char *msg);
+#endif // CXXBRIDGE04_PANIC
 
 template <typename Ret, typename... Args, bool Throws>
 Ret Fn<Ret(Args...), Throws>::operator()(Args... args) const noexcept(!Throws) {

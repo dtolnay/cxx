@@ -141,6 +141,7 @@ fn write_includes(out: &mut OutFile, types: &Types) {
 }
 
 fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
+    let mut needs_panic = false;
     let mut needs_rust_string = false;
     let mut needs_rust_str = false;
     let mut needs_rust_slice = false;
@@ -160,6 +161,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
                 out.include.array = true;
                 out.include.new = true;
                 out.include.type_traits = true;
+                needs_panic = true;
                 needs_rust_vec = true;
                 needs_unsafe_bitcopy = true;
             }
@@ -233,7 +235,8 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
     out.begin_block("namespace rust");
     out.begin_block("inline namespace cxxbridge04");
 
-    if needs_rust_string
+    if needs_panic
+        || needs_rust_string
         || needs_rust_str
         || needs_rust_slice
         || needs_rust_box
@@ -248,6 +251,8 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
     {
         writeln!(out, "// #include \"rust/cxx.h\"");
     }
+
+    include::write(out, needs_panic, "CXXBRIDGE04_PANIC");
 
     if needs_rust_string {
         out.next_section();
