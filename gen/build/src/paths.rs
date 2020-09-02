@@ -105,7 +105,7 @@ fn canonicalize(path: impl AsRef<Path>) -> Result<PathBuf> {
 }
 
 #[cfg(unix)]
-use self::fs::symlink as symlink_or_copy;
+use self::fs::symlink_file as symlink_or_copy;
 
 #[cfg(windows)]
 fn symlink_or_copy(src: &Path, dst: &Path) -> Result<()> {

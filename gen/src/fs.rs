@@ -82,11 +82,12 @@ pub(crate) fn remove_file(path: impl AsRef<Path>) -> Result<()> {
     }
 }
 
-#[cfg(unix)]
-pub(crate) fn symlink(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> Result<()> {
-    let src = src.as_ref();
-    let dst = dst.as_ref();
-    match std::os::unix::fs::symlink(src, dst) {
+fn symlink<'a>(
+    src: &'a Path,
+    dst: &'a Path,
+    fun: fn(&'a Path, &'a Path) -> io::Result<()>,
+) -> Result<()> {
+    match fun(src, dst) {
         Ok(()) => Ok(()),
         Err(e) => err!(
             e,
@@ -97,19 +98,31 @@ pub(crate) fn symlink(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> Result<()
     }
 }
 
+#[cfg(unix)]
+#[allow(unused_imports)]
+pub(crate) use self::symlink_file as symlink_dir;
+
+#[cfg(unix)]
+pub(crate) fn symlink_file(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> Result<()> {
+    symlink(src.as_ref(), dst.as_ref(), std::os::unix::fs::symlink)
+}
+
 #[cfg(windows)]
 pub(crate) fn symlink_file(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> Result<()> {
-    let src = src.as_ref();
-    let dst = dst.as_ref();
-    match std::os::windows::fs::symlink_file(src, dst) {
-        Ok(()) => Ok(()),
-        Err(e) => err!(
-            e,
-            "Failed to create symlink `{}` pointing to `{}`",
-            dst,
-            src,
-        ),
-    }
+    symlink(
+        src.as_ref(),
+        dst.as_ref(),
+        std::os::windows::fs::symlink_file,
+    )
+}
+
+#[cfg(windows)]
+pub(crate) fn symlink_dir(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> Result<()> {
+    symlink(
+        src.as_ref(),
+        dst.as_ref(),
+        std::os::windows::fs::symlink_dir,
+    )
 }
 
 pub(crate) fn write(path: impl AsRef<Path>, contents: impl AsRef<[u8]>) -> Result<()> {
