@@ -160,8 +160,7 @@ fn symlink_crate(prj: &Project, build: &mut Build) {
 
     let mut link = paths::include_dir(prj);
     link.push("CRATE");
-    let _ = fs::create_dir_all(&link);
-    let _ = paths::symlink_dir(manifest_dir, link.join(package_name));
+    let _ = out::symlink_dir(manifest_dir, link.join(package_name));
     build.include(link);
 }
 
@@ -175,12 +174,11 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
     out::write(header_path, &generated.header)?;
 
     let ref link_path = paths::namespaced(&prj.out_dir, rel_path);
-    let _ = paths::symlink_or_copy(header_path, link_path);
+    let _ = out::symlink_file(header_path, link_path);
     if let TargetDir::Path(target_dir) = &prj.target_dir {
         let ref link_path = paths::namespaced(target_dir, rel_path);
-        let _ = fs::create_dir_all(link_path.parent().unwrap());
-        let _ = paths::symlink_or_copy(header_path, link_path);
-        let _ = paths::symlink_or_copy(header_path, link_path.with_appended_extension(".h"));
+        let _ = out::symlink_file(header_path, link_path);
+        let _ = out::symlink_file(header_path, link_path.with_appended_extension(".h"));
     }
 
     let ref rel_path_cc = rel_path.with_appended_extension(".cc");
