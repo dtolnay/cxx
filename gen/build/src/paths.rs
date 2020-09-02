@@ -34,8 +34,7 @@ pub(crate) fn symlink_header(prj: &Project, path: &Path, original: &Path) {
 }
 
 fn try_symlink_header(prj: &Project, path: &Path, original: &Path) -> Result<()> {
-    let suffix = relative_to_parent_of_target_dir(prj, original)?;
-    let ref dst = include_dir(prj).join(suffix);
+    let ref dst = include_dir(prj).join(original);
 
     fs::create_dir_all(dst.parent().unwrap())?;
     let _ = fs::remove_file(dst);
@@ -49,29 +48,14 @@ fn try_symlink_header(prj: &Project, path: &Path, original: &Path) -> Result<()>
     Ok(())
 }
 
-fn relative_to_parent_of_target_dir(prj: &Project, original: &Path) -> Result<PathBuf> {
-    let mut outer = match &prj.target_dir {
-        TargetDir::Path(target_dir) => target_dir.parent().unwrap(),
-        TargetDir::Unknown => unimplemented!(), // FIXME
-    };
-    let original = canonicalize(original)?;
-    loop {
-        if let Ok(suffix) = original.strip_prefix(outer) {
-            return Ok(suffix.to_owned());
-        }
-        match outer.parent() {
-            Some(parent) => outer = parent,
-            None => return Ok(original.components().skip(1).collect()),
-        }
-    }
-}
-
-pub(crate) fn out_with_extension(prj: &Project, path: &Path, ext: &str) -> Result<PathBuf> {
-    let mut file_name = path.file_name().unwrap().to_owned();
+pub(crate) fn out_with_extension(prj: &Project, rel_path: &Path, ext: &str) -> PathBuf {
+    let mut file_name = rel_path.file_name().unwrap().to_owned();
     file_name.push(ext);
 
-    let rel = relative_to_parent_of_target_dir(prj, path)?;
-    Ok(prj.out_dir.join(rel).with_file_name(file_name))
+    prj.out_dir
+        .join("cxxbridge")
+        .join(rel_path)
+        .with_file_name(file_name)
 }
 
 pub(crate) fn include_dir(prj: &Project) -> PathBuf {
@@ -107,20 +91,6 @@ pub(crate) fn search_parents_for_target_dir(out_dir: &Path) -> TargetDir {
         }
         return TargetDir::Unknown;
     }
-}
-
-#[cfg(not(windows))]
-fn canonicalize(path: impl AsRef<Path>) -> Result<PathBuf> {
-    Ok(fs::canonicalize(path)?)
-}
-
-#[cfg(windows)]
-fn canonicalize(path: impl AsRef<Path>) -> Result<PathBuf> {
-    // Real fs::canonicalize on Windows produces UNC paths which cl.exe is
-    // unable to handle in includes. Use a poor approximation instead.
-    // https://github.com/rust-lang/rust/issues/42869
-    // https://github.com/alexcrichton/cc-rs/issues/169
-    Ok(fs::current_dir()?.join(path))
 }
 
 #[cfg(unix)]

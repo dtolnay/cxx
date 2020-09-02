@@ -143,11 +143,11 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
     let opt = Opt::default();
     let generated = gen::generate_from_path(rust_source_file, &opt);
 
-    let header_path = paths::out_with_extension(prj, rust_source_file, ".h")?;
+    let header_path = paths::out_with_extension(prj, rust_source_file, ".h");
     write(&header_path, &generated.header)?;
     paths::symlink_header(prj, &header_path, rust_source_file);
 
-    let implementation_path = paths::out_with_extension(prj, rust_source_file, ".cc")?;
+    let implementation_path = paths::out_with_extension(prj, rust_source_file, ".cc");
     write(&implementation_path, &generated.implementation)?;
     build.file(&implementation_path);
     Ok(())
