@@ -123,17 +123,24 @@ impl Project {
 
 fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Result<Build> {
     let ref prj = Project::init()?;
+    let include_dir = paths::include_dir(prj);
+
     let mut build = Build::new();
     build.cpp(true);
     build.cpp_link_stdlib(None); // linked via link-cplusplus crate
-    build.include(paths::include_dir(prj));
+    build.include(&include_dir);
     write_header(prj);
-    symlink_crate(prj, &mut build);
+    let crate_dir = symlink_crate(prj, &mut build);
 
     for path in rust_source_files {
         generate_bridge(prj, &mut build, path.as_ref())?;
     }
 
+    eprintln!("\nCXX include path:");
+    eprintln!("  {}", include_dir.display());
+    if let Some(crate_dir) = crate_dir {
+        eprintln!("  {}", crate_dir.display());
+    }
     Ok(build)
 }
 
@@ -148,20 +155,21 @@ fn write_header(prj: &Project) {
     }
 }
 
-fn symlink_crate(prj: &Project, build: &mut Build) {
+fn symlink_crate(prj: &Project, build: &mut Build) -> Option<PathBuf> {
     let manifest_dir = match paths::manifest_dir() {
         Some(manifest_dir) => manifest_dir,
-        None => return,
+        None => return None,
     };
     let package_name = match paths::package_name() {
         Some(package_name) => package_name,
-        None => return,
+        None => return None,
     };
 
     let mut link = paths::include_dir(prj);
     link.push("CRATE");
     let _ = out::symlink_dir(manifest_dir, link.join(package_name));
-    build.include(link);
+    build.include(&link);
+    Some(link)
 }
 
 fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) -> Result<()> {
