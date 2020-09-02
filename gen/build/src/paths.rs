@@ -19,9 +19,6 @@ pub(crate) fn out_dir() -> Result<PathBuf> {
 pub(crate) fn cc_build(prj: &Project) -> cc::Build {
     let mut build = cc::Build::new();
     build.include(include_dir(prj));
-    if let Some(manifest_dir) = env::var_os("CARGO_MANIFEST_DIR") {
-        build.include(manifest_dir);
-    }
     build
 }
 
@@ -70,7 +67,11 @@ pub(crate) fn include_dir(prj: &Project) -> PathBuf {
     }
 }
 
-fn package_name() -> Option<OsString> {
+pub(crate) fn manifest_dir() -> Option<PathBuf> {
+    env::var_os("CARGO_MANIFEST_DIR").map(PathBuf::from)
+}
+
+pub(crate) fn package_name() -> Option<OsString> {
     env::var_os("CARGO_PKG_NAME")
 }
 
@@ -117,3 +118,11 @@ fn symlink_or_copy(src: &Path, dst: &Path) -> Result<()> {
 
 #[cfg(not(any(unix, windows)))]
 use self::fs::copy as symlink_or_copy;
+
+#[cfg(any(unix, windows))]
+pub(crate) use self::fs::symlink_dir;
+
+#[cfg(not(any(unix, windows)))]
+pub(crate) fn symlink_dir(_src: impl AsRef<Path>, _dst: impl AsRef<Path>) -> Result<()> {
+    Ok(())
+}

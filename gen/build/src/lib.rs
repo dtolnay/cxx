@@ -126,6 +126,7 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
     build.cpp(true);
     build.cpp_link_stdlib(None); // linked via link-cplusplus crate
     write_header(prj);
+    symlink_crate(prj, &mut build);
 
     for path in rust_source_files {
         generate_bridge(prj, &mut build, path.as_ref())?;
@@ -135,8 +136,26 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
 }
 
 fn write_header(prj: &Project) {
-    let ref cxx_h = paths::include_dir(prj).join("rust").join("cxx.h");
+    let include_dir = paths::include_dir(prj);
+    let ref cxx_h = include_dir.join("rust").join("cxx.h");
     let _ = write(cxx_h, gen::include::HEADER.as_bytes());
+}
+
+fn symlink_crate(prj: &Project, build: &mut Build) {
+    let manifest_dir = match paths::manifest_dir() {
+        Some(manifest_dir) => manifest_dir,
+        None => return,
+    };
+    let package_name = match paths::package_name() {
+        Some(package_name) => package_name,
+        None => return,
+    };
+
+    let mut link = paths::include_dir(prj);
+    link.push("CRATE");
+    let _ = fs::create_dir_all(&link);
+    let _ = paths::symlink_dir(manifest_dir, link.join(package_name));
+    build.include(link);
 }
 
 fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) -> Result<()> {
