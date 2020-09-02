@@ -2,7 +2,7 @@
 
 use std::error::Error as StdError;
 use std::fmt::{self, Display};
-use std::io;
+use std::io::{self, Read};
 use std::path::{Path, PathBuf};
 
 pub(crate) type Result<T> = std::result::Result<T, Error>;
@@ -63,6 +63,14 @@ pub(crate) fn read(path: impl AsRef<Path>) -> Result<Vec<u8>> {
     match std::fs::read(path) {
         Ok(string) => Ok(string),
         Err(e) => err!(e, "Failed to read file `{}`", path),
+    }
+}
+
+pub(crate) fn read_stdin() -> Result<Vec<u8>> {
+    let mut bytes = Vec::new();
+    match io::stdin().read_to_end(&mut bytes) {
+        Ok(_len) => Ok(bytes),
+        Err(e) => err!(e, "Failed to read input from stdin"),
     }
 }
 

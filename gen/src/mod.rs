@@ -80,7 +80,11 @@ pub(super) fn generate_from_path(path: &Path, opt: &Opt) -> GeneratedCode {
 }
 
 fn read_to_string(path: &Path) -> Result<String> {
-    let bytes = fs::read(path)?;
+    let bytes = if path == Path::new("-") {
+        fs::read_stdin()
+    } else {
+        fs::read(path)
+    }?;
     match String::from_utf8(bytes) {
         Ok(string) => Ok(string),
         Err(err) => Err(Error::Utf8(path.to_owned(), err.utf8_error())),
