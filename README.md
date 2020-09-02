@@ -343,10 +343,9 @@ This is still early days for CXX; I am releasing it as a minimum viable product
 to collect feedback on the direction and invite collaborators. Please check the
 open issues.
 
-On the build side, I don't have much experience with the `cc` crate so I expect
-there may be someone who can suggest ways to make that aspect of this crate
-friendlier or more robust. Please report issues if you run into trouble building
-or linking any of this stuff.
+Especially please report issues if you run into trouble building or linking any
+of this stuff. I'm sure there are ways to make the build aspects friendlier or
+more robust.
 
 Finally, I know more about Rust library design than C++ library design so I
 would appreciate help making the C++ APIs in this project more idiomatic where
