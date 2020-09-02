@@ -99,9 +99,11 @@ pub(crate) fn search_parents_for_target_dir(out_dir: &Path) -> TargetDir {
 pub(crate) use self::fs::symlink_file as symlink_or_copy;
 
 #[cfg(windows)]
-pub(crate) fn symlink_or_copy(src: &Path, dst: &Path) -> Result<()> {
+pub(crate) fn symlink_or_copy(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> Result<()> {
     // Pre-Windows 10, symlinks require admin privileges. Since Windows 10, they
     // require Developer Mode. If it fails, fall back to copying the file.
+    let src = src.as_ref();
+    let dst = dst.as_ref();
     if fs::symlink_file(src, dst).is_err() {
         fs::copy(src, dst)?;
     }
