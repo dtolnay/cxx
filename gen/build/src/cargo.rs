@@ -1,12 +1,13 @@
 use crate::paths::TargetDir;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::str;
 
-pub(crate) fn target_dir() -> TargetDir {
+pub(crate) fn target_dir(out_dir: &Path) -> TargetDir {
     (|| {
         let cargo = option_env!("CARGO").unwrap_or("cargo");
         let output = Command::new(cargo)
+            .current_dir(out_dir)
             .arg("metadata")
             .arg("--no-deps")
             .arg("--format-version=1")

@@ -107,7 +107,7 @@ impl Project {
     fn init() -> Result<Self> {
         let out_dir = paths::out_dir()?;
 
-        let target_dir = match cargo::target_dir() {
+        let target_dir = match cargo::target_dir(&out_dir) {
             target_dir @ TargetDir::Path(_) => target_dir,
             // Fallback if Cargo did not work.
             TargetDir::Unknown => paths::search_parents_for_target_dir(&out_dir),
