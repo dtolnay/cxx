@@ -34,14 +34,6 @@ macro_rules! err {
     }
 }
 
-pub(crate) fn canonicalize(path: impl AsRef<Path>) -> Result<PathBuf> {
-    let path = path.as_ref();
-    match std::fs::canonicalize(path) {
-        Ok(string) => Ok(string),
-        Err(e) => err!(e, "Unable to canonicalize path: `{}`", path),
-    }
-}
-
 pub(crate) fn copy(from: impl AsRef<Path>, to: impl AsRef<Path>) -> Result<u64> {
     let from = from.as_ref();
     let to = to.as_ref();

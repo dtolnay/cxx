@@ -26,6 +26,8 @@ cc_library(
         ":gen-module-source",
     ],
     hdrs = ["ffi/tests.h"],
+    include_prefix = "cxx-test-suite",
+    strip_include_prefix = "ffi",
     deps = [
         ":lib-include",
         "//:core",
@@ -51,7 +53,7 @@ genrule(
 cc_library(
     name = "lib-include",
     hdrs = [":gen-lib-header"],
-    include_prefix = "tests/ffi",
+    include_prefix = "cxx-test-suite",
 )
 
 genrule(

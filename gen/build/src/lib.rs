@@ -59,14 +59,14 @@ mod gen;
 mod paths;
 mod syntax;
 
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::gen::error::report;
 use crate::gen::{fs, Opt};
-use crate::paths::TargetDir;
+use crate::paths::{PathExt, TargetDir};
 use cc::Build;
 use std::io::{self, Write};
 use std::iter;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process;
 
 /// This returns a [`cc::Build`] on which you should continue to set up any
@@ -98,45 +98,99 @@ pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) ->
     })
 }
 
+struct Project {
+    out_dir: PathBuf,
+    target_dir: TargetDir,
+}
+
+impl Project {
+    fn init() -> Result<Self> {
+        let out_dir = paths::out_dir()?;
+
+        let target_dir = match cargo::target_dir(&out_dir) {
+            target_dir @ TargetDir::Path(_) => target_dir,
+            // Fallback if Cargo did not work.
+            TargetDir::Unknown => paths::search_parents_for_target_dir(&out_dir),
+        };
+
+        Ok(Project {
+            out_dir,
+            target_dir,
+        })
+    }
+}
+
 fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Result<Build> {
-    let ref target_dir = paths::target_dir()?;
-    let mut build = paths::cc_build(target_dir);
+    let ref prj = Project::init()?;
+    let mut build = Build::new();
     build.cpp(true);
     build.cpp_link_stdlib(None); // linked via link-cplusplus crate
-    write_header(target_dir);
+    build.include(paths::include_dir(prj));
+    write_header(prj);
+    symlink_crate(prj, &mut build);
 
     for path in rust_source_files {
-        generate_bridge(&mut build, path.as_ref(), target_dir)?;
+        generate_bridge(prj, &mut build, path.as_ref())?;
     }
 
     Ok(build)
 }
 
-fn write_header(target_dir: &TargetDir) {
-    let ref cxx_h = paths::include_dir(target_dir).join("rust").join("cxx.h");
+fn write_header(prj: &Project) {
+    let ref cxx_h = prj.out_dir.join("cxxbridge").join("rust").join("cxx.h");
     let _ = write(cxx_h, gen::include::HEADER.as_bytes());
+    if let TargetDir::Path(target_dir) = &prj.target_dir {
+        let ref header_dir = target_dir.join("cxxbridge").join("rust");
+        let _ = fs::create_dir_all(header_dir);
+        let ref cxx_h = header_dir.join("cxx.h");
+        let _ = write(cxx_h, gen::include::HEADER.as_bytes());
+    }
 }
 
-fn generate_bridge(
-    build: &mut Build,
-    rust_source_file: &Path,
-    target_dir: &TargetDir,
-) -> Result<()> {
+fn symlink_crate(prj: &Project, build: &mut Build) {
+    let manifest_dir = match paths::manifest_dir() {
+        Some(manifest_dir) => manifest_dir,
+        None => return,
+    };
+    let package_name = match paths::package_name() {
+        Some(package_name) => package_name,
+        None => return,
+    };
+
+    let mut link = paths::include_dir(prj);
+    link.push("CRATE");
+    let _ = fs::create_dir_all(&link);
+    let _ = paths::symlink_dir(manifest_dir, link.join(package_name));
+    build.include(link);
+}
+
+fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) -> Result<()> {
     let opt = Opt::default();
     let generated = gen::generate_from_path(rust_source_file, &opt);
+    let ref rel_path = paths::local_relative_path(rust_source_file);
 
-    let header_path = paths::out_with_extension(rust_source_file, ".h", target_dir)?;
-    fs::create_dir_all(header_path.parent().unwrap())?;
-    write(&header_path, &generated.header)?;
-    paths::symlink_header(&header_path, rust_source_file, target_dir);
+    let ref rel_path_h = rel_path.with_appended_extension(".h");
+    let ref header_path = paths::namespaced(&prj.out_dir, rel_path_h);
+    write(header_path, &generated.header)?;
 
-    let implementation_path = paths::out_with_extension(rust_source_file, ".cc", target_dir)?;
-    write(&implementation_path, &generated.implementation)?;
-    build.file(&implementation_path);
+    let ref link_path = paths::namespaced(&prj.out_dir, rel_path);
+    let _ = paths::symlink_or_copy(header_path, link_path);
+    if let TargetDir::Path(target_dir) = &prj.target_dir {
+        let ref link_path = paths::namespaced(target_dir, rel_path);
+        let _ = fs::create_dir_all(link_path.parent().unwrap());
+        let _ = paths::symlink_or_copy(header_path, link_path);
+        let _ = paths::symlink_or_copy(header_path, link_path.with_appended_extension(".h"));
+    }
+
+    let ref rel_path_cc = rel_path.with_appended_extension(".cc");
+    let ref implementation_path = paths::namespaced(&prj.out_dir, rel_path_cc);
+    write(implementation_path, &generated.implementation)?;
+    build.file(implementation_path);
     Ok(())
 }
 
 fn write(path: &Path, content: &[u8]) -> Result<()> {
+    let mut create_dir_error = None;
     if path.exists() {
         if let Ok(existing) = fs::read(path) {
             if existing == content {
@@ -146,8 +200,14 @@ fn write(path: &Path, content: &[u8]) -> Result<()> {
         }
         let _ = fs::remove_file(path);
     } else {
-        let _ = fs::create_dir_all(path.parent().unwrap());
+        let parent = path.parent().unwrap();
+        create_dir_error = fs::create_dir_all(parent).err();
     }
-    fs::write(path, content)?;
-    Ok(())
+
+    match fs::write(path, content) {
+        // As long as write succeeded, ignore any create_dir_all error.
+        Ok(()) => Ok(()),
+        // If create_dir_all and write both failed, prefer the first error.
+        Err(err) => Err(Error::Fs(create_dir_error.unwrap_or(err))),
+    }
 }
