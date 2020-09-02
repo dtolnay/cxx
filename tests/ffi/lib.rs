@@ -23,7 +23,7 @@ pub mod ffi {
     }
 
     extern "C" {
-        include!("tests/ffi/tests.h");
+        include!("cxx-test-suite/tests.h");
 
         type C;
 

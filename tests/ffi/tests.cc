@@ -1,5 +1,5 @@
-#include "tests/ffi/tests.h"
-#include "tests/ffi/lib.rs.h"
+#include "cxx-test-suite/tests.h"
+#include "cxx-test-suite/lib.rs.h"
 #include <cstring>
 #include <iterator>
 #include <numeric>
