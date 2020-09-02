@@ -21,7 +21,7 @@ fn test_cpp() {
     let output = std::str::from_utf8(&output.implementation).unwrap();
     // To avoid continual breakage we won't test every byte.
     // Let's look for the major features.
-    assert!(output.contains("void cxxbridge03$do_cpp_thing(::rust::Str::Repr foo)"));
+    assert!(output.contains("void cxxbridge04$do_cpp_thing(::rust::Str::Repr foo)"));
 }
 
 #[test]
@@ -34,5 +34,5 @@ fn test_annotation() {
     };
     let output = generate_from_string(CPP_EXAMPLE, &opts).unwrap();
     let output = std::str::from_utf8(&output.implementation).unwrap();
-    assert!(output.contains("ANNOTATION void cxxbridge03$do_cpp_thing(::rust::Str::Repr foo)"));
+    assert!(output.contains("ANNOTATION void cxxbridge04$do_cpp_thing(::rust::Str::Repr foo)"));
 }

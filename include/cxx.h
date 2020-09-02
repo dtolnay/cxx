@@ -15,12 +15,12 @@
 #endif
 
 namespace rust {
-inline namespace cxxbridge03 {
+inline namespace cxxbridge04 {
 
 struct unsafe_bitcopy_t;
 
-#ifndef CXXBRIDGE03_RUST_STRING
-#define CXXBRIDGE03_RUST_STRING
+#ifndef CXXBRIDGE04_RUST_STRING
+#define CXXBRIDGE04_RUST_STRING
 class String final {
 public:
   String() noexcept;
@@ -49,10 +49,10 @@ private:
   // Size and alignment statically verified by rust_string.rs.
   std::array<uintptr_t, 3> repr;
 };
-#endif // CXXBRIDGE03_RUST_STRING
+#endif // CXXBRIDGE04_RUST_STRING
 
-#ifndef CXXBRIDGE03_RUST_STR
-#define CXXBRIDGE03_RUST_STR
+#ifndef CXXBRIDGE04_RUST_STR
+#define CXXBRIDGE04_RUST_STR
 class Str final {
 public:
   Str() noexcept;
@@ -86,9 +86,9 @@ public:
 private:
   Repr repr;
 };
-#endif // CXXBRIDGE03_RUST_STR
+#endif // CXXBRIDGE04_RUST_STR
 
-#ifndef CXXBRIDGE03_RUST_SLICE
+#ifndef CXXBRIDGE04_RUST_SLICE
 template <typename T>
 class Slice final {
 public:
@@ -117,9 +117,9 @@ public:
 private:
   Repr repr;
 };
-#endif // CXXBRIDGE03_RUST_SLICE
+#endif // CXXBRIDGE04_RUST_SLICE
 
-#ifndef CXXBRIDGE03_RUST_BOX
+#ifndef CXXBRIDGE04_RUST_BOX
 template <typename T>
 class Box final {
 public:
@@ -158,9 +158,9 @@ private:
   void drop() noexcept;
   T *ptr;
 };
-#endif // CXXBRIDGE03_RUST_BOX
+#endif // CXXBRIDGE04_RUST_BOX
 
-#ifndef CXXBRIDGE03_RUST_VEC
+#ifndef CXXBRIDGE04_RUST_VEC
 template <typename T>
 class Vec final {
 public:
@@ -218,10 +218,10 @@ private:
   // Size and alignment statically verified by rust_vec.rs.
   std::array<uintptr_t, 3> repr;
 };
-#endif // CXXBRIDGE03_RUST_VEC
+#endif // CXXBRIDGE04_RUST_VEC
 
-#ifndef CXXBRIDGE03_RUST_FN
-#define CXXBRIDGE03_RUST_FN
+#ifndef CXXBRIDGE04_RUST_FN
+#define CXXBRIDGE04_RUST_FN
 template <typename Signature, bool Throws = false>
 class Fn;
 
@@ -238,10 +238,10 @@ private:
 
 template <typename Signature>
 using TryFn = Fn<Signature, true>;
-#endif // CXXBRIDGE03_RUST_FN
+#endif // CXXBRIDGE04_RUST_FN
 
-#ifndef CXXBRIDGE03_RUST_ERROR
-#define CXXBRIDGE03_RUST_ERROR
+#ifndef CXXBRIDGE04_RUST_ERROR
+#define CXXBRIDGE04_RUST_ERROR
 class Error final : std::exception {
 public:
   Error(const Error &);
@@ -253,16 +253,16 @@ public:
 private:
   Str::Repr msg;
 };
-#endif // CXXBRIDGE03_RUST_ERROR
+#endif // CXXBRIDGE04_RUST_ERROR
 
-#ifndef CXXBRIDGE03_RUST_ISIZE
-#define CXXBRIDGE03_RUST_ISIZE
+#ifndef CXXBRIDGE04_RUST_ISIZE
+#define CXXBRIDGE04_RUST_ISIZE
 #if defined(_WIN32)
 using isize = SSIZE_T;
 #else
 using isize = ssize_t;
 #endif
-#endif // CXXBRIDGE03_RUST_ISIZE
+#endif // CXXBRIDGE04_RUST_ISIZE
 
 std::ostream &operator<<(std::ostream &, const String &);
 std::ostream &operator<<(std::ostream &, const Str &);
@@ -296,17 +296,17 @@ Fn<Ret(Args...), Throws> Fn<Ret(Args...), Throws>::operator*() const noexcept {
   return *this;
 }
 
-#ifndef CXXBRIDGE03_RUST_BITCOPY
-#define CXXBRIDGE03_RUST_BITCOPY
+#ifndef CXXBRIDGE04_RUST_BITCOPY
+#define CXXBRIDGE04_RUST_BITCOPY
 struct unsafe_bitcopy_t {
   explicit unsafe_bitcopy_t() = default;
 };
 
 constexpr unsafe_bitcopy_t unsafe_bitcopy{};
-#endif // CXXBRIDGE03_RUST_BITCOPY
+#endif // CXXBRIDGE04_RUST_BITCOPY
 
-#ifndef CXXBRIDGE03_RUST_SLICE
-#define CXXBRIDGE03_RUST_SLICE
+#ifndef CXXBRIDGE04_RUST_SLICE
+#define CXXBRIDGE04_RUST_SLICE
 template <typename T>
 Slice<T>::Slice() noexcept : repr(Repr{reinterpret_cast<const T *>(this), 0}) {}
 
@@ -344,10 +344,10 @@ template <typename T>
 Slice<T>::operator Repr() noexcept {
   return this->repr;
 }
-#endif // CXXBRIDGE03_RUST_SLICE
+#endif // CXXBRIDGE04_RUST_SLICE
 
-#ifndef CXXBRIDGE03_RUST_BOX
-#define CXXBRIDGE03_RUST_BOX
+#ifndef CXXBRIDGE04_RUST_BOX
+#define CXXBRIDGE04_RUST_BOX
 template <typename T>
 Box<T>::Box(const Box &other) : Box(*other) {}
 
@@ -443,10 +443,10 @@ T *Box<T>::into_raw() noexcept {
 
 template <typename T>
 Box<T>::Box() noexcept {}
-#endif // CXXBRIDGE03_RUST_BOX
+#endif // CXXBRIDGE04_RUST_BOX
 
-#ifndef CXXBRIDGE03_RUST_VEC
-#define CXXBRIDGE03_RUST_VEC
+#ifndef CXXBRIDGE04_RUST_VEC
+#define CXXBRIDGE04_RUST_VEC
 template <typename T>
 Vec<T>::Vec(Vec &&other) noexcept {
   this->repr = other.repr;
@@ -551,7 +551,7 @@ typename Vec<T>::const_iterator Vec<T>::end() const noexcept {
 // Internal API only intended for the cxxbridge code generator.
 template <typename T>
 Vec<T>::Vec(unsafe_bitcopy_t, const Vec &bits) noexcept : repr(bits.repr) {}
-#endif // CXXBRIDGE03_RUST_VEC
+#endif // CXXBRIDGE04_RUST_VEC
 
-} // namespace cxxbridge03
+} // namespace cxxbridge04
 } // namespace rust
