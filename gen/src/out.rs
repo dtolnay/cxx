@@ -57,13 +57,16 @@ impl OutFile {
     pub fn content(&self) -> Vec<u8> {
         let front = &self.front.bytes;
         let content = &self.content.borrow().bytes;
-        let len = front.len() + !front.is_empty() as usize + content.len();
+        let len = front.len() + content.len() + 1;
         let mut out = String::with_capacity(len);
         out.push_str(front);
-        if !front.is_empty() {
+        if !front.is_empty() && !content.is_empty() {
             out.push('\n');
         }
         out.push_str(content);
+        if out.is_empty() {
+            out.push_str("// empty\n");
+        }
         out.into_bytes()
     }
 }
