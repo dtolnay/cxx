@@ -19,6 +19,9 @@ can be 100% safe.
 ```toml
 [dependencies]
 cxx = "0.4"
+
+[build-dependencies]
+cxx-build = "0.4"
 ```
 
 *Compiler support: requires rustc 1.42+ and c++11 or newer*<br>
