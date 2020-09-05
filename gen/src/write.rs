@@ -247,7 +247,6 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
         || needs_unsafe_bitcopy
         || needs_manually_drop
         || needs_maybe_uninit
-        || needs_trycatch
     {
         writeln!(out, "// #include \"rust/cxx.h\"");
     }
