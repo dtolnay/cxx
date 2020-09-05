@@ -17,5 +17,9 @@ const std::string &get_name(const ThingC &thing) { return thing.appname; }
 
 void do_thing(SharedThing state) { print_r(*state.y); }
 
+void throws_strange() {
+  throw 99;
+}
+
 } // namespace example
 } // namespace org

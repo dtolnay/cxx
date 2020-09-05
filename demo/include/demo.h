@@ -20,5 +20,7 @@ std::unique_ptr<ThingC> make_demo(rust::Str appname);
 const std::string &get_name(const ThingC &thing);
 void do_thing(SharedThing state);
 
+void throws_strange();
+
 } // namespace example
 } // namespace org
