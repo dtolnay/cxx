@@ -5,7 +5,7 @@ error[E0277]: the size for values of type `str` cannot be known at compilation t
   |         -----^^^^^-
   |         |    |
   |         |    doesn't have a size known at compile-time
-  |         required by this bound in `ffi::_::__AssertSized`
+  |         required by this bound in `__AssertSized`
   |
-  = help: within `TypeR`, the trait `std::marker::Sized` is not implemented for `str`
+  = help: within `TypeR`, the trait `Sized` is not implemented for `str`
   = note: required because it appears within the type `TypeR`
