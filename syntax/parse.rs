@@ -353,6 +353,7 @@ fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> R
     let ret = parse_return_type(&foreign_fn.sig.output, &mut throws_tokens)?;
     let throws = throws_tokens.is_some();
     let doc = attrs::parse_doc(cx, &foreign_fn.attrs);
+    let unsafety = foreign_fn.sig.unsafety;
     let fn_token = foreign_fn.sig.fn_token;
     let ident = foreign_fn.sig.ident.clone();
     let paren_token = foreign_fn.sig.paren_token;
@@ -367,6 +368,7 @@ fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> R
         doc,
         ident,
         sig: Signature {
+            unsafety,
             fn_token,
             receiver,
             args,
@@ -578,6 +580,7 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
     let ret = parse_return_type(&ty.output, &mut throws_tokens)?;
     let throws = throws_tokens.is_some();
     Ok(Type::Fn(Box::new(Signature {
+        unsafety: ty.unsafety,
         fn_token: ty.fn_token,
         receiver: None,
         args,

@@ -149,6 +149,7 @@ impl Eq for Signature {}
 impl PartialEq for Signature {
     fn eq(&self, other: &Signature) -> bool {
         let Signature {
+            unsafety,
             fn_token: _,
             receiver,
             args,
@@ -158,6 +159,7 @@ impl PartialEq for Signature {
             throws_tokens: _,
         } = self;
         let Signature {
+            unsafety: unsafety2,
             fn_token: _,
             receiver: receiver2,
             args: args2,
@@ -166,7 +168,8 @@ impl PartialEq for Signature {
             paren_token: _,
             throws_tokens: _,
         } = other;
-        receiver == receiver2
+        unsafety.is_some() == unsafety2.is_some()
+            && receiver == receiver2
             && ret == ret2
             && throws == throws2
             && args.len() == args2.len()
@@ -177,6 +180,7 @@ impl PartialEq for Signature {
 impl Hash for Signature {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let Signature {
+            unsafety,
             fn_token: _,
             receiver,
             args,
@@ -185,6 +189,7 @@ impl Hash for Signature {
             paren_token: _,
             throws_tokens: _,
         } = self;
+        unsafety.is_some().hash(state);
         receiver.hash(state);
         for arg in args {
             arg.hash(state);

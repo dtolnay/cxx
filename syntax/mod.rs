@@ -87,6 +87,7 @@ pub struct TypeAlias {
 }
 
 pub struct Signature {
+    pub unsafety: Option<Token![unsafe]>,
     pub fn_token: Token![fn],
     pub receiver: Option<Receiver>,
     pub args: Punctuated<Var, Token![,]>,
