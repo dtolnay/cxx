@@ -1,0 +1,13 @@
+[package]
+name = "cxx-symbols"
+version = "0.4.2"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+edition = "2018"
+license = "MIT OR Apache-2.0"
+description = "Implementation detail of the `cxx` crate"
+repository = "https://github.com/dtolnay/cxx"
+documentation = "https://docs.rs/cxx"
+
+[lib]
+name = "symbols"
+path = "lib.rs"

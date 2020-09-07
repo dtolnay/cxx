@@ -1,4 +1,4 @@
-use super::rust_string::RustString;
+use crate::rust_string::RustString;
 use std::mem;
 use std::ptr;
 
