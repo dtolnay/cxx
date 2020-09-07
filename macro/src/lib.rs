@@ -15,8 +15,10 @@ mod type_id;
 
 use crate::syntax::file::Module;
 use crate::syntax::namespace::Namespace;
+use crate::syntax::qualified::QualifiedName;
 use proc_macro::TokenStream;
-use syn::{parse_macro_input, LitStr};
+use syn::parse::{Parse, ParseStream, Result};
+use syn::parse_macro_input;
 
 /// `#[cxx::bridge] mod ffi { ... }`
 ///
@@ -50,6 +52,14 @@ pub fn bridge(args: TokenStream, input: TokenStream) -> TokenStream {
 
 #[proc_macro]
 pub fn type_id(input: TokenStream) -> TokenStream {
-    let arg = parse_macro_input!(input as LitStr);
-    type_id::expand(arg).into()
+    struct TypeId(QualifiedName);
+
+    impl Parse for TypeId {
+        fn parse(input: ParseStream) -> Result<Self> {
+            QualifiedName::parse_quoted_or_unquoted(input).map(TypeId)
+        }
+    }
+
+    let arg = parse_macro_input!(input as TypeId);
+    type_id::expand(arg.0).into()
 }

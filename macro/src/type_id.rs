@@ -1,16 +1,16 @@
+use crate::syntax::qualified::QualifiedName;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
-use syn::LitStr;
 
 // "folly::File" => `(f, o, l, l, y, (), F, i, l, e)`
-pub fn expand(arg: LitStr) -> TokenStream {
+pub fn expand(arg: QualifiedName) -> TokenStream {
     let mut ids = Vec::new();
 
-    for word in arg.value().split("::") {
+    for word in arg.segments {
         if !ids.is_empty() {
             ids.push(quote!(()));
         }
-        for ch in word.chars() {
+        for ch in word.to_string().chars() {
             ids.push(match ch {
                 'A'..='Z' | 'a'..='z' => {
                     let t = format_ident!("{}", ch);
