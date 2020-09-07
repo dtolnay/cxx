@@ -13,7 +13,7 @@ mod impls;
 pub mod mangle;
 pub mod namespace;
 mod parse;
-mod qualified;
+pub mod qualified;
 pub mod report;
 pub mod set;
 pub mod symbol;
