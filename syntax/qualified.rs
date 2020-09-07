@@ -1,6 +1,6 @@
 use syn::ext::IdentExt;
 use syn::parse::{ParseStream, Result};
-use syn::{Ident, Token};
+use syn::{Ident, LitStr, Token};
 
 pub struct QualifiedName {
     pub segments: Vec<Ident>,
@@ -22,5 +22,14 @@ impl QualifiedName {
             return Err(input.error("expected path segment"));
         }
         Ok(QualifiedName { segments })
+    }
+
+    pub fn parse_quoted_or_unquoted(input: ParseStream) -> Result<Self> {
+        if input.peek(LitStr) {
+            let lit: LitStr = input.parse()?;
+            lit.parse_with(Self::parse_unquoted)
+        } else {
+            Self::parse_unquoted(input)
+        }
     }
 }
