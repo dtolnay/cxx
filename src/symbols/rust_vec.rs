@@ -7,13 +7,6 @@ pub(crate) struct RustVec<T> {
     repr: Vec<T>,
 }
 
-macro_rules! attr {
-    (#[$name:ident = $value:expr] $($rest:tt)*) => {
-        #[$name = $value]
-        $($rest)*
-    };
-}
-
 macro_rules! rust_vec_shims {
     ($segment:expr, $ty:ty) => {
         const_assert_eq!(mem::size_of::<[usize; 3]>(), mem::size_of::<Vec<$ty>>());
