@@ -32,7 +32,9 @@ impl Parse for Namespace {
         if !input.is_empty() {
             input.parse::<kw::namespace>()?;
             input.parse::<Token![=]>()?;
-            segments = input.call(QualifiedName::parse_unquoted)?.segments;
+            segments = input
+                .call(QualifiedName::parse_quoted_or_unquoted)?
+                .segments;
             input.parse::<Option<Token![,]>>()?;
         }
         Ok(Namespace { segments })
