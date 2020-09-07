@@ -399,17 +399,19 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
         })
     }
     .unwrap_or(call);
+    let mut dispatch = quote!(#setup #expr);
+    let unsafety = &efn.sig.unsafety;
+    if unsafety.is_none() {
+        dispatch = quote!(unsafe { #dispatch });
+    }
     let function_shim = quote! {
         #doc
-        pub fn #ident(#(#all_args,)*) #ret {
+        pub #unsafety fn #ident(#(#all_args,)*) #ret {
             extern "C" {
                 #decl
             }
             #trampolines
-            unsafe {
-                #setup
-                #expr
-            }
+            #dispatch
         }
     };
     match &efn.receiver {
