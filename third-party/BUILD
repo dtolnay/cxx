@@ -45,7 +45,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.19/src/**"]),
+    srcs = glob(["vendor/proc-macro2-1.0.20/src/**"]),
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -69,7 +69,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.39/src/**"]),
+    srcs = glob(["vendor/syn-1.0.40/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
