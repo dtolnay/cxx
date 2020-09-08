@@ -242,7 +242,7 @@ using TryFn = Fn<Signature, true>;
 
 #ifndef CXXBRIDGE04_RUST_ERROR
 #define CXXBRIDGE04_RUST_ERROR
-class Error final : std::exception {
+class Error final : public std::exception {
 public:
   Error(const Error &);
   Error(Error &&) noexcept;
