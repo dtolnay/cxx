@@ -1,11 +1,10 @@
 rust_library(
     name = "cxx",
-    srcs = glob(["src/**"], exclude = ["src/symbols/**"]),
+    srcs = glob(["src/**"]),
     visibility = ["PUBLIC"],
     deps = [
         ":core",
         ":macro",
-        ":symbols",
     ],
 )
 
@@ -32,12 +31,6 @@ cxx_library(
         "cxx.h": "include/cxx.h",
     },
     exported_linker_flags = ["-lstdc++"],
-    deps = [":symbols"],
-)
-
-rust_library(
-    name = "symbols",
-    srcs = glob(["src/symbols/**"]),
 )
 
 rust_library(

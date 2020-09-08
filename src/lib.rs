@@ -369,8 +369,9 @@
 
 #[cfg(built_with_cargo)]
 extern crate link_cplusplus;
+
 #[macro_use]
-extern crate symbols;
+mod macros;
 
 mod cxx_string;
 mod cxx_vector;
@@ -383,6 +384,7 @@ mod rust_sliceu8;
 mod rust_str;
 mod rust_string;
 mod rust_vec;
+mod symbols;
 mod unique_ptr;
 mod unwind;
 

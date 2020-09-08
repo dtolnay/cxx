@@ -2,18 +2,12 @@ load("//tools/bazel:rust.bzl", "rust_binary", "rust_library")
 
 rust_library(
     name = "cxx",
-    srcs = glob(
-        ["src/**/*.rs"],
-        exclude = ["src/symbols/**/*.rs"],
-    ),
+    srcs = glob(["src/**/*.rs"]),
     proc_macro_deps = [
         ":cxxbridge-macro",
     ],
     visibility = ["//visibility:public"],
-    deps = [
-        ":core-lib",
-        ":symbols",
-    ],
+    deps = [":core-lib"],
 )
 
 rust_binary(
@@ -42,11 +36,6 @@ cc_library(
     name = "core-lib",
     srcs = ["src/cxx.cc"],
     hdrs = ["include/cxx.h"],
-)
-
-rust_library(
-    name = "symbols",
-    srcs = glob(["src/symbols/**/*.rs"]),
 )
 
 rust_library(

@@ -63,7 +63,6 @@ version = "0.4.3"
 dependencies = [
  "cc",
  "cxx-build",
- "cxx-symbols",
  "cxx-test-suite",
  "cxxbridge-flags",
  "cxxbridge-macro",
@@ -94,10 +93,6 @@ dependencies = [
  "quote",
  "syn",
 ]
-
-[[package]]
-name = "cxx-symbols"
-version = "0.4.3"
 
 [[package]]
 name = "cxx-test-suite"

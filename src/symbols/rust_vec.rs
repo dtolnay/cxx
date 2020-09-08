@@ -1,11 +1,7 @@
 use crate::rust_string::RustString;
+use crate::rust_vec::RustVec;
 use std::mem;
 use std::ptr;
-
-#[repr(C)]
-pub(crate) struct RustVec<T> {
-    repr: Vec<T>,
-}
 
 macro_rules! rust_vec_shims {
     ($segment:expr, $ty:ty) => {

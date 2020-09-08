@@ -3,7 +3,7 @@ use std::mem::ManuallyDrop;
 
 #[repr(C)]
 pub struct RustVec<T> {
-    repr: Vec<T>,
+    pub(crate) repr: Vec<T>,
 }
 
 impl<T> RustVec<T> {
