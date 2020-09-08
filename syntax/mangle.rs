@@ -13,8 +13,8 @@ macro_rules! join {
 
 pub fn extern_fn(namespace: &Namespace, efn: &ExternFn) -> Symbol {
     match &efn.receiver {
-        Some(receiver) => join!(namespace, CXXBRIDGE, receiver.ty, efn.ident),
-        None => join!(namespace, CXXBRIDGE, efn.ident),
+        Some(receiver) => join!(namespace, CXXBRIDGE, receiver.ty, efn.ident.rust),
+        None => join!(namespace, CXXBRIDGE, efn.ident.rust),
     }
 }
 

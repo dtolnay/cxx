@@ -71,10 +71,15 @@ pub struct Enum {
     pub repr: Atom,
 }
 
+pub struct Pair {
+    pub cxx: Ident,
+    pub rust: Ident,
+}
+
 pub struct ExternFn {
     pub lang: Lang,
     pub doc: Doc,
-    pub ident: Ident,
+    pub ident: Pair,
     pub sig: Signature,
     pub semi_token: Token![;],
 }

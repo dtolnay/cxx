@@ -3,7 +3,7 @@ use crate::syntax::file::{Item, ItemForeignMod};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
-    attrs, error, Api, Doc, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Signature,
+    attrs, error, Api, Doc, Enum, ExternFn, ExternType, Impl, Lang, Pair, Receiver, Ref, Signature,
     Slice, Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
 use proc_macro2::{Delimiter, Group, TokenStream, TokenTree};
@@ -370,7 +370,10 @@ fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> R
     Ok(api_function(ExternFn {
         lang,
         doc,
-        ident,
+        ident: Pair {
+            cxx: ident.clone(),
+            rust: ident,
+        },
         sig: Signature {
             unsafety,
             fn_token,
