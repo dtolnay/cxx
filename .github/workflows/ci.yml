@@ -61,6 +61,8 @@ jobs:
           wget -q -O bin/buck https://jitpack.io/com/github/facebook/buck/v2019.10.17.01/buck-v2019.10.17.01.pex
           chmod +x bin/buck
           echo ::add-path::bin
+      - name: Install lld
+        run: sudo apt install lld
       - name: Vendor dependencies
         run: |
           cp third-party/Cargo.lock .

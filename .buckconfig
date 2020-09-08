@@ -14,4 +14,7 @@
 
 [rust]
   default_edition = 2018
-  rustc_flags = -Crelocation-model=dynamic-no-pic --cap-lints=allow
+  rustc_flags = \
+      -Clink-arg=-fuse-ld=lld \
+      -Crelocation-model=dynamic-no-pic \
+      --cap-lints=allow
