@@ -214,6 +214,8 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
             Api::RustFunction(efn) if !out.header => {
                 if efn.throws {
                     out.include.exception = true;
+                    out.include.string = true;
+                    needs_rust_str = true;
                     needs_rust_error = true;
                 }
                 for arg in &efn.args {
