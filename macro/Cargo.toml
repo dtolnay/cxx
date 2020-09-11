@@ -6,7 +6,7 @@ edition = "2018"
 license = "MIT OR Apache-2.0"
 description = "Implementation detail of the `cxx` crate."
 repository = "https://github.com/dtolnay/cxx"
-exclude = ["README.md"]
+exclude = ["build.rs", "README.md"]
 keywords = ["ffi"]
 categories = ["development-tools::ffi"]
 
