@@ -936,7 +936,10 @@ fn write_type(out: &mut OutFile, ty: &Type) {
 
 fn write_alias(out: &mut OutFile, alias: &TypeAlias) {
     if let Some(namespace) = &alias.namespace {
-        let path = namespace.path_for_type(&alias.ident);
+        // Review TODO: Is this unwrap fine? i.e. is it ok to assume that, if
+        // the TypePath parsed, that it has at least one segment?
+        let remote_type = &alias.ty.path.segments.last().unwrap().ident;
+        let path = namespace.path_for_type(remote_type);
         writeln!(out, "using {} = {};", alias.ident, path)
     }
 }

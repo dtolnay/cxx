@@ -668,8 +668,11 @@ fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
 
 fn expand_type_alias_verify(namespace: &Namespace, alias: &TypeAlias) -> TokenStream {
     let namespace = alias.namespace.as_ref().unwrap_or(namespace);
+    // Review TODO: Is this unwrap fine? i.e. is it ok to assume that, if the
+    // TypePath parsed, that it has at least one segment?
+    let remote_type = &alias.ty.path.segments.last().unwrap().ident;
+    let type_id = type_id(namespace, remote_type);
     let ident = &alias.ident;
-    let type_id = type_id(namespace, ident);
     let begin_span = alias.type_token.span;
     let end_span = alias.semi_token.span;
     let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_type::<);

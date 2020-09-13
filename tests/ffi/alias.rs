@@ -11,7 +11,10 @@ pub mod ffi {
         #[namespace = "tests"]
         type C = crate::ffi::C;
 
+        #[namespace = "tests"]
+        type SameC = crate::ffi::C;
+
         fn c_return_unique_ptr() -> UniquePtr<C>;
-        fn c_take_unique_ptr(c: UniquePtr<C>);
+        fn c_take_unique_ptr(c: UniquePtr<SameC>);
     }
 }
