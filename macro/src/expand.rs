@@ -657,9 +657,11 @@ fn expand_rust_function_shim_impl(
 }
 
 fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
+    let doc = &alias.doc;
     let ident = &alias.ident;
     let ty = &alias.ty;
     quote! {
+        #doc
         pub type #ident = #ty;
     }
 }
