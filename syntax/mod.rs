@@ -25,11 +25,12 @@ use self::parse::kw;
 use proc_macro2::{Ident, Span};
 use syn::punctuated::Punctuated;
 use syn::token::{Brace, Bracket, Paren};
-use syn::{Expr, Lifetime, Token, Type as RustType};
+use syn::{Expr, Lifetime, Token, TypePath};
 
 pub use self::atom::Atom;
 pub use self::derive::Derive;
 pub use self::doc::Doc;
+pub use self::namespace::Namespace;
 pub use self::parse::parse_items;
 pub use self::types::Types;
 
@@ -80,10 +81,11 @@ pub struct ExternFn {
 
 pub struct TypeAlias {
     pub doc: Doc,
+    pub namespace: Option<Namespace>,
     pub type_token: Token![type],
     pub ident: Ident,
     pub eq_token: Token![=],
-    pub ty: RustType,
+    pub ty: TypePath,
     pub semi_token: Token![;],
 }
 

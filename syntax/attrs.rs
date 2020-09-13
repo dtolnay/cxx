@@ -1,6 +1,7 @@
+use crate::syntax::qualified::QualifiedName;
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::{self, *};
-use crate::syntax::{Derive, Doc};
+use crate::syntax::{Derive, Doc, Namespace};
 use proc_macro2::Ident;
 use syn::parse::{ParseStream, Parser as _};
 use syn::{Attribute, Error, LitStr, Path, Result, Token};
@@ -10,6 +11,7 @@ pub struct Parser<'a> {
     pub doc: Option<&'a mut Doc>,
     pub derives: Option<&'a mut Vec<Derive>>,
     pub repr: Option<&'a mut Option<Atom>>,
+    pub namespace: Option<&'a mut Option<Namespace>>,
 }
 
 pub(super) fn parse_doc(cx: &mut Errors, attrs: &[Attribute]) -> Doc {
@@ -57,6 +59,16 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
                 }
                 Err(err) => return cx.push(err),
             }
+        } else if attr.path.is_ident("namespace") {
+            match parse_namespace_attribute.parse2(attr.tokens.clone()) {
+                Ok(namespace) => {
+                    if let Some(ns) = &mut parser.namespace {
+                        **ns = Some(Namespace::from(namespace));
+                        continue;
+                    }
+                }
+                Err(err) => return cx.push(err),
+            }
         }
         return cx.error(attr, "unsupported attribute");
     }
@@ -98,4 +110,10 @@ fn parse_repr_attribute(input: ParseStream) -> Result<Atom> {
         begin.token_stream(),
         "unrecognized repr",
     ))
+}
+
+fn parse_namespace_attribute(input: ParseStream) -> Result<Namespace> {
+    input.parse::<Token![=]>()?;
+    let name = input.call(QualifiedName::parse_quoted_or_unquoted)?;
+    Ok(Namespace::from(name))
 }

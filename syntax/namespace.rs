@@ -24,20 +24,32 @@ impl Namespace {
     pub fn iter(&self) -> Iter<Ident> {
         self.segments.iter()
     }
+
+    pub fn path_for_type(&self, ident: &Ident) -> String {
+        let mut segments = self.iter().map(ToString::to_string).collect::<Vec<_>>();
+        segments.push(ident.to_string());
+        segments.join("::")
+    }
+}
+
+impl From<QualifiedName> for Namespace {
+    fn from(value: QualifiedName) -> Namespace {
+        Namespace {
+            segments: value.segments,
+        }
+    }
 }
 
 impl Parse for Namespace {
     fn parse(input: ParseStream) -> Result<Self> {
-        let mut segments = Vec::new();
         if !input.is_empty() {
             input.parse::<kw::namespace>()?;
             input.parse::<Token![=]>()?;
-            segments = input
-                .call(QualifiedName::parse_quoted_or_unquoted)?
-                .segments;
+            let name = input.call(QualifiedName::parse_quoted_or_unquoted)?;
             input.parse::<Option<Token![,]>>()?;
+            return Ok(Namespace::from(name));
         }
-        Ok(Namespace { segments })
+        Ok(Namespace::none())
     }
 }
 

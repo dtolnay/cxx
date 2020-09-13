@@ -102,3 +102,12 @@ rust::Vec<rust::String> c_try_return_rust_vec_string();
 const rust::Vec<uint8_t> &c_try_return_ref_rust_vec(const C &c);
 
 } // namespace tests
+
+namespace alias_tests {
+
+// These aliases on the C++ side aren't under test, there's just no reason to
+// duplicate these functions
+using tests::c_return_unique_ptr;
+using tests::c_take_unique_ptr;
+
+} // namespace alias_tests

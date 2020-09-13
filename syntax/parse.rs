@@ -394,12 +394,24 @@ fn parse_extern_verbatim(cx: &mut Errors, tokens: &TokenStream, lang: Lang) -> R
         };
         let ident: Ident = input.parse()?;
         let eq_token: Token![=] = input.parse()?;
-        let ty: RustType = input.parse()?;
+        let ty: TypePath = input.parse()?;
         let semi_token: Token![;] = input.parse()?;
-        let doc = attrs::parse_doc(cx, &attrs);
+
+        let mut doc = Doc::new();
+        let mut namespace = None;
+        attrs::parse(
+            cx,
+            &attrs,
+            attrs::Parser {
+                doc: Some(&mut doc),
+                namespace: Some(&mut namespace),
+                ..Default::default()
+            },
+        );
 
         Ok(TypeAlias {
             doc,
+            namespace,
             type_token,
             ident,
             eq_token,

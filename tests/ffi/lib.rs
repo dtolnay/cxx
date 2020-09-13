@@ -60,6 +60,7 @@ pub mod ffi {
         fn c_take_str(s: &str);
         fn c_take_sliceu8(s: &[u8]);
         fn c_take_rust_string(s: String);
+        fn c_take_unique_ptr(c: UniquePtr<C>);
         fn c_take_unique_ptr_string(s: UniquePtr<CxxString>);
         fn c_take_unique_ptr_vector_u8(v: UniquePtr<CxxVector<u8>>);
         fn c_take_unique_ptr_vector_f64(v: UniquePtr<CxxVector<f64>>);

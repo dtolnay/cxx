@@ -3,7 +3,9 @@ use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::namespace::Namespace;
 use crate::syntax::symbol::Symbol;
-use crate::syntax::{mangle, Api, Enum, ExternFn, ExternType, Signature, Struct, Type, Types, Var};
+use crate::syntax::{
+    mangle, Api, Enum, ExternFn, ExternType, Signature, Struct, Type, TypeAlias, Types, Var,
+};
 use proc_macro2::Ident;
 use std::collections::HashMap;
 
@@ -42,6 +44,7 @@ pub(super) fn gen(
             Api::Struct(strct) => write_struct_decl(out, &strct.ident),
             Api::CxxType(ety) => write_struct_using(out, &ety.ident),
             Api::RustType(ety) => write_struct_decl(out, &ety.ident),
+            Api::TypeAlias(alias) => write_alias(out, alias),
             _ => {}
         }
     }
@@ -928,6 +931,13 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write!(out, ")>");
         }
         Type::Void(_) => unreachable!(),
+    }
+}
+
+fn write_alias(out: &mut OutFile, alias: &TypeAlias) {
+    if let Some(namespace) = &alias.namespace {
+        let path = namespace.path_for_type(&alias.ident);
+        writeln!(out, "using {} = {};", alias.ident, path)
     }
 }
 

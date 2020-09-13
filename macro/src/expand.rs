@@ -667,6 +667,7 @@ fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
 }
 
 fn expand_type_alias_verify(namespace: &Namespace, alias: &TypeAlias) -> TokenStream {
+    let namespace = alias.namespace.as_ref().unwrap_or(namespace);
     let ident = &alias.ident;
     let type_id = type_id(namespace, ident);
     let begin_span = alias.type_token.span;
@@ -680,13 +681,7 @@ fn expand_type_alias_verify(namespace: &Namespace, alias: &TypeAlias) -> TokenSt
 }
 
 fn type_id(namespace: &Namespace, ident: &Ident) -> TokenStream {
-    let mut path = String::new();
-    for name in namespace {
-        path += &name.to_string();
-        path += "::";
-    }
-    path += &ident.to_string();
-
+    let path = namespace.path_for_type(ident);
     quote! {
         ::cxx::type_id!(#path)
     }
