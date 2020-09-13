@@ -4,7 +4,7 @@
     clippy::trivially_copy_pass_by_ref
 )]
 
-pub mod module;
+pub mod alias;
 
 use cxx::{CxxString, UniquePtr};
 use std::fmt::{self, Display};
