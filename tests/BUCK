@@ -10,7 +10,7 @@ rust_library(
     name = "ffi",
     srcs = [
         "ffi/lib.rs",
-        "ffi/module.rs",
+        "ffi/alias.rs",
     ],
     crate = "cxx_test_suite",
     deps = [
@@ -23,8 +23,8 @@ cxx_library(
     name = "impl",
     srcs = [
         "ffi/tests.cc",
+        ":alias/source",
         ":bridge/source",
-        ":module/source",
     ],
     header_namespace = "cxx-test-suite",
     headers = {
@@ -40,6 +40,6 @@ rust_cxx_bridge(
 )
 
 rust_cxx_bridge(
-    name = "module",
-    src = "ffi/module.rs",
+    name = "alias",
+    src = "ffi/alias.rs",
 )

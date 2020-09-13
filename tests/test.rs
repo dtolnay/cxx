@@ -1,4 +1,4 @@
-use cxx_test_suite::ffi;
+use cxx_test_suite::{alias, ffi};
 use std::cell::Cell;
 use std::ffi::CStr;
 
@@ -89,7 +89,7 @@ fn test_c_take() {
     check!(ffi::c_take_shared(ffi::Shared { z: 2020 }));
     check!(ffi::c_take_box(Box::new(2020)));
     check!(ffi::c_take_ref_c(&unique_ptr));
-    check!(cxx_test_suite::module::ffi::c_take_unique_ptr(unique_ptr));
+    check!(alias::ffi::c_take_unique_ptr(unique_ptr));
     check!(ffi::c_take_str("2020"));
     check!(ffi::c_take_sliceu8(b"2020"));
     check!(ffi::c_take_rust_string("2020".to_owned()));

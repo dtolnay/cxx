@@ -12,8 +12,8 @@ rust_test(
 rust_library(
     name = "cxx_test_suite",
     srcs = [
+        "ffi/alias.rs",
         "ffi/lib.rs",
-        "ffi/module.rs",
     ],
     deps = [
         ":impl",
@@ -25,8 +25,8 @@ cc_library(
     name = "impl",
     srcs = [
         "ffi/tests.cc",
+        ":alias/source",
         ":bridge/source",
-        ":module/source",
     ],
     hdrs = ["ffi/tests.h"],
     include_prefix = "cxx-test-suite",
@@ -46,8 +46,8 @@ rust_cxx_bridge(
 )
 
 rust_cxx_bridge(
-    name = "module",
-    src = "ffi/module.rs",
+    name = "alias",
+    src = "ffi/alias.rs",
     include_prefix = "cxx-test-suite",
     strip_include_prefix = "ffi",
     deps = [":impl"],
