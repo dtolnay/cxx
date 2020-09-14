@@ -939,7 +939,7 @@ fn write_type(out: &mut OutFile, ty: &Type) {
 fn write_alias(out: &mut OutFile, bridge: &Module, alias: &TypeAlias) {
     let namespace = bridge.namespace_for_alias(alias);
     if namespace != &bridge.namespace {
-        let path = namespace.path_for_type(&alias.ty_ident);
+        let path = namespace.path_for_type(Some(&alias.ty_ident));
         writeln!(out, "using {} = {};", alias.ident, path)
     }
 }

@@ -70,7 +70,9 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
                                 attr,
                                 format!(
                                     "conflicting cxx::alias_namespace attributes for {}: {}, {}",
-                                    name, existing, namespace
+                                    name,
+                                    existing.path_for_type(None),
+                                    namespace.path_for_type(None)
                                 ),
                             );
                         }

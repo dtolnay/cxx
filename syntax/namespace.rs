@@ -25,9 +25,11 @@ impl Namespace {
         self.segments.iter()
     }
 
-    pub fn path_for_type(&self, ident: &Ident) -> String {
+    pub fn path_for_type(&self, ident: Option<&Ident>) -> String {
         let mut segments = self.iter().map(ToString::to_string).collect::<Vec<_>>();
-        segments.push(ident.to_string());
+        if let Some(ident) = ident {
+            segments.push(ident.to_string());
+        }
         segments.join("::")
     }
 

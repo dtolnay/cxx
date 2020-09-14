@@ -678,7 +678,7 @@ fn expand_type_alias_verify(ffi: &Module, alias: &TypeAlias) -> TokenStream {
 }
 
 fn type_id(namespace: &Namespace, ident: &Ident) -> TokenStream {
-    let path = namespace.path_for_type(ident);
+    let path = namespace.path_for_type(Some(ident));
     quote! {
         ::cxx::type_id!(#path)
     }
