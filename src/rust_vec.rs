@@ -1,4 +1,6 @@
 use crate::rust_string::RustString;
+use alloc::string::String;
+use alloc::vec::Vec;
 use core::mem::ManuallyDrop;
 
 #[repr(C)]

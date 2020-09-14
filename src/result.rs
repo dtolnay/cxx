@@ -1,5 +1,7 @@
 use crate::exception::Exception;
 use crate::rust_str::RustStr;
+use alloc::boxed::Box;
+use alloc::string::{String, ToString};
 use core::fmt::Display;
 use core::ptr;
 use core::result::Result as StdResult;

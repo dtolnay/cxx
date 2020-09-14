@@ -1,3 +1,5 @@
+use alloc::boxed::Box;
+use alloc::string::String;
 use core::slice;
 
 #[export_name = "cxxbridge04$exception"]

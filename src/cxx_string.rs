@@ -1,4 +1,5 @@
 use alloc::borrow::Cow;
+use alloc::string::String;
 use core::fmt::{self, Debug, Display};
 use core::slice;
 use core::str::{self, Utf8Error};
