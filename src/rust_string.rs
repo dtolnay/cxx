@@ -1,4 +1,4 @@
-use std::mem;
+use core::mem;
 
 #[repr(C)]
 pub struct RustString {

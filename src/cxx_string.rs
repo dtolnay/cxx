@@ -1,7 +1,7 @@
-use std::borrow::Cow;
-use std::fmt::{self, Debug, Display};
-use std::slice;
-use std::str::{self, Utf8Error};
+use alloc::borrow::Cow;
+use core::fmt::{self, Debug, Display};
+use core::slice;
+use core::str::{self, Utf8Error};
 
 extern "C" {
     #[link_name = "cxxbridge04$cxx_string$data"]

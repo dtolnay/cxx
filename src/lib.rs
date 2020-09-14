@@ -370,6 +370,8 @@
 #[cfg(built_with_cargo)]
 extern crate link_cplusplus;
 
+extern crate alloc;
+
 #[macro_use]
 mod macros;
 

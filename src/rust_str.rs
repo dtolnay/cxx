@@ -1,7 +1,7 @@
-use std::mem;
-use std::ptr::NonNull;
-use std::slice;
-use std::str;
+use core::mem;
+use core::ptr::NonNull;
+use core::slice;
+use core::str;
 
 // Not necessarily ABI compatible with &str. Codegen performs the translation.
 #[repr(C)]

@@ -1,5 +1,5 @@
-use std::slice;
-use std::str;
+use core::slice;
+use core::str;
 
 #[export_name = "cxxbridge04$str$valid"]
 unsafe extern "C" fn str_valid(ptr: *const u8, len: usize) -> bool {

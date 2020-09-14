@@ -1,10 +1,10 @@
 use crate::exception::Exception;
 use crate::rust_str::RustStr;
-use std::fmt::Display;
-use std::ptr;
-use std::result::Result as StdResult;
-use std::slice;
-use std::str;
+use core::fmt::Display;
+use core::ptr;
+use core::result::Result as StdResult;
+use core::slice;
+use core::str;
 
 #[repr(C)]
 pub union Result {

@@ -1,4 +1,4 @@
-use std::slice;
+use core::slice;
 
 #[export_name = "cxxbridge04$exception"]
 unsafe extern "C" fn exception(ptr: *const u8, len: usize) -> *const u8 {
