@@ -2,7 +2,7 @@
 #[path = "test.rs"]
 mod test;
 
-use super::Opt;
+use super::{Opt, Output};
 use clap::AppSettings;
 use std::ffi::{OsStr, OsString};
 use std::path::PathBuf;
@@ -39,6 +39,7 @@ fn app() -> App {
         .arg(arg_cxx_impl_annotations())
         .arg(arg_header())
         .arg(arg_include())
+        .arg(arg_output())
         .help_message("Print help information.")
         .version_message("Print version information.");
     if let Some(version) = option_env!("CARGO_PKG_VERSION") {
@@ -51,6 +52,7 @@ const INPUT: &str = "input";
 const CXX_IMPL_ANNOTATIONS: &str = "cxx-impl-annotations";
 const HEADER: &str = "header";
 const INCLUDE: &str = "include";
+const OUTPUT: &str = "output";
 
 pub(super) fn from_args() -> Opt {
     let matches = app().get_matches();
@@ -61,6 +63,11 @@ pub(super) fn from_args() -> Opt {
         include: matches
             .values_of(INCLUDE)
             .map_or_else(Vec::new, |v| v.map(str::to_owned).collect()),
+        output: match matches.value_of_os(OUTPUT) {
+            None => Output::Stdout,
+            Some(path) if path == "-" => Output::Stdout,
+            Some(path) => Output::File(PathBuf::from(path)),
+        },
     }
 }
 
@@ -111,6 +118,19 @@ into the generated C++ code as #include lines.
         .short("i")
         .takes_value(true)
         .multiple(true)
+        .validator_os(validate_utf8)
+        .help(HELP)
+}
+
+fn arg_output() -> Arg {
+    const HELP: &str = "\
+Path of file to write as output. Output goes to stdout if -o is
+not specified.
+    ";
+    Arg::with_name(OUTPUT)
+        .long(OUTPUT)
+        .short("o")
+        .takes_value(true)
         .validator_os(validate_utf8)
         .help(HELP)
 }
