@@ -6,7 +6,7 @@ https://github.com/dtolnay/cxx
 USAGE:
     cxxbridge <input>.rs              Emit .cc file for bridge to stdout
     cxxbridge <input>.rs --header     Emit .h file for bridge to stdout
-    cxxbridge --header                Emit rust/cxx.h header to stdout
+    cxxbridge --header                Emit \"rust/cxx.h\" header to stdout
 
 ARGS:
     <input>

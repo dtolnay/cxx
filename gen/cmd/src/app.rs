@@ -13,7 +13,7 @@ type Arg = clap::Arg<'static, 'static>;
 const USAGE: &str = "\
     cxxbridge <input>.rs              Emit .cc file for bridge to stdout
     cxxbridge <input>.rs --header     Emit .h file for bridge to stdout
-    cxxbridge --header                Emit rust/cxx.h header to stdout\
+    cxxbridge --header                Emit \"rust/cxx.h\" header to stdout\
 ";
 
 const TEMPLATE: &str = "\
