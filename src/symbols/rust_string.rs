@@ -1,7 +1,9 @@
-use std::mem::{ManuallyDrop, MaybeUninit};
-use std::ptr;
-use std::slice;
-use std::str;
+use alloc::borrow::ToOwned;
+use alloc::string::String;
+use core::mem::{ManuallyDrop, MaybeUninit};
+use core::ptr;
+use core::slice;
+use core::str;
 
 #[export_name = "cxxbridge04$string$new"]
 unsafe extern "C" fn string_new(this: &mut MaybeUninit<String>) {

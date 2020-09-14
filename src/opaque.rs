@@ -1,4 +1,4 @@
-use std::mem;
+use core::mem;
 
 // . size = 0
 // . align = 1

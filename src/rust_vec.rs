@@ -1,5 +1,7 @@
 use crate::rust_string::RustString;
-use std::mem::ManuallyDrop;
+use alloc::string::String;
+use alloc::vec::Vec;
+use core::mem::ManuallyDrop;
 
 #[repr(C)]
 pub struct RustVec<T> {

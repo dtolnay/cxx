@@ -1,9 +1,9 @@
 use crate::cxx_string::CxxString;
-use std::ffi::c_void;
-use std::fmt::{self, Display};
-use std::marker::PhantomData;
-use std::mem;
-use std::ptr;
+use core::ffi::c_void;
+use core::fmt::{self, Display};
+use core::marker::PhantomData;
+use core::mem;
+use core::ptr;
 
 /// Binding to C++ `std::vector<T, std::allocator<T>>`.
 ///

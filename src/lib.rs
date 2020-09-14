@@ -348,6 +348,7 @@
 //!
 //! [https://github.com/dtolnay/cxx]: https://github.com/dtolnay/cxx
 
+#![no_std]
 #![doc(html_root_url = "https://docs.rs/cxx/0.4.4")]
 #![deny(improper_ctypes)]
 #![allow(non_camel_case_types)]
@@ -369,6 +370,9 @@
 
 #[cfg(built_with_cargo)]
 extern crate link_cplusplus;
+
+extern crate alloc;
+extern crate std;
 
 #[macro_use]
 mod macros;

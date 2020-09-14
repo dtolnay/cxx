@@ -1,11 +1,11 @@
 use crate::cxx_string::CxxString;
 use crate::cxx_vector::{self, CxxVector, VectorElement};
-use std::ffi::c_void;
-use std::fmt::{self, Debug, Display};
-use std::marker::PhantomData;
-use std::mem;
-use std::ops::{Deref, DerefMut};
-use std::ptr;
+use core::ffi::c_void;
+use core::fmt::{self, Debug, Display};
+use core::marker::PhantomData;
+use core::mem;
+use core::ops::{Deref, DerefMut};
+use core::ptr;
 
 /// Binding to C++ `std::unique_ptr<T, std::default_delete<T>>`.
 #[repr(C)]

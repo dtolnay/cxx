@@ -1,6 +1,6 @@
-use std::mem;
-use std::ptr::NonNull;
-use std::slice;
+use core::mem;
+use core::ptr::NonNull;
+use core::slice;
 
 // Not necessarily ABI compatible with &[u8]. Codegen performs the translation.
 #[repr(C)]
