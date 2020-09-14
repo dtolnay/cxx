@@ -30,26 +30,24 @@ impl Namespace {
         segments.push(ident.to_string());
         segments.join("::")
     }
-}
 
-impl From<QualifiedName> for Namespace {
-    fn from(value: QualifiedName) -> Namespace {
-        Namespace {
-            segments: value.segments,
+    pub fn parse_bridge_attr_namespace(input: ParseStream) -> Result<Namespace> {
+        if input.is_empty() {
+            return Ok(Namespace::none());
         }
+
+        input.parse::<kw::namespace>()?;
+        input.parse::<Token![=]>()?;
+        let ns = input.parse::<Namespace>()?;
+        input.parse::<Option<Token![,]>>()?;
+        Ok(ns)
     }
 }
 
 impl Parse for Namespace {
     fn parse(input: ParseStream) -> Result<Self> {
-        if !input.is_empty() {
-            input.parse::<kw::namespace>()?;
-            input.parse::<Token![=]>()?;
-            let name = input.call(QualifiedName::parse_quoted_or_unquoted)?;
-            input.parse::<Option<Token![,]>>()?;
-            return Ok(Namespace::from(name));
-        }
-        Ok(Namespace::none())
+        let segments = QualifiedName::parse_quoted_or_unquoted(input)?.segments;
+        Ok(Namespace { segments })
     }
 }
 

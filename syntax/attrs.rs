@@ -1,4 +1,3 @@
-use crate::syntax::qualified::QualifiedName;
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::{self, *};
 use crate::syntax::{Derive, Doc, Namespace};
@@ -114,6 +113,5 @@ fn parse_repr_attribute(input: ParseStream) -> Result<Atom> {
 
 fn parse_namespace_attribute(input: ParseStream) -> Result<Namespace> {
     input.parse::<Token![=]>()?;
-    let name = input.call(QualifiedName::parse_quoted_or_unquoted)?;
-    Ok(Namespace::from(name))
+    input.parse::<Namespace>()
 }
