@@ -2,16 +2,12 @@
 // https://github.com/rust-lang/rustfmt/issues/4159
 #[rustfmt::skip]
 #[cxx::bridge(namespace = alias_tests)]
+#[cxx::alias_namespace(crate::ffi = tests)]
 pub mod ffi {
     extern "C" {
         include!("cxx-test-suite/tests.h");
 
-        // Review TODO: Unquoted namespace here doesn't work, is that expected or a bug
-        // in my parsing?
-        #[namespace = "tests"]
         type C = crate::ffi::C;
-
-        #[namespace = "tests"]
         type SameC = crate::ffi::C;
 
         fn c_return_unique_ptr() -> UniquePtr<C>;

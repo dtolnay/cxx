@@ -1,7 +1,10 @@
+use proc_macro2::Span;
+use std::fmt::{self, Display};
 use syn::ext::IdentExt;
 use syn::parse::{ParseStream, Result};
-use syn::{Ident, LitStr, Token};
+use syn::{Error, Ident, LitStr, PathArguments, PathSegment, Token};
 
+#[derive(Hash, PartialEq, Eq)]
 pub struct QualifiedName {
     pub segments: Vec<Ident>,
 }
@@ -31,5 +34,27 @@ impl QualifiedName {
         } else {
             Self::parse_unquoted(input)
         }
+    }
+
+    pub fn from_path_segments<T: IntoIterator<Item = PathSegment>>(
+        iter: T,
+        span: Span,
+    ) -> Result<Self> {
+        let mut segments = Vec::new();
+        for segment in iter {
+            match segment.arguments {
+                PathArguments::None => {}
+                _ => return Err(Error::new(span, "unexpected path arguments")),
+            };
+            segments.push(segment.ident);
+        }
+        Ok(QualifiedName { segments })
+    }
+}
+
+impl Display for QualifiedName {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let segments: Vec<String> = self.segments.iter().map(ToString::to_string).collect();
+        write!(f, "{}", segments.join("::"))
     }
 }

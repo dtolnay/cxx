@@ -16,6 +16,7 @@ use self::error::{format_err, Result};
 use self::file::File;
 use crate::syntax::report::Errors;
 use crate::syntax::{self, check, Types};
+use std::mem;
 use std::path::Path;
 
 /// Options for C++ code generation.
@@ -104,14 +105,15 @@ fn generate_from_string(source: &str, opt: &Opt) -> Result<GeneratedCode> {
 pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
     proc_macro2::fallback::force();
     let ref mut errors = Errors::new();
-    let bridge = syntax
+    let mut bridge = syntax
         .modules
         .into_iter()
         .next()
         .ok_or(Error::NoBridgeMod)?;
     let ref namespace = bridge.namespace;
+    let content = mem::take(&mut bridge.content);
     let trusted = bridge.unsafety.is_some();
-    let ref apis = syntax::parse_items(errors, bridge.content, trusted);
+    let ref apis = syntax::parse_items(errors, content, trusted);
     let ref types = Types::collect(errors, apis);
     errors.propagate()?;
     check::typecheck(errors, namespace, apis, types);
@@ -121,12 +123,12 @@ pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
     // only need to generate one or the other.
     Ok(GeneratedCode {
         header: if opt.gen_header {
-            write::gen(namespace, apis, types, opt, true).content()
+            write::gen(&bridge, apis, types, opt, true).content()
         } else {
             Vec::new()
         },
         implementation: if opt.gen_implementation {
-            write::gen(namespace, apis, types, opt, false).content()
+            write::gen(&bridge, apis, types, opt, false).content()
         } else {
             Vec::new()
         },

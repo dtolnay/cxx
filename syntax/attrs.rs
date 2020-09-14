@@ -1,7 +1,9 @@
+use crate::syntax::qualified::QualifiedName;
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::{self, *};
 use crate::syntax::{Derive, Doc, Namespace};
 use proc_macro2::Ident;
+use std::collections::HashMap;
 use syn::parse::{ParseStream, Parser as _};
 use syn::{Attribute, Error, LitStr, Path, Result, Token};
 
@@ -10,7 +12,7 @@ pub struct Parser<'a> {
     pub doc: Option<&'a mut Doc>,
     pub derives: Option<&'a mut Vec<Derive>>,
     pub repr: Option<&'a mut Option<Atom>>,
-    pub namespace: Option<&'a mut Option<Namespace>>,
+    pub alias_namespaces: Option<&'a mut HashMap<QualifiedName, Namespace>>,
     pub ignore_unsupported: bool,
 }
 
@@ -59,11 +61,20 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
                 }
                 Err(err) => return cx.push(err),
             }
-        } else if attr.path.is_ident("namespace") {
-            match parse_namespace_attribute.parse2(attr.tokens.clone()) {
-                Ok(namespace) => {
-                    if let Some(ns) = &mut parser.namespace {
-                        **ns = Some(Namespace::from(namespace));
+        } else if is_cxx_alias_namespace_attr(attr) {
+            match attr.parse_args_with(parse_namespace_attribute) {
+                Ok((name, namespace)) => {
+                    if let Some(map) = &mut parser.alias_namespaces {
+                        if let Some(existing) = map.get(&name) {
+                            return cx.error(
+                                attr,
+                                format!(
+                                    "conflicting cxx::alias_namespace attributes for {}: {}, {}",
+                                    name, existing, namespace
+                                ),
+                            );
+                        }
+                        map.insert(name, namespace);
                         continue;
                     }
                 }
@@ -74,6 +85,11 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
             return cx.error(attr, "unsupported attribute");
         }
     }
+}
+
+fn is_cxx_alias_namespace_attr(attr: &Attribute) -> bool {
+    let path = &attr.path.segments;
+    path.len() == 2 && path[0].ident == "cxx" && path[1].ident == "alias_namespace"
 }
 
 fn parse_doc_attribute(input: ParseStream) -> Result<LitStr> {
@@ -114,7 +130,9 @@ fn parse_repr_attribute(input: ParseStream) -> Result<Atom> {
     ))
 }
 
-fn parse_namespace_attribute(input: ParseStream) -> Result<Namespace> {
+fn parse_namespace_attribute(input: ParseStream) -> Result<(QualifiedName, Namespace)> {
+    let name = QualifiedName::parse_quoted_or_unquoted(input)?;
     input.parse::<Token![=]>()?;
-    input.parse::<Namespace>()
+    let namespace = input.parse::<Namespace>()?;
+    Ok((name, namespace))
 }

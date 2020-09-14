@@ -1,5 +1,6 @@
 use crate::syntax::discriminant::DiscriminantSet;
 use crate::syntax::file::{Item, ItemForeignMod};
+use crate::syntax::qualified::QualifiedName;
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
@@ -10,6 +11,7 @@ use proc_macro2::{TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
 use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
+use syn::spanned::Spanned;
 use syn::{
     Abi, Attribute, Error, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
     GenericArgument, Ident, ItemEnum, ItemStruct, LitStr, Pat, PathArguments, Result, ReturnType,
@@ -385,6 +387,7 @@ fn parse_extern_verbatim(cx: &mut Errors, tokens: &TokenStream, lang: Lang) -> R
     // type Alias = crate::path::to::Type;
     let parse = |input: ParseStream| -> Result<TypeAlias> {
         let attrs = input.call(Attribute::parse_outer)?;
+        let doc = attrs::parse_doc(cx, &attrs);
         let type_token: Token![type] = match input.parse()? {
             Some(type_token) => type_token,
             None => {
@@ -395,27 +398,25 @@ fn parse_extern_verbatim(cx: &mut Errors, tokens: &TokenStream, lang: Lang) -> R
         let ident: Ident = input.parse()?;
         let eq_token: Token![=] = input.parse()?;
         let ty: TypePath = input.parse()?;
-        let semi_token: Token![;] = input.parse()?;
 
-        let mut doc = Doc::new();
-        let mut namespace = None;
-        attrs::parse(
-            cx,
-            &attrs,
-            attrs::Parser {
-                doc: Some(&mut doc),
-                namespace: Some(&mut namespace),
-                ..Default::default()
-            },
-        );
+        let segments = &ty.path.segments;
+        if segments.len() <= 1 {
+            return Err(Error::new(ty.span(), "invalid type alias"));
+        }
+        let iter = segments.iter().take(segments.len() - 1).cloned();
+        let ty_path = QualifiedName::from_path_segments(iter, ty.span())?;
+        let ty_ident = segments.last().unwrap().ident.clone();
+
+        let semi_token: Token![;] = input.parse()?;
 
         Ok(TypeAlias {
             doc,
-            namespace,
             type_token,
             ident,
             eq_token,
             ty,
+            ty_path,
+            ty_ident,
             semi_token,
         })
     };

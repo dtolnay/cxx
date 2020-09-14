@@ -32,6 +32,7 @@ pub use self::derive::Derive;
 pub use self::doc::Doc;
 pub use self::namespace::Namespace;
 pub use self::parse::parse_items;
+pub use self::qualified::QualifiedName;
 pub use self::types::Types;
 
 pub enum Api {
@@ -81,11 +82,12 @@ pub struct ExternFn {
 
 pub struct TypeAlias {
     pub doc: Doc,
-    pub namespace: Option<Namespace>,
     pub type_token: Token![type],
     pub ident: Ident,
     pub eq_token: Token![=],
     pub ty: TypePath,
+    pub ty_path: QualifiedName,
+    pub ty_ident: Ident,
     pub semi_token: Token![;],
 }
 

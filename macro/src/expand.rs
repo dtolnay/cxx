@@ -56,7 +56,7 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
             }
             Api::TypeAlias(alias) => {
                 expanded.extend(expand_type_alias(alias));
-                hidden.extend(expand_type_alias_verify(namespace, alias));
+                hidden.extend(expand_type_alias_verify(&ffi, alias));
             }
         }
     }
@@ -663,12 +663,9 @@ fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
     }
 }
 
-fn expand_type_alias_verify(namespace: &Namespace, alias: &TypeAlias) -> TokenStream {
-    let namespace = alias.namespace.as_ref().unwrap_or(namespace);
-    // Review TODO: Is this unwrap fine? i.e. is it ok to assume that, if the
-    // TypePath parsed, that it has at least one segment?
-    let remote_type = &alias.ty.path.segments.last().unwrap().ident;
-    let type_id = type_id(namespace, remote_type);
+fn expand_type_alias_verify(ffi: &Module, alias: &TypeAlias) -> TokenStream {
+    let namespace = ffi.namespace_for_alias(alias);
+    let type_id = type_id(namespace, &alias.ty_ident);
     let ident = &alias.ident;
     let begin_span = alias.type_token.span;
     let end_span = alias.semi_token.span;

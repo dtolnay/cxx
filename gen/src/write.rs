@@ -1,6 +1,7 @@
 use crate::gen::out::OutFile;
 use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
+use crate::syntax::file::Module;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
@@ -10,12 +11,13 @@ use proc_macro2::Ident;
 use std::collections::HashMap;
 
 pub(super) fn gen(
-    namespace: &Namespace,
+    bridge: &Module,
     apis: &[Api],
     types: &Types,
     opt: &Opt,
     header: bool,
 ) -> OutFile {
+    let namespace = &bridge.namespace;
     let mut out_file = OutFile::new(namespace.clone(), header);
     let out = &mut out_file;
 
@@ -44,7 +46,7 @@ pub(super) fn gen(
             Api::Struct(strct) => write_struct_decl(out, &strct.ident),
             Api::CxxType(ety) => write_struct_using(out, &ety.ident),
             Api::RustType(ety) => write_struct_decl(out, &ety.ident),
-            Api::TypeAlias(alias) => write_alias(out, alias),
+            Api::TypeAlias(alias) => write_alias(out, bridge, alias),
             _ => {}
         }
     }
@@ -934,12 +936,10 @@ fn write_type(out: &mut OutFile, ty: &Type) {
     }
 }
 
-fn write_alias(out: &mut OutFile, alias: &TypeAlias) {
-    if let Some(namespace) = &alias.namespace {
-        // Review TODO: Is this unwrap fine? i.e. is it ok to assume that, if
-        // the TypePath parsed, that it has at least one segment?
-        let remote_type = &alias.ty.path.segments.last().unwrap().ident;
-        let path = namespace.path_for_type(remote_type);
+fn write_alias(out: &mut OutFile, bridge: &Module, alias: &TypeAlias) {
+    let namespace = bridge.namespace_for_alias(alias);
+    if namespace != &bridge.namespace {
+        let path = namespace.path_for_type(&alias.ty_ident);
         writeln!(out, "using {} = {};", alias.ident, path)
     }
 }

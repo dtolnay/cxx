@@ -1,7 +1,9 @@
 use crate::syntax::namespace::Namespace;
+use crate::syntax::qualified::QualifiedName;
 use crate::syntax::report::Errors;
-use crate::syntax::{attrs, Doc};
+use crate::syntax::{attrs, Doc, TypeAlias};
 use quote::quote;
+use std::collections::HashMap;
 use syn::parse::{Error, Parse, ParseStream, Result};
 use syn::{
     braced, token, Abi, Attribute, ForeignItem, Ident, Item as RustItem, ItemEnum, ItemStruct,
@@ -10,6 +12,7 @@ use syn::{
 
 pub struct Module {
     pub namespace: Namespace,
+    pub alias_namespaces: HashMap<QualifiedName, Namespace>,
     pub doc: Doc,
     pub vis: Visibility,
     pub unsafety: Option<Token![unsafe]>,
@@ -38,18 +41,23 @@ pub struct ItemForeignMod {
 impl Module {
     pub fn add_attributes(&mut self, attrs: &[Attribute]) -> Result<()> {
         let ref mut errors = Errors::new();
-        let mut doc = Doc::new();
         attrs::parse(
             errors,
             attrs,
             attrs::Parser {
-                doc: Some(&mut doc),
+                doc: Some(&mut self.doc),
+                alias_namespaces: Some(&mut self.alias_namespaces),
                 ignore_unsupported: true,
                 ..attrs::Parser::default()
             },
         );
-        self.doc.extend(doc);
         errors.propagate()
+    }
+
+    pub fn namespace_for_alias(&self, alias: &TypeAlias) -> &Namespace {
+        self.alias_namespaces
+            .get(&alias.ty_path)
+            .unwrap_or(&self.namespace)
     }
 }
 
@@ -82,6 +90,7 @@ impl Parse for Module {
 
         let mut module = Module {
             namespace,
+            alias_namespaces: HashMap::new(),
             doc: Doc::new(),
             vis,
             unsafety,
