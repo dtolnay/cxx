@@ -1,4 +1,6 @@
 use crate::syntax::namespace::Namespace;
+use crate::syntax::report::Errors;
+use crate::syntax::{attrs, Doc};
 use quote::quote;
 use syn::parse::{Error, Parse, ParseStream, Result};
 use syn::{
@@ -8,7 +10,7 @@ use syn::{
 
 pub struct Module {
     pub namespace: Namespace,
-    pub attrs: Vec<Attribute>,
+    pub doc: Doc,
     pub vis: Visibility,
     pub unsafety: Option<Token![unsafe]>,
     pub mod_token: Token![mod],
@@ -31,6 +33,24 @@ pub struct ItemForeignMod {
     pub abi: Abi,
     pub brace_token: token::Brace,
     pub items: Vec<ForeignItem>,
+}
+
+impl Module {
+    pub fn add_attributes(&mut self, attrs: &[Attribute]) -> Result<()> {
+        let ref mut errors = Errors::new();
+        let mut doc = Doc::new();
+        attrs::parse(
+            errors,
+            attrs,
+            attrs::Parser {
+                doc: Some(&mut doc),
+                ignore_unsupported: true,
+                ..attrs::Parser::default()
+            },
+        );
+        self.doc.extend(doc);
+        errors.propagate()
+    }
 }
 
 impl Parse for Module {
@@ -60,16 +80,18 @@ impl Parse for Module {
             items.push(content.parse()?);
         }
 
-        Ok(Module {
+        let mut module = Module {
             namespace,
-            attrs,
+            doc: Doc::new(),
             vis,
             unsafety,
             mod_token,
             ident,
             brace_token,
             content: items,
-        })
+        };
+        module.add_attributes(&attrs)?;
+        Ok(module)
     }
 }
 

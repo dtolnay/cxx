@@ -11,6 +11,7 @@ pub struct Parser<'a> {
     pub derives: Option<&'a mut Vec<Derive>>,
     pub repr: Option<&'a mut Option<Atom>>,
     pub namespace: Option<&'a mut Option<Namespace>>,
+    pub ignore_unsupported: bool,
 }
 
 pub(super) fn parse_doc(cx: &mut Errors, attrs: &[Attribute]) -> Doc {
@@ -69,7 +70,9 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
                 Err(err) => return cx.push(err),
             }
         }
-        return cx.error(attr, "unsupported attribute");
+        if !parser.ignore_unsupported {
+            return cx.error(attr, "unsupported attribute");
+        }
     }
 }
 

@@ -17,6 +17,10 @@ impl Doc {
         self.fragments.push(lit);
     }
 
+    pub fn extend(&mut self, doc: Doc) {
+        self.fragments.extend(doc.fragments)
+    }
+
     pub fn to_string(&self) -> String {
         let mut doc = String::new();
         for lit in &self.fragments {

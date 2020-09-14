@@ -102,15 +102,12 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
         });
     }
 
-    let attrs = ffi
-        .attrs
-        .into_iter()
-        .filter(|attr| attr.path.is_ident("doc"));
+    let doc = &ffi.doc;
     let vis = &ffi.vis;
     let ident = &ffi.ident;
 
     quote! {
-        #(#attrs)*
+        #doc
         #[deny(improper_ctypes)]
         #[allow(non_snake_case)]
         #vis mod #ident {
