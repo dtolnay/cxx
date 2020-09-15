@@ -1,4 +1,4 @@
-use cxx_test_suite::{alias, ffi};
+use cxx_test_suite::{alias, alias2, ffi};
 use std::cell::Cell;
 use std::ffi::CStr;
 
@@ -176,6 +176,14 @@ fn test_enum_representations() {
 fn test_alias() {
     let unique_ptr = alias::ffi::c_return_unique_ptr();
     check!(alias::ffi::c_take_unique_ptr(unique_ptr));
+}
+
+#[test]
+fn test_alias2() {
+    let unique_ptr = alias2::ffi::c_return_unique_ptr();
+    check!(alias2::ffi::c_take_unique_ptr(unique_ptr));
+
+    alias2::ffi::create_different_c();
 }
 
 #[no_mangle]

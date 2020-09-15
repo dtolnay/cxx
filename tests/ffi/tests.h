@@ -110,4 +110,18 @@ namespace alias_tests {
 using tests::c_return_unique_ptr;
 using tests::c_take_unique_ptr;
 
+struct DifferentC {
+  size_t n;
+};
+
+std::unique_ptr<alias_tests::DifferentC> create_different_c();
+
 } // namespace alias_tests
+
+namespace alias2_tests {
+
+using alias_tests::create_different_c;
+using tests::c_return_unique_ptr;
+using tests::c_take_unique_ptr;
+
+} // namespace alias2_tests

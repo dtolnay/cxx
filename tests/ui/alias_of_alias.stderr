@@ -1,0 +1,13 @@
+error[E0271]: type mismatch resolving `<here::C as ExternType>::Id == (t, h, e, r, e, (), cxx::C)`
+   --> $DIR/alias_of_alias.rs:33:1
+    |
+33  | #[cxx::bridge(namespace = anywhere)]
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected a tuple with 7 elements, found one with 6 elements
+    |
+   ::: $WORKSPACE/src/extern_type.rs
+    |
+    | pub fn verify_extern_type<T: ExternType<Id = Id>, Id>() {}
+    |                                         ------- required by this bound in `verify_extern_type`
+    |
+    = note: expected tuple `(t, h, e, r, e, (), cxx::C)`
+               found tuple `(h, e, r, e, (), cxx::C)`

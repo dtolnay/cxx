@@ -5,6 +5,7 @@
 )]
 
 pub mod alias;
+pub mod alias2;
 
 use cxx::{CxxString, UniquePtr};
 use std::fmt::{self, Display};

@@ -10,6 +10,7 @@ rust_library(
     name = "cxx_test_suite",
     srcs = [
         "ffi/alias.rs",
+        "ffi/alias2.rs",
         "ffi/lib.rs",
     ],
     deps = [
@@ -23,6 +24,7 @@ cc_library(
     srcs = [
         "ffi/tests.cc",
         ":gen-alias-source",
+        ":gen-alias2-source",
         ":gen-lib-source",
     ],
     hdrs = ["ffi/tests.h"],
@@ -60,6 +62,14 @@ genrule(
     name = "gen-alias-source",
     srcs = ["ffi/alias.rs"],
     outs = ["alias.rs.cc"],
+    cmd = "$(location //:codegen) $< > $@",
+    tools = ["//:codegen"],
+)
+
+genrule(
+    name = "gen-alias2-source",
+    srcs = ["ffi/alias2.rs"],
+    outs = ["alias2.rs.cc"],
     cmd = "$(location //:codegen) $< > $@",
     tools = ["//:codegen"],
 )

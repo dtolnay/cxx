@@ -1,0 +1,10 @@
+error[E0277]: the trait bound `here::C: UniquePtrTarget` is not satisfied
+  --> $DIR/alias_unique_usage.rs:16:1
+   |
+16 | #[cxx::bridge(namespace = there)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `UniquePtrTarget` is not implemented for `here::C`
+   |
+  ::: $WORKSPACE/src/unique_ptr.rs
+   |
+   |     T: UniquePtrTarget,
+   |        --------------- required by this bound in `UniquePtr`

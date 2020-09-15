@@ -421,3 +421,12 @@ extern "C" const char *cxx_run_test() noexcept {
 }
 
 } // namespace tests
+
+namespace alias_tests {
+
+std::unique_ptr<alias_tests::DifferentC> create_different_c() {
+  return std::unique_ptr<alias_tests::DifferentC>(
+      new alias_tests::DifferentC{2000});
+}
+
+} // namespace alias_tests

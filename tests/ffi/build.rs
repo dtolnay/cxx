@@ -3,7 +3,7 @@ fn main() {
         return;
     }
 
-    let sources = vec!["alias.rs", "lib.rs"];
+    let sources = vec!["alias.rs", "alias2.rs", "lib.rs"];
     cxx_build::bridges(sources)
         .file("tests.cc")
         .flag_if_supported(cxxbridge_flags::STD)
