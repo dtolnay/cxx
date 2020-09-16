@@ -177,7 +177,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
                 needs_rust_slice = true;
             }
             ty if ty == Isize => {
-                out.include.base_tsd = true;
+                out.include.basetsd = true;
                 needs_rust_isize = true;
             }
             ty if ty == RustString => {
