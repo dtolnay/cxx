@@ -217,6 +217,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
                     out.include.string = true;
                     needs_rust_str = true;
                     needs_rust_error = true;
+                    needs_maybe_uninit = true;
                 }
                 for arg in &efn.args {
                     if arg.ty != RustString && types.needs_indirect_abi(&arg.ty) {
