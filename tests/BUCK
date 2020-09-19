@@ -1,3 +1,5 @@
+load("//tools/buck:cxx_cxx_library.bzl", "cxx_cxx_library")
+
 rust_test(
     name = "test",
     srcs = ["test.rs"],
@@ -18,46 +20,17 @@ rust_library(
     ],
 )
 
-cxx_library(
+cxx_cxx_library(
     name = "impl",
-    srcs = [
-        "ffi/tests.cc",
-        ":gen-alias-source",
-        ":gen-alias2-source",
-        ":gen-lib-source",
+    crate_name = "cxx-test-suite",
+    bridge_srcs = [
+        "ffi/alias.rs",
+        "ffi/alias2.rs",
+        "ffi/lib.rs",
     ],
-    header_namespace = "cxx-test-suite",
+    srcs = ["ffi/tests.cc"],
     headers = {
-        "lib.rs.h": ":gen-lib-header",
         "tests.h": "ffi/tests.h",
     },
     deps = ["//:core"],
-)
-
-genrule(
-    name = "gen-lib-header",
-    srcs = ["ffi/lib.rs"],
-    out = "lib.rs.h",
-    cmd = "$(exe //:codegen) --header ${SRCS} > ${OUT}",
-)
-
-genrule(
-    name = "gen-lib-source",
-    srcs = ["ffi/lib.rs"],
-    out = "lib.rs.cc",
-    cmd = "$(exe //:codegen) ${SRCS} > ${OUT}",
-)
-
-genrule(
-    name = "gen-alias-source",
-    srcs = ["ffi/alias.rs"],
-    out = "alias.rs.cc",
-    cmd = "$(exe //:codegen) ${SRCS} > ${OUT}",
-)
-
-genrule(
-    name = "gen-alias2-source",
-    srcs = ["ffi/alias2.rs"],
-    out = "alias2.rs.cc",
-    cmd = "$(exe //:codegen) ${SRCS} > ${OUT}",
 )
