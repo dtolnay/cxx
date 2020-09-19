@@ -1,3 +1,5 @@
+load("//tools/buck:cxx_cxx_library.bzl", "cxx_cxx_library")
+
 rust_test(
     name = "test",
     srcs = ["test.rs"],
@@ -17,38 +19,16 @@ rust_library(
     ],
 )
 
-cxx_library(
+cxx_cxx_library(
     name = "impl",
-    srcs = [
-        "ffi/tests.cc",
-        ":gen-lib-source",
-        ":gen-module-source",
+    crate_name = "cxx-test-suite",
+    bridge_srcs = [
+        "ffi/lib.rs",
+        "ffi/module.rs",
     ],
-    header_namespace = "cxx-test-suite",
+    srcs = ["ffi/tests.cc"],
     headers = {
-        "lib.rs.h": ":gen-lib-header",
         "tests.h": "ffi/tests.h",
     },
     deps = ["//:core"],
-)
-
-genrule(
-    name = "gen-lib-header",
-    srcs = ["ffi/lib.rs"],
-    out = "lib.rs.h",
-    cmd = "$(exe //:codegen) --header ${SRCS} > ${OUT}",
-)
-
-genrule(
-    name = "gen-lib-source",
-    srcs = ["ffi/lib.rs"],
-    out = "lib.rs.cc",
-    cmd = "$(exe //:codegen) ${SRCS} > ${OUT}",
-)
-
-genrule(
-    name = "gen-module-source",
-    srcs = ["ffi/module.rs"],
-    out = "module.rs.cc",
-    cmd = "$(exe //:codegen) ${SRCS} > ${OUT}",
 )
