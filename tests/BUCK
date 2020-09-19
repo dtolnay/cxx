@@ -1,4 +1,4 @@
-load("//tools/buck:cxx_cxx_library.bzl", "cxx_cxx_library")
+load("//tools/buck:cxxbridge_cxx_library.bzl", "cxxbridge_cxx_library")
 
 rust_test(
     name = "test",
@@ -6,12 +6,14 @@ rust_test(
     deps = [":ffi"],
 )
 
+bridge_srcs = [
+    "ffi/lib.rs",
+    "ffi/module.rs",
+]
+
 rust_library(
     name = "ffi",
-    srcs = [
-        "ffi/lib.rs",
-        "ffi/module.rs",
-    ],
+    srcs = bridge_srcs,
     crate = "cxx_test_suite",
     deps = [
         ":impl",
@@ -19,13 +21,10 @@ rust_library(
     ],
 )
 
-cxx_cxx_library(
+cxxbridge_cxx_library(
     name = "impl",
     crate_name = "cxx-test-suite",
-    bridge_srcs = [
-        "ffi/lib.rs",
-        "ffi/module.rs",
-    ],
+    bridge_srcs = bridge_srcs,
     srcs = ["ffi/tests.cc"],
     headers = {
         "tests.h": "ffi/tests.h",
