@@ -178,6 +178,7 @@ fn expand_cxx_type(namespace: &Namespace, ety: &ExternType) -> TokenStream {
         }
 
         unsafe impl ::cxx::ExternType for #ident {
+            type Kind = ::cxx::extern_type::KindOpaqueCpp;
             type Id = #type_id;
         }
     }
@@ -675,7 +676,7 @@ fn expand_type_alias_verify(namespace: &Namespace, alias: &TypeAlias) -> TokenSt
     let end = quote_spanned!(end_span=> >);
 
     quote! {
-        const _: fn() = #begin #ident, #type_id #end;
+        const _: fn() = #begin #ident, ::cxx::extern_type::KindOpaqueCpp, #type_id #end;
     }
 }
 

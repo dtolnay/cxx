@@ -1,26 +1,23 @@
-/// A type for which the layout is determined by its C++ definition.
+/// A type for which the layout is determined by an external definition.
 ///
-/// This trait serves the following two related purposes.
+/// `ExternType` makes it possible for CXX to safely share a consistent Rust type across multiple
+/// #\[cxx::bridge\] invocations. This serves multiple related purposes.
 ///
 /// <br>
 ///
-/// ## Safely unifying occurrences of the same extern type
+/// ## Safely unifying occurrences of the same extern C++ type
 ///
-/// `ExternType` makes it possible for CXX to safely share a consistent Rust
-/// type across multiple #\[cxx::bridge\] invocations that refer to a common
-/// extern C++ type.
+/// In the following snippet, two #\[cxx::bridge\] invocations in different files (possibly
+/// different crates) both contain function signatures involving the same C++ type `example::Demo`.
 ///
-/// In the following snippet, two #\[cxx::bridge\] invocations in different
-/// files (possibly different crates) both contain function signatures involving
-/// the same C++ type `example::Demo`. If both were written just containing
-/// `type Demo;`, then both macro expansions would produce their own separate
-/// Rust type called `Demo` and thus the compiler wouldn't allow us to take the
-/// `Demo` returned by `file1::ffi::create_demo` and pass it as the `Demo`
-/// argument accepted by `file2::ffi::take_ref_demo`. Instead, one of the two
-/// `Demo`s has been defined as an extern type alias of the other, making them
-/// the same type in Rust. The CXX code generator will use an automatically
-/// generated `ExternType` impl emitted in file1 to statically verify that in
-/// file2 `crate::file1::ffi::Demo` really does refer to the C++ type
+/// If both were written just containing `type Demo;`, then both macro expansions would produce
+/// their own separate Rust type called `Demo` and thus the compiler wouldn't allow us to take the
+/// `Demo` returned by `file1::ffi::create_demo` and pass it as the `Demo` argument accepted by
+/// `file2::ffi::take_ref_demo`. Instead, one of the two `Demo`s has been defined as an extern type
+/// alias of the other, making them the same type in Rust.
+///
+/// The CXX code generator will use an automatically generated `ExternType` impl emitted in file1 to
+/// statically verify that in file2 `crate::file1::ffi::Demo` really does refer to the C++ type
 /// `example::Demo` as expected in file2.
 ///
 /// ```no_run
@@ -53,12 +50,12 @@
 ///
 /// ## Integrating with bindgen-generated types
 ///
-/// Handwritten `ExternType` impls make it possible to plug in a data structure
-/// emitted by bindgen as the definition of an opaque C++ type emitted by CXX.
+/// Handwritten `ExternType` impls make it possible to plug in a data structure emitted by bindgen
+/// as the definition of an opaque C++ type emitted by CXX.
 ///
-/// By writing the unsafe `ExternType` impl, the programmer asserts that the C++
-/// namespace and type name given in the type id refers to a C++ type that is
-/// equivalent to Rust type that is the `Self` type of the impl.
+/// By writing the unsafe `ExternType` impl, the programmer asserts that the C++ namespace and type
+/// name given in the type id refers to a C++ type that is equivalent to Rust type that is the
+/// `Self` type of the impl.
 ///
 /// ```no_run
 /// # const _: &str = stringify! {
@@ -70,8 +67,10 @@
 /// # }
 ///
 /// use cxx::{type_id, ExternType};
+/// use cxx::extern_type;
 ///
 /// unsafe impl ExternType for folly_sys::StringPiece {
+///     type Kind = extern_type::KindOpaqueCpp;
 ///     type Id = type_id!("folly::StringPiece");
 /// }
 ///
@@ -93,6 +92,16 @@
 /// # fn main() {}
 /// ```
 pub unsafe trait ExternType {
+    /// The type's kind.
+    ///
+    /// Must be either:
+    ///   * `KindShared` for a shared type declared outside of an extern block in a cxx::bridge, or
+    ///   * `KindOpqaueCpp` for an opaque C++ type declared inside of an `extern "C"` block.
+    ///
+    /// Opaque Rust type aliases are unsupported because they can included with a use declaration
+    /// and aliased more simply outside of the cxx::bridge.
+    type Kind;
+
     /// A type-level representation of the type's C++ namespace and type name.
     ///
     /// This will always be defined using `type_id!` in the following form:
@@ -100,11 +109,15 @@ pub unsafe trait ExternType {
     /// ```
     /// # struct TypeName;
     /// # unsafe impl cxx::ExternType for TypeName {
+    /// # type Kind = cxx::extern_type::KindOpaqueCpp;
     /// type Id = cxx::type_id!("name::space::of::TypeName");
     /// # }
     /// ```
     type Id;
 }
 
+pub struct KindOpaqueCpp;
+pub struct KindShared;
+
 #[doc(hidden)]
-pub fn verify_extern_type<T: ExternType<Id = Id>, Id>() {}
+pub fn verify_extern_type<T: ExternType<Kind = Kind, Id = Id>, Kind, Id>() {}

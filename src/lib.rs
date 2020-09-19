@@ -380,7 +380,7 @@ mod macros;
 mod cxx_string;
 mod cxx_vector;
 mod exception;
-mod extern_type;
+pub mod extern_type;
 mod function;
 mod opaque;
 mod result;
