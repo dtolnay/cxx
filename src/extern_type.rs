@@ -1,7 +1,10 @@
 /// A type for which the layout is determined by an external definition.
 ///
 /// `ExternType` makes it possible for CXX to safely share a consistent Rust type across multiple
-/// #\[cxx::bridge\] invocations. This serves multiple related purposes.
+/// #\[cxx::bridge\] invocations, both for shared types defined in another bridge and external C++
+/// definitions. This serves multiple related purposes.
+///
+/// TODO: These docs aren't discoverable. Add a link to here from the main crate docs.
 ///
 /// <br>
 ///
@@ -43,6 +46,96 @@
 ///     }
 /// }
 /// #
+/// # fn main() {}
+/// ```
+///
+/// <br><br>
+///
+/// ## Reusing Rust/C++ shared types across multiple bridges
+///
+/// `ExternType` enables reusing a shared Rust/C++ type declared in another bridge module, allowing
+/// for the creation of libraries to wrap types used in multiple different bridges.
+///
+/// Imagine we have an existing move-only C++ type, file::UniqueFd, that wraps sole ownership of a
+/// file descriptor, analogous to Rust's std::fd::File. The example below defines a shared type
+/// `File` that allows safely transferring ownership of the file across the interface without Box or
+/// UniquePtr and without resource leaks. This type can then be reused in other bridges.
+///
+/// ```no_run
+/// // file/src/lib.rs
+/// # #[cfg(unix)]
+/// # mod file {
+/// # use std::os::unix::io::{IntoRawFd, FromRawFd};
+/// #[cxx::bridge(namespace = file::ffi)]
+/// pub mod ffi {
+///     /// A file backed by a file descriptor, which it is the sole owner of.
+///     struct File {
+///         fd: i32,
+///     }
+/// }
+///
+/// impl From<ffi::File> for std::fs::File {
+///     fn from(value: ffi::File) -> Self {
+///         // Safe because ffi::File owns its file descriptor.
+///         unsafe { Self::from_raw_fd(value.fd) }
+///     }
+/// }
+///
+/// impl From<std::fs::File> for ffi::File {
+///     fn from(value: std::fs::File) -> Self {
+///         Self { fd: value.into_raw_fd() }
+///     }
+/// }
+///
+/// impl Drop for ffi::File {
+///     fn drop(&mut self) {
+///         // Safe because ffi::File owns its file descriptor.
+///         unsafe { std::fs::File::from_raw_fd(self.fd); }
+///     }
+/// }
+/// # }
+///
+/// // file/src/lib.h
+/// # /*
+/// namespace file {
+///
+/// ffi::File TransferToFFI(File file) {
+///     // Imagine file::UniqueFd::release() is analogous to from_raw_fd
+///     return ffi::File{ .fd = file.release() };
+/// }
+///
+/// }
+/// # */
+///
+/// // TODO(https://github.com/dtolnay/cxx/pull/298): Currently this bridge must use the same
+/// // namespace as any bridge it creates aliases from.
+///
+/// // usage.rs
+/// # #[cfg(unix)]
+/// # mod usage {
+/// #[cxx::bridge(namespace = file::ffi)]
+/// pub mod ffi {
+///     type File = crate::file::ffi::File;
+///
+///     extern "C" {
+///         type Demo;
+///
+///         fn create_demo(file: File) -> UniquePtr<Demo>;
+///     }
+/// }
+/// # }
+///
+/// // usage.cc
+/// # /*
+/// file::ffi::File ConvertFile(file::UniqueFd file) {
+/// }
+///
+/// void CreateDemo(file::UniqueFd file) {
+///     auto demo = ffi::create_demo(file::TransferToFFI(std::move(file)));
+///     // use demo
+/// }
+/// # */
+///
 /// # fn main() {}
 /// ```
 ///
