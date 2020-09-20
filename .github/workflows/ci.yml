@@ -53,13 +53,13 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: actions/setup-java@v1
         with:
-          java-version: 8
+          java-version: 11
           java-package: jre
       - name: Install Buck
         run: |
           mkdir bin
           # TODO: unfork back to facebook/buck after https://github.com/facebook/buck/pull/2545 has landed
-          wget -q -O bin/buck https://jitpack.io/com/github/dtolnay/buck/3fedc3867c/buck-3fedc3867c.pex
+          wget -q -O bin/buck https://jitpack.io/com/github/dtolnay/buck/3fedc3867c/buck-3fedc3867c-java11.pex
           chmod +x bin/buck
           echo ::add-path::bin
       - name: Install lld
