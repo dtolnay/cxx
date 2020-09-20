@@ -3,7 +3,7 @@ use quote::quote;
 use syn::parse::{Error, Parse, ParseStream, Result};
 use syn::{
     braced, token, Abi, Attribute, ForeignItem, Ident, Item as RustItem, ItemEnum, ItemStruct,
-    ItemUse, LitStr, Token, Visibility,
+    ItemType, ItemUse, LitStr, Token, Visibility,
 };
 
 pub struct Module {
@@ -20,6 +20,7 @@ pub struct Module {
 pub enum Item {
     Struct(ItemStruct),
     Enum(ItemEnum),
+    Type(ItemType),
     ForeignMod(ItemForeignMod),
     Use(ItemUse),
     Other(RustItem),
@@ -92,6 +93,7 @@ impl Parse for Item {
         match item {
             RustItem::Struct(item) => Ok(Item::Struct(ItemStruct { attrs, ..item })),
             RustItem::Enum(item) => Ok(Item::Enum(ItemEnum { attrs, ..item })),
+            RustItem::Type(item) => Ok(Item::Type(ItemType { attrs, ..item })),
             RustItem::ForeignMod(item) => Ok(Item::ForeignMod(ItemForeignMod {
                 attrs: item.attrs,
                 unsafety,

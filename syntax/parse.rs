@@ -12,8 +12,8 @@ use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::{
     Abi, Attribute, Error, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
-    GenericArgument, Ident, ItemEnum, ItemStruct, LitStr, Pat, PathArguments, Result, ReturnType,
-    Token, Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
+    GenericArgument, Ident, ItemEnum, ItemStruct, ItemType, LitStr, Pat, PathArguments, Result,
+    ReturnType, Token, Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
 };
 
 pub mod kw {
@@ -30,6 +30,10 @@ pub fn parse_items(cx: &mut Errors, items: Vec<Item>, trusted: bool) -> Vec<Api>
             },
             Item::Enum(item) => match parse_enum(cx, item) {
                 Ok(enm) => apis.push(enm),
+                Err(err) => cx.push(err),
+            },
+            Item::Type(item) => match parse_alias(cx, item, AliasKind::Shared) {
+                Ok(alias) => apis.push(alias),
                 Err(err) => cx.push(err),
             },
             Item::ForeignMod(foreign_mod) => parse_foreign_mod(cx, foreign_mod, &mut apis, trusted),
@@ -167,6 +171,33 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum) -> Result<Api> {
         brace_token,
         variants,
         repr,
+    }))
+}
+
+fn parse_alias(cx: &mut Errors, item: ItemType, kind: AliasKind) -> Result<Api> {
+    let generics = &item.generics;
+    if !generics.params.is_empty() || generics.where_clause.is_some() {
+        // TODO: Add ui test for this
+        let type_token = item.type_token;
+        let ident = &item.ident;
+        let where_clause = &generics.where_clause;
+        let span = quote!(#type_token #ident #generics #where_clause);
+        return Err(Error::new_spanned(
+            span,
+            "aliases with generic parameters are not allowed",
+        ));
+    }
+
+    let doc = attrs::parse_doc(cx, &item.attrs);
+
+    Ok(Api::TypeAlias(TypeAlias {
+        kind,
+        doc,
+        type_token: item.type_token,
+        ident: item.ident,
+        eq_token: item.eq_token,
+        ty: *item.ty,
+        semi_token: item.semi_token,
     }))
 }
 
@@ -383,37 +414,27 @@ fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> R
 
 fn parse_extern_verbatim(cx: &mut Errors, tokens: &TokenStream, lang: Lang) -> Result<Api> {
     // type Alias = crate::path::to::Type;
-    let parse = |input: ParseStream| -> Result<TypeAlias> {
-        let attrs = input.call(Attribute::parse_outer)?;
-        let type_token: Token![type] = match input.parse()? {
-            Some(type_token) => type_token,
-            None => {
-                let span = input.cursor().token_stream();
-                return Err(Error::new_spanned(span, "unsupported foreign item"));
-            }
-        };
-        let ident: Ident = input.parse()?;
-        let eq_token: Token![=] = input.parse()?;
-        let ty: RustType = input.parse()?;
-        let semi_token: Token![;] = input.parse()?;
-        let doc = attrs::parse_doc(cx, &attrs);
+    let parse = |input: ParseStream| -> Result<ItemType> {
+        // Test whether this is a type alias. This ends up parsing attributes twice but lets us emit
+        // more useful errors that differentiate between an unsupported item and other alias parsing
+        // errors.
+        // TODO: Add ui test to verify this
+        let fork = input.fork();
+        fork.call(Attribute::parse_outer)?;
+        fork.parse::<Token![type]>().map_err(|_| {
+            let span = fork.cursor().token_stream();
+            Error::new_spanned(span, "unsupported foreign item")
+        })?;
 
-        Ok(TypeAlias {
-            kind: AliasKind::OpaqueCpp,
-            doc,
-            type_token,
-            ident,
-            eq_token,
-            ty,
-            semi_token,
-        })
+        // Reuse alias parsing from syn
+        input.parse()
     };
 
-    let type_alias = parse.parse2(tokens.clone())?;
+    let item = parse.parse2(tokens.clone())?;
     match lang {
-        Lang::Cxx => Ok(Api::TypeAlias(type_alias)),
+        Lang::Cxx => parse_alias(cx, item, AliasKind::OpaqueCpp),
         Lang::Rust => {
-            let (type_token, semi_token) = (type_alias.type_token, type_alias.semi_token);
+            let (type_token, semi_token) = (item.type_token, item.semi_token);
             let span = quote!(#type_token #semi_token);
             let msg = "type alias in extern \"Rust\" block is not supported";
             Err(Error::new_spanned(span, msg))
