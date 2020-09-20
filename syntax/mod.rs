@@ -78,7 +78,13 @@ pub struct ExternFn {
     pub semi_token: Token![;],
 }
 
+pub enum AliasKind {
+    Shared,
+    OpaqueCpp,
+}
+
 pub struct TypeAlias {
+    pub kind: AliasKind,
     pub doc: Doc,
     pub type_token: Token![type],
     pub ident: Ident,

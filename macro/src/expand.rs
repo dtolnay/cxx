@@ -4,7 +4,8 @@ use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    self, check, mangle, Api, Enum, ExternFn, ExternType, Signature, Struct, Type, TypeAlias, Types,
+    self, check, mangle, AliasKind, Api, Enum, ExternFn, ExternType, Signature, Struct, Type,
+    TypeAlias, Types,
 };
 use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
@@ -672,11 +673,15 @@ fn expand_type_alias_verify(namespace: &Namespace, alias: &TypeAlias) -> TokenSt
     let type_id = type_id(namespace, ident);
     let begin_span = alias.type_token.span;
     let end_span = alias.semi_token.span;
+    let kind = match alias.kind {
+        AliasKind::Shared => quote!(KindShared),
+        AliasKind::OpaqueCpp => quote!(KindOpaqueCpp),
+    };
     let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_type::<);
     let end = quote_spanned!(end_span=> >);
 
     quote! {
-        const _: fn() = #begin #ident, ::cxx::extern_type::KindOpaqueCpp, #type_id #end;
+        const _: fn() = #begin #ident, ::cxx::extern_type:: #kind, #type_id #end;
     }
 }
 

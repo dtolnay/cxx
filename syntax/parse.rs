@@ -3,8 +3,8 @@ use crate::syntax::file::{Item, ItemForeignMod};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
-    attrs, error, Api, Doc, Enum, ExternFn, ExternType, Lang, Receiver, Ref, Signature, Slice,
-    Struct, Ty1, Type, TypeAlias, Var, Variant,
+    attrs, error, AliasKind, Api, Doc, Enum, ExternFn, ExternType, Lang, Receiver, Ref, Signature,
+    Slice, Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
 use proc_macro2::{TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
@@ -399,6 +399,7 @@ fn parse_extern_verbatim(cx: &mut Errors, tokens: &TokenStream, lang: Lang) -> R
         let doc = attrs::parse_doc(cx, &attrs);
 
         Ok(TypeAlias {
+            kind: AliasKind::OpaqueCpp,
             doc,
             type_token,
             ident,
