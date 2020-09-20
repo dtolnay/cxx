@@ -21,13 +21,21 @@ macro_rules! check {
 
 #[test]
 fn test_c_return() {
-    let shared = ffi::Shared { z: 2020 };
+    let mut shared = ffi::Shared { z: 2020 };
 
     assert_eq!(2020, ffi::c_return_primitive());
     assert_eq!(2020, ffi::c_return_shared().z);
     assert_eq!(2020, *ffi::c_return_box());
     ffi::c_return_unique_ptr();
     assert_eq!(2020, *ffi::c_return_ref(&shared));
+
+    {
+        shared.z = 2019;
+        let mut_z = ffi::c_return_mut(&mut shared);
+        assert_eq!(2019, *mut_z);
+        *mut_z = 2020;
+    }
+
     assert_eq!("2020", ffi::c_return_str(&shared));
     assert_eq!(b"2020\0", ffi::c_return_sliceu8(&shared));
     assert_eq!("2020", ffi::c_return_rust_string());

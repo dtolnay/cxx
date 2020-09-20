@@ -380,6 +380,13 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(cxx_test_suite_r_is_correct(&*r_return_box()));
   ASSERT(r_return_unique_ptr()->get() == 2020);
   ASSERT(r_return_ref(Shared{2020}) == 2020);
+  {
+    Shared shared{2019};
+    size_t &mut_z = r_return_mut(shared);
+    ASSERT(mut_z == 2019);
+    mut_z = 2020;
+    ASSERT(r_return_ref(shared) == 2020);
+  }
   ASSERT(std::string(r_return_str(Shared{2020})) == "2020");
   ASSERT(std::string(r_return_rust_string()) == "2020");
   ASSERT(*r_return_unique_ptr_string() == "2020");
