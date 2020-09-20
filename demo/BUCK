@@ -22,7 +22,7 @@ cxx_library(
 genrule(
     name = "gen-header",
     srcs = ["src/main.rs"],
-    out = "generated.h",
+    out = "src/main.rs.h",
     cmd = "$(exe //:codegen) --header ${SRCS} > ${OUT}",
     type = "cxxbridge",
 )
@@ -30,16 +30,14 @@ genrule(
 genrule(
     name = "gen-source",
     srcs = ["src/main.rs"],
-    out = "generated.cc",
+    out = "src/main.rs.cc",
     cmd = "$(exe //:codegen) ${SRCS} > ${OUT}",
     type = "cxxbridge",
 )
 
 cxx_library(
     name = "include",
-    exported_headers = {
-        "src/main.rs.h": ":gen-header",
-    },
+    exported_headers = [":gen-header"],
 )
 
 cxx_library(

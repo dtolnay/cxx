@@ -23,7 +23,7 @@ cc_library(
 genrule(
     name = "gen-header",
     srcs = ["src/main.rs"],
-    outs = ["main.rs.h"],
+    outs = ["src/main.rs.h"],
     cmd = "$(location //:codegen) --header $< > $@",
     tools = ["//:codegen"],
 )
@@ -31,7 +31,7 @@ genrule(
 genrule(
     name = "gen-source",
     srcs = ["src/main.rs"],
-    outs = ["generated.cc"],
+    outs = ["src/main.rs.cc"],
     cmd = "$(location //:codegen) $< > $@",
     tools = ["//:codegen"],
 )
@@ -39,7 +39,6 @@ genrule(
 cc_library(
     name = "include",
     hdrs = [":gen-header"],
-    include_prefix = "demo/src",
 )
 
 cc_library(
