@@ -4,6 +4,8 @@ use core::fmt::{self, Display};
 use core::marker::PhantomData;
 use core::mem;
 use core::ptr;
+use std::slice;
+
 
 /// Binding to C++ `std::vector<T, std::allocator<T>>`.
 ///
@@ -62,6 +64,15 @@ where
     /// [operator_at]: https://en.cppreference.com/w/cpp/container/vector/operator_at
     pub unsafe fn get_unchecked(&self, pos: usize) -> &T {
         T::__get_unchecked(self, pos)
+    }
+
+    /// Returns a slice to the underlying vector data
+    ///
+    /// An alternative approach would be to base your FFI API directly on a
+    /// rust::Slice<T> instead of a std::vector<T>.
+    pub fn get_slice(&self) -> &[T] {
+        let slice = T::__vector_slice(self);
+        slice
     }
 }
 
@@ -122,6 +133,7 @@ where
 pub unsafe trait VectorElement: Sized {
     const __NAME: &'static dyn Display;
     fn __vector_size(v: &CxxVector<Self>) -> usize;
+    fn __vector_slice(v: &CxxVector<Self>) -> &[Self];
     unsafe fn __get_unchecked(v: &CxxVector<Self>, pos: usize) -> &Self;
     fn __unique_ptr_null() -> *mut c_void;
     unsafe fn __unique_ptr_raw(raw: *mut CxxVector<Self>) -> *mut c_void;
@@ -144,6 +156,20 @@ macro_rules! impl_vector_element {
                     }
                 }
                 unsafe { __vector_size(v) }
+            }
+            fn __vector_slice(v: &CxxVector<$ty>) -> &[$ty] {
+                extern "C" {
+                    attr! {
+                        #[link_name = concat!("cxxbridge04$std$vector$", $segment, "$data")]
+                        fn __vector_data(_: &CxxVector<$ty>) -> &$ty;
+                    }
+                    attr! {
+                        #[link_name = concat!("cxxbridge04$std$vector$", $segment, "$size")]
+                        fn __vector_size(_: &CxxVector<$ty>) -> usize;
+                    }
+                }
+                let ret = unsafe { slice::from_raw_parts(__vector_data(v), __vector_size(v)) };
+                ret
             }
             unsafe fn __get_unchecked(v: &CxxVector<$ty>, pos: usize) -> &$ty {
                 extern "C" {

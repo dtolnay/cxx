@@ -150,6 +150,8 @@ pub mod ffi {
         fn r_take_ref_rust_vec_string(v: &Vec<String>);
         fn r_take_enum(e: Enum);
 
+        fn r_access_vector_u8_as_slice(v: &CxxVector<u8>);
+
         fn r_try_return_void() -> Result<()>;
         fn r_try_return_primitive() -> Result<usize>;
         fn r_try_return_box() -> Result<Box<R>>;
@@ -164,6 +166,8 @@ pub mod ffi {
 pub type R = usize;
 
 pub struct R2(usize);
+
+use cxx::CxxVector;
 
 impl R2 {
     fn get(&self) -> usize {
@@ -325,6 +329,11 @@ fn r_take_ref_rust_vec_string(v: &Vec<String>) {
 
 fn r_take_enum(e: ffi::Enum) {
     let _ = e;
+}
+
+fn r_access_vector_u8_as_slice(v: &CxxVector<u8>) {
+    let s = v.get_slice();
+    assert_eq!(s, [86, 75, 30, 9]);
 }
 
 fn r_try_return_void() -> Result<(), Error> {

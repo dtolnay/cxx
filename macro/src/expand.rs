@@ -841,6 +841,7 @@ fn expand_cxx_vector(namespace: &Namespace, elem: &Ident) -> TokenStream {
     let name = elem.to_string();
     let prefix = format!("cxxbridge04$std$vector${}{}$", namespace, elem);
     let link_size = format!("{}size", prefix);
+    let link_data = format!("{}data", prefix);
     let link_get_unchecked = format!("{}get_unchecked", prefix);
     let unique_ptr_prefix = format!("cxxbridge04$unique_ptr$std$vector${}{}$", namespace, elem);
     let link_unique_ptr_null = format!("{}null", unique_ptr_prefix);
@@ -858,6 +859,16 @@ fn expand_cxx_vector(namespace: &Namespace, elem: &Ident) -> TokenStream {
                     fn __vector_size(_: &::cxx::CxxVector<#elem>) -> usize;
                 }
                 unsafe { __vector_size(v) }
+            }
+            fn __vector_slice(v: &::cxx::CxxVector<Self>) -> &[Self] {
+                extern "C" {
+                    #[link_name = #link_size]
+                    fn __vector_size(_: &::cxx::CxxVector<#elem>) -> usize;
+                    #[link_name = #link_data]
+                    fn __vector_data(_: &::cxx::CxxVector<#elem>) -> *const #elem;
+                }
+                let ret = unsafe { std::slice::from_raw_parts(__vector_data(v), __vector_size(v)) };
+                ret
             }
             unsafe fn __get_unchecked(v: &::cxx::CxxVector<Self>, pos: usize) -> &Self {
                 extern "C" {

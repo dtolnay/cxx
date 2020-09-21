@@ -199,6 +199,10 @@ void cxxbridge04$unique_ptr$std$string$drop(
       const std::vector<CXX_TYPE> &s) noexcept {                               \
     return s.size();                                                           \
   }                                                                            \
+  const CXX_TYPE* cxxbridge04$std$vector$##RUST_TYPE##$data(                   \
+      const std::vector<CXX_TYPE> &s) noexcept {                               \
+    return s.data();                                                           \
+  }                                                                            \
   const CXX_TYPE *cxxbridge04$std$vector$##RUST_TYPE##$get_unchecked(          \
       const std::vector<CXX_TYPE> &s, size_t pos) noexcept {                   \
     return &s[pos];                                                            \

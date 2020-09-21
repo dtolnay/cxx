@@ -1272,6 +1272,13 @@ fn write_cxx_vector(out: &mut OutFile, vector_ty: &Type, element: &Ident, types:
     writeln!(out, "}}");
     writeln!(
         out,
+        "const {} *cxxbridge04$std$vector${}$data(const ::std::vector<{}> &s) noexcept {{",
+        inner, instance, inner,
+    );
+    writeln!(out, "  return s.data();");
+    writeln!(out, "}}");
+    writeln!(
+        out,
         "const {} *cxxbridge04$std$vector${}$get_unchecked(const ::std::vector<{}> &s, size_t pos) noexcept {{",
         inner, instance, inner,
     );

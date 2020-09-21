@@ -401,6 +401,12 @@ extern "C" const char *cxx_run_test() noexcept {
       std::unique_ptr<std::string>(new std::string("2020")));
   r_take_enum(Enum::AVal);
 
+  // Caller owns data handed into rust APIs
+  {
+    std::vector<std::uint8_t> v{86, 75, 30, 9};
+    r_access_vector_u8_as_slice(v);
+  }
+
   ASSERT(r_try_return_primitive() == 2020);
   try {
     r_fail_return_primitive();
