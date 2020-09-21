@@ -152,6 +152,7 @@ pub mod ffi {
 
         fn r_try_return_void() -> Result<()>;
         fn r_try_return_primitive() -> Result<usize>;
+        fn r_try_return_box() -> Result<Box<R>>;
         fn r_fail_return_primitive() -> Result<usize>;
 
         fn r_return_r2(n: usize) -> Box<R2>;
@@ -332,6 +333,10 @@ fn r_try_return_void() -> Result<(), Error> {
 
 fn r_try_return_primitive() -> Result<usize, Error> {
     Ok(2020)
+}
+
+fn r_try_return_box() -> Result<Box<R>, Error> {
+    Ok(Box::new(2020))
 }
 
 fn r_fail_return_primitive() -> Result<usize, Error> {
