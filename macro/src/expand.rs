@@ -580,42 +580,42 @@ fn expand_rust_function_shim_impl(
     };
     call.extend(quote! { (#(#vars),*) });
 
-    let mut expr = sig
-        .ret
-        .as_ref()
-        .and_then(|ret| match ret {
-            Type::Ident(ident) if ident == RustString => {
-                Some(quote!(::cxx::private::RustString::from(#call)))
+    let conversion = sig.ret.as_ref().and_then(|ret| match ret {
+        Type::Ident(ident) if ident == RustString => Some(quote!(::cxx::private::RustString::from)),
+        Type::RustBox(_) => Some(quote!(::std::boxed::Box::into_raw)),
+        Type::RustVec(vec) => {
+            if vec.inner == RustString {
+                Some(quote!(::cxx::private::RustVec::from_vec_string))
+            } else {
+                Some(quote!(::cxx::private::RustVec::from))
             }
-            Type::RustBox(_) => Some(quote!(::std::boxed::Box::into_raw(#call))),
-            Type::RustVec(vec) => {
-                if vec.inner == RustString {
-                    Some(quote!(::cxx::private::RustVec::from_vec_string(#call)))
-                } else {
-                    Some(quote!(::cxx::private::RustVec::from(#call)))
-                }
-            }
-            Type::UniquePtr(_) => Some(quote!(::cxx::UniquePtr::into_raw(#call))),
-            Type::Ref(ty) => match &ty.inner {
-                Type::Ident(ident) if ident == RustString => match ty.mutability {
-                    None => Some(quote!(::cxx::private::RustString::from_ref(#call))),
-                    Some(_) => Some(quote!(::cxx::private::RustString::from_mut(#call))),
-                },
-                Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
-                    None => Some(quote!(::cxx::private::RustVec::from_ref_vec_string(#call))),
-                    Some(_) => Some(quote!(::cxx::private::RustVec::from_mut_vec_string(#call))),
-                },
-                Type::RustVec(_) => match ty.mutability {
-                    None => Some(quote!(::cxx::private::RustVec::from_ref(#call))),
-                    Some(_) => Some(quote!(::cxx::private::RustVec::from_mut(#call))),
-                },
-                _ => None,
+        }
+        Type::UniquePtr(_) => Some(quote!(::cxx::UniquePtr::into_raw)),
+        Type::Ref(ty) => match &ty.inner {
+            Type::Ident(ident) if ident == RustString => match ty.mutability {
+                None => Some(quote!(::cxx::private::RustString::from_ref)),
+                Some(_) => Some(quote!(::cxx::private::RustString::from_mut)),
             },
-            Type::Str(_) => Some(quote!(::cxx::private::RustStr::from(#call))),
-            Type::SliceRefU8(_) => Some(quote!(::cxx::private::RustSliceU8::from(#call))),
+            Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
+                None => Some(quote!(::cxx::private::RustVec::from_ref_vec_string)),
+                Some(_) => Some(quote!(::cxx::private::RustVec::from_mut_vec_string)),
+            },
+            Type::RustVec(_) => match ty.mutability {
+                None => Some(quote!(::cxx::private::RustVec::from_ref)),
+                Some(_) => Some(quote!(::cxx::private::RustVec::from_mut)),
+            },
             _ => None,
-        })
-        .unwrap_or(call);
+        },
+        Type::Str(_) => Some(quote!(::cxx::private::RustStr::from)),
+        Type::SliceRefU8(_) => Some(quote!(::cxx::private::RustSliceU8::from)),
+        _ => None,
+    });
+
+    let mut expr = match conversion {
+        None => call,
+        Some(conversion) if !sig.throws => quote!(#conversion(#call)),
+        Some(conversion) => quote!(::std::result::Result::map(#call, #conversion)),
+    };
 
     let mut outparam = None;
     let indirect_return = indirect_return(sig, types);

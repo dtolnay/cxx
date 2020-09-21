@@ -775,9 +775,11 @@ fn write_rust_function_shim_impl(
         write!(out, "extern$");
     }
     write!(out, ")");
-    if let Some(ret) = &sig.ret {
-        if let Type::RustBox(_) | Type::UniquePtr(_) = ret {
-            write!(out, ")");
+    if !indirect_return {
+        if let Some(ret) = &sig.ret {
+            if let Type::RustBox(_) | Type::UniquePtr(_) = ret {
+                write!(out, ")");
+            }
         }
     }
     writeln!(out, ";");
