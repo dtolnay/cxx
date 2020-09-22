@@ -58,8 +58,7 @@ jobs:
       - name: Install Buck
         run: |
           mkdir bin
-          # TODO: unfork back to facebook/buck after https://github.com/facebook/buck/pull/2545 has landed
-          wget -q -O bin/buck https://jitpack.io/com/github/dtolnay/buck/3fedc3867c/buck-3fedc3867c-java11.pex
+          wget -q -O bin/buck https://jitpack.io/com/github/facebook/buck/891556d066/buck-891556d066-java11.pex # dev branch from 2020.09.21
           chmod +x bin/buck
           echo ::add-path::bin
       - name: Install lld
