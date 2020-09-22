@@ -1,3 +1,5 @@
+load("//tools/buck:genrule.bzl", "genrule")
+
 rust_binary(
     name = "demo",
     srcs = glob(["src/**/*.rs"]),
