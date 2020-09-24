@@ -2,6 +2,7 @@ load("//tools/bazel:rust.bzl", "rust_library", "rust_test")
 
 rust_test(
     name = "test",
+    size = "small",
     srcs = ["test.rs"],
     deps = [":cxx_test_suite"],
 )
