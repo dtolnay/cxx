@@ -39,7 +39,7 @@ cc_library(
 genrule(
     name = "gen-lib-header",
     srcs = ["ffi/lib.rs"],
-    outs = ["lib.rs.h"],
+    outs = ["ffi/lib.rs.h"],
     cmd = "$(location //:codegen) --header $< > $@",
     tools = ["//:codegen"],
 )
@@ -47,7 +47,7 @@ genrule(
 genrule(
     name = "gen-lib-source",
     srcs = ["ffi/lib.rs"],
-    outs = ["lib.rs.cc"],
+    outs = ["ffi/lib.rs.cc"],
     cmd = "$(location //:codegen) $< > $@",
     tools = ["//:codegen"],
 )
@@ -56,12 +56,13 @@ cc_library(
     name = "lib-include",
     hdrs = [":gen-lib-header"],
     include_prefix = "cxx-test-suite",
+    strip_include_prefix = "ffi",
 )
 
 genrule(
     name = "gen-module-source",
     srcs = ["ffi/module.rs"],
-    outs = ["module.rs.cc"],
+    outs = ["ffi/module.rs.cc"],
     cmd = "$(location //:codegen) $< > $@",
     tools = ["//:codegen"],
 )
