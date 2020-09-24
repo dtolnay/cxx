@@ -9,10 +9,12 @@
 
 mod app;
 mod gen;
+mod output;
 mod syntax;
 
-use gen::error::{report, Result};
-use gen::{fs, include};
+use crate::gen::error::{report, Result};
+use crate::gen::{fs, include};
+use crate::output::Output;
 use std::io::{self, Write};
 use std::path::PathBuf;
 use std::process;
@@ -26,12 +28,6 @@ struct Opt {
     output: Output,
 }
 
-#[derive(Debug)]
-enum Output {
-    Stdout,
-    File(PathBuf),
-}
-
 fn main() {
     if let Err(err) = try_main() {
         let _ = writeln!(io::stderr(), "cxxbridge: {}", report(err));
@@ -42,15 +38,17 @@ fn main() {
 fn try_main() -> Result<()> {
     let opt = app::from_args();
 
+    let gen_header = opt.header || opt.output.ends_with(".h");
+
     let gen = gen::Opt {
         include: opt.include,
         cxx_impl_annotations: opt.cxx_impl_annotations,
-        gen_header: opt.header,
-        gen_implementation: !opt.header,
+        gen_header,
+        gen_implementation: !gen_header,
     };
 
     let content;
-    let content = match (opt.input, opt.header) {
+    let content = match (opt.input, gen_header) {
         (Some(input), true) => {
             content = gen::generate_from_path(&input, &gen).header;
             content.as_slice()
