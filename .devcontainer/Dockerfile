@@ -2,7 +2,7 @@ FROM mcr.microsoft.com/vscode/devcontainers/rust:1
 
 RUN apt-get update \
     && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends openjdk-11-jdk \
+    && apt-get -y install --no-install-recommends openjdk-11-jdk lld \
     && rustup default nightly 2>&1 \
     && rustup component add rust-analyzer-preview rustfmt clippy 2>&1 \
     && wget -q -O bin/install-bazel https://github.com/bazelbuild/bazel/releases/download/2.1.1/bazel-2.1.1-installer-linux-x86_64.sh \
