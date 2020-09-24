@@ -859,12 +859,12 @@ fn expand_cxx_vector(namespace: &Namespace, elem: &Ident) -> TokenStream {
                 }
                 unsafe { __vector_size(v) }
             }
-            unsafe fn __get_unchecked(v: &::cxx::CxxVector<Self>, pos: usize) -> &Self {
+            unsafe fn __get_unchecked(v: &::cxx::CxxVector<Self>, pos: usize) -> *const Self {
                 extern "C" {
                     #[link_name = #link_get_unchecked]
                     fn __get_unchecked(_: &::cxx::CxxVector<#elem>, _: usize) -> *const #elem;
                 }
-                &*__get_unchecked(v, pos)
+                __get_unchecked(v, pos)
             }
             fn __unique_ptr_null() -> *mut ::std::ffi::c_void {
                 extern "C" {
