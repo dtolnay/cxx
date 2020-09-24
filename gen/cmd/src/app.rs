@@ -56,18 +56,25 @@ const OUTPUT: &str = "output";
 
 pub(super) fn from_args() -> Opt {
     let matches = app().get_matches();
+
+    let input = matches.value_of_os(INPUT).map(PathBuf::from);
+    let cxx_impl_annotations = matches.value_of(CXX_IMPL_ANNOTATIONS).map(str::to_owned);
+    let header = matches.is_present(HEADER);
+    let include = matches
+        .values_of(INCLUDE)
+        .map_or_else(Vec::new, |v| v.map(str::to_owned).collect());
+    let output = match matches.value_of_os(OUTPUT) {
+        None => Output::Stdout,
+        Some(path) if path == "-" => Output::Stdout,
+        Some(path) => Output::File(PathBuf::from(path)),
+    };
+
     Opt {
-        input: matches.value_of_os(INPUT).map(PathBuf::from),
-        cxx_impl_annotations: matches.value_of(CXX_IMPL_ANNOTATIONS).map(str::to_owned),
-        header: matches.is_present(HEADER),
-        include: matches
-            .values_of(INCLUDE)
-            .map_or_else(Vec::new, |v| v.map(str::to_owned).collect()),
-        output: match matches.value_of_os(OUTPUT) {
-            None => Output::Stdout,
-            Some(path) if path == "-" => Output::Stdout,
-            Some(path) => Output::File(PathBuf::from(path)),
-        },
+        input,
+        cxx_impl_annotations,
+        header,
+        include,
+        output,
     }
 }
 
