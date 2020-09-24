@@ -145,6 +145,7 @@ pub mod ffi {
         fn r_take_rust_string(s: String);
         fn r_take_unique_ptr_string(s: UniquePtr<CxxString>);
         fn r_take_ref_vector(v: &CxxVector<u8>);
+        fn r_take_ref_empty_vector(v: &CxxVector<u64>);
         fn r_take_rust_vec(v: Vec<u8>);
         fn r_take_rust_vec_string(v: Vec<String>);
         fn r_take_ref_rust_vec(v: &Vec<u8>);
@@ -311,6 +312,11 @@ fn r_take_unique_ptr_string(s: UniquePtr<CxxString>) {
 fn r_take_ref_vector(v: &CxxVector<u8>) {
     let slice = v.as_slice();
     assert_eq!(slice, [20, 2, 0]);
+}
+
+fn r_take_ref_empty_vector(v: &CxxVector<u64>) {
+    assert!(v.as_slice().is_empty());
+    assert!(v.is_empty());
 }
 
 fn r_take_rust_vec(v: Vec<u8>) {
