@@ -25,7 +25,7 @@ struct Opt {
     header: bool,
     cxx_impl_annotations: Option<String>,
     include: Vec<String>,
-    output: Output,
+    outputs: Vec<Output>,
 }
 
 fn main() {
@@ -35,35 +35,54 @@ fn main() {
     }
 }
 
+enum Kind {
+    GeneratedHeader,
+    GeneratedImplementation,
+    Header,
+}
+
 fn try_main() -> Result<()> {
     let opt = app::from_args();
 
-    let gen_header = opt.header || opt.output.ends_with(".h");
+    let mut outputs = Vec::new();
+    let mut gen_header = false;
+    let mut gen_implementation = false;
+    for output in opt.outputs {
+        let kind = if opt.input.is_none() {
+            Kind::Header
+        } else if opt.header || output.ends_with(".h") {
+            gen_header = true;
+            Kind::GeneratedHeader
+        } else {
+            gen_implementation = true;
+            Kind::GeneratedImplementation
+        };
+        outputs.push((output, kind));
+    }
 
     let gen = gen::Opt {
         include: opt.include,
         cxx_impl_annotations: opt.cxx_impl_annotations,
         gen_header,
-        gen_implementation: !gen_header,
+        gen_implementation,
     };
 
-    let content;
-    let content = match (opt.input, gen_header) {
-        (Some(input), true) => {
-            content = gen::generate_from_path(&input, &gen).header;
-            content.as_slice()
-        }
-        (Some(input), false) => {
-            content = gen::generate_from_path(&input, &gen).implementation;
-            content.as_slice()
-        }
-        (None, true) => include::HEADER.as_bytes(),
-        (None, false) => unreachable!(), // enforced by required_unless
+    let generated_code = if let Some(input) = opt.input {
+        gen::generate_from_path(&input, &gen)
+    } else {
+        Default::default()
     };
 
-    match opt.output {
-        Output::Stdout => drop(io::stdout().write_all(content)),
-        Output::File(path) => fs::write(path, content)?,
+    for (output, kind) in outputs {
+        let content = match kind {
+            Kind::GeneratedHeader => &generated_code.header,
+            Kind::GeneratedImplementation => &generated_code.implementation,
+            Kind::Header => include::HEADER.as_bytes(),
+        };
+        match output {
+            Output::Stdout => drop(io::stdout().write_all(content)),
+            Output::File(path) => fs::write(path, content)?,
+        }
     }
 
     Ok(())

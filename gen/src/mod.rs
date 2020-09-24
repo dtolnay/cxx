@@ -50,6 +50,7 @@ pub struct Opt {
 }
 
 /// Results of code generation.
+#[derive(Default)]
 pub struct GeneratedCode {
     /// The bytes of a C++ header file.
     pub header: Vec<u8>,
