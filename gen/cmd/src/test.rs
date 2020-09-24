@@ -24,8 +24,9 @@ OPTIONS:
             Print help information.
 
         --header
-            Emit header with declarations only.
-
+            Emit header with declarations only. Optional if using `-o` with
+            a path ending in `.h`.
+               \x20
     -i, --include <include>...
             Any additional headers to #include. The cxxbridge tool does not
             parse or even require the given paths to exist; they simply go

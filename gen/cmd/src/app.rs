@@ -102,9 +102,11 @@ these C++ functions in another.
 }
 
 fn arg_header() -> Arg {
-    Arg::with_name(HEADER)
-        .long(HEADER)
-        .help("Emit header with declarations only.")
+    const HELP: &str = "\
+Emit header with declarations only. Optional if using `-o` with
+a path ending in `.h`.
+    ";
+    Arg::with_name(HEADER).long(HEADER).help(HELP)
 }
 
 fn arg_include() -> Arg {
