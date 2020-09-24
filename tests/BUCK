@@ -1,4 +1,4 @@
-load("//tools/buck:genrule.bzl", "genrule")
+load("//tools/buck:rust_cxx_bridge.bzl", "rust_cxx_bridge")
 
 rust_test(
     name = "test",
@@ -34,23 +34,12 @@ cxx_library(
     deps = ["//:core"],
 )
 
-genrule(
-    name = "bridge/header",
-    srcs = ["ffi/lib.rs"],
-    out = "ffi/lib.rs.h",
-    cmd = "$(exe //:codegen) --header ${SRCS} > ${OUT}",
+rust_cxx_bridge(
+    name = "bridge",
+    src = "ffi/lib.rs",
 )
 
-genrule(
-    name = "bridge/source",
-    srcs = ["ffi/lib.rs"],
-    out = "ffi/lib.rs.cc",
-    cmd = "$(exe //:codegen) ${SRCS} > ${OUT}",
-)
-
-genrule(
-    name = "module/source",
-    srcs = ["ffi/module.rs"],
-    out = "ffi/module.rs.cc",
-    cmd = "$(exe //:codegen) ${SRCS} > ${OUT}",
+rust_cxx_bridge(
+    name = "module",
+    src = "ffi/module.rs",
 )

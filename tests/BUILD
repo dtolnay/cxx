@@ -1,5 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//tools/bazel:rust.bzl", "rust_library", "rust_test")
+load("//tools/bazel:rust_cxx_bridge.bzl", "rust_cxx_bridge")
 
 rust_test(
     name = "test",
@@ -36,33 +37,18 @@ cc_library(
     ],
 )
 
-genrule(
-    name = "bridge/header",
-    srcs = ["ffi/lib.rs"],
-    outs = ["ffi/lib.rs.h"],
-    cmd = "$(location //:codegen) --header $< > $@",
-    tools = ["//:codegen"],
-)
-
-genrule(
-    name = "bridge/source",
-    srcs = ["ffi/lib.rs"],
-    outs = ["ffi/lib.rs.cc"],
-    cmd = "$(location //:codegen) $< > $@",
-    tools = ["//:codegen"],
-)
-
-cc_library(
-    name = "bridge/include",
-    hdrs = [":bridge/header"],
+rust_cxx_bridge(
+    name = "bridge",
+    src = "ffi/lib.rs",
     include_prefix = "cxx-test-suite",
     strip_include_prefix = "ffi",
+    deps = [":impl"],
 )
 
-genrule(
-    name = "module/source",
-    srcs = ["ffi/module.rs"],
-    outs = ["ffi/module.rs.cc"],
-    cmd = "$(location //:codegen) $< > $@",
-    tools = ["//:codegen"],
+rust_cxx_bridge(
+    name = "module",
+    src = "ffi/module.rs",
+    include_prefix = "cxx-test-suite",
+    strip_include_prefix = "ffi",
+    deps = [":impl"],
 )
