@@ -399,6 +399,7 @@ extern "C" const char *cxx_run_test() noexcept {
   r_take_rust_string(rust::String("2020"));
   r_take_unique_ptr_string(
       std::unique_ptr<std::string>(new std::string("2020")));
+  r_take_ref_vector(std::vector<uint8_t>{20, 2, 0});
   r_take_enum(Enum::AVal);
 
   ASSERT(r_try_return_primitive() == 2020);
