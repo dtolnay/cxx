@@ -65,18 +65,25 @@ pub(super) fn from_args() -> Opt {
         .unwrap_or_default()
         .map(str::to_owned)
         .collect();
-    let output = match matches.value_of_os(OUTPUT) {
-        None => Output::Stdout,
-        Some(path) if path == "-" => Output::Stdout,
-        Some(path) => Output::File(PathBuf::from(path)),
-    };
+
+    let mut outputs = Vec::new();
+    for path in matches.values_of_os(OUTPUT).unwrap_or_default() {
+        outputs.push(if path == "-" {
+            Output::Stdout
+        } else {
+            Output::File(PathBuf::from(path))
+        });
+    }
+    if outputs.is_empty() {
+        outputs.push(Output::Stdout);
+    }
 
     Opt {
         input,
         cxx_impl_annotations,
         header,
         include,
-        output,
+        outputs,
     }
 }
 
@@ -142,6 +149,7 @@ not specified.
         .long(OUTPUT)
         .short("o")
         .takes_value(true)
+        .multiple(true)
         .validator_os(validate_utf8)
         .help(HELP)
 }
