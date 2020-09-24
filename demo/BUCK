@@ -1,4 +1,4 @@
-load("//tools/buck:genrule.bzl", "genrule")
+load("//tools/buck:rust_cxx_bridge.bzl", "rust_cxx_bridge")
 
 rust_binary(
     name = "demo",
@@ -10,34 +10,10 @@ rust_binary(
     ],
 )
 
-cxx_library(
+rust_cxx_bridge(
     name = "bridge",
-    srcs = [":bridge/source"],
-    deps = [
-        ":bridge/include",
-        ":demo-include",
-    ],
-)
-
-genrule(
-    name = "bridge/header",
-    srcs = ["src/main.rs"],
-    out = "src/main.rs.h",
-    cmd = "$(exe //:codegen) --header ${SRCS} > ${OUT}",
-    type = "cxxbridge",
-)
-
-genrule(
-    name = "bridge/source",
-    srcs = ["src/main.rs"],
-    out = "src/main.rs.cc",
-    cmd = "$(exe //:codegen) ${SRCS} > ${OUT}",
-    type = "cxxbridge",
-)
-
-cxx_library(
-    name = "bridge/include",
-    exported_headers = [":bridge/header"],
+    src = "src/main.rs",
+    deps = [":demo-include"],
 )
 
 cxx_library(

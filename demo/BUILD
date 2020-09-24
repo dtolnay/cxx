@@ -1,5 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//tools/bazel:rust.bzl", "rust_binary")
+load("//tools/bazel:rust_cxx_bridge.bzl", "rust_cxx_bridge")
 
 rust_binary(
     name = "demo",
@@ -11,34 +12,10 @@ rust_binary(
     ],
 )
 
-cc_library(
+rust_cxx_bridge(
     name = "bridge",
-    srcs = [":bridge/source"],
-    deps = [
-        ":bridge/include",
-        ":demo-include",
-    ],
-)
-
-genrule(
-    name = "bridge/header",
-    srcs = ["src/main.rs"],
-    outs = ["src/main.rs.h"],
-    cmd = "$(location //:codegen) --header $< > $@",
-    tools = ["//:codegen"],
-)
-
-genrule(
-    name = "bridge/source",
-    srcs = ["src/main.rs"],
-    outs = ["src/main.rs.cc"],
-    cmd = "$(location //:codegen) $< > $@",
-    tools = ["//:codegen"],
-)
-
-cc_library(
-    name = "bridge/include",
-    hdrs = [":bridge/header"],
+    src = "src/main.rs",
+    deps = [":demo-include"],
 )
 
 cc_library(
