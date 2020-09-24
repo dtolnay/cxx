@@ -168,8 +168,22 @@ macro_rules! impl_vector_element {
                         fn __vector_size(_: &CxxVector<$ty>) -> usize;
                     }
                 }
-                let ret = unsafe { slice::from_raw_parts(__vector_data(v), __vector_size(v)) };
-                ret
+                let data : *const $ty = unsafe { __vector_data(v) };
+                if (data.is_null())
+                {
+                    // Avoid undefined behaviour in slice::from_raw_parts() as
+                    // std::vector::data() returns nullptr if no capacity().
+                    // Alternative: Use from_raw_parts(NonNull::dangling(), 0)
+                    let ret = <&[$ty]>::default(); // empty slice
+                    ret
+                }
+                else
+                {
+                    // std::vector with capacity() has valid data ptr, even if
+                    // size() == 0.
+                    let ret = unsafe { slice::from_raw_parts(data, __vector_size(v)) };
+                    ret
+                }
             }
             unsafe fn __get_unchecked(v: &CxxVector<$ty>, pos: usize) -> &$ty {
                 extern "C" {

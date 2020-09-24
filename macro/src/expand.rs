@@ -867,8 +867,22 @@ fn expand_cxx_vector(namespace: &Namespace, elem: &Ident) -> TokenStream {
                     #[link_name = #link_data]
                     fn __vector_data(_: &::cxx::CxxVector<#elem>) -> *const #elem;
                 }
-                let ret = unsafe { std::slice::from_raw_parts(__vector_data(v), __vector_size(v)) };
-                ret
+                let data = unsafe { __vector_data(v) };
+                if (data.is_null())
+                {
+                    // Avoid undefined behaviour in slice::from_raw_parts() as
+                    // std::vector::data() returns nullptr if no capacity().
+                    // Alternative: Use from_raw_parts(NonNull::dangling(), 0)
+                    let ret = <&[Self]>::default(); // empty slice
+                    ret
+                }
+                else
+                {
+                    // std::vector with capacity() has valid data ptr, even if
+                    // size() == 0.
+                    let ret = unsafe { std::slice::from_raw_parts(data, __vector_size(v)) };
+                    ret
+                }
             }
             unsafe fn __get_unchecked(v: &::cxx::CxxVector<Self>, pos: usize) -> &Self {
                 extern "C" {

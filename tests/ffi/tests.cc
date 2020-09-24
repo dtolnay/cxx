@@ -406,6 +406,23 @@ extern "C" const char *cxx_run_test() noexcept {
     std::vector<std::uint8_t> v{86, 75, 30, 9};
     r_access_vector_u8_as_slice(v);
   }
+  {
+    // Empty std::vector has data() == nullptr.
+    // This shall produce an empty slice.
+    std::vector<std::uint8_t> v;
+    ASSERT(v.data() == nullptr);
+    ASSERT(v.size() == 0);
+    r_access_vector_u8_as_slice_empty(v);
+  }
+  {
+    // Empty std::vector with capacity has data() != nullptr and size() == 0.
+    // This shall produce an empty slice.
+    std::vector<std::uint8_t> v;
+    v.reserve(10);
+    ASSERT(v.data() != nullptr);
+    ASSERT(v.size() == 0);
+    r_access_vector_u8_as_slice_empty(v);
+  }
 
   ASSERT(r_try_return_primitive() == 2020);
   try {

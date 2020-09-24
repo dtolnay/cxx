@@ -151,6 +151,7 @@ pub mod ffi {
         fn r_take_enum(e: Enum);
 
         fn r_access_vector_u8_as_slice(v: &CxxVector<u8>);
+        fn r_access_vector_u8_as_slice_empty(v: &CxxVector<u8>);
 
         fn r_try_return_void() -> Result<()>;
         fn r_try_return_primitive() -> Result<usize>;
@@ -334,6 +335,11 @@ fn r_take_enum(e: ffi::Enum) {
 fn r_access_vector_u8_as_slice(v: &CxxVector<u8>) {
     let s = v.get_slice();
     assert_eq!(s, [86, 75, 30, 9]);
+}
+
+fn r_access_vector_u8_as_slice_empty(v: &CxxVector<u8>) {
+    let s = v.get_slice();
+    assert!(s.is_empty());
 }
 
 fn r_try_return_void() -> Result<(), Error> {
