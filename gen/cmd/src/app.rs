@@ -62,7 +62,9 @@ pub(super) fn from_args() -> Opt {
     let header = matches.is_present(HEADER);
     let include = matches
         .values_of(INCLUDE)
-        .map_or_else(Vec::new, |v| v.map(str::to_owned).collect());
+        .unwrap_or_default()
+        .map(str::to_owned)
+        .collect();
     let output = match matches.value_of_os(OUTPUT) {
         None => Output::Stdout,
         Some(path) if path == "-" => Output::Stdout,
