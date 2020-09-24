@@ -5,23 +5,23 @@ rust_binary(
     name = "demo",
     srcs = glob(["src/**/*.rs"]),
     deps = [
+        ":bridge",
         ":demo-sys",
-        ":gen",
         "//:cxx",
     ],
 )
 
 cc_library(
-    name = "gen",
-    srcs = [":gen-source"],
+    name = "bridge",
+    srcs = [":bridge/source"],
     deps = [
+        ":bridge/include",
         ":demo-include",
-        ":include",
     ],
 )
 
 genrule(
-    name = "gen-header",
+    name = "bridge/header",
     srcs = ["src/main.rs"],
     outs = ["src/main.rs.h"],
     cmd = "$(location //:codegen) --header $< > $@",
@@ -29,7 +29,7 @@ genrule(
 )
 
 genrule(
-    name = "gen-source",
+    name = "bridge/source",
     srcs = ["src/main.rs"],
     outs = ["src/main.rs.cc"],
     cmd = "$(location //:codegen) $< > $@",
@@ -37,8 +37,8 @@ genrule(
 )
 
 cc_library(
-    name = "include",
-    hdrs = [":gen-header"],
+    name = "bridge/include",
+    hdrs = [":bridge/header"],
 )
 
 cc_library(
@@ -46,8 +46,8 @@ cc_library(
     srcs = ["src/demo.cc"],
     copts = ["-std=c++14"],
     deps = [
+        ":bridge/include",
         ":demo-include",
-        ":include",
     ],
 )
 

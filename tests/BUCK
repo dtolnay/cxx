@@ -23,33 +23,33 @@ cxx_library(
     name = "impl",
     srcs = [
         "ffi/tests.cc",
-        ":gen-lib-source",
-        ":gen-module-source",
+        ":bridge/source",
+        ":module/source",
     ],
     header_namespace = "cxx-test-suite",
     headers = {
-        "lib.rs.h": ":gen-lib-header",
+        "lib.rs.h": ":bridge/header",
         "tests.h": "ffi/tests.h",
     },
     deps = ["//:core"],
 )
 
 genrule(
-    name = "gen-lib-header",
+    name = "bridge/header",
     srcs = ["ffi/lib.rs"],
     out = "ffi/lib.rs.h",
     cmd = "$(exe //:codegen) --header ${SRCS} > ${OUT}",
 )
 
 genrule(
-    name = "gen-lib-source",
+    name = "bridge/source",
     srcs = ["ffi/lib.rs"],
     out = "ffi/lib.rs.cc",
     cmd = "$(exe //:codegen) ${SRCS} > ${OUT}",
 )
 
 genrule(
-    name = "gen-module-source",
+    name = "module/source",
     srcs = ["ffi/module.rs"],
     out = "ffi/module.rs.cc",
     cmd = "$(exe //:codegen) ${SRCS} > ${OUT}",
