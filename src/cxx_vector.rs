@@ -4,6 +4,7 @@ use core::fmt::{self, Display};
 use core::marker::PhantomData;
 use core::mem;
 use core::ptr;
+use core::slice;
 
 /// Binding to C++ `std::vector<T, std::allocator<T>>`.
 ///
@@ -44,7 +45,7 @@ where
     /// out of bounds.
     pub fn get(&self, pos: usize) -> Option<&T> {
         if pos < self.len() {
-            Some(unsafe { T::__get_unchecked(self, pos) })
+            Some(unsafe { self.get_unchecked(pos) })
         } else {
             None
         }
@@ -61,7 +62,24 @@ where
     ///
     /// [operator_at]: https://en.cppreference.com/w/cpp/container/vector/operator_at
     pub unsafe fn get_unchecked(&self, pos: usize) -> &T {
-        T::__get_unchecked(self, pos)
+        &*T::__get_unchecked(self, pos)
+    }
+
+    /// Returns a slice to the underlying contiguous array of elements.
+    pub fn as_slice(&self) -> &[T] {
+        let len = self.len();
+        if len == 0 {
+            // The slice::from_raw_parts in the other branch requires a nonnull
+            // and properly aligned data ptr. C++ standard does not guarantee
+            // that data() on a vector with size 0 would return a nonnull
+            // pointer or sufficiently aligned pointer, so using it would be
+            // undefined behavior. Create our own empty slice in Rust instead
+            // which upholds the invariants.
+            <&[T]>::default()
+        } else {
+            let ptr = unsafe { T::__get_unchecked(self, 0) };
+            unsafe { slice::from_raw_parts(ptr, len) }
+        }
     }
 }
 
@@ -122,7 +140,7 @@ where
 pub unsafe trait VectorElement: Sized {
     const __NAME: &'static dyn Display;
     fn __vector_size(v: &CxxVector<Self>) -> usize;
-    unsafe fn __get_unchecked(v: &CxxVector<Self>, pos: usize) -> &Self;
+    unsafe fn __get_unchecked(v: &CxxVector<Self>, pos: usize) -> *const Self;
     fn __unique_ptr_null() -> *mut c_void;
     unsafe fn __unique_ptr_raw(raw: *mut CxxVector<Self>) -> *mut c_void;
     unsafe fn __unique_ptr_get(repr: *mut c_void) -> *const CxxVector<Self>;
@@ -145,14 +163,14 @@ macro_rules! impl_vector_element {
                 }
                 unsafe { __vector_size(v) }
             }
-            unsafe fn __get_unchecked(v: &CxxVector<$ty>, pos: usize) -> &$ty {
+            unsafe fn __get_unchecked(v: &CxxVector<$ty>, pos: usize) -> *const $ty {
                 extern "C" {
                     attr! {
                         #[link_name = concat!("cxxbridge04$std$vector$", $segment, "$get_unchecked")]
                         fn __get_unchecked(_: &CxxVector<$ty>, _: usize) -> *const $ty;
                     }
                 }
-                &*__get_unchecked(v, pos)
+                __get_unchecked(v, pos)
             }
             fn __unique_ptr_null() -> *mut c_void {
                 extern "C" {
