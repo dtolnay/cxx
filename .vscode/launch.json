@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run cxx demo",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": ["build", "--manifest-path", "demo/Cargo.toml"],
+                "filter": {
+                    "name": "demo",
+                    "kind": "bin"
+                }
+            }
+        }
+    ]
+}
