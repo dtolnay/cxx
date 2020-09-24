@@ -75,7 +75,7 @@ where
             // pointer or sufficiently aligned pointer, so using it would be
             // undefined behavior. Create our own empty slice in Rust instead
             // which upholds the invariants.
-            <&[T]>::default()
+            &[]
         } else {
             let ptr = unsafe { T::__get_unchecked(self, 0) };
             unsafe { slice::from_raw_parts(ptr, len) }
