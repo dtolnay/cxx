@@ -69,6 +69,12 @@ where
     pub fn as_slice(&self) -> &[T] {
         let len = self.len();
         if len == 0 {
+            // The slice::from_raw_parts in the other branch requires a nonnull
+            // and properly aligned data ptr. C++ standard does not guarantee
+            // that data() on a vector with size 0 would return a nonnull
+            // pointer or sufficiently aligned pointer, so using it would be
+            // undefined behavior. Create our own empty slice in Rust instead
+            // which upholds the invariants.
             <&[T]>::default()
         } else {
             let ptr = unsafe { T::__get_unchecked(self, 0) };
