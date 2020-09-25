@@ -134,6 +134,7 @@ version = "0.0.0"
 dependencies = [
  "cxx",
  "cxx-build",
+ "cxxbridge-flags",
 ]
 
 [[package]]
