@@ -80,6 +80,11 @@ pub(super) fn gen(
                     write_struct_with_methods(out, ety, methods);
                 }
             }
+            Api::TypeAlias(ety) => {
+                if types.required_trivial_aliases.contains(&ety.ident) {
+                    check_trivial_extern_type(out, &ety.ident)
+                }
+            }
             _ => {}
         }
     }
@@ -124,13 +129,18 @@ pub(super) fn gen(
 fn write_includes(out: &mut OutFile, types: &Types) {
     for ty in types {
         match ty {
-            Type::Ident(ident) => match Atom::from(ident) {
-                Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(I8) | Some(I16) | Some(I32)
-                | Some(I64) => out.include.cstdint = true,
-                Some(Usize) => out.include.cstddef = true,
-                Some(CxxString) => out.include.string = true,
-                Some(Bool) | Some(Isize) | Some(F32) | Some(F64) | Some(RustString) | None => {}
-            },
+            Type::Ident(ident) => {
+                match Atom::from(ident) {
+                    Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(I8) | Some(I16)
+                    | Some(I32) | Some(I64) => out.include.cstdint = true,
+                    Some(Usize) => out.include.cstddef = true,
+                    Some(CxxString) => out.include.string = true,
+                    Some(Bool) | Some(Isize) | Some(F32) | Some(F64) | Some(RustString) | None => {}
+                };
+                if types.required_trivial_aliases.contains(&ident) {
+                    out.include.type_traits = true;
+                };
+            }
             Type::RustBox(_) => out.include.type_traits = true,
             Type::UniquePtr(_) => out.include.memory = true,
             Type::CxxVector(_) => out.include.vector = true,
@@ -399,6 +409,11 @@ fn check_enum(out: &mut OutFile, enm: &Enum) {
             enm.ident, variant.ident, variant.discriminant,
         );
     }
+}
+
+fn check_trivial_extern_type(out: &mut OutFile, id: &Ident) {
+    writeln!(out, "static_assert(std::is_trivially_move_constructible<{}>::value,\"type {} marked as Trivial in Rust is not trivially move constructible in C++\");", id, id);
+    writeln!(out, "static_assert(std::is_trivially_destructible<{}>::value,\"type {} marked as Trivial in Rust is not trivially destructible in C++\");", id, id);
 }
 
 fn write_exception_glue(out: &mut OutFile, apis: &[Api]) {
