@@ -34,6 +34,14 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{matrix.rust}}
+      - name: Determine test suite subset
+        # Our Windows jobs are the longest running, so exclude the relatively
+        # slow compiletest from them to speed up end-to-end CI time, except
+        # during cron builds when no human is presumably waiting on the build.
+        # The extra coverage is not particularly valuable and we can still
+        # ensure the test is kept passing on the basis of the scheduled builds.
+        if: matrix.os == 'windows' && github.event_name != 'schedule'
+        run: echo '::set-env name=RUSTFLAGS::--cfg skip_ui_tests'
       - run: cargo run --manifest-path demo/Cargo.toml
       - run: cargo test --workspace --exclude cxx-test-suite
 
