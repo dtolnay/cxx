@@ -4,6 +4,11 @@
 //! C++ code generator, set up any additional compiler flags depending on
 //! the use case, and make the C++ compiler invocation.
 //!
+//! Set CXX features such as support of a different C++ standard - default is
+//! C++11 - by setting the feature on the CXX crate. This ensures that the CXX
+//! bridge library code in cxx.h|cc gets compiled with the same feature flags
+//! as your code.
+//!
 //! <br>
 //!
 //! # Example
@@ -16,7 +21,7 @@
 //! fn main() {
 //!     cxx_build::bridge("src/main.rs")
 //!         .file("src/demo.cc")
-//!         .flag_if_supported("-std=c++11")
+//!         .flag_if_supported(cxxbridge_flags::STD)
 //!         .compile("cxxbridge-demo");
 //!
 //!     println!("cargo:rerun-if-changed=src/main.rs");
@@ -87,7 +92,7 @@ pub fn bridge(rust_source_file: impl AsRef<Path>) -> Build {
 /// let source_files = vec!["src/main.rs", "src/path/to/other.rs"];
 /// cxx_build::bridges(source_files)
 ///     .file("src/demo.cc")
-///     .flag_if_supported("-std=c++11")
+///     .flag_if_supported(cxxbridge_flags::STD)
 ///     .compile("cxxbridge-demo");
 /// ```
 #[must_use]

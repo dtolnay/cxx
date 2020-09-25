@@ -212,6 +212,11 @@ For builds that are orchestrated by Cargo, you will use a build script that runs
 CXX's C++ code generator and compiles the resulting C++ code along with any
 other C++ code for your crate.
 
+Set CXX features such as support of a different C++ standard - default is
+C++11 - by setting the feature on the CXX crate. This ensures that the CXX
+bridge library code in cxx.h|cc gets compiled with the same feature flags
+as your code.
+
 The canonical build script is as follows. The indicated line returns a
 [`cc::Build`] instance (from the usual widely used `cc` crate) on which you can
 set up any additional source files and compiler flags as normal.
@@ -221,8 +226,14 @@ set up any additional source files and compiler flags as normal.
 ```toml
 # Cargo.toml
 
+[dependencies]
+cxx = "0.4"
+# To pick a different C++ standard:
+# cxx = { version = "0.4", features = ["c++14"] }
+
 [build-dependencies]
 cxx-build = "0.4"
+cxxbridge-flags = "0.4"
 ```
 
 ```rust
@@ -231,7 +242,7 @@ cxx-build = "0.4"
 fn main() {
     cxx_build::bridge("src/main.rs")  // returns a cc::Build
         .file("src/demo.cc")
-        .flag_if_supported("-std=c++11")
+        .flag_if_supported(cxxbridge_flags::STD)
         .compile("cxxbridge-demo");
 
     println!("cargo:rerun-if-changed=src/main.rs");
