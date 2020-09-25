@@ -134,6 +134,8 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
     build.cpp(true);
     build.cpp_link_stdlib(None); // linked via link-cplusplus crate
     build.include(&include_dir);
+    // Set feature parameters, such as C++ std, for simpler usage
+    build.flag_if_supported(cxxbridge_flags::STD);
     write_header(prj);
     let crate_dir = symlink_crate(prj, &mut build);
 

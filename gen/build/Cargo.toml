@@ -16,6 +16,7 @@ codespan-reporting = "0.9"
 proc-macro2 = { version = "1.0.17", default-features = false, features = ["span-locations"] }
 quote = { version = "1.0", default-features = false }
 syn = { version = "1.0.20", default-features = false, features = ["parsing", "printing", "clone-impls", "full"] }
+cxxbridge-flags = { version = "=0.4.7", path = "../../flags", default-features = false }
 
 [dev-dependencies]
 cxx-gen = { version = "0.4", path = "../lib" }

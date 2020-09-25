@@ -10,5 +10,4 @@ cxx = { path = "..", features= ["c++14"] }
 
 [build-dependencies]
 cxx-build = { path = "../gen/build" }
-cxxbridge-flags = { path = "../flags" }
 

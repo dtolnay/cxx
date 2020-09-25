@@ -51,6 +51,11 @@ rust_library(
 )
 
 rust_library(
+    name = "cxxbridge-flags",
+    srcs = glob(["flags/src/*.rs"]),
+)
+
+rust_library(
     name = "build",
     srcs = glob(["gen/build/src/**/*.rs"]),
     data = ["gen/build/src/gen/include/cxx.h"],
@@ -61,6 +66,7 @@ rust_library(
         "//third-party:proc-macro2",
         "//third-party:quote",
         "//third-party:syn",
+        "//:cxxbridge-flags",
     ],
 )
 
