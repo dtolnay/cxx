@@ -78,6 +78,7 @@ dependencies = [
  "cc",
  "codespan-reporting",
  "cxx-gen",
+ "cxxbridge-flags",
  "proc-macro2",
  "quote",
  "syn",
@@ -100,7 +101,6 @@ version = "0.0.0"
 dependencies = [
  "cxx",
  "cxx-build",
- "cxxbridge-flags",
 ]
 
 [[package]]
@@ -134,7 +134,6 @@ version = "0.0.0"
 dependencies = [
  "cxx",
  "cxx-build",
- "cxxbridge-flags",
 ]
 
 [[package]]
