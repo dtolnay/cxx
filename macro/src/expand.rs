@@ -57,6 +57,10 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
             Api::TypeAlias(alias) => {
                 expanded.extend(expand_type_alias(alias));
                 hidden.extend(expand_type_alias_verify(namespace, alias));
+                let ident = &alias.ident;
+                if types.required_trivial_aliases.contains(ident) {
+                    hidden.extend(expand_type_alias_kind_trivial_verify(alias));
+                }
             }
         }
     }
@@ -179,6 +183,7 @@ fn expand_cxx_type(namespace: &Namespace, ety: &ExternType) -> TokenStream {
 
         unsafe impl ::cxx::ExternType for #ident {
             type Id = #type_id;
+            type Kind = ::cxx::Opaque;
         }
     }
 }
@@ -674,6 +679,18 @@ fn expand_type_alias_verify(namespace: &Namespace, alias: &TypeAlias) -> TokenSt
 
     quote! {
         const _: fn() = #begin #ident, #type_id #end;
+    }
+}
+
+fn expand_type_alias_kind_trivial_verify(type_alias: &TypeAlias) -> TokenStream {
+    let ident = &type_alias.ident;
+    let begin_span = type_alias.type_token.span;
+    let end_span = type_alias.semi_token.span;
+    let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_kind::<);
+    let end = quote_spanned!(end_span=> >);
+
+    quote! {
+        const _: fn() = #begin #ident, ::cxx::Trivial #end;
     }
 }
 

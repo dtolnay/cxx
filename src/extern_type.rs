@@ -104,7 +104,28 @@ pub unsafe trait ExternType {
     /// # }
     /// ```
     type Id;
+
+    /// Either `kind::Opaque` or `kind::Trivial`. If in doubt, use
+    /// `kind::Opaque`.
+    type Kind;
+}
+
+pub(crate) mod kind {
+
+    /// An opaque type which can't be passed or held by value within Rust.
+    /// For example, a C++ type with a destructor, or a non-trivial move
+    /// constructor. Rust's strict move semantics mean that we can't own
+    /// these by value in Rust, but they can still be owned by a
+    /// `UniquePtr`...
+    pub struct Opaque;
+
+    /// A type with trivial move constructors and no destructor, which
+    /// can therefore be owned and moved around in Rust code directly.
+    pub struct Trivial;
 }
 
 #[doc(hidden)]
 pub fn verify_extern_type<T: ExternType<Id = Id>, Id>() {}
+
+#[doc(hidden)]
+pub fn verify_extern_kind<T: ExternType<Kind = Kind>, Kind>() {}
