@@ -11,7 +11,12 @@ def rust_cxx_bridge(
         name = "%s/header" % name,
         srcs = [src],
         outs = [src + ".h"],
-        args = ["$(location %s)" % src, "-o", "$(location %s.h)" % src, "--header"],
+        args = [
+            "$(location %s)" % src,
+            "-o",
+            "$(location %s.h)" % src,
+            "--header",
+        ],
         tool = "//:codegen",
     )
 
@@ -19,7 +24,11 @@ def rust_cxx_bridge(
         name = "%s/source" % name,
         srcs = [src],
         outs = [src + ".cc"],
-        args = ["$(location %s)" % src, "-o", "$(location %s.cc)" % src],
+        args = [
+            "$(location %s)" % src,
+            "-o",
+            "$(location %s.cc)" % src,
+        ],
         tool = "//:codegen",
     )
 
