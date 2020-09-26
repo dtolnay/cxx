@@ -1,3 +1,4 @@
+load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 def rust_cxx_bridge(
@@ -6,20 +7,29 @@ def rust_cxx_bridge(
         include_prefix = None,
         strip_include_prefix = None,
         deps = []):
-    native.genrule(
+    run_binary(
         name = "%s/header" % name,
         srcs = [src],
         outs = [src + ".h"],
-        cmd = "$(location //:codegen) --header $< > $@",
-        tools = ["//:codegen"],
+        args = [
+            "$(location %s)" % src,
+            "-o",
+            "$(location %s.h)" % src,
+            "--header",
+        ],
+        tool = "//:codegen",
     )
 
-    native.genrule(
+    run_binary(
         name = "%s/source" % name,
         srcs = [src],
         outs = [src + ".cc"],
-        cmd = "$(location //:codegen) $< > $@",
-        tools = ["//:codegen"],
+        args = [
+            "$(location %s)" % src,
+            "-o",
+            "$(location %s.cc)" % src,
+        ],
+        tool = "//:codegen",
     )
 
     cc_library(
