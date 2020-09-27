@@ -5,7 +5,7 @@ def rust_cxx_bridge(name, src, deps = []):
         name = "%s/header" % name,
         srcs = [src],
         out = src + ".h",
-        cmd = "$(exe //:codegen) --header ${SRCS} > ${OUT}",
+        cmd = "$(exe //:codegen) ${SRCS} -o ${OUT}",
         type = "cxxbridge",
     )
 
@@ -13,7 +13,7 @@ def rust_cxx_bridge(name, src, deps = []):
         name = "%s/source" % name,
         srcs = [src],
         out = src + ".cc",
-        cmd = "$(exe //:codegen) ${SRCS} > ${OUT}",
+        cmd = "$(exe //:codegen) ${SRCS} -o ${OUT}",
         type = "cxxbridge",
     )
 
