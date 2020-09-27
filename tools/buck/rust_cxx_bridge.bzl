@@ -3,17 +3,21 @@ load("//tools/buck:genrule.bzl", "genrule")
 def rust_cxx_bridge(name, src, deps = []):
     genrule(
         name = "%s/header" % name,
-        srcs = [src],
         out = src + ".h",
-        cmd = "$(exe //:codegen) ${SRCS} -o ${OUT}",
-        type = "cxxbridge",
+        cmd = "cp $(location :%s/generated)/generated.h ${OUT}" % name,
     )
 
     genrule(
         name = "%s/source" % name,
-        srcs = [src],
         out = src + ".cc",
-        cmd = "$(exe //:codegen) ${SRCS} -o ${OUT}",
+        cmd = "cp $(location :%s/generated)/generated.cc ${OUT}" % name,
+    )
+
+    genrule(
+        name = "%s/generated" % name,
+        srcs = [src],
+        out = ".",
+        cmd = "$(exe //:codegen) ${SRCS} -o ${OUT}/generated.h -o ${OUT}/generated.cc",
         type = "cxxbridge",
     )
 
