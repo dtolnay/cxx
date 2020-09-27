@@ -7,25 +7,27 @@ def rust_cxx_bridge(
         include_prefix = None,
         strip_include_prefix = None,
         deps = []):
-    run_binary(
+    native.alias(
         name = "%s/header" % name,
+        actual = src + ".h",
+    )
+
+    native.alias(
+        name = "%s/source" % name,
+        actual = src + ".cc",
+    )
+
+    run_binary(
+        name = "%s/generated" % name,
         srcs = [src],
-        outs = [src + ".h"],
+        outs = [
+            src + ".h",
+            src + ".cc",
+        ],
         args = [
             "$(location %s)" % src,
             "-o",
             "$(location %s.h)" % src,
-            "--header",
-        ],
-        tool = "//:codegen",
-    )
-
-    run_binary(
-        name = "%s/source" % name,
-        srcs = [src],
-        outs = [src + ".cc"],
-        args = [
-            "$(location %s)" % src,
             "-o",
             "$(location %s.cc)" % src,
         ],
@@ -34,13 +36,13 @@ def rust_cxx_bridge(
 
     cc_library(
         name = name,
-        srcs = [":%s/source" % name],
+        srcs = [src + ".cc"],
         deps = deps + [":%s/include" % name],
     )
 
     cc_library(
         name = "%s/include" % name,
-        hdrs = [":%s/header" % name],
+        hdrs = [src + ".h"],
         include_prefix = include_prefix,
         strip_include_prefix = strip_include_prefix,
     )
