@@ -39,7 +39,7 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
 
     for api in apis {
         match api {
-            Api::Include(_) | Api::RustType(_) => {}
+            Api::Include(_) | Api::RustType(_) | Api::Impl(_) => {}
             Api::Struct(strct) => expanded.extend(expand_struct(strct)),
             Api::Enum(enm) => expanded.extend(expand_enum(enm)),
             Api::CxxType(ety) => {
@@ -74,12 +74,6 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
                     hidden.extend(expand_rust_vec(namespace, ident));
                 }
             }
-        } else if let Type::UniquePtr(ptr) = ty {
-            if let Type::Ident(ident) = &ptr.inner {
-                if Atom::from(ident).is_none() && !types.aliases.contains_key(ident) {
-                    expanded.extend(expand_unique_ptr(namespace, ident, types));
-                }
-            }
         } else if let Type::CxxVector(ptr) = ty {
             if let Type::Ident(ident) = &ptr.inner {
                 if Atom::from(ident).is_none() && !types.aliases.contains_key(ident) {
@@ -90,6 +84,10 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
                 }
             }
         }
+    }
+
+    for ident in types.unique_ptr_impls.into_iter() {
+        expanded.extend(expand_unique_ptr(namespace, ident, types));
     }
 
     // Work around https://github.com/rust-lang/rust/issues/67851.

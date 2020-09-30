@@ -15,6 +15,7 @@ pub struct Types<'a> {
     pub aliases: Map<&'a Ident, &'a TypeAlias>,
     pub untrusted: Map<&'a Ident, &'a ExternType>,
     pub required_trivial: Map<&'a Ident, TrivialReason<'a>>,
+    pub unique_ptr_impls: Set<&'a Ident>,
 }
 
 impl<'a> Types<'a> {
@@ -26,6 +27,7 @@ impl<'a> Types<'a> {
         let mut rust = Set::new();
         let mut aliases = Map::new();
         let mut untrusted = Map::new();
+        let mut unique_ptr_impls = Set::new();
 
         fn visit<'a>(all: &mut Set<&'a Type>, ty: &'a Type) {
             all.insert(ty);
@@ -133,6 +135,9 @@ impl<'a> Types<'a> {
                     cxx.insert(ident);
                     aliases.insert(ident, alias);
                 }
+                Api::Impl(imp) => {
+                    unique_ptr_impls.insert(&imp.ident);
+                }
             }
         }
 
@@ -170,6 +175,16 @@ impl<'a> Types<'a> {
             }
         }
 
+        for ty in &all {
+            if let Type::UniquePtr(ptr) = ty {
+                if let Type::Ident(ident) = &ptr.inner {
+                    if Atom::from(ident).is_none() && !aliases.contains_key(ident) {
+                        unique_ptr_impls.insert(ident);
+                    }
+                }
+            }
+        }
+
         Types {
             all,
             structs,
@@ -179,6 +194,7 @@ impl<'a> Types<'a> {
             aliases,
             untrusted,
             required_trivial,
+            unique_ptr_impls,
         }
     }
 

@@ -30,6 +30,10 @@ where
     pub fn contains(&self, value: &T) -> bool {
         self.set.contains(value)
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.set.is_empty()
+    }
 }
 
 impl<'s, 'a, T> IntoIterator for &'s OrderedSet<&'a T> {

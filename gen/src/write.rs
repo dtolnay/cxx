@@ -154,6 +154,9 @@ fn write_includes(out: &mut OutFile, types: &Types) {
             _ => {}
         }
     }
+    if !types.unique_ptr_impls.is_empty() {
+        out.include.memory = true;
+    }
 }
 
 fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
@@ -1054,13 +1057,6 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
                     write_rust_vec_extern(out, inner);
                 }
             }
-        } else if let Type::UniquePtr(ptr) = ty {
-            if let Type::Ident(inner) = &ptr.inner {
-                if Atom::from(inner).is_none() && !types.aliases.contains_key(inner) {
-                    out.next_section();
-                    write_unique_ptr(out, inner, types);
-                }
-            }
         } else if let Type::CxxVector(ptr) = ty {
             if let Type::Ident(inner) = &ptr.inner {
                 if Atom::from(inner).is_none() && !types.aliases.contains_key(inner) {
@@ -1070,6 +1066,12 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
             }
         }
     }
+
+    for inner in types.unique_ptr_impls.into_iter() {
+        out.next_section();
+        write_unique_ptr(out, inner, types);
+    }
+
     out.end_block("extern \"C\"");
 
     out.begin_block("namespace rust");

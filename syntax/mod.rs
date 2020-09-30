@@ -42,6 +42,7 @@ pub enum Api {
     RustType(ExternType),
     RustFunction(ExternFn),
     TypeAlias(TypeAlias),
+    Impl(Impl),
 }
 
 pub struct ExternType {
@@ -85,6 +86,13 @@ pub struct TypeAlias {
     pub eq_token: Token![=],
     pub ty: RustType,
     pub semi_token: Token![;],
+}
+
+pub struct Impl {
+    pub impl_token: Token![impl],
+    pub trait_ident: Ident,
+    pub for_token: Token![for],
+    pub ident: Ident,
 }
 
 pub struct Signature {

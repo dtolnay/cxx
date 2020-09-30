@@ -3,8 +3,8 @@ use crate::syntax::file::{Item, ItemForeignMod};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
-    attrs, error, Api, Doc, Enum, ExternFn, ExternType, Lang, Receiver, Ref, Signature, Slice,
-    Struct, Ty1, Type, TypeAlias, Var, Variant,
+    attrs, error, Api, Doc, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Signature,
+    Slice, Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
 use proc_macro2::{TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
@@ -12,8 +12,8 @@ use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::{
     Abi, Attribute, Error, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
-    GenericArgument, Ident, ItemEnum, ItemStruct, LitStr, Pat, PathArguments, Result, ReturnType,
-    Token, Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
+    GenericArgument, Ident, ItemEnum, ItemImpl, ItemStruct, LitStr, Pat, PathArguments, Result,
+    ReturnType, Token, Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
 };
 
 pub mod kw {
@@ -34,6 +34,7 @@ pub fn parse_items(cx: &mut Errors, items: Vec<Item>, trusted: bool) -> Vec<Api>
             },
             Item::ForeignMod(foreign_mod) => parse_foreign_mod(cx, foreign_mod, &mut apis, trusted),
             Item::Use(item) => cx.error(item, error::USE_NOT_ALLOWED),
+            Item::Impl(item) => parse_impl(cx, item, &mut apis),
             Item::Other(item) => cx.error(item, "unsupported item"),
         }
     }
@@ -619,5 +620,50 @@ fn parse_return_type(
     match parse_type(ret)? {
         Type::Void(_) => Ok(None),
         ty => Ok(Some(ty)),
+    }
+}
+
+fn parse_impl(cx: &mut Errors, imp: ItemImpl, api: &mut Vec<Api>) {
+    // At present we only support impl UniquePtrTarget for <ty>;
+    if !imp.items.is_empty() {
+        cx.error(imp, "impl must be empty");
+        return;
+    }
+    match &imp.trait_ {
+        None => cx.error(imp, "impl must be for a trait"),
+        Some((_, ty_path, for_token)) => {
+            let ident = ty_path.get_ident();
+            match ident {
+                None => {
+                    cx.error(imp, "path incomplete");
+                    return;
+                }
+                Some(trait_ident) if trait_ident.to_string() == "UniquePtrTarget" => {
+                    let ty = parse_type(&imp.self_ty);
+                    match ty {
+                        Err(_) => {
+                            cx.error(imp, "unable to parse type");
+                            return;
+                        }
+                        Ok(ty) => match ty {
+                            Type::Ident(ty) => {
+                                api.push(Api::Impl(Impl {
+                                    for_token: for_token.clone(),
+                                    trait_ident: trait_ident.clone(),
+                                    impl_token: imp.impl_token,
+                                    ident: ty,
+                                }));
+                            }
+                            _ => cx
+                                .error(imp, "can only impl UniquePtrTarget for a plain identifier"),
+                        },
+                    }
+                }
+                Some(_) => cx.error(
+                    imp,
+                    "only supported trait which can be implemented is UniquePtrTarget",
+                ),
+            }
+        }
     }
 }
