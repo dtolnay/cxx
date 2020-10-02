@@ -1,0 +1,21 @@
+error[E0277]: the trait bound `here::C: UniquePtrTarget` is not satisfied
+  --> $DIR/alias_missing_unique_ptr_impl.rs:15:1
+   |
+15 | #[cxx::bridge]
+   | ^^^^^^^^^^^^^^ the trait `UniquePtrTarget` is not implemented for `here::C`
+   |
+  ::: $WORKSPACE/src/unique_ptr.rs
+   |
+   |     T: UniquePtrTarget,
+   |        --------------- required by this bound in `UniquePtr`
+
+error[E0277]: the trait bound `here::Shared: UniquePtrTarget` is not satisfied
+  --> $DIR/alias_missing_unique_ptr_impl.rs:15:1
+   |
+15 | #[cxx::bridge]
+   | ^^^^^^^^^^^^^^ the trait `UniquePtrTarget` is not implemented for `here::Shared`
+   |
+  ::: $WORKSPACE/src/unique_ptr.rs
+   |
+   |     T: UniquePtrTarget,
+   |        --------------- required by this bound in `UniquePtr`
