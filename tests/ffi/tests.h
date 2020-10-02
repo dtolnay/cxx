@@ -16,6 +16,8 @@ public:
   size_t set(size_t n);
   size_t get2() const;
   size_t set2(size_t n);
+  size_t get3() const;
+  size_t set3(size_t n);
   size_t set_succeed(size_t n);
   size_t get_fail();
   const std::vector<uint8_t> &get_v() const;

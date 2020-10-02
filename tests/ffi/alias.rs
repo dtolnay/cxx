@@ -30,6 +30,9 @@ pub mod ffi {
         fn alias_c_take_unique_ptr_vector_shared(v: UniquePtr<CxxVector<Shared>>);
         fn alias_c_take_rust_vec_shared(v: Vec<Shared>);
         fn alias_c_take_enum(e: Enum);
+
+        fn get3(self: &C) -> usize;
+        fn set3(self: &mut C, n: usize) -> usize;
     }
 
     extern "Rust" {

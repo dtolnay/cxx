@@ -1,0 +1,5 @@
+error: shared type aliases cannot be used as a receiver type
+  --> $DIR/alias_receiver_type.rs:23:22
+   |
+23 |         fn bad(self: &Shared);
+   |                      ^^^^^^^

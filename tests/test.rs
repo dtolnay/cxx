@@ -235,6 +235,16 @@ fn test_c_method_calls() {
 }
 
 #[test]
+fn test_alias_c_method_calls() {
+    let mut unique_ptr = alias::ffi::alias_c_return_unique_ptr();
+
+    let old_value = unique_ptr.get3();
+    assert_eq!(2020, old_value);
+    assert_eq!(2021, unique_ptr.set3(2021));
+    assert_eq!(2021, unique_ptr.get3());
+}
+
+#[test]
 fn test_enum_representations() {
     assert_eq!(0, ffi::Enum::AVal.repr);
     assert_eq!(2020, ffi::Enum::BVal.repr);
