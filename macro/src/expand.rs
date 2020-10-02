@@ -140,7 +140,7 @@ fn expand_struct(namespace: &Namespace, strct: &Struct) -> TokenStream {
         }
 
         unsafe impl ::cxx::ExternType for #ident {
-            type Kind = ::cxx::extern_type::KindShared;
+            type Kind = ::cxx::ExternTypeKindShared;
             type Id = #type_id;
         }
     }
@@ -172,7 +172,7 @@ fn expand_enum(namespace: &Namespace, enm: &Enum) -> TokenStream {
         }
 
         unsafe impl ::cxx::ExternType for #ident {
-            type Kind = ::cxx::extern_type::KindShared;
+            type Kind = ::cxx::ExternTypeKindShared;
             type Id = #type_id;
         }
     }
@@ -191,7 +191,7 @@ fn expand_cxx_type(namespace: &Namespace, ety: &ExternType) -> TokenStream {
         }
 
         unsafe impl ::cxx::ExternType for #ident {
-            type Kind = ::cxx::extern_type::KindOpaqueCpp;
+            type Kind = ::cxx::ExternTypeKindOpaqueCpp;
             type Id = #type_id;
         }
     }
@@ -686,14 +686,14 @@ fn expand_type_alias_verify(namespace: &Namespace, alias: &TypeAlias) -> TokenSt
     let begin_span = alias.type_token.span;
     let end_span = alias.semi_token.span;
     let kind = match alias.kind {
-        AliasKind::Shared => quote!(KindShared),
-        AliasKind::OpaqueCpp => quote!(KindOpaqueCpp),
+        AliasKind::Shared => quote!(ExternTypeKindShared),
+        AliasKind::OpaqueCpp => quote!(ExternTypeKindOpaqueCpp),
     };
     let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_type::<);
     let end = quote_spanned!(end_span=> >);
 
     quote! {
-        const _: fn() = #begin #ident, ::cxx::extern_type:: #kind, #type_id #end;
+        const _: fn() = #begin #ident, ::cxx:: #kind, #type_id #end;
     }
 }
 

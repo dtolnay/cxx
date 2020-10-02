@@ -395,7 +395,7 @@ mod macros;
 mod cxx_string;
 mod cxx_vector;
 mod exception;
-pub mod extern_type;
+mod extern_type;
 mod function;
 mod opaque;
 mod result;
@@ -410,7 +410,7 @@ mod unwind;
 pub use crate::cxx_string::CxxString;
 pub use crate::cxx_vector::CxxVector;
 pub use crate::exception::Exception;
-pub use crate::extern_type::ExternType;
+pub use crate::extern_type::{ExternType, ExternTypeKindOpaqueCpp, ExternTypeKindShared};
 pub use crate::unique_ptr::UniquePtr;
 pub use cxxbridge_macro::bridge;
 

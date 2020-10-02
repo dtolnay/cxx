@@ -157,12 +157,9 @@
 /// #     pub struct StringPiece([usize; 2]);
 /// # }
 ///
-/// use cxx::{type_id, ExternType};
-/// use cxx::extern_type;
-///
-/// unsafe impl ExternType for folly_sys::StringPiece {
-///     type Kind = extern_type::KindOpaqueCpp;
-///     type Id = type_id!("folly::StringPiece");
+/// unsafe impl cxx::ExternType for folly_sys::StringPiece {
+///     type Kind = cxx::ExternTypeKindOpaqueCpp;
+///     type Id = cxx::type_id!("folly::StringPiece");
 /// }
 ///
 /// #[cxx::bridge(namespace = folly)]
@@ -186,8 +183,10 @@ pub unsafe trait ExternType {
     /// The type's kind.
     ///
     /// Must be either:
-    ///   * `KindShared` for a shared type declared outside of an extern block in a cxx::bridge, or
-    ///   * `KindOpqaueCpp` for an opaque C++ type declared inside of an `extern "C"` block.
+    ///   * `ExternTypeKindShared` for a shared type declared outside of an extern block in a
+    ///     cxx::bridge, or
+    ///   * `ExternTypeKindOpqaueCpp` for an opaque C++ type declared inside of an `extern "C"`
+    ///     block.
     ///
     /// Opaque Rust type aliases are unsupported because they can included with a use declaration
     /// and aliased more simply outside of the cxx::bridge.
@@ -200,15 +199,15 @@ pub unsafe trait ExternType {
     /// ```
     /// # struct TypeName;
     /// # unsafe impl cxx::ExternType for TypeName {
-    /// # type Kind = cxx::extern_type::KindOpaqueCpp;
+    /// # type Kind = cxx::ExternTypeKindOpaqueCpp;
     /// type Id = cxx::type_id!("name::space::of::TypeName");
     /// # }
     /// ```
     type Id;
 }
 
-pub struct KindOpaqueCpp;
-pub struct KindShared;
+pub struct ExternTypeKindOpaqueCpp;
+pub struct ExternTypeKindShared;
 
 #[doc(hidden)]
 pub fn verify_extern_type<T: ExternType<Kind = Kind, Id = Id>, Kind, Id>() {}
