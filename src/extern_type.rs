@@ -4,8 +4,6 @@
 /// #\[cxx::bridge\] invocations, both for shared types defined in another bridge and external C++
 /// definitions. This serves multiple related purposes.
 ///
-/// TODO: These docs aren't discoverable. Add a link to here from the main crate docs.
-///
 /// <br>
 ///
 /// ## Safely unifying occurrences of the same extern C++ type

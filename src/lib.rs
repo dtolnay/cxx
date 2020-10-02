@@ -346,6 +346,21 @@
 //! <tr><td><sup><i>tbd</i></sup></td><td>std::shared_ptr&lt;T&gt;</td></tr>
 //! </table>
 //!
+//! <br>
+//!
+//! # Working with multiple bridge modules
+//!
+//! Multiple cxx::bridge modules can coexist in the same project. There are multiple reasons for
+//! wanting to do so, such as for code organization reasons or to share a common library of FFI
+//! types across many different bridges. Type aliases can be used inside the cxx::bridge to safely
+//! unify the same opaque C++ type across multiple bridges or to reuse a shared type declared in
+//! another bridge.
+//
+//! See the [documentation for the ExternType trait](trait.ExternType.html) for more information
+//! and examples.
+//!
+//!
+//! [ExternType trait]: trait.ExternType.html
 //! [https://github.com/dtolnay/cxx]: https://github.com/dtolnay/cxx
 
 #![no_std]
