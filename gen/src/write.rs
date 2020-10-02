@@ -1007,12 +1007,14 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
     for ty in types {
         if let Type::RustBox(ty) = ty {
             if let Type::Ident(inner) = &ty.inner {
-                out.next_section();
-                write_rust_box_extern(out, inner);
+                if Atom::from(inner).is_none() && !types.aliases.contains_key(inner) {
+                    out.next_section();
+                    write_rust_box_extern(out, inner);
+                }
             }
         } else if let Type::RustVec(ty) = ty {
             if let Type::Ident(inner) = &ty.inner {
-                if Atom::from(inner).is_none() {
+                if Atom::from(inner).is_none() && !types.aliases.contains_key(inner) {
                     out.next_section();
                     write_rust_vec_extern(out, inner);
                 }
@@ -1040,11 +1042,13 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
     for ty in types {
         if let Type::RustBox(ty) = ty {
             if let Type::Ident(inner) = &ty.inner {
-                write_rust_box_impl(out, inner);
+                if Atom::from(inner).is_none() && !types.aliases.contains_key(inner) {
+                    write_rust_box_impl(out, inner);
+                }
             }
         } else if let Type::RustVec(ty) = ty {
             if let Type::Ident(inner) = &ty.inner {
-                if Atom::from(inner).is_none() {
+                if Atom::from(inner).is_none() && !types.aliases.contains_key(inner) {
                     write_rust_vec_impl(out, inner);
                 }
             }

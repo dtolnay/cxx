@@ -116,8 +116,12 @@ fn test_c_take() {
     check!(ffi::c_take_primitive(2020));
     check!(ffi::c_take_shared(ffi::Shared { z: 2020 }));
     check!(ffi::c_take_box(Box::new(2020)));
+    check!(ffi::c_take_box_shared(Box::new(ffi::Shared { z: 2020 })));
     check!(ffi::c_take_ref_c(&unique_ptr));
-    check!(alias::ffi::c_take_unique_ptr(unique_ptr));
+    check!(ffi::c_take_unique_ptr(unique_ptr));
+    check!(ffi::c_take_unique_ptr_shared(
+        ffi::c_return_unique_ptr_shared()
+    ));
     check!(ffi::c_take_str("2020"));
     check!(ffi::c_take_sliceu8(b"2020"));
     check!(ffi::c_take_rust_string("2020".to_owned()));
@@ -151,11 +155,24 @@ fn test_c_take() {
 
 #[test]
 fn test_alias_c_take() {
+    let unique_ptr = alias::ffi::alias_c_return_unique_ptr();
+
     check!(alias::ffi::alias_c_take_shared(ffi::Shared { z: 2020 }));
-    check!(alias::ffi::alias_c_take_enum(ffi::Enum::AVal));
+    check!(alias::ffi::alias_c_take_box_shared(Box::new(ffi::Shared {
+        z: 2020
+    })));
+    check!(alias::ffi::alias_c_take_unique_ptr(unique_ptr));
+    check!(alias::ffi::alias_c_take_unique_ptr_shared(
+        alias::ffi::alias_c_return_unique_ptr_shared()
+    ));
     check!(alias::ffi::alias_c_take_unique_ptr_vector_shared(
         alias::ffi::alias_c_return_unique_ptr_vector_shared()
     ));
+    let shared_test_vec = vec![ffi::Shared { z: 1010 }, ffi::Shared { z: 1011 }];
+    check!(alias::ffi::alias_c_take_rust_vec_shared(
+        shared_test_vec.clone()
+    ));
+    check!(alias::ffi::alias_c_take_enum(ffi::Enum::AVal));
 }
 
 /*

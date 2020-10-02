@@ -40,6 +40,7 @@ size_t &c_return_mut(Shared &shared);
 rust::Str c_return_str(const Shared &shared);
 rust::Slice<uint8_t> c_return_sliceu8(const Shared &shared);
 rust::String c_return_rust_string();
+std::unique_ptr<Shared> c_return_unique_ptr_shared();
 std::unique_ptr<std::string> c_return_unique_ptr_string();
 std::unique_ptr<std::vector<uint8_t>> c_return_unique_ptr_vector_u8();
 std::unique_ptr<std::vector<double>> c_return_unique_ptr_vector_f64();
@@ -59,7 +60,9 @@ Enum c_return_enum(uint16_t n);
 void c_take_primitive(size_t n);
 void c_take_shared(Shared shared);
 void c_take_box(rust::Box<R> r);
+void c_take_box_shared(rust::Box<Shared> shared);
 void c_take_unique_ptr(std::unique_ptr<C> c);
+void c_take_unique_ptr_shared(std::unique_ptr<Shared> shared);
 void c_take_ref_r(const R &r);
 void c_take_ref_c(const C &c);
 void c_take_str(rust::Str s);
@@ -102,14 +105,21 @@ rust::Vec<rust::String> c_try_return_rust_vec_string();
 const rust::Vec<uint8_t> &c_try_return_ref_rust_vec(const C &c);
 
 const auto alias_c_return_shared = c_return_shared;
+const auto alias_c_return_unique_ptr = c_return_unique_ptr;
 const auto alias_c_return_ref = c_return_ref;
 const auto alias_c_return_mut = c_return_mut;
 const auto alias_c_return_enum = c_return_enum;
+const auto alias_c_return_unique_ptr_shared = c_return_unique_ptr_shared;
 const auto alias_c_return_unique_ptr_vector_shared =
     c_return_unique_ptr_vector_shared;
+
+const auto alias_c_take_shared = c_take_shared;
+const auto alias_c_take_box_shared = c_take_box_shared;
+const auto alias_c_take_unique_ptr = c_take_unique_ptr;
+const auto alias_c_take_unique_ptr_shared = c_take_unique_ptr_shared;
 const auto alias_c_take_unique_ptr_vector_shared =
     c_take_unique_ptr_vector_shared;
-const auto alias_c_take_shared = c_take_shared;
+const auto alias_c_take_rust_vec_shared = c_take_rust_vec_shared;
 const auto alias_c_take_enum = c_take_enum;
 
 } // namespace tests

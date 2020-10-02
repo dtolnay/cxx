@@ -67,6 +67,10 @@ rust::Slice<uint8_t> c_return_sliceu8(const Shared &shared) {
 
 rust::String c_return_rust_string() { return "2020"; }
 
+std::unique_ptr<Shared> c_return_unique_ptr_shared() {
+  return std::unique_ptr<Shared>(new Shared{2020});
+}
+
 std::unique_ptr<std::string> c_return_unique_ptr_string() {
   return std::unique_ptr<std::string>(new std::string("2020"));
 }
@@ -161,8 +165,20 @@ void c_take_box(rust::Box<R> r) {
   }
 }
 
+void c_take_box_shared(rust::Box<Shared> shared) {
+  if (shared->z == 2020) {
+    cxx_test_suite_set_correct();
+  }
+}
+
 void c_take_unique_ptr(std::unique_ptr<C> c) {
   if (c->get() == 2020) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_unique_ptr_shared(std::unique_ptr<Shared> shared) {
+  if (shared->z == 2020) {
     cxx_test_suite_set_correct();
   }
 }

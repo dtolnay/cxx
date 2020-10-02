@@ -13,29 +13,28 @@ pub mod ffi {
 
         type C = crate::ffi::C;
 
-        // TODO: The alias prefix can be removed once these are in their own namespace.
+        // TODO(https://github.com/dtolnay/cxx/pull/298): The alias prefix can be removed once these
+        // are in their own namespace.
         fn alias_c_return_shared() -> Shared;
+        fn alias_c_return_unique_ptr() -> UniquePtr<C>;
         fn alias_c_return_ref(shared: &Shared) -> &usize;
         fn alias_c_return_mut(shared: &mut Shared) -> &mut usize;
         fn alias_c_return_enum(n: u16) -> Enum;
+        fn alias_c_return_unique_ptr_shared() -> UniquePtr<Shared>;
         fn alias_c_return_unique_ptr_vector_shared() -> UniquePtr<CxxVector<Shared>>;
 
         fn alias_c_take_shared(shared: Shared);
-        // TODO: This don't work yet because both bridges try to emit the rust_vec$tests$Shared
-        // functions. Need the remote bridge to always emit if this is gonna work. Or can we work
-        // around ODR by making the rust_vec functions inline?
-        //fn alias_c_take_rust_vec_shared(v: Vec<Shared>);
-        // TODO: Box<Shared> probably has the same problem, not currently tested
-        // TODO: Same for UniquePtr<Shared>, not currently tested
-        // TODO: Below probably doesn't work if the remote bridge doesn't use CxxVector<Shared>
+        fn alias_c_take_box_shared(shared: Box<Shared>);
+        fn alias_c_take_unique_ptr(c: UniquePtr<C>);
+        fn alias_c_take_unique_ptr_shared(s: UniquePtr<Shared>);
         fn alias_c_take_unique_ptr_vector_shared(v: UniquePtr<CxxVector<Shared>>);
+        fn alias_c_take_rust_vec_shared(v: Vec<Shared>);
         fn alias_c_take_enum(e: Enum);
-
-        fn c_take_unique_ptr(c: UniquePtr<C>);
     }
 
     extern "Rust" {
-        // TODO: The alias prefix can be removed once these are in their own namespace.
+        // TODO(https://github.com/dtolnay/cxx/pull/298): The alias prefix can be removed once these
+        // are in their own namespace.
         fn alias_r_return_shared() -> Shared;
         fn alias_r_return_ref(shared: &Shared) -> &usize;
         fn alias_r_return_mut(shared: &mut Shared) -> &mut usize;

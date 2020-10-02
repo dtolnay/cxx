@@ -31,6 +31,7 @@ pub mod ffi {
         fn c_return_shared() -> Shared;
         fn c_return_box() -> Box<R>;
         fn c_return_unique_ptr() -> UniquePtr<C>;
+        fn c_return_unique_ptr_shared() -> UniquePtr<Shared>;
         fn c_return_ref(shared: &Shared) -> &usize;
         fn c_return_mut(shared: &mut Shared) -> &mut usize;
         fn c_return_str(shared: &Shared) -> &str;
@@ -55,6 +56,9 @@ pub mod ffi {
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);
         fn c_take_box(r: Box<R>);
+        fn c_take_box_shared(shared: Box<Shared>);
+        fn c_take_unique_ptr(c: UniquePtr<C>);
+        fn c_take_unique_ptr_shared(s: UniquePtr<Shared>);
         fn c_take_ref_r(r: &R);
         fn c_take_ref_c(c: &C);
         fn c_take_str(s: &str);
