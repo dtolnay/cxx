@@ -1,0 +1,21 @@
+error[E0271]: type mismatch resolving `<here::C as ExternType>::Kind == KindShared`
+   --> $DIR/alias_wrong_kind.rs:15:1
+    |
+15  | #[cxx::bridge]
+    | ^^^^^^^^^^^^^^ expected struct `KindShared`, found struct `KindOpaqueCpp`
+    |
+   ::: $WORKSPACE/src/extern_type.rs
+    |
+    | pub fn verify_extern_type<T: ExternType<Kind = Kind, Id = Id>, Kind, Id>() {}
+    |                                         ----------- required by this bound in `verify_extern_type`
+
+error[E0271]: type mismatch resolving `<here::Shared as ExternType>::Kind == KindOpaqueCpp`
+   --> $DIR/alias_wrong_kind.rs:15:1
+    |
+15  | #[cxx::bridge]
+    | ^^^^^^^^^^^^^^ expected struct `KindOpaqueCpp`, found struct `KindShared`
+    |
+   ::: $WORKSPACE/src/extern_type.rs
+    |
+    | pub fn verify_extern_type<T: ExternType<Kind = Kind, Id = Id>, Kind, Id>() {}
+    |                                         ----------- required by this bound in `verify_extern_type`

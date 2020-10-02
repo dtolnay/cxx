@@ -131,7 +131,6 @@ fn expand_struct(namespace: &Namespace, strct: &Struct) -> TokenStream {
         quote!(#vis #field)
     });
     let type_id = type_id(namespace, ident);
-    // TODO: Add ui test for mismatched alias kinds
     quote! {
         #doc
         #[derive(#(#derives),*)]

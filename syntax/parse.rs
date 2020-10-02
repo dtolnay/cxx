@@ -177,7 +177,6 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum) -> Result<Api> {
 fn parse_alias(cx: &mut Errors, item: ItemType, kind: AliasKind) -> Result<Api> {
     let generics = &item.generics;
     if !generics.params.is_empty() || generics.where_clause.is_some() {
-        // TODO: Add ui test for this
         let type_token = item.type_token;
         let ident = &item.ident;
         let where_clause = &generics.where_clause;
@@ -417,14 +416,11 @@ fn parse_extern_verbatim(cx: &mut Errors, tokens: &TokenStream, lang: Lang) -> R
     let parse = |input: ParseStream| -> Result<ItemType> {
         // Test whether this is a type alias. This ends up parsing attributes twice but lets us emit
         // more useful errors that differentiate between an unsupported item and other alias parsing
-        // errors.
-        // TODO: Add ui test to verify this
+        // errors while still reusing syn's ItemType parsing.
         let fork = input.fork();
         fork.call(Attribute::parse_outer)?;
-        fork.parse::<Token![type]>().map_err(|_| {
-            let span = fork.cursor().token_stream();
-            Error::new_spanned(span, "unsupported foreign item")
-        })?;
+        fork.parse::<Token![type]>()
+            .map_err(|_| Error::new_spanned(tokens, "unsupported foreign item"))?;
 
         // Reuse alias parsing from syn
         input.parse()

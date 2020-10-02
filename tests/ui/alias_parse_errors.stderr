@@ -1,0 +1,17 @@
+error: unsupported foreign item
+ --> $DIR/alias_parse_errors.rs:7:9
+  |
+7 |         fn unsupported_foreign_item() {}
+  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: aliases with generic parameters are not allowed
+ --> $DIR/alias_parse_errors.rs:9:9
+  |
+9 |         type BadGeneric<T> = Bad;
+  |         ^^^^^^^^^^^^^^^^^^
+
+error: type alias in extern "Rust" block is not supported
+  --> $DIR/alias_parse_errors.rs:14:9
+   |
+14 |         type Alias = crate::Type;
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^
