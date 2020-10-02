@@ -74,6 +74,26 @@ fn test_c_return() {
 }
 
 #[test]
+fn test_alias_c_return() {
+    let mut shared = ffi::Shared { z: 2020 };
+
+    assert_eq!(2020, alias::ffi::alias_c_return_shared().z);
+    assert_eq!(2020, *alias::ffi::alias_c_return_ref(&shared));
+
+    {
+        shared.z = 2019;
+        let mut_z = alias::ffi::alias_c_return_mut(&mut shared);
+        assert_eq!(2019, *mut_z);
+        *mut_z = 2020;
+    }
+
+    match alias::ffi::alias_c_return_enum(1) {
+        enm @ ffi::Enum::BVal => assert_eq!(2020, enm.repr),
+        _ => assert!(false),
+    }
+}
+
+#[test]
 fn test_c_try_return() {
     assert_eq!((), ffi::c_try_return_void().unwrap());
     assert_eq!(2020, ffi::c_try_return_primitive().unwrap());
@@ -129,6 +149,15 @@ fn test_c_take() {
     check!(ffi::c_take_enum(ffi::Enum::AVal));
 }
 
+#[test]
+fn test_alias_c_take() {
+    check!(alias::ffi::alias_c_take_shared(ffi::Shared { z: 2020 }));
+    check!(alias::ffi::alias_c_take_enum(ffi::Enum::AVal));
+    check!(alias::ffi::alias_c_take_unique_ptr_vector_shared(
+        alias::ffi::alias_c_return_unique_ptr_vector_shared()
+    ));
+}
+
 /*
 // https://github.com/dtolnay/cxx/issues/232
 #[test]
@@ -157,6 +186,21 @@ fn test_c_call_r() {
         }
     }
     check!(cxx_run_test());
+}
+
+#[test]
+fn test_alias_c_call_r() {
+    fn cxx_run_alias_test() {
+        extern "C" {
+            fn cxx_run_alias_test() -> *const i8;
+        }
+        let failure = unsafe { cxx_run_alias_test() };
+        if !failure.is_null() {
+            let msg = unsafe { CStr::from_ptr(failure as *mut std::os::raw::c_char) };
+            eprintln!("{}", msg.to_string_lossy());
+        }
+    }
+    check!(cxx_run_alias_test());
 }
 
 #[test]

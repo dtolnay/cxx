@@ -1,7 +1,7 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::set::OrderedSet as Set;
-use crate::syntax::{Api, Derive, Enum, ExternType, Struct, Type, TypeAlias};
+use crate::syntax::{AliasKind, Api, Derive, Enum, ExternType, Struct, Type, TypeAlias};
 use proc_macro2::Ident;
 use quote::ToTokens;
 use std::collections::{BTreeMap as Map, HashSet as UnorderedSet};
@@ -129,7 +129,9 @@ impl<'a> Types<'a> {
                     if !type_names.insert(ident) {
                         duplicate_name(cx, alias, ident);
                     }
-                    cxx.insert(ident);
+                    if let AliasKind::OpaqueCpp = alias.kind {
+                        cxx.insert(ident);
+                    }
                     aliases.insert(ident, alias);
                 }
             }

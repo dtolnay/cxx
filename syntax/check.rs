@@ -64,6 +64,7 @@ fn check_type_ident(cx: &mut Check, ident: &Ident) {
         && !cx.types.enums.contains_key(ident)
         && !cx.types.cxx.contains(ident)
         && !cx.types.rust.contains(ident)
+        && !cx.types.aliases.contains_key(ident)
     {
         cx.error(ident, "unsupported type");
     }
@@ -230,6 +231,8 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
             && !cx.types.cxx.contains(&receiver.ty)
             && !cx.types.rust.contains(&receiver.ty)
         {
+            // TODO: Add ui test for aliases being disallowed in receiver position since we can't
+            // tell if it's a struct or enum, unique error message
             cx.error(span, "unrecognized receiver type");
         }
 

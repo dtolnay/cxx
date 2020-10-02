@@ -32,6 +32,7 @@ cc_library(
     include_prefix = "cxx-test-suite",
     strip_include_prefix = "ffi",
     deps = [
+        ":alias/include",
         ":bridge/include",
         "//:core",
     ],

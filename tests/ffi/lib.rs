@@ -193,7 +193,7 @@ fn r_return_primitive() -> usize {
     2020
 }
 
-fn r_return_shared() -> ffi::Shared {
+pub(crate) fn r_return_shared() -> ffi::Shared {
     ffi::Shared { z: 2020 }
 }
 
@@ -208,11 +208,11 @@ fn r_return_unique_ptr() -> UniquePtr<ffi::C> {
     unsafe { UniquePtr::from_raw(cxx_test_suite_get_unique_ptr()) }
 }
 
-fn r_return_ref(shared: &ffi::Shared) -> &usize {
+pub(crate) fn r_return_ref(shared: &ffi::Shared) -> &usize {
     &shared.z
 }
 
-fn r_return_mut(shared: &mut ffi::Shared) -> &mut usize {
+pub(crate) fn r_return_mut(shared: &mut ffi::Shared) -> &mut usize {
     &mut shared.z
 }
 
@@ -258,7 +258,7 @@ fn r_return_sum(n1: usize, n2: usize) -> usize {
     n1 + n2
 }
 
-fn r_return_enum(n: u32) -> ffi::Enum {
+pub(crate) fn r_return_enum(n: u32) -> ffi::Enum {
     if n == 0 {
         ffi::Enum::AVal
     } else if n <= 2020 {
@@ -272,7 +272,7 @@ fn r_take_primitive(n: usize) {
     assert_eq!(n, 2020);
 }
 
-fn r_take_shared(shared: ffi::Shared) {
+pub(crate) fn r_take_shared(shared: ffi::Shared) {
     assert_eq!(shared.z, 2020);
 }
 
@@ -335,7 +335,7 @@ fn r_take_ref_rust_vec_string(v: &Vec<String>) {
     let _ = v;
 }
 
-fn r_take_enum(e: ffi::Enum) {
+pub(crate) fn r_take_enum(e: ffi::Enum) {
     let _ = e;
 }
 

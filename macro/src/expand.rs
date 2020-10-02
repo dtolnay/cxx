@@ -41,8 +41,8 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
     for api in apis {
         match api {
             Api::Include(_) | Api::RustType(_) => {}
-            Api::Struct(strct) => expanded.extend(expand_struct(strct)),
-            Api::Enum(enm) => expanded.extend(expand_enum(enm)),
+            Api::Struct(strct) => expanded.extend(expand_struct(namespace, strct)),
+            Api::Enum(enm) => expanded.extend(expand_enum(namespace, enm)),
             Api::CxxType(ety) => {
                 let ident = &ety.ident;
                 if !types.structs.contains_key(ident) && !types.enums.contains_key(ident) {
@@ -120,7 +120,7 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
     }
 }
 
-fn expand_struct(strct: &Struct) -> TokenStream {
+fn expand_struct(namespace: &Namespace, strct: &Struct) -> TokenStream {
     let ident = &strct.ident;
     let doc = &strct.doc;
     let derives = &strct.derives;
@@ -130,6 +130,8 @@ fn expand_struct(strct: &Struct) -> TokenStream {
         let vis = Token![pub](field.ident.span());
         quote!(#vis #field)
     });
+    let type_id = type_id(namespace, ident);
+    // TODO: Add ui test for mismatched alias kinds
     quote! {
         #doc
         #[derive(#(#derives),*)]
@@ -137,10 +139,15 @@ fn expand_struct(strct: &Struct) -> TokenStream {
         pub struct #ident {
             #(#fields,)*
         }
+
+        unsafe impl ::cxx::ExternType for #ident {
+            type Kind = ::cxx::extern_type::KindShared;
+            type Id = #type_id;
+        }
     }
 }
 
-fn expand_enum(enm: &Enum) -> TokenStream {
+fn expand_enum(namespace: &Namespace, enm: &Enum) -> TokenStream {
     let ident = &enm.ident;
     let doc = &enm.doc;
     let repr = enm.repr;
@@ -151,6 +158,7 @@ fn expand_enum(enm: &Enum) -> TokenStream {
             pub const #variant_ident: Self = #ident { repr: #discriminant };
         })
     });
+    let type_id = type_id(namespace, ident);
     quote! {
         #doc
         #[derive(Copy, Clone, PartialEq, Eq)]
@@ -162,6 +170,11 @@ fn expand_enum(enm: &Enum) -> TokenStream {
         #[allow(non_upper_case_globals)]
         impl #ident {
             #(#variants)*
+        }
+
+        unsafe impl ::cxx::ExternType for #ident {
+            type Kind = ::cxx::extern_type::KindShared;
+            type Id = #type_id;
         }
     }
 }

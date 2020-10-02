@@ -1,4 +1,5 @@
 #include "cxx-test-suite/tests.h"
+#include "cxx-test-suite/alias.rs.h"
 #include "cxx-test-suite/lib.rs.h"
 #include <cstring>
 #include <iterator>
@@ -357,15 +358,16 @@ const rust::Vec<uint8_t> &c_try_return_ref_rust_vec(const C &c) {
   throw std::runtime_error("unimplemented");
 }
 
-extern "C" C *cxx_test_suite_get_unique_ptr() noexcept {
+extern "C" {
+
+C *cxx_test_suite_get_unique_ptr() noexcept {
   return std::unique_ptr<C>(new C{2020}).release();
 }
 
-extern "C" std::string *cxx_test_suite_get_unique_ptr_string() noexcept {
+std::string *cxx_test_suite_get_unique_ptr_string() noexcept {
   return std::unique_ptr<std::string>(new std::string("2020")).release();
 }
 
-extern "C" const char *cxx_run_test() noexcept {
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
 #define ASSERT(x)                                                              \
@@ -375,6 +377,7 @@ extern "C" const char *cxx_run_test() noexcept {
     }                                                                          \
   } while (false)
 
+const char *cxx_run_test() noexcept {
   ASSERT(r_return_primitive() == 2020);
   ASSERT(r_return_shared().z == 2020);
   ASSERT(cxx_test_suite_r_is_correct(&*r_return_box()));
@@ -431,5 +434,28 @@ extern "C" const char *cxx_run_test() noexcept {
   cxx_test_suite_set_correct();
   return nullptr;
 }
+
+const char *cxx_run_alias_test() noexcept {
+  ASSERT(alias_r_return_shared().z == 2020);
+  ASSERT(alias_r_return_ref(Shared{2020}) == 2020);
+  {
+    Shared shared{2019};
+    size_t &mut_z = alias_r_return_mut(shared);
+    ASSERT(mut_z == 2019);
+    mut_z = 2020;
+    ASSERT(alias_r_return_ref(shared) == 2020);
+  }
+  ASSERT(alias_r_return_enum(0) == Enum::AVal);
+  ASSERT(alias_r_return_enum(1) == Enum::BVal);
+  ASSERT(alias_r_return_enum(2021) == Enum::CVal);
+
+  r_take_shared(Shared{2020});
+  r_take_enum(Enum::AVal);
+
+  cxx_test_suite_set_correct();
+  return nullptr;
+}
+
+} // extern "C"
 
 } // namespace tests

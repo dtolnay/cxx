@@ -28,6 +28,7 @@ cxx_library(
     ],
     header_namespace = "cxx-test-suite",
     headers = {
+        "alias.rs.h": ":alias/header",
         "lib.rs.h": ":bridge/header",
         "tests.h": "ffi/tests.h",
     },

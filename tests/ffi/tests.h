@@ -101,4 +101,15 @@ rust::Vec<uint8_t> c_try_return_rust_vec();
 rust::Vec<rust::String> c_try_return_rust_vec_string();
 const rust::Vec<uint8_t> &c_try_return_ref_rust_vec(const C &c);
 
+const auto alias_c_return_shared = c_return_shared;
+const auto alias_c_return_ref = c_return_ref;
+const auto alias_c_return_mut = c_return_mut;
+const auto alias_c_return_enum = c_return_enum;
+const auto alias_c_return_unique_ptr_vector_shared =
+    c_return_unique_ptr_vector_shared;
+const auto alias_c_take_unique_ptr_vector_shared =
+    c_take_unique_ptr_vector_shared;
+const auto alias_c_take_shared = c_take_shared;
+const auto alias_c_take_enum = c_take_enum;
+
 } // namespace tests
