@@ -396,9 +396,10 @@ fn parse_extern_verbatim(cx: &mut Errors, tokens: &TokenStream, lang: Lang) -> R
         let eq_token: Token![=] = input.parse()?;
         let ty: RustType = input.parse()?;
         let semi_token: Token![;] = input.parse()?;
-        attrs::parse_doc(cx, &attrs);
+        let doc = attrs::parse_doc(cx, &attrs);
 
         Ok(TypeAlias {
+            doc,
             type_token,
             ident,
             eq_token,

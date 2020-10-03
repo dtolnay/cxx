@@ -79,6 +79,7 @@ pub struct ExternFn {
 }
 
 pub struct TypeAlias {
+    pub doc: Doc,
     pub type_token: Token![type],
     pub ident: Ident,
     pub eq_token: Token![=],
