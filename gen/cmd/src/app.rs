@@ -136,6 +136,7 @@ into the generated C++ code as #include lines.
         .short("i")
         .takes_value(true)
         .multiple(true)
+        .number_of_values(1)
         .validator_os(validate_utf8)
         .help(HELP)
 }
@@ -150,6 +151,7 @@ not specified.
         .short("o")
         .takes_value(true)
         .multiple(true)
+        .number_of_values(1)
         .validator_os(validate_utf8)
         .help(HELP)
 }
