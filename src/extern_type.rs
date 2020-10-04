@@ -94,6 +94,8 @@
 /// # fn main() {}
 /// ```
 ///
+/// <br><br>
+///
 /// ## Opaque and Trivial types
 ///
 /// Some C++ types are safe to hold and pass around in Rust, by value.
@@ -135,6 +137,13 @@ pub unsafe trait ExternType {
     type Kind;
 }
 
+/// Marker types identifying Rust's knowledge about an extern C++ type.
+///
+/// These markers are used in the `Kind` associated type in impls of the
+/// [`ExternType`] trait. Refer to the discussion of [Opaque and Trivial
+/// types][trait] for an overview of their purpose.
+///
+/// [trait]: ExternType#opaque-and-trivial-types
 pub mod kind {
     /// An opaque type which can't be passed or held by value within Rust.
     /// For example, a C++ type with a destructor, or a non-trivial move
