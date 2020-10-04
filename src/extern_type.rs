@@ -107,14 +107,22 @@ pub unsafe trait ExternType {
     /// ```
     type Id;
 
-    /// Either `cxx::kind::Opaque` or `cxx::kind::Trivial`. If in doubt, use
-    /// `cxx::kind::Opaque`.
+    /// Either [`cxx::kind::Opaque`] or [`cxx::kind::Trivial`].
     ///
-    /// Some C++ types are safe to hold and pass around in Rust, by value.
-    /// Those C++ types must have a trivial move constructor, and must
-    /// have no destructor.
+    /// [`cxx::kind::Opaque`]: kind::Opaque
+    /// [`cxx::kind::Trivial`]: kind::Trivial
     ///
-    /// If you believe your C++ type is indeed trivial, you can specify
+    /// A C++ type is only okay to hold and pass around by value in Rust if its
+    /// [move constructor is trivial] and it has no destructor. In CXX, these
+    /// are called Trivial extern C++ types, while types with nontrivial move
+    /// behavior or a destructor must be considered Opaque and handled by Rust
+    /// only behind an indirection, such as a reference or UniquePtr.
+    ///
+    /// [move constructor is trivial]: https://en.cppreference.com/w/cpp/types/is_move_constructible
+    ///
+    /// If you believe your C++ type reflected by this ExternType impl is indeed
+    /// trivial, you can specify:
+    ///
     /// ```
     /// # struct TypeName;
     /// # unsafe impl cxx::ExternType for TypeName {
@@ -122,14 +130,11 @@ pub unsafe trait ExternType {
     /// type Kind = cxx::kind::Trivial;
     /// # }
     /// ```
-    /// which will enable you to pass it into C++ functions by value,
-    /// return it by value from such functions, and include it in
-    /// `struct`s that you have declared to `cxx::bridge`. Your promises
-    /// about the triviality of the C++ type will be checked using
-    /// `static_assert`s in the generated C++.
     ///
-    /// Opaque types can't be passed by value, but can still be held
-    /// in `UniquePtr`.
+    /// which will enable you to pass it into C++ functions by value, return it
+    /// by value, and include it in `struct`s that you have declared to
+    /// `cxx::bridge`. Your claim about the triviality of the C++ type will be
+    /// checked by a `static_assert` in the generated C++ side of the binding.
     type Kind;
 }
 
