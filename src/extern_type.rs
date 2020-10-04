@@ -154,12 +154,12 @@ pub mod kind {
     ///
     /// When passed across an FFI boundary, an opaque C++ type must be behind an
     /// indirection such as a reference or UniquePtr.
-    pub struct Opaque;
+    pub enum Opaque {}
 
     /// A type with trivial move constructor and no destructor, which can
     /// therefore be owned and moved around in Rust code without requiring
     /// indirection.
-    pub struct Trivial;
+    pub enum Trivial {}
 }
 
 #[doc(hidden)]
