@@ -338,7 +338,7 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
         || cx.types.cxx.contains(ident)
             && !cx.types.structs.contains_key(ident)
             && !cx.types.enums.contains_key(ident)
-            && !cx.types.required_trivial_aliases.contains(ident)
+            && !cx.types.required_trivial_aliases.contains_key(ident)
         || cx.types.rust.contains(ident)
 }
 
@@ -377,7 +377,7 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
             } else if cx.types.enums.contains_key(ident) {
                 "enum".to_owned()
             } else if cx.types.cxx.contains(ident) {
-                if cx.types.required_trivial_aliases.contains(ident) {
+                if cx.types.required_trivial_aliases.contains_key(ident) {
                     "trivial C++ type".to_owned()
                 } else {
                     "non-trivial C++ type".to_owned()

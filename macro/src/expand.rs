@@ -683,7 +683,7 @@ fn expand_type_alias_verify(
         const _: fn() = #begin #ident, #type_id #end;
     };
 
-    if types.required_trivial_aliases.contains(&alias.ident) {
+    if types.required_trivial_aliases.contains_key(&alias.ident) {
         let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_kind::<);
         verify.extend(quote! {
             const _: fn() = #begin #ident, ::cxx::kind::Trivial #end;
