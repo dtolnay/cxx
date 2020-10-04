@@ -1,4 +1,4 @@
-use self::kind::Kind;
+use self::kind::{Kind, Opaque, Trivial};
 
 /// A type for which the layout is determined by its C++ definition.
 ///
@@ -146,6 +146,8 @@ pub unsafe trait ExternType {
 /// impls of the `ExternType` trait. Refer to the documentation of `Kind` for an
 /// overview of their purpose.
 pub mod kind {
+    use super::private;
+
     /// An opaque type which cannot be passed or held by value within Rust.
     ///
     /// Rust's move semantics are such that every move is equivalent to a
@@ -163,13 +165,19 @@ pub mod kind {
     /// indirection.
     pub enum Trivial {}
 
-    pub trait Kind {}
+    pub trait Kind: private::Sealed {}
     impl Kind for Opaque {}
     impl Kind for Trivial {}
+}
+
+mod private {
+    pub trait Sealed {}
+    impl Sealed for super::Opaque {}
+    impl Sealed for super::Trivial {}
 }
 
 #[doc(hidden)]
 pub fn verify_extern_type<T: ExternType<Id = Id>, Id>() {}
 
 #[doc(hidden)]
-pub fn verify_extern_kind<T: ExternType<Kind = Kind>, Kind>() {}
+pub fn verify_extern_kind<T: ExternType<Kind = Kind>, Kind: self::Kind>() {}
