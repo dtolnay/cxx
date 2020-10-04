@@ -4,9 +4,10 @@ use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    self, check, mangle, Api, Enum, ExternFn, ExternType, Signature, Struct, Type, TypeAlias, Types,
+    self, check, mangle, Api, Enum, ExternFn, ExternType, Impl, Signature, Struct, Type, TypeAlias,
+    Types,
 };
-use proc_macro2::{Ident, TokenStream};
+use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
 use std::mem;
 use syn::{parse_quote, Result, Token};
@@ -62,6 +63,7 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
     }
 
     for ty in types {
+        let explicit_impl = types.explicit_impls.get(ty);
         if let Type::RustBox(ty) = ty {
             if let Type::Ident(ident) = &ty.inner {
                 if Atom::from(ident).is_none() {
@@ -77,20 +79,20 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
         } else if let Type::UniquePtr(ptr) = ty {
             if let Type::Ident(ident) = &ptr.inner {
                 if Atom::from(ident).is_none()
-                    && (!types.aliases.contains_key(ident) || types.explicit_impls.contains(ty))
+                    && (explicit_impl.is_some() || !types.aliases.contains_key(ident))
                 {
-                    expanded.extend(expand_unique_ptr(namespace, ident, types));
+                    expanded.extend(expand_unique_ptr(namespace, ident, types, explicit_impl));
                 }
             }
         } else if let Type::CxxVector(ptr) = ty {
             if let Type::Ident(ident) = &ptr.inner {
                 if Atom::from(ident).is_none()
-                    && (!types.aliases.contains_key(ident) || types.explicit_impls.contains(ty))
+                    && (explicit_impl.is_some() || !types.aliases.contains_key(ident))
                 {
                     // Generate impl for CxxVector<T> if T is a struct or opaque
                     // C++ type. Impl for primitives is already provided by cxx
                     // crate.
-                    expanded.extend(expand_cxx_vector(namespace, ident));
+                    expanded.extend(expand_cxx_vector(namespace, ident, explicit_impl));
                 }
             }
         }
@@ -784,7 +786,12 @@ fn expand_rust_vec(namespace: &Namespace, elem: &Ident) -> TokenStream {
     }
 }
 
-fn expand_unique_ptr(namespace: &Namespace, ident: &Ident, types: &Types) -> TokenStream {
+fn expand_unique_ptr(
+    namespace: &Namespace,
+    ident: &Ident,
+    types: &Types,
+    explicit_impl: Option<&Impl>,
+) -> TokenStream {
     let name = ident.to_string();
     let prefix = format!("cxxbridge04$unique_ptr${}{}$", namespace, ident);
     let link_null = format!("{}null", prefix);
@@ -810,8 +817,13 @@ fn expand_unique_ptr(namespace: &Namespace, ident: &Ident, types: &Types) -> Tok
         None
     };
 
-    quote! {
-        unsafe impl ::cxx::private::UniquePtrTarget for #ident {
+    let begin_span =
+        explicit_impl.map_or_else(Span::call_site, |explicit| explicit.impl_token.span);
+    let end_span = explicit_impl.map_or_else(Span::call_site, |explicit| explicit.brace_token.span);
+    let unsafe_token = format_ident!("unsafe", span = begin_span);
+
+    quote_spanned! {end_span=>
+        #unsafe_token impl ::cxx::private::UniquePtrTarget for #ident {
             const __NAME: &'static dyn ::std::fmt::Display = &#name;
             fn __null() -> *mut ::std::ffi::c_void {
                 extern "C" {
@@ -857,7 +869,12 @@ fn expand_unique_ptr(namespace: &Namespace, ident: &Ident, types: &Types) -> Tok
     }
 }
 
-fn expand_cxx_vector(namespace: &Namespace, elem: &Ident) -> TokenStream {
+fn expand_cxx_vector(
+    namespace: &Namespace,
+    elem: &Ident,
+    explicit_impl: Option<&Impl>,
+) -> TokenStream {
+    let _ = explicit_impl;
     let name = elem.to_string();
     let prefix = format!("cxxbridge04$std$vector${}{}$", namespace, elem);
     let link_size = format!("{}size", prefix);
@@ -869,8 +886,13 @@ fn expand_cxx_vector(namespace: &Namespace, elem: &Ident) -> TokenStream {
     let link_unique_ptr_release = format!("{}release", unique_ptr_prefix);
     let link_unique_ptr_drop = format!("{}drop", unique_ptr_prefix);
 
-    quote! {
-        unsafe impl ::cxx::private::VectorElement for #elem {
+    let begin_span =
+        explicit_impl.map_or_else(Span::call_site, |explicit| explicit.impl_token.span);
+    let end_span = explicit_impl.map_or_else(Span::call_site, |explicit| explicit.brace_token.span);
+    let unsafe_token = format_ident!("unsafe", span = begin_span);
+
+    quote_spanned! {end_span=>
+        #unsafe_token impl ::cxx::private::VectorElement for #elem {
             const __NAME: &'static dyn ::std::fmt::Display = &#name;
             fn __vector_size(v: &::cxx::CxxVector<Self>) -> usize {
                 extern "C" {
