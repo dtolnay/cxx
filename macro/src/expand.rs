@@ -56,11 +56,7 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
             }
             Api::TypeAlias(alias) => {
                 expanded.extend(expand_type_alias(alias));
-                hidden.extend(expand_type_alias_verify(namespace, alias));
-                let ident = &alias.ident;
-                if types.required_trivial_aliases.contains(ident) {
-                    hidden.extend(expand_type_alias_kind_trivial_verify(alias));
-                }
+                hidden.extend(expand_type_alias_verify(namespace, alias, types));
             }
         }
     }
@@ -671,7 +667,11 @@ fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
     }
 }
 
-fn expand_type_alias_verify(namespace: &Namespace, alias: &TypeAlias) -> TokenStream {
+fn expand_type_alias_verify(
+    namespace: &Namespace,
+    alias: &TypeAlias,
+    types: &Types,
+) -> TokenStream {
     let ident = &alias.ident;
     let type_id = type_id(namespace, ident);
     let begin_span = alias.type_token.span;
@@ -679,21 +679,18 @@ fn expand_type_alias_verify(namespace: &Namespace, alias: &TypeAlias) -> TokenSt
     let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_type::<);
     let end = quote_spanned!(end_span=> >);
 
-    quote! {
+    let mut verify = quote! {
         const _: fn() = #begin #ident, #type_id #end;
-    }
-}
+    };
 
-fn expand_type_alias_kind_trivial_verify(type_alias: &TypeAlias) -> TokenStream {
-    let ident = &type_alias.ident;
-    let begin_span = type_alias.type_token.span;
-    let end_span = type_alias.semi_token.span;
-    let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_kind::<);
-    let end = quote_spanned!(end_span=> >);
-
-    quote! {
-        const _: fn() = #begin #ident, ::cxx::kind::Trivial #end;
+    if types.required_trivial_aliases.contains(&alias.ident) {
+        let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_kind::<);
+        verify.extend(quote! {
+            const _: fn() = #begin #ident, ::cxx::kind::Trivial #end;
+        });
     }
+
+    verify
 }
 
 fn type_id(namespace: &Namespace, ident: &Ident) -> TokenStream {

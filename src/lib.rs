@@ -422,8 +422,7 @@ pub type Vector<T> = CxxVector<T>;
 #[doc(hidden)]
 pub mod private {
     pub use crate::cxx_vector::VectorElement;
-    pub use crate::extern_type::verify_extern_kind;
-    pub use crate::extern_type::verify_extern_type;
+    pub use crate::extern_type::{verify_extern_kind, verify_extern_type};
     pub use crate::function::FatFunction;
     pub use crate::opaque::Opaque;
     pub use crate::result::{r#try, Result};
