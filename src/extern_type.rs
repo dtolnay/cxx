@@ -93,31 +93,6 @@
 /// #
 /// # fn main() {}
 /// ```
-///
-/// <br><br>
-///
-/// ## Opaque and Trivial types
-///
-/// Some C++ types are safe to hold and pass around in Rust, by value.
-/// Those C++ types must have a trivial move constructor, and must
-/// have no destructor.
-///
-/// If you believe your C++ type is indeed trivial, you can specify
-/// ```
-/// # struct TypeName;
-/// # unsafe impl cxx::ExternType for TypeName {
-/// type Id = cxx::type_id!("name::space::of::TypeName");
-/// type Kind = cxx::kind::Trivial;
-/// # }
-/// ```
-/// which will enable you to pass it into C++ functions by value,
-/// return it by value from such functions, and include it in
-/// `struct`s that you have declared to `cxx::bridge`. Your promises
-/// about the triviality of the C++ type will be checked using
-/// `static_assert`s in the generated C++.
-///
-/// Opaque types can't be passed by value, but can still be held
-/// in `UniquePtr`.
 pub unsafe trait ExternType {
     /// A type-level representation of the type's C++ namespace and type name.
     ///
@@ -134,16 +109,35 @@ pub unsafe trait ExternType {
 
     /// Either `cxx::kind::Opaque` or `cxx::kind::Trivial`. If in doubt, use
     /// `cxx::kind::Opaque`.
+    ///
+    /// Some C++ types are safe to hold and pass around in Rust, by value.
+    /// Those C++ types must have a trivial move constructor, and must
+    /// have no destructor.
+    ///
+    /// If you believe your C++ type is indeed trivial, you can specify
+    /// ```
+    /// # struct TypeName;
+    /// # unsafe impl cxx::ExternType for TypeName {
+    /// type Id = cxx::type_id!("name::space::of::TypeName");
+    /// type Kind = cxx::kind::Trivial;
+    /// # }
+    /// ```
+    /// which will enable you to pass it into C++ functions by value,
+    /// return it by value from such functions, and include it in
+    /// `struct`s that you have declared to `cxx::bridge`. Your promises
+    /// about the triviality of the C++ type will be checked using
+    /// `static_assert`s in the generated C++.
+    ///
+    /// Opaque types can't be passed by value, but can still be held
+    /// in `UniquePtr`.
     type Kind;
 }
 
 /// Marker types identifying Rust's knowledge about an extern C++ type.
 ///
-/// These markers are used in the `Kind` associated type in impls of the
-/// [`ExternType`] trait. Refer to the discussion of [Opaque and Trivial
-/// types][trait] for an overview of their purpose.
-///
-/// [trait]: ExternType#opaque-and-trivial-types
+/// These markers are used in the [`Kind`][ExternType::Kind] associated type in
+/// impls of the `ExternType` trait. Refer to the documentation of `Kind` for an
+/// overview of their purpose.
 pub mod kind {
     /// An opaque type which cannot be passed or held by value within Rust.
     ///
