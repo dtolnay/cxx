@@ -1,3 +1,4 @@
+use std::borrow::Borrow;
 use std::collections::HashSet;
 use std::fmt::{self, Debug};
 use std::hash::Hash;
@@ -27,7 +28,11 @@ where
         new
     }
 
-    pub fn contains(&self, value: &T) -> bool {
+    pub fn contains<Q>(&self, value: &Q) -> bool
+    where
+        &'a T: Borrow<Q>,
+        Q: ?Sized + Hash + Eq,
+    {
         self.set.contains(value)
     }
 }
