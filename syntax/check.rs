@@ -46,7 +46,7 @@ fn do_typecheck(cx: &mut Check) {
         match api {
             Api::Struct(strct) => check_api_struct(cx, strct),
             Api::Enum(enm) => check_api_enum(cx, enm),
-            Api::CxxType(ty) | Api::RustType(ty) => check_api_type(cx, ty),
+            Api::CxxType(ety) | Api::RustType(ety) => check_api_type(cx, ety),
             Api::CxxFunction(efn) | Api::RustFunction(efn) => check_api_fn(cx, efn),
             _ => {}
         }
@@ -207,10 +207,10 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
     }
 }
 
-fn check_api_type(cx: &mut Check, ty: &ExternType) {
-    check_reserved_name(cx, &ty.ident);
+fn check_api_type(cx: &mut Check, ety: &ExternType) {
+    check_reserved_name(cx, &ety.ident);
 
-    if let Some(reason) = cx.types.required_trivial.get(&ty.ident) {
+    if let Some(reason) = cx.types.required_trivial.get(&ety.ident) {
         let what = match reason {
             TrivialReason::StructField(strct) => format!("a field of `{}`", strct.ident),
             TrivialReason::FunctionArgument(efn) => format!("an argument of `{}`", efn.ident),
@@ -220,7 +220,7 @@ fn check_api_type(cx: &mut Check, ty: &ExternType) {
             "needs a cxx::ExternType impl in order to be used as {}",
             what,
         );
-        cx.error(ty, msg);
+        cx.error(ety, msg);
     }
 }
 

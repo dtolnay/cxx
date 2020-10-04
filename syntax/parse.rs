@@ -221,7 +221,7 @@ fn parse_foreign_mod(
     }
 
     let mut types = items.iter().filter_map(|item| match item {
-        Api::CxxType(ty) | Api::RustType(ty) => Some(&ty.ident),
+        Api::CxxType(ety) | Api::RustType(ety) => Some(&ety.ident),
         Api::TypeAlias(alias) => Some(&alias.ident),
         _ => None,
     });
