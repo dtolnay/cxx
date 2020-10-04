@@ -412,8 +412,24 @@ fn check_enum(out: &mut OutFile, enm: &Enum) {
 }
 
 fn check_trivial_extern_type(out: &mut OutFile, id: &Ident) {
-    writeln!(out, "static_assert(std::is_trivially_move_constructible<{}>::value,\"type {} marked as Trivial in Rust is not trivially move constructible in C++\");", id, id);
-    writeln!(out, "static_assert(std::is_trivially_destructible<{}>::value,\"type {} marked as Trivial in Rust is not trivially destructible in C++\");", id, id);
+    writeln!(out, "static_assert(");
+    writeln!(
+        out,
+        "    std::is_trivially_move_constructible<{}>::value,",
+        id,
+    );
+    writeln!(
+        out,
+        "    \"type {} marked as Trivial in Rust is not trivially move constructible in C++\");",
+        id,
+    );
+    writeln!(out, "static_assert(");
+    writeln!(out, "    std::is_trivially_destructible<{}>::value,", id);
+    writeln!(
+        out,
+        "    \"type {} marked as Trivial in Rust is not trivially destructible in C++\");",
+        id,
+    );
 }
 
 fn write_exception_glue(out: &mut OutFile, apis: &[Api]) {
