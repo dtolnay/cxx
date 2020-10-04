@@ -395,6 +395,8 @@ mod unwind;
 pub use crate::cxx_string::CxxString;
 pub use crate::cxx_vector::CxxVector;
 pub use crate::exception::Exception;
+pub use crate::extern_type::kind::Opaque;
+pub use crate::extern_type::kind::Trivial;
 pub use crate::extern_type::ExternType;
 pub use crate::unique_ptr::UniquePtr;
 pub use cxxbridge_macro::bridge;
@@ -422,6 +424,7 @@ pub type Vector<T> = CxxVector<T>;
 #[doc(hidden)]
 pub mod private {
     pub use crate::cxx_vector::VectorElement;
+    pub use crate::extern_type::verify_extern_kind;
     pub use crate::extern_type::verify_extern_type;
     pub use crate::function::FatFunction;
     pub use crate::opaque::Opaque;

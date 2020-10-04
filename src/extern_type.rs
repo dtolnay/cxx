@@ -54,7 +54,7 @@
 /// ## Integrating with bindgen-generated types
 ///
 /// Handwritten `ExternType` impls make it possible to plug in a data structure
-/// emitted by bindgen as the definition of an opaque C++ type emitted by CXX.
+/// emitted by bindgen as the definition of a C++ type emitted by CXX.
 ///
 /// By writing the unsafe `ExternType` impl, the programmer asserts that the C++
 /// namespace and type name given in the type id refers to a C++ type that is
@@ -69,10 +69,11 @@
 /// #     pub struct StringPiece([usize; 2]);
 /// # }
 ///
-/// use cxx::{type_id, ExternType};
+/// use cxx::{type_id, ExternType, Opaque};
 ///
 /// unsafe impl ExternType for folly_sys::StringPiece {
 ///     type Id = type_id!("folly::StringPiece");
+///     type Kind = Opaque;
 /// }
 ///
 /// #[cxx::bridge(namespace = folly)]
@@ -92,6 +93,29 @@
 /// #
 /// # fn main() {}
 /// ```
+///
+/// ## Opaque and Trivial types
+///
+/// Some C++ types are safe to hold and pass around in Rust, by value.
+/// Those C++ types must have a trivial move constructor, and must
+/// have no destructor.
+///
+/// If you believe your C++ type is indeed trivial, you can specify
+/// ```
+/// # struct TypeName;
+/// # unsafe impl cxx::ExternType for TypeName {
+/// type Id = cxx::type_id!("name::space::of::TypeName");
+/// type Kind = cxx::Trivial;
+/// # }
+/// ```
+/// which will enable you to pass it into C++ functions by value,
+/// return it by value from such functions, and include it in
+/// `struct`s that you have declared to `cxx::bridge`. Your promises
+/// about the triviality of the C++ type will be checked using
+/// `static_assert`s in the generated C++.
+///
+/// Opaque types can't be passed by value, but can still be held
+/// in `UniquePtr`.
 pub unsafe trait ExternType {
     /// A type-level representation of the type's C++ namespace and type name.
     ///
@@ -101,10 +125,32 @@ pub unsafe trait ExternType {
     /// # struct TypeName;
     /// # unsafe impl cxx::ExternType for TypeName {
     /// type Id = cxx::type_id!("name::space::of::TypeName");
+    /// type Kind = cxx::Opaque;
     /// # }
     /// ```
     type Id;
+
+    /// Either `cxx::Opaque` or `cxx::Trivial`. If in doubt, use
+    /// `cxx::Opaque`.
+    type Kind;
+}
+
+pub(crate) mod kind {
+
+    /// An opaque type which can't be passed or held by value within Rust.
+    /// For example, a C++ type with a destructor, or a non-trivial move
+    /// constructor. Rust's strict move semantics mean that we can't own
+    /// these by value in Rust, but they can still be owned by a
+    /// `UniquePtr`...
+    pub struct Opaque;
+
+    /// A type with trivial move constructors and no destructor, which
+    /// can therefore be owned and moved around in Rust code directly.
+    pub struct Trivial;
 }
 
 #[doc(hidden)]
 pub fn verify_extern_type<T: ExternType<Id = Id>, Id>() {}
+
+#[doc(hidden)]
+pub fn verify_extern_kind<T: ExternType<Kind = Kind>, Kind>() {}
