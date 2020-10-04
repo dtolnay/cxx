@@ -39,7 +39,7 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
 
     for api in apis {
         match api {
-            Api::Include(_) | Api::RustType(_) => {}
+            Api::Include(_) | Api::RustType(_) | Api::Impl(_) => {}
             Api::Struct(strct) => expanded.extend(expand_struct(strct)),
             Api::Enum(enm) => expanded.extend(expand_enum(enm)),
             Api::CxxType(ety) => {
@@ -76,13 +76,17 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
             }
         } else if let Type::UniquePtr(ptr) = ty {
             if let Type::Ident(ident) = &ptr.inner {
-                if Atom::from(ident).is_none() && !types.aliases.contains_key(ident) {
+                if Atom::from(ident).is_none()
+                    && (!types.aliases.contains_key(ident) || types.explicit_impls.contains(ty))
+                {
                     expanded.extend(expand_unique_ptr(namespace, ident, types));
                 }
             }
         } else if let Type::CxxVector(ptr) = ty {
             if let Type::Ident(ident) = &ptr.inner {
-                if Atom::from(ident).is_none() && !types.aliases.contains_key(ident) {
+                if Atom::from(ident).is_none()
+                    && (!types.aliases.contains_key(ident) || types.explicit_impls.contains(ty))
+                {
                     // Generate impl for CxxVector<T> if T is a struct or opaque
                     // C++ type. Impl for primitives is already provided by cxx
                     // crate.

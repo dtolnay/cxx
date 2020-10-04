@@ -15,6 +15,7 @@ pub struct Types<'a> {
     pub aliases: Map<&'a Ident, &'a TypeAlias>,
     pub untrusted: Map<&'a Ident, &'a ExternType>,
     pub required_trivial: Map<&'a Ident, TrivialReason<'a>>,
+    pub explicit_impls: Set<&'a Type>,
 }
 
 impl<'a> Types<'a> {
@@ -26,6 +27,7 @@ impl<'a> Types<'a> {
         let mut rust = Set::new();
         let mut aliases = Map::new();
         let mut untrusted = Map::new();
+        let mut explicit_impls = Set::new();
 
         fn visit<'a>(all: &mut Set<&'a Type>, ty: &'a Type) {
             all.insert(ty);
@@ -133,6 +135,10 @@ impl<'a> Types<'a> {
                     cxx.insert(ident);
                     aliases.insert(ident, alias);
                 }
+                Api::Impl(imp) => {
+                    visit(&mut all, &imp.ty);
+                    explicit_impls.insert(&imp.ty);
+                }
             }
         }
 
@@ -179,6 +185,7 @@ impl<'a> Types<'a> {
             aliases,
             untrusted,
             required_trivial,
+            explicit_impls,
         }
     }
 

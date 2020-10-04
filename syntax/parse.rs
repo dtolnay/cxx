@@ -3,17 +3,17 @@ use crate::syntax::file::{Item, ItemForeignMod};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
-    attrs, error, Api, Doc, Enum, ExternFn, ExternType, Lang, Receiver, Ref, Signature, Slice,
-    Struct, Ty1, Type, TypeAlias, Var, Variant,
+    attrs, error, Api, Doc, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Signature,
+    Slice, Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
-use proc_macro2::{TokenStream, TokenTree};
+use proc_macro2::{Delimiter, Group, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
 use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::{
     Abi, Attribute, Error, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
-    GenericArgument, Ident, ItemEnum, ItemStruct, LitStr, Pat, PathArguments, Result, ReturnType,
-    Token, Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
+    GenericArgument, Ident, ItemEnum, ItemImpl, ItemStruct, LitStr, Pat, PathArguments, Result,
+    ReturnType, Token, Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
 };
 
 pub mod kw {
@@ -33,6 +33,10 @@ pub fn parse_items(cx: &mut Errors, items: Vec<Item>, trusted: bool) -> Vec<Api>
                 Err(err) => cx.push(err),
             },
             Item::ForeignMod(foreign_mod) => parse_foreign_mod(cx, foreign_mod, &mut apis, trusted),
+            Item::Impl(item) => match parse_impl(item) {
+                Ok(imp) => apis.push(imp),
+                Err(err) => cx.push(err),
+            },
             Item::Use(item) => cx.error(item, error::USE_NOT_ALLOWED),
             Item::Other(item) => cx.error(item, "unsupported item"),
         }
@@ -418,6 +422,37 @@ fn parse_extern_verbatim(cx: &mut Errors, tokens: &TokenStream, lang: Lang) -> R
             Err(Error::new_spanned(span, msg))
         }
     }
+}
+
+fn parse_impl(imp: ItemImpl) -> Result<Api> {
+    if !imp.items.is_empty() {
+        let mut span = Group::new(Delimiter::Brace, TokenStream::new());
+        span.set_span(imp.brace_token.span);
+        return Err(Error::new_spanned(span, "expected an empty impl block"));
+    }
+
+    let self_ty = &imp.self_ty;
+    if let Some((bang, path, for_token)) = &imp.trait_ {
+        let span = quote!(#bang #path #for_token #self_ty);
+        return Err(Error::new_spanned(
+            span,
+            "unexpected impl, expected something like `impl UniquePtr<T> {}`",
+        ));
+    }
+
+    let generics = &imp.generics;
+    if !generics.params.is_empty() || generics.where_clause.is_some() {
+        return Err(Error::new_spanned(
+            imp,
+            "generic parameters on an impl is not supported",
+        ));
+    }
+
+    Ok(Api::Impl(Impl {
+        impl_token: imp.impl_token,
+        ty: parse_type(&self_ty)?,
+        brace_token: imp.brace_token,
+    }))
 }
 
 fn parse_include(input: ParseStream) -> Result<String> {
