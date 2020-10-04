@@ -1,3 +1,5 @@
+use self::kind::Kind;
+
 /// A type for which the layout is determined by its C++ definition.
 ///
 /// This trait serves the following two related purposes.
@@ -135,7 +137,7 @@ pub unsafe trait ExternType {
     /// by value, and include it in `struct`s that you have declared to
     /// `cxx::bridge`. Your claim about the triviality of the C++ type will be
     /// checked by a `static_assert` in the generated C++ side of the binding.
-    type Kind;
+    type Kind: Kind;
 }
 
 /// Marker types identifying Rust's knowledge about an extern C++ type.
@@ -160,6 +162,10 @@ pub mod kind {
     /// therefore be owned and moved around in Rust code without requiring
     /// indirection.
     pub enum Trivial {}
+
+    pub trait Kind {}
+    impl Kind for Opaque {}
+    impl Kind for Trivial {}
 }
 
 #[doc(hidden)]
