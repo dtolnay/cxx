@@ -145,15 +145,21 @@ pub unsafe trait ExternType {
 ///
 /// [trait]: ExternType#opaque-and-trivial-types
 pub mod kind {
-    /// An opaque type which can't be passed or held by value within Rust.
-    /// For example, a C++ type with a destructor, or a non-trivial move
-    /// constructor. Rust's strict move semantics mean that we can't own
-    /// these by value in Rust, but they can still be owned by a
-    /// `UniquePtr`...
+    /// An opaque type which cannot be passed or held by value within Rust.
+    ///
+    /// Rust's move semantics are such that every move is equivalent to a
+    /// memcpy. This is incompatible in general with C++'s constructor-based
+    /// move semantics, so a C++ type which has a destructor or nontrivial move
+    /// constructor must never exist by value in Rust. In CXX, such types are
+    /// called opaque C++ types.
+    ///
+    /// When passed across an FFI boundary, an opaque C++ type must be behind an
+    /// indirection such as a reference or UniquePtr.
     pub struct Opaque;
 
-    /// A type with trivial move constructors and no destructor, which
-    /// can therefore be owned and moved around in Rust code directly.
+    /// A type with trivial move constructor and no destructor, which can
+    /// therefore be owned and moved around in Rust code without requiring
+    /// indirection.
     pub struct Trivial;
 }
 
