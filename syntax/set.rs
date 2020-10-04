@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use std::fmt::{self, Debug};
 use std::hash::Hash;
 use std::slice;
 
@@ -45,5 +46,14 @@ impl<'s, 'a, T> Iterator for Iter<'s, 'a, T> {
     type Item = &'a T;
     fn next(&mut self) -> Option<Self::Item> {
         self.0.next().copied()
+    }
+}
+
+impl<'a, T> Debug for OrderedSet<&'a T>
+where
+    T: Debug,
+{
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.debug_set().entries(self).finish()
     }
 }
