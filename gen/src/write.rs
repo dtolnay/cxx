@@ -80,12 +80,16 @@ pub(super) fn gen(
                     write_struct_with_methods(out, ety, methods);
                 }
             }
-            Api::TypeAlias(ety) => {
-                if types.required_trivial.contains_key(&ety.ident) {
-                    check_trivial_extern_type(out, &ety.ident)
-                }
-            }
             _ => {}
+        }
+    }
+
+    out.next_section();
+    for api in apis {
+        if let Api::TypeAlias(ety) = api {
+            if types.required_trivial.contains_key(&ety.ident) {
+                check_trivial_extern_type(out, &ety.ident)
+            }
         }
     }
 
