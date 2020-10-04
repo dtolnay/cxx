@@ -3,8 +3,8 @@ use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::types::TrivialReason;
 use crate::syntax::{
-    error, ident, Api, Enum, ExternFn, ExternType, Lang, Receiver, Ref, Slice, Struct, Ty1, Type,
-    Types,
+    error, ident, Api, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Slice, Struct, Ty1,
+    Type, Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
@@ -48,6 +48,7 @@ fn do_typecheck(cx: &mut Check) {
             Api::Enum(enm) => check_api_enum(cx, enm),
             Api::CxxType(ety) | Api::RustType(ety) => check_api_type(cx, ety),
             Api::CxxFunction(efn) | Api::RustFunction(efn) => check_api_fn(cx, efn),
+            Api::Impl(imp) => check_api_impl(cx, imp),
             _ => {}
         }
     }
@@ -284,6 +285,18 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
     }
 
     check_multiple_arg_lifetimes(cx, efn);
+}
+
+fn check_api_impl(cx: &mut Check, imp: &Impl) {
+    if let Type::UniquePtr(ty) | Type::CxxVector(ty) = &imp.ty {
+        if let Type::Ident(inner) = &ty.inner {
+            if Atom::from(inner).is_none() {
+                return;
+            }
+        }
+    }
+
+    cx.error(imp, "unsupported Self type of explicit impl");
 }
 
 fn check_mut_return_restriction(cx: &mut Check, efn: &ExternFn) {

@@ -1056,14 +1056,18 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
             }
         } else if let Type::UniquePtr(ptr) = ty {
             if let Type::Ident(inner) = &ptr.inner {
-                if Atom::from(inner).is_none() && !types.aliases.contains_key(inner) {
+                if Atom::from(inner).is_none()
+                    && (!types.aliases.contains_key(inner) || types.explicit_impls.contains(ty))
+                {
                     out.next_section();
                     write_unique_ptr(out, inner, types);
                 }
             }
         } else if let Type::CxxVector(ptr) = ty {
             if let Type::Ident(inner) = &ptr.inner {
-                if Atom::from(inner).is_none() && !types.aliases.contains_key(inner) {
+                if Atom::from(inner).is_none()
+                    && (!types.aliases.contains_key(inner) || types.explicit_impls.contains(ty))
+                {
                     out.next_section();
                     write_cxx_vector(out, ty, inner, types);
                 }

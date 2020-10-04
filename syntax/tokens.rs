@@ -1,7 +1,7 @@
 use crate::syntax::atom::Atom::*;
 use crate::syntax::{
-    Atom, Derive, Enum, ExternFn, ExternType, Receiver, Ref, Signature, Slice, Struct, Ty1, Type,
-    TypeAlias, Var,
+    Atom, Derive, Enum, ExternFn, ExternType, Impl, Receiver, Ref, Signature, Slice, Struct, Ty1,
+    Type, TypeAlias, Var,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote_spanned, ToTokens};
@@ -118,6 +118,14 @@ impl ToTokens for ExternFn {
         // Notional token range for error reporting purposes.
         self.sig.fn_token.to_tokens(tokens);
         self.semi_token.to_tokens(tokens);
+    }
+}
+
+impl ToTokens for Impl {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        self.impl_token.to_tokens(tokens);
+        self.ty.to_tokens(tokens);
+        self.brace_token.surround(tokens, |_tokens| {});
     }
 }
 
