@@ -395,9 +395,7 @@ mod unwind;
 pub use crate::cxx_string::CxxString;
 pub use crate::cxx_vector::CxxVector;
 pub use crate::exception::Exception;
-pub use crate::extern_type::kind::Opaque;
-pub use crate::extern_type::kind::Trivial;
-pub use crate::extern_type::ExternType;
+pub use crate::extern_type::{kind, ExternType};
 pub use crate::unique_ptr::UniquePtr;
 pub use cxxbridge_macro::bridge;
 

@@ -69,11 +69,11 @@
 /// #     pub struct StringPiece([usize; 2]);
 /// # }
 ///
-/// use cxx::{type_id, ExternType, Opaque};
+/// use cxx::{type_id, ExternType};
 ///
 /// unsafe impl ExternType for folly_sys::StringPiece {
 ///     type Id = type_id!("folly::StringPiece");
-///     type Kind = Opaque;
+///     type Kind = cxx::kind::Opaque;
 /// }
 ///
 /// #[cxx::bridge(namespace = folly)]
@@ -105,7 +105,7 @@
 /// # struct TypeName;
 /// # unsafe impl cxx::ExternType for TypeName {
 /// type Id = cxx::type_id!("name::space::of::TypeName");
-/// type Kind = cxx::Trivial;
+/// type Kind = cxx::kind::Trivial;
 /// # }
 /// ```
 /// which will enable you to pass it into C++ functions by value,
@@ -125,18 +125,17 @@ pub unsafe trait ExternType {
     /// # struct TypeName;
     /// # unsafe impl cxx::ExternType for TypeName {
     /// type Id = cxx::type_id!("name::space::of::TypeName");
-    /// type Kind = cxx::Opaque;
+    /// type Kind = cxx::kind::Opaque;
     /// # }
     /// ```
     type Id;
 
-    /// Either `cxx::Opaque` or `cxx::Trivial`. If in doubt, use
-    /// `cxx::Opaque`.
+    /// Either `cxx::kind::Opaque` or `cxx::kind::Trivial`. If in doubt, use
+    /// `cxx::kind::Opaque`.
     type Kind;
 }
 
-pub(crate) mod kind {
-
+pub mod kind {
     /// An opaque type which can't be passed or held by value within Rust.
     /// For example, a C++ type with a destructor, or a non-trivial move
     /// constructor. Rust's strict move semantics mean that we can't own
