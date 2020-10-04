@@ -418,6 +418,24 @@ fn check_enum(out: &mut OutFile, enm: &Enum) {
 }
 
 fn check_trivial_extern_type(out: &mut OutFile, id: &Ident) {
+    // NOTE: The following two static assertions are just nice-to-have and not
+    // necessary for soundness. That's because triviality is always declared by
+    // the user in the form of an unsafe impl of cxx::ExternType:
+    //
+    //     unsafe impl ExternType for MyType {
+    //         type Id = cxx::type_id!("...");
+    //         type Kind = cxx::kind::Trivial;
+    //     }
+    //
+    // Since the user went on the record with their unsafe impl to unsafely
+    // claim they KNOW that the type is trivial, it's fine for that to be on
+    // them if that were wrong.
+    //
+    // There may be a legitimate reason we'll want to remove these assertions
+    // for support of types that the programmer knows are Rust-movable despite
+    // not being recognized as such by the C++ type system due to a move
+    // constructor or destructor.
+
     writeln!(out, "static_assert(");
     writeln!(
         out,
