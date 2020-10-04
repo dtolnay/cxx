@@ -102,7 +102,7 @@ pub unsafe trait ExternType {
     /// # struct TypeName;
     /// # unsafe impl cxx::ExternType for TypeName {
     /// type Id = cxx::type_id!("name::space::of::TypeName");
-    /// type Kind = cxx::kind::Opaque;
+    /// #     type Kind = cxx::kind::Opaque;
     /// # }
     /// ```
     type Id;
@@ -118,7 +118,7 @@ pub unsafe trait ExternType {
     /// ```
     /// # struct TypeName;
     /// # unsafe impl cxx::ExternType for TypeName {
-    /// type Id = cxx::type_id!("name::space::of::TypeName");
+    /// #     type Id = cxx::type_id!("name::space::of::TypeName");
     /// type Kind = cxx::kind::Trivial;
     /// # }
     /// ```
