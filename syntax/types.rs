@@ -1,7 +1,7 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::set::OrderedSet as Set;
-use crate::syntax::{Api, Derive, Enum, ExternType, Struct, Type, TypeAlias};
+use crate::syntax::{Api, Derive, Enum, ExternFn, ExternType, Struct, Type, TypeAlias};
 use proc_macro2::Ident;
 use quote::ToTokens;
 use std::collections::{BTreeMap as Map, HashSet as UnorderedSet};
@@ -14,7 +14,7 @@ pub struct Types<'a> {
     pub rust: Set<&'a Ident>,
     pub aliases: Map<&'a Ident, &'a TypeAlias>,
     pub untrusted: Map<&'a Ident, &'a ExternType>,
-    pub required_trivial_aliases: Set<&'a Ident>,
+    pub required_trivial: Map<&'a Ident, TrivialReason<'a>>,
 }
 
 impl<'a> Types<'a> {
@@ -140,27 +140,30 @@ impl<'a> Types<'a> {
         // we check that this is permissible. We do this _after_ scanning all
         // the APIs above, in case some function or struct references a type
         // which is declared subsequently.
-        let mut required_trivial_aliases = Set::new();
-        let mut insist_alias_types_are_trivial = |ty: &'a Type| {
+        let mut required_trivial = Map::new();
+        let mut insist_alias_types_are_trivial = |ty: &'a Type, reason| {
             if let Type::Ident(ident) = ty {
-                if aliases.contains_key(ident) {
-                    required_trivial_aliases.insert(ident);
+                if cxx.contains(ident) {
+                    required_trivial.entry(ident).or_insert(reason);
                 }
             }
         };
         for api in apis {
             match api {
                 Api::Struct(strct) => {
+                    let reason = TrivialReason::StructField(strct);
                     for field in &strct.fields {
-                        insist_alias_types_are_trivial(&field.ty);
+                        insist_alias_types_are_trivial(&field.ty, reason);
                     }
                 }
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
+                    let reason = TrivialReason::FunctionArgument(efn);
                     for arg in &efn.args {
-                        insist_alias_types_are_trivial(&arg.ty);
+                        insist_alias_types_are_trivial(&arg.ty, reason);
                     }
                     if let Some(ret) = &efn.ret {
-                        insist_alias_types_are_trivial(&ret);
+                        let reason = TrivialReason::FunctionReturn(efn);
+                        insist_alias_types_are_trivial(&ret, reason);
                     }
                 }
                 _ => {}
@@ -175,7 +178,7 @@ impl<'a> Types<'a> {
             rust,
             aliases,
             untrusted,
-            required_trivial_aliases,
+            required_trivial,
         }
     }
 
@@ -209,6 +212,13 @@ impl<'t, 'a> IntoIterator for &'t Types<'a> {
     fn into_iter(self) -> Self::IntoIter {
         self.all.into_iter()
     }
+}
+
+#[derive(Copy, Clone)]
+pub enum TrivialReason<'a> {
+    StructField(&'a Struct),
+    FunctionArgument(&'a ExternFn),
+    FunctionReturn(&'a ExternFn),
 }
 
 fn duplicate_name(cx: &mut Errors, sp: impl ToTokens, ident: &Ident) {

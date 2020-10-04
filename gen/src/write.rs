@@ -81,7 +81,7 @@ pub(super) fn gen(
                 }
             }
             Api::TypeAlias(ety) => {
-                if types.required_trivial_aliases.contains(&ety.ident) {
+                if types.required_trivial.contains_key(&ety.ident) {
                     check_trivial_extern_type(out, &ety.ident)
                 }
             }
@@ -136,7 +136,9 @@ fn write_includes(out: &mut OutFile, types: &Types) {
                 Some(CxxString) => out.include.string = true,
                 Some(Bool) | Some(Isize) | Some(F32) | Some(F64) | Some(RustString) => {}
                 None => {
-                    if types.required_trivial_aliases.contains(&ident) {
+                    if types.aliases.contains_key(ident)
+                        && types.required_trivial.contains_key(ident)
+                    {
                         out.include.type_traits = true;
                     }
                 }
