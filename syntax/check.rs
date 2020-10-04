@@ -1,6 +1,7 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
+use crate::syntax::types::TrivialReason;
 use crate::syntax::{
     error, ident, Api, Enum, ExternFn, ExternType, Lang, Receiver, Ref, Slice, Struct, Ty1, Type,
     Types,
@@ -208,6 +209,19 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
 
 fn check_api_type(cx: &mut Check, ty: &ExternType) {
     check_reserved_name(cx, &ty.ident);
+
+    if let Some(reason) = cx.types.required_trivial.get(&ty.ident) {
+        let what = match reason {
+            TrivialReason::StructField(strct) => format!("a field of `{}`", strct.ident),
+            TrivialReason::FunctionArgument(efn) => format!("an argument of `{}`", efn.ident),
+            TrivialReason::FunctionReturn(efn) => format!("a return value of `{}`", efn.ident),
+        };
+        let msg = format!(
+            "needs a cxx::ExternType impl in order to be used as {}",
+            what,
+        );
+        cx.error(ty, msg);
+    }
 }
 
 fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
@@ -338,7 +352,8 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
         || cx.types.cxx.contains(ident)
             && !cx.types.structs.contains_key(ident)
             && !cx.types.enums.contains_key(ident)
-            && !cx.types.required_trivial_aliases.contains_key(ident)
+            && !(cx.types.aliases.contains_key(ident)
+                && cx.types.required_trivial.contains_key(ident))
         || cx.types.rust.contains(ident)
 }
 
@@ -376,12 +391,10 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
                 "struct".to_owned()
             } else if cx.types.enums.contains_key(ident) {
                 "enum".to_owned()
+            } else if cx.types.aliases.contains_key(ident) {
+                "C++ type".to_owned()
             } else if cx.types.cxx.contains(ident) {
-                if cx.types.required_trivial_aliases.contains_key(ident) {
-                    "trivial C++ type".to_owned()
-                } else {
-                    "non-trivial C++ type".to_owned()
-                }
+                "opaque C++ type".to_owned()
             } else if cx.types.rust.contains(ident) {
                 "opaque Rust type".to_owned()
             } else if Atom::from(ident) == Some(CxxString) {

@@ -14,7 +14,7 @@ pub struct Types<'a> {
     pub rust: Set<&'a Ident>,
     pub aliases: Map<&'a Ident, &'a TypeAlias>,
     pub untrusted: Map<&'a Ident, &'a ExternType>,
-    pub required_trivial_aliases: Map<&'a Ident, TrivialReason<'a>>,
+    pub required_trivial: Map<&'a Ident, TrivialReason<'a>>,
 }
 
 impl<'a> Types<'a> {
@@ -140,11 +140,11 @@ impl<'a> Types<'a> {
         // we check that this is permissible. We do this _after_ scanning all
         // the APIs above, in case some function or struct references a type
         // which is declared subsequently.
-        let mut required_trivial_aliases = Map::new();
+        let mut required_trivial = Map::new();
         let mut insist_alias_types_are_trivial = |ty: &'a Type, reason| {
             if let Type::Ident(ident) = ty {
-                if aliases.contains_key(ident) {
-                    required_trivial_aliases.entry(ident).or_insert(reason);
+                if cxx.contains(ident) {
+                    required_trivial.entry(ident).or_insert(reason);
                 }
             }
         };
@@ -178,7 +178,7 @@ impl<'a> Types<'a> {
             rust,
             aliases,
             untrusted,
-            required_trivial_aliases,
+            required_trivial,
         }
     }
 
