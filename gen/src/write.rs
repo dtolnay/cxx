@@ -322,10 +322,10 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
         writeln!(out, "missing trycatch(...);");
         writeln!(out);
         writeln!(out, "template <typename Try, typename Fail>");
-        writeln!(out, "static typename std::enable_if<");
+        writeln!(out, "static typename ::std::enable_if<");
         writeln!(
             out,
-            "    std::is_same<decltype(trycatch(std::declval<Try>(), std::declval<Fail>())),",
+            "    ::std::is_same<decltype(trycatch(::std::declval<Try>(), ::std::declval<Fail>())),",
         );
         writeln!(out, "                 missing>::value>::type");
         writeln!(out, "trycatch(Try &&func, Fail &&fail) noexcept try {{");
@@ -439,7 +439,7 @@ fn check_trivial_extern_type(out: &mut OutFile, id: &Ident) {
     writeln!(out, "static_assert(");
     writeln!(
         out,
-        "    std::is_trivially_move_constructible<{}>::value,",
+        "    ::std::is_trivially_move_constructible<{}>::value,",
         id,
     );
     writeln!(
@@ -448,7 +448,7 @@ fn check_trivial_extern_type(out: &mut OutFile, id: &Ident) {
         id,
     );
     writeln!(out, "static_assert(");
-    writeln!(out, "    std::is_trivially_destructible<{}>::value,", id);
+    writeln!(out, "    ::std::is_trivially_destructible<{}>::value,", id);
     writeln!(
         out,
         "    \"type {} marked as Trivial in Rust is not trivially destructible in C++\");",
