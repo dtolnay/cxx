@@ -129,18 +129,18 @@ pub(super) fn gen(
 fn write_includes(out: &mut OutFile, types: &Types) {
     for ty in types {
         match ty {
-            Type::Ident(ident) => {
-                match Atom::from(ident) {
-                    Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(I8) | Some(I16)
-                    | Some(I32) | Some(I64) => out.include.cstdint = true,
-                    Some(Usize) => out.include.cstddef = true,
-                    Some(CxxString) => out.include.string = true,
-                    Some(Bool) | Some(Isize) | Some(F32) | Some(F64) | Some(RustString) | None => {}
-                };
-                if types.required_trivial_aliases.contains(&ident) {
-                    out.include.type_traits = true;
-                };
-            }
+            Type::Ident(ident) => match Atom::from(ident) {
+                Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(I8) | Some(I16) | Some(I32)
+                | Some(I64) => out.include.cstdint = true,
+                Some(Usize) => out.include.cstddef = true,
+                Some(CxxString) => out.include.string = true,
+                Some(Bool) | Some(Isize) | Some(F32) | Some(F64) | Some(RustString) => {}
+                None => {
+                    if types.required_trivial_aliases.contains(&ident) {
+                        out.include.type_traits = true;
+                    }
+                }
+            },
             Type::RustBox(_) => out.include.type_traits = true,
             Type::UniquePtr(_) => out.include.memory = true,
             Type::CxxVector(_) => out.include.vector = true,
