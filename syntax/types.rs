@@ -141,44 +141,26 @@ impl<'a> Types<'a> {
         // the APIs above, in case some function or struct references a type
         // which is declared subsequently.
         let mut required_trivial_aliases = Set::new();
-
-        fn insist_alias_types_are_trivial<'c>(
-            required_trivial_aliases: &mut Set<&'c Ident>,
-            aliases: &Map<&'c Ident, &'c TypeAlias>,
-            ty: &'c Type,
-        ) {
+        let mut insist_alias_types_are_trivial = |ty: &'a Type| {
             if let Type::Ident(ident) = ty {
                 if aliases.contains_key(ident) {
                     required_trivial_aliases.insert(ident);
                 }
             }
-        }
-
+        };
         for api in apis {
             match api {
                 Api::Struct(strct) => {
                     for field in &strct.fields {
-                        insist_alias_types_are_trivial(
-                            &mut required_trivial_aliases,
-                            &aliases,
-                            &field.ty,
-                        );
+                        insist_alias_types_are_trivial(&field.ty);
                     }
                 }
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
                     for arg in &efn.args {
-                        insist_alias_types_are_trivial(
-                            &mut required_trivial_aliases,
-                            &aliases,
-                            &arg.ty,
-                        );
+                        insist_alias_types_are_trivial(&arg.ty);
                     }
                     if let Some(ret) = &efn.ret {
-                        insist_alias_types_are_trivial(
-                            &mut required_trivial_aliases,
-                            &aliases,
-                            &ret,
-                        );
+                        insist_alias_types_are_trivial(&ret);
                     }
                 }
                 _ => {}
