@@ -1,7 +1,7 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::set::OrderedSet as Set;
-use crate::syntax::{Api, Derive, Enum, ExternFn, ExternType, Struct, Type, TypeAlias};
+use crate::syntax::{Api, Derive, Enum, ExternFn, ExternType, Impl, Struct, Type, TypeAlias};
 use proc_macro2::Ident;
 use quote::ToTokens;
 use std::collections::{BTreeMap as Map, HashSet as UnorderedSet};
@@ -15,7 +15,7 @@ pub struct Types<'a> {
     pub aliases: Map<&'a Ident, &'a TypeAlias>,
     pub untrusted: Map<&'a Ident, &'a ExternType>,
     pub required_trivial: Map<&'a Ident, TrivialReason<'a>>,
-    pub explicit_impls: Set<&'a Type>,
+    pub explicit_impls: Set<&'a Impl>,
 }
 
 impl<'a> Types<'a> {
@@ -137,7 +137,7 @@ impl<'a> Types<'a> {
                 }
                 Api::Impl(imp) => {
                     visit(&mut all, &imp.ty);
-                    explicit_impls.insert(&imp.ty);
+                    explicit_impls.insert(imp);
                 }
             }
         }
