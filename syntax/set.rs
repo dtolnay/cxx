@@ -35,6 +35,14 @@ where
     {
         self.set.contains(value)
     }
+
+    pub fn get<Q>(&self, value: &Q) -> Option<&'a T>
+    where
+        &'a T: Borrow<Q>,
+        Q: ?Sized + Hash + Eq,
+    {
+        self.set.get(value).copied()
+    }
 }
 
 impl<'s, 'a, T> IntoIterator for &'s OrderedSet<&'a T> {

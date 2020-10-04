@@ -1,4 +1,5 @@
-use crate::syntax::{ExternFn, Receiver, Ref, Signature, Slice, Ty1, Type};
+use crate::syntax::{ExternFn, Impl, Receiver, Ref, Signature, Slice, Ty1, Type};
+use std::borrow::Borrow;
 use std::hash::{Hash, Hasher};
 use std::mem;
 use std::ops::{Deref, DerefMut};
@@ -236,5 +237,40 @@ impl Hash for Receiver {
         lifetime.hash(state);
         mutability.is_some().hash(state);
         ty.hash(state);
+    }
+}
+
+impl Hash for Impl {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let Impl {
+            impl_token: _,
+            ty,
+            brace_token: _,
+        } = self;
+        ty.hash(state);
+    }
+}
+
+impl Eq for Impl {}
+
+impl PartialEq for Impl {
+    fn eq(&self, other: &Impl) -> bool {
+        let Impl {
+            impl_token: _,
+            ty,
+            brace_token: _,
+        } = self;
+        let Impl {
+            impl_token: _,
+            ty: ty2,
+            brace_token: _,
+        } = other;
+        ty == ty2
+    }
+}
+
+impl Borrow<Type> for &Impl {
+    fn borrow(&self) -> &Type {
+        &self.ty
     }
 }
