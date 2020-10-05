@@ -8,9 +8,6 @@ pub(super) mod include;
 pub(super) mod out;
 mod write;
 
-#[cfg(test)]
-mod tests;
-
 pub(super) use self::error::Error;
 use self::error::{format_err, Result};
 use self::file::File;

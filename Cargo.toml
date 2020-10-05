@@ -29,6 +29,7 @@ cxxbridge-flags = { version = "=0.4.7", path = "flags", default-features = false
 
 [dev-dependencies]
 cxx-build = { version = "=0.4.7", path = "gen/build" }
+cxx-gen = { version = "0.4", path = "gen/lib" }
 cxx-test-suite = { version = "0", path = "tests/ffi" }
 rustversion = "1.0"
 trybuild = { version = "1.0.33", features = ["diff"] }
