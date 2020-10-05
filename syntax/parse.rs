@@ -73,7 +73,7 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct) -> Result<Api> {
         Fields::Named(fields) => fields,
         Fields::Unit => return Err(Error::new_spanned(item, "unit structs are not supported")),
         Fields::Unnamed(_) => {
-            return Err(Error::new_spanned(item, "tuple structs are not supported"))
+            return Err(Error::new_spanned(item, "tuple structs are not supported"));
         }
     };
 

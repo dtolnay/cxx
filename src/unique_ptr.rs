@@ -190,7 +190,9 @@ unsafe impl UniquePtrTarget for CxxString {
     const __NAME: &'static dyn Display = &"CxxString";
     fn __null() -> *mut c_void {
         let mut repr = ptr::null_mut::<c_void>();
-        unsafe { unique_ptr_std_string_null(&mut repr) }
+        unsafe {
+            unique_ptr_std_string_null(&mut repr);
+        }
         repr
     }
     unsafe fn __raw(raw: *mut Self) -> *mut c_void {
