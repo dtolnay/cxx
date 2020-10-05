@@ -123,7 +123,7 @@ pub unsafe trait ExternType {
     /// [move constructor is trivial]: https://en.cppreference.com/w/cpp/types/is_move_constructible
     ///
     /// If you believe your C++ type reflected by this ExternType impl is indeed
-    /// trivial, you can specify:
+    /// fine to hold by value and move in Rust, you can specify:
     ///
     /// ```
     /// # struct TypeName;
