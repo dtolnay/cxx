@@ -138,14 +138,7 @@ fn write_includes(out: &mut OutFile, types: &Types) {
                 | Some(I64) => out.include.cstdint = true,
                 Some(Usize) => out.include.cstddef = true,
                 Some(CxxString) => out.include.string = true,
-                Some(Bool) | Some(Isize) | Some(F32) | Some(F64) | Some(RustString) => {}
-                None => {
-                    if types.aliases.contains_key(ident)
-                        && types.required_trivial.contains_key(ident)
-                    {
-                        out.include.type_traits = true;
-                    }
-                }
+                Some(Bool) | Some(Isize) | Some(F32) | Some(F64) | Some(RustString) | None => {}
             },
             Type::RustBox(_) => out.include.type_traits = true,
             Type::UniquePtr(_) => out.include.memory = true,
@@ -436,6 +429,7 @@ fn check_trivial_extern_type(out: &mut OutFile, id: &Ident) {
     // not being recognized as such by the C++ type system due to a move
     // constructor or destructor.
 
+    out.include.type_traits = true;
     writeln!(out, "static_assert(");
     writeln!(
         out,
