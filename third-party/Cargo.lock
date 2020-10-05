@@ -63,6 +63,7 @@ version = "0.4.7"
 dependencies = [
  "cc",
  "cxx-build",
+ "cxx-gen",
  "cxx-test-suite",
  "cxxbridge-flags",
  "cxxbridge-macro",
