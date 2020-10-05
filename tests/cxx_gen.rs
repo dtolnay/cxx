@@ -1,6 +1,7 @@
 use cxx_gen::{generate_header_and_cc, Opt};
+use std::str;
 
-const CPP_EXAMPLE: &str = r#"
+const BRIDGE0: &str = r#"
     #[cxx::bridge]
     mod ffi {
         extern "C" {
@@ -10,22 +11,22 @@ const CPP_EXAMPLE: &str = r#"
 "#;
 
 #[test]
-fn test_cpp() {
+fn test_extern_c_function() {
     let opt = Opt::default();
-    let source = CPP_EXAMPLE.parse().unwrap();
-    let output = generate_header_and_cc(source, &opt).unwrap();
-    let output = std::str::from_utf8(&output.implementation).unwrap();
+    let source = BRIDGE0.parse().unwrap();
+    let generated = generate_header_and_cc(source, &opt).unwrap();
+    let output = str::from_utf8(&generated.implementation).unwrap();
     // To avoid continual breakage we won't test every byte.
     // Let's look for the major features.
     assert!(output.contains("void cxxbridge04$do_cpp_thing(::rust::Str::Repr foo)"));
 }
 
 #[test]
-fn test_annotation() {
+fn test_impl_annotation() {
     let mut opt = Opt::default();
     opt.cxx_impl_annotations = Some("ANNOTATION".to_owned());
-    let source = CPP_EXAMPLE.parse().unwrap();
-    let output = generate_header_and_cc(source, &opt).unwrap();
-    let output = std::str::from_utf8(&output.implementation).unwrap();
+    let source = BRIDGE0.parse().unwrap();
+    let generated = generate_header_and_cc(source, &opt).unwrap();
+    let output = str::from_utf8(&generated.implementation).unwrap();
     assert!(output.contains("ANNOTATION void cxxbridge04$do_cpp_thing(::rust::Str::Repr foo)"));
 }
