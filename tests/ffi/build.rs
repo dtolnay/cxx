@@ -1,8 +1,11 @@
+use cxx_build::CFG;
+
 fn main() {
     if cfg!(trybuild) {
         return;
     }
 
+    CFG.include_prefix = "tests/ffi";
     let sources = vec!["lib.rs", "module.rs"];
     cxx_build::bridges(sources)
         .file("tests.cc")

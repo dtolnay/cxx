@@ -29,8 +29,6 @@ cc_library(
         ":module/source",
     ],
     hdrs = ["ffi/tests.h"],
-    include_prefix = "cxx-test-suite",
-    strip_include_prefix = "ffi",
     deps = [
         ":bridge/include",
         "//:core",
@@ -40,15 +38,11 @@ cc_library(
 rust_cxx_bridge(
     name = "bridge",
     src = "ffi/lib.rs",
-    include_prefix = "cxx-test-suite",
-    strip_include_prefix = "ffi",
     deps = [":impl"],
 )
 
 rust_cxx_bridge(
     name = "module",
     src = "ffi/module.rs",
-    include_prefix = "cxx-test-suite",
-    strip_include_prefix = "ffi",
     deps = [":impl"],
 )
