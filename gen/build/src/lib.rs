@@ -54,6 +54,7 @@
 )]
 
 mod cargo;
+mod cfg;
 mod error;
 mod gen;
 mod out;
@@ -72,6 +73,8 @@ use std::io::{self, Write};
 use std::iter;
 use std::path::{Path, PathBuf};
 use std::process;
+
+pub use crate::cfg::{Cfg, CFG};
 
 /// This returns a [`cc::Build`] on which you should continue to set up any
 /// additional source files or compiler flags, and lastly call its [`compile`]
@@ -103,7 +106,7 @@ pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) ->
 }
 
 struct Project {
-    package_name: OsString,
+    include_prefix: PathBuf,
     manifest_dir: PathBuf,
     // Output directory as received from Cargo.
     out_dir: PathBuf,
@@ -124,7 +127,11 @@ struct Project {
 
 impl Project {
     fn init() -> Result<Self> {
-        let package_name = env_os("CARGO_PKG_NAME")?;
+        let include_prefix = Path::new(CFG.include_prefix);
+        assert!(include_prefix.is_relative());
+        assert!(!include_prefix.as_os_str().is_empty());
+        let include_prefix = include_prefix.components().collect();
+
         let manifest_dir = paths::manifest_dir()?;
         let out_dir = paths::out_dir()?;
 
@@ -141,7 +148,7 @@ impl Project {
         };
 
         Ok(Project {
-            package_name,
+            include_prefix,
             manifest_dir,
             out_dir,
             shared_dir,
@@ -240,7 +247,7 @@ fn env_include_dirs() -> impl Iterator<Item = PathBuf> {
 
 fn make_crate_dir(prj: &Project) -> Option<PathBuf> {
     let crate_dir = prj.out_dir.join("cxxbridge").join("crate");
-    let link = crate_dir.join(&prj.package_name);
+    let link = crate_dir.join(&prj.include_prefix);
     if out::symlink_dir(&prj.manifest_dir, link).is_ok() {
         println!("cargo:CXXBRIDGE_CRATE={}", crate_dir.to_string_lossy());
         Some(crate_dir)
@@ -270,8 +277,8 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
     let ref rel_path = paths::local_relative_path(rust_source_file);
 
     let cxxbridge = prj.out_dir.join("cxxbridge");
-    let include_dir = cxxbridge.join("include").join(&prj.package_name);
-    let sources_dir = cxxbridge.join("sources").join(&prj.package_name);
+    let include_dir = cxxbridge.join("include").join(&prj.include_prefix);
+    let sources_dir = cxxbridge.join("sources").join(&prj.include_prefix);
 
     let ref rel_path_h = rel_path.with_appended_extension(".h");
     let ref header_path = include_dir.join(rel_path_h);
@@ -285,8 +292,8 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
     out::write(implementation_path, &generated.implementation)?;
     build.file(implementation_path);
 
-    let shared_h = prj.shared_dir.join(&prj.package_name).join(rel_path_h);
-    let shared_cc = prj.shared_dir.join(&prj.package_name).join(rel_path_cc);
+    let shared_h = prj.shared_dir.join(&prj.include_prefix).join(rel_path_h);
+    let shared_cc = prj.shared_dir.join(&prj.include_prefix).join(rel_path_cc);
     let _ = out::symlink_file(header_path, shared_h);
     let _ = out::symlink_file(implementation_path, shared_cc);
     Ok(())
