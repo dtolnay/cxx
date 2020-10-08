@@ -62,6 +62,7 @@ rust_library(
         "//third-party:lazy_static",
         "//third-party:proc-macro2",
         "//third-party:quote",
+        "//third-party:scratch",
         "//third-party:syn",
     ],
 )

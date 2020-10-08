@@ -69,6 +69,13 @@ rust_library(
 )
 
 rust_library(
+    name = "scratch",
+    srcs = glob(["vendor/scratch-1.0.0/src/**"]),
+    rustc_env = {"OUT_DIR": ""},
+    visibility = ["//visibility:public"],
+)
+
+rust_library(
     name = "syn",
     srcs = glob(["vendor/syn-1.0.42/src/**"]),
     crate_features = [
