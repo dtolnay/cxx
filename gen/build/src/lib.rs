@@ -177,10 +177,14 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
     let mut build = Build::new();
     build.cpp(true);
     build.cpp_link_stdlib(None); // linked via link-cplusplus crate
+    build.include(include_dir);
     if let Some(crate_dir) = crate_dir {
+        // Placed after the generated code directory (include_dir) on the
+        // include line so that `#include "path/to/file.rs"` from C++
+        // "magically" works and refers to the API generated from that Rust
+        // source file.
         build.include(crate_dir);
     }
-    build.include(include_dir);
 
     for path in rust_source_files {
         generate_bridge(prj, &mut build, path.as_ref())?;
