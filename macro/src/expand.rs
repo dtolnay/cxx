@@ -41,8 +41,8 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
     for api in apis {
         match api {
             Api::Include(_) | Api::RustType(_) | Api::Impl(_) => {}
-            Api::Struct(strct) => expanded.extend(expand_struct(strct)),
-            Api::Enum(enm) => expanded.extend(expand_enum(enm)),
+            Api::Struct(strct) => expanded.extend(expand_struct(namespace, strct)),
+            Api::Enum(enm) => expanded.extend(expand_enum(namespace, enm)),
             Api::CxxType(ety) => {
                 let ident = &ety.ident;
                 if !types.structs.contains_key(ident) && !types.enums.contains_key(ident) {
@@ -125,16 +125,18 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
     }
 }
 
-fn expand_struct(strct: &Struct) -> TokenStream {
+fn expand_struct(namespace: &Namespace, strct: &Struct) -> TokenStream {
     let ident = &strct.ident;
     let doc = &strct.doc;
     let derives = &strct.derives;
+    let type_id = type_id(namespace, ident);
     let fields = strct.fields.iter().map(|field| {
         // This span on the pub makes "private type in public interface" errors
         // appear in the right place.
         let vis = Token![pub](field.ident.span());
         quote!(#vis #field)
     });
+
     quote! {
         #doc
         #[derive(#(#derives),*)]
@@ -142,13 +144,19 @@ fn expand_struct(strct: &Struct) -> TokenStream {
         pub struct #ident {
             #(#fields,)*
         }
+
+        unsafe impl ::cxx::ExternType for #ident {
+            type Id = #type_id;
+            type Kind = ::cxx::kind::Trivial;
+        }
     }
 }
 
-fn expand_enum(enm: &Enum) -> TokenStream {
+fn expand_enum(namespace: &Namespace, enm: &Enum) -> TokenStream {
     let ident = &enm.ident;
     let doc = &enm.doc;
     let repr = enm.repr;
+    let type_id = type_id(namespace, ident);
     let variants = enm.variants.iter().map(|variant| {
         let variant_ident = &variant.ident;
         let discriminant = &variant.discriminant;
@@ -156,6 +164,7 @@ fn expand_enum(enm: &Enum) -> TokenStream {
             pub const #variant_ident: Self = #ident { repr: #discriminant };
         })
     });
+
     quote! {
         #doc
         #[derive(Copy, Clone, PartialEq, Eq)]
@@ -167,6 +176,11 @@ fn expand_enum(enm: &Enum) -> TokenStream {
         #[allow(non_upper_case_globals)]
         impl #ident {
             #(#variants)*
+        }
+
+        unsafe impl ::cxx::ExternType for #ident {
+            type Id = #type_id;
+            type Kind = ::cxx::kind::Trivial;
         }
     }
 }
