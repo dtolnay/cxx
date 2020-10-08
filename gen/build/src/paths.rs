@@ -1,8 +1,6 @@
-use crate::error::{Error, Result};
+use crate::error::Result;
 use crate::gen::fs;
-use crate::Project;
-use std::env;
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsStr;
 use std::path::{Component, Path, PathBuf};
 
 pub(crate) enum TargetDir {
@@ -10,10 +8,12 @@ pub(crate) enum TargetDir {
     Unknown,
 }
 
+pub(crate) fn manifest_dir() -> Result<PathBuf> {
+    crate::env_os("CARGO_MANIFEST_DIR").map(PathBuf::from)
+}
+
 pub(crate) fn out_dir() -> Result<PathBuf> {
-    env::var_os("OUT_DIR")
-        .map(PathBuf::from)
-        .ok_or(Error::MissingOutDir)
+    crate::env_os("OUT_DIR").map(PathBuf::from)
 }
 
 // Given a path provided by the user, determines where generated files related
@@ -32,14 +32,6 @@ pub(crate) fn local_relative_path(path: &Path) -> PathBuf {
     rel_path
 }
 
-pub(crate) fn namespaced(base: &Path, rel_path: &Path) -> PathBuf {
-    let mut path = base.to_owned();
-    path.push("cxxbridge");
-    path.extend(package_name());
-    path.push(rel_path);
-    path
-}
-
 pub(crate) trait PathExt {
     fn with_appended_extension(&self, suffix: impl AsRef<OsStr>) -> PathBuf;
 }
@@ -50,21 +42,6 @@ impl PathExt for Path {
         file_name.push(suffix);
         self.with_file_name(file_name)
     }
-}
-
-pub(crate) fn include_dir(prj: &Project) -> PathBuf {
-    match &prj.target_dir {
-        TargetDir::Path(target_dir) => target_dir.join("cxxbridge"),
-        TargetDir::Unknown => prj.out_dir.join("cxxbridge"),
-    }
-}
-
-pub(crate) fn manifest_dir() -> Option<PathBuf> {
-    env::var_os("CARGO_MANIFEST_DIR").map(PathBuf::from)
-}
-
-pub(crate) fn package_name() -> Option<OsString> {
-    env::var_os("CARGO_PKG_NAME")
 }
 
 pub(crate) fn search_parents_for_target_dir(out_dir: &Path) -> TargetDir {

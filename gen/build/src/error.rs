@@ -1,19 +1,22 @@
 use crate::gen::fs;
 use std::error::Error as StdError;
+use std::ffi::OsString;
 use std::fmt::{self, Display};
 
 pub(super) type Result<T, E = Error> = std::result::Result<T, E>;
 
 #[derive(Debug)]
 pub(super) enum Error {
-    MissingOutDir,
+    NoEnv(OsString),
     Fs(fs::Error),
 }
 
 impl Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Error::MissingOutDir => write!(f, "missing OUT_DIR environment variable"),
+            Error::NoEnv(var) => {
+                write!(f, "missing {} environment variable", var.to_string_lossy())
+            }
             Error::Fs(err) => err.fmt(f),
         }
     }
