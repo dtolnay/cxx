@@ -65,6 +65,7 @@ use crate::gen::error::report;
 use crate::gen::Opt;
 use crate::paths::{PathExt, TargetDir};
 use cc::Build;
+use std::collections::BTreeMap;
 use std::env;
 use std::ffi::{OsStr, OsString};
 use std::io::{self, Write};
@@ -167,7 +168,9 @@ impl Project {
 //                 .../
 //                    lib.rs.cc
 //
-// The crate/ and include/ directories are placed on the #include path.
+// The crate/ and include/ directories are placed on the #include path for the
+// current build as well as for downstream builds that have a direct dependency
+// on the current crate.
 fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Result<Build> {
     let ref prj = Project::init()?;
 
@@ -177,31 +180,69 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
     let mut build = Build::new();
     build.cpp(true);
     build.cpp_link_stdlib(None); // linked via link-cplusplus crate
-    build.include(include_dir);
-    if let Some(crate_dir) = crate_dir {
-        // Placed after the generated code directory (include_dir) on the
-        // include line so that `#include "path/to/file.rs"` from C++
-        // "magically" works and refers to the API generated from that Rust
-        // source file.
-        build.include(crate_dir);
-    }
 
     for path in rust_source_files {
         generate_bridge(prj, &mut build, path.as_ref())?;
     }
 
     eprintln!("\nCXX include path:");
+    build.include(include_dir);
+    eprintln!("  {}", include_dir.display());
     if let Some(crate_dir) = crate_dir {
+        // Placed after the generated code directory (include_dir) on the
+        // include line so that `#include "path/to/file.rs"` from C++
+        // "magically" works and refers to the API generated from that Rust
+        // source file.
+        build.include(crate_dir);
         eprintln!("  {}", crate_dir.display());
     }
-    eprintln!("  {}", include_dir.display());
+    for dep in env_include_dirs() {
+        build.include(&dep);
+        eprintln!("  {}", dep.display());
+    }
     Ok(build)
+}
+
+fn env_include_dirs() -> impl Iterator<Item = PathBuf> {
+    let mut env_include_dirs = BTreeMap::new();
+    for (k, v) in env::vars_os() {
+        let mut k = k.to_string_lossy().into_owned();
+        // Only variables set from a build script of direct dependencies are
+        // observable. That's exactly what we want! Your crate needs to declare
+        // a direct dependency on the other crate in order to be able to
+        // #include its headers.
+        //
+        // Also, they're only observable if the dependency's manifest contains a
+        // `links` key. This is important because Cargo imposes no ordering on
+        // the execution of build scripts without a `links` key. When exposing a
+        // generated header for the current crate to #include, we need to be
+        // sure the dependency's build script has already executed and emitted
+        // that generated header.
+        //
+        // References:
+        //   - https://doc.rust-lang.org/cargo/reference/build-scripts.html#the-links-manifest-key
+        //   - https://doc.rust-lang.org/cargo/reference/build-script-examples.html#using-another-sys-crate
+        if k.starts_with("DEP_") {
+            if k.ends_with("_CXXBRIDGE_INCLUDE") {
+                // Tweak to ensure sorted before the other one, for the same
+                // reason as the comment on ordering of include_dir vs crate_dir
+                // above.
+                k.replace_range(k.len() - "INCLUDE".len().., "0");
+                env_include_dirs.insert(k, PathBuf::from(v));
+            } else if k.ends_with("_CXXBRIDGE_CRATE") {
+                k.replace_range(k.len() - "CRATE".len().., "1");
+                env_include_dirs.insert(k, PathBuf::from(v));
+            }
+        }
+    }
+    env_include_dirs.into_iter().map(|entry| entry.1)
 }
 
 fn make_crate_dir(prj: &Project) -> Option<PathBuf> {
     let crate_dir = prj.out_dir.join("cxxbridge").join("crate");
     let link = crate_dir.join(&prj.package_name);
     if out::symlink_dir(&prj.manifest_dir, link).is_ok() {
+        println!("cargo:CXXBRIDGE_CRATE={}", crate_dir.to_string_lossy());
         Some(crate_dir)
     } else {
         None
@@ -219,6 +260,7 @@ fn make_include_dir(prj: &Project) -> Result<PathBuf> {
         out::write(shared_cxx_h, gen::include::HEADER.as_bytes())?;
         out::symlink_file(shared_cxx_h, cxx_h)?;
     }
+    println!("cargo:CXXBRIDGE_INCLUDE={}", include_dir.to_string_lossy());
     Ok(include_dir)
 }
 
