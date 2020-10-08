@@ -48,6 +48,7 @@ rust_library(
 rust_library(
     name = "build",
     srcs = glob(["gen/build/src/**"]),
+    env = {"OUT_DIR": ""},
     visibility = ["PUBLIC"],
     deps = [
         "//third-party:cc",
