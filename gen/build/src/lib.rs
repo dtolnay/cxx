@@ -62,7 +62,7 @@ mod syntax;
 
 use crate::error::Result;
 use crate::gen::error::report;
-use crate::gen::{fs, Opt};
+use crate::gen::Opt;
 use crate::paths::{PathExt, TargetDir};
 use cc::Build;
 use std::io::{self, Write};
@@ -148,9 +148,7 @@ fn write_header(prj: &Project) {
     let ref cxx_h = prj.out_dir.join("cxxbridge").join("rust").join("cxx.h");
     let _ = out::write(cxx_h, gen::include::HEADER.as_bytes());
     if let TargetDir::Path(target_dir) = &prj.target_dir {
-        let ref header_dir = target_dir.join("cxxbridge").join("rust");
-        let _ = fs::create_dir_all(header_dir);
-        let ref cxx_h = header_dir.join("cxx.h");
+        let ref cxx_h = target_dir.join("cxxbridge").join("rust").join("cxx.h");
         let _ = out::write(cxx_h, gen::include::HEADER.as_bytes());
     }
 }
