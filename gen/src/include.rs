@@ -56,11 +56,12 @@ pub struct Includes {
     pub cstring: bool,
     pub exception: bool,
     pub memory: bool,
+    pub new: bool,
     pub string: bool,
     pub type_traits: bool,
     pub utility: bool,
     pub vector: bool,
-    pub base_tsd: bool,
+    pub basetsd: bool,
 }
 
 impl Includes {
@@ -106,6 +107,9 @@ impl Display for Includes {
         if self.memory {
             writeln!(f, "#include <memory>")?;
         }
+        if self.new {
+            writeln!(f, "#include <new>")?;
+        }
         if self.string {
             writeln!(f, "#include <string>")?;
         }
@@ -118,13 +122,10 @@ impl Display for Includes {
         if self.vector {
             writeln!(f, "#include <vector>")?;
         }
-        if self.base_tsd {
+        if self.basetsd {
             writeln!(f, "#if defined(_WIN32)")?;
-            writeln!(f, "#include <BaseTsd.h>")?;
+            writeln!(f, "#include <basetsd.h>")?;
             writeln!(f, "#endif")?;
-        }
-        if *self != Self::default() {
-            writeln!(f)?;
         }
         Ok(())
     }

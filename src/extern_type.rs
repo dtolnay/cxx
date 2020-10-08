@@ -1,3 +1,5 @@
+use self::kind::{Kind, Opaque, Trivial};
+
 /// A type for which the layout is determined by its C++ definition.
 ///
 /// This trait serves the following two related purposes.
@@ -54,7 +56,7 @@
 /// ## Integrating with bindgen-generated types
 ///
 /// Handwritten `ExternType` impls make it possible to plug in a data structure
-/// emitted by bindgen as the definition of an opaque C++ type emitted by CXX.
+/// emitted by bindgen as the definition of a C++ type emitted by CXX.
 ///
 /// By writing the unsafe `ExternType` impl, the programmer asserts that the C++
 /// namespace and type name given in the type id refers to a C++ type that is
@@ -73,6 +75,7 @@
 ///
 /// unsafe impl ExternType for folly_sys::StringPiece {
 ///     type Id = type_id!("folly::StringPiece");
+///     type Kind = cxx::kind::Opaque;
 /// }
 ///
 /// #[cxx::bridge(namespace = folly)]
@@ -101,10 +104,80 @@ pub unsafe trait ExternType {
     /// # struct TypeName;
     /// # unsafe impl cxx::ExternType for TypeName {
     /// type Id = cxx::type_id!("name::space::of::TypeName");
+    /// #     type Kind = cxx::kind::Opaque;
     /// # }
     /// ```
     type Id;
+
+    /// Either [`cxx::kind::Opaque`] or [`cxx::kind::Trivial`].
+    ///
+    /// [`cxx::kind::Opaque`]: kind::Opaque
+    /// [`cxx::kind::Trivial`]: kind::Trivial
+    ///
+    /// A C++ type is only okay to hold and pass around by value in Rust if its
+    /// [move constructor is trivial] and it has no destructor. In CXX, these
+    /// are called Trivial extern C++ types, while types with nontrivial move
+    /// behavior or a destructor must be considered Opaque and handled by Rust
+    /// only behind an indirection, such as a reference or UniquePtr.
+    ///
+    /// [move constructor is trivial]: https://en.cppreference.com/w/cpp/types/is_move_constructible
+    ///
+    /// If you believe your C++ type reflected by this ExternType impl is indeed
+    /// fine to hold by value and move in Rust, you can specify:
+    ///
+    /// ```
+    /// # struct TypeName;
+    /// # unsafe impl cxx::ExternType for TypeName {
+    /// #     type Id = cxx::type_id!("name::space::of::TypeName");
+    /// type Kind = cxx::kind::Trivial;
+    /// # }
+    /// ```
+    ///
+    /// which will enable you to pass it into C++ functions by value, return it
+    /// by value, and include it in `struct`s that you have declared to
+    /// `cxx::bridge`. Your claim about the triviality of the C++ type will be
+    /// checked by a `static_assert` in the generated C++ side of the binding.
+    type Kind: Kind;
+}
+
+/// Marker types identifying Rust's knowledge about an extern C++ type.
+///
+/// These markers are used in the [`Kind`][ExternType::Kind] associated type in
+/// impls of the `ExternType` trait. Refer to the documentation of `Kind` for an
+/// overview of their purpose.
+pub mod kind {
+    use super::private;
+
+    /// An opaque type which cannot be passed or held by value within Rust.
+    ///
+    /// Rust's move semantics are such that every move is equivalent to a
+    /// memcpy. This is incompatible in general with C++'s constructor-based
+    /// move semantics, so a C++ type which has a destructor or nontrivial move
+    /// constructor must never exist by value in Rust. In CXX, such types are
+    /// called opaque C++ types.
+    ///
+    /// When passed across an FFI boundary, an opaque C++ type must be behind an
+    /// indirection such as a reference or UniquePtr.
+    pub enum Opaque {}
+
+    /// A type with trivial move constructor and no destructor, which can
+    /// therefore be owned and moved around in Rust code without requiring
+    /// indirection.
+    pub enum Trivial {}
+
+    pub trait Kind: private::Sealed {}
+    impl Kind for Opaque {}
+    impl Kind for Trivial {}
+}
+
+mod private {
+    pub trait Sealed {}
+    impl Sealed for super::Opaque {}
+    impl Sealed for super::Trivial {}
 }
 
 #[doc(hidden)]
 pub fn verify_extern_type<T: ExternType<Id = Id>, Id>() {}
+
+#[doc(hidden)]
+pub fn verify_extern_kind<T: ExternType<Kind = Kind>, Kind: self::Kind>() {}

@@ -1,18 +1,21 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::set::OrderedSet as Set;
-use crate::syntax::{Api, Derive, Enum, Struct, Type, TypeAlias};
+use crate::syntax::{Api, Derive, Enum, ExternFn, ExternType, Impl, Struct, Type, TypeAlias};
 use proc_macro2::Ident;
 use quote::ToTokens;
 use std::collections::{BTreeMap as Map, HashSet as UnorderedSet};
 
 pub struct Types<'a> {
-    pub all: Set<'a, Type>,
-    pub structs: Map<Ident, &'a Struct>,
-    pub enums: Map<Ident, &'a Enum>,
-    pub cxx: Set<'a, Ident>,
-    pub rust: Set<'a, Ident>,
-    pub aliases: Map<Ident, &'a TypeAlias>,
+    pub all: Set<&'a Type>,
+    pub structs: Map<&'a Ident, &'a Struct>,
+    pub enums: Map<&'a Ident, &'a Enum>,
+    pub cxx: Set<&'a Ident>,
+    pub rust: Set<&'a Ident>,
+    pub aliases: Map<&'a Ident, &'a TypeAlias>,
+    pub untrusted: Map<&'a Ident, &'a ExternType>,
+    pub required_trivial: Map<&'a Ident, TrivialReason<'a>>,
+    pub explicit_impls: Set<&'a Impl>,
 }
 
 impl<'a> Types<'a> {
@@ -23,8 +26,10 @@ impl<'a> Types<'a> {
         let mut cxx = Set::new();
         let mut rust = Set::new();
         let mut aliases = Map::new();
+        let mut untrusted = Map::new();
+        let mut explicit_impls = Set::new();
 
-        fn visit<'a>(all: &mut Set<'a, Type>, ty: &'a Type) {
+        fn visit<'a>(all: &mut Set<&'a Type>, ty: &'a Type) {
             all.insert(ty);
             match ty {
                 Type::Ident(_) | Type::Str(_) | Type::Void(_) | Type::SliceRefU8(_) => {}
@@ -48,36 +53,60 @@ impl<'a> Types<'a> {
         let mut type_names = UnorderedSet::new();
         let mut function_names = UnorderedSet::new();
         for api in apis {
+            // The same identifier is permitted to be declared as both a shared
+            // enum and extern C++ type, or shared struct and extern C++ type.
+            // That indicates to not emit the C++ enum/struct definition because
+            // it's defined by the included headers already.
+            //
+            // All other cases of duplicate identifiers are reported as an error.
             match api {
                 Api::Include(_) => {}
                 Api::Struct(strct) => {
                     let ident = &strct.ident;
-                    if type_names.insert(ident) {
-                        structs.insert(ident.clone(), strct);
-                    } else {
+                    if !type_names.insert(ident)
+                        && (!cxx.contains(ident)
+                            || structs.contains_key(ident)
+                            || enums.contains_key(ident))
+                    {
+                        // If already declared as a struct or enum, or if
+                        // colliding with something other than an extern C++
+                        // type, then error.
                         duplicate_name(cx, strct, ident);
                     }
+                    structs.insert(ident, strct);
                     for field in &strct.fields {
                         visit(&mut all, &field.ty);
                     }
                 }
                 Api::Enum(enm) => {
                     let ident = &enm.ident;
-                    // We allow declaring the same type as a shared enum and as a Cxxtype, as this
-                    // means not to emit the C++ enum definition.
-                    if !type_names.insert(ident) && !cxx.contains(ident) {
+                    if !type_names.insert(ident)
+                        && (!cxx.contains(ident)
+                            || structs.contains_key(ident)
+                            || enums.contains_key(ident))
+                    {
+                        // If already declared as a struct or enum, or if
+                        // colliding with something other than an extern C++
+                        // type, then error.
                         duplicate_name(cx, enm, ident);
                     }
-                    enums.insert(ident.clone(), enm);
+                    enums.insert(ident, enm);
                 }
                 Api::CxxType(ety) => {
                     let ident = &ety.ident;
-                    // We allow declaring the same type as a shared enum and as a Cxxtype, as this
-                    // means not to emit the C++ enum definition.
-                    if !type_names.insert(ident) && !enums.contains_key(ident) {
+                    if !type_names.insert(ident)
+                        && (cxx.contains(ident)
+                            || !structs.contains_key(ident) && !enums.contains_key(ident))
+                    {
+                        // If already declared as an extern C++ type, or if
+                        // colliding with something which is neither struct nor
+                        // enum, then error.
                         duplicate_name(cx, ety, ident);
                     }
                     cxx.insert(ident);
+                    if !ety.trusted {
+                        untrusted.insert(ident, ety);
+                    }
                 }
                 Api::RustType(ety) => {
                     let ident = &ety.ident;
@@ -104,8 +133,46 @@ impl<'a> Types<'a> {
                         duplicate_name(cx, alias, ident);
                     }
                     cxx.insert(ident);
-                    aliases.insert(ident.clone(), alias);
+                    aliases.insert(ident, alias);
                 }
+                Api::Impl(imp) => {
+                    visit(&mut all, &imp.ty);
+                    explicit_impls.insert(imp);
+                }
+            }
+        }
+
+        // All these APIs may contain types passed by value. We need to ensure
+        // we check that this is permissible. We do this _after_ scanning all
+        // the APIs above, in case some function or struct references a type
+        // which is declared subsequently.
+        let mut required_trivial = Map::new();
+        let mut insist_alias_types_are_trivial = |ty: &'a Type, reason| {
+            if let Type::Ident(ident) = ty {
+                if cxx.contains(ident) {
+                    required_trivial.entry(ident).or_insert(reason);
+                }
+            }
+        };
+        for api in apis {
+            match api {
+                Api::Struct(strct) => {
+                    let reason = TrivialReason::StructField(strct);
+                    for field in &strct.fields {
+                        insist_alias_types_are_trivial(&field.ty, reason);
+                    }
+                }
+                Api::CxxFunction(efn) | Api::RustFunction(efn) => {
+                    let reason = TrivialReason::FunctionArgument(efn);
+                    for arg in &efn.args {
+                        insist_alias_types_are_trivial(&arg.ty, reason);
+                    }
+                    if let Some(ret) = &efn.ret {
+                        let reason = TrivialReason::FunctionReturn(efn);
+                        insist_alias_types_are_trivial(&ret, reason);
+                    }
+                }
+                _ => {}
             }
         }
 
@@ -116,6 +183,9 @@ impl<'a> Types<'a> {
             cxx,
             rust,
             aliases,
+            untrusted,
+            required_trivial,
+            explicit_impls,
         }
     }
 
@@ -149,6 +219,13 @@ impl<'t, 'a> IntoIterator for &'t Types<'a> {
     fn into_iter(self) -> Self::IntoIter {
         self.all.into_iter()
     }
+}
+
+#[derive(Copy, Clone)]
+pub enum TrivialReason<'a> {
+    StructField(&'a Struct),
+    FunctionArgument(&'a ExternFn),
+    FunctionReturn(&'a ExternFn),
 }
 
 fn duplicate_name(cx: &mut Errors, sp: impl ToTokens, ident: &Ident) {

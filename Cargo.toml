@@ -1,38 +1,41 @@
 [package]
 name = "cxx"
-version = "0.3.4" # remember to update html_root_url
+version = "0.4.7" # remember to update html_root_url
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 edition = "2018"
-links = "cxxbridge03"
+links = "cxxbridge04"
 license = "MIT OR Apache-2.0"
 description = "Safe interop between Rust and C++"
 repository = "https://github.com/dtolnay/cxx"
 documentation = "https://docs.rs/cxx"
 readme = "README.md"
-exclude = ["/demo-cxx", "/gen", "/syntax", "/third-party"]
+exclude = ["/demo", "/gen", "/syntax", "/third-party"]
 keywords = ["ffi"]
 categories = ["development-tools::ffi", "api-bindings"]
 
 [features]
-default = [] # c++11
-"c++14" = []
-"c++17" = []
+default = ["cxxbridge-flags/default"] # c++11
+"c++14" = ["cxxbridge-flags/c++14"]
+"c++17" = ["cxxbridge-flags/c++17"]
+"c++20" = ["cxxbridge-flags/c++20"]
 
 [dependencies]
-cxxbridge-macro = { version = "=0.3.4", path = "macro" }
+cxxbridge-macro = { version = "=0.4.7", path = "macro" }
 link-cplusplus = "1.0"
 
 [build-dependencies]
 cc = "1.0.49"
+cxxbridge-flags = { version = "=0.4.7", path = "flags", default-features = false }
 
 [dev-dependencies]
-cxx-build = { version = "=0.3.4", path = "gen/build" }
+cxx-build = { version = "=0.4.7", path = "gen/build" }
+cxx-gen = { version = "0.4", path = "gen/lib" }
 cxx-test-suite = { version = "0", path = "tests/ffi" }
 rustversion = "1.0"
-trybuild = { version = "1.0.27", features = ["diff"] }
+trybuild = { version = "1.0.33", features = ["diff"] }
 
 [workspace]
-members = ["demo-rs", "gen/build", "gen/cmd", "macro", "tests/ffi"]
+members = ["demo", "flags", "gen/build", "gen/cmd", "gen/lib", "macro", "tests/ffi"]
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]

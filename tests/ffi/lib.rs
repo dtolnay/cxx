@@ -6,11 +6,12 @@
 
 pub mod module;
 
-use cxx::{CxxString, UniquePtr};
+use cxx::{CxxString, CxxVector, UniquePtr};
 use std::fmt::{self, Display};
 
 #[cxx::bridge(namespace = tests)]
 pub mod ffi {
+    #[derive(Clone)]
     struct Shared {
         z: usize,
     }
@@ -22,7 +23,7 @@ pub mod ffi {
     }
 
     extern "C" {
-        include!("tests/ffi/tests.h");
+        include!("cxx-test-suite/tests.h");
 
         type C;
 
@@ -31,17 +32,22 @@ pub mod ffi {
         fn c_return_box() -> Box<R>;
         fn c_return_unique_ptr() -> UniquePtr<C>;
         fn c_return_ref(shared: &Shared) -> &usize;
+        fn c_return_mut(shared: &mut Shared) -> &mut usize;
         fn c_return_str(shared: &Shared) -> &str;
         fn c_return_sliceu8(shared: &Shared) -> &[u8];
         fn c_return_rust_string() -> String;
         fn c_return_unique_ptr_string() -> UniquePtr<CxxString>;
         fn c_return_unique_ptr_vector_u8() -> UniquePtr<CxxVector<u8>>;
         fn c_return_unique_ptr_vector_f64() -> UniquePtr<CxxVector<f64>>;
+        fn c_return_unique_ptr_vector_string() -> UniquePtr<CxxVector<CxxString>>;
         fn c_return_unique_ptr_vector_shared() -> UniquePtr<CxxVector<Shared>>;
         fn c_return_unique_ptr_vector_opaque() -> UniquePtr<CxxVector<C>>;
         fn c_return_ref_vector(c: &C) -> &CxxVector<u8>;
+        fn c_return_mut_vector(c: &mut C) -> &mut CxxVector<u8>;
         fn c_return_rust_vec() -> Vec<u8>;
         fn c_return_ref_rust_vec(c: &C) -> &Vec<u8>;
+        fn c_return_mut_rust_vec(c: &mut C) -> &mut Vec<u8>;
+        fn c_return_rust_vec_string() -> Vec<String>;
         fn c_return_identity(_: usize) -> usize;
         fn c_return_sum(_: usize, _: usize) -> usize;
         fn c_return_enum(n: u16) -> Enum;
@@ -57,14 +63,23 @@ pub mod ffi {
         fn c_take_unique_ptr_string(s: UniquePtr<CxxString>);
         fn c_take_unique_ptr_vector_u8(v: UniquePtr<CxxVector<u8>>);
         fn c_take_unique_ptr_vector_f64(v: UniquePtr<CxxVector<f64>>);
+        fn c_take_unique_ptr_vector_string(v: UniquePtr<CxxVector<CxxString>>);
         fn c_take_unique_ptr_vector_shared(v: UniquePtr<CxxVector<Shared>>);
         fn c_take_ref_vector(v: &CxxVector<u8>);
         fn c_take_rust_vec(v: Vec<u8>);
         fn c_take_rust_vec_shared(v: Vec<Shared>);
+        fn c_take_rust_vec_string(v: Vec<String>);
+        fn c_take_rust_vec_index(v: Vec<u8>);
+        fn c_take_rust_vec_shared_index(v: Vec<Shared>);
         fn c_take_rust_vec_shared_forward_iterator(v: Vec<Shared>);
         fn c_take_ref_rust_vec(v: &Vec<u8>);
+        fn c_take_ref_rust_vec_string(v: &Vec<String>);
+        fn c_take_ref_rust_vec_index(v: &Vec<u8>);
         fn c_take_ref_rust_vec_copy(v: &Vec<u8>);
+        /*
+        // https://github.com/dtolnay/cxx/issues/232
         fn c_take_callback(callback: fn(String) -> usize);
+        */
         fn c_take_enum(e: Enum);
 
         fn c_try_return_void() -> Result<()>;
@@ -77,6 +92,7 @@ pub mod ffi {
         fn c_try_return_rust_string() -> Result<String>;
         fn c_try_return_unique_ptr_string() -> Result<UniquePtr<CxxString>>;
         fn c_try_return_rust_vec() -> Result<Vec<u8>>;
+        fn c_try_return_rust_vec_string() -> Result<Vec<String>>;
         fn c_try_return_ref_rust_vec(c: &C) -> Result<&Vec<u8>>;
 
         fn get(self: &C) -> usize;
@@ -115,11 +131,14 @@ pub mod ffi {
         fn r_return_box() -> Box<R>;
         fn r_return_unique_ptr() -> UniquePtr<C>;
         fn r_return_ref(shared: &Shared) -> &usize;
+        fn r_return_mut(shared: &mut Shared) -> &mut usize;
         fn r_return_str(shared: &Shared) -> &str;
         fn r_return_rust_string() -> String;
         fn r_return_unique_ptr_string() -> UniquePtr<CxxString>;
         fn r_return_rust_vec() -> Vec<u8>;
+        fn r_return_rust_vec_string() -> Vec<String>;
         fn r_return_ref_rust_vec(shared: &Shared) -> &Vec<u8>;
+        fn r_return_mut_rust_vec(shared: &mut Shared) -> &mut Vec<u8>;
         fn r_return_identity(_: usize) -> usize;
         fn r_return_sum(_: usize, _: usize) -> usize;
         fn r_return_enum(n: u32) -> Enum;
@@ -134,12 +153,17 @@ pub mod ffi {
         fn r_take_sliceu8(s: &[u8]);
         fn r_take_rust_string(s: String);
         fn r_take_unique_ptr_string(s: UniquePtr<CxxString>);
+        fn r_take_ref_vector(v: &CxxVector<u8>);
+        fn r_take_ref_empty_vector(v: &CxxVector<u64>);
         fn r_take_rust_vec(v: Vec<u8>);
+        fn r_take_rust_vec_string(v: Vec<String>);
         fn r_take_ref_rust_vec(v: &Vec<u8>);
+        fn r_take_ref_rust_vec_string(v: &Vec<String>);
         fn r_take_enum(e: Enum);
 
         fn r_try_return_void() -> Result<()>;
         fn r_try_return_primitive() -> Result<usize>;
+        fn r_try_return_box() -> Result<Box<R>>;
         fn r_fail_return_primitive() -> Result<usize>;
 
         fn r_return_r2(n: usize) -> Box<R2>;
@@ -200,6 +224,10 @@ fn r_return_ref(shared: &ffi::Shared) -> &usize {
     &shared.z
 }
 
+fn r_return_mut(shared: &mut ffi::Shared) -> &mut usize {
+    &mut shared.z
+}
+
 fn r_return_str(shared: &ffi::Shared) -> &str {
     let _ = shared;
     "2020"
@@ -220,7 +248,16 @@ fn r_return_rust_vec() -> Vec<u8> {
     Vec::new()
 }
 
+fn r_return_rust_vec_string() -> Vec<String> {
+    Vec::new()
+}
+
 fn r_return_ref_rust_vec(shared: &ffi::Shared) -> &Vec<u8> {
+    let _ = shared;
+    unimplemented!()
+}
+
+fn r_return_mut_rust_vec(shared: &mut ffi::Shared) -> &mut Vec<u8> {
     let _ = shared;
     unimplemented!()
 }
@@ -284,11 +321,29 @@ fn r_take_unique_ptr_string(s: UniquePtr<CxxString>) {
     assert_eq!(s.as_ref().unwrap().to_str().unwrap(), "2020");
 }
 
+fn r_take_ref_vector(v: &CxxVector<u8>) {
+    let slice = v.as_slice();
+    assert_eq!(slice, [20, 2, 0]);
+}
+
+fn r_take_ref_empty_vector(v: &CxxVector<u64>) {
+    assert!(v.as_slice().is_empty());
+    assert!(v.is_empty());
+}
+
 fn r_take_rust_vec(v: Vec<u8>) {
     let _ = v;
 }
 
+fn r_take_rust_vec_string(v: Vec<String>) {
+    let _ = v;
+}
+
 fn r_take_ref_rust_vec(v: &Vec<u8>) {
+    let _ = v;
+}
+
+fn r_take_ref_rust_vec_string(v: &Vec<String>) {
     let _ = v;
 }
 
@@ -302,6 +357,10 @@ fn r_try_return_void() -> Result<(), Error> {
 
 fn r_try_return_primitive() -> Result<usize, Error> {
     Ok(2020)
+}
+
+fn r_try_return_box() -> Result<Box<R>, Error> {
+    Ok(Box::new(2020))
 }
 
 fn r_fail_return_primitive() -> Result<usize, Error> {

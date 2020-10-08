@@ -1,0 +1,13 @@
+[book]
+title = "CXX"
+authors = ["David Tolnay"]
+description = "Guide for the `cxx` crate, a safe approach to FFI between Rust and C++."
+
+[rust]
+edition = "2018"
+
+[build]
+build-dir = "build"
+
+[output.html]
+git-repository-url = "https://github.com/dtolnay/cxx"

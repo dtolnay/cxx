@@ -1,6 +1,7 @@
-#include "tests/ffi/tests.h"
-#include "tests/ffi/lib.rs.h"
+#include "cxx-test-suite/tests.h"
+#include "cxx-test-suite/lib.rs.h"
 #include <cstring>
+#include <iterator>
 #include <numeric>
 #include <stdexcept>
 
@@ -34,6 +35,8 @@ size_t C::get_fail() { throw std::runtime_error("unimplemented"); }
 
 const std::vector<uint8_t> &C::get_v() const { return this->v; }
 
+std::vector<uint8_t> &C::get_v() { return this->v; }
+
 size_t c_return_primitive() { return 2020; }
 
 Shared c_return_shared() { return Shared{2020}; }
@@ -47,6 +50,8 @@ std::unique_ptr<C> c_return_unique_ptr() {
 }
 
 const size_t &c_return_ref(const Shared &shared) { return shared.z; }
+
+size_t &c_return_mut(Shared &shared) { return shared.z; }
 
 rust::Str c_return_str(const Shared &shared) {
   (void)shared;
@@ -83,6 +88,11 @@ std::unique_ptr<std::vector<double>> c_return_unique_ptr_vector_f64() {
   return vec;
 }
 
+std::unique_ptr<std::vector<std::string>> c_return_unique_ptr_vector_string() {
+  return std::unique_ptr<std::vector<std::string>>(
+      new std::vector<std::string>());
+}
+
 std::unique_ptr<std::vector<Shared>> c_return_unique_ptr_vector_shared() {
   auto vec = std::unique_ptr<std::vector<Shared>>(new std::vector<Shared>());
   vec->push_back(Shared{1010});
@@ -98,12 +108,23 @@ const std::vector<uint8_t> &c_return_ref_vector(const C &c) {
   return c.get_v();
 }
 
+std::vector<uint8_t> &c_return_mut_vector(C &c) { return c.get_v(); }
+
 rust::Vec<uint8_t> c_return_rust_vec() {
   throw std::runtime_error("unimplemented");
 }
 
 const rust::Vec<uint8_t> &c_return_ref_rust_vec(const C &c) {
   (void)c;
+  throw std::runtime_error("unimplemented");
+}
+
+rust::Vec<uint8_t> &c_return_mut_rust_vec(C &c) {
+  (void)c;
+  throw std::runtime_error("unimplemented");
+}
+
+rust::Vec<rust::String> c_return_rust_vec_string() {
   throw std::runtime_error("unimplemented");
 }
 
@@ -194,6 +215,12 @@ void c_take_unique_ptr_vector_f64(std::unique_ptr<std::vector<double>> v) {
   }
 }
 
+void c_take_unique_ptr_vector_string(
+    std::unique_ptr<std::vector<std::string>> v) {
+  (void)v;
+  cxx_test_suite_set_correct();
+}
+
 void c_take_unique_ptr_vector_shared(std::unique_ptr<std::vector<Shared>> v) {
   if (v->size() == 2) {
     cxx_test_suite_set_correct();
@@ -208,6 +235,17 @@ void c_take_ref_vector(const std::vector<uint8_t> &v) {
 
 void c_take_rust_vec(rust::Vec<uint8_t> v) { c_take_ref_rust_vec(v); }
 
+void c_take_rust_vec_index(rust::Vec<uint8_t> v) {
+  try {
+    v.at(100);
+  } catch (const std::out_of_range &ex) {
+    std::string expected = "rust::Vec index out of range";
+    if (ex.what() == expected) {
+      cxx_test_suite_set_correct();
+    }
+  }
+}
+
 void c_take_rust_vec_shared(rust::Vec<Shared> v) {
   uint32_t sum = 0;
   for (auto i : v) {
@@ -216,6 +254,11 @@ void c_take_rust_vec_shared(rust::Vec<Shared> v) {
   if (sum == 2021) {
     cxx_test_suite_set_correct();
   }
+}
+
+void c_take_rust_vec_string(rust::Vec<rust::String> v) {
+  (void)v;
+  cxx_test_suite_set_correct();
 }
 
 void c_take_rust_vec_shared_forward_iterator(rust::Vec<Shared> v) {
@@ -230,9 +273,28 @@ void c_take_rust_vec_shared_forward_iterator(rust::Vec<Shared> v) {
   }
 }
 
+void c_take_rust_vec_shared_index(rust::Vec<Shared> v) {
+  if (v[0].z == 1010 && v.at(0).z == 1010 && v.front().z == 1010 &&
+      v[1].z == 1011 && v.at(1).z == 1011 && v.back().z == 1011) {
+    cxx_test_suite_set_correct();
+  }
+}
+
 void c_take_ref_rust_vec(const rust::Vec<uint8_t> &v) {
   uint8_t sum = std::accumulate(v.begin(), v.end(), 0);
   if (sum == 200) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_ref_rust_vec_string(const rust::Vec<rust::String> &v) {
+  (void)v;
+  cxx_test_suite_set_correct();
+}
+
+void c_take_ref_rust_vec_index(const rust::Vec<uint8_t> &v) {
+  if (v[0] == 86 && v.at(0) == 86 && v.front() == 86 && v[1] == 75 &&
+      v.at(1) == 75 && v[3] == 9 && v.at(3) == 9 && v.back() == 9) {
     cxx_test_suite_set_correct();
   }
 }
@@ -249,9 +311,12 @@ void c_take_ref_rust_vec_copy(const rust::Vec<uint8_t> &v) {
   }
 }
 
+/*
+// https://github.com/dtolnay/cxx/issues/232
 void c_take_callback(rust::Fn<size_t(rust::String)> callback) {
   callback("2020");
 }
+*/
 
 void c_take_enum(Enum e) {
   if (e == Enum::AVal) {
@@ -280,6 +345,10 @@ std::unique_ptr<std::string> c_try_return_unique_ptr_string() {
 }
 
 rust::Vec<uint8_t> c_try_return_rust_vec() {
+  throw std::runtime_error("unimplemented");
+}
+
+rust::Vec<rust::String> c_try_return_rust_vec_string() {
   throw std::runtime_error("unimplemented");
 }
 
@@ -346,6 +415,11 @@ extern "C" const char *cxx_run_test() noexcept {
   r_take_rust_string(rust::String("2020"));
   r_take_unique_ptr_string(
       std::unique_ptr<std::string>(new std::string("2020")));
+  r_take_ref_vector(std::vector<uint8_t>{20, 2, 0});
+  std::vector<uint64_t> empty_vector;
+  r_take_ref_empty_vector(empty_vector);
+  empty_vector.reserve(10);
+  r_take_ref_empty_vector(empty_vector);
   r_take_enum(Enum::AVal);
 
   ASSERT(r_try_return_primitive() == 2020);

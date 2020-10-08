@@ -1,11 +1,12 @@
 [package]
 name = "cxxbridge-cmd"
-version = "0.3.4"
+version = "0.4.7"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 description = "C++ code generator for integrating `cxx` crate into a non-Cargo build."
 repository = "https://github.com/dtolnay/cxx"
+exclude = ["build.rs"]
 keywords = ["ffi"]
 categories = ["development-tools::ffi"]
 
@@ -14,11 +15,10 @@ name = "cxxbridge"
 path = "src/main.rs"
 
 [dependencies]
-anyhow = "1.0"
+clap = "2.33"
 codespan-reporting = "0.9"
 proc-macro2 = { version = "1.0.17", default-features = false, features = ["span-locations"] }
 quote = { version = "1.0", default-features = false }
-structopt = "0.3"
 syn = { version = "1.0.20", default-features = false, features = ["parsing", "printing", "clone-impls", "full"] }
 
 [package.metadata.docs.rs]

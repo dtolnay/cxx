@@ -1,4 +1,5 @@
-use crate::syntax::{ExternFn, Receiver, Ref, Signature, Slice, Ty1, Type};
+use crate::syntax::{ExternFn, Impl, Receiver, Ref, Signature, Slice, Ty1, Type};
+use std::borrow::Borrow;
 use std::hash::{Hash, Hasher};
 use std::mem;
 use std::ops::{Deref, DerefMut};
@@ -149,6 +150,7 @@ impl Eq for Signature {}
 impl PartialEq for Signature {
     fn eq(&self, other: &Signature) -> bool {
         let Signature {
+            unsafety,
             fn_token: _,
             receiver,
             args,
@@ -158,6 +160,7 @@ impl PartialEq for Signature {
             throws_tokens: _,
         } = self;
         let Signature {
+            unsafety: unsafety2,
             fn_token: _,
             receiver: receiver2,
             args: args2,
@@ -166,7 +169,8 @@ impl PartialEq for Signature {
             paren_token: _,
             throws_tokens: _,
         } = other;
-        receiver == receiver2
+        unsafety.is_some() == unsafety2.is_some()
+            && receiver == receiver2
             && ret == ret2
             && throws == throws2
             && args.len() == args2.len()
@@ -177,6 +181,7 @@ impl PartialEq for Signature {
 impl Hash for Signature {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let Signature {
+            unsafety,
             fn_token: _,
             receiver,
             args,
@@ -185,6 +190,7 @@ impl Hash for Signature {
             paren_token: _,
             throws_tokens: _,
         } = self;
+        unsafety.is_some().hash(state);
         receiver.hash(state);
         for arg in args {
             arg.hash(state);
@@ -231,5 +237,40 @@ impl Hash for Receiver {
         lifetime.hash(state);
         mutability.is_some().hash(state);
         ty.hash(state);
+    }
+}
+
+impl Hash for Impl {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let Impl {
+            impl_token: _,
+            ty,
+            brace_token: _,
+        } = self;
+        ty.hash(state);
+    }
+}
+
+impl Eq for Impl {}
+
+impl PartialEq for Impl {
+    fn eq(&self, other: &Impl) -> bool {
+        let Impl {
+            impl_token: _,
+            ty,
+            brace_token: _,
+        } = self;
+        let Impl {
+            impl_token: _,
+            ty: ty2,
+            brace_token: _,
+        } = other;
+        ty == ty2
+    }
+}
+
+impl Borrow<Type> for &Impl {
+    fn borrow(&self) -> &Type {
+        &self.ty
     }
 }

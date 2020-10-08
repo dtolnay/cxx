@@ -1,9 +1,10 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
+use crate::syntax::types::TrivialReason;
 use crate::syntax::{
-    error, ident, Api, Enum, ExternFn, ExternType, Lang, Receiver, Ref, Slice, Struct, Ty1, Type,
-    Types,
+    error, ident, Api, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Slice, Struct, Ty1,
+    Type, Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
@@ -45,8 +46,9 @@ fn do_typecheck(cx: &mut Check) {
         match api {
             Api::Struct(strct) => check_api_struct(cx, strct),
             Api::Enum(enm) => check_api_enum(cx, enm),
-            Api::CxxType(ty) | Api::RustType(ty) => check_api_type(cx, ty),
+            Api::CxxType(ety) | Api::RustType(ety) => check_api_type(cx, ety),
             Api::CxxFunction(efn) | Api::RustFunction(efn) => check_api_fn(cx, efn),
+            Api::Impl(imp) => check_api_impl(cx, imp),
             _ => {}
         }
     }
@@ -71,7 +73,10 @@ fn check_type_ident(cx: &mut Check, ident: &Ident) {
 
 fn check_type_box(cx: &mut Check, ptr: &Ty1) {
     if let Type::Ident(ident) = &ptr.inner {
-        if cx.types.cxx.contains(ident) {
+        if cx.types.cxx.contains(ident)
+            && !cx.types.structs.contains_key(ident)
+            && !cx.types.enums.contains_key(ident)
+        {
             cx.error(ptr, error::BOX_CXX_TYPE.msg);
         }
 
@@ -85,15 +90,19 @@ fn check_type_box(cx: &mut Check, ptr: &Ty1) {
 
 fn check_type_rust_vec(cx: &mut Check, ty: &Ty1) {
     if let Type::Ident(ident) = &ty.inner {
-        if cx.types.cxx.contains(ident) {
+        if cx.types.cxx.contains(ident)
+            && !cx.types.structs.contains_key(ident)
+            && !cx.types.enums.contains_key(ident)
+        {
             cx.error(ty, "Rust Vec containing C++ type is not supported yet");
             return;
         }
 
         match Atom::from(ident) {
             None | Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize) | Some(I8)
-            | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32) | Some(F64) => return,
-            Some(Bool) | Some(RustString) => { /* todo */ }
+            | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32) | Some(F64)
+            | Some(RustString) => return,
+            Some(Bool) => { /* todo */ }
             Some(CxxString) => {}
         }
     }
@@ -129,8 +138,8 @@ fn check_type_cxx_vector(cx: &mut Check, ptr: &Ty1) {
 
         match Atom::from(ident) {
             None | Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize) | Some(I8)
-            | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32) | Some(F64) => return,
-            Some(CxxString) => { /* todo */ }
+            | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32) | Some(F64)
+            | Some(CxxString) => return,
             Some(Bool) | Some(RustString) => {}
         }
     }
@@ -160,11 +169,19 @@ fn check_type_slice(cx: &mut Check, ty: &Slice) {
 }
 
 fn check_api_struct(cx: &mut Check, strct: &Struct) {
-    check_reserved_name(cx, &strct.ident);
+    let ident = &strct.ident;
+    check_reserved_name(cx, ident);
 
     if strct.fields.is_empty() {
         let span = span_for_struct_error(strct);
         cx.error(span, "structs without any fields are not supported");
+    }
+
+    if cx.types.cxx.contains(ident) {
+        if let Some(ety) = cx.types.untrusted.get(ident) {
+            let msg = "extern shared struct must be declared in an `unsafe extern` block";
+            cx.error(ety, msg);
+        }
     }
 
     for field in &strct.fields {
@@ -191,8 +208,21 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
     }
 }
 
-fn check_api_type(cx: &mut Check, ty: &ExternType) {
-    check_reserved_name(cx, &ty.ident);
+fn check_api_type(cx: &mut Check, ety: &ExternType) {
+    check_reserved_name(cx, &ety.ident);
+
+    if let Some(reason) = cx.types.required_trivial.get(&ety.ident) {
+        let what = match reason {
+            TrivialReason::StructField(strct) => format!("a field of `{}`", strct.ident),
+            TrivialReason::FunctionArgument(efn) => format!("an argument of `{}`", efn.ident),
+            TrivialReason::FunctionReturn(efn) => format!("a return value of `{}`", efn.ident),
+        };
+        let msg = format!(
+            "needs a cxx::ExternType impl in order to be used as {}",
+            what,
+        );
+        cx.error(ety, msg);
+    }
 }
 
 fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
@@ -257,6 +287,18 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
     check_multiple_arg_lifetimes(cx, efn);
 }
 
+fn check_api_impl(cx: &mut Check, imp: &Impl) {
+    if let Type::UniquePtr(ty) | Type::CxxVector(ty) = &imp.ty {
+        if let Type::Ident(inner) = &ty.inner {
+            if Atom::from(inner).is_none() {
+                return;
+            }
+        }
+    }
+
+    cx.error(imp, "unsupported Self type of explicit impl");
+}
+
 fn check_mut_return_restriction(cx: &mut Check, efn: &ExternFn) {
     match &efn.ret {
         Some(Type::Ref(ty)) if ty.mutability.is_some() => {}
@@ -319,7 +361,13 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
         Type::CxxVector(_) | Type::Slice(_) | Type::Void(_) => return true,
         _ => return false,
     };
-    ident == CxxString || cx.types.cxx.contains(ident) || cx.types.rust.contains(ident)
+    ident == CxxString
+        || cx.types.cxx.contains(ident)
+            && !cx.types.structs.contains_key(ident)
+            && !cx.types.enums.contains_key(ident)
+            && !(cx.types.aliases.contains_key(ident)
+                && cx.types.required_trivial.contains_key(ident))
+        || cx.types.rust.contains(ident)
 }
 
 fn span_for_struct_error(strct: &Struct) -> TokenStream {
@@ -354,8 +402,12 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         Type::Ident(ident) => {
             if cx.types.structs.contains_key(ident) {
                 "struct".to_owned()
-            } else if cx.types.cxx.contains(ident) {
+            } else if cx.types.enums.contains_key(ident) {
+                "enum".to_owned()
+            } else if cx.types.aliases.contains_key(ident) {
                 "C++ type".to_owned()
+            } else if cx.types.cxx.contains(ident) {
+                "opaque C++ type".to_owned()
             } else if cx.types.rust.contains(ident) {
                 "opaque Rust type".to_owned()
             } else if Atom::from(ident) == Some(CxxString) {

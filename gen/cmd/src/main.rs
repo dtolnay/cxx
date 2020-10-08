@@ -3,58 +3,87 @@
     clippy::inherent_to_string,
     clippy::large_enum_variant,
     clippy::new_without_default,
+    clippy::or_fun_call,
     clippy::toplevel_ref_arg
 )]
 
+mod app;
 mod gen;
+mod output;
 mod syntax;
 
-use gen::include;
+use crate::gen::error::{report, Result};
+use crate::gen::{fs, include};
+use crate::output::Output;
 use std::io::{self, Write};
 use std::path::PathBuf;
-use structopt::StructOpt;
+use std::process;
 
-#[derive(StructOpt, Debug)]
-#[structopt(
-    name = "cxxbridge",
-    author = "David Tolnay <dtolnay@gmail.com>",
-    about = "https://github.com/dtolnay/cxx",
-    usage = "\
-    cxxbridge <input>.rs              Emit .cc file for bridge to stdout
-    cxxbridge <input>.rs --header     Emit .h file for bridge to stdout
-    cxxbridge --header                Emit rust/cxx.h header to stdout",
-    help_message = "Print help information",
-    version_message = "Print version information"
-)]
+#[derive(Debug)]
 struct Opt {
-    /// Input Rust source file containing #[cxx::bridge]
-    #[structopt(parse(from_os_str), required_unless = "header")]
     input: Option<PathBuf>,
-
-    /// Emit header with declarations only
-    #[structopt(long)]
     header: bool,
-
-    /// Any additional headers to #include
-    #[structopt(short, long)]
+    cxx_impl_annotations: Option<String>,
     include: Vec<String>,
-}
-
-fn write(content: impl AsRef<[u8]>) {
-    let _ = io::stdout().lock().write_all(content.as_ref());
+    outputs: Vec<Output>,
 }
 
 fn main() {
-    let opt = Opt::from_args();
+    if let Err(err) = try_main() {
+        let _ = writeln!(io::stderr(), "cxxbridge: {}", report(err));
+        process::exit(1);
+    }
+}
+
+enum Kind {
+    GeneratedHeader,
+    GeneratedImplementation,
+    Header,
+}
+
+fn try_main() -> Result<()> {
+    let opt = app::from_args();
+
+    let mut outputs = Vec::new();
+    let mut gen_header = false;
+    let mut gen_implementation = false;
+    for output in opt.outputs {
+        let kind = if opt.input.is_none() {
+            Kind::Header
+        } else if opt.header || output.ends_with(".h") {
+            gen_header = true;
+            Kind::GeneratedHeader
+        } else {
+            gen_implementation = true;
+            Kind::GeneratedImplementation
+        };
+        outputs.push((output, kind));
+    }
 
     let gen = gen::Opt {
         include: opt.include,
+        cxx_impl_annotations: opt.cxx_impl_annotations,
+        gen_header,
+        gen_implementation,
     };
 
-    match (opt.input, opt.header) {
-        (Some(input), true) => write(gen::do_generate_header(&input, gen)),
-        (Some(input), false) => write(gen::do_generate_bridge(&input, gen)),
-        (None, true) => write(include::HEADER),
-        (None, false) => unreachable!(), // enforced by required_unless
+    let generated_code = if let Some(input) = opt.input {
+        gen::generate_from_path(&input, &gen)
+    } else {
+        Default::default()
+    };
+
+    for (output, kind) in outputs {
+        let content = match kind {
+            Kind::GeneratedHeader => &generated_code.header,
+            Kind::GeneratedImplementation => &generated_code.implementation,
+            Kind::Header => include::HEADER.as_bytes(),
+        };
+        match output {
+            Output::Stdout => drop(io::stdout().write_all(content)),
+            Output::File(path) => fs::write(path, content)?,
+        }
     }
+
+    Ok(())
 }

@@ -4,9 +4,17 @@
   # required downstream.
   allow_symlinks = allow
 
+  # Hide BUCK files under target/package/ from `buck build ...`. Otherwise:
+  #   $ buck build ...
+  #   //target/package/cxx-0.3.0/tests:ffi references non-existing file or directory 'target/package/cxx-0.3.0/tests/ffi/lib.rs'
+  ignore = target
+
 [cxx]
   cxxflags = -std=c++11
 
 [rust]
   default_edition = 2018
-  rustc_flags = -Crelocation-model=dynamic-no-pic --cap-lints=allow
+  rustc_flags = \
+      -Clink-arg=-fuse-ld=lld \
+      -Crelocation-model=dynamic-no-pic \
+      --cap-lints=allow

@@ -1,21 +1,24 @@
 [package]
 name = "cxx-build"
-version = "0.3.4"
+version = "0.4.7"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 description = "C++ code generator for integrating `cxx` crate into a Cargo build."
 repository = "https://github.com/dtolnay/cxx"
+exclude = ["build.rs"]
 keywords = ["ffi"]
 categories = ["development-tools::ffi"]
 
 [dependencies]
-anyhow = "1.0"
 cc = "1.0.49"
 codespan-reporting = "0.9"
 proc-macro2 = { version = "1.0.17", default-features = false, features = ["span-locations"] }
 quote = { version = "1.0", default-features = false }
 syn = { version = "1.0.20", default-features = false, features = ["parsing", "printing", "clone-impls", "full"] }
+
+[dev-dependencies]
+cxx-gen = { version = "0.4", path = "../lib" }
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]

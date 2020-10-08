@@ -20,7 +20,7 @@ pub(crate) fn check_all(cx: &mut Check, namespace: &Namespace, apis: &[Api]) {
 
     for api in apis {
         match api {
-            Api::Include(_) => {}
+            Api::Include(_) | Api::Impl(_) => {}
             Api::Struct(strct) => {
                 check(cx, &strct.ident);
                 for field in &strct.fields {

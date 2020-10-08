@@ -1,9 +1,11 @@
 error[E0277]: the size for values of type `str` cannot be known at compilation time
-   --> $DIR/opaque_not_sized.rs:4:14
-    |
-4   |         type TypeR;
-    |              ^^^^^ doesn't have a size known at compile-time
-    |
-    = help: within `TypeR`, the trait `std::marker::Sized` is not implemented for `str`
-    = note: to learn more, visit <https://doc.rust-lang.org/book/ch19-04-advanced-types.html#dynamically-sized-types-and-the-sized-trait>
-    = note: required because it appears within the type `TypeR`
+ --> $DIR/opaque_not_sized.rs:4:14
+  |
+4 |         type TypeR;
+  |         -----^^^^^-
+  |         |    |
+  |         |    doesn't have a size known at compile-time
+  |         required by this bound in `__AssertSized`
+  |
+  = help: within `TypeR`, the trait `Sized` is not implemented for `str`
+  = note: required because it appears within the type `TypeR`

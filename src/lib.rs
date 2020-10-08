@@ -57,10 +57,9 @@
 //!
 //! # Example
 //!
-//! A runnable version of this example is provided under the *demo-rs* directory
-//! of [https://github.com/dtolnay/cxx] (with the C++ side of the implementation
-//! in the *demo-cxx* directory). To try it out, jump into demo-rs and run
-//! `cargo run`.
+//! A runnable version of this example is provided under the *demo* directory of
+//! [https://github.com/dtolnay/cxx]. To try it out, run `cargo run` from that
+//! directory.
 //!
 //! ```no_run
 //! #[cxx::bridge]
@@ -76,7 +75,7 @@
 //!         // One or more headers with the matching C++ declarations. Our code
 //!         // generators don't read it but it gets #include'd and used in static
 //!         // assertions to ensure our picture of the FFI boundary is accurate.
-//!         include!("demo-cxx/demo.h");
+//!         include!("demo/include/demo.h");
 //!
 //!         // Zero or more opaque types which both languages can pass around but
 //!         // only C++ can see the fields.
@@ -113,10 +112,10 @@
 //!
 //! Here are links to the complete set of source files involved in the demo:
 //!
-//! - [demo-rs/src/main.rs](https://github.com/dtolnay/cxx/blob/master/demo-rs/src/main.rs)
-//! - [demo-rs/build.rs](https://github.com/dtolnay/cxx/blob/master/demo-rs/build.rs)
-//! - [demo-cxx/demo.h](https://github.com/dtolnay/cxx/blob/master/demo-cxx/demo.h)
-//! - [demo-cxx/demo.cc](https://github.com/dtolnay/cxx/blob/master/demo-cxx/demo.cc)
+//! - [demo/src/main.rs](https://github.com/dtolnay/cxx/blob/master/demo/src/main.rs)
+//! - [demo/build.rs](https://github.com/dtolnay/cxx/blob/master/demo/build.rs)
+//! - [demo/include/demo.h](https://github.com/dtolnay/cxx/blob/master/demo/include/demo.h)
+//! - [demo/src/demo.cc](https://github.com/dtolnay/cxx/blob/master/demo/src/demo.cc)
 //!
 //! To look at the code generated in both languages for the example by the CXX
 //! code generators:
@@ -124,10 +123,10 @@
 //! ```console
 //!    # run Rust code generator and print to stdout
 //!    # (requires https://github.com/dtolnay/cargo-expand)
-//! $ cargo expand --manifest-path demo-rs/Cargo.toml
+//! $ cargo expand --manifest-path demo/Cargo.toml
 //!
 //!    # run C++ code generator and print to stdout
-//! $ cargo run --manifest-path gen/cmd/Cargo.toml -- demo-rs/src/main.rs
+//! $ cargo run --manifest-path gen/cmd/Cargo.toml -- demo/src/main.rs
 //! ```
 //!
 //! <br>
@@ -229,7 +228,7 @@
 //! # Cargo.toml
 //!
 //! [build-dependencies]
-//! cxx-build = "0.3"
+//! cxx-build = "0.4"
 //! ```
 //!
 //! ```no_run
@@ -237,13 +236,13 @@
 //!
 //! fn main() {
 //!     cxx_build::bridge("src/main.rs")  // returns a cc::Build
-//!         .file("../demo-cxx/demo.cc")
+//!         .file("src/demo.cc")
 //!         .flag_if_supported("-std=c++11")
 //!         .compile("cxxbridge-demo");
 //!
 //!     println!("cargo:rerun-if-changed=src/main.rs");
-//!     println!("cargo:rerun-if-changed=../demo-cxx/demo.h");
-//!     println!("cargo:rerun-if-changed=../demo-cxx/demo.cc");
+//!     println!("cargo:rerun-if-changed=src/demo.cc");
+//!     println!("cargo:rerun-if-changed=include/demo.h");
 //! }
 //! ```
 //!
@@ -341,6 +340,7 @@
 //! <tr><td>BTreeMap&lt;K, V&gt;</td><td><sup><i>tbd</i></sup></td></tr>
 //! <tr><td>HashMap&lt;K, V&gt;</td><td><sup><i>tbd</i></sup></td></tr>
 //! <tr><td>Arc&lt;T&gt;</td><td><sup><i>tbd</i></sup></td></tr>
+//! <tr><td>Option&lt;T&gt;</td><td><sup><i>tbd</i></sup></td></tr>
 //! <tr><td><sup><i>tbd</i></sup></td><td>std::map&lt;K, V&gt;</td></tr>
 //! <tr><td><sup><i>tbd</i></sup></td><td>std::unordered_map&lt;K, V&gt;</td></tr>
 //! <tr><td><sup><i>tbd</i></sup></td><td>std::shared_ptr&lt;T&gt;</td></tr>
@@ -348,7 +348,8 @@
 //!
 //! [https://github.com/dtolnay/cxx]: https://github.com/dtolnay/cxx
 
-#![doc(html_root_url = "https://docs.rs/cxx/0.3.4")]
+#![no_std]
+#![doc(html_root_url = "https://docs.rs/cxx/0.4.7")]
 #![deny(improper_ctypes)]
 #![allow(non_camel_case_types)]
 #![allow(
@@ -367,7 +368,11 @@
     clippy::useless_let_if_seq
 )]
 
+#[cfg(built_with_cargo)]
 extern crate link_cplusplus;
+
+extern crate alloc;
+extern crate std;
 
 #[macro_use]
 mod macros;
@@ -383,27 +388,41 @@ mod rust_sliceu8;
 mod rust_str;
 mod rust_string;
 mod rust_vec;
+mod symbols;
 mod unique_ptr;
 mod unwind;
-
-#[cfg(not(no_export_symbols))]
-mod symbols;
 
 pub use crate::cxx_string::CxxString;
 pub use crate::cxx_vector::CxxVector;
 pub use crate::exception::Exception;
-pub use crate::extern_type::ExternType;
+pub use crate::extern_type::{kind, ExternType};
 pub use crate::unique_ptr::UniquePtr;
 pub use cxxbridge_macro::bridge;
 
 /// For use in impls of the `ExternType` trait. See [`ExternType`].
+///
+/// [`ExternType`]: trait.ExternType.html
 pub use cxxbridge_macro::type_id;
+
+/// Synonym for `CxxString`.
+///
+/// To avoid confusion with Rust's standard library string you probably
+/// shouldn't import this type with `use`. Instead, write `cxx::String`, or
+/// import and use `CxxString`.
+pub type String = CxxString;
+
+/// Synonym for `CxxVector`.
+///
+/// To avoid confusion with Rust's standard library vector you probably
+/// shouldn't import this type with `use`. Instead, write `cxx::Vector<T>`, or
+/// import and use `CxxVector`.
+pub type Vector<T> = CxxVector<T>;
 
 // Not public API.
 #[doc(hidden)]
 pub mod private {
     pub use crate::cxx_vector::VectorElement;
-    pub use crate::extern_type::verify_extern_type;
+    pub use crate::extern_type::{verify_extern_kind, verify_extern_type};
     pub use crate::function::FatFunction;
     pub use crate::opaque::Opaque;
     pub use crate::result::{r#try, Result};

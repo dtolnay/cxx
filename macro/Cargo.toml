@@ -1,12 +1,12 @@
 [package]
 name = "cxxbridge-macro"
-version = "0.3.4"
+version = "0.4.7"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
 description = "Implementation detail of the `cxx` crate."
 repository = "https://github.com/dtolnay/cxx"
-exclude = ["README.md"]
+exclude = ["build.rs", "README.md"]
 keywords = ["ffi"]
 categories = ["development-tools::ffi"]
 
@@ -19,7 +19,7 @@ quote = "1.0.4"
 syn = { version = "1.0.20", features = ["full"] }
 
 [dev-dependencies]
-cxx = { version = "0.3", path = ".." }
+cxx = { version = "0.4", path = ".." }
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]

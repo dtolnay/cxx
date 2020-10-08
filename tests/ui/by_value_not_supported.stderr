@@ -1,4 +1,4 @@
-error: using C++ type by value is not supported
+error: using opaque C++ type by value is not supported
  --> $DIR/by_value_not_supported.rs:4:9
   |
 4 |         c: C,
@@ -16,13 +16,19 @@ error: using C++ string by value is not supported
 6 |         s: CxxString,
   |         ^^^^^^^^^^^^
 
-error: passing C++ type by value is not supported
+error: needs a cxx::ExternType impl in order to be used as a field of `S`
+  --> $DIR/by_value_not_supported.rs:10:9
+   |
+10 |         type C;
+   |         ^^^^^^
+
+error: passing opaque C++ type by value is not supported
   --> $DIR/by_value_not_supported.rs:16:14
    |
 16 |         fn f(c: C) -> C;
    |              ^^^^
 
-error: returning C++ type by value is not supported
+error: returning opaque C++ type by value is not supported
   --> $DIR/by_value_not_supported.rs:16:23
    |
 16 |         fn f(c: C) -> C;

@@ -7,11 +7,13 @@ mod derive;
 mod discriminant;
 mod doc;
 pub mod error;
+pub mod file;
 pub mod ident;
 mod impls;
 pub mod mangle;
 pub mod namespace;
 mod parse;
+pub mod qualified;
 pub mod report;
 pub mod set;
 pub mod symbol;
@@ -40,12 +42,15 @@ pub enum Api {
     RustType(ExternType),
     RustFunction(ExternFn),
     TypeAlias(TypeAlias),
+    Impl(Impl),
 }
 
 pub struct ExternType {
     pub doc: Doc,
     pub type_token: Token![type],
     pub ident: Ident,
+    pub semi_token: Token![;],
+    pub trusted: bool,
 }
 
 pub struct Struct {
@@ -76,6 +81,7 @@ pub struct ExternFn {
 }
 
 pub struct TypeAlias {
+    pub doc: Doc,
     pub type_token: Token![type],
     pub ident: Ident,
     pub eq_token: Token![=],
@@ -83,7 +89,14 @@ pub struct TypeAlias {
     pub semi_token: Token![;],
 }
 
+pub struct Impl {
+    pub impl_token: Token![impl],
+    pub ty: Type,
+    pub brace_token: Brace,
+}
+
 pub struct Signature {
+    pub unsafety: Option<Token![unsafe]>,
     pub fn_token: Token![fn],
     pub receiver: Option<Receiver>,
     pub args: Punctuated<Var, Token![,]>,

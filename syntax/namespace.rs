@@ -1,8 +1,9 @@
+use crate::syntax::qualified::QualifiedName;
 use quote::IdentFragment;
 use std::fmt::{self, Display};
 use std::slice::Iter;
 use syn::parse::{Parse, ParseStream, Result};
-use syn::{Ident, Path, Token};
+use syn::{Ident, Token};
 
 mod kw {
     syn::custom_keyword!(namespace);
@@ -31,10 +32,9 @@ impl Parse for Namespace {
         if !input.is_empty() {
             input.parse::<kw::namespace>()?;
             input.parse::<Token![=]>()?;
-            let path = input.call(Path::parse_mod_style)?;
-            for segment in path.segments {
-                segments.push(segment.ident);
-            }
+            segments = input
+                .call(QualifiedName::parse_quoted_or_unquoted)?
+                .segments;
             input.parse::<Option<Token![,]>>()?;
         }
         Ok(Namespace { segments })

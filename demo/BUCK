@@ -1,0 +1,33 @@
+load("//tools/buck:rust_cxx_bridge.bzl", "rust_cxx_bridge")
+
+rust_binary(
+    name = "demo",
+    srcs = glob(["src/**/*.rs"]),
+    deps = [
+        ":bridge",
+        ":demo-sys",
+        "//:cxx",
+    ],
+)
+
+rust_cxx_bridge(
+    name = "bridge",
+    src = "src/main.rs",
+    deps = [":demo-include"],
+)
+
+cxx_library(
+    name = "demo-sys",
+    srcs = ["src/demo.cc"],
+    compiler_flags = ["-std=c++14"],
+    deps = [
+        ":bridge/include",
+        ":demo-include",
+    ],
+)
+
+cxx_library(
+    name = "demo-include",
+    exported_headers = ["include/demo.h"],
+    deps = ["//:core"],
+)

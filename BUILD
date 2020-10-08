@@ -1,14 +1,14 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
 load("//tools/bazel:rust.bzl", "rust_binary", "rust_library")
 
 rust_library(
     name = "cxx",
     srcs = glob(["src/**/*.rs"]),
-    visibility = ["//visibility:public"],
-    deps = [
-        ":core-lib",
+    proc_macro_deps = [
         ":cxxbridge-macro",
-        "//third-party:link-cplusplus",
     ],
+    visibility = ["//visibility:public"],
+    deps = [":core-lib"],
 )
 
 rust_binary(
@@ -17,11 +17,10 @@ rust_binary(
     data = ["gen/cmd/src/gen/include/cxx.h"],
     visibility = ["//visibility:public"],
     deps = [
-        "//third-party:anyhow",
+        "//third-party:clap",
         "//third-party:codespan-reporting",
         "//third-party:proc-macro2",
         "//third-party:quote",
-        "//third-party:structopt",
         "//third-party:syn",
     ],
 )
@@ -57,7 +56,20 @@ rust_library(
     data = ["gen/build/src/gen/include/cxx.h"],
     visibility = ["//visibility:public"],
     deps = [
-        "//third-party:anyhow",
+        "//third-party:cc",
+        "//third-party:codespan-reporting",
+        "//third-party:proc-macro2",
+        "//third-party:quote",
+        "//third-party:syn",
+    ],
+)
+
+rust_library(
+    name = "lib",
+    srcs = glob(["gen/lib/src/**/*.rs"]),
+    data = ["gen/lib/src/gen/include/cxx.h"],
+    visibility = ["//visibility:public"],
+    deps = [
         "//third-party:cc",
         "//third-party:codespan-reporting",
         "//third-party:proc-macro2",

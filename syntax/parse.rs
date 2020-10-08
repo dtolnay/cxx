@@ -1,25 +1,26 @@
 use crate::syntax::discriminant::DiscriminantSet;
+use crate::syntax::file::{Item, ItemForeignMod};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
-    attrs, error, Api, Doc, Enum, ExternFn, ExternType, Lang, Receiver, Ref, Signature, Slice,
-    Struct, Ty1, Type, TypeAlias, Var, Variant,
+    attrs, error, Api, Doc, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Signature,
+    Slice, Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
-use proc_macro2::{TokenStream, TokenTree};
+use proc_macro2::{Delimiter, Group, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
 use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::{
     Abi, Attribute, Error, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
-    GenericArgument, Ident, Item, ItemEnum, ItemForeignMod, ItemStruct, LitStr, Pat, PathArguments,
-    Result, ReturnType, Token, Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
+    GenericArgument, Ident, ItemEnum, ItemImpl, ItemStruct, LitStr, Pat, PathArguments, Result,
+    ReturnType, Token, Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
 };
 
 pub mod kw {
     syn::custom_keyword!(Result);
 }
 
-pub fn parse_items(cx: &mut Errors, items: Vec<Item>) -> Vec<Api> {
+pub fn parse_items(cx: &mut Errors, items: Vec<Item>, trusted: bool) -> Vec<Api> {
     let mut apis = Vec::new();
     for item in items {
         match item {
@@ -31,9 +32,13 @@ pub fn parse_items(cx: &mut Errors, items: Vec<Item>) -> Vec<Api> {
                 Ok(enm) => apis.push(enm),
                 Err(err) => cx.push(err),
             },
-            Item::ForeignMod(foreign_mod) => parse_foreign_mod(cx, foreign_mod, &mut apis),
+            Item::ForeignMod(foreign_mod) => parse_foreign_mod(cx, foreign_mod, &mut apis, trusted),
+            Item::Impl(item) => match parse_impl(item) {
+                Ok(imp) => apis.push(imp),
+                Err(err) => cx.push(err),
+            },
             Item::Use(item) => cx.error(item, error::USE_NOT_ALLOWED),
-            _ => cx.error(item, "unsupported item"),
+            Item::Other(item) => cx.error(item, "unsupported item"),
         }
     }
     apis
@@ -68,7 +73,7 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct) -> Result<Api> {
         Fields::Named(fields) => fields,
         Fields::Unit => return Err(Error::new_spanned(item, "unit structs are not supported")),
         Fields::Unnamed(_) => {
-            return Err(Error::new_spanned(item, "tuple structs are not supported"))
+            return Err(Error::new_spanned(item, "tuple structs are not supported"));
         }
     };
 
@@ -169,16 +174,35 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum) -> Result<Api> {
     }))
 }
 
-fn parse_foreign_mod(cx: &mut Errors, foreign_mod: ItemForeignMod, out: &mut Vec<Api>) {
-    let lang = match parse_lang(foreign_mod.abi) {
+fn parse_foreign_mod(
+    cx: &mut Errors,
+    foreign_mod: ItemForeignMod,
+    out: &mut Vec<Api>,
+    trusted: bool,
+) {
+    let lang = match parse_lang(&foreign_mod.abi) {
         Ok(lang) => lang,
         Err(err) => return cx.push(err),
     };
 
+    match lang {
+        Lang::Rust => {
+            if foreign_mod.unsafety.is_some() {
+                let unsafety = foreign_mod.unsafety;
+                let abi = foreign_mod.abi;
+                let span = quote!(#unsafety #abi);
+                cx.error(span, "extern \"Rust\" block does not need to be unsafe");
+            }
+        }
+        Lang::Cxx => {}
+    }
+
+    let trusted = trusted || foreign_mod.unsafety.is_some();
+
     let mut items = Vec::new();
     for foreign in &foreign_mod.items {
         match foreign {
-            ForeignItem::Type(foreign) => match parse_extern_type(cx, foreign, lang) {
+            ForeignItem::Type(foreign) => match parse_extern_type(cx, foreign, lang, trusted) {
                 Ok(ety) => items.push(ety),
                 Err(err) => cx.push(err),
             },
@@ -201,7 +225,7 @@ fn parse_foreign_mod(cx: &mut Errors, foreign_mod: ItemForeignMod, out: &mut Vec
     }
 
     let mut types = items.iter().filter_map(|item| match item {
-        Api::CxxType(ty) | Api::RustType(ty) => Some(&ty.ident),
+        Api::CxxType(ety) | Api::RustType(ety) => Some(&ety.ident),
         Api::TypeAlias(alias) => Some(&alias.ident),
         _ => None,
     });
@@ -221,7 +245,7 @@ fn parse_foreign_mod(cx: &mut Errors, foreign_mod: ItemForeignMod, out: &mut Vec
     out.extend(items);
 }
 
-fn parse_lang(abi: Abi) -> Result<Lang> {
+fn parse_lang(abi: &Abi) -> Result<Lang> {
     let name = match &abi.name {
         Some(name) => name,
         None => {
@@ -238,10 +262,16 @@ fn parse_lang(abi: Abi) -> Result<Lang> {
     }
 }
 
-fn parse_extern_type(cx: &mut Errors, foreign_type: &ForeignItemType, lang: Lang) -> Result<Api> {
+fn parse_extern_type(
+    cx: &mut Errors,
+    foreign_type: &ForeignItemType,
+    lang: Lang,
+    trusted: bool,
+) -> Result<Api> {
     let doc = attrs::parse_doc(cx, &foreign_type.attrs);
     let type_token = foreign_type.type_token;
     let ident = foreign_type.ident.clone();
+    let semi_token = foreign_type.semi_token;
     let api_type = match lang {
         Lang::Cxx => Api::CxxType,
         Lang::Rust => Api::RustType,
@@ -250,6 +280,8 @@ fn parse_extern_type(cx: &mut Errors, foreign_type: &ForeignItemType, lang: Lang
         doc,
         type_token,
         ident,
+        semi_token,
+        trusted,
     }))
 }
 
@@ -325,6 +357,7 @@ fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> R
     let ret = parse_return_type(&foreign_fn.sig.output, &mut throws_tokens)?;
     let throws = throws_tokens.is_some();
     let doc = attrs::parse_doc(cx, &foreign_fn.attrs);
+    let unsafety = foreign_fn.sig.unsafety;
     let fn_token = foreign_fn.sig.fn_token;
     let ident = foreign_fn.sig.ident.clone();
     let mut attr = None;
@@ -354,6 +387,7 @@ fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> R
         ident,
         alias,
         sig: Signature {
+            unsafety,
             fn_token,
             receiver,
             args,
@@ -381,9 +415,10 @@ fn parse_extern_verbatim(cx: &mut Errors, tokens: &TokenStream, lang: Lang) -> R
         let eq_token: Token![=] = input.parse()?;
         let ty: RustType = input.parse()?;
         let semi_token: Token![;] = input.parse()?;
-        attrs::parse_doc(cx, &attrs);
+        let doc = attrs::parse_doc(cx, &attrs);
 
         Ok(TypeAlias {
+            doc,
             type_token,
             ident,
             eq_token,
@@ -402,6 +437,37 @@ fn parse_extern_verbatim(cx: &mut Errors, tokens: &TokenStream, lang: Lang) -> R
             Err(Error::new_spanned(span, msg))
         }
     }
+}
+
+fn parse_impl(imp: ItemImpl) -> Result<Api> {
+    if !imp.items.is_empty() {
+        let mut span = Group::new(Delimiter::Brace, TokenStream::new());
+        span.set_span(imp.brace_token.span);
+        return Err(Error::new_spanned(span, "expected an empty impl block"));
+    }
+
+    let self_ty = &imp.self_ty;
+    if let Some((bang, path, for_token)) = &imp.trait_ {
+        let span = quote!(#bang #path #for_token #self_ty);
+        return Err(Error::new_spanned(
+            span,
+            "unexpected impl, expected something like `impl UniquePtr<T> {}`",
+        ));
+    }
+
+    let generics = &imp.generics;
+    if !generics.params.is_empty() || generics.where_clause.is_some() {
+        return Err(Error::new_spanned(
+            imp,
+            "generic parameters on an impl is not supported",
+        ));
+    }
+
+    Ok(Api::Impl(Impl {
+        impl_token: imp.impl_token,
+        ty: parse_type(&self_ty)?,
+        brace_token: imp.brace_token,
+    }))
 }
 
 fn parse_include(input: ParseStream) -> Result<String> {
@@ -565,6 +631,7 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
     let ret = parse_return_type(&ty.output, &mut throws_tokens)?;
     let throws = throws_tokens.is_some();
     Ok(Type::Fn(Box::new(Signature {
+        unsafety: ty.unsafety,
         fn_token: ty.fn_token,
         receiver: None,
         args,

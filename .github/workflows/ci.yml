@@ -34,8 +34,16 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{matrix.rust}}
-      - run: cargo run --manifest-path demo-rs/Cargo.toml
-      - run: cargo test
+      - name: Determine test suite subset
+        # Our Windows jobs are the longest running, so exclude the relatively
+        # slow compiletest from them to speed up end-to-end CI time, except
+        # during cron builds when no human is presumably waiting on the build.
+        # The extra coverage is not particularly valuable and we can still
+        # ensure the test is kept passing on the basis of the scheduled builds.
+        if: matrix.os == 'windows' && github.event_name != 'schedule'
+        run: echo '::set-env name=RUSTFLAGS::--cfg skip_ui_tests'
+      - run: cargo run --manifest-path demo/Cargo.toml
+      - run: cargo test --workspace --exclude cxx-test-suite
 
   msrv:
     name: Rust 1.42.0
@@ -43,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@1.42.0
-      - run: cargo run --manifest-path demo-rs/Cargo.toml
+      - run: cargo run --manifest-path demo/Cargo.toml
 
   buck:
     name: Buck
@@ -53,20 +61,22 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: actions/setup-java@v1
         with:
-          java-version: 8
+          java-version: 11
           java-package: jre
       - name: Install Buck
         run: |
           mkdir bin
-          wget -q -O bin/buck https://jitpack.io/com/github/facebook/buck/v2019.10.17.01/buck-v2019.10.17.01.pex
+          wget -q -O bin/buck https://jitpack.io/com/github/facebook/buck/891556d066/buck-891556d066-java11.pex # dev branch from 2020.09.21
           chmod +x bin/buck
           echo ::add-path::bin
+      - name: Install lld
+        run: sudo apt install lld
       - name: Vendor dependencies
         run: |
           cp third-party/Cargo.lock .
           cargo vendor --versioned-dirs --locked third-party/vendor
       - run: buck build :cxx#check --verbose=0
-      - run: buck run demo-rs --verbose=0
+      - run: buck run demo --verbose=0
       - run: buck test ... --verbose=0
 
   bazel:
@@ -84,5 +94,5 @@ jobs:
         run: |
           cp third-party/Cargo.lock .
           cargo vendor --versioned-dirs --locked third-party/vendor
-      - run: bazel run demo-rs --verbose_failures --noshow_progress
+      - run: bazel run demo --verbose_failures --noshow_progress
       - run: bazel test ... --verbose_failures --noshow_progress

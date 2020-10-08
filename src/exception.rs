@@ -1,4 +1,5 @@
-use std::fmt::{self, Debug, Display};
+use alloc::boxed::Box;
+use core::fmt::{self, Debug, Display};
 
 /// Exception thrown from an `extern "C"` function.
 #[derive(Debug)]

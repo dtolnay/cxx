@@ -4,7 +4,7 @@
 /bazel-out
 /bazel-testlogs
 /buck-out
-/Cargo.lock
 /expand.cc
 /expand.rs
-/target
+Cargo.lock
+target
