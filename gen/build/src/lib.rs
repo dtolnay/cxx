@@ -129,7 +129,6 @@ impl Project {
     fn init() -> Result<Self> {
         let include_prefix = Path::new(CFG.include_prefix);
         assert!(include_prefix.is_relative());
-        assert!(!include_prefix.as_os_str().is_empty());
         let include_prefix = include_prefix.components().collect();
 
         let manifest_dir = paths::manifest_dir()?;
@@ -246,6 +245,11 @@ fn env_include_dirs() -> impl Iterator<Item = PathBuf> {
 }
 
 fn make_crate_dir(prj: &Project) -> Option<PathBuf> {
+    if prj.include_prefix.as_os_str().is_empty() {
+        let crate_dir = prj.manifest_dir.clone();
+        println!("cargo:CXXBRIDGE_CRATE={}", crate_dir.to_string_lossy());
+        return Some(crate_dir);
+    }
     let crate_dir = prj.out_dir.join("cxxbridge").join("crate");
     let link = crate_dir.join(&prj.include_prefix);
     if out::symlink_dir(&prj.manifest_dir, link).is_ok() {
