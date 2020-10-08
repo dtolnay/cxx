@@ -79,6 +79,7 @@ dependencies = [
  "cc",
  "codespan-reporting",
  "cxx-gen",
+ "lazy_static",
  "proc-macro2",
  "quote",
  "syn",
