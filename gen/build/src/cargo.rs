@@ -10,7 +10,12 @@ pub(crate) fn target_dir(out_dir: &Path) -> TargetDir {
 
 fn try_target_dir(out_dir: &Path) -> Option<PathBuf> {
     if let Some(target_dir) = env::var_os("CARGO_TARGET_DIR") {
-        return Some(PathBuf::from(target_dir));
+        let target_dir = PathBuf::from(target_dir);
+        if target_dir.is_absolute() {
+            return Some(target_dir);
+        } else {
+            return None;
+        };
     }
 
     let cargo = option_env!("CARGO").unwrap_or("cargo");
