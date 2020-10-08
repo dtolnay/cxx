@@ -1,0 +1,41 @@
+# C++ types and calls
+
+See the [tutorial](tutorial.md) for the basics of calling from Rust into C++. What types can you pass in those function calls?
+
+## Built-in C++ and Rust types
+
+See [the list here](https://docs.rs/cxx/0.4.7/cxx/#builtin-types).
+
+When deciding whether to use a `::rust::Str[ing]` or a `std::string`, think about whether the text is guaranteed to be UTF-8. See [performance](performance.md) for more information.
+
+## Your own C++ types
+
+Say you've got some pre-existing C++ struct which you need to use in Rust code. You've got three options:
+
+* *Add a definition for that type into your `#[cxx::bridge]` mod*. This will generate both Rust and C++ definitions, so you'll need to _delete_ your pre-existing definition. But this enables `cxx` to generate safe interop code, so it's the preferred solution if you have free rein to alter pre-existing code.
+* *Declare that this is an opaque C++ type*. To do this, add a `type Foo;` line within your `extern "C"` section of your `#[cxx::bridge]` mod. This option will enable you to refer to the type from C++ code, and pass it into and out of C++ functions, but only by reference or by `UniquePtr`. You won't be able to own the type by value in Rust, and you won't be able to access its fields. This is probably what you want for any pre-existing C++ type which has substantial encapsulation: if you would normally only access the type by calling member functions, as opposed to by manipulating fields directly, it's safest and easiest to treat it as an opaque type from a Rust perspective.
+* *Declare this outside of `#[cxx::bridge]` and refer to it using a type alias, stating that the type is Trivial*. If you really need to access fields in a pre-existing C++ type, then you can assert to `cxx` that it's safe to hold by value in Rust. See below for how to do this.
+
+## Type aliases to trivial existing C++ types
+
+To do this, use a type alias:
+```rust
+struct Foo {
+    // mirror existing C++ definition exactly.
+    // don't forget repr(C), alignment, etc.
+}
+
+#[cxx::bridge]
+mod ffi {
+    extern "C" {
+        type Foo = crate::Foo;
+    }
+}
+```
+and implement the [`ExternType`](https://docs.rs/cxx/0.4.7/cxx/trait.ExternType.html) trait for is, specifying that the type kind is `Trivial`. By doing this, you are asserting that this type really is safe to hold by value in Rust: for example, it has no destructor, and it can trivially be moved. These statements do not apply for structs which contain (for instance) `std::string`. There is no way that you can hold in Rust, by value, a struct which contains a `std::string`.
+
+In practice, writing definitions which exactly match existing C++ definitions is error-prone. You're better off using an external tool such as [bindgen](https://docs.rs/bindgen/) or [autocxx](https://docs.rs/autocxx) (which calls bindgen internally).
+
+## Declaring C++ methods
+
+At present, it's not possible to attach methods to a C++ type.

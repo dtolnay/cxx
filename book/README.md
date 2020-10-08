@@ -7,3 +7,7 @@ To build and view locally:
 - Open the generated *build/index.html*.
 
 [mdBook]: https://github.com/rust-lang/mdBook
+
+Whilst you're working on it, you may find it useful to:
+
+- `mdbook watch`
