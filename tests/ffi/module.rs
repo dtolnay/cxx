@@ -4,7 +4,7 @@
 #[cxx::bridge(namespace = tests)]
 pub mod ffi {
     extern "C" {
-        include!("cxx-test-suite/tests.h");
+        include!("tests/ffi/tests.h");
 
         type C = crate::ffi::C;
 

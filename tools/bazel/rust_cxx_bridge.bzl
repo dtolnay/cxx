@@ -1,12 +1,7 @@
 load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
-def rust_cxx_bridge(
-        name,
-        src,
-        include_prefix = None,
-        strip_include_prefix = None,
-        deps = []):
+def rust_cxx_bridge(name, src, deps = []):
     native.alias(
         name = "%s/header" % name,
         actual = src + ".h",
@@ -43,6 +38,4 @@ def rust_cxx_bridge(
     cc_library(
         name = "%s/include" % name,
         hdrs = [src + ".h"],
-        include_prefix = include_prefix,
-        strip_include_prefix = strip_include_prefix,
     )
