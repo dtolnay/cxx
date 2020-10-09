@@ -228,7 +228,7 @@
 //! # Cargo.toml
 //!
 //! [build-dependencies]
-//! cxx-build = "0.4"
+//! cxx-build = "0.5"
 //! ```
 //!
 //! ```no_run
@@ -349,7 +349,7 @@
 //! [https://github.com/dtolnay/cxx]: https://github.com/dtolnay/cxx
 
 #![no_std]
-#![doc(html_root_url = "https://docs.rs/cxx/0.4.7")]
+#![doc(html_root_url = "https://docs.rs/cxx/0.5.0")]
 #![deny(improper_ctypes)]
 #![allow(non_camel_case_types)]
 #![allow(
