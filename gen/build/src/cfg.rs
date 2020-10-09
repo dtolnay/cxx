@@ -97,6 +97,18 @@ mod r#impl {
     }
 
     thread_local! {
+        // FIXME: If https://github.com/rust-lang/rust/issues/77425 is resolved,
+        // we can delete this thread local side table and instead make each CFG
+        // instance directly own the associated super::Cfg.
+        //
+        //     #[allow(const_item_mutation)]
+        //     pub const CFG: Cfg = Cfg {
+        //         cfg: AtomicPtr::new(ptr::null_mut()),
+        //     };
+        //     pub struct Cfg {
+        //         cfg: AtomicPtr<super::Cfg>,
+        //     }
+        //
         static CONST_DEREFS: RefCell<HashMap<Handle, Box<super::Cfg<'static>>>> = RefCell::default();
     }
 
