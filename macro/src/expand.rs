@@ -1,3 +1,4 @@
+use crate::derive::DeriveAttribute;
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::file::Module;
 use crate::syntax::namespace::Namespace;
@@ -128,7 +129,7 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
 fn expand_struct(namespace: &Namespace, strct: &Struct) -> TokenStream {
     let ident = &strct.ident;
     let doc = &strct.doc;
-    let derives = &strct.derives;
+    let derives = DeriveAttribute(&strct.derives);
     let type_id = type_id(namespace, ident);
     let fields = strct.fields.iter().map(|field| {
         // This span on the pub makes "private type in public interface" errors
@@ -139,7 +140,7 @@ fn expand_struct(namespace: &Namespace, strct: &Struct) -> TokenStream {
 
     quote! {
         #doc
-        #[derive(#(#derives),*)]
+        #derives
         #[repr(C)]
         pub struct #ident {
             #(#fields,)*
@@ -727,7 +728,7 @@ fn type_id(namespace: &Namespace, ident: &Ident) -> TokenStream {
 }
 
 fn expand_rust_box(namespace: &Namespace, ident: &Ident) -> TokenStream {
-    let link_prefix = format!("cxxbridge04$box${}{}$", namespace, ident);
+    let link_prefix = format!("cxxbridge05$box${}{}$", namespace, ident);
     let link_uninit = format!("{}uninit", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
 
@@ -756,7 +757,7 @@ fn expand_rust_box(namespace: &Namespace, ident: &Ident) -> TokenStream {
 }
 
 fn expand_rust_vec(namespace: &Namespace, elem: &Ident) -> TokenStream {
-    let link_prefix = format!("cxxbridge04$rust_vec${}{}$", namespace, elem);
+    let link_prefix = format!("cxxbridge05$rust_vec${}{}$", namespace, elem);
     let link_new = format!("{}new", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
     let link_len = format!("{}len", link_prefix);
@@ -807,7 +808,7 @@ fn expand_unique_ptr(
     explicit_impl: Option<&Impl>,
 ) -> TokenStream {
     let name = ident.to_string();
-    let prefix = format!("cxxbridge04$unique_ptr${}{}$", namespace, ident);
+    let prefix = format!("cxxbridge05$unique_ptr${}{}$", namespace, ident);
     let link_null = format!("{}null", prefix);
     let link_new = format!("{}new", prefix);
     let link_raw = format!("{}raw", prefix);
@@ -890,10 +891,10 @@ fn expand_cxx_vector(
 ) -> TokenStream {
     let _ = explicit_impl;
     let name = elem.to_string();
-    let prefix = format!("cxxbridge04$std$vector${}{}$", namespace, elem);
+    let prefix = format!("cxxbridge05$std$vector${}{}$", namespace, elem);
     let link_size = format!("{}size", prefix);
     let link_get_unchecked = format!("{}get_unchecked", prefix);
-    let unique_ptr_prefix = format!("cxxbridge04$unique_ptr$std$vector${}{}$", namespace, elem);
+    let unique_ptr_prefix = format!("cxxbridge05$unique_ptr$std$vector${}{}$", namespace, elem);
     let link_unique_ptr_null = format!("{}null", unique_ptr_prefix);
     let link_unique_ptr_raw = format!("{}raw", unique_ptr_prefix);
     let link_unique_ptr_get = format!("{}get", unique_ptr_prefix);

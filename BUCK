@@ -52,8 +52,10 @@ rust_library(
     deps = [
         "//third-party:cc",
         "//third-party:codespan-reporting",
+        "//third-party:lazy_static",
         "//third-party:proc-macro2",
         "//third-party:quote",
+        "//third-party:scratch",
         "//third-party:syn",
     ],
 )

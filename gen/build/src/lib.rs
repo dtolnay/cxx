@@ -54,21 +54,27 @@
 )]
 
 mod cargo;
+mod cfg;
 mod error;
 mod gen;
 mod out;
 mod paths;
 mod syntax;
 
-use crate::error::Result;
+use crate::error::{Error, Result};
 use crate::gen::error::report;
-use crate::gen::{fs, Opt};
+use crate::gen::Opt;
 use crate::paths::{PathExt, TargetDir};
 use cc::Build;
+use std::collections::BTreeMap;
+use std::env;
+use std::ffi::{OsStr, OsString};
 use std::io::{self, Write};
 use std::iter;
 use std::path::{Path, PathBuf};
 use std::process;
+
+pub use crate::cfg::{Cfg, CFG};
 
 /// This returns a [`cc::Build`] on which you should continue to set up any
 /// additional source files or compiler flags, and lastly call its [`compile`]
@@ -100,12 +106,32 @@ pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) ->
 }
 
 struct Project {
+    include_prefix: PathBuf,
+    manifest_dir: PathBuf,
+    // Output directory as received from Cargo.
     out_dir: PathBuf,
-    target_dir: TargetDir,
+    // Directory into which to symlink all generated code.
+    //
+    // This is *not* used for an #include path, only as a debugging convenience.
+    // Normally available at target/cxxbridge/ if we are able to know where the
+    // target dir is, otherwise under a common scratch dir.
+    //
+    // The reason this isn't the #include dir is that we do not want builds to
+    // have access to headers from arbitrary other parts of the dependency
+    // graph. Using a global directory for all builds would be both a race
+    // condition depending on what order Cargo randomly executes the build
+    // scripts, as well as semantically undesirable for builds not to have to
+    // declare their real dependencies.
+    shared_dir: PathBuf,
 }
 
 impl Project {
     fn init() -> Result<Self> {
+        let include_prefix = Path::new(CFG.include_prefix);
+        assert!(include_prefix.is_relative());
+        let include_prefix = include_prefix.components().collect();
+
+        let manifest_dir = paths::manifest_dir()?;
         let out_dir = paths::out_dir()?;
 
         let target_dir = match cargo::target_dir(&out_dir) {
@@ -114,62 +140,138 @@ impl Project {
             TargetDir::Unknown => paths::search_parents_for_target_dir(&out_dir),
         };
 
+        let shared_dir = match target_dir {
+            TargetDir::Path(target_dir) => target_dir.join("cxxbridge"),
+            TargetDir::Unknown => scratch::path("cxxbridge"),
+        };
+
         Ok(Project {
+            include_prefix,
+            manifest_dir,
             out_dir,
-            target_dir,
+            shared_dir,
         })
     }
 }
 
+// We lay out the OUT_DIR as follows. Everything is namespaced under a cxxbridge
+// subdirectory to avoid stomping on other things that the caller's build script
+// might be doing inside OUT_DIR.
+//
+//     $OUT_DIR/
+//        cxxbridge/
+//           crate/
+//              $CARGO_PKG_NAME -> $CARGO_MANIFEST_DIR
+//           include/
+//              rust/
+//                 cxx.h
+//              $CARGO_PKG_NAME/
+//                 .../
+//                    lib.rs.h
+//           sources/
+//              $CARGO_PKG_NAME/
+//                 .../
+//                    lib.rs.cc
+//
+// The crate/ and include/ directories are placed on the #include path for the
+// current build as well as for downstream builds that have a direct dependency
+// on the current crate.
 fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Result<Build> {
     let ref prj = Project::init()?;
-    let include_dir = paths::include_dir(prj);
+
+    let ref crate_dir = make_crate_dir(prj);
+    let ref include_dir = make_include_dir(prj)?;
 
     let mut build = Build::new();
     build.cpp(true);
     build.cpp_link_stdlib(None); // linked via link-cplusplus crate
-    build.include(&include_dir);
-    write_header(prj);
-    let crate_dir = symlink_crate(prj, &mut build);
 
     for path in rust_source_files {
         generate_bridge(prj, &mut build, path.as_ref())?;
     }
 
     eprintln!("\nCXX include path:");
+    build.include(include_dir);
     eprintln!("  {}", include_dir.display());
     if let Some(crate_dir) = crate_dir {
+        // Placed after the generated code directory (include_dir) on the
+        // include line so that `#include "path/to/file.rs"` from C++
+        // "magically" works and refers to the API generated from that Rust
+        // source file.
+        build.include(crate_dir);
         eprintln!("  {}", crate_dir.display());
+    }
+    for dep in env_include_dirs() {
+        build.include(&dep);
+        eprintln!("  {}", dep.display());
     }
     Ok(build)
 }
 
-fn write_header(prj: &Project) {
-    let ref cxx_h = prj.out_dir.join("cxxbridge").join("rust").join("cxx.h");
-    let _ = out::write(cxx_h, gen::include::HEADER.as_bytes());
-    if let TargetDir::Path(target_dir) = &prj.target_dir {
-        let ref header_dir = target_dir.join("cxxbridge").join("rust");
-        let _ = fs::create_dir_all(header_dir);
-        let ref cxx_h = header_dir.join("cxx.h");
-        let _ = out::write(cxx_h, gen::include::HEADER.as_bytes());
+fn env_include_dirs() -> impl Iterator<Item = PathBuf> {
+    let mut env_include_dirs = BTreeMap::new();
+    for (k, v) in env::vars_os() {
+        let mut k = k.to_string_lossy().into_owned();
+        // Only variables set from a build script of direct dependencies are
+        // observable. That's exactly what we want! Your crate needs to declare
+        // a direct dependency on the other crate in order to be able to
+        // #include its headers.
+        //
+        // Also, they're only observable if the dependency's manifest contains a
+        // `links` key. This is important because Cargo imposes no ordering on
+        // the execution of build scripts without a `links` key. When exposing a
+        // generated header for the current crate to #include, we need to be
+        // sure the dependency's build script has already executed and emitted
+        // that generated header.
+        //
+        // References:
+        //   - https://doc.rust-lang.org/cargo/reference/build-scripts.html#the-links-manifest-key
+        //   - https://doc.rust-lang.org/cargo/reference/build-script-examples.html#using-another-sys-crate
+        if k.starts_with("DEP_") {
+            if k.ends_with("_CXXBRIDGE_INCLUDE") {
+                // Tweak to ensure sorted before the other one, for the same
+                // reason as the comment on ordering of include_dir vs crate_dir
+                // above.
+                k.replace_range(k.len() - "INCLUDE".len().., "0");
+                env_include_dirs.insert(k, PathBuf::from(v));
+            } else if k.ends_with("_CXXBRIDGE_CRATE") {
+                k.replace_range(k.len() - "CRATE".len().., "1");
+                env_include_dirs.insert(k, PathBuf::from(v));
+            }
+        }
+    }
+    env_include_dirs.into_iter().map(|entry| entry.1)
+}
+
+fn make_crate_dir(prj: &Project) -> Option<PathBuf> {
+    if prj.include_prefix.as_os_str().is_empty() {
+        let crate_dir = prj.manifest_dir.clone();
+        println!("cargo:CXXBRIDGE_CRATE={}", crate_dir.to_string_lossy());
+        return Some(crate_dir);
+    }
+    let crate_dir = prj.out_dir.join("cxxbridge").join("crate");
+    let link = crate_dir.join(&prj.include_prefix);
+    if out::symlink_dir(&prj.manifest_dir, link).is_ok() {
+        println!("cargo:CXXBRIDGE_CRATE={}", crate_dir.to_string_lossy());
+        Some(crate_dir)
+    } else {
+        None
     }
 }
 
-fn symlink_crate(prj: &Project, build: &mut Build) -> Option<PathBuf> {
-    let manifest_dir = match paths::manifest_dir() {
-        Some(manifest_dir) => manifest_dir,
-        None => return None,
-    };
-    let package_name = match paths::package_name() {
-        Some(package_name) => package_name,
-        None => return None,
-    };
-
-    let mut link = paths::include_dir(prj);
-    link.push("CRATE");
-    let _ = out::symlink_dir(manifest_dir, link.join(package_name));
-    build.include(&link);
-    Some(link)
+fn make_include_dir(prj: &Project) -> Result<PathBuf> {
+    let include_dir = prj.out_dir.join("cxxbridge").join("include");
+    let cxx_h = include_dir.join("rust").join("cxx.h");
+    let ref shared_cxx_h = prj.shared_dir.join("rust").join("cxx.h");
+    if let Some(ref original) = env::var_os("DEP_CXXBRIDGE05_HEADER") {
+        out::symlink_file(original, cxx_h)?;
+        out::symlink_file(original, shared_cxx_h)?;
+    } else {
+        out::write(shared_cxx_h, gen::include::HEADER.as_bytes())?;
+        out::symlink_file(shared_cxx_h, cxx_h)?;
+    }
+    println!("cargo:CXXBRIDGE_INCLUDE={}", include_dir.to_string_lossy());
+    Ok(include_dir)
 }
 
 fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) -> Result<()> {
@@ -177,21 +279,30 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
     let generated = gen::generate_from_path(rust_source_file, &opt);
     let ref rel_path = paths::local_relative_path(rust_source_file);
 
+    let cxxbridge = prj.out_dir.join("cxxbridge");
+    let include_dir = cxxbridge.join("include").join(&prj.include_prefix);
+    let sources_dir = cxxbridge.join("sources").join(&prj.include_prefix);
+
     let ref rel_path_h = rel_path.with_appended_extension(".h");
-    let ref header_path = paths::namespaced(&prj.out_dir, rel_path_h);
+    let ref header_path = include_dir.join(rel_path_h);
     out::write(header_path, &generated.header)?;
 
-    let ref link_path = paths::namespaced(&prj.out_dir, rel_path);
+    let ref link_path = include_dir.join(rel_path);
     let _ = out::symlink_file(header_path, link_path);
-    if let TargetDir::Path(target_dir) = &prj.target_dir {
-        let ref link_path = paths::namespaced(target_dir, rel_path);
-        let _ = out::symlink_file(header_path, link_path);
-        let _ = out::symlink_file(header_path, link_path.with_appended_extension(".h"));
-    }
 
     let ref rel_path_cc = rel_path.with_appended_extension(".cc");
-    let ref implementation_path = paths::namespaced(&prj.out_dir, rel_path_cc);
+    let ref implementation_path = sources_dir.join(rel_path_cc);
     out::write(implementation_path, &generated.implementation)?;
     build.file(implementation_path);
+
+    let shared_h = prj.shared_dir.join(&prj.include_prefix).join(rel_path_h);
+    let shared_cc = prj.shared_dir.join(&prj.include_prefix).join(rel_path_cc);
+    let _ = out::symlink_file(header_path, shared_h);
+    let _ = out::symlink_file(implementation_path, shared_cc);
     Ok(())
+}
+
+fn env_os(key: impl AsRef<OsStr>) -> Result<OsString> {
+    let key = key.as_ref();
+    env::var_os(key).ok_or_else(|| Error::NoEnv(key.to_owned()))
 }

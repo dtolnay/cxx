@@ -7,7 +7,7 @@ rust_library(
 
 rust_library(
     name = "cc",
-    srcs = glob(["vendor/cc-1.0.60/src/**"]),
+    srcs = glob(["vendor/cc-1.0.61/src/**"]),
     visibility = ["PUBLIC"],
 )
 
@@ -36,6 +36,7 @@ rust_library(
 rust_library(
     name = "lazy_static",
     srcs = glob(["vendor/lazy_static-1.4.0/src/**"]),
+    visibility = ["PUBLIC"],
 )
 
 rust_library(
@@ -60,6 +61,13 @@ rust_library(
     visibility = ["PUBLIC"],
     features = ["proc-macro"],
     deps = [":proc-macro2"],
+)
+
+rust_library(
+    name = "scratch",
+    srcs = glob(["vendor/scratch-1.0.0/src/**"]),
+    env = {"OUT_DIR": ""},
+    visibility = ["PUBLIC"],
 )
 
 rust_library(
