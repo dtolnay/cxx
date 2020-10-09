@@ -253,7 +253,7 @@
 //! For use in non-Cargo builds like Bazel or Buck, CXX provides an alternate
 //! way of invoking the C++ code generator as a standalone command line tool.
 //! The tool is packaged as the `cxxbridge-cmd` crate on crates.io or can be
-//! built from the *cmd* directory of [https://github.com/dtolnay/cxx].
+//! built from the *gen/cmd* directory of [https://github.com/dtolnay/cxx].
 //!
 //! ```bash
 //! $ cargo install cxxbridge-cmd
