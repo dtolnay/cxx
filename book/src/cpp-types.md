@@ -38,4 +38,19 @@ In practice, writing definitions which exactly match existing C++ definitions is
 
 ## Declaring C++ methods
 
-At present, it's not possible to attach methods to a C++ type.
+Don't attempt to put an `impl` block inside your `#[cxx::bridge]`. Instead, just declare functions which take a `&Type` or `&mut Type` as their first parameter, and these will be treated as method calls:
+
+
+```rust
+#[cxx::bridge]
+pub mod cxxbridge {
+    extern "C" {
+        include!("input.h");
+        type Bob;
+        pub fn get_bob(self: &Bob) -> u32;
+    }
+}
+
+```
+
+Any calls to `get_bob` will result in a call to the C++ function `uint32_t Bob::get_bob() const`.
