@@ -7,30 +7,30 @@
 #include <vector>
 
 extern "C" {
-const char *cxxbridge04$cxx_string$data(const std::string &s) noexcept {
+const char *cxxbridge05$cxx_string$data(const std::string &s) noexcept {
   return s.data();
 }
 
-size_t cxxbridge04$cxx_string$length(const std::string &s) noexcept {
+size_t cxxbridge05$cxx_string$length(const std::string &s) noexcept {
   return s.length();
 }
 
 // rust::String
-void cxxbridge04$string$new(rust::String *self) noexcept;
-void cxxbridge04$string$clone(rust::String *self,
+void cxxbridge05$string$new(rust::String *self) noexcept;
+void cxxbridge05$string$clone(rust::String *self,
                               const rust::String &other) noexcept;
-bool cxxbridge04$string$from(rust::String *self, const char *ptr,
+bool cxxbridge05$string$from(rust::String *self, const char *ptr,
                              size_t len) noexcept;
-void cxxbridge04$string$drop(rust::String *self) noexcept;
-const char *cxxbridge04$string$ptr(const rust::String *self) noexcept;
-size_t cxxbridge04$string$len(const rust::String *self) noexcept;
+void cxxbridge05$string$drop(rust::String *self) noexcept;
+const char *cxxbridge05$string$ptr(const rust::String *self) noexcept;
+size_t cxxbridge05$string$len(const rust::String *self) noexcept;
 
 // rust::Str
-bool cxxbridge04$str$valid(const char *ptr, size_t len) noexcept;
+bool cxxbridge05$str$valid(const char *ptr, size_t len) noexcept;
 } // extern "C"
 
 namespace rust {
-inline namespace cxxbridge04 {
+inline namespace cxxbridge05 {
 
 template <typename Exception>
 void panic [[noreturn]] (const char *msg) {
@@ -44,42 +44,42 @@ void panic [[noreturn]] (const char *msg) {
 
 template void panic<std::out_of_range>[[noreturn]] (const char *msg);
 
-String::String() noexcept { cxxbridge04$string$new(this); }
+String::String() noexcept { cxxbridge05$string$new(this); }
 
 String::String(const String &other) noexcept {
-  cxxbridge04$string$clone(this, other);
+  cxxbridge05$string$clone(this, other);
 }
 
 String::String(String &&other) noexcept {
   this->repr = other.repr;
-  cxxbridge04$string$new(&other);
+  cxxbridge05$string$new(&other);
 }
 
-String::~String() noexcept { cxxbridge04$string$drop(this); }
+String::~String() noexcept { cxxbridge05$string$drop(this); }
 
 String::String(const std::string &s) : String(s.data(), s.length()) {}
 
 String::String(const char *s) : String(s, std::strlen(s)) {}
 
 String::String(const char *s, size_t len) {
-  if (!cxxbridge04$string$from(this, s, len)) {
+  if (!cxxbridge05$string$from(this, s, len)) {
     panic<std::invalid_argument>("data for rust::String is not utf-8");
   }
 }
 
 String &String::operator=(const String &other) noexcept {
   if (this != &other) {
-    cxxbridge04$string$drop(this);
-    cxxbridge04$string$clone(this, other);
+    cxxbridge05$string$drop(this);
+    cxxbridge05$string$clone(this, other);
   }
   return *this;
 }
 
 String &String::operator=(String &&other) noexcept {
   if (this != &other) {
-    cxxbridge04$string$drop(this);
+    cxxbridge05$string$drop(this);
     this->repr = other.repr;
-    cxxbridge04$string$new(&other);
+    cxxbridge05$string$new(&other);
   }
   return *this;
 }
@@ -89,12 +89,12 @@ String::operator std::string() const {
 }
 
 const char *String::data() const noexcept {
-  return cxxbridge04$string$ptr(this);
+  return cxxbridge05$string$ptr(this);
 }
 
-size_t String::size() const noexcept { return cxxbridge04$string$len(this); }
+size_t String::size() const noexcept { return cxxbridge05$string$len(this); }
 
-size_t String::length() const noexcept { return cxxbridge04$string$len(this); }
+size_t String::length() const noexcept { return cxxbridge05$string$len(this); }
 
 String::String(unsafe_bitcopy_t, const String &bits) noexcept
     : repr(bits.repr) {}
@@ -113,7 +113,7 @@ Str::Str(const std::string &s) : Str(s.data(), s.length()) {}
 Str::Str(const char *s) : Str(s, std::strlen(s)) {}
 
 Str::Str(const char *s, size_t len) : repr(Repr{s, len}) {
-  if (!cxxbridge04$str$valid(this->repr.ptr, this->repr.len)) {
+  if (!cxxbridge05$str$valid(this->repr.ptr, this->repr.len)) {
     panic<std::invalid_argument>("data for rust::Str is not utf-8");
   }
 }
@@ -143,7 +143,7 @@ std::ostream &operator<<(std::ostream &os, const Str &s) {
 }
 
 extern "C" {
-const char *cxxbridge04$error(const char *ptr, size_t len) {
+const char *cxxbridge05$error(const char *ptr, size_t len) {
   char *copy = new char[len];
   strncpy(copy, ptr, len);
   return copy;
@@ -153,7 +153,7 @@ const char *cxxbridge04$error(const char *ptr, size_t len) {
 Error::Error(Str::Repr msg) noexcept : msg(msg) {}
 
 Error::Error(const Error &other) {
-  this->msg.ptr = cxxbridge04$error(other.msg.ptr, other.msg.len);
+  this->msg.ptr = cxxbridge05$error(other.msg.ptr, other.msg.len);
   this->msg.len = other.msg.len;
 }
 
@@ -168,96 +168,96 @@ Error::~Error() noexcept { delete[] this->msg.ptr; }
 
 const char *Error::what() const noexcept { return this->msg.ptr; }
 
-} // namespace cxxbridge04
+} // namespace cxxbridge05
 } // namespace rust
 
 extern "C" {
-void cxxbridge04$unique_ptr$std$string$null(
+void cxxbridge05$unique_ptr$std$string$null(
     std::unique_ptr<std::string> *ptr) noexcept {
   new (ptr) std::unique_ptr<std::string>();
 }
-void cxxbridge04$unique_ptr$std$string$raw(std::unique_ptr<std::string> *ptr,
+void cxxbridge05$unique_ptr$std$string$raw(std::unique_ptr<std::string> *ptr,
                                            std::string *raw) noexcept {
   new (ptr) std::unique_ptr<std::string>(raw);
 }
-const std::string *cxxbridge04$unique_ptr$std$string$get(
+const std::string *cxxbridge05$unique_ptr$std$string$get(
     const std::unique_ptr<std::string> &ptr) noexcept {
   return ptr.get();
 }
-std::string *cxxbridge04$unique_ptr$std$string$release(
+std::string *cxxbridge05$unique_ptr$std$string$release(
     std::unique_ptr<std::string> &ptr) noexcept {
   return ptr.release();
 }
-void cxxbridge04$unique_ptr$std$string$drop(
+void cxxbridge05$unique_ptr$std$string$drop(
     std::unique_ptr<std::string> *ptr) noexcept {
   ptr->~unique_ptr();
 }
 } // extern "C"
 
 #define STD_VECTOR_OPS(RUST_TYPE, CXX_TYPE)                                    \
-  size_t cxxbridge04$std$vector$##RUST_TYPE##$size(                            \
+  size_t cxxbridge05$std$vector$##RUST_TYPE##$size(                            \
       const std::vector<CXX_TYPE> &s) noexcept {                               \
     return s.size();                                                           \
   }                                                                            \
-  const CXX_TYPE *cxxbridge04$std$vector$##RUST_TYPE##$get_unchecked(          \
+  const CXX_TYPE *cxxbridge05$std$vector$##RUST_TYPE##$get_unchecked(          \
       const std::vector<CXX_TYPE> &s, size_t pos) noexcept {                   \
     return &s[pos];                                                            \
   }                                                                            \
-  void cxxbridge04$unique_ptr$std$vector$##RUST_TYPE##$null(                   \
+  void cxxbridge05$unique_ptr$std$vector$##RUST_TYPE##$null(                   \
       std::unique_ptr<std::vector<CXX_TYPE>> *ptr) noexcept {                  \
     new (ptr) std::unique_ptr<std::vector<CXX_TYPE>>();                        \
   }                                                                            \
-  void cxxbridge04$unique_ptr$std$vector$##RUST_TYPE##$raw(                    \
+  void cxxbridge05$unique_ptr$std$vector$##RUST_TYPE##$raw(                    \
       std::unique_ptr<std::vector<CXX_TYPE>> *ptr,                             \
       std::vector<CXX_TYPE> *raw) noexcept {                                   \
     new (ptr) std::unique_ptr<std::vector<CXX_TYPE>>(raw);                     \
   }                                                                            \
   const std::vector<CXX_TYPE>                                                  \
-      *cxxbridge04$unique_ptr$std$vector$##RUST_TYPE##$get(                    \
+      *cxxbridge05$unique_ptr$std$vector$##RUST_TYPE##$get(                    \
           const std::unique_ptr<std::vector<CXX_TYPE>> &ptr) noexcept {        \
     return ptr.get();                                                          \
   }                                                                            \
   std::vector<CXX_TYPE>                                                        \
-      *cxxbridge04$unique_ptr$std$vector$##RUST_TYPE##$release(                \
+      *cxxbridge05$unique_ptr$std$vector$##RUST_TYPE##$release(                \
           std::unique_ptr<std::vector<CXX_TYPE>> &ptr) noexcept {              \
     return ptr.release();                                                      \
   }                                                                            \
-  void cxxbridge04$unique_ptr$std$vector$##RUST_TYPE##$drop(                   \
+  void cxxbridge05$unique_ptr$std$vector$##RUST_TYPE##$drop(                   \
       std::unique_ptr<std::vector<CXX_TYPE>> *ptr) noexcept {                  \
     ptr->~unique_ptr();                                                        \
   }
 
 #define RUST_VEC_EXTERNS(RUST_TYPE, CXX_TYPE)                                  \
-  void cxxbridge04$rust_vec$##RUST_TYPE##$new(                                 \
+  void cxxbridge05$rust_vec$##RUST_TYPE##$new(                                 \
       rust::Vec<CXX_TYPE> *ptr) noexcept;                                      \
-  void cxxbridge04$rust_vec$##RUST_TYPE##$drop(                                \
+  void cxxbridge05$rust_vec$##RUST_TYPE##$drop(                                \
       rust::Vec<CXX_TYPE> *ptr) noexcept;                                      \
-  size_t cxxbridge04$rust_vec$##RUST_TYPE##$len(                               \
+  size_t cxxbridge05$rust_vec$##RUST_TYPE##$len(                               \
       const rust::Vec<CXX_TYPE> *ptr) noexcept;                                \
-  const CXX_TYPE *cxxbridge04$rust_vec$##RUST_TYPE##$data(                     \
+  const CXX_TYPE *cxxbridge05$rust_vec$##RUST_TYPE##$data(                     \
       const rust::Vec<CXX_TYPE> *ptr) noexcept;                                \
-  size_t cxxbridge04$rust_vec$##RUST_TYPE##$stride() noexcept;
+  size_t cxxbridge05$rust_vec$##RUST_TYPE##$stride() noexcept;
 
 #define RUST_VEC_OPS(RUST_TYPE, CXX_TYPE)                                      \
   template <>                                                                  \
   Vec<CXX_TYPE>::Vec() noexcept {                                              \
-    cxxbridge04$rust_vec$##RUST_TYPE##$new(this);                              \
+    cxxbridge05$rust_vec$##RUST_TYPE##$new(this);                              \
   }                                                                            \
   template <>                                                                  \
   void Vec<CXX_TYPE>::drop() noexcept {                                        \
-    return cxxbridge04$rust_vec$##RUST_TYPE##$drop(this);                      \
+    return cxxbridge05$rust_vec$##RUST_TYPE##$drop(this);                      \
   }                                                                            \
   template <>                                                                  \
   size_t Vec<CXX_TYPE>::size() const noexcept {                                \
-    return cxxbridge04$rust_vec$##RUST_TYPE##$len(this);                       \
+    return cxxbridge05$rust_vec$##RUST_TYPE##$len(this);                       \
   }                                                                            \
   template <>                                                                  \
   const CXX_TYPE *Vec<CXX_TYPE>::data() const noexcept {                       \
-    return cxxbridge04$rust_vec$##RUST_TYPE##$data(this);                      \
+    return cxxbridge05$rust_vec$##RUST_TYPE##$data(this);                      \
   }                                                                            \
   template <>                                                                  \
   size_t Vec<CXX_TYPE>::stride() noexcept {                                    \
-    return cxxbridge04$rust_vec$##RUST_TYPE##$stride();                        \
+    return cxxbridge05$rust_vec$##RUST_TYPE##$stride();                        \
   }
 
 // Usize and isize are the same type as one of the below.
@@ -290,7 +290,7 @@ FOR_EACH_RUST_VEC(RUST_VEC_EXTERNS)
 } // extern "C"
 
 namespace rust {
-inline namespace cxxbridge04 {
+inline namespace cxxbridge05 {
 FOR_EACH_RUST_VEC(RUST_VEC_OPS)
-} // namespace cxxbridge04
+} // namespace cxxbridge05
 } // namespace rust

@@ -3,7 +3,7 @@ use crate::syntax::symbol::{self, Symbol};
 use crate::syntax::ExternFn;
 use proc_macro2::Ident;
 
-const CXXBRIDGE: &str = "cxxbridge04";
+const CXXBRIDGE: &str = "cxxbridge05";
 
 macro_rules! join {
     ($($segment:expr),*) => {

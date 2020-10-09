@@ -5,9 +5,9 @@ use core::slice;
 use core::str::{self, Utf8Error};
 
 extern "C" {
-    #[link_name = "cxxbridge04$cxx_string$data"]
+    #[link_name = "cxxbridge05$cxx_string$data"]
     fn string_data(_: &CxxString) -> *const u8;
-    #[link_name = "cxxbridge04$cxx_string$length"]
+    #[link_name = "cxxbridge05$cxx_string$length"]
     fn string_length(_: &CxxString) -> usize;
 }
 
