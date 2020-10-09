@@ -1,3 +1,4 @@
+use crate::derive::DeriveAttribute;
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::file::Module;
 use crate::syntax::namespace::Namespace;
@@ -128,7 +129,7 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
 fn expand_struct(namespace: &Namespace, strct: &Struct) -> TokenStream {
     let ident = &strct.ident;
     let doc = &strct.doc;
-    let derives = &strct.derives;
+    let derives = DeriveAttribute(&strct.derives);
     let type_id = type_id(namespace, ident);
     let fields = strct.fields.iter().map(|field| {
         // This span on the pub makes "private type in public interface" errors
@@ -139,7 +140,7 @@ fn expand_struct(namespace: &Namespace, strct: &Struct) -> TokenStream {
 
     quote! {
         #doc
-        #[derive(#(#derives),*)]
+        #derives
         #[repr(C)]
         pub struct #ident {
             #(#fields,)*
