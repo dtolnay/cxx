@@ -142,8 +142,7 @@ impl Project {
 
         let shared_dir = match target_dir {
             TargetDir::Path(target_dir) => target_dir.join("cxxbridge"),
-            // Use cxx-build's OUT_DIR.
-            TargetDir::Unknown => PathBuf::from(env!("OUT_DIR")),
+            TargetDir::Unknown => scratch::path("cxxbridge"),
         };
 
         Ok(Project {

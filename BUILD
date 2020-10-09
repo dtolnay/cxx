@@ -54,7 +54,6 @@ rust_library(
     name = "build",
     srcs = glob(["gen/build/src/**/*.rs"]),
     data = ["gen/build/src/gen/include/cxx.h"],
-    rustc_env = {"OUT_DIR": ""},
     visibility = ["//visibility:public"],
     deps = [
         "//third-party:cc",
