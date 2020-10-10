@@ -9,6 +9,7 @@ rust_test(
 rust_library(
     name = "ffi",
     srcs = [
+        "ffi/extra.rs",
         "ffi/lib.rs",
         "ffi/module.rs",
     ],
@@ -25,6 +26,7 @@ cxx_library(
         "ffi/tests.cc",
         ":bridge/source",
         ":module/source",
+        ":extra/source",
     ],
     headers = {
         "ffi/lib.rs.h": ":bridge/header",
@@ -41,4 +43,9 @@ rust_cxx_bridge(
 rust_cxx_bridge(
     name = "module",
     src = "ffi/module.rs",
+)
+
+rust_cxx_bridge(
+    name = "extra",
+    src = "ffi/extra.rs",
 )
