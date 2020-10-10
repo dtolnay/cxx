@@ -20,6 +20,8 @@ public:
   size_t get_fail();
   const std::vector<uint8_t> &get_v() const;
   std::vector<uint8_t> &get_v();
+  rust::String cOverloadedMethod(int32_t x) const;
+  rust::String cOverloadedMethod(rust::Str x) const;
 
 private:
   size_t n;
@@ -100,5 +102,8 @@ std::unique_ptr<std::string> c_try_return_unique_ptr_string();
 rust::Vec<uint8_t> c_try_return_rust_vec();
 rust::Vec<rust::String> c_try_return_rust_vec_string();
 const rust::Vec<uint8_t> &c_try_return_ref_rust_vec(const C &c);
+
+rust::String cOverloadedFunction(int32_t x);
+rust::String cOverloadedFunction(rust::Str x);
 
 } // namespace tests

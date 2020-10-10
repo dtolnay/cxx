@@ -300,6 +300,20 @@ fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> R
         ));
     }
 
+    let mut doc = Doc::new();
+    let mut cxx_name = None;
+    let mut rust_name = None;
+    attrs::parse(
+        cx,
+        &foreign_fn.attrs,
+        attrs::Parser {
+            doc: Some(&mut doc),
+            cxx_name: Some(&mut cxx_name),
+            rust_name: Some(&mut rust_name),
+            ..Default::default()
+        },
+    );
+
     let mut receiver = None;
     let mut args = Punctuated::new();
     for arg in foreign_fn.sig.inputs.pairs() {
@@ -356,10 +370,12 @@ fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> R
     let mut throws_tokens = None;
     let ret = parse_return_type(&foreign_fn.sig.output, &mut throws_tokens)?;
     let throws = throws_tokens.is_some();
-    let doc = attrs::parse_doc(cx, &foreign_fn.attrs);
     let unsafety = foreign_fn.sig.unsafety;
     let fn_token = foreign_fn.sig.fn_token;
-    let ident = foreign_fn.sig.ident.clone();
+    let ident = Pair {
+        cxx: cxx_name.unwrap_or(foreign_fn.sig.ident.clone()),
+        rust: rust_name.unwrap_or(foreign_fn.sig.ident.clone()),
+    };
     let paren_token = foreign_fn.sig.paren_token;
     let semi_token = foreign_fn.semi_token;
     let api_function = match lang {
@@ -370,10 +386,7 @@ fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> R
     Ok(api_function(ExternFn {
         lang,
         doc,
-        ident: Pair {
-            cxx: ident.clone(),
-            rust: ident,
-        },
+        ident,
         sig: Signature {
             unsafety,
             fn_token,
