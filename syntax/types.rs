@@ -51,8 +51,7 @@ impl<'a> Types<'a> {
         }
 
         let mut type_names = UnorderedSet::new();
-        let mut cxx_function_names = UnorderedSet::new();
-        let mut rust_function_names = UnorderedSet::new();
+        let mut function_names = UnorderedSet::new();
         for api in apis {
             // The same identifier is permitted to be declared as both a shared
             // enum and extern C++ type, or shared struct and extern C++ type.
@@ -117,15 +116,10 @@ impl<'a> Types<'a> {
                     rust.insert(ident);
                 }
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
-                    let cxx_fn = (&efn.receiver, &efn.ident.cxx);
-                    let rust_fn = (&efn.receiver, &efn.ident.rust);
-                    let cxx_duplicate = !cxx_function_names.insert(cxx_fn);
-                    if !rust_function_names.insert(rust_fn) {
+                    // Note: duplication of the C++ name is fine because C++ has
+                    // function overloading.
+                    if !function_names.insert((&efn.receiver, &efn.ident.rust)) {
                         duplicate_name(cx, efn, &efn.ident.rust);
-                    } else if cxx_duplicate {
-                        // Insert into cxx_function_names either way, but hide
-                        // error if we're already erroring on the rust name.
-                        duplicate_name(cx, efn, &efn.ident.cxx);
                     }
                     for arg in &efn.args {
                         visit(&mut all, &arg.ty);
