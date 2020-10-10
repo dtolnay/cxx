@@ -1,4 +1,5 @@
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("//tools/bazel:vendor.bzl", "vendor")
 
 http_archive(
     name = "io_bazel_rules_rust",
@@ -33,4 +34,9 @@ rust_repository_set(
     name = "rust_1_47_darwin",
     exec_triple = "x86_64-apple-darwin",
     version = "1.47.0",
+)
+
+vendor(
+    name = "third-party",
+    lockfile = "//third-party:Cargo.lock",
 )

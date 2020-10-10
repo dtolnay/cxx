@@ -90,10 +90,6 @@ jobs:
           chmod +x install.sh
           ./install.sh --user
           echo ::add-path::$HOME/bin
-      - name: Vendor dependencies
-        run: |
-          cp third-party/Cargo.lock .
-          cargo vendor --versioned-dirs --locked third-party/vendor
       - run: bazel run demo --verbose_failures --noshow_progress
       - run: bazel test ... --verbose_failures --noshow_progress
 
