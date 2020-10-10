@@ -1,5 +1,5 @@
-use cxx_test_suite::ffi;
 use cxx_test_suite::extra::ffi2;
+use cxx_test_suite::ffi;
 use std::cell::Cell;
 use std::ffi::CStr;
 

@@ -27,8 +27,8 @@ cc_library(
     srcs = [
         "ffi/tests.cc",
         ":bridge/source",
-        ":module/source",
         ":extra/source",
+        ":module/source",
     ],
     hdrs = ["ffi/tests.h"],
     deps = [
@@ -44,13 +44,13 @@ rust_cxx_bridge(
 )
 
 rust_cxx_bridge(
-    name = "module",
-    src = "ffi/module.rs",
+    name = "extra",
+    src = "ffi/extra.rs",
     deps = [":impl"],
 )
 
 rust_cxx_bridge(
-    name = "extra",
-    src = "ffi/extra.rs",
+    name = "module",
+    src = "ffi/module.rs",
     deps = [":impl"],
 )
