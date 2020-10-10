@@ -8,6 +8,12 @@
 //! [https://github.com/google/autocxx]: https://github.com/google/autocxx
 
 #![allow(dead_code)]
+#![allow(
+    clippy::inherent_to_string,
+    clippy::new_without_default,
+    clippy::or_fun_call,
+    clippy::toplevel_ref_arg
+)]
 
 mod error;
 mod gen;

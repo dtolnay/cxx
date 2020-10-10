@@ -46,6 +46,7 @@
 //! ```
 
 #![allow(
+    clippy::drop_copy,
     clippy::inherent_to_string,
     clippy::needless_doctest_main,
     clippy::new_without_default,
