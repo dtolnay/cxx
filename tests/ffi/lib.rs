@@ -5,9 +5,36 @@
 )]
 
 pub mod module;
+pub mod extra;
 
 use cxx::{CxxString, CxxVector, UniquePtr};
 use std::fmt::{self, Display};
+
+mod other {
+    use cxx::kind::{Opaque, Trivial};
+    use cxx::{type_id, CxxString, ExternType};
+
+    #[repr(C)]
+    pub struct D {
+        d: u64,
+    }
+
+    #[repr(C)]
+    pub struct E {
+        e: u64,
+        e_str: CxxString,
+    }
+
+    unsafe impl ExternType for D {
+        type Id = type_id!("tests::D");
+        type Kind = Trivial;
+    }
+
+    unsafe impl ExternType for E {
+        type Id = type_id!("tests::E");
+        type Kind = Opaque;
+    }
+}
 
 #[cxx::bridge(namespace = tests)]
 pub mod ffi {

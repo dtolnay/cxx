@@ -4,6 +4,8 @@
 #include <iterator>
 #include <numeric>
 #include <stdexcept>
+#include <memory>
+#include <string>
 
 extern "C" void cxx_test_suite_set_correct() noexcept;
 extern "C" tests::R *cxx_test_suite_get_box() noexcept;
@@ -379,6 +381,54 @@ rust::String cOverloadedFunction(int x) {
 
 rust::String cOverloadedFunction(rust::Str x) {
   return rust::String(std::string(x));
+}
+
+void c_take_trivial_ptr(std::unique_ptr<D> d) {
+  if (d->d == 30) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_trivial_ref(const D& d) {
+  if (d.d == 30) {
+    cxx_test_suite_set_correct();
+  }
+}
+void c_take_trivial(D d) {
+  if (d.d == 30) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_opaque_ptr(std::unique_ptr<E> e) {
+  if (e->e == 40) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_opaque_ref(const E& e) {
+  if (e.e == 40 && e.e_str == "hello") {
+    cxx_test_suite_set_correct();
+  }
+}
+
+std::unique_ptr<D> c_return_trivial_ptr() {
+  auto d = std::unique_ptr<D>(new D());
+  d->d = 30;
+  return d;
+}
+
+D c_return_trivial() {
+  D d;
+  d.d = 30;
+  return d;
+}
+
+std::unique_ptr<E> c_return_opaque_ptr() {
+  auto e = std::unique_ptr<E>(new E());
+  e->e = 40;
+  e->e_str = std::string("hello");
+  return e;
 }
 
 extern "C" const char *cxx_run_test() noexcept {
