@@ -1,4 +1,5 @@
 use cxx_test_suite::ffi;
+use cxx_test_suite::extra::ffi2;
 use std::cell::Cell;
 use std::ffi::CStr;
 
@@ -189,4 +190,20 @@ fn test_rust_name_attribute() {
     let unique_ptr = ffi::c_return_unique_ptr();
     assert_eq!("2020", unique_ptr.i32_overloaded_method(2020));
     assert_eq!("2020", unique_ptr.str_overloaded_method("2020"));
+}
+
+#[test]
+fn test_extern_trivial() {
+    let d = ffi2::c_return_trivial();
+    check!(ffi2::c_take_trivial_ref(&d));
+    check!(ffi2::c_take_trivial(d));
+    let d = ffi2::c_return_trivial_ptr();
+    check!(ffi2::c_take_trivial_ptr(d));
+}
+
+#[test]
+fn test_extern_opaque() {
+    let e = ffi2::c_return_opaque_ptr();
+    check!(ffi2::c_take_opaque_ref(e.as_ref().unwrap()));
+    check!(ffi2::c_take_opaque_ptr(e));
 }

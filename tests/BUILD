@@ -12,6 +12,7 @@ rust_test(
 rust_library(
     name = "cxx_test_suite",
     srcs = [
+        "ffi/extra.rs",
         "ffi/lib.rs",
         "ffi/module.rs",
     ],
@@ -27,6 +28,7 @@ cc_library(
         "ffi/tests.cc",
         ":bridge/source",
         ":module/source",
+        ":extra/source",
     ],
     hdrs = ["ffi/tests.h"],
     deps = [
@@ -44,5 +46,11 @@ rust_cxx_bridge(
 rust_cxx_bridge(
     name = "module",
     src = "ffi/module.rs",
+    deps = [":impl"],
+)
+
+rust_cxx_bridge(
+    name = "extra",
+    src = "ffi/extra.rs",
     deps = [":impl"],
 )
