@@ -68,7 +68,7 @@ jobs:
           mkdir bin
           wget -q -O bin/buck https://jitpack.io/com/github/facebook/buck/891556d066/buck-891556d066-java11.pex # dev branch from 2020.09.21
           chmod +x bin/buck
-          echo ::add-path::bin
+          echo bin >> $GITHUB_PATH
       - name: Install lld
         run: sudo apt install lld
       - name: Vendor dependencies
@@ -89,7 +89,7 @@ jobs:
           wget -q -O install.sh https://github.com/bazelbuild/bazel/releases/download/2.1.1/bazel-2.1.1-installer-linux-x86_64.sh
           chmod +x install.sh
           ./install.sh --user
-          echo ::add-path::$HOME/bin
+          echo $HOME/bin >> $GITHUB_PATH
       - run: bazel run demo --verbose_failures --noshow_progress
       - run: bazel test ... --verbose_failures --noshow_progress
 
