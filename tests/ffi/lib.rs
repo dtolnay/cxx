@@ -101,6 +101,15 @@ pub mod ffi {
         fn set2(&mut self, n: usize) -> usize;
         fn set_succeed(&mut self, n: usize) -> Result<usize>;
         fn get_fail(&mut self) -> Result<usize>;
+
+        #[rust_name = "i32_overloaded_method"]
+        fn cOverloadedMethod(&self, x: i32) -> String;
+        #[rust_name = "str_overloaded_method"]
+        fn cOverloadedMethod(&self, x: &str) -> String;
+        #[rust_name = "i32_overloaded_function"]
+        fn cOverloadedFunction(x: i32) -> String;
+        #[rust_name = "str_overloaded_function"]
+        fn cOverloadedFunction(x: &str) -> String;
     }
 
     extern "C" {
@@ -160,6 +169,9 @@ pub mod ffi {
         fn r_return_r2(n: usize) -> Box<R2>;
         fn get(self: &R2) -> usize;
         fn set(self: &mut R2, n: usize) -> usize;
+
+        #[cxx_name = "rAliasedFunction"]
+        fn r_aliased_function(x: i32) -> String;
     }
 }
 
@@ -357,4 +369,8 @@ fn r_fail_return_primitive() -> Result<usize, Error> {
 
 fn r_return_r2(n: usize) -> Box<R2> {
     Box::new(R2(n))
+}
+
+fn r_aliased_function(x: i32) -> String {
+    x.to_string()
 }
