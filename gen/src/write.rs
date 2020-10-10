@@ -370,7 +370,7 @@ fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &[&Ex
     for method in methods {
         write!(out, "  ");
         let sig = &method.sig;
-        let local_name = method.ident.to_string();
+        let local_name = method.ident.cxx.to_string();
         write_rust_function_shim_decl(out, &local_name, sig, false);
         writeln!(out, ";");
     }
@@ -517,8 +517,8 @@ fn write_cxx_function_shim(
     write!(out, "  ");
     write_return_type(out, &efn.ret);
     match &efn.receiver {
-        None => write!(out, "(*{}$)(", efn.ident),
-        Some(receiver) => write!(out, "({}::*{}$)(", receiver.ty, efn.ident),
+        None => write!(out, "(*{}$)(", efn.ident.rust),
+        Some(receiver) => write!(out, "({}::*{}$)(", receiver.ty, efn.ident.rust),
     }
     for (i, arg) in efn.args.iter().enumerate() {
         if i > 0 {
@@ -534,8 +534,8 @@ fn write_cxx_function_shim(
     }
     write!(out, " = ");
     match &efn.receiver {
-        None => write!(out, "{}", efn.ident),
-        Some(receiver) => write!(out, "&{}::{}", receiver.ty, efn.ident),
+        None => write!(out, "{}", efn.ident.cxx),
+        Some(receiver) => write!(out, "&{}::{}", receiver.ty, efn.ident.cxx),
     }
     writeln!(out, ";");
     write!(out, "  ");
@@ -562,8 +562,8 @@ fn write_cxx_function_shim(
         _ => {}
     }
     match &efn.receiver {
-        None => write!(out, "{}$(", efn.ident),
-        Some(_) => write!(out, "(self.*{}$)(", efn.ident),
+        None => write!(out, "{}$(", efn.ident.rust),
+        Some(_) => write!(out, "(self.*{}$)(", efn.ident.rust),
     }
     for (i, arg) in efn.args.iter().enumerate() {
         if i > 0 {
@@ -697,8 +697,8 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         writeln!(out, "//{}", line);
     }
     let local_name = match &efn.sig.receiver {
-        None => efn.ident.to_string(),
-        Some(receiver) => format!("{}::{}", receiver.ty, efn.ident),
+        None => efn.ident.cxx.to_string(),
+        Some(receiver) => format!("{}::{}", receiver.ty, efn.ident.cxx),
     };
     let invoke = mangle::extern_fn(&out.namespace, efn);
     let indirect_call = false;

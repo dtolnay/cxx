@@ -206,7 +206,6 @@ fn expand_cxx_type(namespace: &Namespace, ety: &ExternType) -> TokenStream {
 }
 
 fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types) -> TokenStream {
-    let ident = &efn.ident;
     let receiver = efn.receiver.iter().map(|receiver| {
         let receiver_type = receiver.ty();
         quote!(_: #receiver_type)
@@ -238,7 +237,7 @@ fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types
         outparam = Some(quote!(__return: *mut #ret));
     }
     let link_name = mangle::extern_fn(namespace, efn);
-    let local_name = format_ident!("__{}", ident);
+    let local_name = format_ident!("__{}", efn.ident.rust);
     quote! {
         #[link_name = #link_name]
         fn #local_name(#(#all_args,)* #outparam) #ret;
@@ -246,7 +245,6 @@ fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types
 }
 
 fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types) -> TokenStream {
-    let ident = &efn.ident;
     let doc = &efn.doc;
     let decl = expand_cxx_function_decl(namespace, efn, types);
     let receiver = efn.receiver.iter().map(|receiver| {
@@ -329,7 +327,7 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
             }
         })
         .collect::<TokenStream>();
-    let local_name = format_ident!("__{}", ident);
+    let local_name = format_ident!("__{}", efn.ident.rust);
     let call = if indirect_return {
         let ret = expand_extern_type(efn.ret.as_ref().unwrap());
         setup.extend(quote! {
@@ -426,6 +424,7 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
     if unsafety.is_none() {
         dispatch = quote!(unsafe { #dispatch });
     }
+    let ident = &efn.ident.rust;
     let function_shim = quote! {
         #doc
         pub #unsafety fn #ident(#(#all_args,)*) #ret {
@@ -455,7 +454,7 @@ fn expand_function_pointer_trampoline(
     let c_trampoline = mangle::c_trampoline(namespace, efn, var);
     let r_trampoline = mangle::r_trampoline(namespace, efn, var);
     let local_name = parse_quote!(__);
-    let catch_unwind_label = format!("::{}::{}", efn.ident, var);
+    let catch_unwind_label = format!("::{}::{}", efn.ident.rust, var);
     let shim = expand_rust_function_shim_impl(
         sig,
         types,
@@ -510,11 +509,10 @@ fn expand_rust_type_assert_sized(ety: &ExternType) -> TokenStream {
 }
 
 fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types) -> TokenStream {
-    let ident = &efn.ident;
     let link_name = mangle::extern_fn(namespace, efn);
-    let local_name = format_ident!("__{}", ident);
-    let catch_unwind_label = format!("::{}", ident);
-    let invoke = Some(ident);
+    let local_name = format_ident!("__{}", efn.ident.rust);
+    let catch_unwind_label = format!("::{}", efn.ident.rust);
+    let invoke = Some(&efn.ident.rust);
     expand_rust_function_shim_impl(
         efn,
         types,

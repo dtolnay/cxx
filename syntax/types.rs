@@ -116,9 +116,10 @@ impl<'a> Types<'a> {
                     rust.insert(ident);
                 }
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
-                    let ident = &efn.ident;
-                    if !function_names.insert((&efn.receiver, ident)) {
-                        duplicate_name(cx, efn, ident);
+                    // Note: duplication of the C++ name is fine because C++ has
+                    // function overloading.
+                    if !function_names.insert((&efn.receiver, &efn.ident.rust)) {
+                        duplicate_name(cx, efn, &efn.ident.rust);
                     }
                     for arg in &efn.args {
                         visit(&mut all, &arg.ty);

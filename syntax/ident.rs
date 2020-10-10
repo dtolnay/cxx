@@ -37,7 +37,7 @@ pub(crate) fn check_all(cx: &mut Check, namespace: &Namespace, apis: &[Api]) {
                 check(cx, &ety.ident);
             }
             Api::CxxFunction(efn) | Api::RustFunction(efn) => {
-                check(cx, &efn.ident);
+                check(cx, &efn.ident.rust);
                 for arg in &efn.args {
                     check(cx, &arg.ident);
                 }
