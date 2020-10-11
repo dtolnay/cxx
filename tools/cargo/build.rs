@@ -12,7 +12,7 @@ Either use:
 
 prior to cloning, or else use:
 
-   $ git clone -c core.symlinks=true ...
+   $ git clone -c core.symlinks=true https://github.com/dtolnay/cxx
 
 for the clone.
 
