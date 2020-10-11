@@ -16,8 +16,10 @@ prior to cloning, or else use:
 
 for the clone.
 
-Symlinks are only required for local development, not for building
-`cxx` as a (possibly transitive) dependency from crates.io.
+Symlinks are only required when compiling locally from a clone of
+the git repository---they are NOT required when building `cxx` as
+a Cargo-managed (possibly transitive) build dependency downloaded
+through crates.io.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ";
 
