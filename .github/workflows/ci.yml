@@ -45,14 +45,6 @@ jobs:
       - run: cargo run --manifest-path demo/Cargo.toml
       - run: cargo test --workspace --exclude cxx-test-suite
 
-  msrv:
-    name: Rust 1.42.0
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: dtolnay/rust-toolchain@1.42.0
-      - run: cargo run --manifest-path demo/Cargo.toml
-
   buck:
     name: Buck
     runs-on: ubuntu-latest

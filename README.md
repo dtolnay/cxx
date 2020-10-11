@@ -24,7 +24,7 @@ cxx = "0.5"
 cxx-build = "0.5"
 ```
 
-*Compiler support: requires rustc 1.42+ and c++11 or newer*<br>
+*Compiler support: requires rustc 1.43+ and c++11 or newer*<br>
 *[Release notes](https://github.com/dtolnay/cxx/releases)*
 
 <br>
