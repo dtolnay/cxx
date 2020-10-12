@@ -54,18 +54,19 @@
     clippy::toplevel_ref_arg
 )]
 
-mod cargo;
 mod cfg;
 mod error;
 mod gen;
 mod out;
 mod paths;
 mod syntax;
+mod target;
 
 use crate::error::{Error, Result};
 use crate::gen::error::report;
 use crate::gen::Opt;
-use crate::paths::{PathExt, TargetDir};
+use crate::paths::PathExt;
+use crate::target::TargetDir;
 use cc::Build;
 use std::collections::BTreeMap;
 use std::env;
@@ -135,13 +136,7 @@ impl Project {
         let manifest_dir = paths::manifest_dir()?;
         let out_dir = paths::out_dir()?;
 
-        let target_dir = match cargo::target_dir(&out_dir) {
-            target_dir @ TargetDir::Path(_) => target_dir,
-            // Fallback if Cargo did not work.
-            TargetDir::Unknown => paths::search_parents_for_target_dir(&out_dir),
-        };
-
-        let shared_dir = match target_dir {
+        let shared_dir = match target::find_target_dir(&out_dir) {
             TargetDir::Path(target_dir) => target_dir.join("cxxbridge"),
             TargetDir::Unknown => scratch::path("cxxbridge"),
         };

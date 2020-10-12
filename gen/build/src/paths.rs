@@ -3,11 +3,6 @@ use crate::gen::fs;
 use std::ffi::OsStr;
 use std::path::{Component, Path, PathBuf};
 
-pub(crate) enum TargetDir {
-    Path(PathBuf),
-    Unknown,
-}
-
 pub(crate) fn manifest_dir() -> Result<PathBuf> {
     crate::env_os("CARGO_MANIFEST_DIR").map(PathBuf::from)
 }
@@ -41,34 +36,6 @@ impl PathExt for Path {
         let mut file_name = self.file_name().unwrap().to_owned();
         file_name.push(suffix);
         self.with_file_name(file_name)
-    }
-}
-
-pub(crate) fn search_parents_for_target_dir(out_dir: &Path) -> TargetDir {
-    // fs::canonicalize on Windows produces UNC paths which cl.exe is unable to
-    // handle in includes.
-    // https://github.com/rust-lang/rust/issues/42869
-    // https://github.com/alexcrichton/cc-rs/issues/169
-    let mut also_try_canonical = cfg!(not(windows));
-
-    let mut dir = out_dir.to_owned();
-    loop {
-        let is_target = dir.ends_with("target");
-        let parent_contains_cargo_toml = dir.with_file_name("Cargo.toml").exists();
-        if is_target && parent_contains_cargo_toml {
-            return TargetDir::Path(dir);
-        }
-        if dir.pop() {
-            continue;
-        }
-        if also_try_canonical {
-            if let Ok(canonical_dir) = out_dir.canonicalize() {
-                dir = canonical_dir;
-                also_try_canonical = false;
-                continue;
-            }
-        }
-        return TargetDir::Unknown;
     }
 }
 
