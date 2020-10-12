@@ -6,7 +6,10 @@ rust_test(
     name = "test",
     size = "small",
     srcs = ["test.rs"],
-    deps = [":cxx_test_suite"],
+    deps = [
+        ":cxx_test_suite",
+        "//:cxx",
+    ],
 )
 
 rust_library(

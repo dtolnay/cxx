@@ -3,7 +3,10 @@ load("//tools/buck:rust_cxx_bridge.bzl", "rust_cxx_bridge")
 rust_test(
     name = "test",
     srcs = ["test.rs"],
-    deps = [":ffi"],
+    deps = [
+        ":ffi",
+        "//:cxx",
+    ],
 )
 
 rust_library(
