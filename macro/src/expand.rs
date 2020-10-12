@@ -814,13 +814,22 @@ fn expand_unique_ptr(
     let link_release = format!("{}release", prefix);
     let link_drop = format!("{}drop", prefix);
 
-    let new_method = if types.structs.contains_key(ident) {
+    let new_method = if types.structs.contains_key(ident) || types.aliases.contains_key(ident) {
+        let trivial_assertion: Option<syn::Stmt> = if types.aliases.contains_key(ident) {
+            Some(parse_quote! {
+               < < #ident as :: cxx :: ExternType > :: Kind as :: cxx :: kind :: Kind > :: assert_trivial();
+            })
+        } else {
+            None
+        };
+
         Some(quote! {
             fn __new(mut value: Self) -> *mut ::std::ffi::c_void {
                 extern "C" {
                     #[link_name = #link_new]
                     fn __new(this: *mut *mut ::std::ffi::c_void, value: *mut #ident);
                 }
+                #trivial_assertion
                 let mut repr = ::std::ptr::null_mut::<::std::ffi::c_void>();
                 unsafe { __new(&mut repr, &mut value) }
                 repr

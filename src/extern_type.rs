@@ -165,9 +165,17 @@ pub mod kind {
     /// indirection.
     pub enum Trivial {}
 
-    pub trait Kind: private::Sealed {}
-    impl Kind for Opaque {}
-    impl Kind for Trivial {}
+    pub trait Kind: private::Sealed {
+        fn assert_trivial();
+    }
+    impl Kind for Opaque {
+        fn assert_trivial() {
+            panic!("Type not trivial");
+        }
+    }
+    impl Kind for Trivial {
+        fn assert_trivial() {}
+    }
 }
 
 mod private {
