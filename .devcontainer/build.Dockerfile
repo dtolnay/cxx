@@ -6,7 +6,7 @@ RUN apt-get update \
     && rustup default nightly 2>&1 \
     && rustup component add rust-analyzer-preview rustfmt clippy 2>&1 \
     && wget -q -O bin/install-bazel https://github.com/bazelbuild/bazel/releases/download/2.1.1/bazel-2.1.1-installer-linux-x86_64.sh \
-    && wget -q -O bin/buck https://jitpack.io/com/github/facebook/buck/891556d066/buck-891556d066-java11.pex \
+    && wget -q -O bin/buck https://jitpack.io/com/github/facebook/buck/a5f0342ae3/buck-a5f0342ae3-java11.pex \
     && wget -q -O bin/buildifier https://github.com/bazelbuild/buildtools/releases/latest/download/buildifier \
     && wget -q -O tmp/watchman.zip https://github.com/facebook/watchman/releases/download/v2020.09.21.00/watchman-v2020.09.21.00-linux.zip \
     && chmod +x bin/install-bazel bin/buck bin/buildifier \
