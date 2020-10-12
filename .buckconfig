@@ -18,3 +18,6 @@
       -Clink-arg=-fuse-ld=lld \
       -Crelocation-model=dynamic-no-pic \
       --cap-lints=allow
+
+[defaults.rust_library]
+  type = check

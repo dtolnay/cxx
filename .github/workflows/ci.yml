@@ -58,7 +58,7 @@ jobs:
       - name: Install Buck
         run: |
           mkdir bin
-          wget -q -O bin/buck https://jitpack.io/com/github/facebook/buck/891556d066/buck-891556d066-java11.pex # dev branch from 2020.09.21
+          wget -q -O bin/buck https://jitpack.io/com/github/facebook/buck/a5f0342ae3/buck-a5f0342ae3-java11.pex # dev branch from 2020.10.11
           chmod +x bin/buck
           echo bin >> $GITHUB_PATH
       - name: Install lld
