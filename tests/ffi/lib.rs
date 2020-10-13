@@ -14,23 +14,15 @@ mod other {
     use cxx::kind::{Opaque, Trivial};
     use cxx::{type_id, CxxString, ExternType};
 
-    // Trivial.
     #[repr(C)]
     pub struct D {
         pub d: u64,
     }
 
-    // Opaque, and has realistic complexity.
     #[repr(C)]
     pub struct E {
         e_str: CxxString,
         e: u64,
-    }
-
-    // Opaque, but simple enough that bad code can try to create it.
-    #[repr(C)]
-    pub struct F {
-        pub f: u64,
     }
 
     unsafe impl ExternType for D {
@@ -40,11 +32,6 @@ mod other {
 
     unsafe impl ExternType for E {
         type Id = type_id!("tests::E");
-        type Kind = Opaque;
-    }
-
-    unsafe impl ExternType for F {
-        type Id = type_id!("tests::F");
         type Kind = Opaque;
     }
 }

@@ -12,14 +12,12 @@
 pub mod ffi2 {
     impl UniquePtr<D> {}
     impl UniquePtr<E> {}
-    impl UniquePtr<F> {}
 
     extern "C" {
         include!("tests/ffi/tests.h");
 
         type D = crate::other::D;
         type E = crate::other::E;
-        type F = crate::other::F;
 
         fn c_take_trivial_ptr(d: UniquePtr<D>);
         fn c_take_trivial_ref(d: &D);

@@ -1247,9 +1247,9 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: &Type, types: &Types) {
     let can_construct_from_value = match ty {
         // Some aliases are to opaque types; some are to trivial types.
         // We can't know at code generation time, so we generate both C++
-        // and Rust side bindings for a "new" method anyway. But that
-        // Rust code will explode at runtime if anyone tries to call it on
-        // an opaque type.
+        // and Rust side bindings for a "new" method anyway. But the Rust
+        // code can't be called for Opaque types because the 'new'
+        // method is not implemented.
         Type::Ident(ident) => types.structs.contains_key(ident) || types.aliases.contains_key(ident),
         _ => false,
     };

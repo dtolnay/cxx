@@ -207,7 +207,4 @@ fn test_extern_opaque() {
     let e = ffi2::c_return_opaque_ptr();
     check!(ffi2::c_take_opaque_ref(e.as_ref().unwrap()));
     check!(ffi2::c_take_opaque_ptr(e));
-    assert!(std::panic::catch_unwind(|| {
-        cxx::UniquePtr::new(ffi2::F { f: 42 })
-    }).is_err());
 }

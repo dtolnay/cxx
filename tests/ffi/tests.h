@@ -37,10 +37,6 @@ struct E {
   std::string e_str;
 };
 
-struct F {
-  uint64_t f;
-};
-
 enum COwnedEnum {
   CVal1,
   CVal2,
