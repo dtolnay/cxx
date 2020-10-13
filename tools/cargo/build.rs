@@ -61,6 +61,7 @@ fn main() {
         let from_dir = parent_dir.join("from");
         let to_dir = parent_dir.join("to");
         if fs::create_dir_all(&from_dir).is_ok()
+            && fs::remove_dir(&to_dir).is_ok()
             && windows::symlink_dir(&from_dir, &to_dir).is_err()
         {
             message = DENIED;
