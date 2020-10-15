@@ -10,8 +10,9 @@ This template repo shows how to use cmake with cxx.
 
 The cmake files do the following things:
 1. Call `cargo build [--release]` to build a shared library
-2. Call `cxxbridge src/lib.rs > ...` to generate the header file (as specified [here](https://github.com/dtolnay/cxx#non-cargo-setup))
-3. Copy the shared lib as well as the headers to CMAKE_BINARY_DIR
-4. Link and include the libraray
+2. Call `cxxbridge src/lib.rs > ...` to generate the source/header files (as specified [here](https://github.com/dtolnay/cxx#non-cargo-setup))
+3. Create a shared lib from the cxx generated source and link to the rust .so file
+3. Copy the shared libs as well as the headers to CMAKE_BINARY_DIR
+4. Link and include the libraray to the corresponding targets
 
 The cmake files are largely inspired by [Using unsafe for Fun and Profit](https://github.com/Michael-F-Bryan/rust-ffi-guide).
