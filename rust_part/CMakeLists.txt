@@ -9,7 +9,7 @@ endif ()
 set(RUST_PART_SO "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_DIR}/librust_part.so")
 
 add_custom_target(rust_part ALL
-    COMMENT "Compiling client module"
+    COMMENT "Compiling rust_part module"
     COMMAND CARGO_TARGET_DIR=${CMAKE_CURRENT_BINARY_DIR} ${CARGO_CMD} 
     COMMAND cp ${RUST_PART_SO} ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND cxxbridge src/lib.rs > ${CMAKE_CURRENT_BINARY_DIR}/rust_part.hpp
