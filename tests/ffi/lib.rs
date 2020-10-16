@@ -216,8 +216,10 @@ pub mod ffi {
         fn r_take_ref_r(r: &R);
         fn r_take_ref_c(c: &C);
         fn r_take_str(s: &str);
+        fn r_take_empty_str(s: &str);
         fn r_take_slice_char(s: &[c_char]);
         fn r_take_rust_string(s: String);
+        fn r_take_empty_rust_string(s: String);
         fn r_take_unique_ptr_string(s: UniquePtr<CxxString>);
         fn r_take_ref_vector(v: &CxxVector<u8>);
         fn r_take_ref_empty_vector(v: &CxxVector<u64>);
@@ -470,8 +472,16 @@ fn r_take_str(s: &str) {
     assert_eq!(s, "2020");
 }
 
+fn r_take_empty_str(s: &str) {
+    assert_eq!(s.len(), 0);
+}
+
 fn r_take_rust_string(s: String) {
     assert_eq!(s, "2020");
+}
+
+fn r_take_empty_rust_string(s: String) {
+    assert_eq!(s.len(), 0);
 }
 
 fn r_take_slice_char(s: &[c_char]) {

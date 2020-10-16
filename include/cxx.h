@@ -15,6 +15,45 @@
 #include <basetsd.h>
 #endif
 
+#ifdef CXXBRIDGE_HAS_STRING_VIEW
+#error "string_view gets auto-detected"
+#endif
+
+// clang-format off
+// detect if string_view supported (C++17 required)
+#ifdef __has_include
+  #if __has_include(<version>)
+    // gcc >= 9, clang >= 9, msvc >= 19.22
+    #include <version>
+    #if __cpp_lib_string_view >= 201603L
+      #define CXXBRIDGE_HAS_STRING_VIEW
+    #endif
+  #else
+    // no <version> include
+    #if defined(__cpp_lib_string_view) && __cpp_lib_string_view >= 201603L
+      // gcc: 8, clang: 5 - 8, msvc: 19.15 - 19.21
+      #define CXXBRIDGE_HAS_STRING_VIEW
+    #else
+      // only include if compiled with c++17
+      #if (__GNUC__ >= 7 && __cplusplus >= 201703L) || (_MSVC_LANG >= 201703L)
+        // gcc: 7, msvc: 19.14
+        #define CXXBRIDGE_HAS_STRING_VIEW
+      #endif
+    #endif
+  #endif
+#else
+  // no __has_include
+  #if _MSC_VER >= 1910L && _MSVC_LANG > 201402L
+    // msvc: 19.10 requires c++latest (!)
+    #define CPPBRIDGE_HAS_STRING_VIEW
+  #endif
+#endif
+// clang-format on
+
+#ifdef CXXBRIDGE_HAS_STRING_VIEW
+#include <string_view>
+#endif
+
 namespace rust {
 inline namespace cxxbridge1 {
 
@@ -34,6 +73,9 @@ public:
   String(String &&) noexcept;
   ~String() noexcept;
 
+#ifdef CXXBRIDGE_HAS_STRING_VIEW
+  String(std::string_view sv) : String(sv.data(), sv.length()) {}
+#endif
   String(const std::string &);
   String(const char *);
   String(const char *, size_t);
@@ -42,6 +84,11 @@ public:
   String &operator=(String &&) noexcept;
 
   explicit operator std::string() const;
+#ifdef CXXBRIDGE_HAS_STRING_VIEW
+  explicit operator std::string_view() const noexcept {
+    return {this->data(), this->size()};
+  }
+#endif
 
   // Note: no null terminator.
   const char *data() const noexcept;
@@ -71,6 +118,9 @@ private:
 class Str final {
 public:
   Str() noexcept;
+#ifdef CXXBRIDGE_HAS_STRING_VIEW
+  Str(std::string_view sv) : Str(sv.data(), sv.length()) {}
+#endif
   Str(const std::string &);
   Str(const char *);
   Str(const char *, size_t);
@@ -78,6 +128,11 @@ public:
   Str &operator=(const Str &) noexcept = default;
 
   explicit operator std::string() const;
+#ifdef CXXBRIDGE_HAS_STRING_VIEW
+  explicit operator std::string_view() const noexcept {
+    return {this->data(), this->size()};
+  }
+#endif
 
   // Note: no null terminator.
   const char *data() const noexcept;
