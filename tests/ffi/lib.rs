@@ -16,13 +16,13 @@ mod other {
 
     #[repr(C)]
     pub struct D {
-        d: u64,
+        pub d: u64,
     }
 
     #[repr(C)]
     pub struct E {
-        e: u64,
         e_str: CxxString,
+        e: u64,
     }
 
     unsafe impl ExternType for D {

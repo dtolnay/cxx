@@ -199,6 +199,7 @@ fn test_extern_trivial() {
     check!(ffi2::c_take_trivial(d));
     let d = ffi2::c_return_trivial_ptr();
     check!(ffi2::c_take_trivial_ptr(d));
+    cxx::UniquePtr::new(ffi2::D { d: 42 });
 }
 
 #[test]
