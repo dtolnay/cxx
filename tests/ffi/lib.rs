@@ -21,8 +21,8 @@ mod other {
 
     #[repr(C)]
     pub struct E {
-        e_str: CxxString,
         e: u64,
+        e_str: CxxString,
     }
 
     unsafe impl ExternType for D {
