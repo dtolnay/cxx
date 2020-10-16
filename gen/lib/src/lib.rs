@@ -23,6 +23,8 @@ pub use crate::error::Error;
 pub use crate::gen::{GeneratedCode, Opt};
 use proc_macro2::TokenStream;
 
+const CXX_HEADER: &'static str = include_str!("../../../include/cxx.h");
+
 /// Generate C++ bindings code from a Rust token stream. This should be a Rust
 /// token stream which somewhere contains a `#[cxx::bridge] mod {}`.
 pub fn generate_header_and_cc(rust_source: TokenStream, opt: &Opt) -> Result<GeneratedCode, Error> {
@@ -30,4 +32,9 @@ pub fn generate_header_and_cc(rust_source: TokenStream, opt: &Opt) -> Result<Gen
         .map_err(crate::gen::Error::from)
         .map_err(Error::from)?;
     gen::generate(syntax, opt).map_err(Error::from)
+}
+
+/// Returns the complete contents of the cxx.h header.
+pub fn get_cxx_header_contents() -> &'static str {
+    CXX_HEADER
 }
