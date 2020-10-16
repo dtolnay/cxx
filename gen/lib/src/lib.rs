@@ -20,6 +20,7 @@ mod gen;
 mod syntax;
 
 pub use crate::error::Error;
+pub use crate::gen::include::HEADER;
 pub use crate::gen::{GeneratedCode, Opt};
 use proc_macro2::TokenStream;
 
