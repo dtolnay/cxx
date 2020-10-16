@@ -9,7 +9,6 @@ mod outside {
     }
 }
 
-
 #[cxx::bridge]
 mod ffi {
     impl UniquePtr<C> {}
@@ -22,5 +21,5 @@ mod ffi {
 }
 
 fn main() {
-    cxx::UniquePtr::new(outside::C { a: 4 } );
+    cxx::UniquePtr::new(outside::C { a: 4 });
 }

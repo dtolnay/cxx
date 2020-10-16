@@ -1,7 +1,7 @@
 use crate::cxx_string::CxxString;
 use crate::cxx_vector::{self, CxxVector, VectorElement};
-use crate::ExternType;
 use crate::kind::Trivial;
+use crate::ExternType;
 use core::ffi::c_void;
 use core::fmt::{self, Debug, Display};
 use core::marker::PhantomData;
@@ -36,7 +36,8 @@ where
     /// Allocates memory on the heap and makes a UniquePtr pointing to it.
     pub fn new(value: T) -> Self
     where
-    T: ExternType<Kind = Trivial> {
+        T: ExternType<Kind = Trivial>,
+    {
         UniquePtr {
             repr: T::__new(value),
             ty: PhantomData,
