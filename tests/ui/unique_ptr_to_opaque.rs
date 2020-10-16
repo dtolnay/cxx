@@ -11,8 +11,6 @@ mod outside {
 
 #[cxx::bridge]
 mod ffi {
-    impl UniquePtr<C> {}
-
     extern "C" {
         type C = crate::outside::C;
     }
