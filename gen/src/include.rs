@@ -1,6 +1,7 @@
 use crate::gen::out::OutFile;
 use std::fmt::{self, Display};
 
+/// The complete contents of the "rust/cxx.h" header.
 pub static HEADER: &str = include_str!("include/cxx.h");
 
 pub(super) fn write(out: &mut OutFile, needed: bool, guard: &str) {
