@@ -1,7 +1,10 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::set::OrderedSet as Set;
-use crate::syntax::{Api, Derive, Enum, ExternFn, ExternType, Impl, Struct, Type, TypeAlias};
+use crate::syntax::{
+    Api, CppName, Derive, Enum, ExternFn, ExternType, Impl, Pair, ResolvableName, Struct, Type,
+    TypeAlias,
+};
 use proc_macro2::Ident;
 use quote::ToTokens;
 use std::collections::{BTreeMap as Map, HashSet as UnorderedSet};
@@ -16,6 +19,7 @@ pub struct Types<'a> {
     pub untrusted: Map<&'a Ident, &'a ExternType>,
     pub required_trivial: Map<&'a Ident, TrivialReason<'a>>,
     pub explicit_impls: Set<&'a Impl>,
+    pub resolutions: Map<&'a Ident, &'a CppName>,
 }
 
 impl<'a> Types<'a> {
@@ -28,6 +32,7 @@ impl<'a> Types<'a> {
         let mut aliases = Map::new();
         let mut untrusted = Map::new();
         let mut explicit_impls = Set::new();
+        let mut resolutions = Map::new();
 
         fn visit<'a>(all: &mut Set<&'a Type>, ty: &'a Type) {
             all.insert(ty);
@@ -50,6 +55,10 @@ impl<'a> Types<'a> {
             }
         }
 
+        let mut add_resolution = |pair: &'a Pair| {
+            resolutions.insert(&pair.rust, &pair.cxx);
+        };
+
         let mut type_names = UnorderedSet::new();
         let mut function_names = UnorderedSet::new();
         for api in apis {
@@ -62,7 +71,7 @@ impl<'a> Types<'a> {
             match api {
                 Api::Include(_) => {}
                 Api::Struct(strct) => {
-                    let ident = &strct.ident;
+                    let ident = &strct.ident.rust;
                     if !type_names.insert(ident)
                         && (!cxx.contains(ident)
                             || structs.contains_key(ident)
@@ -73,13 +82,14 @@ impl<'a> Types<'a> {
                         // type, then error.
                         duplicate_name(cx, strct, ident);
                     }
-                    structs.insert(ident, strct);
+                    structs.insert(&strct.ident.rust, strct);
                     for field in &strct.fields {
                         visit(&mut all, &field.ty);
                     }
+                    add_resolution(&strct.ident);
                 }
                 Api::Enum(enm) => {
-                    let ident = &enm.ident;
+                    let ident = &enm.ident.rust;
                     if !type_names.insert(ident)
                         && (!cxx.contains(ident)
                             || structs.contains_key(ident)
@@ -91,9 +101,10 @@ impl<'a> Types<'a> {
                         duplicate_name(cx, enm, ident);
                     }
                     enums.insert(ident, enm);
+                    add_resolution(&enm.ident);
                 }
                 Api::CxxType(ety) => {
-                    let ident = &ety.ident;
+                    let ident = &ety.ident.rust;
                     if !type_names.insert(ident)
                         && (cxx.contains(ident)
                             || !structs.contains_key(ident) && !enums.contains_key(ident))
@@ -107,13 +118,15 @@ impl<'a> Types<'a> {
                     if !ety.trusted {
                         untrusted.insert(ident, ety);
                     }
+                    add_resolution(&ety.ident);
                 }
                 Api::RustType(ety) => {
-                    let ident = &ety.ident;
+                    let ident = &ety.ident.rust;
                     if !type_names.insert(ident) {
                         duplicate_name(cx, ety, ident);
                     }
                     rust.insert(ident);
+                    add_resolution(&ety.ident);
                 }
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
                     // Note: duplication of the C++ name is fine because C++ has
@@ -130,11 +143,12 @@ impl<'a> Types<'a> {
                 }
                 Api::TypeAlias(alias) => {
                     let ident = &alias.ident;
-                    if !type_names.insert(ident) {
-                        duplicate_name(cx, alias, ident);
+                    if !type_names.insert(&ident.rust) {
+                        duplicate_name(cx, alias, &ident.rust);
                     }
-                    cxx.insert(ident);
-                    aliases.insert(ident, alias);
+                    cxx.insert(&ident.rust);
+                    aliases.insert(&ident.rust, alias);
+                    add_resolution(&alias.ident);
                 }
                 Api::Impl(imp) => {
                     visit(&mut all, &imp.ty);
@@ -150,8 +164,8 @@ impl<'a> Types<'a> {
         let mut required_trivial = Map::new();
         let mut insist_alias_types_are_trivial = |ty: &'a Type, reason| {
             if let Type::Ident(ident) = ty {
-                if cxx.contains(ident) {
-                    required_trivial.entry(ident).or_insert(reason);
+                if cxx.contains(&ident.rust) {
+                    required_trivial.entry(&ident.rust).or_insert(reason);
                 }
             }
         };
@@ -187,16 +201,17 @@ impl<'a> Types<'a> {
             untrusted,
             required_trivial,
             explicit_impls,
+            resolutions,
         }
     }
 
     pub fn needs_indirect_abi(&self, ty: &Type) -> bool {
         match ty {
             Type::Ident(ident) => {
-                if let Some(strct) = self.structs.get(ident) {
+                if let Some(strct) = self.structs.get(&ident.rust) {
                     !self.is_pod(strct)
                 } else {
-                    Atom::from(ident) == Some(RustString)
+                    Atom::from(&ident.rust) == Some(RustString)
                 }
             }
             Type::RustVec(_) => true,
@@ -211,6 +226,12 @@ impl<'a> Types<'a> {
             }
         }
         false
+    }
+
+    pub fn resolve(&self, ident: &ResolvableName) -> &CppName {
+        self.resolutions
+            .get(&ident.rust)
+            .expect("Unable to resolve type")
     }
 }
 

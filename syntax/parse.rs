@@ -3,8 +3,8 @@ use crate::syntax::file::{Item, ItemForeignMod};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
-    attrs, error, Api, Doc, Enum, ExternFn, ExternType, Impl, Lang, Pair, Receiver, Ref, Signature,
-    Slice, Struct, Ty1, Type, TypeAlias, Var, Variant,
+    attrs, error, Api, CppName, Doc, Enum, ExternFn, ExternType, Impl, Lang, Namespace, Pair,
+    Receiver, Ref, ResolvableName, Signature, Slice, Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
 use proc_macro2::{Delimiter, Group, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
@@ -20,20 +20,22 @@ pub mod kw {
     syn::custom_keyword!(Result);
 }
 
-pub fn parse_items(cx: &mut Errors, items: Vec<Item>, trusted: bool) -> Vec<Api> {
+pub fn parse_items(cx: &mut Errors, items: Vec<Item>, trusted: bool, ns: &Namespace) -> Vec<Api> {
     let mut apis = Vec::new();
     for item in items {
         match item {
-            Item::Struct(item) => match parse_struct(cx, item) {
+            Item::Struct(item) => match parse_struct(cx, item, ns.clone()) {
                 Ok(strct) => apis.push(strct),
                 Err(err) => cx.push(err),
             },
-            Item::Enum(item) => match parse_enum(cx, item) {
+            Item::Enum(item) => match parse_enum(cx, item, ns.clone()) {
                 Ok(enm) => apis.push(enm),
                 Err(err) => cx.push(err),
             },
-            Item::ForeignMod(foreign_mod) => parse_foreign_mod(cx, foreign_mod, &mut apis, trusted),
-            Item::Impl(item) => match parse_impl(item) {
+            Item::ForeignMod(foreign_mod) => {
+                parse_foreign_mod(cx, foreign_mod, &mut apis, trusted, ns)
+            }
+            Item::Impl(item) => match parse_impl(item, ns) {
                 Ok(imp) => apis.push(imp),
                 Err(err) => cx.push(err),
             },
@@ -44,7 +46,7 @@ pub fn parse_items(cx: &mut Errors, items: Vec<Item>, trusted: bool) -> Vec<Api>
     apis
 }
 
-fn parse_struct(cx: &mut Errors, item: ItemStruct) -> Result<Api> {
+fn parse_struct(cx: &mut Errors, item: ItemStruct, mut ns: Namespace) -> Result<Api> {
     let generics = &item.generics;
     if !generics.params.is_empty() || generics.where_clause.is_some() {
         let struct_token = item.struct_token;
@@ -65,6 +67,7 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct) -> Result<Api> {
         attrs::Parser {
             doc: Some(&mut doc),
             derives: Some(&mut derives),
+            namespace: Some(&mut ns),
             ..Default::default()
         },
     );
@@ -81,7 +84,7 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct) -> Result<Api> {
         doc,
         derives,
         struct_token: item.struct_token,
-        ident: item.ident,
+        ident: Pair::new(ns.clone(), item.ident),
         brace_token: fields.brace_token,
         fields: fields
             .named
@@ -89,14 +92,14 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct) -> Result<Api> {
             .map(|field| {
                 Ok(Var {
                     ident: field.ident.unwrap(),
-                    ty: parse_type(&field.ty)?,
+                    ty: parse_type(&field.ty, &ns)?,
                 })
             })
             .collect::<Result<_>>()?,
     }))
 }
 
-fn parse_enum(cx: &mut Errors, item: ItemEnum) -> Result<Api> {
+fn parse_enum(cx: &mut Errors, item: ItemEnum, mut ns: Namespace) -> Result<Api> {
     let generics = &item.generics;
     if !generics.params.is_empty() || generics.where_clause.is_some() {
         let enum_token = item.enum_token;
@@ -117,6 +120,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum) -> Result<Api> {
         attrs::Parser {
             doc: Some(&mut doc),
             repr: Some(&mut repr),
+            namespace: Some(&mut ns),
             ..Default::default()
         },
     );
@@ -167,7 +171,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum) -> Result<Api> {
     Ok(Api::Enum(Enum {
         doc,
         enum_token,
-        ident: item.ident,
+        ident: Pair::new(ns, item.ident),
         brace_token,
         variants,
         repr,
@@ -179,6 +183,7 @@ fn parse_foreign_mod(
     foreign_mod: ItemForeignMod,
     out: &mut Vec<Api>,
     trusted: bool,
+    ns: &Namespace,
 ) {
     let lang = match parse_lang(&foreign_mod.abi) {
         Ok(lang) => lang,
@@ -202,11 +207,13 @@ fn parse_foreign_mod(
     let mut items = Vec::new();
     for foreign in &foreign_mod.items {
         match foreign {
-            ForeignItem::Type(foreign) => match parse_extern_type(cx, foreign, lang, trusted) {
-                Ok(ety) => items.push(ety),
-                Err(err) => cx.push(err),
-            },
-            ForeignItem::Fn(foreign) => match parse_extern_fn(cx, foreign, lang) {
+            ForeignItem::Type(foreign) => {
+                match parse_extern_type(cx, foreign, lang, trusted, ns.clone()) {
+                    Ok(ety) => items.push(ety),
+                    Err(err) => cx.push(err),
+                }
+            }
+            ForeignItem::Fn(foreign) => match parse_extern_fn(cx, foreign, lang, ns.clone()) {
                 Ok(efn) => items.push(efn),
                 Err(err) => cx.push(err),
             },
@@ -216,10 +223,12 @@ fn parse_foreign_mod(
                     Err(err) => cx.push(err),
                 }
             }
-            ForeignItem::Verbatim(tokens) => match parse_extern_verbatim(cx, tokens, lang) {
-                Ok(api) => items.push(api),
-                Err(err) => cx.push(err),
-            },
+            ForeignItem::Verbatim(tokens) => {
+                match parse_extern_verbatim(cx, tokens, lang, ns.clone()) {
+                    Ok(api) => items.push(api),
+                    Err(err) => cx.push(err),
+                }
+            }
             _ => cx.error(foreign, "unsupported foreign item"),
         }
     }
@@ -234,8 +243,8 @@ fn parse_foreign_mod(
         for item in &mut items {
             if let Api::CxxFunction(efn) | Api::RustFunction(efn) = item {
                 if let Some(receiver) = &mut efn.receiver {
-                    if receiver.ty == "Self" {
-                        receiver.ty = single_type.clone();
+                    if receiver.ty.is_self() {
+                        receiver.ty = ResolvableName::from_pair(single_type.clone());
                     }
                 }
             }
@@ -267,8 +276,18 @@ fn parse_extern_type(
     foreign_type: &ForeignItemType,
     lang: Lang,
     trusted: bool,
+    mut ns: Namespace,
 ) -> Result<Api> {
-    let doc = attrs::parse_doc(cx, &foreign_type.attrs);
+    let mut doc = Doc::new();
+    attrs::parse(
+        cx,
+        &foreign_type.attrs,
+        attrs::Parser {
+            doc: Some(&mut doc),
+            namespace: Some(&mut ns),
+            ..Default::default()
+        },
+    );
     let type_token = foreign_type.type_token;
     let ident = foreign_type.ident.clone();
     let semi_token = foreign_type.semi_token;
@@ -279,13 +298,18 @@ fn parse_extern_type(
     Ok(api_type(ExternType {
         doc,
         type_token,
-        ident,
+        ident: Pair::new(ns, ident),
         semi_token,
         trusted,
     }))
 }
 
-fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> Result<Api> {
+fn parse_extern_fn(
+    cx: &mut Errors,
+    foreign_fn: &ForeignItemFn,
+    lang: Lang,
+    mut ns: Namespace,
+) -> Result<Api> {
     let generics = &foreign_fn.sig.generics;
     if !generics.params.is_empty() || generics.where_clause.is_some() {
         return Err(Error::new_spanned(
@@ -310,6 +334,7 @@ fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> R
             doc: Some(&mut doc),
             cxx_name: Some(&mut cxx_name),
             rust_name: Some(&mut rust_name),
+            namespace: Some(&mut ns),
             ..Default::default()
         },
     );
@@ -326,7 +351,7 @@ fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> R
                         lifetime: lifetime.clone(),
                         mutability: arg.mutability,
                         var: arg.self_token,
-                        ty: Token![Self](arg.self_token.span).into(),
+                        ty: ResolvableName::make_self(arg.self_token.span),
                         shorthand: true,
                     });
                     continue;
@@ -341,7 +366,7 @@ fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> R
                     }
                     _ => return Err(Error::new_spanned(arg, "unsupported signature")),
                 };
-                let ty = parse_type(&arg.ty)?;
+                let ty = parse_type(&arg.ty, &ns)?;
                 if ident != "self" {
                     args.push_value(Var { ident, ty });
                     if let Some(comma) = comma {
@@ -355,7 +380,7 @@ fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> R
                             ampersand: reference.ampersand,
                             lifetime: reference.lifetime,
                             mutability: reference.mutability,
-                            var: Token![self](ident.span()),
+                            var: Token![self](ident.rust.span()),
                             ty: ident,
                             shorthand: false,
                         });
@@ -368,12 +393,12 @@ fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> R
     }
 
     let mut throws_tokens = None;
-    let ret = parse_return_type(&foreign_fn.sig.output, &mut throws_tokens)?;
+    let ret = parse_return_type(&foreign_fn.sig.output, &mut throws_tokens, &ns)?;
     let throws = throws_tokens.is_some();
     let unsafety = foreign_fn.sig.unsafety;
     let fn_token = foreign_fn.sig.fn_token;
     let ident = Pair {
-        cxx: cxx_name.unwrap_or(foreign_fn.sig.ident.clone()),
+        cxx: CppName::new(ns, cxx_name.unwrap_or(foreign_fn.sig.ident.clone())),
         rust: rust_name.unwrap_or(foreign_fn.sig.ident.clone()),
     };
     let paren_token = foreign_fn.sig.paren_token;
@@ -401,7 +426,12 @@ fn parse_extern_fn(cx: &mut Errors, foreign_fn: &ForeignItemFn, lang: Lang) -> R
     }))
 }
 
-fn parse_extern_verbatim(cx: &mut Errors, tokens: &TokenStream, lang: Lang) -> Result<Api> {
+fn parse_extern_verbatim(
+    cx: &mut Errors,
+    tokens: &TokenStream,
+    lang: Lang,
+    mut ns: Namespace,
+) -> Result<Api> {
     // type Alias = crate::path::to::Type;
     let parse = |input: ParseStream| -> Result<TypeAlias> {
         let attrs = input.call(Attribute::parse_outer)?;
@@ -416,12 +446,21 @@ fn parse_extern_verbatim(cx: &mut Errors, tokens: &TokenStream, lang: Lang) -> R
         let eq_token: Token![=] = input.parse()?;
         let ty: RustType = input.parse()?;
         let semi_token: Token![;] = input.parse()?;
-        let doc = attrs::parse_doc(cx, &attrs);
+        let mut doc = Doc::new();
+        attrs::parse(
+            cx,
+            &attrs,
+            attrs::Parser {
+                doc: Some(&mut doc),
+                namespace: Some(&mut ns),
+                ..Default::default()
+            },
+        );
 
         Ok(TypeAlias {
             doc,
             type_token,
-            ident,
+            ident: Pair::new(ns, ident),
             eq_token,
             ty,
             semi_token,
@@ -440,7 +479,7 @@ fn parse_extern_verbatim(cx: &mut Errors, tokens: &TokenStream, lang: Lang) -> R
     }
 }
 
-fn parse_impl(imp: ItemImpl) -> Result<Api> {
+fn parse_impl(imp: ItemImpl, ns: &Namespace) -> Result<Api> {
     if !imp.items.is_empty() {
         let mut span = Group::new(Delimiter::Brace, TokenStream::new());
         span.set_span(imp.brace_token.span);
@@ -466,7 +505,7 @@ fn parse_impl(imp: ItemImpl) -> Result<Api> {
 
     Ok(Api::Impl(Impl {
         impl_token: imp.impl_token,
-        ty: parse_type(&self_ty)?,
+        ty: parse_type(&self_ty, ns)?,
         brace_token: imp.brace_token,
     }))
 }
@@ -503,21 +542,21 @@ fn parse_include(input: ParseStream) -> Result<String> {
     Err(input.error("expected \"quoted/path/to\" or <bracketed/path/to>"))
 }
 
-fn parse_type(ty: &RustType) -> Result<Type> {
+fn parse_type(ty: &RustType, ns: &Namespace) -> Result<Type> {
     match ty {
-        RustType::Reference(ty) => parse_type_reference(ty),
-        RustType::Path(ty) => parse_type_path(ty),
-        RustType::Slice(ty) => parse_type_slice(ty),
-        RustType::BareFn(ty) => parse_type_fn(ty),
+        RustType::Reference(ty) => parse_type_reference(ty, ns),
+        RustType::Path(ty) => parse_type_path(ty, ns),
+        RustType::Slice(ty) => parse_type_slice(ty, ns),
+        RustType::BareFn(ty) => parse_type_fn(ty, ns),
         RustType::Tuple(ty) if ty.elems.is_empty() => Ok(Type::Void(ty.paren_token.span)),
         _ => Err(Error::new_spanned(ty, "unsupported type")),
     }
 }
 
-fn parse_type_reference(ty: &TypeReference) -> Result<Type> {
-    let inner = parse_type(&ty.elem)?;
+fn parse_type_reference(ty: &TypeReference, ns: &Namespace) -> Result<Type> {
+    let inner = parse_type(&ty.elem, ns)?;
     let which = match &inner {
-        Type::Ident(ident) if ident == "str" => {
+        Type::Ident(ident) if ident.rust == "str" => {
             if ty.mutability.is_some() {
                 return Err(Error::new_spanned(ty, "unsupported type"));
             } else {
@@ -525,7 +564,7 @@ fn parse_type_reference(ty: &TypeReference) -> Result<Type> {
             }
         }
         Type::Slice(slice) => match &slice.inner {
-            Type::Ident(ident) if ident == U8 && ty.mutability.is_none() => Type::SliceRefU8,
+            Type::Ident(ident) if ident.rust == U8 && ty.mutability.is_none() => Type::SliceRefU8,
             _ => Type::Ref,
         },
         _ => Type::Ref,
@@ -538,19 +577,20 @@ fn parse_type_reference(ty: &TypeReference) -> Result<Type> {
     })))
 }
 
-fn parse_type_path(ty: &TypePath) -> Result<Type> {
+fn parse_type_path(ty: &TypePath, ns: &Namespace) -> Result<Type> {
     let path = &ty.path;
     if ty.qself.is_none() && path.leading_colon.is_none() && path.segments.len() == 1 {
         let segment = &path.segments[0];
         let ident = segment.ident.clone();
+        let maybe_resolved_ident = ResolvableName::new(ident.clone());
         match &segment.arguments {
-            PathArguments::None => return Ok(Type::Ident(ident)),
+            PathArguments::None => return Ok(Type::Ident(maybe_resolved_ident)),
             PathArguments::AngleBracketed(generic) => {
                 if ident == "UniquePtr" && generic.args.len() == 1 {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
-                        let inner = parse_type(arg)?;
+                        let inner = parse_type(arg, ns)?;
                         return Ok(Type::UniquePtr(Box::new(Ty1 {
-                            name: ident,
+                            name: maybe_resolved_ident,
                             langle: generic.lt_token,
                             inner,
                             rangle: generic.gt_token,
@@ -558,9 +598,9 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
                     }
                 } else if ident == "CxxVector" && generic.args.len() == 1 {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
-                        let inner = parse_type(arg)?;
+                        let inner = parse_type(arg, ns)?;
                         return Ok(Type::CxxVector(Box::new(Ty1 {
-                            name: ident,
+                            name: maybe_resolved_ident,
                             langle: generic.lt_token,
                             inner,
                             rangle: generic.gt_token,
@@ -568,9 +608,9 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
                     }
                 } else if ident == "Box" && generic.args.len() == 1 {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
-                        let inner = parse_type(arg)?;
+                        let inner = parse_type(arg, ns)?;
                         return Ok(Type::RustBox(Box::new(Ty1 {
-                            name: ident,
+                            name: maybe_resolved_ident,
                             langle: generic.lt_token,
                             inner,
                             rangle: generic.gt_token,
@@ -578,9 +618,9 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
                     }
                 } else if ident == "Vec" && generic.args.len() == 1 {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
-                        let inner = parse_type(arg)?;
+                        let inner = parse_type(arg, ns)?;
                         return Ok(Type::RustVec(Box::new(Ty1 {
-                            name: ident,
+                            name: maybe_resolved_ident,
                             langle: generic.lt_token,
                             inner,
                             rangle: generic.gt_token,
@@ -594,15 +634,15 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
     Err(Error::new_spanned(ty, "unsupported type"))
 }
 
-fn parse_type_slice(ty: &TypeSlice) -> Result<Type> {
-    let inner = parse_type(&ty.elem)?;
+fn parse_type_slice(ty: &TypeSlice, ns: &Namespace) -> Result<Type> {
+    let inner = parse_type(&ty.elem, ns)?;
     Ok(Type::Slice(Box::new(Slice {
         bracket: ty.bracket_token,
         inner,
     })))
 }
 
-fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
+fn parse_type_fn(ty: &TypeBareFn, ns: &Namespace) -> Result<Type> {
     if ty.lifetimes.is_some() {
         return Err(Error::new_spanned(
             ty,
@@ -620,7 +660,7 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
         .iter()
         .enumerate()
         .map(|(i, arg)| {
-            let ty = parse_type(&arg.ty)?;
+            let ty = parse_type(&arg.ty, ns)?;
             let ident = match &arg.name {
                 Some(ident) => ident.0.clone(),
                 None => format_ident!("_{}", i),
@@ -629,7 +669,7 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
         })
         .collect::<Result<_>>()?;
     let mut throws_tokens = None;
-    let ret = parse_return_type(&ty.output, &mut throws_tokens)?;
+    let ret = parse_return_type(&ty.output, &mut throws_tokens, ns)?;
     let throws = throws_tokens.is_some();
     Ok(Type::Fn(Box::new(Signature {
         unsafety: ty.unsafety,
@@ -646,6 +686,7 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
 fn parse_return_type(
     ty: &ReturnType,
     throws_tokens: &mut Option<(kw::Result, Token![<], Token![>])>,
+    ns: &Namespace,
 ) -> Result<Option<Type>> {
     let mut ret = match ty {
         ReturnType::Default => return Ok(None),
@@ -667,7 +708,7 @@ fn parse_return_type(
             }
         }
     }
-    match parse_type(ret)? {
+    match parse_type(ret, ns)? {
         Type::Void(_) => Ok(None),
         ty => Ok(Some(ty)),
     }
