@@ -1,4 +1,3 @@
-use crate::syntax::namespace::Namespace;
 use crate::syntax::symbol::{self, Symbol};
 use crate::syntax::ExternFn;
 use proc_macro2::Ident;
@@ -11,19 +10,19 @@ macro_rules! join {
     };
 }
 
-pub fn extern_fn(namespace: &Namespace, efn: &ExternFn) -> Symbol {
+pub fn extern_fn(efn: &ExternFn) -> Symbol {
     match &efn.receiver {
-        Some(receiver) => join!(namespace, CXXBRIDGE, receiver.ty, efn.ident.rust),
-        None => join!(namespace, CXXBRIDGE, efn.ident.rust),
+        Some(receiver) => join!(efn.ident.cxx.ns, CXXBRIDGE, receiver.ty, efn.ident.rust),
+        None => join!(efn.ident.cxx.ns, CXXBRIDGE, efn.ident.rust),
     }
 }
 
 // The C half of a function pointer trampoline.
-pub fn c_trampoline(namespace: &Namespace, efn: &ExternFn, var: &Ident) -> Symbol {
-    join!(extern_fn(namespace, efn), var, 0)
+pub fn c_trampoline(efn: &ExternFn, var: &Ident) -> Symbol {
+    join!(extern_fn(efn), var, 0)
 }
 
 // The Rust half of a function pointer trampoline.
-pub fn r_trampoline(namespace: &Namespace, efn: &ExternFn, var: &Ident) -> Symbol {
-    join!(extern_fn(namespace, efn), var, 1)
+pub fn r_trampoline(efn: &ExternFn, var: &Ident) -> Symbol {
+    join!(extern_fn(efn), var, 1)
 }

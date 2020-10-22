@@ -1,4 +1,5 @@
 use crate::syntax::namespace::Namespace;
+use crate::syntax::QualifiedIdent;
 use proc_macro2::{Ident, TokenStream};
 use quote::ToTokens;
 use std::fmt::{self, Display, Write};
@@ -52,6 +53,13 @@ impl Segment for Namespace {
         for segment in self {
             symbol.push(segment);
         }
+    }
+}
+
+impl Segment for QualifiedIdent {
+    fn write(&self, symbol: &mut Symbol) {
+        self.ns.write(symbol);
+        self.ident.write(symbol);
     }
 }
 

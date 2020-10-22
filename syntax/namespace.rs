@@ -8,8 +8,7 @@ use syn::{Ident, Token};
 mod kw {
     syn::custom_keyword!(namespace);
 }
-
-#[derive(Clone)]
+#[derive(Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub struct Namespace {
     segments: Vec<Ident>,
 }
@@ -23,6 +22,10 @@ impl Namespace {
 
     pub fn iter(&self) -> Iter<Ident> {
         self.segments.iter()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.segments.is_empty()
     }
 }
 

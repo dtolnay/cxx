@@ -1,3 +1,4 @@
+use crate::syntax::QualifiedIdent;
 use crate::syntax::Type;
 use proc_macro2::Ident;
 use std::fmt::{self, Display};
@@ -22,6 +23,14 @@ pub enum Atom {
 }
 
 impl Atom {
+    pub fn from_qualified_ident(ident: &QualifiedIdent) -> Option<Self> {
+        if !ident.ns.is_empty() {
+            None
+        } else {
+            Self::from(&ident.ident)
+        }
+    }
+
     pub fn from(ident: &Ident) -> Option<Self> {
         Self::from_str(ident.to_string().as_str())
     }
@@ -90,6 +99,18 @@ impl PartialEq<Atom> for Type {
 impl PartialEq<Atom> for &Ident {
     fn eq(&self, atom: &Atom) -> bool {
         *self == atom
+    }
+}
+
+impl PartialEq<Atom> for &QualifiedIdent {
+    fn eq(&self, atom: &Atom) -> bool {
+        self.ns.is_empty() && self.ident == atom
+    }
+}
+
+impl PartialEq<Atom> for QualifiedIdent {
+    fn eq(&self, atom: &Atom) -> bool {
+        self.ns.is_empty() && self.ident == atom
     }
 }
 

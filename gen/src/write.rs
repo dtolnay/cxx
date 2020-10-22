@@ -3,7 +3,9 @@ use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::namespace::Namespace;
 use crate::syntax::symbol::Symbol;
-use crate::syntax::{mangle, Api, Enum, ExternFn, ExternType, Signature, Struct, Type, Types, Var};
+use crate::syntax::{
+    mangle, Api, Enum, ExternFn, ExternType, QualifiedIdent, Signature, Struct, Type, Types, Var,
+};
 use proc_macro2::Ident;
 use std::collections::HashMap;
 
@@ -133,7 +135,7 @@ pub(super) fn gen(
 fn write_includes(out: &mut OutFile, types: &Types) {
     for ty in types {
         match ty {
-            Type::Ident(ident) => match Atom::from(ident) {
+            Type::Ident(ident) => match Atom::from_qualified_ident(ident) {
                 Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(I8) | Some(I16) | Some(I32)
                 | Some(I64) => out.include.cstdint = true,
                 Some(Usize) => out.include.cstddef = true,
@@ -349,11 +351,11 @@ fn write_struct(out: &mut OutFile, strct: &Struct) {
     writeln!(out, "#endif // {}", guard);
 }
 
-fn write_struct_decl(out: &mut OutFile, ident: &Ident) {
+fn write_struct_decl(out: &mut OutFile, ident: &QualifiedIdent) {
     writeln!(out, "struct {};", ident);
 }
 
-fn write_struct_using(out: &mut OutFile, ident: &Ident) {
+fn write_struct_using(out: &mut OutFile, ident: &QualifiedIdent) {
     writeln!(out, "using {} = {};", ident, ident);
 }
 
@@ -410,7 +412,7 @@ fn check_enum(out: &mut OutFile, enm: &Enum) {
     }
 }
 
-fn check_trivial_extern_type(out: &mut OutFile, id: &Ident) {
+fn check_trivial_extern_type(out: &mut OutFile, id: &QualifiedIdent) {
     // NOTE: The following two static assertions are just nice-to-have and not
     // necessary for soundness. That's because triviality is always declared by
     // the user in the form of an unsafe impl of cxx::ExternType:
@@ -486,7 +488,7 @@ fn write_cxx_function_shim(
     } else {
         write_extern_return_type_space(out, &efn.ret, types);
     }
-    let mangled = mangle::extern_fn(&out.namespace, efn);
+    let mangled = mangle::extern_fn(efn);
     write!(out, "{}(", mangled);
     if let Some(receiver) = &efn.receiver {
         if receiver.mutability.is_none() {
@@ -632,17 +634,17 @@ fn write_function_pointer_trampoline(
     types: &Types,
 ) {
     out.next_section();
-    let r_trampoline = mangle::r_trampoline(&out.namespace, efn, var);
+    let r_trampoline = mangle::r_trampoline(efn, var);
     let indirect_call = true;
     write_rust_function_decl_impl(out, &r_trampoline, f, types, indirect_call);
 
     out.next_section();
-    let c_trampoline = mangle::c_trampoline(&out.namespace, efn, var).to_string();
+    let c_trampoline = mangle::c_trampoline(efn, var).to_string();
     write_rust_function_shim_impl(out, &c_trampoline, f, types, &r_trampoline, indirect_call);
 }
 
 fn write_rust_function_decl(out: &mut OutFile, efn: &ExternFn, types: &Types, _: &Option<String>) {
-    let link_name = mangle::extern_fn(&out.namespace, efn);
+    let link_name = mangle::extern_fn(efn);
     let indirect_call = false;
     write_rust_function_decl_impl(out, &link_name, efn, types, indirect_call);
 }
@@ -700,7 +702,7 @@ fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn, types: &Types) {
         None => efn.ident.cxx.to_string(),
         Some(receiver) => format!("{}::{}", receiver.ty, efn.ident.cxx),
     };
-    let invoke = mangle::extern_fn(&out.namespace, efn);
+    let invoke = mangle::extern_fn(efn);
     let indirect_call = false;
     write_rust_function_shim_impl(out, &local_name, efn, types, &invoke, indirect_call);
 }
@@ -923,7 +925,7 @@ fn write_extern_arg(out: &mut OutFile, arg: &Var, types: &Types) {
 
 fn write_type(out: &mut OutFile, ty: &Type) {
     match ty {
-        Type::Ident(ident) => match Atom::from(ident) {
+        Type::Ident(ident) => match Atom::from_qualified_ident(ident) {
             Some(atom) => write_atom(out, atom),
             None => write!(out, "{}", ident),
         },
@@ -1061,14 +1063,14 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
             }
         } else if let Type::RustVec(ty) = ty {
             if let Type::Ident(inner) = &ty.inner {
-                if Atom::from(inner).is_none() {
+                if Atom::from_qualified_ident(inner).is_none() {
                     out.next_section();
                     write_rust_vec_extern(out, inner);
                 }
             }
         } else if let Type::UniquePtr(ptr) = ty {
             if let Type::Ident(inner) = &ptr.inner {
-                if Atom::from(inner).is_none()
+                if Atom::from_qualified_ident(inner).is_none()
                     && (!types.aliases.contains_key(inner) || types.explicit_impls.contains(ty))
                 {
                     out.next_section();
@@ -1077,7 +1079,7 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
             }
         } else if let Type::CxxVector(ptr) = ty {
             if let Type::Ident(inner) = &ptr.inner {
-                if Atom::from(inner).is_none()
+                if Atom::from_qualified_ident(inner).is_none()
                     && (!types.aliases.contains_key(inner) || types.explicit_impls.contains(ty))
                 {
                     out.next_section();
@@ -1097,7 +1099,7 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
             }
         } else if let Type::RustVec(ty) = ty {
             if let Type::Ident(inner) = &ty.inner {
-                if Atom::from(inner).is_none() {
+                if Atom::from_qualified_ident(inner).is_none() {
                     write_rust_vec_impl(out, inner);
                 }
             }
@@ -1107,7 +1109,7 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
     out.end_block("namespace rust");
 }
 
-fn write_rust_box_extern(out: &mut OutFile, ident: &Ident) {
+fn write_rust_box_extern(out: &mut OutFile, ident: &QualifiedIdent) {
     let mut inner = String::new();
     for name in &out.namespace {
         inner += &name.to_string();
@@ -1131,7 +1133,7 @@ fn write_rust_box_extern(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "#endif // CXXBRIDGE05_RUST_BOX_{}", instance);
 }
 
-fn write_rust_vec_extern(out: &mut OutFile, element: &Ident) {
+fn write_rust_vec_extern(out: &mut OutFile, element: &QualifiedIdent) {
     let element = Type::Ident(element.clone());
     let inner = to_typename(&out.namespace, &element);
     let instance = to_mangled(&out.namespace, &element);
@@ -1166,7 +1168,7 @@ fn write_rust_vec_extern(out: &mut OutFile, element: &Ident) {
     writeln!(out, "#endif // CXXBRIDGE05_RUST_VEC_{}", instance);
 }
 
-fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
+fn write_rust_box_impl(out: &mut OutFile, ident: &QualifiedIdent) {
     let mut inner = String::new();
     for name in &out.namespace {
         inner += &name.to_string();
@@ -1186,7 +1188,7 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "}}");
 }
 
-fn write_rust_vec_impl(out: &mut OutFile, element: &Ident) {
+fn write_rust_vec_impl(out: &mut OutFile, element: &QualifiedIdent) {
     let element = Type::Ident(element.clone());
     let inner = to_typename(&out.namespace, &element);
     let instance = to_mangled(&out.namespace, &element);
@@ -1225,7 +1227,7 @@ fn write_rust_vec_impl(out: &mut OutFile, element: &Ident) {
     writeln!(out, "}}");
 }
 
-fn write_unique_ptr(out: &mut OutFile, ident: &Ident, types: &Types) {
+fn write_unique_ptr(out: &mut OutFile, ident: &QualifiedIdent, types: &Types) {
     let ty = Type::Ident(ident.clone());
     let instance = to_mangled(&out.namespace, &ty);
 
@@ -1315,7 +1317,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: &Type, types: &Types) {
     writeln!(out, "}}");
 }
 
-fn write_cxx_vector(out: &mut OutFile, vector_ty: &Type, element: &Ident, types: &Types) {
+fn write_cxx_vector(out: &mut OutFile, vector_ty: &Type, element: &QualifiedIdent, types: &Types) {
     let element = Type::Ident(element.clone());
     let inner = to_typename(&out.namespace, &element);
     let instance = to_mangled(&out.namespace, &element);

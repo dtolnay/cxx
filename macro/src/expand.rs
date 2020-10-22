@@ -5,8 +5,8 @@ use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    self, check, mangle, Api, Enum, ExternFn, ExternType, Impl, Signature, Struct, Type, TypeAlias,
-    Types,
+    self, check, mangle, Api, Enum, ExternFn, ExternType, Impl, QualifiedIdent, Signature, Struct,
+    Type, TypeAlias, Types,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
@@ -17,11 +17,11 @@ pub fn bridge(mut ffi: Module) -> Result<TokenStream> {
     let ref mut errors = Errors::new();
     let content = mem::take(&mut ffi.content);
     let trusted = ffi.unsafety.is_some();
-    let ref apis = syntax::parse_items(errors, content, trusted);
+    let namespace = &ffi.namespace;
+    let ref apis = syntax::parse_items(errors, content, trusted, namespace);
     let ref types = Types::collect(errors, apis);
     errors.propagate()?;
-    let namespace = &ffi.namespace;
-    check::typecheck(errors, namespace, apis, types);
+    check::typecheck(errors, apis, types);
     errors.propagate()?;
 
     Ok(expand(ffi, apis, types))
@@ -51,11 +51,9 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
                 }
             }
             Api::CxxFunction(efn) => {
-                expanded.extend(expand_cxx_function_shim(namespace, efn, types));
+                expanded.extend(expand_cxx_function_shim(efn, types));
             }
-            Api::RustFunction(efn) => {
-                hidden.extend(expand_rust_function_shim(namespace, efn, types))
-            }
+            Api::RustFunction(efn) => hidden.extend(expand_rust_function_shim(efn, types)),
             Api::TypeAlias(alias) => {
                 expanded.extend(expand_type_alias(alias));
                 hidden.extend(expand_type_alias_verify(namespace, alias, types));
@@ -67,19 +65,19 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
         let explicit_impl = types.explicit_impls.get(ty);
         if let Type::RustBox(ty) = ty {
             if let Type::Ident(ident) = &ty.inner {
-                if Atom::from(ident).is_none() {
+                if Atom::from_qualified_ident(ident).is_none() {
                     hidden.extend(expand_rust_box(namespace, ident));
                 }
             }
         } else if let Type::RustVec(ty) = ty {
             if let Type::Ident(ident) = &ty.inner {
-                if Atom::from(ident).is_none() {
+                if Atom::from_qualified_ident(ident).is_none() {
                     hidden.extend(expand_rust_vec(namespace, ident));
                 }
             }
         } else if let Type::UniquePtr(ptr) = ty {
             if let Type::Ident(ident) = &ptr.inner {
-                if Atom::from(ident).is_none()
+                if Atom::from_qualified_ident(ident).is_none()
                     && (explicit_impl.is_some() || !types.aliases.contains_key(ident))
                 {
                     expanded.extend(expand_unique_ptr(namespace, ident, types, explicit_impl));
@@ -87,7 +85,7 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
             }
         } else if let Type::CxxVector(ptr) = ty {
             if let Type::Ident(ident) = &ptr.inner {
-                if Atom::from(ident).is_none()
+                if Atom::from_qualified_ident(ident).is_none()
                     && (explicit_impl.is_some() || !types.aliases.contains_key(ident))
                 {
                     // Generate impl for CxxVector<T> if T is a struct or opaque
@@ -205,7 +203,7 @@ fn expand_cxx_type(namespace: &Namespace, ety: &ExternType) -> TokenStream {
     }
 }
 
-fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types) -> TokenStream {
+fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
     let receiver = efn.receiver.iter().map(|receiver| {
         let receiver_type = receiver.ty();
         quote!(_: #receiver_type)
@@ -236,7 +234,7 @@ fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types
         let ret = expand_extern_type(efn.ret.as_ref().unwrap());
         outparam = Some(quote!(__return: *mut #ret));
     }
-    let link_name = mangle::extern_fn(namespace, efn);
+    let link_name = mangle::extern_fn(efn);
     let local_name = format_ident!("__{}", efn.ident.rust);
     quote! {
         #[link_name = #link_name]
@@ -244,9 +242,9 @@ fn expand_cxx_function_decl(namespace: &Namespace, efn: &ExternFn, types: &Types
     }
 }
 
-fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types) -> TokenStream {
+fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let doc = &efn.doc;
-    let decl = expand_cxx_function_decl(namespace, efn, types);
+    let decl = expand_cxx_function_decl(efn, types);
     let receiver = efn.receiver.iter().map(|receiver| {
         let ampersand = receiver.ampersand;
         let mutability = receiver.mutability;
@@ -306,9 +304,7 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
         .filter_map(|arg| {
             if let Type::Fn(f) = &arg.ty {
                 let var = &arg.ident;
-                Some(expand_function_pointer_trampoline(
-                    namespace, efn, var, f, types,
-                ))
+                Some(expand_function_pointer_trampoline(efn, var, f, types))
             } else {
                 None
             }
@@ -445,14 +441,13 @@ fn expand_cxx_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types
 }
 
 fn expand_function_pointer_trampoline(
-    namespace: &Namespace,
     efn: &ExternFn,
     var: &Ident,
     sig: &Signature,
     types: &Types,
 ) -> TokenStream {
-    let c_trampoline = mangle::c_trampoline(namespace, efn, var);
-    let r_trampoline = mangle::r_trampoline(namespace, efn, var);
+    let c_trampoline = mangle::c_trampoline(efn, var);
+    let r_trampoline = mangle::r_trampoline(efn, var);
     let local_name = parse_quote!(__);
     let catch_unwind_label = format!("::{}::{}", efn.ident.rust, var);
     let shim = expand_rust_function_shim_impl(
@@ -508,8 +503,8 @@ fn expand_rust_type_assert_sized(ety: &ExternType) -> TokenStream {
     }
 }
 
-fn expand_rust_function_shim(namespace: &Namespace, efn: &ExternFn, types: &Types) -> TokenStream {
-    let link_name = mangle::extern_fn(namespace, efn);
+fn expand_rust_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
+    let link_name = mangle::extern_fn(efn);
     let local_name = format_ident!("__{}", efn.ident.rust);
     let catch_unwind_label = format!("::{}", efn.ident.rust);
     let invoke = Some(&efn.ident.rust);
@@ -712,7 +707,7 @@ fn expand_type_alias_verify(
     verify
 }
 
-fn type_id(namespace: &Namespace, ident: &Ident) -> TokenStream {
+fn type_id(namespace: &Namespace, ident: &QualifiedIdent) -> TokenStream {
     let mut path = String::new();
     for name in namespace {
         path += &name.to_string();
@@ -725,7 +720,7 @@ fn type_id(namespace: &Namespace, ident: &Ident) -> TokenStream {
     }
 }
 
-fn expand_rust_box(namespace: &Namespace, ident: &Ident) -> TokenStream {
+fn expand_rust_box(namespace: &Namespace, ident: &QualifiedIdent) -> TokenStream {
     let link_prefix = format!("cxxbridge05$box${}{}$", namespace, ident);
     let link_uninit = format!("{}uninit", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
@@ -754,7 +749,7 @@ fn expand_rust_box(namespace: &Namespace, ident: &Ident) -> TokenStream {
     }
 }
 
-fn expand_rust_vec(namespace: &Namespace, elem: &Ident) -> TokenStream {
+fn expand_rust_vec(namespace: &Namespace, elem: &QualifiedIdent) -> TokenStream {
     let link_prefix = format!("cxxbridge05$rust_vec${}{}$", namespace, elem);
     let link_new = format!("{}new", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
@@ -801,7 +796,7 @@ fn expand_rust_vec(namespace: &Namespace, elem: &Ident) -> TokenStream {
 
 fn expand_unique_ptr(
     namespace: &Namespace,
-    ident: &Ident,
+    ident: &QualifiedIdent,
     types: &Types,
     explicit_impl: Option<&Impl>,
 ) -> TokenStream {
@@ -884,7 +879,7 @@ fn expand_unique_ptr(
 
 fn expand_cxx_vector(
     namespace: &Namespace,
-    elem: &Ident,
+    elem: &QualifiedIdent,
     explicit_impl: Option<&Impl>,
 ) -> TokenStream {
     let _ = explicit_impl;

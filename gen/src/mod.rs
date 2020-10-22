@@ -109,10 +109,10 @@ pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
         .ok_or(Error::NoBridgeMod)?;
     let ref namespace = bridge.namespace;
     let trusted = bridge.unsafety.is_some();
-    let ref apis = syntax::parse_items(errors, bridge.content, trusted);
+    let ref apis = syntax::parse_items(errors, bridge.content, trusted, namespace);
     let ref types = Types::collect(errors, apis);
     errors.propagate()?;
-    check::typecheck(errors, namespace, apis, types);
+    check::typecheck(errors, apis, types);
     errors.propagate()?;
     // Some callers may wish to generate both header and C++
     // from the same token stream to avoid parsing twice. But others

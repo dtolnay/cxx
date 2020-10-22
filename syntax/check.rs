@@ -1,25 +1,22 @@
 use crate::syntax::atom::Atom::{self, *};
-use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::types::TrivialReason;
 use crate::syntax::{
-    error, ident, Api, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Slice, Struct, Ty1,
-    Type, Types,
+    error, ident, Api, Enum, ExternFn, ExternType, Impl, Lang, QualifiedIdent, Receiver, Ref,
+    Slice, Struct, Ty1, Type, Types,
 };
-use proc_macro2::{Delimiter, Group, Ident, TokenStream};
+use proc_macro2::{Delimiter, Group, TokenStream};
 use quote::{quote, ToTokens};
 use std::fmt::Display;
 
 pub(crate) struct Check<'a> {
-    namespace: &'a Namespace,
     apis: &'a [Api],
     types: &'a Types<'a>,
     errors: &'a mut Errors,
 }
 
-pub(crate) fn typecheck(cx: &mut Errors, namespace: &Namespace, apis: &[Api], types: &Types) {
+pub(crate) fn typecheck(cx: &mut Errors, apis: &[Api], types: &Types) {
     do_typecheck(&mut Check {
-        namespace,
         apis,
         types,
         errors: cx,
@@ -27,7 +24,7 @@ pub(crate) fn typecheck(cx: &mut Errors, namespace: &Namespace, apis: &[Api], ty
 }
 
 fn do_typecheck(cx: &mut Check) {
-    ident::check_all(cx, cx.namespace, cx.apis);
+    ident::check_all(cx, cx.apis);
 
     for ty in cx.types {
         match ty {
@@ -60,8 +57,8 @@ impl Check<'_> {
     }
 }
 
-fn check_type_ident(cx: &mut Check, ident: &Ident) {
-    if Atom::from(ident).is_none()
+fn check_type_ident(cx: &mut Check, ident: &QualifiedIdent) {
+    if Atom::from_qualified_ident(ident).is_none()
         && !cx.types.structs.contains_key(ident)
         && !cx.types.enums.contains_key(ident)
         && !cx.types.cxx.contains(ident)
@@ -80,7 +77,7 @@ fn check_type_box(cx: &mut Check, ptr: &Ty1) {
             cx.error(ptr, error::BOX_CXX_TYPE.msg);
         }
 
-        if Atom::from(ident).is_none() {
+        if Atom::from_qualified_ident(ident).is_none() {
             return;
         }
     }
@@ -98,7 +95,7 @@ fn check_type_rust_vec(cx: &mut Check, ty: &Ty1) {
             return;
         }
 
-        match Atom::from(ident) {
+        match Atom::from_qualified_ident(ident) {
             None | Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize) | Some(I8)
             | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32) | Some(F64)
             | Some(RustString) => return,
@@ -116,7 +113,7 @@ fn check_type_unique_ptr(cx: &mut Check, ptr: &Ty1) {
             cx.error(ptr, "unique_ptr of a Rust type is not supported yet");
         }
 
-        match Atom::from(ident) {
+        match Atom::from_qualified_ident(ident) {
             None | Some(CxxString) => return,
             _ => {}
         }
@@ -136,7 +133,7 @@ fn check_type_cxx_vector(cx: &mut Check, ptr: &Ty1) {
             );
         }
 
-        match Atom::from(ident) {
+        match Atom::from_qualified_ident(ident) {
             None | Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize) | Some(I8)
             | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32) | Some(F64)
             | Some(CxxString) => return,
@@ -229,7 +226,7 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
     if let Some(receiver) = &efn.receiver {
         let ref span = span_for_receiver_error(receiver);
 
-        if receiver.ty == "Self" {
+        if receiver.ty.is_self() {
             let mutability = match receiver.mutability {
                 Some(_) => "mut ",
                 None => "",
@@ -290,7 +287,7 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
 fn check_api_impl(cx: &mut Check, imp: &Impl) {
     if let Type::UniquePtr(ty) | Type::CxxVector(ty) = &imp.ty {
         if let Type::Ident(inner) = &ty.inner {
-            if Atom::from(inner).is_none() {
+            if Atom::from_qualified_ident(inner).is_none() {
                 return;
             }
         }
@@ -344,12 +341,12 @@ fn check_multiple_arg_lifetimes(cx: &mut Check, efn: &ExternFn) {
     }
 }
 
-fn check_reserved_name(cx: &mut Check, ident: &Ident) {
+fn check_reserved_name(cx: &mut Check, ident: &QualifiedIdent) {
     if ident == "Box"
         || ident == "UniquePtr"
         || ident == "Vec"
         || ident == "CxxVector"
-        || Atom::from(ident).is_some()
+        || Atom::from_qualified_ident(ident).is_some()
     {
         cx.error(ident, "reserved name");
     }
@@ -410,7 +407,7 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
                 "opaque C++ type".to_owned()
             } else if cx.types.rust.contains(ident) {
                 "opaque Rust type".to_owned()
-            } else if Atom::from(ident) == Some(CxxString) {
+            } else if Atom::from_qualified_ident(ident) == Some(CxxString) {
                 "C++ string".to_owned()
             } else {
                 ident.to_string()

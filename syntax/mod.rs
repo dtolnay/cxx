@@ -21,8 +21,11 @@ mod tokens;
 pub mod types;
 
 use self::discriminant::Discriminant;
+use self::namespace::Namespace;
 use self::parse::kw;
-use proc_macro2::{Ident, Span};
+use core::fmt::{Formatter, Result};
+use proc_macro2::{Ident, Span, TokenStream};
+use quote::{quote, IdentFragment, ToTokens};
 use syn::punctuated::Punctuated;
 use syn::token::{Brace, Bracket, Paren};
 use syn::{Expr, Lifetime, Token, Type as RustType};
@@ -32,6 +35,12 @@ pub use self::derive::Derive;
 pub use self::doc::Doc;
 pub use self::parse::parse_items;
 pub use self::types::Types;
+
+#[derive(Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
+pub struct QualifiedIdent {
+    pub ns: Namespace,
+    pub ident: Ident,
+}
 
 pub enum Api {
     Include(String),
@@ -48,7 +57,7 @@ pub enum Api {
 pub struct ExternType {
     pub doc: Doc,
     pub type_token: Token![type],
-    pub ident: Ident,
+    pub ident: QualifiedIdent,
     pub semi_token: Token![;],
     pub trusted: bool,
 }
@@ -57,7 +66,7 @@ pub struct Struct {
     pub doc: Doc,
     pub derives: Vec<Derive>,
     pub struct_token: Token![struct],
-    pub ident: Ident,
+    pub ident: QualifiedIdent,
     pub brace_token: Brace,
     pub fields: Vec<Var>,
 }
@@ -65,14 +74,14 @@ pub struct Struct {
 pub struct Enum {
     pub doc: Doc,
     pub enum_token: Token![enum],
-    pub ident: Ident,
+    pub ident: QualifiedIdent,
     pub brace_token: Brace,
     pub variants: Vec<Variant>,
     pub repr: Atom,
 }
 
 pub struct Pair {
-    pub cxx: Ident,
+    pub cxx: QualifiedIdent,
     pub rust: Ident,
 }
 
@@ -87,7 +96,7 @@ pub struct ExternFn {
 pub struct TypeAlias {
     pub doc: Doc,
     pub type_token: Token![type],
-    pub ident: Ident,
+    pub ident: QualifiedIdent,
     pub eq_token: Token![=],
     pub ty: RustType,
     pub semi_token: Token![;],
@@ -112,7 +121,7 @@ pub struct Signature {
 
 #[derive(Eq, PartialEq, Hash)]
 pub struct Var {
-    pub ident: Ident,
+    pub ident: Ident, // fields and variables are not namespaced
     pub ty: Type,
 }
 
@@ -121,7 +130,7 @@ pub struct Receiver {
     pub lifetime: Option<Lifetime>,
     pub mutability: Option<Token![mut]>,
     pub var: Token![self],
-    pub ty: Ident,
+    pub ty: QualifiedIdent,
     pub shorthand: bool,
 }
 
@@ -132,7 +141,7 @@ pub struct Variant {
 }
 
 pub enum Type {
-    Ident(Ident),
+    Ident(QualifiedIdent),
     RustBox(Box<Ty1>),
     RustVec(Box<Ty1>),
     UniquePtr(Box<Ty1>),
@@ -146,7 +155,7 @@ pub enum Type {
 }
 
 pub struct Ty1 {
-    pub name: Ident,
+    pub name: QualifiedIdent,
     pub langle: Token![<],
     pub inner: Type,
     pub rangle: Token![>],
@@ -168,4 +177,105 @@ pub struct Slice {
 pub enum Lang {
     Cxx,
     Rust,
+}
+
+impl QualifiedIdent {
+    /// Use this constructor if the name is always qualified according to
+    /// the namespace.
+    pub fn new_never_primitive(ns: &Namespace, ident: Ident) -> Self {
+        Self {
+            ns: ns.clone(),
+            ident,
+        }
+    }
+
+    /// If there's a chance that the name is not fully-qualified, but
+    /// is instead a built-in type (e.g. i32, CxxString, str) then
+    /// use this constructor. This is a temporary hack. Eventually we'll
+    /// need a later phase to go through and resolve all unresolved
+    /// idents according to the current available symbols and 'use'
+    /// statements that are in use (which will include an implicit
+    /// 'use' statement covering these standard types.) At the moment
+    /// there is no such resolution pass, so we aim to try to resolve
+    /// all idents at construction time.
+    pub fn new_maybe_primitive(ns: &Namespace, ident: Ident) -> Self {
+        let is_primitive = Atom::from(&ident).is_some() || ident == "str" || ident == "UniquePtr";
+        Self {
+            ns: if is_primitive {
+                Namespace::none()
+            } else {
+                ns.clone()
+            },
+            ident,
+        }
+    }
+
+    pub fn make_self(span: Span) -> Self {
+        QualifiedIdent {
+            ns: Namespace::none(),
+            ident: Token![Self](span).into(),
+        }
+    }
+
+    pub fn is_self(&self) -> bool {
+        self.ns.is_empty() && self.ident == "Self"
+    }
+
+    pub fn span(&self) -> Span {
+        self.ident.span()
+    }
+
+    fn iter_all_segments(
+        &self,
+    ) -> std::iter::Chain<std::slice::Iter<Ident>, std::iter::Once<&Ident>> {
+        self.ns.iter().chain(std::iter::once(&self.ident))
+    }
+}
+
+// TODO - we need to change this to the following
+// to output fully-qualified names in Rust and C++. It breaks everything :)
+const USE_FULLY_QUALIFIED_NAMES: bool = false;
+
+impl std::fmt::Display for QualifiedIdent {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        if USE_FULLY_QUALIFIED_NAMES {
+            let fully_qualified = self
+                .iter_all_segments()
+                .map(|s| s.to_string())
+                .collect::<Vec<_>>()
+                .join("::");
+            write!(f, "{}", fully_qualified)
+        } else {
+            write!(f, "{}", self.ident.to_string())
+        }
+    }
+}
+
+impl ToTokens for QualifiedIdent {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        if USE_FULLY_QUALIFIED_NAMES {
+            let segments = self.iter_all_segments();
+            tokens.extend(quote! {
+                #(#segments)::*
+            })
+        } else {
+            self.ident.to_tokens(tokens);
+        }
+    }
+}
+
+impl PartialEq<str> for QualifiedIdent {
+    fn eq(&self, other: &str) -> bool {
+        self.ns.is_empty() && self.ident == *other
+    }
+}
+
+impl IdentFragment for QualifiedIdent {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        for seg in self.iter_all_segments() {
+            f.write_str(&seg.to_string())?;
+            f.write_str("__")?;
+        }
+        Ok(())
+    }
 }

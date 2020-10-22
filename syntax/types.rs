@@ -1,20 +1,22 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::set::OrderedSet as Set;
-use crate::syntax::{Api, Derive, Enum, ExternFn, ExternType, Impl, Struct, Type, TypeAlias};
+use crate::syntax::{
+    Api, Derive, Enum, ExternFn, ExternType, Impl, QualifiedIdent, Struct, Type, TypeAlias,
+};
 use proc_macro2::Ident;
 use quote::ToTokens;
 use std::collections::{BTreeMap as Map, HashSet as UnorderedSet};
 
 pub struct Types<'a> {
     pub all: Set<&'a Type>,
-    pub structs: Map<&'a Ident, &'a Struct>,
-    pub enums: Map<&'a Ident, &'a Enum>,
-    pub cxx: Set<&'a Ident>,
-    pub rust: Set<&'a Ident>,
-    pub aliases: Map<&'a Ident, &'a TypeAlias>,
-    pub untrusted: Map<&'a Ident, &'a ExternType>,
-    pub required_trivial: Map<&'a Ident, TrivialReason<'a>>,
+    pub structs: Map<&'a QualifiedIdent, &'a Struct>,
+    pub enums: Map<&'a QualifiedIdent, &'a Enum>,
+    pub cxx: Set<&'a QualifiedIdent>,
+    pub rust: Set<&'a QualifiedIdent>,
+    pub aliases: Map<&'a QualifiedIdent, &'a TypeAlias>,
+    pub untrusted: Map<&'a QualifiedIdent, &'a ExternType>,
+    pub required_trivial: Map<&'a QualifiedIdent, TrivialReason<'a>>,
     pub explicit_impls: Set<&'a Impl>,
 }
 
@@ -71,7 +73,7 @@ impl<'a> Types<'a> {
                         // If already declared as a struct or enum, or if
                         // colliding with something other than an extern C++
                         // type, then error.
-                        duplicate_name(cx, strct, ident);
+                        duplicate_cxx_name(cx, strct, ident);
                     }
                     structs.insert(ident, strct);
                     for field in &strct.fields {
@@ -88,7 +90,7 @@ impl<'a> Types<'a> {
                         // If already declared as a struct or enum, or if
                         // colliding with something other than an extern C++
                         // type, then error.
-                        duplicate_name(cx, enm, ident);
+                        duplicate_cxx_name(cx, enm, ident);
                     }
                     enums.insert(ident, enm);
                 }
@@ -101,7 +103,7 @@ impl<'a> Types<'a> {
                         // If already declared as an extern C++ type, or if
                         // colliding with something which is neither struct nor
                         // enum, then error.
-                        duplicate_name(cx, ety, ident);
+                        duplicate_cxx_name(cx, ety, ident);
                     }
                     cxx.insert(ident);
                     if !ety.trusted {
@@ -111,7 +113,7 @@ impl<'a> Types<'a> {
                 Api::RustType(ety) => {
                     let ident = &ety.ident;
                     if !type_names.insert(ident) {
-                        duplicate_name(cx, ety, ident);
+                        duplicate_cxx_name(cx, ety, ident);
                     }
                     rust.insert(ident);
                 }
@@ -119,7 +121,7 @@ impl<'a> Types<'a> {
                     // Note: duplication of the C++ name is fine because C++ has
                     // function overloading.
                     if !function_names.insert((&efn.receiver, &efn.ident.rust)) {
-                        duplicate_name(cx, efn, &efn.ident.rust);
+                        duplicate_rs_name(cx, efn, &efn.ident.rust);
                     }
                     for arg in &efn.args {
                         visit(&mut all, &arg.ty);
@@ -131,7 +133,7 @@ impl<'a> Types<'a> {
                 Api::TypeAlias(alias) => {
                     let ident = &alias.ident;
                     if !type_names.insert(ident) {
-                        duplicate_name(cx, alias, ident);
+                        duplicate_cxx_name(cx, alias, ident);
                     }
                     cxx.insert(ident);
                     aliases.insert(ident, alias);
@@ -196,7 +198,7 @@ impl<'a> Types<'a> {
                 if let Some(strct) = self.structs.get(ident) {
                     !self.is_pod(strct)
                 } else {
-                    Atom::from(ident) == Some(RustString)
+                    Atom::from_qualified_ident(ident) == Some(RustString)
                 }
             }
             Type::RustVec(_) => true,
@@ -229,7 +231,12 @@ pub enum TrivialReason<'a> {
     FunctionReturn(&'a ExternFn),
 }
 
-fn duplicate_name(cx: &mut Errors, sp: impl ToTokens, ident: &Ident) {
-    let msg = format!("the name `{}` is defined multiple times", ident);
+fn duplicate_cxx_name(cx: &mut Errors, sp: impl ToTokens, ident: &QualifiedIdent) {
+    let msg = format!("the C++ name `{}` is defined multiple times", ident);
+    cx.error(sp, msg);
+}
+
+fn duplicate_rs_name(cx: &mut Errors, sp: impl ToTokens, ident: &Ident) {
+    let msg = format!("the Rust name `{}` is defined multiple times", ident);
     cx.error(sp, msg);
 }
