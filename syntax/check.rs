@@ -64,7 +64,10 @@ fn check_type_ident(cx: &mut Check, ident: &QualifiedIdent) {
         && !cx.types.cxx.contains(ident)
         && !cx.types.rust.contains(ident)
     {
-        cx.error(ident, &format!("unsupported type: {}", ident));
+        cx.error(
+            ident,
+            &format!("unsupported type: {}", ident.to_fully_qualified()),
+        );
     }
 }
 
@@ -210,7 +213,9 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
 
     if let Some(reason) = cx.types.required_trivial.get(&ety.ident) {
         let what = match reason {
-            TrivialReason::StructField(strct) => format!("a field of `{}`", strct.ident),
+            TrivialReason::StructField(strct) => {
+                format!("a field of `{}`", strct.ident.to_fully_qualified())
+            }
             TrivialReason::FunctionArgument(efn) => format!("an argument of `{}`", efn.ident.rust),
             TrivialReason::FunctionReturn(efn) => format!("a return value of `{}`", efn.ident.rust),
         };
@@ -410,7 +415,7 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
             } else if Atom::from_qualified_ident(ident) == Some(CxxString) {
                 "C++ string".to_owned()
             } else {
-                ident.to_string()
+                ident.to_fully_qualified()
             }
         }
         Type::RustBox(_) => "Box".to_owned(),

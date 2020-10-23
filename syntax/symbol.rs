@@ -37,16 +37,30 @@ impl Symbol {
     }
 }
 
-pub trait Segment: Display {
+pub trait Segment {
+    fn write(&self, symbol: &mut Symbol);
+}
+
+impl Segment for str {
     fn write(&self, symbol: &mut Symbol) {
         symbol.push(&self);
     }
 }
-
-impl Segment for str {}
-impl Segment for usize {}
-impl Segment for Ident {}
-impl Segment for Symbol {}
+impl Segment for usize {
+    fn write(&self, symbol: &mut Symbol) {
+        symbol.push(&self);
+    }
+}
+impl Segment for Ident {
+    fn write(&self, symbol: &mut Symbol) {
+        symbol.push(&self);
+    }
+}
+impl Segment for Symbol {
+    fn write(&self, symbol: &mut Symbol) {
+        symbol.push(&self);
+    }
+}
 
 impl Segment for Namespace {
     fn write(&self, symbol: &mut Symbol) {
@@ -65,7 +79,7 @@ impl Segment for QualifiedIdent {
 
 impl<T> Segment for &'_ T
 where
-    T: ?Sized + Segment,
+    T: ?Sized + Segment + Display,
 {
     fn write(&self, symbol: &mut Symbol) {
         (**self).write(symbol);

@@ -5,6 +5,7 @@ pub(super) mod error;
 mod file;
 pub(super) mod fs;
 pub(super) mod include;
+mod namespace_organizer;
 pub(super) mod out;
 mod write;
 
@@ -119,12 +120,12 @@ pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
     // only need to generate one or the other.
     Ok(GeneratedCode {
         header: if opt.gen_header {
-            write::gen(namespace, apis, types, opt, true).content()
+            write::gen(apis, types, opt, true).content()
         } else {
             Vec::new()
         },
         implementation: if opt.gen_implementation {
-            write::gen(namespace, apis, types, opt, false).content()
+            write::gen(apis, types, opt, false).content()
         } else {
             Vec::new()
         },

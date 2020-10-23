@@ -39,7 +39,7 @@ impl ToTokens for Var {
 impl ToTokens for Ty1 {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let span = self.name.span();
-        let name = self.name.to_string();
+        let name = self.name.ident.to_string();
         if let "UniquePtr" | "CxxVector" = name.as_str() {
             tokens.extend(quote_spanned!(span=> ::cxx::));
         } else if name == "Vec" {

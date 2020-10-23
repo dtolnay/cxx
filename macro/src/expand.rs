@@ -1,7 +1,6 @@
 use crate::derive::DeriveAttribute;
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::file::Module;
-use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
@@ -30,7 +29,7 @@ pub fn bridge(mut ffi: Module) -> Result<TokenStream> {
 fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
     let mut expanded = TokenStream::new();
     let mut hidden = TokenStream::new();
-    let namespace = &ffi.namespace;
+    //let namespace = &ffi.namespace;
 
     for api in apis {
         if let Api::RustType(ety) = api {
@@ -42,12 +41,12 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
     for api in apis {
         match api {
             Api::Include(_) | Api::RustType(_) | Api::Impl(_) => {}
-            Api::Struct(strct) => expanded.extend(expand_struct(namespace, strct)),
-            Api::Enum(enm) => expanded.extend(expand_enum(namespace, enm)),
+            Api::Struct(strct) => expanded.extend(expand_struct(strct)),
+            Api::Enum(enm) => expanded.extend(expand_enum(enm)),
             Api::CxxType(ety) => {
                 let ident = &ety.ident;
                 if !types.structs.contains_key(ident) && !types.enums.contains_key(ident) {
-                    expanded.extend(expand_cxx_type(namespace, ety));
+                    expanded.extend(expand_cxx_type(ety));
                 }
             }
             Api::CxxFunction(efn) => {
@@ -56,7 +55,7 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
             Api::RustFunction(efn) => hidden.extend(expand_rust_function_shim(efn, types)),
             Api::TypeAlias(alias) => {
                 expanded.extend(expand_type_alias(alias));
-                hidden.extend(expand_type_alias_verify(namespace, alias, types));
+                hidden.extend(expand_type_alias_verify(alias, types));
             }
         }
     }
@@ -66,13 +65,13 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
         if let Type::RustBox(ty) = ty {
             if let Type::Ident(ident) = &ty.inner {
                 if Atom::from_qualified_ident(ident).is_none() {
-                    hidden.extend(expand_rust_box(namespace, ident));
+                    hidden.extend(expand_rust_box(ident));
                 }
             }
         } else if let Type::RustVec(ty) = ty {
             if let Type::Ident(ident) = &ty.inner {
                 if Atom::from_qualified_ident(ident).is_none() {
-                    hidden.extend(expand_rust_vec(namespace, ident));
+                    hidden.extend(expand_rust_vec(ident));
                 }
             }
         } else if let Type::UniquePtr(ptr) = ty {
@@ -80,7 +79,7 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
                 if Atom::from_qualified_ident(ident).is_none()
                     && (explicit_impl.is_some() || !types.aliases.contains_key(ident))
                 {
-                    expanded.extend(expand_unique_ptr(namespace, ident, types, explicit_impl));
+                    expanded.extend(expand_unique_ptr(ident, types, explicit_impl));
                 }
             }
         } else if let Type::CxxVector(ptr) = ty {
@@ -91,7 +90,7 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
                     // Generate impl for CxxVector<T> if T is a struct or opaque
                     // C++ type. Impl for primitives is already provided by cxx
                     // crate.
-                    expanded.extend(expand_cxx_vector(namespace, ident, explicit_impl));
+                    expanded.extend(expand_cxx_vector(ident, explicit_impl));
                 }
             }
         }
@@ -124,11 +123,11 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
     }
 }
 
-fn expand_struct(namespace: &Namespace, strct: &Struct) -> TokenStream {
+fn expand_struct(strct: &Struct) -> TokenStream {
     let ident = &strct.ident;
     let doc = &strct.doc;
     let derives = DeriveAttribute(&strct.derives);
-    let type_id = type_id(namespace, ident);
+    let type_id = type_id(ident);
     let fields = strct.fields.iter().map(|field| {
         // This span on the pub makes "private type in public interface" errors
         // appear in the right place.
@@ -151,11 +150,11 @@ fn expand_struct(namespace: &Namespace, strct: &Struct) -> TokenStream {
     }
 }
 
-fn expand_enum(namespace: &Namespace, enm: &Enum) -> TokenStream {
+fn expand_enum(enm: &Enum) -> TokenStream {
     let ident = &enm.ident;
     let doc = &enm.doc;
     let repr = enm.repr;
-    let type_id = type_id(namespace, ident);
+    let type_id = type_id(ident);
     let variants = enm.variants.iter().map(|variant| {
         let variant_ident = &variant.ident;
         let discriminant = &variant.discriminant;
@@ -184,10 +183,10 @@ fn expand_enum(namespace: &Namespace, enm: &Enum) -> TokenStream {
     }
 }
 
-fn expand_cxx_type(namespace: &Namespace, ety: &ExternType) -> TokenStream {
+fn expand_cxx_type(ety: &ExternType) -> TokenStream {
     let ident = &ety.ident;
     let doc = &ety.doc;
-    let type_id = type_id(namespace, ident);
+    let type_id = type_id(ident);
 
     quote! {
         #doc
@@ -681,13 +680,9 @@ fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
     }
 }
 
-fn expand_type_alias_verify(
-    namespace: &Namespace,
-    alias: &TypeAlias,
-    types: &Types,
-) -> TokenStream {
+fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
     let ident = &alias.ident;
-    let type_id = type_id(namespace, ident);
+    let type_id = type_id(ident);
     let begin_span = alias.type_token.span;
     let end_span = alias.semi_token.span;
     let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_type::<);
@@ -707,21 +702,15 @@ fn expand_type_alias_verify(
     verify
 }
 
-fn type_id(namespace: &Namespace, ident: &QualifiedIdent) -> TokenStream {
-    let mut path = String::new();
-    for name in namespace {
-        path += &name.to_string();
-        path += "::";
-    }
-    path += &ident.to_string();
-
+fn type_id(ident: &QualifiedIdent) -> TokenStream {
+    let path = ident.to_fully_qualified();
     quote! {
         ::cxx::type_id!(#path)
     }
 }
 
-fn expand_rust_box(namespace: &Namespace, ident: &QualifiedIdent) -> TokenStream {
-    let link_prefix = format!("cxxbridge05$box${}{}$", namespace, ident);
+fn expand_rust_box(ident: &QualifiedIdent) -> TokenStream {
+    let link_prefix = format!("cxxbridge05$box${}$", ident.to_bridge_name());
     let link_uninit = format!("{}uninit", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
 
@@ -749,8 +738,8 @@ fn expand_rust_box(namespace: &Namespace, ident: &QualifiedIdent) -> TokenStream
     }
 }
 
-fn expand_rust_vec(namespace: &Namespace, elem: &QualifiedIdent) -> TokenStream {
-    let link_prefix = format!("cxxbridge05$rust_vec${}{}$", namespace, elem);
+fn expand_rust_vec(elem: &QualifiedIdent) -> TokenStream {
+    let link_prefix = format!("cxxbridge05$rust_vec${}$", elem.to_bridge_name());
     let link_new = format!("{}new", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
     let link_len = format!("{}len", link_prefix);
@@ -795,13 +784,12 @@ fn expand_rust_vec(namespace: &Namespace, elem: &QualifiedIdent) -> TokenStream 
 }
 
 fn expand_unique_ptr(
-    namespace: &Namespace,
     ident: &QualifiedIdent,
     types: &Types,
     explicit_impl: Option<&Impl>,
 ) -> TokenStream {
-    let name = ident.to_string();
-    let prefix = format!("cxxbridge05$unique_ptr${}{}$", namespace, ident);
+    let name = ident.to_fully_qualified();
+    let prefix = format!("cxxbridge05$unique_ptr${}$", ident.to_bridge_name());
     let link_null = format!("{}null", prefix);
     let link_new = format!("{}new", prefix);
     let link_raw = format!("{}raw", prefix);
@@ -877,17 +865,16 @@ fn expand_unique_ptr(
     }
 }
 
-fn expand_cxx_vector(
-    namespace: &Namespace,
-    elem: &QualifiedIdent,
-    explicit_impl: Option<&Impl>,
-) -> TokenStream {
+fn expand_cxx_vector(elem: &QualifiedIdent, explicit_impl: Option<&Impl>) -> TokenStream {
     let _ = explicit_impl;
-    let name = elem.to_string();
-    let prefix = format!("cxxbridge05$std$vector${}{}$", namespace, elem);
+    let name = elem.to_fully_qualified();
+    let prefix = format!("cxxbridge05$std$vector${}$", elem.to_bridge_name());
     let link_size = format!("{}size", prefix);
     let link_get_unchecked = format!("{}get_unchecked", prefix);
-    let unique_ptr_prefix = format!("cxxbridge05$unique_ptr$std$vector${}{}$", namespace, elem);
+    let unique_ptr_prefix = format!(
+        "cxxbridge05$unique_ptr$std$vector${}$",
+        elem.to_bridge_name()
+    );
     let link_unique_ptr_null = format!("{}null", unique_ptr_prefix);
     let link_unique_ptr_raw = format!("{}raw", unique_ptr_prefix);
     let link_unique_ptr_get = format!("{}get", unique_ptr_prefix);

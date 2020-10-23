@@ -232,7 +232,10 @@ pub enum TrivialReason<'a> {
 }
 
 fn duplicate_cxx_name(cx: &mut Errors, sp: impl ToTokens, ident: &QualifiedIdent) {
-    let msg = format!("the C++ name `{}` is defined multiple times", ident);
+    let msg = format!(
+        "the C++ name `{}` is defined multiple times",
+        ident.to_fully_qualified()
+    );
     cx.error(sp, msg);
 }
 
