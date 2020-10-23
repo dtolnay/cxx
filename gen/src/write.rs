@@ -343,7 +343,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api], types: &Types) {
 }
 
 fn write_struct(out: &mut OutFile, strct: &Struct) {
-    let guard = format!("CXXBRIDGE05_STRUCT_{}", strct.ident.to_include_guard());
+    let guard = format!("CXXBRIDGE05_STRUCT_{}", strct.ident.to_symbol());
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     for line in strct.doc.to_string().lines() {
@@ -373,7 +373,7 @@ fn write_struct_using(out: &mut OutFile, ident: &QualifiedIdent) {
 }
 
 fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &[&ExternFn]) {
-    let guard = format!("CXXBRIDGE05_STRUCT_{}", ety.ident.to_include_guard());
+    let guard = format!("CXXBRIDGE05_STRUCT_{}", ety.ident.to_symbol());
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     for line in ety.doc.to_string().lines() {
@@ -398,7 +398,7 @@ fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &[&Ex
 }
 
 fn write_enum(out: &mut OutFile, enm: &Enum) {
-    let guard = format!("CXXBRIDGE05_ENUM_{}", enm.ident.to_include_guard());
+    let guard = format!("CXXBRIDGE05_ENUM_{}", enm.ident.to_symbol());
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     for line in enm.doc.to_string().lines() {
@@ -1065,10 +1065,10 @@ fn to_typename(ty: &Type) -> String {
 
 // Only called for legal referent types of unique_ptr and element types of
 // std::vector and Vec.
-fn to_mangled(ty: &Type) -> String {
+fn to_mangled(ty: &Type) -> Symbol {
     match ty {
-        Type::Ident(ident) => ident.to_bridge_name(),
-        Type::CxxVector(ptr) => format!("std$vector${}", to_mangled(&ptr.inner)),
+        Type::Ident(ident) => ident.to_symbol(),
+        Type::CxxVector(ptr) => to_mangled(&ptr.inner).prefix_with("std$vector$"),
         _ => unreachable!(),
     }
 }
@@ -1131,7 +1131,7 @@ fn write_generic_instantiations(out: &mut OutFile, types: &Types) {
 
 fn write_rust_box_extern(out: &mut OutFile, ident: &QualifiedIdent) {
     let inner = ident.to_fully_qualified();
-    let instance = ident.to_bridge_name();
+    let instance = ident.to_symbol();
 
     writeln!(out, "#ifndef CXXBRIDGE05_RUST_BOX_{}", instance);
     writeln!(out, "#define CXXBRIDGE05_RUST_BOX_{}", instance);
@@ -1185,7 +1185,7 @@ fn write_rust_vec_extern(out: &mut OutFile, element: &QualifiedIdent) {
 
 fn write_rust_box_impl(out: &mut OutFile, ident: &QualifiedIdent) {
     let inner = ident.to_fully_qualified();
-    let instance = ident.to_bridge_name();
+    let instance = ident.to_symbol();
 
     writeln!(out, "template <>");
     writeln!(out, "void Box<{}>::uninit() noexcept {{", inner);

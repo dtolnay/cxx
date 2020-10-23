@@ -23,6 +23,7 @@ pub mod types;
 use self::discriminant::Discriminant;
 use self::namespace::Namespace;
 use self::parse::kw;
+use self::symbol::Symbol;
 use core::fmt::{Formatter, Result};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{IdentFragment, ToTokens};
@@ -257,12 +258,8 @@ impl QualifiedIdent {
             .join(sep)
     }
 
-    pub fn to_include_guard(&self) -> String {
-        self.to_bridge_name()
-    }
-
-    pub fn to_bridge_name(&self) -> String {
-        self.join("$")
+    pub fn to_symbol(&self) -> Symbol {
+        Symbol::from_idents(self.iter_all_segments())
     }
 
     pub fn to_fully_qualified(&self) -> String {

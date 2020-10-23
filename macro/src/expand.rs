@@ -710,7 +710,7 @@ fn type_id(ident: &QualifiedIdent) -> TokenStream {
 }
 
 fn expand_rust_box(ident: &QualifiedIdent) -> TokenStream {
-    let link_prefix = format!("cxxbridge05$box${}$", ident.to_bridge_name());
+    let link_prefix = format!("cxxbridge05$box${}$", ident.to_symbol());
     let link_uninit = format!("{}uninit", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
 
@@ -739,7 +739,7 @@ fn expand_rust_box(ident: &QualifiedIdent) -> TokenStream {
 }
 
 fn expand_rust_vec(elem: &QualifiedIdent) -> TokenStream {
-    let link_prefix = format!("cxxbridge05$rust_vec${}$", elem.to_bridge_name());
+    let link_prefix = format!("cxxbridge05$rust_vec${}$", elem.to_symbol());
     let link_new = format!("{}new", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
     let link_len = format!("{}len", link_prefix);
@@ -789,7 +789,7 @@ fn expand_unique_ptr(
     explicit_impl: Option<&Impl>,
 ) -> TokenStream {
     let name = ident.to_fully_qualified();
-    let prefix = format!("cxxbridge05$unique_ptr${}$", ident.to_bridge_name());
+    let prefix = format!("cxxbridge05$unique_ptr${}$", ident.to_symbol());
     let link_null = format!("{}null", prefix);
     let link_new = format!("{}new", prefix);
     let link_raw = format!("{}raw", prefix);
@@ -868,13 +868,10 @@ fn expand_unique_ptr(
 fn expand_cxx_vector(elem: &QualifiedIdent, explicit_impl: Option<&Impl>) -> TokenStream {
     let _ = explicit_impl;
     let name = elem.to_fully_qualified();
-    let prefix = format!("cxxbridge05$std$vector${}$", elem.to_bridge_name());
+    let prefix = format!("cxxbridge05$std$vector${}$", elem.to_symbol());
     let link_size = format!("{}size", prefix);
     let link_get_unchecked = format!("{}get_unchecked", prefix);
-    let unique_ptr_prefix = format!(
-        "cxxbridge05$unique_ptr$std$vector${}$",
-        elem.to_bridge_name()
-    );
+    let unique_ptr_prefix = format!("cxxbridge05$unique_ptr$std$vector${}$", elem.to_symbol());
     let link_unique_ptr_null = format!("{}null", unique_ptr_prefix);
     let link_unique_ptr_raw = format!("{}raw", unique_ptr_prefix);
     let link_unique_ptr_get = format!("{}get", unique_ptr_prefix);
