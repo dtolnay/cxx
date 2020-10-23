@@ -319,3 +319,43 @@ fn env_os(key: impl AsRef<OsStr>) -> Result<OsString> {
     let key = key.as_ref();
     env::var_os(key).ok_or_else(|| Error::NoEnv(key.to_owned()))
 }
+
+
+#[test]
+fn test_include_dir_correct0() {
+    verify_include_dir(&PathBuf::from("some_crate/path/to/dir"), Path::new("some_crate"));
+}
+
+#[test]
+fn test_include_dir_correct1() {
+    verify_include_dir(&PathBuf::from("some_crate/path/to/dir"), Path::new("some_crate/path"));
+}
+
+#[test]
+fn test_include_dir_correct2() {
+    verify_include_dir(&PathBuf::from("some_crate/path/to/dir"), Path::new("some_crate/path/"));
+}
+
+#[test]
+fn test_include_dir_correct_absolute() {
+    let root = if cfg!(windows) {
+        PathBuf::from("C:/")
+    } else {
+        PathBuf::from("/")
+    };
+
+    verify_include_dir(&root, Path::new("some_crate"));
+    verify_include_dir(&root.join("temp"), Path::new("some_crate"));
+}
+
+#[test]
+#[should_panic]
+fn test_include_dir_wrong_prefix() {
+    verify_include_dir(&PathBuf::from("other_dir/path/to/dir"), Path::new("some_crate"));
+}
+
+#[test]
+#[should_panic]
+fn test_include_dir_incomplete_prefix() {
+    verify_include_dir(&PathBuf::from("some_crate/path/to/dir"), Path::new("some"));
+}
