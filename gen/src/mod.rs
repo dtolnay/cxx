@@ -53,6 +53,9 @@ pub struct GeneratedCode {
     pub header: Vec<u8>,
     /// The bytes of a C++ implementation file (e.g. .cc, cpp etc.)
     pub implementation: Vec<u8>,
+
+    // All directory paths that were parsed inside a cxxbridge include!() macro
+    pub(crate) bridge_include_dirs: Vec<String>,
 }
 
 impl Default for Opt {
@@ -128,5 +131,6 @@ pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
         } else {
             Vec::new()
         },
+        bridge_include_dirs: types.include_dirs.iter().map(|&s| s.clone()).collect()
     })
 }

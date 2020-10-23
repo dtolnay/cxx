@@ -16,6 +16,7 @@ pub struct Types<'a> {
     pub untrusted: Map<&'a Ident, &'a ExternType>,
     pub required_trivial: Map<&'a Ident, TrivialReason<'a>>,
     pub explicit_impls: Set<&'a Impl>,
+    pub include_dirs: UnorderedSet<&'a String>,
 }
 
 impl<'a> Types<'a> {
@@ -28,6 +29,7 @@ impl<'a> Types<'a> {
         let mut aliases = Map::new();
         let mut untrusted = Map::new();
         let mut explicit_impls = Set::new();
+        let mut include_dirs = UnorderedSet::new();
 
         fn visit<'a>(all: &mut Set<&'a Type>, ty: &'a Type) {
             all.insert(ty);
@@ -60,7 +62,9 @@ impl<'a> Types<'a> {
             //
             // All other cases of duplicate identifiers are reported as an error.
             match api {
-                Api::Include(_) => {}
+                Api::Include(include_dir) => {
+                    include_dirs.insert(include_dir);
+                }
                 Api::Struct(strct) => {
                     let ident = &strct.ident;
                     if !type_names.insert(ident)
@@ -187,6 +191,7 @@ impl<'a> Types<'a> {
             untrusted,
             required_trivial,
             explicit_impls,
+            include_dirs,
         }
     }
 

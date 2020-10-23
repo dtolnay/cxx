@@ -273,6 +273,10 @@ fn make_include_dir(prj: &Project) -> Result<PathBuf> {
 fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) -> Result<()> {
     let opt = Opt::default();
     let generated = gen::generate_from_path(rust_source_file, &opt);
+    for include_dir in generated.bridge_include_dirs {
+        verify_include_dir(&PathBuf::from(include_dir), &prj.include_prefix);
+    }
+
     let ref rel_path = paths::local_relative_path(rust_source_file);
 
     let cxxbridge = prj.out_dir.join("cxxbridge");
@@ -296,6 +300,19 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
     let _ = out::symlink_file(header_path, shared_h);
     let _ = out::symlink_file(implementation_path, shared_cc);
     Ok(())
+}
+
+// Ensures that the argument of the include!() macro is either starting with the crate name, or an absolute path
+// This prevents accidental use of other relative paths (e.g. from the crate root _without_ the name, or from the cxx::bridge file).
+fn verify_include_dir(include_dir: &PathBuf, include_prefix: &Path) {
+    // Absolute paths are unproblematic
+    // Simple path prefix should be OK -- no symlinks, . or .. should appear as the first element in include!()
+    if include_dir.is_absolute() || include_dir.starts_with(include_prefix) {
+        return;
+    }
+
+    panic!("include!(\"{}\") is invalid:\n   path must either start with include prefix '{}' or be an absolute path.\n\n",
+           include_dir.display(), include_prefix.display());
 }
 
 fn env_os(key: impl AsRef<OsStr>) -> Result<OsString> {
