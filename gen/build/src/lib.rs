@@ -311,8 +311,9 @@ fn verify_include_dir(include_dir: &PathBuf, include_prefix: &Path) {
         return;
     }
 
+    // Include prefix is stored with backslashes under Windows -> very basic slash conversion (use path-slash for more sophisticated one)
     panic!("include!(\"{}\") is invalid:\n   path must either start with include prefix '{}' or be an absolute path.\n\n",
-           include_dir.display(), include_prefix.display());
+           include_dir.display(), include_prefix.to_str().unwrap().to_string().replace("\\", "/"));
 }
 
 fn env_os(key: impl AsRef<OsStr>) -> Result<OsString> {
