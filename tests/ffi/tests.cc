@@ -478,11 +478,24 @@ void c_take_opaque_ptr(std::unique_ptr<E> e) {
   }
 }
 
+void c_take_opaque_ns_ptr(std::unique_ptr<::F::F> f) {
+  if (f->f == 40) {
+    cxx_test_suite_set_correct();
+  }
+}
+
 void c_take_opaque_ref(const E& e) {
   if (e.e == 40 && e.e_str == "hello") {
     cxx_test_suite_set_correct();
   }
 }
+
+void c_take_opaque_ns_ref(const ::F::F& f) {
+  if (f.f == 40 && f.f_str == "hello") {
+    cxx_test_suite_set_correct();
+  }
+}
+
 
 std::unique_ptr<D> c_return_trivial_ptr() {
   auto d = std::unique_ptr<D>(new D());
@@ -501,6 +514,13 @@ std::unique_ptr<E> c_return_opaque_ptr() {
   e->e = 40;
   e->e_str = std::string("hello");
   return e;
+}
+
+std::unique_ptr<::F::F> c_return_ns_opaque_ptr() {
+  auto f = std::unique_ptr<::F::F>(new ::F::F());
+  f->f = 40;
+  f->f_str = std::string("hello");
+  return f;
 }
 
 extern "C" const char *cxx_run_test() noexcept {

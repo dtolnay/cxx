@@ -12,6 +12,13 @@ namespace A {
   } // namespace B
 } // namespace A
 
+namespace F {
+  struct F {
+    uint64_t f;
+    std::string f_str;
+  };
+}
+
 namespace tests {
 
 struct R;
@@ -137,10 +144,13 @@ void c_take_trivial_ptr(std::unique_ptr<D> d);
 void c_take_trivial_ref(const D& d);
 void c_take_trivial(D d);
 void c_take_opaque_ptr(std::unique_ptr<E> e);
+void c_take_opaque_ns_ptr(std::unique_ptr<::F::F> f);
 void c_take_opaque_ref(const E& e);
+void c_take_opaque_ns_ref(const ::F::F& f);
 std::unique_ptr<D> c_return_trivial_ptr();
 D c_return_trivial();
 std::unique_ptr<E> c_return_opaque_ptr();
+std::unique_ptr<::F::F> c_return_ns_opaque_ptr();
 
 rust::String cOverloadedFunction(int32_t x);
 rust::String cOverloadedFunction(rust::Str x);

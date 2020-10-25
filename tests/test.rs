@@ -230,4 +230,8 @@ fn test_extern_opaque() {
     let e = ffi2::c_return_opaque_ptr();
     check!(ffi2::c_take_opaque_ref(e.as_ref().unwrap()));
     check!(ffi2::c_take_opaque_ptr(e));
+
+    let f = ffi2::c_return_ns_opaque_ptr();
+    check!(ffi2::c_take_opaque_ns_ref(f.as_ref().unwrap()));
+    check!(ffi2::c_take_opaque_ns_ptr(f));
 }

@@ -25,6 +25,22 @@ mod other {
         e_str: CxxString,
     }
 
+    pub mod f {
+        use cxx::kind::Opaque;
+        use cxx::{type_id, CxxString, ExternType};
+
+        #[repr(C)]
+        pub struct F {
+            e: u64,
+            e_str: CxxString,
+        }
+
+        unsafe impl ExternType for F {
+            type Id = type_id!("F::F");
+            type Kind = Opaque;
+        }
+    }
+
     unsafe impl ExternType for D {
         type Id = type_id!("tests::D");
         type Kind = Trivial;
