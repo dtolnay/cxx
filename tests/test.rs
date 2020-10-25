@@ -23,12 +23,16 @@ macro_rules! check {
 #[test]
 fn test_c_return() {
     let shared = ffi::Shared { z: 2020 };
+    let ns_shared = ffi::AShared { z: 2020 };
+    let nested_ns_shared = ffi::ABShared { z: 2020 };
 
     assert_eq!(2020, ffi::c_return_primitive());
     assert_eq!(2020, ffi::c_return_shared().z);
     assert_eq!(2020, *ffi::c_return_box());
     ffi::c_return_unique_ptr();
     assert_eq!(2020, *ffi::c_return_ref(&shared));
+    assert_eq!(2020, *ffi::c_return_ns_ref(&ns_shared));
+    assert_eq!(2020, *ffi::c_return_nested_ns_ref(&nested_ns_shared));
     assert_eq!("2020", ffi::c_return_str(&shared));
     assert_eq!(b"2020\0", ffi::c_return_sliceu8(&shared));
     assert_eq!("2020", ffi::c_return_rust_string());
@@ -64,6 +68,14 @@ fn test_c_return() {
         enm @ ffi::Enum::CVal => assert_eq!(2021, enm.repr),
         _ => assert!(false),
     }
+    match ffi::c_return_ns_enum(0) {
+        enm @ ffi::AEnum::AAVal => assert_eq!(0, enm.repr),
+        _ => assert!(false),
+    }
+    match ffi::c_return_nested_ns_enum(0) {
+        enm @ ffi::ABEnum::ABAVal => assert_eq!(0, enm.repr),
+        _ => assert!(false),
+    }
 }
 
 #[test]
@@ -88,6 +100,8 @@ fn test_c_take() {
 
     check!(ffi::c_take_primitive(2020));
     check!(ffi::c_take_shared(ffi::Shared { z: 2020 }));
+    check!(ffi::c_take_ns_shared(ffi::AShared { z: 2020 }));
+    check!(ffi::c_take_nested_ns_shared(ffi::ABShared { z: 2020 }));
     check!(ffi::c_take_box(Box::new(2020)));
     check!(ffi::c_take_ref_c(&unique_ptr));
     check!(cxx_test_suite::module::ffi::c_take_unique_ptr(unique_ptr));
@@ -119,7 +133,16 @@ fn test_c_take() {
     check!(ffi::c_take_ref_rust_vec(&test_vec));
     check!(ffi::c_take_ref_rust_vec_index(&test_vec));
     check!(ffi::c_take_ref_rust_vec_copy(&test_vec));
+    let ns_shared_test_vec = vec![ffi::AShared { z: 1010 }, ffi::AShared { z: 1011 }];
+    check!(ffi::c_take_rust_vec_ns_shared(ns_shared_test_vec));
+    let nested_ns_shared_test_vec = vec![ffi::ABShared { z: 1010 }, ffi::ABShared { z: 1011 }];
+    check!(ffi::c_take_rust_vec_nested_ns_shared(
+        nested_ns_shared_test_vec
+    ));
+
     check!(ffi::c_take_enum(ffi::Enum::AVal));
+    check!(ffi::c_take_ns_enum(ffi::AEnum::AAVal));
+    check!(ffi::c_take_nested_ns_enum(ffi::ABEnum::ABAVal));
 }
 
 /*

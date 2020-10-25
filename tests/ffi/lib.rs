@@ -49,6 +49,32 @@ pub mod ffi {
         CVal,
     }
 
+    #[namespace(namespace = A)]
+    #[derive(Clone)]
+    struct AShared {
+        z: usize,
+    }
+
+    #[namespace(namespace = A)]
+    enum AEnum {
+        AAVal,
+        ABVal = 2020,
+        ACVal,
+    }
+
+    #[namespace(namespace = A::B)]
+    enum ABEnum {
+        ABAVal,
+        ABBVal = 2020,
+        ABCVal,
+    }
+
+    #[namespace(namespace = A::B)]
+    #[derive(Clone)]
+    struct ABShared {
+        z: usize,
+    }
+
     extern "C" {
         include!("tests/ffi/tests.h");
 
@@ -78,6 +104,10 @@ pub mod ffi {
         fn c_return_identity(_: usize) -> usize;
         fn c_return_sum(_: usize, _: usize) -> usize;
         fn c_return_enum(n: u16) -> Enum;
+        fn c_return_ns_ref(shared: &AShared) -> &usize;
+        fn c_return_nested_ns_ref(shared: &ABShared) -> &usize;
+        fn c_return_ns_enum(n: u16) -> AEnum;
+        fn c_return_nested_ns_enum(n: u16) -> ABEnum;
 
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);
@@ -108,6 +138,12 @@ pub mod ffi {
         fn c_take_callback(callback: fn(String) -> usize);
         */
         fn c_take_enum(e: Enum);
+        fn c_take_ns_enum(e: AEnum);
+        fn c_take_nested_ns_enum(e: ABEnum);
+        fn c_take_ns_shared(shared: AShared);
+        fn c_take_nested_ns_shared(shared: ABShared);
+        fn c_take_rust_vec_ns_shared(v: Vec<AShared>);
+        fn c_take_rust_vec_nested_ns_shared(v: Vec<ABShared>);
 
         fn c_try_return_void() -> Result<()>;
         fn c_try_return_primitive() -> Result<usize>;
