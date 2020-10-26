@@ -41,6 +41,16 @@ mod other {
         }
     }
 
+    #[repr(C)]
+    pub struct G {
+        pub g: u64,
+    }
+
+    unsafe impl ExternType for G {
+        type Id = type_id!("G::G");
+        type Kind = Trivial;
+    }
+
     unsafe impl ExternType for D {
         type Id = type_id!("tests::D");
         type Kind = Trivial;

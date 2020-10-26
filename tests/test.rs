@@ -223,6 +223,13 @@ fn test_extern_trivial() {
     let d = ffi2::c_return_trivial_ptr();
     check!(ffi2::c_take_trivial_ptr(d));
     cxx::UniquePtr::new(ffi2::D { d: 42 });
+
+    let g = ffi2::c_return_trivial_ns();
+    check!(ffi2::c_take_trivial_ns_ref(&g));
+    check!(ffi2::c_take_trivial_ns(g));
+    let g = ffi2::c_return_trivial_ns_ptr();
+    check!(ffi2::c_take_trivial_ns_ptr(g));
+    cxx::UniquePtr::new(ffi2::G { g: 42 });
 }
 
 #[test]

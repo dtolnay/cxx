@@ -19,6 +19,12 @@ namespace F {
   };
 }
 
+namespace G {
+  struct G {
+    uint64_t g;
+  };
+}
+
 namespace tests {
 
 struct R;
@@ -143,12 +149,18 @@ const rust::Vec<uint8_t> &c_try_return_ref_rust_vec(const C &c);
 void c_take_trivial_ptr(std::unique_ptr<D> d);
 void c_take_trivial_ref(const D& d);
 void c_take_trivial(D d);
+
+void c_take_trivial_ns_ptr(std::unique_ptr<::G::G> g);
+void c_take_trivial_ns_ref(const ::G::G& g);
+void c_take_trivial_ns(::G::G g);
 void c_take_opaque_ptr(std::unique_ptr<E> e);
 void c_take_opaque_ns_ptr(std::unique_ptr<::F::F> f);
 void c_take_opaque_ref(const E& e);
 void c_take_opaque_ns_ref(const ::F::F& f);
 std::unique_ptr<D> c_return_trivial_ptr();
 D c_return_trivial();
+std::unique_ptr<::G::G> c_return_trivial_ns_ptr();
+::G::G c_return_trivial_ns();
 std::unique_ptr<E> c_return_opaque_ptr();
 std::unique_ptr<::F::F> c_return_ns_opaque_ptr();
 

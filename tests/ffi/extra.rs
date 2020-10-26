@@ -13,6 +13,7 @@ pub mod ffi2 {
     impl UniquePtr<D> {}
     impl UniquePtr<E> {}
     impl UniquePtr<F> {}
+    impl UniquePtr<G> {}
 
     extern "C" {
         include!("tests/ffi/tests.h");
@@ -21,16 +22,23 @@ pub mod ffi2 {
         type E = crate::other::E;
         #[namespace (namespace = F)]
         type F = crate::other::f::F;
+        #[namespace (namespace = G)]
+        type G = crate::other::G;
 
         fn c_take_trivial_ptr(d: UniquePtr<D>);
         fn c_take_trivial_ref(d: &D);
         fn c_take_trivial(d: D);
+        fn c_take_trivial_ns_ptr(g: UniquePtr<G>);
+        fn c_take_trivial_ns_ref(g: &G);
+        fn c_take_trivial_ns(g: G);
         fn c_take_opaque_ptr(e: UniquePtr<E>);
         fn c_take_opaque_ref(e: &E);
         fn c_take_opaque_ns_ptr(e: UniquePtr<F>);
         fn c_take_opaque_ns_ref(e: &F);
         fn c_return_trivial_ptr() -> UniquePtr<D>;
         fn c_return_trivial() -> D;
+        fn c_return_trivial_ns_ptr() -> UniquePtr<G>;
+        fn c_return_trivial_ns() -> G;
         fn c_return_opaque_ptr() -> UniquePtr<E>;
         fn c_return_ns_opaque_ptr() -> UniquePtr<F>;  
     }

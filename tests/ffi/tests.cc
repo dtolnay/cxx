@@ -466,8 +466,28 @@ void c_take_trivial_ref(const D& d) {
     cxx_test_suite_set_correct();
   }
 }
+
 void c_take_trivial(D d) {
   if (d.d == 30) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+
+void c_take_trivial_ns_ptr(std::unique_ptr<::G::G> g) {
+  if (g->g == 30) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_trivial_ns_ref(const ::G::G& g) {
+  if (g.g == 30) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_trivial_ns(::G::G g) {
+  if (g.g == 30) {
     cxx_test_suite_set_correct();
   }
 }
@@ -496,7 +516,6 @@ void c_take_opaque_ns_ref(const ::F::F& f) {
   }
 }
 
-
 std::unique_ptr<D> c_return_trivial_ptr() {
   auto d = std::unique_ptr<D>(new D());
   d->d = 30;
@@ -507,6 +526,18 @@ D c_return_trivial() {
   D d;
   d.d = 30;
   return d;
+}
+
+std::unique_ptr<::G::G> c_return_trivial_ns_ptr() {
+  auto g = std::unique_ptr<::G::G>(new ::G::G());
+  g->g = 30;
+  return g;
+}
+
+::G::G c_return_trivial_ns() {
+  ::G::G g;
+  g.g = 30;
+  return g;
 }
 
 std::unique_ptr<E> c_return_opaque_ptr() {
