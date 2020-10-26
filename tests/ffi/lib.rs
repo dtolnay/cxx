@@ -199,6 +199,9 @@ pub mod ffi {
         fn cOverloadedFunction(x: i32) -> String;
         #[rust_name = "str_overloaded_function"]
         fn cOverloadedFunction(x: &str) -> String;
+
+        #[namespace (namespace = other)]
+        fn ns_c_take_ns_shared(shared: AShared);
     }
 
     extern "C" {

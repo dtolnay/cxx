@@ -46,5 +46,10 @@ pub mod ffi2 {
         fn c_return_ns_opaque_ptr() -> UniquePtr<F>;  
         fn c_return_ns_unique_ptr() -> UniquePtr<H>;
         fn c_take_ref_ns_c(h: &H);
+
+        #[namespace (namespace = other)]
+        fn ns_c_take_trivial(d: D);
+        #[namespace (namespace = other)]
+        fn ns_c_return_trivial() -> D;
     }
 }

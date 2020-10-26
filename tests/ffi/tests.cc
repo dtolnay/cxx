@@ -627,3 +627,24 @@ extern "C" const char *cxx_run_test() noexcept {
 }
 
 } // namespace tests
+
+namespace other {
+
+  void ns_c_take_trivial(::tests::D d) {
+    if (d.d == 30) {
+      cxx_test_suite_set_correct();
+    }
+  }
+
+  ::tests::D ns_c_return_trivial() {
+    ::tests::D d;
+    d.d = 30;
+    return d;
+  }
+
+  void ns_c_take_ns_shared(::A::AShared shared) {
+    if (shared.z == 2020) {
+      cxx_test_suite_set_correct();
+    }
+  }
+}

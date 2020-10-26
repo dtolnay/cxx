@@ -177,3 +177,9 @@ rust::String cOverloadedFunction(int32_t x);
 rust::String cOverloadedFunction(rust::Str x);
 
 } // namespace tests
+
+namespace other {
+  void ns_c_take_trivial(::tests::D d);
+  ::tests::D ns_c_return_trivial();
+  void ns_c_take_ns_shared(::A::AShared shared);
+} // namespace other
