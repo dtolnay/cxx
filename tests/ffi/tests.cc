@@ -647,4 +647,14 @@ namespace other {
       cxx_test_suite_set_correct();
     }
   }
-}
+} // namespace other
+
+namespace I {
+  uint32_t I::get() const {
+    return a;
+  }
+
+  std::unique_ptr<I> ns_c_return_unique_ptr_ns() {
+    return std::unique_ptr<I>(new I());
+  }
+} // namespace I

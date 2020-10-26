@@ -183,3 +183,15 @@ namespace other {
   ::tests::D ns_c_return_trivial();
   void ns_c_take_ns_shared(::A::AShared shared);
 } // namespace other
+
+namespace I {
+  class I {
+  private:
+    uint32_t a;
+  public:
+    I() : a(1000) {}
+    uint32_t get() const;
+  };
+
+  std::unique_ptr<I> ns_c_return_unique_ptr_ns();
+} // namespace I

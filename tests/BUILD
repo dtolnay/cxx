@@ -18,6 +18,7 @@ rust_library(
         "ffi/extra.rs",
         "ffi/lib.rs",
         "ffi/module.rs",
+        "ffi/class_in_ns.rs",
     ],
     deps = [
         ":impl",
@@ -32,6 +33,7 @@ cc_library(
         ":bridge/source",
         ":extra/source",
         ":module/source",
+        ":class_in_ns/source",
     ],
     hdrs = ["ffi/tests.h"],
     deps = [
@@ -55,5 +57,11 @@ rust_cxx_bridge(
 rust_cxx_bridge(
     name = "module",
     src = "ffi/module.rs",
+    deps = [":impl"],
+)
+
+rust_cxx_bridge(
+    name = "class_in_ns",
+    src = "ffi/class_in_ns.rs",
     deps = [":impl"],
 )

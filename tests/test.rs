@@ -1,3 +1,4 @@
+use cxx_test_suite::class_in_ns::ffi3;
 use cxx_test_suite::extra::ffi2;
 use cxx_test_suite::ffi;
 use std::cell::Cell;
@@ -191,6 +192,14 @@ fn test_c_method_calls() {
     assert_eq!(old_value, unique_ptr.get2());
     assert_eq!(2022, unique_ptr.set_succeed(2022).unwrap());
     assert!(unique_ptr.get_fail().is_err());
+}
+
+#[test]
+fn test_c_ns_method_calls() {
+    let unique_ptr = ffi3::ns_c_return_unique_ptr_ns();
+
+    let old_value = unique_ptr.get();
+    assert_eq!(1000, old_value);
 }
 
 #[test]

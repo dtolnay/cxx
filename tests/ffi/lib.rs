@@ -4,6 +4,7 @@
     clippy::trivially_copy_pass_by_ref
 )]
 
+pub mod class_in_ns;
 pub mod extra;
 pub mod module;
 
