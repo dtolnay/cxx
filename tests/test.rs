@@ -30,6 +30,7 @@ fn test_c_return() {
     assert_eq!(2020, ffi::c_return_shared().z);
     assert_eq!(2020, *ffi::c_return_box());
     ffi::c_return_unique_ptr();
+    ffi2::c_return_ns_unique_ptr();
     assert_eq!(2020, *ffi::c_return_ref(&shared));
     assert_eq!(2020, *ffi::c_return_ns_ref(&ns_shared));
     assert_eq!(2020, *ffi::c_return_nested_ns_ref(&nested_ns_shared));
@@ -97,6 +98,7 @@ fn test_c_try_return() {
 #[test]
 fn test_c_take() {
     let unique_ptr = ffi::c_return_unique_ptr();
+    let unique_ptr_ns = ffi2::c_return_ns_unique_ptr();
 
     check!(ffi::c_take_primitive(2020));
     check!(ffi::c_take_shared(ffi::Shared { z: 2020 }));
@@ -104,6 +106,7 @@ fn test_c_take() {
     check!(ffi::c_take_nested_ns_shared(ffi::ABShared { z: 2020 }));
     check!(ffi::c_take_box(Box::new(2020)));
     check!(ffi::c_take_ref_c(&unique_ptr));
+    check!(ffi2::c_take_ref_ns_c(&unique_ptr_ns));
     check!(cxx_test_suite::module::ffi::c_take_unique_ptr(unique_ptr));
     check!(ffi::c_take_str("2020"));
     check!(ffi::c_take_sliceu8(b"2020"));

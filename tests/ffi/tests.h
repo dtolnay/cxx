@@ -25,6 +25,13 @@ namespace G {
   };
 }
 
+namespace H {
+  class H {
+  public:
+    std::string h;
+  };
+}
+
 namespace tests {
 
 struct R;
@@ -70,6 +77,7 @@ Shared c_return_shared();
 ::A::B::ABShared c_return_nested_ns_shared();
 rust::Box<R> c_return_box();
 std::unique_ptr<C> c_return_unique_ptr();
+std::unique_ptr<::H::H> c_return_ns_unique_ptr();
 const size_t &c_return_ref(const Shared &shared);
 const size_t &c_return_ns_ref(const ::A::AShared &shared);
 const size_t &c_return_nested_ns_ref(const ::A::B::ABShared &shared);
@@ -103,6 +111,7 @@ void c_take_box(rust::Box<R> r);
 void c_take_unique_ptr(std::unique_ptr<C> c);
 void c_take_ref_r(const R &r);
 void c_take_ref_c(const C &c);
+void c_take_ref_ns_c(const ::H::H &h);
 void c_take_str(rust::Str s);
 void c_take_sliceu8(rust::Slice<uint8_t> s);
 void c_take_rust_string(rust::String s);

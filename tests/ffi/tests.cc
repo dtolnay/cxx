@@ -55,6 +55,10 @@ std::unique_ptr<C> c_return_unique_ptr() {
   return std::unique_ptr<C>(new C{2020});
 }
 
+std::unique_ptr<::H::H> c_return_ns_unique_ptr() {
+  return std::unique_ptr<::H::H>(new ::H::H{"hello"});
+}
+
 const size_t &c_return_ref(const Shared &shared) { return shared.z; }
 
 const size_t &c_return_ns_ref(const ::A::AShared &shared) { return shared.z; }
@@ -216,6 +220,12 @@ void c_take_ref_r(const R &r) {
 
 void c_take_ref_c(const C &c) {
   if (c.get() == 2020) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_ref_ns_c(const ::H::H &h) {
+  if (h.h == "hello") {
     cxx_test_suite_set_correct();
   }
 }

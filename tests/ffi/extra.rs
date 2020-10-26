@@ -25,6 +25,9 @@ pub mod ffi2 {
         #[namespace (namespace = G)]
         type G = crate::other::G;
 
+        #[namespace(namespace = H)]
+        type H;
+
         fn c_take_trivial_ptr(d: UniquePtr<D>);
         fn c_take_trivial_ref(d: &D);
         fn c_take_trivial(d: D);
@@ -41,5 +44,7 @@ pub mod ffi2 {
         fn c_return_trivial_ns() -> G;
         fn c_return_opaque_ptr() -> UniquePtr<E>;
         fn c_return_ns_opaque_ptr() -> UniquePtr<F>;  
+        fn c_return_ns_unique_ptr() -> UniquePtr<H>;
+        fn c_take_ref_ns_c(h: &H);
     }
 }
