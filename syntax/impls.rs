@@ -1,8 +1,26 @@
-use crate::syntax::{ExternFn, Impl, Receiver, Ref, Signature, Slice, Ty1, Type};
+use crate::syntax::{ExternFn, Impl, Include, Receiver, Ref, Signature, Slice, Ty1, Type};
 use std::borrow::Borrow;
 use std::hash::{Hash, Hasher};
 use std::mem;
 use std::ops::{Deref, DerefMut};
+
+impl PartialEq for Include {
+    fn eq(&self, other: &Include) -> bool {
+        let Include {
+            path,
+            kind,
+            begin_span: _,
+            end_span: _,
+        } = self;
+        let Include {
+            path: path2,
+            kind: kind2,
+            begin_span: _,
+            end_span: _,
+        } = other;
+        path == path2 && kind == kind2
+    }
+}
 
 impl Deref for ExternFn {
     type Target = Signature;
