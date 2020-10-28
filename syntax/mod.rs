@@ -52,10 +52,13 @@ pub struct Include {
     pub end_span: Span,
 }
 
-#[derive(Copy, Clone, PartialEq)]
+/// Whether to emit `#include "path"` or `#include <path>`.
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum IncludeKind {
-    Quoted,    // #include "quoted/path/to"
-    Bracketed, // #include <bracketed/path/to>
+    /// `#include "quoted/path/to"`
+    Quoted,
+    /// `#include <bracketed/path/to>`
+    Bracketed,
 }
 
 pub struct ExternType {

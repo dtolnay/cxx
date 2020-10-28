@@ -13,7 +13,8 @@ mod output;
 mod syntax;
 
 use crate::gen::error::{report, Result};
-use crate::gen::{fs, include};
+use crate::gen::fs;
+use crate::gen::include::{self, Include};
 use crate::output::Output;
 use std::io::{self, Write};
 use std::path::PathBuf;
@@ -24,7 +25,7 @@ struct Opt {
     input: Option<PathBuf>,
     header: bool,
     cxx_impl_annotations: Option<String>,
-    include: Vec<String>,
+    include: Vec<Include>,
     outputs: Vec<Output>,
 }
 

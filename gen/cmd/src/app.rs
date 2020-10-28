@@ -3,6 +3,8 @@
 mod test;
 
 use super::{Opt, Output};
+use crate::gen::include::Include;
+use crate::syntax::IncludeKind;
 use clap::AppSettings;
 use std::ffi::{OsStr, OsString};
 use std::path::PathBuf;
@@ -63,7 +65,19 @@ pub(super) fn from_args() -> Opt {
     let include = matches
         .values_of(INCLUDE)
         .unwrap_or_default()
-        .map(str::to_owned)
+        .map(|include| {
+            if include.starts_with('<') && include.ends_with('>') {
+                Include {
+                    path: include[1..include.len() - 1].to_owned(),
+                    kind: IncludeKind::Bracketed,
+                }
+            } else {
+                Include {
+                    path: include.to_owned(),
+                    kind: IncludeKind::Quoted,
+                }
+            }
+        })
         .collect();
 
     let mut outputs = Vec::new();
