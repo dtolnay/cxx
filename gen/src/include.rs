@@ -1,5 +1,5 @@
 use crate::gen::out::OutFile;
-use crate::syntax::IncludeKind;
+use crate::syntax::{self, IncludeKind};
 use std::fmt::{self, Display};
 
 /// The complete contents of the "rust/cxx.h" header.
@@ -84,14 +84,23 @@ impl Includes {
         Includes::default()
     }
 
-    pub fn insert(&mut self, include: Include) {
-        self.custom.push(include);
+    pub fn insert(&mut self, include: impl Into<Include>) {
+        self.custom.push(include.into());
     }
 }
 
 impl<'a> Extend<&'a Include> for Includes {
     fn extend<I: IntoIterator<Item = &'a Include>>(&mut self, iter: I) {
         self.custom.extend(iter.into_iter().cloned());
+    }
+}
+
+impl<'a> From<&'a syntax::Include> for Include {
+    fn from(include: &syntax::Include) -> Self {
+        Include {
+            path: include.path.clone(),
+            kind: include.kind,
+        }
     }
 }
 

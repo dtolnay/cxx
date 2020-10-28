@@ -1,4 +1,3 @@
-use crate::gen::include::Include;
 use crate::gen::out::OutFile;
 use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
@@ -25,9 +24,7 @@ pub(super) fn gen(
     out.include.extend(&opt.include);
     for api in apis {
         if let Api::Include(include) = api {
-            let path = include.path.clone();
-            let kind = include.kind;
-            out.include.insert(Include { path, kind });
+            out.include.insert(include);
         }
     }
 
