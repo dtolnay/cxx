@@ -8,7 +8,7 @@ on:
 
 jobs:
     ubuntu-build:
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-20.04
         strategy:
             matrix:
               lto: ["ON", "OFF"]
@@ -22,12 +22,11 @@ jobs:
         - name: Setup rust toolchain
           uses: actions-rs/toolchain@v1
           with:
-            toolchain: nightly
+            toolchain: stable 
             override: true
         - run: cargo install cxxbridge-cmd
         - run: sudo apt update
-        - run: sudo apt install -y clang cmake git lld
+        - run: sudo apt install -y clang cmake git lld-8
         - run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_LTO=${{matrix.lto}} ..
         - run: cd build && make
         - run: cd build && ./main
-
