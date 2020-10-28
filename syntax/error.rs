@@ -19,6 +19,7 @@ pub static ERRORS: &[Error] = &[
     CXX_STRING_BY_VALUE,
     CXX_TYPE_BY_VALUE,
     DISCRIMINANT_OVERFLOW,
+    DOT_INCLUDE,
     DOUBLE_UNDERSCORE,
     RUST_TYPE_BY_VALUE,
     USE_NOT_ALLOWED,
@@ -52,6 +53,12 @@ pub static DISCRIMINANT_OVERFLOW: Error = Error {
     msg: "discriminant overflow on value after ",
     label: Some("discriminant overflow"),
     note: Some("note: explicitly set `= 0` if that is desired outcome"),
+};
+
+pub static DOT_INCLUDE: Error = Error {
+    msg: "#include relative to `.` or `..` is not supported in Cargo builds",
+    label: Some("#include relative to `.` or `..` is not supported in Cargo builds"),
+    note: Some("note: use a path starting with the crate name"),
 };
 
 pub static DOUBLE_UNDERSCORE: Error = Error {

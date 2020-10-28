@@ -271,7 +271,10 @@ fn make_include_dir(prj: &Project) -> Result<PathBuf> {
 }
 
 fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) -> Result<()> {
-    let opt = Opt::default();
+    let opt = Opt {
+        allow_dot_includes: false,
+        ..Opt::default()
+    };
     let generated = gen::generate_from_path(rust_source_file, &opt);
     let ref rel_path = paths::local_relative_path(rust_source_file);
 

@@ -66,6 +66,7 @@ fn try_main() -> Result<()> {
         cxx_impl_annotations: opt.cxx_impl_annotations,
         gen_header,
         gen_implementation,
+        ..Default::default()
     };
 
     let generated_code = if let Some(input) = opt.input {
