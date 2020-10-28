@@ -7,14 +7,14 @@ else ()
 endif ()
 
 if(ENABLE_LTO)
-    set(ENV{RUSTFLAGS} "-Clinker-plugin-lto")
+    set(RUST_FLAGS "-Clinker-plugin-lto" "-Clinker=clang" "-Clink-arg=-fuse-ld=lld")
 endif()
 
 set(RUST_PART_LIB "${CMAKE_CURRENT_BINARY_DIR}/${TARGET_DIR}/librust_part.a")
 
 add_custom_target(rust_part ALL
     COMMENT "Compiling rust_part module"
-    COMMAND CARGO_TARGET_DIR=${CMAKE_CURRENT_BINARY_DIR} ${CARGO_CMD} 
+    COMMAND CARGO_TARGET_DIR=${CMAKE_CURRENT_BINARY_DIR} RUSTFLAGS="${RUST_FLAGS}" ${CARGO_CMD} 
     COMMAND cxxbridge src/lib.rs > ${CMAKE_CURRENT_BINARY_DIR}/rust_part.hpp
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 set_target_properties(rust_part PROPERTIES LOCATION ${CMAKE_CURRENT_BINARY_DIR})
