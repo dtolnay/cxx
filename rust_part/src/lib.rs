@@ -18,6 +18,7 @@ mod ffi {
         type Points;
         fn print_shared_thing(points: &SharedThing);
         fn make_shared_thing() -> SharedThing;
+        fn rust_echo(val: i32) -> i32;
     }
 }
 
@@ -40,4 +41,9 @@ fn make_shared_thing() -> ffi::SharedThing {
         }),
         persons: ffi::make_person(),
     }
+}
+
+#[inline(always)]
+fn rust_echo(val: i32) -> i32 {
+    val
 }
