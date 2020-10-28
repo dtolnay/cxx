@@ -1,4 +1,5 @@
 use crate::gen::out::OutFile;
+use crate::syntax::IncludeKind;
 use std::fmt::{self, Display};
 
 /// The complete contents of the "rust/cxx.h" header.
@@ -48,9 +49,15 @@ fn find_line(mut offset: usize, line: &str) -> Option<usize> {
     }
 }
 
+#[derive(PartialEq)]
+pub struct Include {
+    pub path: String,
+    pub kind: IncludeKind,
+}
+
 #[derive(Default, PartialEq)]
 pub struct Includes {
-    custom: Vec<String>,
+    custom: Vec<Include>,
     pub array: bool,
     pub cstddef: bool,
     pub cstdint: bool,
@@ -70,24 +77,30 @@ impl Includes {
         Includes::default()
     }
 
-    pub fn insert(&mut self, include: impl AsRef<str>) {
-        self.custom.push(include.as_ref().to_owned());
+    pub fn insert(&mut self, include: Include) {
+        self.custom.push(include);
     }
 }
 
-impl Extend<String> for Includes {
-    fn extend<I: IntoIterator<Item = String>>(&mut self, iter: I) {
-        self.custom.extend(iter);
+impl<'a> Extend<&'a String> for Includes {
+    fn extend<I: IntoIterator<Item = &'a String>>(&mut self, iter: I) {
+        self.custom.extend(iter.into_iter().map(|path| Include {
+            path: path.clone(),
+            kind: IncludeKind::Quoted,
+        }));
     }
 }
 
 impl Display for Includes {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for include in &self.custom {
-            if include.starts_with('<') && include.ends_with('>') {
-                writeln!(f, "#include {}", include)?;
-            } else {
-                writeln!(f, "#include \"{}\"", include.escape_default())?;
+            match include.kind {
+                IncludeKind::Quoted => {
+                    writeln!(f, "#include \"{}\"", include.path.escape_default())?;
+                }
+                IncludeKind::Bracketed => {
+                    writeln!(f, "#include <{}>", include.path)?;
+                }
             }
         }
         if self.array {
