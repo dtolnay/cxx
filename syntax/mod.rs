@@ -34,7 +34,7 @@ pub use self::parse::parse_items;
 pub use self::types::Types;
 
 pub enum Api {
-    Include(String),
+    Include(Include),
     Struct(Struct),
     Enum(Enum),
     CxxType(ExternType),
@@ -43,6 +43,19 @@ pub enum Api {
     RustFunction(ExternFn),
     TypeAlias(TypeAlias),
     Impl(Impl),
+}
+
+pub struct Include {
+    pub path: String,
+    pub kind: IncludeKind,
+    pub begin_span: Span,
+    pub end_span: Span,
+}
+
+#[derive(Copy, Clone, PartialEq)]
+pub enum IncludeKind {
+    Quoted,    // #include "quoted/path/to"
+    Bracketed, // #include <bracketed/path/to>
 }
 
 pub struct ExternType {

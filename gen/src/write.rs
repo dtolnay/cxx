@@ -3,7 +3,9 @@ use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::namespace::Namespace;
 use crate::syntax::symbol::Symbol;
-use crate::syntax::{mangle, Api, Enum, ExternFn, ExternType, Signature, Struct, Type, Types, Var};
+use crate::syntax::{
+    mangle, Api, Enum, ExternFn, ExternType, IncludeKind, Signature, Struct, Type, Types, Var,
+};
 use proc_macro2::Ident;
 use std::collections::HashMap;
 
@@ -24,7 +26,10 @@ pub(super) fn gen(
     out.include.extend(opt.include.clone());
     for api in apis {
         if let Api::Include(include) = api {
-            out.include.insert(include);
+            match include.kind {
+                IncludeKind::Quoted => out.include.insert(&include.path),
+                IncludeKind::Bracketed => out.include.insert(format!("<{}>", include.path)),
+            }
         }
     }
 
