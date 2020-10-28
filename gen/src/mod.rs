@@ -11,6 +11,7 @@ mod write;
 pub(super) use self::error::Error;
 use self::error::{format_err, Result};
 use self::file::File;
+use self::include::Include;
 use crate::syntax::report::Errors;
 use crate::syntax::{self, check, Types};
 use std::path::Path;
@@ -34,7 +35,7 @@ pub struct Opt {
     /// Any additional headers to #include. The cxxbridge tool does not parse or
     /// even require the given paths to exist; they simply go into the generated
     /// C++ code as #include lines.
-    pub include: Vec<String>,
+    pub include: Vec<Include>,
     /// Optional annotation for implementations of C++ function wrappers that
     /// may be exposed to Rust. You may for example need to provide
     /// `__declspec(dllexport)` or `__attribute__((visibility("default")))` if

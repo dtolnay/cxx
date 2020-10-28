@@ -49,9 +49,16 @@ fn find_line(mut offset: usize, line: &str) -> Option<usize> {
     }
 }
 
-#[derive(PartialEq)]
+/// A header to #include.
+///
+/// The cxxbridge tool does not parse or even require the given paths to exist;
+/// they simply go into the generated C++ code as #include lines.
+#[derive(Clone, PartialEq, Debug)]
 pub struct Include {
+    /// The header's path, not including the enclosing quotation marks or angle
+    /// brackets.
     pub path: String,
+    /// Whether to emit `#include "path"` or `#include <path>`.
     pub kind: IncludeKind,
 }
 
@@ -82,12 +89,9 @@ impl Includes {
     }
 }
 
-impl<'a> Extend<&'a String> for Includes {
-    fn extend<I: IntoIterator<Item = &'a String>>(&mut self, iter: I) {
-        self.custom.extend(iter.into_iter().map(|path| Include {
-            path: path.clone(),
-            kind: IncludeKind::Quoted,
-        }));
+impl<'a> Extend<&'a Include> for Includes {
+    fn extend<I: IntoIterator<Item = &'a Include>>(&mut self, iter: I) {
+        self.custom.extend(iter.into_iter().cloned());
     }
 }
 
