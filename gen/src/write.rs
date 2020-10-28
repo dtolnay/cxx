@@ -1,11 +1,10 @@
+use crate::gen::include::Include;
 use crate::gen::out::OutFile;
 use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::namespace::Namespace;
 use crate::syntax::symbol::Symbol;
-use crate::syntax::{
-    mangle, Api, Enum, ExternFn, ExternType, IncludeKind, Signature, Struct, Type, Types, Var,
-};
+use crate::syntax::{mangle, Api, Enum, ExternFn, ExternType, Signature, Struct, Type, Types, Var};
 use proc_macro2::Ident;
 use std::collections::HashMap;
 
@@ -23,13 +22,12 @@ pub(super) fn gen(
         writeln!(out.front, "#pragma once");
     }
 
-    out.include.extend(opt.include.clone());
+    out.include.extend(&opt.include);
     for api in apis {
         if let Api::Include(include) = api {
-            match include.kind {
-                IncludeKind::Quoted => out.include.insert(&include.path),
-                IncludeKind::Bracketed => out.include.insert(format!("<{}>", include.path)),
-            }
+            let path = include.path.clone();
+            let kind = include.kind;
+            out.include.insert(Include { path, kind });
         }
     }
 
