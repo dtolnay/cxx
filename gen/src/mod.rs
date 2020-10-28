@@ -1,6 +1,7 @@
 // Functionality that is shared between the cxx_build::bridge entry point and
 // the cxxbridge CLI command.
 
+mod check;
 pub(super) mod error;
 mod file;
 pub(super) mod fs;
@@ -13,7 +14,7 @@ use self::error::{format_err, Result};
 use self::file::File;
 use self::include::Include;
 use crate::syntax::report::Errors;
-use crate::syntax::{self, check, Types};
+use crate::syntax::{self, Types};
 use std::path::Path;
 
 /// Options for C++ code generation.
@@ -45,6 +46,7 @@ pub struct Opt {
 
     pub(super) gen_header: bool,
     pub(super) gen_implementation: bool,
+    pub(super) allow_dot_includes: bool,
 }
 
 /// Results of code generation.
@@ -63,6 +65,7 @@ impl Default for Opt {
             cxx_impl_annotations: None,
             gen_header: true,
             gen_implementation: true,
+            allow_dot_includes: true,
         }
     }
 }
@@ -112,6 +115,7 @@ pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
     let trusted = bridge.unsafety.is_some();
     let ref apis = syntax::parse_items(errors, bridge.content, trusted);
     let ref types = Types::collect(errors, apis);
+    check::precheck(errors, apis, opt);
     errors.propagate()?;
     check::typecheck(errors, namespace, apis, types);
     errors.propagate()?;
