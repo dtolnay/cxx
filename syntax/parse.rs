@@ -6,7 +6,7 @@ use crate::syntax::{
     attrs, error, Api, Doc, Enum, ExternFn, ExternType, Impl, Include, IncludeKind, Lang, Pair,
     Receiver, Ref, Signature, Slice, Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
-use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree};
+use proc_macro2::{Delimiter, Group, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
 use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
@@ -485,14 +485,10 @@ fn parse_include(input: ParseStream) -> Result<Include> {
 
     if input.peek(Token![<]) {
         let mut path = String::new();
-        let mut begin_span = None;
-        let mut end_span = Span::call_site();
 
-        input.parse::<Token![<]>()?;
+        let langle: Token![<] = input.parse()?;
         while !input.is_empty() && !input.peek(Token![>]) {
             let token: TokenTree = input.parse()?;
-            end_span = token.span();
-            begin_span = Some(begin_span.unwrap_or(end_span));
             match token {
                 TokenTree::Ident(token) => path += &token.to_string(),
                 TokenTree::Literal(token)
@@ -507,14 +503,12 @@ fn parse_include(input: ParseStream) -> Result<Include> {
             }
         }
         let rangle: Token![>] = input.parse()?;
-        let begin_span =
-            begin_span.ok_or_else(|| Error::new(rangle.span, "empty filename in #include"))?;
 
         return Ok(Include {
             path,
             kind: IncludeKind::Bracketed,
-            begin_span,
-            end_span,
+            begin_span: langle.span,
+            end_span: rangle.span,
         });
     }
 
