@@ -1,7 +1,7 @@
 use crate::syntax::atom::Atom::*;
 use crate::syntax::{
-    Atom, Derive, Enum, ExternFn, ExternType, Impl, Receiver, Ref, Signature, Slice, Struct, Ty1,
-    Type, TypeAlias, Var,
+    Atom, Derive, Enum, ExternFn, ExternType, Impl, Pair, Receiver, Ref, ResolvableName, Signature,
+    Slice, Struct, Ty1, Type, TypeAlias, Var,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote_spanned, ToTokens};
@@ -11,11 +11,11 @@ impl ToTokens for Type {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         match self {
             Type::Ident(ident) => {
-                if ident == CxxString {
-                    let span = ident.span();
+                if ident.rust == CxxString {
+                    let span = ident.rust.span();
                     tokens.extend(quote_spanned!(span=> ::cxx::));
                 }
-                ident.to_tokens(tokens);
+                ident.rust.to_tokens(tokens);
             }
             Type::RustBox(ty) | Type::UniquePtr(ty) | Type::CxxVector(ty) | Type::RustVec(ty) => {
                 ty.to_tokens(tokens)
@@ -39,7 +39,7 @@ impl ToTokens for Var {
 impl ToTokens for Ty1 {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let span = self.name.span();
-        let name = self.name.to_string();
+        let name = self.name.rust.to_string();
         if let "UniquePtr" | "CxxVector" = name.as_str() {
             tokens.extend(quote_spanned!(span=> ::cxx::));
         } else if name == "Vec" {
@@ -121,6 +121,12 @@ impl ToTokens for ExternFn {
     }
 }
 
+impl ToTokens for Pair {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        self.rust.to_tokens(tokens);
+    }
+}
+
 impl ToTokens for Impl {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         self.impl_token.to_tokens(tokens);
@@ -146,6 +152,12 @@ impl ToTokens for Signature {
                 ret.to_tokens(tokens);
             }
         }
+    }
+}
+
+impl ToTokens for ResolvableName {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        self.rust.to_tokens(tokens);
     }
 }
 

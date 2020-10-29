@@ -10,6 +10,7 @@ impl QualifiedName {
     pub fn parse_unquoted(input: ParseStream) -> Result<Self> {
         let mut segments = Vec::new();
         let mut trailing_punct = true;
+        input.parse::<Option<Token![::]>>()?;
         while trailing_punct && input.peek(Ident::peek_any) {
             let ident = Ident::parse_any(input)?;
             segments.push(ident);

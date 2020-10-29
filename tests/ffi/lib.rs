@@ -4,6 +4,7 @@
     clippy::trivially_copy_pass_by_ref
 )]
 
+pub mod class_in_ns;
 pub mod extra;
 pub mod module;
 
@@ -23,6 +24,32 @@ mod other {
     pub struct E {
         e: u64,
         e_str: CxxString,
+    }
+
+    pub mod f {
+        use cxx::kind::Opaque;
+        use cxx::{type_id, CxxString, ExternType};
+
+        #[repr(C)]
+        pub struct F {
+            e: u64,
+            e_str: CxxString,
+        }
+
+        unsafe impl ExternType for F {
+            type Id = type_id!("F::F");
+            type Kind = Opaque;
+        }
+    }
+
+    #[repr(C)]
+    pub struct G {
+        pub g: u64,
+    }
+
+    unsafe impl ExternType for G {
+        type Id = type_id!("G::G");
+        type Kind = Trivial;
     }
 
     unsafe impl ExternType for D {
@@ -47,6 +74,32 @@ pub mod ffi {
         AVal,
         BVal = 2020,
         CVal,
+    }
+
+    #[namespace(namespace = A)]
+    #[derive(Clone)]
+    struct AShared {
+        z: usize,
+    }
+
+    #[namespace(namespace = A)]
+    enum AEnum {
+        AAVal,
+        ABVal = 2020,
+        ACVal,
+    }
+
+    #[namespace(namespace = A::B)]
+    enum ABEnum {
+        ABAVal,
+        ABBVal = 2020,
+        ABCVal,
+    }
+
+    #[namespace(namespace = A::B)]
+    #[derive(Clone)]
+    struct ABShared {
+        z: usize,
     }
 
     extern "C" {
@@ -78,6 +131,10 @@ pub mod ffi {
         fn c_return_identity(_: usize) -> usize;
         fn c_return_sum(_: usize, _: usize) -> usize;
         fn c_return_enum(n: u16) -> Enum;
+        fn c_return_ns_ref(shared: &AShared) -> &usize;
+        fn c_return_nested_ns_ref(shared: &ABShared) -> &usize;
+        fn c_return_ns_enum(n: u16) -> AEnum;
+        fn c_return_nested_ns_enum(n: u16) -> ABEnum;
 
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);
@@ -108,6 +165,12 @@ pub mod ffi {
         fn c_take_callback(callback: fn(String) -> usize);
         */
         fn c_take_enum(e: Enum);
+        fn c_take_ns_enum(e: AEnum);
+        fn c_take_nested_ns_enum(e: ABEnum);
+        fn c_take_ns_shared(shared: AShared);
+        fn c_take_nested_ns_shared(shared: ABShared);
+        fn c_take_rust_vec_ns_shared(v: Vec<AShared>);
+        fn c_take_rust_vec_nested_ns_shared(v: Vec<ABShared>);
 
         fn c_try_return_void() -> Result<()>;
         fn c_try_return_primitive() -> Result<usize>;
@@ -137,6 +200,9 @@ pub mod ffi {
         fn cOverloadedFunction(x: i32) -> String;
         #[rust_name = "str_overloaded_function"]
         fn cOverloadedFunction(x: &str) -> String;
+
+        #[namespace (namespace = other)]
+        fn ns_c_take_ns_shared(shared: AShared);
     }
 
     extern "C" {

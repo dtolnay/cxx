@@ -81,7 +81,7 @@ impl AsRef<str> for Atom {
 impl PartialEq<Atom> for Type {
     fn eq(&self, atom: &Atom) -> bool {
         match self {
-            Type::Ident(ident) => ident == atom,
+            Type::Ident(ident) => ident.rust == atom,
             _ => false,
         }
     }

@@ -1,8 +1,13 @@
-use crate::syntax::{ExternFn, Impl, Include, Receiver, Ref, Signature, Slice, Ty1, Type};
+use crate::syntax::{
+    Api, CppName, ExternFn, Impl, Include, Namespace, Pair, Receiver, Ref, ResolvableName,
+    Signature, Slice, Symbol, Ty1, Type, Types,
+};
+use proc_macro2::{Ident, Span};
 use std::borrow::Borrow;
 use std::hash::{Hash, Hasher};
 use std::mem;
 use std::ops::{Deref, DerefMut};
+use syn::Token;
 
 impl PartialEq for Include {
     fn eq(&self, other: &Include) -> bool {
@@ -290,5 +295,86 @@ impl PartialEq for Impl {
 impl Borrow<Type> for &Impl {
     fn borrow(&self) -> &Type {
         &self.ty
+    }
+}
+
+impl Pair {
+    /// Use this constructor when the item can't have a different
+    /// name in Rust and C++. For cases where #[rust_name] and similar
+    /// attributes can be used, construct the object by hand.
+    pub fn new(ns: Namespace, ident: Ident) -> Self {
+        Self {
+            rust: ident.clone(),
+            cxx: CppName::new(ns, ident),
+        }
+    }
+}
+
+impl ResolvableName {
+    pub fn new(ident: Ident) -> Self {
+        Self { rust: ident }
+    }
+
+    pub fn from_pair(pair: Pair) -> Self {
+        Self { rust: pair.rust }
+    }
+
+    pub fn make_self(span: Span) -> Self {
+        Self {
+            rust: Token![Self](span).into(),
+        }
+    }
+
+    pub fn is_self(&self) -> bool {
+        self.rust == "Self"
+    }
+
+    pub fn span(&self) -> Span {
+        self.rust.span()
+    }
+
+    pub fn to_symbol(&self, types: &Types) -> Symbol {
+        types.resolve(self).to_symbol()
+    }
+}
+
+impl Api {
+    pub fn get_namespace(&self) -> Option<&Namespace> {
+        match self {
+            Api::CxxFunction(cfn) => Some(&cfn.ident.cxx.ns),
+            Api::CxxType(cty) => Some(&cty.ident.cxx.ns),
+            Api::Enum(enm) => Some(&enm.ident.cxx.ns),
+            Api::Struct(strct) => Some(&strct.ident.cxx.ns),
+            Api::RustType(rty) => Some(&rty.ident.cxx.ns),
+            Api::RustFunction(rfn) => Some(&rfn.ident.cxx.ns),
+            Api::Impl(_) | Api::Include(_) | Api::TypeAlias(_) => None,
+        }
+    }
+}
+
+impl CppName {
+    pub fn new(ns: Namespace, ident: Ident) -> Self {
+        Self { ns, ident }
+    }
+
+    fn iter_all_segments(
+        &self,
+    ) -> std::iter::Chain<std::slice::Iter<Ident>, std::iter::Once<&Ident>> {
+        self.ns.iter().chain(std::iter::once(&self.ident))
+    }
+
+    fn join(&self, sep: &str) -> String {
+        self.iter_all_segments()
+            .map(|s| s.to_string())
+            .collect::<Vec<_>>()
+            .join(sep)
+    }
+
+    pub fn to_symbol(&self) -> Symbol {
+        Symbol::from_idents(self.iter_all_segments())
+    }
+
+    pub fn to_fully_qualified(&self) -> String {
+        format!("::{}", self.join("::"))
     }
 }

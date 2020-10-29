@@ -1,10 +1,8 @@
 use crate::gen::include::Includes;
-use crate::syntax::namespace::Namespace;
 use std::cell::RefCell;
 use std::fmt::{self, Arguments, Write};
 
 pub(crate) struct OutFile {
-    pub namespace: Namespace,
     pub header: bool,
     pub include: Includes,
     pub front: Content,
@@ -18,9 +16,8 @@ pub struct Content {
 }
 
 impl OutFile {
-    pub fn new(namespace: Namespace, header: bool) -> Self {
+    pub fn new(header: bool) -> Self {
         OutFile {
-            namespace,
             header,
             include: Includes::new(),
             front: Content::new(),

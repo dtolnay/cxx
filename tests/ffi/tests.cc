@@ -43,6 +43,10 @@ size_t c_return_primitive() { return 2020; }
 
 Shared c_return_shared() { return Shared{2020}; }
 
+::A::AShared c_return_ns_shared() { return ::A::AShared{2020}; }
+
+::A::B::ABShared c_return_nested_ns_shared() { return ::A::B::ABShared{2020}; }
+
 rust::Box<R> c_return_box() {
   return rust::Box<R>::from_raw(cxx_test_suite_get_box());
 }
@@ -51,7 +55,15 @@ std::unique_ptr<C> c_return_unique_ptr() {
   return std::unique_ptr<C>(new C{2020});
 }
 
+std::unique_ptr<::H::H> c_return_ns_unique_ptr() {
+  return std::unique_ptr<::H::H>(new ::H::H{"hello"});
+}
+
 const size_t &c_return_ref(const Shared &shared) { return shared.z; }
+
+const size_t &c_return_ns_ref(const ::A::AShared &shared) { return shared.z; }
+
+const size_t &c_return_nested_ns_ref(const ::A::B::ABShared &shared) { return shared.z; }
 
 size_t &c_return_mut(Shared &shared) { return shared.z; }
 
@@ -144,6 +156,26 @@ Enum c_return_enum(uint16_t n) {
   }
 }
 
+::A::AEnum c_return_ns_enum(uint16_t n) {
+  if (n <= static_cast<uint16_t>(::A::AEnum::AAVal)) {
+    return ::A::AEnum::AAVal;
+  } else if (n <= static_cast<uint16_t>(::A::AEnum::ABVal)) {
+    return ::A::AEnum::ABVal;
+  } else {
+    return ::A::AEnum::ACVal;
+  }
+}
+
+::A::B::ABEnum c_return_nested_ns_enum(uint16_t n) {
+  if (n <= static_cast<uint16_t>(::A::B::ABEnum::ABAVal)) {
+    return ::A::B::ABEnum::ABAVal;
+  } else if (n <= static_cast<uint16_t>(::A::B::ABEnum::ABBVal)) {
+    return ::A::B::ABEnum::ABBVal;
+  } else {
+    return ::A::B::ABEnum::ABCVal;
+  }
+}
+
 void c_take_primitive(size_t n) {
   if (n == 2020) {
     cxx_test_suite_set_correct();
@@ -151,6 +183,18 @@ void c_take_primitive(size_t n) {
 }
 
 void c_take_shared(Shared shared) {
+  if (shared.z == 2020) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_ns_shared(::A::AShared shared) {
+  if (shared.z == 2020) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_nested_ns_shared(::A::B::ABShared shared) {
   if (shared.z == 2020) {
     cxx_test_suite_set_correct();
   }
@@ -176,6 +220,12 @@ void c_take_ref_r(const R &r) {
 
 void c_take_ref_c(const C &c) {
   if (c.get() == 2020) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_ref_ns_c(const ::H::H &h) {
+  if (h.h == "hello") {
     cxx_test_suite_set_correct();
   }
 }
@@ -258,6 +308,26 @@ void c_take_rust_vec_shared(rust::Vec<Shared> v) {
   }
 }
 
+void c_take_rust_vec_ns_shared(rust::Vec<::A::AShared> v) {
+  uint32_t sum = 0;
+  for (auto i : v) {
+    sum += i.z;
+  }
+  if (sum == 2021) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_rust_vec_nested_ns_shared(rust::Vec<::A::B::ABShared> v) {
+  uint32_t sum = 0;
+  for (auto i : v) {
+    sum += i.z;
+  }
+  if (sum == 2021) {
+    cxx_test_suite_set_correct();
+  }
+}
+
 void c_take_rust_vec_string(rust::Vec<rust::String> v) {
   (void)v;
   cxx_test_suite_set_correct();
@@ -322,6 +392,18 @@ void c_take_callback(rust::Fn<size_t(rust::String)> callback) {
 
 void c_take_enum(Enum e) {
   if (e == Enum::AVal) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_ns_enum(::A::AEnum e) {
+  if (e == ::A::AEnum::AAVal) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_nested_ns_enum(::A::B::ABEnum e) {
+  if (e == ::A::B::ABEnum::ABAVal) {
     cxx_test_suite_set_correct();
   }
 }
@@ -394,8 +476,28 @@ void c_take_trivial_ref(const D& d) {
     cxx_test_suite_set_correct();
   }
 }
+
 void c_take_trivial(D d) {
   if (d.d == 30) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+
+void c_take_trivial_ns_ptr(std::unique_ptr<::G::G> g) {
+  if (g->g == 30) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_trivial_ns_ref(const ::G::G& g) {
+  if (g.g == 30) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_trivial_ns(::G::G g) {
+  if (g.g == 30) {
     cxx_test_suite_set_correct();
   }
 }
@@ -406,8 +508,20 @@ void c_take_opaque_ptr(std::unique_ptr<E> e) {
   }
 }
 
+void c_take_opaque_ns_ptr(std::unique_ptr<::F::F> f) {
+  if (f->f == 40) {
+    cxx_test_suite_set_correct();
+  }
+}
+
 void c_take_opaque_ref(const E& e) {
   if (e.e == 40 && e.e_str == "hello") {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_opaque_ns_ref(const ::F::F& f) {
+  if (f.f == 40 && f.f_str == "hello") {
     cxx_test_suite_set_correct();
   }
 }
@@ -424,11 +538,30 @@ D c_return_trivial() {
   return d;
 }
 
+std::unique_ptr<::G::G> c_return_trivial_ns_ptr() {
+  auto g = std::unique_ptr<::G::G>(new ::G::G());
+  g->g = 30;
+  return g;
+}
+
+::G::G c_return_trivial_ns() {
+  ::G::G g;
+  g.g = 30;
+  return g;
+}
+
 std::unique_ptr<E> c_return_opaque_ptr() {
   auto e = std::unique_ptr<E>(new E());
   e->e = 40;
   e->e_str = std::string("hello");
   return e;
+}
+
+std::unique_ptr<::F::F> c_return_ns_opaque_ptr() {
+  auto f = std::unique_ptr<::F::F>(new ::F::F());
+  f->f = 40;
+  f->f_str = std::string("hello");
+  return f;
 }
 
 extern "C" const char *cxx_run_test() noexcept {
@@ -494,3 +627,34 @@ extern "C" const char *cxx_run_test() noexcept {
 }
 
 } // namespace tests
+
+namespace other {
+
+  void ns_c_take_trivial(::tests::D d) {
+    if (d.d == 30) {
+      cxx_test_suite_set_correct();
+    }
+  }
+
+  ::tests::D ns_c_return_trivial() {
+    ::tests::D d;
+    d.d = 30;
+    return d;
+  }
+
+  void ns_c_take_ns_shared(::A::AShared shared) {
+    if (shared.z == 2020) {
+      cxx_test_suite_set_correct();
+    }
+  }
+} // namespace other
+
+namespace I {
+  uint32_t I::get() const {
+    return a;
+  }
+
+  std::unique_ptr<I> ns_c_return_unique_ptr_ns() {
+    return std::unique_ptr<I>(new I());
+  }
+} // namespace I

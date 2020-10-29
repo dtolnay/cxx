@@ -6,6 +6,7 @@ pub(super) mod error;
 mod file;
 pub(super) mod fs;
 pub(super) mod include;
+mod namespace_organizer;
 pub(super) mod out;
 mod write;
 
@@ -113,23 +114,23 @@ pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
         .ok_or(Error::NoBridgeMod)?;
     let ref namespace = bridge.namespace;
     let trusted = bridge.unsafety.is_some();
-    let ref apis = syntax::parse_items(errors, bridge.content, trusted);
+    let ref apis = syntax::parse_items(errors, bridge.content, trusted, namespace);
     let ref types = Types::collect(errors, apis);
     check::precheck(errors, apis, opt);
     errors.propagate()?;
-    check::typecheck(errors, namespace, apis, types);
+    check::typecheck(errors, apis, types);
     errors.propagate()?;
     // Some callers may wish to generate both header and C++
     // from the same token stream to avoid parsing twice. But others
     // only need to generate one or the other.
     Ok(GeneratedCode {
         header: if opt.gen_header {
-            write::gen(namespace, apis, types, opt, true).content()
+            write::gen(apis, types, opt, true).content()
         } else {
             Vec::new()
         },
         implementation: if opt.gen_implementation {
-            write::gen(namespace, apis, types, opt, false).content()
+            write::gen(apis, types, opt, false).content()
         } else {
             Vec::new()
         },

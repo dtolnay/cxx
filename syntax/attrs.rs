@@ -1,3 +1,4 @@
+use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::{self, *};
 use crate::syntax::{Derive, Doc};
@@ -12,19 +13,7 @@ pub struct Parser<'a> {
     pub repr: Option<&'a mut Option<Atom>>,
     pub cxx_name: Option<&'a mut Option<Ident>>,
     pub rust_name: Option<&'a mut Option<Ident>>,
-}
-
-pub(super) fn parse_doc(cx: &mut Errors, attrs: &[Attribute]) -> Doc {
-    let mut doc = Doc::new();
-    parse(
-        cx,
-        attrs,
-        Parser {
-            doc: Some(&mut doc),
-            ..Parser::default()
-        },
-    );
-    doc
+    pub namespace: Option<&'a mut Namespace>,
 }
 
 pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
@@ -74,6 +63,16 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
                 Ok(attr) => {
                     if let Some(rust_name) = &mut parser.rust_name {
                         **rust_name = Some(attr);
+                        continue;
+                    }
+                }
+                Err(err) => return cx.push(err),
+            }
+        } else if attr.path.is_ident("namespace") {
+            match parse_namespace_attribute.parse2(attr.tokens.clone()) {
+                Ok(attr) => {
+                    if let Some(namespace) = &mut parser.namespace {
+                        **namespace = attr;
                         continue;
                     }
                 }
@@ -130,4 +129,11 @@ fn parse_function_alias_attribute(input: ParseStream) -> Result<Ident> {
     } else {
         input.parse()
     }
+}
+
+fn parse_namespace_attribute(input: ParseStream) -> Result<Namespace> {
+    let content;
+    syn::parenthesized!(content in input);
+    let namespace = content.parse::<Namespace>()?;
+    Ok(namespace)
 }

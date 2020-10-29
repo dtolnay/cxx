@@ -21,7 +21,9 @@ mod tokens;
 pub mod types;
 
 use self::discriminant::Discriminant;
+use self::namespace::Namespace;
 use self::parse::kw;
+use self::symbol::Symbol;
 use proc_macro2::{Ident, Span};
 use syn::punctuated::Punctuated;
 use syn::token::{Brace, Bracket, Paren};
@@ -32,6 +34,29 @@ pub use self::derive::Derive;
 pub use self::doc::Doc;
 pub use self::parse::parse_items;
 pub use self::types::Types;
+
+/// A Rust identifier will forver == a proc_macro2::Ident,
+/// but for completeness here's a type alias.
+pub type RsIdent = Ident;
+
+/// At the moment, a Rust name is simply a proc_macro2::Ident.
+/// In the future, it may become namespaced based on a mod path.
+pub type RsName = RsIdent;
+
+/// At the moment, a C++ identifier is also a proc_macro2::Ident.
+/// In the future, we may wish to make a newtype wrapper here
+/// to avoid confusion between C++ and Rust identifiers.
+pub type CppIdent = Ident;
+
+#[derive(Clone)]
+/// A C++ identifier in a particular namespace.
+/// It is intentional that this does not impl Display,
+/// because we want to force users actively to decide whether to output
+/// it as a qualified name or as an unqualfiied name.
+pub struct CppName {
+    pub ns: Namespace,
+    pub ident: CppIdent,
+}
 
 pub enum Api {
     Include(Include),
@@ -64,7 +89,7 @@ pub enum IncludeKind {
 pub struct ExternType {
     pub doc: Doc,
     pub type_token: Token![type],
-    pub ident: Ident,
+    pub ident: Pair,
     pub semi_token: Token![;],
     pub trusted: bool,
 }
@@ -73,7 +98,7 @@ pub struct Struct {
     pub doc: Doc,
     pub derives: Vec<Derive>,
     pub struct_token: Token![struct],
-    pub ident: Ident,
+    pub ident: Pair,
     pub brace_token: Brace,
     pub fields: Vec<Var>,
 }
@@ -81,15 +106,18 @@ pub struct Struct {
 pub struct Enum {
     pub doc: Doc,
     pub enum_token: Token![enum],
-    pub ident: Ident,
+    pub ident: Pair,
     pub brace_token: Brace,
     pub variants: Vec<Variant>,
     pub repr: Atom,
 }
 
+/// A type with a defined Rust name and a fully resolved,
+/// qualified, namespaced, C++ name.
+#[derive(Clone)]
 pub struct Pair {
-    pub cxx: Ident,
-    pub rust: Ident,
+    pub cxx: CppName,
+    pub rust: RsName,
 }
 
 pub struct ExternFn {
@@ -103,7 +131,7 @@ pub struct ExternFn {
 pub struct TypeAlias {
     pub doc: Doc,
     pub type_token: Token![type],
-    pub ident: Ident,
+    pub ident: Pair,
     pub eq_token: Token![=],
     pub ty: RustType,
     pub semi_token: Token![;],
@@ -128,7 +156,7 @@ pub struct Signature {
 
 #[derive(Eq, PartialEq, Hash)]
 pub struct Var {
-    pub ident: Ident,
+    pub ident: RsIdent, // fields and variables are not namespaced
     pub ty: Type,
 }
 
@@ -137,18 +165,18 @@ pub struct Receiver {
     pub lifetime: Option<Lifetime>,
     pub mutability: Option<Token![mut]>,
     pub var: Token![self],
-    pub ty: Ident,
+    pub ty: ResolvableName,
     pub shorthand: bool,
 }
 
 pub struct Variant {
-    pub ident: Ident,
+    pub ident: RsIdent,
     pub discriminant: Discriminant,
     pub expr: Option<Expr>,
 }
 
 pub enum Type {
-    Ident(Ident),
+    Ident(ResolvableName),
     RustBox(Box<Ty1>),
     RustVec(Box<Ty1>),
     UniquePtr(Box<Ty1>),
@@ -162,7 +190,7 @@ pub enum Type {
 }
 
 pub struct Ty1 {
-    pub name: Ident,
+    pub name: ResolvableName,
     pub langle: Token![<],
     pub inner: Type,
     pub rangle: Token![>],
@@ -184,4 +212,11 @@ pub struct Slice {
 pub enum Lang {
     Cxx,
     Rust,
+}
+
+/// Wrapper for a type which needs to be resolved
+/// before it can be printed in C++.
+#[derive(Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
+pub struct ResolvableName {
+    pub rust: RsName,
 }
