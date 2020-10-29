@@ -14,8 +14,8 @@ jobs:
               lto: ["ON", "OFF"]
         env:
             DEBIAN_FRONTEND: noninteractive
-            CC: clang
-            CXX: clang++ 
+            CC: clang-11
+            CXX: clang++-11
         steps:
         - name: Checkout
           uses: actions/checkout@v2.0.0
@@ -26,7 +26,8 @@ jobs:
             override: true
         - run: cargo install cxxbridge-cmd
         - run: sudo apt update
-        - run: sudo apt install -y clang cmake git lld-8
+        - run: sudo apt install -y cmake git
+        - run: sudo bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
         - run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_LTO=${{matrix.lto}} ..
         - run: cd build && make
         - run: cd build && ./main
