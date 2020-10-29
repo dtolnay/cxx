@@ -13,4 +13,3 @@ RUN mkdir build-docker && cd build-docker && cmake -DCMAKE_BUILD_TYPE=Release -D
 RUN cd build-docker && make
 RUN cd build-docker && ./main
 
-

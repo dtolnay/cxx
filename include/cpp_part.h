@@ -18,12 +18,6 @@ struct Person
     }
 };
 
-const std::string &get_name(const Person &person)
-{
-    return person.name;
-}
+const std::string &get_name(const Person &person);
 
-std::unique_ptr<Person> make_person()
-{
-    return std::make_unique<Person>();
-}
+std::unique_ptr<Person> make_person();

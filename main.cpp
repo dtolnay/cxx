@@ -1,6 +1,16 @@
 #include <iostream>
-#include "rust_part.hpp"
+#include "rust_part.h"
 #include <chrono>
+
+const std::string &get_name(const Person &person)
+{
+    return person.name;
+}
+
+std::unique_ptr<Person> make_person()
+{
+    return std::make_unique<Person>();
+}
 
 int cpp_echo(int val)
 {
@@ -53,6 +63,5 @@ int main()
     rust_part::print_shared_thing(thing);
 
     test_lto();
-
     return 0;
 }
