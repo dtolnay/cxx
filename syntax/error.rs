@@ -21,6 +21,7 @@ pub static ERRORS: &[Error] = &[
     DISCRIMINANT_OVERFLOW,
     DOUBLE_UNDERSCORE,
     RUST_TYPE_BY_VALUE,
+    UNSUPPORTED_TYPE,
     USE_NOT_ALLOWED,
 ];
 
@@ -64,6 +65,12 @@ pub static RUST_TYPE_BY_VALUE: Error = Error {
     msg: "opaque Rust type by value is not supported",
     label: None,
     note: Some("hint: wrap it in a Box<>"),
+};
+
+pub static UNSUPPORTED_TYPE: Error = Error {
+    msg: "unsupported type: ",
+    label: Some("unsupported type"),
+    note: None,
 };
 
 pub static USE_NOT_ALLOWED: Error = Error {
