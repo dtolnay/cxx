@@ -300,12 +300,20 @@ impl Borrow<Type> for &Impl {
 
 impl Pair {
     /// Use this constructor when the item can't have a different
-    /// name in Rust and C++. For cases where #[rust_name] and similar
-    /// attributes can be used, construct the object by hand.
+    /// name in Rust and C++.
     pub fn new(ns: Namespace, ident: Ident) -> Self {
         Self {
             rust: ident.clone(),
             cxx: CppName::new(ns, ident),
+        }
+    }
+
+    /// Use this constructor when attributes such as #[rust_name]
+    /// can be used to potentially give a different name in Rust vs C++.
+    pub fn new_from_differing_names(ns: Namespace, cxx_ident: Ident, rust_ident: Ident) -> Self {
+        Self {
+            rust: rust_ident,
+            cxx: CppName::new(ns, cxx_ident),
         }
     }
 }
