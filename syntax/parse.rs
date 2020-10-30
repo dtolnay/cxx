@@ -245,7 +245,7 @@ fn parse_foreign_mod(
             if let Api::CxxFunction(efn) | Api::RustFunction(efn) = item {
                 if let Some(receiver) = &mut efn.receiver {
                     if receiver.ty.is_self() {
-                        receiver.ty = ResolvableName::from_pair(single_type.clone());
+                        receiver.ty = ResolvableName::new(single_type.rust.clone());
                     }
                 }
             }

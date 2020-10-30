@@ -315,10 +315,6 @@ impl ResolvableName {
         Self { rust: ident }
     }
 
-    pub fn from_pair(pair: Pair) -> Self {
-        Self { rust: pair.rust }
-    }
-
     pub fn make_self(span: Span) -> Self {
         Self {
             rust: Token![Self](span).into(),
@@ -357,9 +353,7 @@ impl CppName {
         Self { ns, ident }
     }
 
-    fn iter_all_segments(
-        &self,
-    ) -> std::iter::Chain<std::slice::Iter<Ident>, std::iter::Once<&Ident>> {
+    fn iter_all_segments(&self) -> impl Iterator<Item = &Ident> {
         self.ns.iter().chain(std::iter::once(&self.ident))
     }
 
