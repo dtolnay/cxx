@@ -10,12 +10,12 @@ pub mod ffi3 {
     extern "C" {
         include!("tests/ffi/tests.h");
 
-        #[namespace (namespace = I)]
+        #[namespace = "I"]
         type I;
 
         fn get(self: &I) -> u32;
 
-        #[namespace (namespace = I)]
+        #[namespace = "I"]
         fn ns_c_return_unique_ptr_ns() -> UniquePtr<I>;
     }
 }
