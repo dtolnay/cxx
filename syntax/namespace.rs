@@ -1,4 +1,6 @@
 use crate::syntax::qualified::QualifiedName;
+#[cfg(test)]
+use proc_macro2::Span;
 use quote::IdentFragment;
 use std::fmt::{self, Display};
 use std::slice::Iter;
@@ -35,6 +37,16 @@ impl Namespace {
         let ns = input.parse::<Namespace>()?;
         input.parse::<Option<Token![,]>>()?;
         Ok(ns)
+    }
+
+    #[cfg(test)]
+    pub fn from_str(ns: &str) -> Self {
+        Namespace {
+            segments: ns
+                .split("::")
+                .map(|x| Ident::new(x, Span::call_site()))
+                .collect(),
+        }
     }
 }
 
