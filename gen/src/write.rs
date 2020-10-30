@@ -1,4 +1,4 @@
-use crate::gen::namespace_organizer::{sort_by_namespace, NamespaceEntries};
+use crate::gen::namespace_organizer::NamespaceEntries;
 use crate::gen::out::OutFile;
 use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
@@ -30,7 +30,7 @@ pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> OutFi
 
     out.next_section();
 
-    let apis_by_namespace = sort_by_namespace(apis);
+    let apis_by_namespace = NamespaceEntries::new(apis);
 
     gen_namespace_contents(&apis_by_namespace, types, opt, header, out);
 
@@ -51,10 +51,10 @@ fn gen_namespace_contents(
     header: bool,
     out: &mut OutFile,
 ) {
-    let apis = &ns_entries.entries;
+    let apis = ns_entries.entries();
 
     out.next_section();
-    for api in apis {
+    for api in apis.iter() {
         match api {
             Api::Struct(strct) => write_struct_decl(out, &strct.ident.cxx.ident),
             Api::CxxType(ety) => write_struct_using(out, &ety.ident.cxx),
@@ -64,7 +64,7 @@ fn gen_namespace_contents(
     }
 
     let mut methods_for_type = HashMap::new();
-    for api in apis {
+    for api in apis.iter() {
         if let Api::RustFunction(efn) = api {
             if let Some(receiver) = &efn.sig.receiver {
                 methods_for_type
@@ -134,7 +134,7 @@ fn gen_namespace_contents(
 
     out.next_section();
 
-    for (child_ns, child_ns_entries) in &ns_entries.children {
+    for (child_ns, child_ns_entries) in ns_entries.children() {
         writeln!(out, "namespace {} {{", child_ns);
         gen_namespace_contents(&child_ns_entries, types, opt, header, out);
         writeln!(out, "}} // namespace {}", child_ns);

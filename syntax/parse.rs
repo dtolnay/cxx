@@ -3,7 +3,7 @@ use crate::syntax::file::{Item, ItemForeignMod};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
-    attrs, error, Api, CppName, Doc, Enum, ExternFn, ExternType, Impl, Include, IncludeKind, Lang,
+    attrs, error, Api, Doc, Enum, ExternFn, ExternType, Impl, Include, IncludeKind, Lang,
     Namespace, Pair, Receiver, Ref, ResolvableName, Signature, Slice, Struct, Ty1, Type, TypeAlias,
     Var, Variant,
 };
@@ -245,7 +245,7 @@ fn parse_foreign_mod(
             if let Api::CxxFunction(efn) | Api::RustFunction(efn) = item {
                 if let Some(receiver) = &mut efn.receiver {
                     if receiver.ty.is_self() {
-                        receiver.ty = ResolvableName::from_pair(single_type.clone());
+                        receiver.ty = ResolvableName::new(single_type.rust.clone());
                     }
                 }
             }
@@ -398,10 +398,11 @@ fn parse_extern_fn(
     let throws = throws_tokens.is_some();
     let unsafety = foreign_fn.sig.unsafety;
     let fn_token = foreign_fn.sig.fn_token;
-    let ident = Pair {
-        cxx: CppName::new(ns, cxx_name.unwrap_or(foreign_fn.sig.ident.clone())),
-        rust: rust_name.unwrap_or(foreign_fn.sig.ident.clone()),
-    };
+    let ident = Pair::new_from_differing_names(
+        ns,
+        cxx_name.unwrap_or(foreign_fn.sig.ident.clone()),
+        rust_name.unwrap_or(foreign_fn.sig.ident.clone()),
+    );
     let paren_token = foreign_fn.sig.paren_token;
     let semi_token = foreign_fn.semi_token;
     let api_function = match lang {

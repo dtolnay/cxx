@@ -300,12 +300,20 @@ impl Borrow<Type> for &Impl {
 
 impl Pair {
     /// Use this constructor when the item can't have a different
-    /// name in Rust and C++. For cases where #[rust_name] and similar
-    /// attributes can be used, construct the object by hand.
+    /// name in Rust and C++.
     pub fn new(ns: Namespace, ident: Ident) -> Self {
         Self {
             rust: ident.clone(),
             cxx: CppName::new(ns, ident),
+        }
+    }
+
+    /// Use this constructor when attributes such as #[rust_name]
+    /// can be used to potentially give a different name in Rust vs C++.
+    pub fn new_from_differing_names(ns: Namespace, cxx_ident: Ident, rust_ident: Ident) -> Self {
+        Self {
+            rust: rust_ident,
+            cxx: CppName::new(ns, cxx_ident),
         }
     }
 }
@@ -313,10 +321,6 @@ impl Pair {
 impl ResolvableName {
     pub fn new(ident: Ident) -> Self {
         Self { rust: ident }
-    }
-
-    pub fn from_pair(pair: Pair) -> Self {
-        Self { rust: pair.rust }
     }
 
     pub fn make_self(span: Span) -> Self {
@@ -357,9 +361,7 @@ impl CppName {
         Self { ns, ident }
     }
 
-    fn iter_all_segments(
-        &self,
-    ) -> std::iter::Chain<std::slice::Iter<Ident>, std::iter::Once<&Ident>> {
+    fn iter_all_segments(&self) -> impl Iterator<Item = &Ident> {
         self.ns.iter().chain(std::iter::once(&self.ident))
     }
 

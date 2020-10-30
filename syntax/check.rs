@@ -211,9 +211,7 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
 
     if let Some(reason) = cx.types.required_trivial.get(&ety.ident.rust) {
         let what = match reason {
-            TrivialReason::StructField(strct) => {
-                format!("a field of `{}`", strct.ident.cxx.to_fully_qualified())
-            }
+            TrivialReason::StructField(strct) => format!("a field of `{}`", strct.ident.rust),
             TrivialReason::FunctionArgument(efn) => format!("an argument of `{}`", efn.ident.rust),
             TrivialReason::FunctionReturn(efn) => format!("a return value of `{}`", efn.ident.rust),
         };

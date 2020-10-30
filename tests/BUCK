@@ -15,7 +15,6 @@ rust_library(
         "ffi/extra.rs",
         "ffi/lib.rs",
         "ffi/module.rs",
-        "ffi/class_in_ns.rs",
     ],
     crate = "cxx_test_suite",
     deps = [
@@ -31,7 +30,6 @@ cxx_library(
         ":bridge/source",
         ":extra/source",
         ":module/source",
-        ":class_in_ns/source",
     ],
     headers = {
         "ffi/lib.rs.h": ":bridge/header",
@@ -53,9 +51,4 @@ rust_cxx_bridge(
 rust_cxx_bridge(
     name = "module",
     src = "ffi/module.rs",
-)
-
-rust_cxx_bridge(
-    name = "class_in_ns",
-    src = "ffi/class_in_ns.rs",
 )
