@@ -24,19 +24,23 @@ impl Namespace {
     pub fn iter(&self) -> Iter<Ident> {
         self.segments.iter()
     }
+
+    pub fn parse_bridge_attr_namespace(input: ParseStream) -> Result<Namespace> {
+        if input.is_empty() {
+            return Ok(Namespace::none());
+        }
+
+        input.parse::<kw::namespace>()?;
+        input.parse::<Token![=]>()?;
+        let ns = input.parse::<Namespace>()?;
+        input.parse::<Option<Token![,]>>()?;
+        Ok(ns)
+    }
 }
 
 impl Parse for Namespace {
     fn parse(input: ParseStream) -> Result<Self> {
-        let mut segments = Vec::new();
-        if !input.is_empty() {
-            input.parse::<kw::namespace>()?;
-            input.parse::<Token![=]>()?;
-            segments = input
-                .call(QualifiedName::parse_quoted_or_unquoted)?
-                .segments;
-            input.parse::<Option<Token![,]>>()?;
-        }
+        let segments = QualifiedName::parse_quoted_or_unquoted(input)?.segments;
         Ok(Namespace { segments })
     }
 }

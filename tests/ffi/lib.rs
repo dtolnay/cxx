@@ -76,27 +76,27 @@ pub mod ffi {
         CVal,
     }
 
-    #[namespace(namespace = A)]
+    #[namespace = "A"]
     #[derive(Clone)]
     struct AShared {
         z: usize,
     }
 
-    #[namespace(namespace = A)]
+    #[namespace = "A"]
     enum AEnum {
         AAVal,
         ABVal = 2020,
         ACVal,
     }
 
-    #[namespace(namespace = A::B)]
+    #[namespace = "A::B"]
     enum ABEnum {
         ABAVal,
         ABBVal = 2020,
         ABCVal,
     }
 
-    #[namespace(namespace = A::B)]
+    #[namespace = "A::B"]
     #[derive(Clone)]
     struct ABShared {
         z: usize,
@@ -201,7 +201,7 @@ pub mod ffi {
         #[rust_name = "str_overloaded_function"]
         fn cOverloadedFunction(x: &str) -> String;
 
-        #[namespace (namespace = other)]
+        #[namespace = "other"]
         fn ns_c_take_ns_shared(shared: AShared);
     }
 

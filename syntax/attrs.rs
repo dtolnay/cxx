@@ -132,8 +132,7 @@ fn parse_function_alias_attribute(input: ParseStream) -> Result<Ident> {
 }
 
 fn parse_namespace_attribute(input: ParseStream) -> Result<Namespace> {
-    let content;
-    syn::parenthesized!(content in input);
-    let namespace = content.parse::<Namespace>()?;
+    input.parse::<Token![=]>()?;
+    let namespace = input.parse::<Namespace>()?;
     Ok(namespace)
 }

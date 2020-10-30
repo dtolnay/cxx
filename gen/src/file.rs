@@ -67,6 +67,6 @@ fn parse_args(attr: &Attribute) -> Result<Namespace> {
     if attr.tokens.is_empty() {
         Ok(Namespace::none())
     } else {
-        attr.parse_args()
+        attr.parse_args_with(Namespace::parse_bridge_attr_namespace)
     }
 }

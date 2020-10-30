@@ -18,7 +18,7 @@ use crate::syntax::file::Module;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::qualified::QualifiedName;
 use proc_macro::TokenStream;
-use syn::parse::{Parse, ParseStream, Result};
+use syn::parse::{Parse, ParseStream, Parser, Result};
 use syn::parse_macro_input;
 
 /// `#[cxx::bridge] mod ffi { ... }`
@@ -42,7 +42,10 @@ use syn::parse_macro_input;
 pub fn bridge(args: TokenStream, input: TokenStream) -> TokenStream {
     let _ = syntax::error::ERRORS;
 
-    let namespace = parse_macro_input!(args as Namespace);
+    let namespace = match Namespace::parse_bridge_attr_namespace.parse(args) {
+        Ok(ns) => ns,
+        Err(err) => return err.to_compile_error().into(),
+    };
     let mut ffi = parse_macro_input!(input as Module);
     ffi.namespace = namespace;
 
