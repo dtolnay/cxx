@@ -19,6 +19,11 @@ inline namespace cxxbridge05 {
 
 struct unsafe_bitcopy_t;
 
+namespace {
+template <typename T>
+class impl;
+}
+
 #ifndef CXXBRIDGE05_RUST_STRING
 #define CXXBRIDGE05_RUST_STRING
 class String final {
@@ -256,7 +261,7 @@ public:
 
 private:
   Error() noexcept = default;
-  friend class impl;
+  friend impl<Error>;
   const char *msg;
   size_t len;
 };
