@@ -78,7 +78,7 @@ public:
   //
   // Not necessarily ABI compatible with &str. Codegen will translate to
   // cxx::rust_str::RustStr which matches this layout.
-  struct Repr {
+  struct Repr final {
     const char *ptr;
     size_t len;
   };
@@ -112,7 +112,7 @@ public:
   // At present this class is only used for &[u8] slices.
   // Not necessarily ABI compatible with &[u8]. Codegen will translate to
   // cxx::rust_sliceu8::RustSliceU8 which matches this layout.
-  struct Repr {
+  struct Repr final {
     const T *ptr;
     size_t len;
   };
@@ -187,7 +187,7 @@ public:
   const T &front() const;
   const T &back() const;
 
-  class const_iterator {
+  class const_iterator final {
   public:
     using difference_type = ptrdiff_t;
     using value_type = typename std::add_const<T>::type;
@@ -231,7 +231,7 @@ template <typename Signature, bool Throws = false>
 class Fn;
 
 template <typename Ret, typename... Args, bool Throws>
-class Fn<Ret(Args...), Throws> {
+class Fn<Ret(Args...), Throws> final {
 public:
   Ret operator()(Args... args) const noexcept(!Throws);
   Fn operator*() const noexcept;
@@ -310,7 +310,7 @@ Fn<Ret(Args...), Throws> Fn<Ret(Args...), Throws>::operator*() const noexcept {
 
 #ifndef CXXBRIDGE05_RUST_BITCOPY
 #define CXXBRIDGE05_RUST_BITCOPY
-struct unsafe_bitcopy_t {
+struct unsafe_bitcopy_t final {
   explicit unsafe_bitcopy_t() = default;
 };
 
