@@ -1,4 +1,5 @@
 #include "../include/cxx.h"
+#include <cassert>
 #include <cstring>
 #include <exception>
 #include <iostream>
@@ -65,9 +66,13 @@ static void initString(String *self, const char *s, size_t len) {
 
 String::String(const std::string &s) { initString(this, s.data(), s.length()); }
 
-String::String(const char *s) { initString(this, s, std::strlen(s)); }
+String::String(const char *s) {
+  assert(s != nullptr);
+  initString(this, s, std::strlen(s));
+}
 
 String::String(const char *s, size_t len) {
+  assert(s != nullptr || len == 0);
   initString(this,
              s == nullptr && len == 0 ? reinterpret_cast<const char *>(1) : s,
              len);
@@ -124,12 +129,16 @@ Str::Str(const std::string &s) : repr(Repr{s.data(), s.length()}) {
   initStr(this->repr);
 }
 
-Str::Str(const char *s) : repr(Repr{s, std::strlen(s)}) { initStr(this->repr); }
+Str::Str(const char *s) : repr(Repr{s, std::strlen(s)}) {
+  assert(s != nullptr);
+  initStr(this->repr);
+}
 
 Str::Str(const char *s, size_t len)
     : repr(
           Repr{s == nullptr && len == 0 ? reinterpret_cast<const char *>(1) : s,
                len}) {
+  assert(s != nullptr || len == 0);
   initStr(this->repr);
 }
 
