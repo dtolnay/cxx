@@ -17,8 +17,8 @@ impl<'a> NamespaceEntries<'a> {
         &self.entries
     }
 
-    pub fn children(&self) -> impl Iterator<Item = (&&Ident, &NamespaceEntries)> {
-        self.children.iter()
+    pub fn children(&self) -> impl Iterator<Item = (&Ident, &NamespaceEntries)> {
+        self.children.iter().map(|(k, entries)| (*k, entries))
     }
 
     fn sort_by_inner_namespace(apis: Vec<&'a Api>, depth: usize) -> Self {
