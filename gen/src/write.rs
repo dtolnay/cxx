@@ -315,6 +315,25 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
         writeln!(out, "}};");
     }
 
+    if needs_rust_error {
+        out.begin_block("namespace repr");
+        writeln!(out, "struct PtrLen final {{");
+        writeln!(out, "  const char *ptr;");
+        writeln!(out, "  size_t len;");
+        writeln!(out, "}};");
+        out.end_block("namespace repr");
+
+        writeln!(out, "class impl final {{");
+        writeln!(out, "public:");
+        writeln!(out, "  static Error error(repr::PtrLen ptrlen) noexcept {{");
+        writeln!(out, "    Error error;");
+        writeln!(out, "    error.msg = ptrlen.ptr;");
+        writeln!(out, "    error.len = ptrlen.len;");
+        writeln!(out, "    return error;");
+        writeln!(out, "  }}");
+        writeln!(out, "}};");
+    }
+
     out.end_block("namespace cxxbridge05");
 
     if needs_trycatch {
@@ -685,7 +704,7 @@ fn write_rust_function_decl_impl(
     indirect_call: bool,
 ) {
     if sig.throws {
-        write!(out, "::rust::Str::Repr ");
+        write!(out, "::rust::repr::PtrLen ");
     } else {
         write_extern_return_type_space(out, &sig.ret);
     }
@@ -823,7 +842,7 @@ fn write_rust_function_shim_impl(
         }
     }
     if sig.throws {
-        write!(out, "::rust::Str::Repr error$ = ");
+        write!(out, "::rust::repr::PtrLen error$ = ");
     }
     write!(out, "{}(", invoke);
     if sig.receiver.is_some() {
@@ -871,7 +890,7 @@ fn write_rust_function_shim_impl(
     writeln!(out, ";");
     if sig.throws {
         writeln!(out, "  if (error$.ptr) {{");
-        writeln!(out, "    throw ::rust::Error(error$);");
+        writeln!(out, "    throw ::rust::impl::error(error$);");
         writeln!(out, "  }}");
     }
     if indirect_return {

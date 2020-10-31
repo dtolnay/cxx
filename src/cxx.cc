@@ -172,22 +172,21 @@ const char *cxxbridge05$error(const char *ptr, size_t len) {
 }
 } // extern "C"
 
-Error::Error(Str::Repr msg) noexcept : msg(msg) {}
-
 Error::Error(const Error &other) {
-  this->msg.ptr = cxxbridge05$error(other.msg.ptr, other.msg.len);
-  this->msg.len = other.msg.len;
+  this->msg = cxxbridge05$error(other.msg, other.len);
+  this->len = other.len;
 }
 
 Error::Error(Error &&other) noexcept {
   this->msg = other.msg;
-  other.msg.ptr = nullptr;
-  other.msg.len = 0;
+  this->len = other.len;
+  other.msg = nullptr;
+  other.len = 0;
 }
 
-Error::~Error() noexcept { delete[] this->msg.ptr; }
+Error::~Error() noexcept { delete[] this->msg; }
 
-const char *Error::what() const noexcept { return this->msg.ptr; }
+const char *Error::what() const noexcept { return this->msg; }
 
 } // namespace cxxbridge05
 } // namespace rust

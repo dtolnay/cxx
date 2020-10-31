@@ -251,12 +251,14 @@ class Error final : public std::exception {
 public:
   Error(const Error &);
   Error(Error &&) noexcept;
-  Error(Str::Repr) noexcept;
   ~Error() noexcept;
   const char *what() const noexcept override;
 
 private:
-  Str::Repr msg;
+  Error() noexcept = default;
+  friend class impl;
+  const char *msg;
+  size_t len;
 };
 #endif // CXXBRIDGE05_RUST_ERROR
 
