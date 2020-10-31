@@ -159,7 +159,7 @@ size_t Str::length() const noexcept { return this->repr.len; }
 
 Str::Str(Repr repr_) noexcept : repr(repr_) {}
 
-Str::operator Repr() noexcept { return this->repr; }
+Str::operator Repr() const noexcept { return this->repr; }
 
 std::ostream &operator<<(std::ostream &os, const Str &s) {
   os.write(s.data(), s.size());

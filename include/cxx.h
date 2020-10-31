@@ -81,7 +81,7 @@ public:
     size_t len;
   };
   Str(Repr) noexcept;
-  explicit operator Repr() noexcept;
+  explicit operator Repr() const noexcept;
 
 private:
   Repr repr;
@@ -112,7 +112,7 @@ public:
     size_t len;
   };
   Slice(Repr) noexcept;
-  explicit operator Repr() noexcept;
+  explicit operator Repr() const noexcept;
 
 private:
   Repr repr;
@@ -348,7 +348,7 @@ template <typename T>
 Slice<T>::Slice(Repr repr_) noexcept : repr(repr_) {}
 
 template <typename T>
-Slice<T>::operator Repr() noexcept {
+Slice<T>::operator Repr() const noexcept {
   return this->repr;
 }
 #endif // CXXBRIDGE05_RUST_SLICE
