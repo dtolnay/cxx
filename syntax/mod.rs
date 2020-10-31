@@ -183,8 +183,8 @@ pub enum Lang {
     Rust,
 }
 
-// A type with a defined Rust name and a fully resolved, qualified, namespaced,
-// C++ name.
+// An association of a defined Rust name with a fully resolved, namespace
+// qualified C++ name.
 #[derive(Clone)]
 pub struct Pair {
     pub cxx: CppName,
@@ -193,7 +193,7 @@ pub struct Pair {
 
 // A C++ identifier in a particular namespace. It is intentional that this does
 // not impl Display, because we want to force users actively to decide whether
-// to output it as a qualified name or as an unqualfiied name.
+// to output it as a qualified name or as an unqualfied name.
 #[derive(Clone)]
 pub struct CppName {
     pub ns: Namespace,
