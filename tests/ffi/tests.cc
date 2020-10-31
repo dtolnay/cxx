@@ -2,9 +2,9 @@
 #include "tests/ffi/lib.rs.h"
 #include <cstring>
 #include <iterator>
+#include <memory>
 #include <numeric>
 #include <stdexcept>
-#include <memory>
 #include <string>
 
 extern "C" void cxx_test_suite_set_correct() noexcept;
@@ -63,7 +63,9 @@ const size_t &c_return_ref(const Shared &shared) { return shared.z; }
 
 const size_t &c_return_ns_ref(const ::A::AShared &shared) { return shared.z; }
 
-const size_t &c_return_nested_ns_ref(const ::A::B::ABShared &shared) { return shared.z; }
+const size_t &c_return_nested_ns_ref(const ::A::B::ABShared &shared) {
+  return shared.z;
+}
 
 size_t &c_return_mut(Shared &shared) { return shared.z; }
 
@@ -471,7 +473,7 @@ void c_take_trivial_ptr(std::unique_ptr<D> d) {
   }
 }
 
-void c_take_trivial_ref(const D& d) {
+void c_take_trivial_ref(const D &d) {
   if (d.d == 30) {
     cxx_test_suite_set_correct();
   }
@@ -483,14 +485,13 @@ void c_take_trivial(D d) {
   }
 }
 
-
 void c_take_trivial_ns_ptr(std::unique_ptr<::G::G> g) {
   if (g->g == 30) {
     cxx_test_suite_set_correct();
   }
 }
 
-void c_take_trivial_ns_ref(const ::G::G& g) {
+void c_take_trivial_ns_ref(const ::G::G &g) {
   if (g.g == 30) {
     cxx_test_suite_set_correct();
   }
@@ -514,13 +515,13 @@ void c_take_opaque_ns_ptr(std::unique_ptr<::F::F> f) {
   }
 }
 
-void c_take_opaque_ref(const E& e) {
+void c_take_opaque_ref(const E &e) {
   if (e.e == 40 && e.e_str == "hello") {
     cxx_test_suite_set_correct();
   }
 }
 
-void c_take_opaque_ns_ref(const ::F::F& f) {
+void c_take_opaque_ns_ref(const ::F::F &f) {
   if (f.f == 40 && f.f_str == "hello") {
     cxx_test_suite_set_correct();
   }
@@ -629,32 +630,29 @@ extern "C" const char *cxx_run_test() noexcept {
 } // namespace tests
 
 namespace other {
-
-  void ns_c_take_trivial(::tests::D d) {
-    if (d.d == 30) {
-      cxx_test_suite_set_correct();
-    }
+void ns_c_take_trivial(::tests::D d) {
+  if (d.d == 30) {
+    cxx_test_suite_set_correct();
   }
+}
 
-  ::tests::D ns_c_return_trivial() {
-    ::tests::D d;
-    d.d = 30;
-    return d;
-  }
+::tests::D ns_c_return_trivial() {
+  ::tests::D d;
+  d.d = 30;
+  return d;
+}
 
-  void ns_c_take_ns_shared(::A::AShared shared) {
-    if (shared.z == 2020) {
-      cxx_test_suite_set_correct();
-    }
+void ns_c_take_ns_shared(::A::AShared shared) {
+  if (shared.z == 2020) {
+    cxx_test_suite_set_correct();
   }
+}
 } // namespace other
 
 namespace I {
-  uint32_t I::get() const {
-    return a;
-  }
+uint32_t I::get() const { return a; }
 
-  std::unique_ptr<I> ns_c_return_unique_ptr_ns() {
-    return std::unique_ptr<I>(new I());
-  }
+std::unique_ptr<I> ns_c_return_unique_ptr_ns() {
+  return std::unique_ptr<I>(new I());
+}
 } // namespace I

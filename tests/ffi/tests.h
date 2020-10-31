@@ -4,33 +4,33 @@
 #include <string>
 
 namespace A {
-  struct AShared;
-  enum class AEnum : uint16_t;
-  namespace B {
-    struct ABShared;
-    enum class ABEnum : uint16_t;
-  } // namespace B
+struct AShared;
+enum class AEnum : uint16_t;
+namespace B {
+struct ABShared;
+enum class ABEnum : uint16_t;
+} // namespace B
 } // namespace A
 
 namespace F {
-  struct F {
-    uint64_t f;
-    std::string f_str;
-  };
-}
+struct F {
+  uint64_t f;
+  std::string f_str;
+};
+} // namespace F
 
 namespace G {
-  struct G {
-    uint64_t g;
-  };
-}
+struct G {
+  uint64_t g;
+};
+} // namespace G
 
 namespace H {
-  class H {
-  public:
-    std::string h;
-  };
-}
+class H {
+public:
+  std::string h;
+};
+} // namespace H
 
 namespace tests {
 
@@ -156,16 +156,16 @@ rust::Vec<rust::String> c_try_return_rust_vec_string();
 const rust::Vec<uint8_t> &c_try_return_ref_rust_vec(const C &c);
 
 void c_take_trivial_ptr(std::unique_ptr<D> d);
-void c_take_trivial_ref(const D& d);
+void c_take_trivial_ref(const D &d);
 void c_take_trivial(D d);
 
 void c_take_trivial_ns_ptr(std::unique_ptr<::G::G> g);
-void c_take_trivial_ns_ref(const ::G::G& g);
+void c_take_trivial_ns_ref(const ::G::G &g);
 void c_take_trivial_ns(::G::G g);
 void c_take_opaque_ptr(std::unique_ptr<E> e);
 void c_take_opaque_ns_ptr(std::unique_ptr<::F::F> f);
-void c_take_opaque_ref(const E& e);
-void c_take_opaque_ns_ref(const ::F::F& f);
+void c_take_opaque_ref(const E &e);
+void c_take_opaque_ns_ref(const ::F::F &f);
 std::unique_ptr<D> c_return_trivial_ptr();
 D c_return_trivial();
 std::unique_ptr<::G::G> c_return_trivial_ns_ptr();
@@ -179,19 +179,20 @@ rust::String cOverloadedFunction(rust::Str x);
 } // namespace tests
 
 namespace other {
-  void ns_c_take_trivial(::tests::D d);
-  ::tests::D ns_c_return_trivial();
-  void ns_c_take_ns_shared(::A::AShared shared);
+void ns_c_take_trivial(::tests::D d);
+::tests::D ns_c_return_trivial();
+void ns_c_take_ns_shared(::A::AShared shared);
 } // namespace other
 
 namespace I {
-  class I {
-  private:
-    uint32_t a;
-  public:
-    I() : a(1000) {}
-    uint32_t get() const;
-  };
+class I {
+private:
+  uint32_t a;
 
-  std::unique_ptr<I> ns_c_return_unique_ptr_ns();
+public:
+  I() : a(1000) {}
+  uint32_t get() const;
+};
+
+std::unique_ptr<I> ns_c_return_unique_ptr_ns();
 } // namespace I
