@@ -115,33 +115,33 @@ std::ostream &operator<<(std::ostream &os, const String &s) {
   return os;
 }
 
-Str::Str() noexcept : repr(Repr{reinterpret_cast<const char *>(1), 0}) {}
+Str::Str() noexcept : ptr(reinterpret_cast<const char *>(1)), len(0) {}
 
-static void initStr(Str::Repr repr) {
-  if (!cxxbridge05$str$valid(repr.ptr, repr.len)) {
+static void initStr(const char *ptr, size_t len) {
+  if (!cxxbridge05$str$valid(ptr, len)) {
     panic<std::invalid_argument>("data for rust::Str is not utf-8");
   }
 }
 
-Str::Str(const std::string &s) : repr(Repr{s.data(), s.length()}) {
-  initStr(this->repr);
+Str::Str(const std::string &s) : ptr(s.data()), len(s.length()) {
+  initStr(this->ptr, this->len);
 }
 
-Str::Str(const char *s) : repr(Repr{s, std::strlen(s)}) {
+Str::Str(const char *s) : ptr(s), len(std::strlen(s)) {
   assert(s != nullptr);
-  initStr(this->repr);
+  initStr(this->ptr, this->len);
 }
 
 Str::Str(const char *s, size_t len)
-    : repr(
-          Repr{s == nullptr && len == 0 ? reinterpret_cast<const char *>(1) : s,
-               len}) {
+    : ptr(s == nullptr && len == 0 ? reinterpret_cast<const char *>(1) : s),
+      len(len) {
   assert(s != nullptr || len == 0);
-  initStr(this->repr);
+  initStr(this->ptr, this->len);
 }
 
 Str &Str::operator=(Str other) noexcept {
-  this->repr = other.repr;
+  this->ptr = other.ptr;
+  this->len = other.len;
   return *this;
 }
 
@@ -149,15 +149,11 @@ Str::operator std::string() const {
   return std::string(this->data(), this->size());
 }
 
-const char *Str::data() const noexcept { return this->repr.ptr; }
+const char *Str::data() const noexcept { return this->ptr; }
 
-size_t Str::size() const noexcept { return this->repr.len; }
+size_t Str::size() const noexcept { return this->len; }
 
-size_t Str::length() const noexcept { return this->repr.len; }
-
-Str::Str(Repr repr_) noexcept : repr(repr_) {}
-
-Str::operator Repr() const noexcept { return this->repr; }
+size_t Str::length() const noexcept { return this->len; }
 
 std::ostream &operator<<(std::ostream &os, const Str &s) {
   os.write(s.data(), s.size());
