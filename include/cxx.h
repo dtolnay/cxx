@@ -56,8 +56,6 @@ private:
 class Str final {
 public:
   Str() noexcept;
-  Str(const Str &) noexcept;
-
   Str(const std::string &);
   Str(const char *);
   Str(const char *, size_t);
@@ -71,6 +69,10 @@ public:
   const char *data() const noexcept;
   size_t size() const noexcept;
   size_t length() const noexcept;
+
+  // Important in order for System V ABI to pass in registers.
+  Str(const Str &) noexcept = default;
+  ~Str() noexcept = default;
 
   // Repr is PRIVATE; must not be used other than by our generated code.
   //
@@ -93,7 +95,6 @@ template <typename T>
 class Slice final {
 public:
   Slice() noexcept;
-  Slice(const Slice<T> &) noexcept;
   Slice(const T *, size_t count) noexcept;
 
   Slice &operator=(Slice<T>) noexcept;
@@ -101,6 +102,10 @@ public:
   const T *data() const noexcept;
   size_t size() const noexcept;
   size_t length() const noexcept;
+
+  // Important in order for System V ABI to pass in registers.
+  Slice(const Slice<T> &) noexcept = default;
+  ~Slice() noexcept = default;
 
   // Repr is PRIVATE; must not be used other than by our generated code.
   //
@@ -316,9 +321,6 @@ constexpr unsafe_bitcopy_t unsafe_bitcopy{};
 #define CXXBRIDGE05_RUST_SLICE
 template <typename T>
 Slice<T>::Slice() noexcept : repr(Repr{reinterpret_cast<const T *>(this), 0}) {}
-
-template <typename T>
-Slice<T>::Slice(const Slice<T> &) noexcept = default;
 
 template <typename T>
 Slice<T>::Slice(const T *s, size_t count) noexcept : repr(Repr{s, count}) {}

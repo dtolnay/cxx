@@ -117,8 +117,6 @@ std::ostream &operator<<(std::ostream &os, const String &s) {
 
 Str::Str() noexcept : repr(Repr{reinterpret_cast<const char *>(1), 0}) {}
 
-Str::Str(const Str &) noexcept = default;
-
 static void initStr(Str::Repr repr) {
   if (!cxxbridge05$str$valid(repr.ptr, repr.len)) {
     panic<std::invalid_argument>("data for rust::Str is not utf-8");
