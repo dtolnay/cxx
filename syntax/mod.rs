@@ -202,7 +202,7 @@ pub struct CppName {
 
 // Wrapper for a type which needs to be resolved before it can be printed in
 // C++.
-#[derive(Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
+#[derive(Clone, PartialEq, Hash)]
 pub struct ResolvableName {
     pub rust: Ident,
 }
