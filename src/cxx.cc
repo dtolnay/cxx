@@ -167,7 +167,7 @@ std::ostream &operator<<(std::ostream &os, const Str &s) {
 extern "C" {
 const char *cxxbridge05$error(const char *ptr, size_t len) {
   char *copy = new char[len];
-  strncpy(copy, ptr, len);
+  std::strncpy(copy, ptr, len);
   return copy;
 }
 } // extern "C"
