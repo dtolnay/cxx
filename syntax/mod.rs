@@ -35,16 +35,6 @@ pub use self::doc::Doc;
 pub use self::parse::parse_items;
 pub use self::types::Types;
 
-#[derive(Clone)]
-/// A C++ identifier in a particular namespace.
-/// It is intentional that this does not impl Display,
-/// because we want to force users actively to decide whether to output
-/// it as a qualified name or as an unqualfiied name.
-pub struct CppName {
-    pub ns: Namespace,
-    pub ident: Ident,
-}
-
 pub enum Api {
     Include(Include),
     Struct(Struct),
@@ -97,14 +87,6 @@ pub struct Enum {
     pub brace_token: Brace,
     pub variants: Vec<Variant>,
     pub repr: Atom,
-}
-
-/// A type with a defined Rust name and a fully resolved,
-/// qualified, namespaced, C++ name.
-#[derive(Clone)]
-pub struct Pair {
-    pub cxx: CppName,
-    pub rust: Ident,
 }
 
 pub struct ExternFn {
@@ -199,6 +181,24 @@ pub struct Slice {
 pub enum Lang {
     Cxx,
     Rust,
+}
+
+/// A type with a defined Rust name and a fully resolved,
+/// qualified, namespaced, C++ name.
+#[derive(Clone)]
+pub struct Pair {
+    pub cxx: CppName,
+    pub rust: Ident,
+}
+
+#[derive(Clone)]
+/// A C++ identifier in a particular namespace.
+/// It is intentional that this does not impl Display,
+/// because we want to force users actively to decide whether to output
+/// it as a qualified name or as an unqualfiied name.
+pub struct CppName {
+    pub ns: Namespace,
+    pub ident: Ident,
 }
 
 /// Wrapper for a type which needs to be resolved
