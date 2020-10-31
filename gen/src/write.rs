@@ -496,10 +496,8 @@ fn write_exception_glue(out: &mut OutFile, apis: &[&Api]) {
 }
 
 fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, impl_annotations: &Option<String>) {
-    if !out.header {
-        if let Some(annotation) = impl_annotations {
-            write!(out, "{} ", annotation);
-        }
+    if let Some(annotation) = impl_annotations {
+        write!(out, "{} ", annotation);
     }
     if efn.throws {
         write!(out, "::rust::Str::Repr ");
