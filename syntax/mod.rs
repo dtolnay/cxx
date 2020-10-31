@@ -183,26 +183,25 @@ pub enum Lang {
     Rust,
 }
 
-/// A type with a defined Rust name and a fully resolved,
-/// qualified, namespaced, C++ name.
+// A type with a defined Rust name and a fully resolved, qualified, namespaced,
+// C++ name.
 #[derive(Clone)]
 pub struct Pair {
     pub cxx: CppName,
     pub rust: Ident,
 }
 
+// A C++ identifier in a particular namespace. It is intentional that this does
+// not impl Display, because we want to force users actively to decide whether
+// to output it as a qualified name or as an unqualfiied name.
 #[derive(Clone)]
-/// A C++ identifier in a particular namespace.
-/// It is intentional that this does not impl Display,
-/// because we want to force users actively to decide whether to output
-/// it as a qualified name or as an unqualfiied name.
 pub struct CppName {
     pub ns: Namespace,
     pub ident: Ident,
 }
 
-/// Wrapper for a type which needs to be resolved
-/// before it can be printed in C++.
+// Wrapper for a type which needs to be resolved before it can be printed in
+// C++.
 #[derive(Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub struct ResolvableName {
     pub rust: Ident,
