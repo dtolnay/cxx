@@ -1,9 +1,11 @@
 use crate::gen::include::Includes;
+use crate::syntax::Types;
 use std::cell::RefCell;
 use std::fmt::{self, Arguments, Write};
 
-pub(crate) struct OutFile {
+pub(crate) struct OutFile<'a> {
     pub header: bool,
+    pub types: &'a Types<'a>,
     pub include: Includes,
     pub front: Content,
     content: RefCell<Content>,
@@ -15,10 +17,11 @@ pub struct Content {
     blocks_pending: Vec<&'static str>,
 }
 
-impl OutFile {
-    pub fn new(header: bool) -> Self {
+impl<'a> OutFile<'a> {
+    pub fn new(header: bool, types: &'a Types) -> Self {
         OutFile {
             header,
+            types,
             include: Includes::new(),
             front: Content::new(),
             content: RefCell::new(Content::new()),

@@ -10,8 +10,8 @@ use crate::syntax::{
 use proc_macro2::Ident;
 use std::collections::HashMap;
 
-pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> OutFile {
-    let mut out_file = OutFile::new(header);
+pub(super) fn gen<'a>(apis: &[Api], types: &'a Types, opt: &Opt, header: bool) -> OutFile<'a> {
+    let mut out_file = OutFile::new(header, types);
     let out = &mut out_file;
 
     if header {
