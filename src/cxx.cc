@@ -180,7 +180,6 @@ Error::Error(const Error &other) {
 }
 
 Error::Error(Error &&other) noexcept {
-  delete[] this->msg.ptr;
   this->msg = other.msg;
   other.msg.ptr = nullptr;
   other.msg.len = 0;
