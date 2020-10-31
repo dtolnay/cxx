@@ -57,12 +57,23 @@ String::String(String &&other) noexcept {
 
 String::~String() noexcept { cxxbridge05$string$drop(this); }
 
-String::String(const std::string &s) : String(s.data(), s.length()) {}
+String::String(const std::string &s) {
+  if (!cxxbridge05$string$from(this, s.data(), s.length())) {
+    panic<std::invalid_argument>("data for rust::String is not utf-8");
+  }
+}
 
-String::String(const char *s) : String(s, std::strlen(s)) {}
+String::String(const char *s) {
+  if (!cxxbridge05$string$from(this, s, std::strlen(s))) {
+    panic<std::invalid_argument>("data for rust::String is not utf-8");
+  }
+}
 
 String::String(const char *s, size_t len) {
-  if (!cxxbridge05$string$from(this, s, len)) {
+  if (!cxxbridge05$string$from(
+          this,
+          s == nullptr && len == 0 ? reinterpret_cast<const char *>(1) : s,
+          len)) {
     panic<std::invalid_argument>("data for rust::String is not utf-8");
   }
 }
@@ -104,15 +115,26 @@ std::ostream &operator<<(std::ostream &os, const String &s) {
   return os;
 }
 
-Str::Str() noexcept : repr(Repr{reinterpret_cast<const char *>(this), 0}) {}
+Str::Str() noexcept : repr(Repr{reinterpret_cast<const char *>(1), 0}) {}
 
 Str::Str(const Str &) noexcept = default;
 
-Str::Str(const std::string &s) : Str(s.data(), s.length()) {}
+Str::Str(const std::string &s) : repr(Repr{s.data(), s.length()}) {
+  if (!cxxbridge05$str$valid(this->repr.ptr, this->repr.len)) {
+    panic<std::invalid_argument>("data for rust::Str is not utf-8");
+  }
+}
 
-Str::Str(const char *s) : Str(s, std::strlen(s)) {}
+Str::Str(const char *s) : repr(Repr{s, std::strlen(s)}) {
+  if (!cxxbridge05$str$valid(this->repr.ptr, this->repr.len)) {
+    panic<std::invalid_argument>("data for rust::Str is not utf-8");
+  }
+}
 
-Str::Str(const char *s, size_t len) : repr(Repr{s, len}) {
+Str::Str(const char *s, size_t len)
+    : repr(
+          Repr{s == nullptr && len == 0 ? reinterpret_cast<const char *>(1) : s,
+               len}) {
   if (!cxxbridge05$str$valid(this->repr.ptr, this->repr.len)) {
     panic<std::invalid_argument>("data for rust::Str is not utf-8");
   }
