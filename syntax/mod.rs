@@ -35,19 +35,6 @@ pub use self::doc::Doc;
 pub use self::parse::parse_items;
 pub use self::types::Types;
 
-/// A Rust identifier will forver == a proc_macro2::Ident,
-/// but for completeness here's a type alias.
-pub type RsIdent = Ident;
-
-/// At the moment, a Rust name is simply a proc_macro2::Ident.
-/// In the future, it may become namespaced based on a mod path.
-pub type RsName = RsIdent;
-
-/// At the moment, a C++ identifier is also a proc_macro2::Ident.
-/// In the future, we may wish to make a newtype wrapper here
-/// to avoid confusion between C++ and Rust identifiers.
-pub type CppIdent = Ident;
-
 #[derive(Clone)]
 /// A C++ identifier in a particular namespace.
 /// It is intentional that this does not impl Display,
@@ -55,7 +42,7 @@ pub type CppIdent = Ident;
 /// it as a qualified name or as an unqualfiied name.
 pub struct CppName {
     pub ns: Namespace,
-    pub ident: CppIdent,
+    pub ident: Ident,
 }
 
 pub enum Api {
@@ -117,7 +104,7 @@ pub struct Enum {
 #[derive(Clone)]
 pub struct Pair {
     pub cxx: CppName,
-    pub rust: RsName,
+    pub rust: Ident,
 }
 
 pub struct ExternFn {
@@ -156,7 +143,7 @@ pub struct Signature {
 
 #[derive(Eq, PartialEq, Hash)]
 pub struct Var {
-    pub ident: RsIdent, // fields and variables are not namespaced
+    pub ident: Ident,
     pub ty: Type,
 }
 
@@ -170,7 +157,7 @@ pub struct Receiver {
 }
 
 pub struct Variant {
-    pub ident: RsIdent,
+    pub ident: Ident,
     pub discriminant: Discriminant,
     pub expr: Option<Expr>,
 }
@@ -218,5 +205,5 @@ pub enum Lang {
 /// before it can be printed in C++.
 #[derive(Clone, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub struct ResolvableName {
-    pub rust: RsName,
+    pub rust: Ident,
 }
