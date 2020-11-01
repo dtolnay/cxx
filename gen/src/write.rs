@@ -110,13 +110,11 @@ fn gen_namespace_contents(out: &mut OutFile, ns_entries: &NamespaceEntries) {
         out.begin_block("extern \"C\"");
         write_exception_glue(out, apis);
         for api in apis {
-            let (efn, write): (_, fn(_, _)) = match api {
-                Api::CxxFunction(efn) => (efn, write_cxx_function_shim),
-                Api::RustFunction(efn) => (efn, write_rust_function_decl),
-                _ => continue,
-            };
-            out.next_section();
-            write(out, efn);
+            match api {
+                Api::CxxFunction(efn) => write_cxx_function_shim(out, efn),
+                Api::RustFunction(efn) => write_rust_function_decl(out, efn),
+                _ => {}
+            }
         }
         out.end_block("extern \"C\"");
     }
@@ -344,6 +342,7 @@ fn write_exception_glue(out: &mut OutFile, apis: &[&Api]) {
 }
 
 fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn) {
+    out.next_section();
     if let Some(annotation) = &out.opt.cxx_impl_annotations {
         write!(out, "{} ", annotation);
     }
@@ -532,7 +531,6 @@ fn write_function_pointer_trampoline(
     var: &Ident,
     f: &Signature,
 ) {
-    out.next_section();
     let r_trampoline = mangle::r_trampoline(efn, var, out.types);
     let indirect_call = true;
     write_rust_function_decl_impl(out, &r_trampoline, f, indirect_call);
@@ -554,6 +552,7 @@ fn write_rust_function_decl_impl(
     sig: &Signature,
     indirect_call: bool,
 ) {
+    out.next_section();
     if sig.throws {
         out.builtin.ptr_len = true;
         write!(out, "::rust::repr::PtrLen ");
