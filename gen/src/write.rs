@@ -327,7 +327,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
     if needs_trycatch || needs_rust_error {
         out.begin_block("namespace repr");
         writeln!(out, "struct PtrLen final {{");
-        writeln!(out, "  const char *ptr;");
+        writeln!(out, "  const void *ptr;");
         writeln!(out, "  size_t len;");
         writeln!(out, "}};");
         out.end_block("namespace repr");
@@ -339,7 +339,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
         writeln!(out, "public:");
         writeln!(out, "  static Error error(repr::PtrLen repr) noexcept {{");
         writeln!(out, "    Error error;");
-        writeln!(out, "    error.msg = repr.ptr;");
+        writeln!(out, "    error.msg = static_cast<const char *>(repr.ptr);");
         writeln!(out, "    error.len = repr.len;");
         writeln!(out, "    return error;");
         writeln!(out, "  }}");
