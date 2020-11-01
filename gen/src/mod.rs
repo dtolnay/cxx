@@ -108,20 +108,24 @@ fn generate_from_string(source: &str, opt: &Opt) -> Result<GeneratedCode> {
 }
 
 pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
+    if syntax.modules.is_empty() {
+        return Err(Error::NoBridgeMod);
+    }
+
+    let ref mut apis = Vec::new();
     let ref mut errors = Errors::new();
-    let bridge = syntax
-        .modules
-        .into_iter()
-        .next()
-        .ok_or(Error::NoBridgeMod)?;
-    let ref namespace = bridge.namespace;
-    let trusted = bridge.unsafety.is_some();
-    let ref apis = syntax::parse_items(errors, bridge.content, trusted, namespace);
+    for bridge in syntax.modules {
+        let ref namespace = bridge.namespace;
+        let trusted = bridge.unsafety.is_some();
+        apis.extend(syntax::parse_items(errors, bridge.content, trusted, namespace));
+    }
+
     let ref types = Types::collect(errors, apis);
     check::precheck(errors, apis, opt);
     errors.propagate()?;
     check::typecheck(errors, apis, types);
     errors.propagate()?;
+
     // Some callers may wish to generate both header and implementation from the
     // same token stream to avoid parsing twice. Others only need to generate
     // one or the other.
