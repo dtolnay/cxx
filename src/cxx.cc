@@ -5,6 +5,7 @@
 #include <iostream>
 #include <memory>
 #include <stdexcept>
+#include <type_traits>
 #include <vector>
 
 extern "C" {
@@ -153,6 +154,12 @@ std::ostream &operator<<(std::ostream &os, const Str &s) {
   os.write(s.data(), s.size());
   return os;
 }
+
+static_assert(std::is_trivially_copy_constructible<Str>::value,
+              "trivial Str(const Str &)");
+static_assert(std::is_trivially_copy_assignable<Str>::value,
+              "trivial operator=(const Str &)");
+static_assert(std::is_trivially_destructible<Str>::value, "trivial ~Str()");
 
 extern "C" {
 const char *cxxbridge05$error(const char *ptr, size_t len) {
