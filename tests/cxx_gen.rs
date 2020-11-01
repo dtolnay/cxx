@@ -18,7 +18,7 @@ fn test_extern_c_function() {
     let output = str::from_utf8(&generated.implementation).unwrap();
     // To avoid continual breakage we won't test every byte.
     // Let's look for the major features.
-    assert!(output.contains("void cxxbridge05$do_cpp_thing(::rust::Str foo)"));
+    assert!(output.contains("void cxxbridge05$do_cpp_thing(::rust::repr::PtrLen foo)"));
 }
 
 #[test]
@@ -28,5 +28,5 @@ fn test_impl_annotation() {
     let source = BRIDGE0.parse().unwrap();
     let generated = generate_header_and_cc(source, &opt).unwrap();
     let output = str::from_utf8(&generated.implementation).unwrap();
-    assert!(output.contains("ANNOTATION void cxxbridge05$do_cpp_thing(::rust::Str foo)"));
+    assert!(output.contains("ANNOTATION void cxxbridge05$do_cpp_thing(::rust::repr::PtrLen foo)"));
 }

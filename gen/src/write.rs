@@ -324,7 +324,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
 
     out.begin_block("namespace");
 
-    if needs_trycatch || needs_rust_error {
+    if needs_trycatch || needs_rust_error || needs_rust_str && !out.header {
         out.begin_block("namespace repr");
         writeln!(out, "struct PtrLen final {{");
         writeln!(out, "  const void *ptr;");
@@ -333,7 +333,28 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
         out.end_block("namespace repr");
     }
 
+    if needs_rust_str && !out.header {
+        out.next_section();
+        writeln!(out, "template <>");
+        writeln!(out, "class impl<Str> final {{");
+        writeln!(out, "public:");
+        writeln!(
+            out,
+            "  static Str new_unchecked(repr::PtrLen repr) noexcept {{",
+        );
+        writeln!(out, "    Str str;");
+        writeln!(out, "    str.ptr = static_cast<const char *>(repr.ptr);");
+        writeln!(out, "    str.len = repr.len;");
+        writeln!(out, "    return str;");
+        writeln!(out, "  }}");
+        writeln!(out, "  static repr::PtrLen repr(Str str) noexcept {{");
+        writeln!(out, "    return repr::PtrLen{{str.ptr, str.len}};");
+        writeln!(out, "  }}");
+        writeln!(out, "}};");
+    }
+
     if needs_rust_error {
+        out.next_section();
         writeln!(out, "template <>");
         writeln!(out, "class impl<Error> final {{");
         writeln!(out, "public:");
@@ -619,6 +640,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, impl_annotations: 
     }
     match &efn.ret {
         Some(Type::Ref(_)) => write!(out, "&"),
+        Some(Type::Str(_)) if !indirect_return => write!(out, "::rust::impl<::rust::Str>::repr("),
         Some(Type::SliceRefU8(_)) if !indirect_return => {
             write!(out, "::rust::Slice<uint8_t>::Repr(")
         }
@@ -638,6 +660,12 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, impl_annotations: 
         } else if let Type::UniquePtr(_) = &arg.ty {
             write_type(out, &arg.ty);
             write!(out, "({})", arg.ident);
+        } else if let Type::Str(_) = arg.ty {
+            write!(
+                out,
+                "::rust::impl<::rust::Str>::new_unchecked({})",
+                arg.ident,
+            );
         } else if arg.ty == RustString {
             write!(
                 out,
@@ -658,7 +686,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, impl_annotations: 
     match &efn.ret {
         Some(Type::RustBox(_)) => write!(out, ".into_raw()"),
         Some(Type::UniquePtr(_)) => write!(out, ".release()"),
-        Some(Type::SliceRefU8(_)) if !indirect_return => write!(out, ")"),
+        Some(Type::Str(_)) | Some(Type::SliceRefU8(_)) if !indirect_return => write!(out, ")"),
         _ => {}
     }
     if indirect_return {
@@ -850,6 +878,7 @@ fn write_rust_function_shim_impl(
                 write!(out, "(");
             }
             Type::Ref(_) => write!(out, "*"),
+            Type::Str(_) => write!(out, "::rust::impl<::rust::Str>::new_unchecked("),
             _ => {}
         }
     }
@@ -865,6 +894,7 @@ fn write_rust_function_shim_impl(
             write!(out, ", ");
         }
         match &arg.ty {
+            Type::Str(_) => write!(out, "::rust::impl<::rust::Str>::repr("),
             Type::SliceRefU8(_) => write!(out, "::rust::Slice<uint8_t>::Repr("),
             ty if out.types.needs_indirect_abi(ty) => write!(out, "&"),
             _ => {}
@@ -873,7 +903,7 @@ fn write_rust_function_shim_impl(
         match &arg.ty {
             Type::RustBox(_) => write!(out, ".into_raw()"),
             Type::UniquePtr(_) => write!(out, ".release()"),
-            Type::SliceRefU8(_) => write!(out, ")"),
+            Type::Str(_) | Type::SliceRefU8(_) => write!(out, ")"),
             ty if ty != RustString && out.types.needs_indirect_abi(ty) => write!(out, "$.value"),
             _ => {}
         }
@@ -893,7 +923,7 @@ fn write_rust_function_shim_impl(
     write!(out, ")");
     if !indirect_return {
         if let Some(ret) = &sig.ret {
-            if let Type::RustBox(_) | Type::UniquePtr(_) = ret {
+            if let Type::RustBox(_) | Type::UniquePtr(_) | Type::Str(_) = ret {
                 write!(out, ")");
             }
         }
@@ -964,6 +994,7 @@ fn write_extern_return_type_space(out: &mut OutFile, ty: &Option<Type>) {
             write_type(out, &ty.inner);
             write!(out, " *");
         }
+        Some(Type::Str(_)) => write!(out, "::rust::repr::PtrLen "),
         Some(Type::SliceRefU8(_)) => write!(out, "::rust::Slice<uint8_t>::Repr "),
         Some(ty) if out.types.needs_indirect_abi(ty) => write!(out, "void "),
         _ => write_return_type(out, ty),
@@ -976,6 +1007,7 @@ fn write_extern_arg(out: &mut OutFile, arg: &Var) {
             write_type_space(out, &ty.inner);
             write!(out, "*");
         }
+        Type::Str(_) => write!(out, "::rust::repr::PtrLen "),
         Type::SliceRefU8(_) => write!(out, "::rust::Slice<uint8_t>::Repr "),
         _ => write_type_space(out, &arg.ty),
     }

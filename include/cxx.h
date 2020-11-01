@@ -79,6 +79,7 @@ public:
   ~Str() noexcept = default;
 
 private:
+  friend impl<Str>;
   // Not necessarily ABI compatible with &str. Codegen will translate to
   // cxx::rust_str::RustStr which matches this layout.
   const char *ptr;
