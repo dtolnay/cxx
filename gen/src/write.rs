@@ -39,7 +39,6 @@ pub(super) fn gen<'a>(apis: &[Api], types: &'a Types, opt: &Opt, header: bool) -
 fn gen_namespace_forward_declarations(out: &mut OutFile, ns_entries: &NamespaceEntries) {
     let apis = ns_entries.entries();
 
-    out.next_section();
     for api in apis {
         match api {
             Api::Include(include) => out.include.insert(include),
@@ -49,8 +48,6 @@ fn gen_namespace_forward_declarations(out: &mut OutFile, ns_entries: &NamespaceE
             _ => {}
         }
     }
-
-    out.next_section();
 
     for (child_ns, child_ns_entries) in ns_entries.children() {
         writeln!(out, "namespace {} {{", child_ns);
