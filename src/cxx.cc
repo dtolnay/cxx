@@ -184,6 +184,17 @@ Error::Error(Error &&other) noexcept
 
 Error::~Error() noexcept { delete[] this->msg; }
 
+Error &Error::operator=(const Error &other) {
+  if (this != &other) {
+    std::exception::operator=(other);
+    delete[] this->msg;
+    this->msg = nullptr;
+    this->msg = cxxbridge05$error(other.msg, other.len);
+    this->len = other.len;
+  }
+  return *this;
+}
+
 const char *Error::what() const noexcept { return this->msg; }
 
 } // namespace cxxbridge05

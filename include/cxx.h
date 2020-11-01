@@ -257,6 +257,9 @@ public:
   Error(const Error &);
   Error(Error &&) noexcept;
   ~Error() noexcept;
+
+  Error &operator=(const Error &);
+
   const char *what() const noexcept override;
 
 private:
