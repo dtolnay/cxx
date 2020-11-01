@@ -20,7 +20,7 @@ impl Parse for File {
 fn parse(input: ParseStream, modules: &mut Vec<Module>) -> Result<()> {
     while !input.is_empty() {
         let mut cxx_bridge = false;
-        let mut namespace = Namespace::none();
+        let mut namespace = Namespace::ROOT;
         let mut attrs = input.call(Attribute::parse_outer)?;
         for attr in &attrs {
             let path = &attr.path.segments;
@@ -65,7 +65,7 @@ fn parse(input: ParseStream, modules: &mut Vec<Module>) -> Result<()> {
 
 fn parse_args(attr: &Attribute) -> Result<Namespace> {
     if attr.tokens.is_empty() {
-        Ok(Namespace::none())
+        Ok(Namespace::ROOT)
     } else {
         attr.parse_args_with(Namespace::parse_bridge_attr_namespace)
     }

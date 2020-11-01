@@ -123,7 +123,7 @@ mod tests {
     }
 
     fn make_api(ns: Option<&str>, ident: &str) -> Api {
-        let ns = ns.map_or_else(Namespace::none, |ns| syn::parse_str(ns).unwrap());
+        let ns = ns.map_or(Namespace::ROOT, |ns| syn::parse_str(ns).unwrap());
         Api::CxxType(ExternType {
             doc: Doc::new(),
             type_token: Token![type](Span::call_site()),

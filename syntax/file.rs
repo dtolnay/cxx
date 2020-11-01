@@ -36,7 +36,7 @@ pub struct ItemForeignMod {
 
 impl Parse for Module {
     fn parse(input: ParseStream) -> Result<Self> {
-        let namespace = Namespace::none();
+        let namespace = Namespace::ROOT;
         let mut attrs = input.call(Attribute::parse_outer)?;
         let vis: Visibility = input.parse()?;
         let unsafety: Option<Token![unsafe]> = input.parse()?;

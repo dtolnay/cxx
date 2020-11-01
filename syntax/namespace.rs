@@ -16,11 +16,9 @@ pub struct Namespace {
 }
 
 impl Namespace {
-    pub fn none() -> Self {
-        Namespace {
-            segments: Vec::new(),
-        }
-    }
+    pub const ROOT: Self = Namespace {
+        segments: Vec::new(),
+    };
 
     pub fn iter(&self) -> Iter<Ident> {
         self.segments.iter()
@@ -28,7 +26,7 @@ impl Namespace {
 
     pub fn parse_bridge_attr_namespace(input: ParseStream) -> Result<Namespace> {
         if input.is_empty() {
-            return Ok(Namespace::none());
+            return Ok(Namespace::ROOT);
         }
 
         input.parse::<kw::namespace>()?;
