@@ -619,7 +619,6 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, impl_annotations: 
     }
     match &efn.ret {
         Some(Type::Ref(_)) => write!(out, "&"),
-        Some(Type::Str(_)) if !indirect_return => write!(out, "::rust::Str::Repr("),
         Some(Type::SliceRefU8(_)) if !indirect_return => {
             write!(out, "::rust::Slice<uint8_t>::Repr(")
         }
@@ -659,7 +658,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, impl_annotations: 
     match &efn.ret {
         Some(Type::RustBox(_)) => write!(out, ".into_raw()"),
         Some(Type::UniquePtr(_)) => write!(out, ".release()"),
-        Some(Type::Str(_)) | Some(Type::SliceRefU8(_)) if !indirect_return => write!(out, ")"),
+        Some(Type::SliceRefU8(_)) if !indirect_return => write!(out, ")"),
         _ => {}
     }
     if indirect_return {
@@ -866,7 +865,6 @@ fn write_rust_function_shim_impl(
             write!(out, ", ");
         }
         match &arg.ty {
-            Type::Str(_) => write!(out, "::rust::Str::Repr("),
             Type::SliceRefU8(_) => write!(out, "::rust::Slice<uint8_t>::Repr("),
             ty if out.types.needs_indirect_abi(ty) => write!(out, "&"),
             _ => {}
@@ -875,7 +873,7 @@ fn write_rust_function_shim_impl(
         match &arg.ty {
             Type::RustBox(_) => write!(out, ".into_raw()"),
             Type::UniquePtr(_) => write!(out, ".release()"),
-            Type::Str(_) | Type::SliceRefU8(_) => write!(out, ")"),
+            Type::SliceRefU8(_) => write!(out, ")"),
             ty if ty != RustString && out.types.needs_indirect_abi(ty) => write!(out, "$.value"),
             _ => {}
         }
@@ -939,7 +937,6 @@ fn write_indirect_return_type(out: &mut OutFile, ty: &Type) {
             write_type(out, &ty.inner);
             write!(out, " *");
         }
-        Type::Str(_) => write!(out, "::rust::Str::Repr"),
         Type::SliceRefU8(_) => write!(out, "::rust::Slice<uint8_t>::Repr"),
         _ => write_type(out, ty),
     }
@@ -967,7 +964,6 @@ fn write_extern_return_type_space(out: &mut OutFile, ty: &Option<Type>) {
             write_type(out, &ty.inner);
             write!(out, " *");
         }
-        Some(Type::Str(_)) => write!(out, "::rust::Str::Repr "),
         Some(Type::SliceRefU8(_)) => write!(out, "::rust::Slice<uint8_t>::Repr "),
         Some(ty) if out.types.needs_indirect_abi(ty) => write!(out, "void "),
         _ => write_return_type(out, ty),
@@ -980,7 +976,6 @@ fn write_extern_arg(out: &mut OutFile, arg: &Var) {
             write_type_space(out, &ty.inner);
             write!(out, "*");
         }
-        Type::Str(_) => write!(out, "::rust::Str::Repr "),
         Type::SliceRefU8(_) => write!(out, "::rust::Slice<uint8_t>::Repr "),
         _ => write_type_space(out, &arg.ty),
     }

@@ -79,19 +79,11 @@ public:
   Str(const Str &) noexcept = default;
   ~Str() noexcept = default;
 
-  // Repr is PRIVATE; must not be used other than by our generated code.
-  //
+private:
   // Not necessarily ABI compatible with &str. Codegen will translate to
   // cxx::rust_str::RustStr which matches this layout.
-  struct Repr final {
-    const char *ptr;
-    size_t len;
-  };
-  Str(Repr) noexcept;
-  explicit operator Repr() const noexcept;
-
-private:
-  Repr repr;
+  const char *ptr;
+  size_t len;
 };
 #endif // CXXBRIDGE05_RUST_STR
 
