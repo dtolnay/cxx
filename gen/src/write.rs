@@ -25,8 +25,7 @@ pub(super) fn gen<'a>(apis: &[Api], types: &'a Types, opt: &Opt, header: bool) -
         }
     }
 
-    write_includes(out);
-    write_include_cxxbridge(out, apis);
+    pick_includes_and_builtins(out, apis);
     write_builtins(out);
 
     out.next_section();
@@ -149,7 +148,7 @@ fn gen_namespace_contents(out: &mut OutFile, ns_entries: &NamespaceEntries, opt:
     }
 }
 
-fn write_includes(out: &mut OutFile) {
+fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
     for ty in out.types {
         match ty {
             Type::Ident(ident) => match Atom::from(&ident.rust) {
@@ -166,9 +165,7 @@ fn write_includes(out: &mut OutFile) {
             _ => {}
         }
     }
-}
 
-fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
     for ty in out.types {
         match ty {
             Type::RustBox(_) => {
