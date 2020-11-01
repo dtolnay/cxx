@@ -1,4 +1,5 @@
 use crate::gen::alphasort::NamespaceEntries;
+use crate::gen::block::Block;
 use crate::gen::out::OutFile;
 use crate::gen::{builtin, include, Opt};
 use crate::syntax::atom::Atom::{self, *};
@@ -107,7 +108,7 @@ fn gen_namespace_contents(out: &mut OutFile, ns_entries: &NamespaceEntries) {
     }
 
     if !out.header {
-        out.begin_block("extern \"C\"");
+        out.begin_block(Block::ExternC);
         write_exception_glue(out, apis);
         for api in apis {
             match api {
@@ -116,7 +117,7 @@ fn gen_namespace_contents(out: &mut OutFile, ns_entries: &NamespaceEntries) {
                 _ => {}
             }
         }
-        out.end_block("extern \"C\"");
+        out.end_block(Block::ExternC);
     }
 
     for api in apis {
@@ -127,10 +128,9 @@ fn gen_namespace_contents(out: &mut OutFile, ns_entries: &NamespaceEntries) {
     }
 
     for (namespace, nested_ns_entries) in ns_entries.nested_content() {
-        let block = format!("namespace {}", namespace);
-        out.begin_block(&block);
+        out.begin_block(Block::UserDefinedNamespace(namespace.clone()));
         gen_namespace_contents(out, nested_ns_entries);
-        out.end_block(&block);
+        out.end_block(Block::UserDefinedNamespace(namespace.clone()));
     }
 }
 
@@ -973,7 +973,7 @@ fn to_mangled(ty: &Type, types: &Types) -> Symbol {
 }
 
 fn write_generic_instantiations(out: &mut OutFile) {
-    out.begin_block("extern \"C\"");
+    out.begin_block(Block::ExternC);
     for ty in out.types {
         if let Type::RustBox(ty) = ty {
             if let Type::Ident(inner) = &ty.inner {
@@ -1009,10 +1009,10 @@ fn write_generic_instantiations(out: &mut OutFile) {
             }
         }
     }
-    out.end_block("extern \"C\"");
+    out.end_block(Block::ExternC);
 
-    out.begin_block("namespace rust");
-    out.begin_block("inline namespace cxxbridge05");
+    out.begin_block(Block::Namespace("rust"));
+    out.begin_block(Block::InlineNamespace("cxxbridge05"));
     for ty in out.types {
         if let Type::RustBox(ty) = ty {
             if let Type::Ident(inner) = &ty.inner {
@@ -1026,8 +1026,8 @@ fn write_generic_instantiations(out: &mut OutFile) {
             }
         }
     }
-    out.end_block("namespace cxxbridge05");
-    out.end_block("namespace rust");
+    out.end_block(Block::InlineNamespace("cxxbridge05"));
+    out.end_block(Block::Namespace("rust"));
 }
 
 fn write_rust_box_extern(out: &mut OutFile, ident: &CppName) {

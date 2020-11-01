@@ -1,3 +1,4 @@
+use crate::gen::block::Block;
 use crate::gen::ifndef;
 use crate::gen::out::{Content, OutFile};
 
@@ -39,8 +40,8 @@ pub(super) fn write(out: &mut OutFile) {
     let builtin = &mut out.builtin;
     let out = &mut builtin.content;
 
-    out.begin_block("namespace rust");
-    out.begin_block("inline namespace cxxbridge05");
+    out.begin_block(Block::Namespace("rust"));
+    out.begin_block(Block::InlineNamespace("cxxbridge05"));
     writeln!(out, "// #include \"rust/cxx.h\"");
 
     ifndef::write(out, builtin.panic, "CXXBRIDGE05_PANIC");
@@ -51,10 +52,10 @@ pub(super) fn write(out: &mut OutFile) {
     }
 
     if builtin.rust_error {
-        out.begin_block("namespace");
+        out.begin_block(Block::AnonymousNamespace);
         writeln!(out, "template <typename T>");
         writeln!(out, "class impl;");
-        out.end_block("namespace");
+        out.end_block(Block::AnonymousNamespace);
     }
 
     ifndef::write(out, builtin.rust_string, "CXXBRIDGE05_RUST_STRING");
@@ -91,15 +92,15 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "}};");
     }
 
-    out.begin_block("namespace");
+    out.begin_block(Block::AnonymousNamespace);
 
     if builtin.ptr_len {
-        out.begin_block("namespace repr");
+        out.begin_block(Block::Namespace("repr"));
         writeln!(out, "struct PtrLen final {{");
         writeln!(out, "  const void *ptr;");
         writeln!(out, "  size_t len;");
         writeln!(out, "}};");
-        out.end_block("namespace repr");
+        out.end_block(Block::Namespace("repr"));
     }
 
     if builtin.rust_str_new_unchecked || builtin.rust_str_repr {
@@ -167,11 +168,11 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "}};");
     }
 
-    out.end_block("namespace");
-    out.end_block("namespace cxxbridge05");
+    out.end_block(Block::AnonymousNamespace);
+    out.end_block(Block::InlineNamespace("cxxbridge05"));
 
     if builtin.trycatch {
-        out.begin_block("namespace behavior");
+        out.begin_block(Block::Namespace("behavior"));
         include.exception = true;
         include.type_traits = true;
         include.utility = true;
@@ -190,8 +191,8 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "}} catch (const ::std::exception &e) {{");
         writeln!(out, "  fail(e.what());");
         writeln!(out, "}}");
-        out.end_block("namespace behavior");
+        out.end_block(Block::Namespace("behavior"));
     }
 
-    out.end_block("namespace rust");
+    out.end_block(Block::Namespace("rust"));
 }

@@ -1,3 +1,4 @@
+use crate::gen::block::Block;
 use crate::gen::builtin::Builtins;
 use crate::gen::include::Includes;
 use crate::gen::Opt;
@@ -18,7 +19,7 @@ pub(crate) struct OutFile<'a> {
 pub struct Content {
     bytes: String,
     section_pending: bool,
-    blocks_pending: Vec<String>,
+    blocks_pending: Vec<Block>,
 }
 
 impl<'a> OutFile<'a> {
@@ -38,11 +39,11 @@ impl<'a> OutFile<'a> {
         self.content.get_mut().next_section();
     }
 
-    pub fn begin_block(&mut self, block: &str) {
+    pub fn begin_block(&mut self, block: Block) {
         self.content.get_mut().begin_block(block);
     }
 
-    pub fn end_block(&mut self, block: &str) {
+    pub fn end_block(&mut self, block: Block) {
         self.content.get_mut().end_block(block);
     }
 
@@ -95,15 +96,13 @@ impl Content {
         self.section_pending = true;
     }
 
-    pub fn begin_block(&mut self, block: &str) {
-        self.blocks_pending.push(block.to_owned());
+    pub fn begin_block(&mut self, block: Block) {
+        self.blocks_pending.push(block);
     }
 
-    pub fn end_block(&mut self, block: &str) {
+    pub fn end_block(&mut self, block: Block) {
         if self.blocks_pending.pop().is_none() {
-            self.bytes.push_str("} // ");
-            self.bytes.push_str(block);
-            self.bytes.push('\n');
+            Block::write_end(&block, &mut self.bytes);
             self.section_pending = true;
         }
     }
@@ -119,8 +118,7 @@ impl Content {
                     self.bytes.push('\n');
                 }
                 for block in self.blocks_pending.drain(..) {
-                    self.bytes.push_str(&block);
-                    self.bytes.push_str(" {\n");
+                    Block::write_begin(&block, &mut self.bytes);
                 }
                 self.section_pending = false;
             } else if self.section_pending {

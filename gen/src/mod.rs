@@ -2,6 +2,7 @@
 // the cxxbridge CLI command.
 
 mod alphasort;
+mod block;
 mod builtin;
 mod check;
 pub(super) mod error;
