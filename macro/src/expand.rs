@@ -594,7 +594,7 @@ fn expand_rust_function_shim_impl(
                 quote!(#receiver_type::#ident)
             }
         },
-        None => quote!(__extern),
+        None => quote!(::std::mem::transmute::<*const (), #sig>(__extern)),
     };
     call.extend(quote! { (#(#vars),*) });
 
@@ -662,7 +662,7 @@ fn expand_rust_function_shim_impl(
     };
 
     let pointer = match invoke {
-        None => Some(quote!(__extern: #sig)),
+        None => Some(quote!(__extern: *const ())),
         Some(_) => None,
     };
 

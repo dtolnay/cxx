@@ -149,8 +149,6 @@ fn test_c_take() {
     check!(ffi::c_take_nested_ns_enum(ffi::ABEnum::ABAVal));
 }
 
-/*
-// https://github.com/dtolnay/cxx/issues/232
 #[test]
 fn test_c_callback() {
     fn callback(s: String) -> usize {
@@ -162,7 +160,6 @@ fn test_c_callback() {
 
     check!(ffi::c_take_callback(callback));
 }
-*/
 
 #[test]
 fn test_c_call_r() {

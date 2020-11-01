@@ -134,10 +134,7 @@ void c_take_ref_rust_vec(const rust::Vec<uint8_t> &v);
 void c_take_ref_rust_vec_string(const rust::Vec<rust::String> &v);
 void c_take_ref_rust_vec_index(const rust::Vec<uint8_t> &v);
 void c_take_ref_rust_vec_copy(const rust::Vec<uint8_t> &v);
-/*
-// https://github.com/dtolnay/cxx/issues/232
 void c_take_callback(rust::Fn<size_t(rust::String)> callback);
-*/
 void c_take_enum(Enum e);
 void c_take_ns_enum(::A::AEnum e);
 void c_take_nested_ns_enum(::A::B::ABEnum e);
