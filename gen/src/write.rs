@@ -214,20 +214,21 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
     let mut needs_manually_drop = false;
     let mut needs_maybe_uninit = false;
     let mut needs_trycatch = false;
+    let mut needs_rust_str_new_unchecked = false;
+    let mut needs_rust_str_repr = false;
     for api in apis {
         match api {
             Api::CxxFunction(efn) if !out.header => {
                 if efn.throws {
                     needs_trycatch = true;
+                } else if let Some(Type::Str(_)) = efn.ret {
+                    needs_rust_str_repr = true;
                 }
                 for arg in &efn.args {
-                    let bitcopy = match arg.ty {
-                        Type::RustVec(_) => true,
-                        _ => arg.ty == RustString,
-                    };
-                    if bitcopy {
-                        needs_unsafe_bitcopy = true;
-                        break;
+                    match arg.ty {
+                        Type::Str(_) => needs_rust_str_new_unchecked = true,
+                        Type::RustVec(_) => needs_unsafe_bitcopy = true,
+                        _ => needs_unsafe_bitcopy |= arg.ty == RustString,
                     }
                 }
             }
@@ -242,12 +243,16 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
                 for arg in &efn.args {
                     if arg.ty != RustString && out.types.needs_indirect_abi(&arg.ty) {
                         needs_manually_drop = true;
-                        break;
+                    }
+                    if let Type::Str(_) = arg.ty {
+                        needs_rust_str_repr = true;
                     }
                 }
                 if let Some(ret) = &efn.ret {
                     if out.types.needs_indirect_abi(ret) {
                         needs_maybe_uninit = true;
+                    } else if let Type::Str(_) = ret {
+                        needs_rust_str_new_unchecked = true;
                     }
                 }
             }
@@ -324,7 +329,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
 
     out.begin_block("namespace");
 
-    if needs_trycatch || needs_rust_error || needs_rust_str && !out.header {
+    if needs_trycatch || needs_rust_error || needs_rust_str_new_unchecked || needs_rust_str_repr {
         out.begin_block("namespace repr");
         writeln!(out, "struct PtrLen final {{");
         writeln!(out, "  const void *ptr;");
@@ -333,23 +338,27 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
         out.end_block("namespace repr");
     }
 
-    if needs_rust_str && !out.header {
+    if needs_rust_str_new_unchecked || needs_rust_str_repr {
         out.next_section();
         writeln!(out, "template <>");
         writeln!(out, "class impl<Str> final {{");
         writeln!(out, "public:");
-        writeln!(
-            out,
-            "  static Str new_unchecked(repr::PtrLen repr) noexcept {{",
-        );
-        writeln!(out, "    Str str;");
-        writeln!(out, "    str.ptr = static_cast<const char *>(repr.ptr);");
-        writeln!(out, "    str.len = repr.len;");
-        writeln!(out, "    return str;");
-        writeln!(out, "  }}");
-        writeln!(out, "  static repr::PtrLen repr(Str str) noexcept {{");
-        writeln!(out, "    return repr::PtrLen{{str.ptr, str.len}};");
-        writeln!(out, "  }}");
+        if needs_rust_str_new_unchecked {
+            writeln!(
+                out,
+                "  static Str new_unchecked(repr::PtrLen repr) noexcept {{",
+            );
+            writeln!(out, "    Str str;");
+            writeln!(out, "    str.ptr = static_cast<const char *>(repr.ptr);");
+            writeln!(out, "    str.len = repr.len;");
+            writeln!(out, "    return str;");
+            writeln!(out, "  }}");
+        }
+        if needs_rust_str_repr {
+            writeln!(out, "  static repr::PtrLen repr(Str str) noexcept {{");
+            writeln!(out, "    return repr::PtrLen{{str.ptr, str.len}};");
+            writeln!(out, "  }}");
+        }
         writeln!(out, "}};");
     }
 
