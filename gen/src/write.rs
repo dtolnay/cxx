@@ -1,4 +1,4 @@
-use crate::gen::namespace_organizer::NamespaceEntries;
+use crate::gen::alphasort::NamespaceEntries;
 use crate::gen::out::OutFile;
 use crate::gen::{builtin, include, Opt};
 use crate::syntax::atom::Atom::{self, *};

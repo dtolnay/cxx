@@ -1,6 +1,7 @@
 // Functionality that is shared between the cxx_build::bridge entry point and
 // the cxxbridge CLI command.
 
+mod alphasort;
 mod builtin;
 mod check;
 pub(super) mod error;
@@ -8,7 +9,6 @@ mod file;
 pub(super) mod fs;
 mod ifndef;
 pub(super) mod include;
-mod namespace_organizer;
 pub(super) mod out;
 mod write;
 
