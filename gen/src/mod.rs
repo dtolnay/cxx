@@ -117,7 +117,12 @@ pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
     for bridge in syntax.modules {
         let ref namespace = bridge.namespace;
         let trusted = bridge.unsafety.is_some();
-        apis.extend(syntax::parse_items(errors, bridge.content, trusted, namespace));
+        apis.extend(syntax::parse_items(
+            errors,
+            bridge.content,
+            trusted,
+            namespace,
+        ));
     }
 
     let ref types = Types::collect(errors, apis);
