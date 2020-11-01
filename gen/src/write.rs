@@ -18,17 +18,13 @@ pub(super) fn gen<'a>(apis: &[Api], types: &'a Types, opt: &Opt, header: bool) -
         writeln!(out.include, "#pragma once");
     }
 
+    pick_includes_and_builtins(out, apis);
     out.include.extend(&opt.include);
     for api in apis {
         if let Api::Include(include) = api {
             out.include.insert(include);
         }
     }
-
-    pick_includes_and_builtins(out, apis);
-    write_builtins(out);
-
-    out.next_section();
 
     let apis_by_namespace = NamespaceEntries::new(apis);
 
@@ -40,6 +36,7 @@ pub(super) fn gen<'a>(apis: &[Api], types: &'a Types, opt: &Opt, header: bool) -
         write_generic_instantiations(out);
     }
 
+    write_builtins(out);
     write_includes(out);
 
     out_file
