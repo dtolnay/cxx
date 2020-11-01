@@ -353,6 +353,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, impl_annotations: 
         write!(out, "{} ", annotation);
     }
     if efn.throws {
+        out.builtin.ptr_len = true;
         write!(out, "::rust::repr::PtrLen ");
     } else {
         write_extern_return_type_space(out, &efn.ret);
@@ -425,6 +426,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, impl_annotations: 
     writeln!(out, ";");
     write!(out, "  ");
     if efn.throws {
+        out.builtin.ptr_len = true;
         out.builtin.trycatch = true;
         writeln!(out, "::rust::repr::PtrLen throw$;");
         writeln!(out, "  ::rust::behavior::trycatch(");
@@ -551,6 +553,7 @@ fn write_rust_function_decl_impl(
     indirect_call: bool,
 ) {
     if sig.throws {
+        out.builtin.ptr_len = true;
         write!(out, "::rust::repr::PtrLen ");
     } else {
         write_extern_return_type_space(out, &sig.ret);
@@ -695,6 +698,7 @@ fn write_rust_function_shim_impl(
         }
     }
     if sig.throws {
+        out.builtin.ptr_len = true;
         write!(out, "::rust::repr::PtrLen error$ = ");
     }
     write!(out, "{}(", invoke);
@@ -811,7 +815,10 @@ fn write_extern_return_type_space(out: &mut OutFile, ty: &Option<Type>) {
             write_type(out, &ty.inner);
             write!(out, " *");
         }
-        Some(Type::Str(_)) => write!(out, "::rust::repr::PtrLen "),
+        Some(Type::Str(_)) => {
+            out.builtin.ptr_len = true;
+            write!(out, "::rust::repr::PtrLen ");
+        }
         Some(Type::SliceRefU8(_)) => write!(out, "::rust::Slice<uint8_t>::Repr "),
         Some(ty) if out.types.needs_indirect_abi(ty) => write!(out, "void "),
         _ => write_return_type(out, ty),
@@ -824,7 +831,10 @@ fn write_extern_arg(out: &mut OutFile, arg: &Var) {
             write_type_space(out, &ty.inner);
             write!(out, "*");
         }
-        Type::Str(_) => write!(out, "::rust::repr::PtrLen "),
+        Type::Str(_) => {
+            out.builtin.ptr_len = true;
+            write!(out, "::rust::repr::PtrLen ");
+        }
         Type::SliceRefU8(_) => write!(out, "::rust::Slice<uint8_t>::Repr "),
         _ => write_type_space(out, &arg.ty),
     }

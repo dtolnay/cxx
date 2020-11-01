@@ -16,6 +16,7 @@ pub struct Builtins {
     pub manually_drop: bool,
     pub maybe_uninit: bool,
     pub trycatch: bool,
+    pub ptr_len: bool,
     pub rust_str_new_unchecked: bool,
     pub rust_str_repr: bool,
     pub content: Content,
@@ -90,11 +91,7 @@ pub(super) fn write(out: &mut OutFile) {
 
     out.begin_block("namespace");
 
-    if builtin.trycatch
-        || builtin.rust_error
-        || builtin.rust_str_new_unchecked
-        || builtin.rust_str_repr
-    {
+    if builtin.ptr_len {
         out.begin_block("namespace repr");
         writeln!(out, "struct PtrLen final {{");
         writeln!(out, "  const void *ptr;");
