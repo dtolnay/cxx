@@ -19,7 +19,7 @@ pub struct Include {
 }
 
 #[derive(Default, PartialEq)]
-pub struct Includes {
+pub struct Includes<'a> {
     pub custom: Vec<Include>,
     pub array: bool,
     pub cstddef: bool,
@@ -33,10 +33,10 @@ pub struct Includes {
     pub utility: bool,
     pub vector: bool,
     pub basetsd: bool,
-    pub content: Content,
+    pub content: Content<'a>,
 }
 
-impl Includes {
+impl<'a> Includes<'a> {
     pub fn new() -> Self {
         Includes::default()
     }
@@ -101,13 +101,13 @@ pub(super) fn write(out: &mut OutFile) {
     }
 }
 
-impl<'a> Extend<&'a Include> for Includes {
-    fn extend<I: IntoIterator<Item = &'a Include>>(&mut self, iter: I) {
+impl<'i, 'a> Extend<&'i Include> for Includes<'a> {
+    fn extend<I: IntoIterator<Item = &'i Include>>(&mut self, iter: I) {
         self.custom.extend(iter.into_iter().cloned());
     }
 }
 
-impl<'a> From<&'a syntax::Include> for Include {
+impl<'i> From<&'i syntax::Include> for Include {
     fn from(include: &syntax::Include) -> Self {
         Include {
             path: include.path.clone(),
@@ -116,15 +116,15 @@ impl<'a> From<&'a syntax::Include> for Include {
     }
 }
 
-impl Deref for Includes {
-    type Target = Content;
+impl<'a> Deref for Includes<'a> {
+    type Target = Content<'a>;
 
     fn deref(&self) -> &Self::Target {
         &self.content
     }
 }
 
-impl DerefMut for Includes {
+impl<'a> DerefMut for Includes<'a> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.content
     }
