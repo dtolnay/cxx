@@ -102,12 +102,12 @@ fn generate_from_string(source: &str, opt: &Opt) -> Result<GeneratedCode> {
         let shebang_end = source.find('\n').unwrap_or(source.len());
         source = &source[shebang_end..];
     }
+    proc_macro2::fallback::force();
     let syntax: File = syn::parse_str(source)?;
     generate(syntax, opt)
 }
 
 pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
-    proc_macro2::fallback::force();
     let ref mut errors = Errors::new();
     let bridge = syntax
         .modules
