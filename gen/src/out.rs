@@ -1,3 +1,4 @@
+use crate::gen::builtin::Builtins;
 use crate::gen::include::Includes;
 use crate::syntax::Types;
 use std::cell::RefCell;
@@ -7,6 +8,7 @@ pub(crate) struct OutFile<'a> {
     pub header: bool,
     pub types: &'a Types<'a>,
     pub include: Includes,
+    pub builtin: Builtins,
     pub front: Content,
     content: RefCell<Content>,
 }
@@ -23,6 +25,7 @@ impl<'a> OutFile<'a> {
             header,
             types,
             include: Includes::new(),
+            builtin: Builtins::new(),
             front: Content::new(),
             content: RefCell::new(Content::new()),
         }
