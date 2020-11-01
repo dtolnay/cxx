@@ -1,6 +1,7 @@
 // Functionality that is shared between the cxx_build::bridge entry point and
 // the cxxbridge CLI command.
 
+mod builtin;
 mod check;
 pub(super) mod error;
 mod file;

@@ -168,74 +168,59 @@ fn write_includes(out: &mut OutFile) {
 }
 
 fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
-    let mut needs_panic = false;
-    let mut needs_rust_string = false;
-    let mut needs_rust_str = false;
-    let mut needs_rust_slice = false;
-    let mut needs_rust_box = false;
-    let mut needs_rust_vec = false;
-    let mut needs_rust_fn = false;
-    let mut needs_rust_isize = false;
-    let mut needs_unsafe_bitcopy = false;
     for ty in out.types {
         match ty {
             Type::RustBox(_) => {
                 out.include.new = true;
                 out.include.type_traits = true;
-                needs_rust_box = true;
+                out.builtin.rust_box = true;
             }
             Type::RustVec(_) => {
                 out.include.array = true;
                 out.include.new = true;
                 out.include.type_traits = true;
-                needs_panic = true;
-                needs_rust_vec = true;
-                needs_unsafe_bitcopy = true;
+                out.builtin.panic = true;
+                out.builtin.rust_vec = true;
+                out.builtin.unsafe_bitcopy = true;
             }
             Type::Str(_) => {
                 out.include.cstdint = true;
                 out.include.string = true;
-                needs_rust_str = true;
+                out.builtin.rust_str = true;
             }
             Type::Fn(_) => {
-                needs_rust_fn = true;
+                out.builtin.rust_fn = true;
             }
             Type::Slice(_) | Type::SliceRefU8(_) => {
-                needs_rust_slice = true;
+                out.builtin.rust_slice = true;
             }
             ty if ty == Isize => {
                 out.include.basetsd = true;
-                needs_rust_isize = true;
+                out.builtin.rust_isize = true;
             }
             ty if ty == RustString => {
                 out.include.array = true;
                 out.include.cstdint = true;
                 out.include.string = true;
-                needs_rust_string = true;
+                out.builtin.rust_string = true;
             }
             _ => {}
         }
     }
 
-    let mut needs_rust_error = false;
-    let mut needs_manually_drop = false;
-    let mut needs_maybe_uninit = false;
-    let mut needs_trycatch = false;
-    let mut needs_rust_str_new_unchecked = false;
-    let mut needs_rust_str_repr = false;
     for api in apis {
         match api {
             Api::CxxFunction(efn) if !out.header => {
                 if efn.throws {
-                    needs_trycatch = true;
+                    out.builtin.trycatch = true;
                 } else if let Some(Type::Str(_)) = efn.ret {
-                    needs_rust_str_repr = true;
+                    out.builtin.rust_str_repr = true;
                 }
                 for arg in &efn.args {
                     match arg.ty {
-                        Type::Str(_) => needs_rust_str_new_unchecked = true,
-                        Type::RustVec(_) => needs_unsafe_bitcopy = true,
-                        _ => needs_unsafe_bitcopy |= arg.ty == RustString,
+                        Type::Str(_) => out.builtin.rust_str_new_unchecked = true,
+                        Type::RustVec(_) => out.builtin.unsafe_bitcopy = true,
+                        _ => out.builtin.unsafe_bitcopy |= arg.ty == RustString,
                     }
                 }
             }
@@ -243,23 +228,23 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
                 if efn.throws {
                     out.include.exception = true;
                     out.include.string = true;
-                    needs_rust_str = true;
-                    needs_rust_error = true;
-                    needs_maybe_uninit = true;
+                    out.builtin.rust_str = true;
+                    out.builtin.rust_error = true;
+                    out.builtin.maybe_uninit = true;
                 }
                 for arg in &efn.args {
                     if arg.ty != RustString && out.types.needs_indirect_abi(&arg.ty) {
-                        needs_manually_drop = true;
+                        out.builtin.manually_drop = true;
                     }
                     if let Type::Str(_) = arg.ty {
-                        needs_rust_str_repr = true;
+                        out.builtin.rust_str_repr = true;
                     }
                 }
                 if let Some(ret) = &efn.ret {
                     if out.types.needs_indirect_abi(ret) {
-                        needs_maybe_uninit = true;
+                        out.builtin.maybe_uninit = true;
                     } else if let Type::Str(_) = ret {
-                        needs_rust_str_new_unchecked = true;
+                        out.builtin.rust_str_new_unchecked = true;
                     }
                 }
             }
@@ -270,47 +255,35 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
     out.begin_block("namespace rust");
     out.begin_block("inline namespace cxxbridge05");
 
-    if needs_panic
-        || needs_rust_string
-        || needs_rust_str
-        || needs_rust_slice
-        || needs_rust_box
-        || needs_rust_vec
-        || needs_rust_fn
-        || needs_rust_error
-        || needs_rust_isize
-        || needs_unsafe_bitcopy
-        || needs_manually_drop
-        || needs_maybe_uninit
-    {
+    if out.builtin != Default::default() {
         writeln!(out, "// #include \"rust/cxx.h\"");
     }
 
-    include::write(out, needs_panic, "CXXBRIDGE05_PANIC");
+    include::write(out, out.builtin.panic, "CXXBRIDGE05_PANIC");
 
-    if needs_rust_string {
+    if out.builtin.rust_string {
         out.next_section();
         writeln!(out, "struct unsafe_bitcopy_t;");
     }
 
-    if needs_rust_error {
+    if out.builtin.rust_error {
         out.begin_block("namespace");
         writeln!(out, "template <typename T>");
         writeln!(out, "class impl;");
         out.end_block("namespace");
     }
 
-    include::write(out, needs_rust_string, "CXXBRIDGE05_RUST_STRING");
-    include::write(out, needs_rust_str, "CXXBRIDGE05_RUST_STR");
-    include::write(out, needs_rust_slice, "CXXBRIDGE05_RUST_SLICE");
-    include::write(out, needs_rust_box, "CXXBRIDGE05_RUST_BOX");
-    include::write(out, needs_unsafe_bitcopy, "CXXBRIDGE05_RUST_BITCOPY");
-    include::write(out, needs_rust_vec, "CXXBRIDGE05_RUST_VEC");
-    include::write(out, needs_rust_fn, "CXXBRIDGE05_RUST_FN");
-    include::write(out, needs_rust_error, "CXXBRIDGE05_RUST_ERROR");
-    include::write(out, needs_rust_isize, "CXXBRIDGE05_RUST_ISIZE");
+    include::write(out, out.builtin.rust_string, "CXXBRIDGE05_RUST_STRING");
+    include::write(out, out.builtin.rust_str, "CXXBRIDGE05_RUST_STR");
+    include::write(out, out.builtin.rust_slice, "CXXBRIDGE05_RUST_SLICE");
+    include::write(out, out.builtin.rust_box, "CXXBRIDGE05_RUST_BOX");
+    include::write(out, out.builtin.unsafe_bitcopy, "CXXBRIDGE05_RUST_BITCOPY");
+    include::write(out, out.builtin.rust_vec, "CXXBRIDGE05_RUST_VEC");
+    include::write(out, out.builtin.rust_fn, "CXXBRIDGE05_RUST_FN");
+    include::write(out, out.builtin.rust_error, "CXXBRIDGE05_RUST_ERROR");
+    include::write(out, out.builtin.rust_isize, "CXXBRIDGE05_RUST_ISIZE");
 
-    if needs_manually_drop {
+    if out.builtin.manually_drop {
         out.next_section();
         out.include.utility = true;
         writeln!(out, "template <typename T>");
@@ -324,7 +297,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
         writeln!(out, "}};");
     }
 
-    if needs_maybe_uninit {
+    if out.builtin.maybe_uninit {
         out.next_section();
         writeln!(out, "template <typename T>");
         writeln!(out, "union MaybeUninit {{");
@@ -336,7 +309,11 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
 
     out.begin_block("namespace");
 
-    if needs_trycatch || needs_rust_error || needs_rust_str_new_unchecked || needs_rust_str_repr {
+    if out.builtin.trycatch
+        || out.builtin.rust_error
+        || out.builtin.rust_str_new_unchecked
+        || out.builtin.rust_str_repr
+    {
         out.begin_block("namespace repr");
         writeln!(out, "struct PtrLen final {{");
         writeln!(out, "  const void *ptr;");
@@ -345,12 +322,12 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
         out.end_block("namespace repr");
     }
 
-    if needs_rust_str_new_unchecked || needs_rust_str_repr {
+    if out.builtin.rust_str_new_unchecked || out.builtin.rust_str_repr {
         out.next_section();
         writeln!(out, "template <>");
         writeln!(out, "class impl<Str> final {{");
         writeln!(out, "public:");
-        if needs_rust_str_new_unchecked {
+        if out.builtin.rust_str_new_unchecked {
             writeln!(
                 out,
                 "  static Str new_unchecked(repr::PtrLen repr) noexcept {{",
@@ -361,7 +338,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
             writeln!(out, "    return str;");
             writeln!(out, "  }}");
         }
-        if needs_rust_str_repr {
+        if out.builtin.rust_str_repr {
             writeln!(out, "  static repr::PtrLen repr(Str str) noexcept {{");
             writeln!(out, "    return repr::PtrLen{{str.ptr, str.len}};");
             writeln!(out, "  }}");
@@ -369,7 +346,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
         writeln!(out, "}};");
     }
 
-    if needs_rust_error {
+    if out.builtin.rust_error {
         out.next_section();
         writeln!(out, "template <>");
         writeln!(out, "class impl<Error> final {{");
@@ -386,7 +363,7 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
     out.end_block("namespace");
     out.end_block("namespace cxxbridge05");
 
-    if needs_trycatch {
+    if out.builtin.trycatch {
         out.begin_block("namespace behavior");
         out.include.exception = true;
         out.include.type_traits = true;
