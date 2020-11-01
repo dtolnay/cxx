@@ -1,7 +1,6 @@
-use crate::gen::include::{self, Includes};
 use crate::gen::namespace_organizer::NamespaceEntries;
-use crate::gen::out::{Content, OutFile};
-use crate::gen::Opt;
+use crate::gen::out::OutFile;
+use crate::gen::{include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
@@ -16,7 +15,7 @@ pub(super) fn gen<'a>(apis: &[Api], types: &'a Types, opt: &Opt, header: bool) -
     let out = &mut out_file;
 
     if header {
-        writeln!(out.front, "#pragma once");
+        writeln!(out.include, "#pragma once");
     }
 
     out.include.extend(&opt.include);
@@ -41,7 +40,7 @@ pub(super) fn gen<'a>(apis: &[Api], types: &'a Types, opt: &Opt, header: bool) -
         write_generic_instantiations(out);
     }
 
-    write_includes(&mut out.front, &out.include);
+    write_includes(out);
 
     out_file
 }
@@ -248,7 +247,10 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
     }
 }
 
-fn write_includes(out: &mut Content, include: &Includes) {
+fn write_includes(out: &mut OutFile) {
+    let include = &mut out.include;
+    let out = &mut include.content;
+
     for include in &include.custom {
         match include.kind {
             IncludeKind::Quoted => {

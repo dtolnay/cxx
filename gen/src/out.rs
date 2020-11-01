@@ -9,10 +9,10 @@ pub(crate) struct OutFile<'a> {
     pub types: &'a Types<'a>,
     pub include: Includes,
     pub builtin: Builtins,
-    pub front: Content,
     content: RefCell<Content>,
 }
 
+#[derive(Default)]
 pub struct Content {
     bytes: String,
     section_pending: bool,
@@ -26,7 +26,6 @@ impl<'a> OutFile<'a> {
             types,
             include: Includes::new(),
             builtin: Builtins::new(),
-            front: Content::new(),
             content: RefCell::new(Content::new()),
         }
     }
@@ -50,12 +49,12 @@ impl<'a> OutFile<'a> {
     }
 
     pub fn content(&self) -> Vec<u8> {
-        let front = &self.front.bytes;
+        let include = &self.include.content.bytes;
         let content = &self.content.borrow().bytes;
-        let len = front.len() + content.len() + 1;
+        let len = include.len() + content.len() + 1;
         let mut out = String::with_capacity(len);
-        out.push_str(front);
-        if !front.is_empty() && !content.is_empty() {
+        out.push_str(include);
+        if !include.is_empty() && !content.is_empty() {
             out.push('\n');
         }
         out.push_str(content);
@@ -73,13 +72,15 @@ impl Write for Content {
     }
 }
 
+impl PartialEq for Content {
+    fn eq(&self, _other: &Content) -> bool {
+        true
+    }
+}
+
 impl Content {
     fn new() -> Self {
-        Content {
-            bytes: String::new(),
-            section_pending: false,
-            blocks_pending: Vec::new(),
-        }
+        Content::default()
     }
 
     pub fn next_section(&mut self) {

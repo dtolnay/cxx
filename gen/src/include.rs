@@ -1,5 +1,6 @@
-use crate::gen::out::OutFile;
+use crate::gen::out::{Content, OutFile};
 use crate::syntax::{self, IncludeKind};
+use std::ops::{Deref, DerefMut};
 
 /// The complete contents of the "rust/cxx.h" header.
 pub static HEADER: &str = include_str!("include/cxx.h");
@@ -76,6 +77,7 @@ pub struct Includes {
     pub utility: bool,
     pub vector: bool,
     pub basetsd: bool,
+    pub content: Content,
 }
 
 impl Includes {
@@ -100,5 +102,19 @@ impl<'a> From<&'a syntax::Include> for Include {
             path: include.path.clone(),
             kind: include.kind,
         }
+    }
+}
+
+impl Deref for Includes {
+    type Target = Content;
+
+    fn deref(&self) -> &Self::Target {
+        &self.content
+    }
+}
+
+impl DerefMut for Includes {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.content
     }
 }
