@@ -101,6 +101,16 @@ pub mod ffi {
         z: usize,
     }
 
+    #[namespace = "first"]
+    struct First {
+        second: Box<Second>,
+    }
+
+    #[namespace = "second"]
+    struct Second {
+        i: i32,
+    }
+
     extern "C" {
         include!("tests/ffi/tests.h");
 
