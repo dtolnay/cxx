@@ -29,7 +29,7 @@ impl<'a> NamespaceEntries<'a> {
 
         let mut kids_by_child_ns = BTreeMap::new();
         for api in apis {
-            if let Some(ns) = api.get_namespace() {
+            if let Some(ns) = api.namespace() {
                 let first_ns_elem = ns.iter().nth(depth);
                 if let Some(first_ns_elem) = first_ns_elem {
                     let list = kids_by_child_ns.entry(first_ns_elem).or_insert(Vec::new());

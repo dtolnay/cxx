@@ -82,7 +82,7 @@ impl<'a> IntoIterator for &'a Namespace {
 }
 
 impl Api {
-    pub fn get_namespace(&self) -> Option<&Namespace> {
+    pub fn namespace(&self) -> Option<&Namespace> {
         match self {
             Api::CxxFunction(efn) | Api::RustFunction(efn) => Some(&efn.ident.cxx.ns),
             Api::CxxType(ety) | Api::RustType(ety) => Some(&ety.ident.cxx.ns),
