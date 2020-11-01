@@ -10,8 +10,8 @@ use crate::syntax::{
 use proc_macro2::Ident;
 use std::collections::HashMap;
 
-pub(super) fn gen<'a>(apis: &[Api], types: &'a Types, opt: &Opt, header: bool) -> OutFile<'a> {
-    let mut out_file = OutFile::new(header, types);
+pub(super) fn gen<'a>(apis: &[Api], types: &'a Types, opt: &'a Opt, header: bool) -> OutFile<'a> {
+    let mut out_file = OutFile::new(header, opt, types);
     let out = &mut out_file;
 
     if header {
@@ -23,7 +23,7 @@ pub(super) fn gen<'a>(apis: &[Api], types: &'a Types, opt: &Opt, header: bool) -
 
     let apis_by_namespace = NamespaceEntries::new(apis);
     gen_namespace_forward_declarations(out, &apis_by_namespace);
-    gen_namespace_contents(out, &apis_by_namespace, opt);
+    gen_namespace_contents(out, &apis_by_namespace);
 
     if !header {
         out.next_section();
@@ -56,7 +56,7 @@ fn gen_namespace_forward_declarations(out: &mut OutFile, ns_entries: &NamespaceE
     }
 }
 
-fn gen_namespace_contents(out: &mut OutFile, ns_entries: &NamespaceEntries, opt: &Opt) {
+fn gen_namespace_contents(out: &mut OutFile, ns_entries: &NamespaceEntries) {
     let apis = ns_entries.direct_content();
 
     let mut methods_for_type = HashMap::new();
@@ -110,13 +110,13 @@ fn gen_namespace_contents(out: &mut OutFile, ns_entries: &NamespaceEntries, opt:
         out.begin_block("extern \"C\"");
         write_exception_glue(out, apis);
         for api in apis {
-            let (efn, write): (_, fn(_, _, _)) = match api {
+            let (efn, write): (_, fn(_, _)) = match api {
                 Api::CxxFunction(efn) => (efn, write_cxx_function_shim),
                 Api::RustFunction(efn) => (efn, write_rust_function_decl),
                 _ => continue,
             };
             out.next_section();
-            write(out, efn, &opt.cxx_impl_annotations);
+            write(out, efn);
         }
         out.end_block("extern \"C\"");
     }
@@ -131,7 +131,7 @@ fn gen_namespace_contents(out: &mut OutFile, ns_entries: &NamespaceEntries, opt:
     for (namespace, nested_ns_entries) in ns_entries.nested_content() {
         let block = format!("namespace {}", namespace);
         out.begin_block(&block);
-        gen_namespace_contents(out, nested_ns_entries, opt);
+        gen_namespace_contents(out, nested_ns_entries);
         out.end_block(&block);
     }
 }
@@ -343,8 +343,8 @@ fn write_exception_glue(out: &mut OutFile, apis: &[&Api]) {
     }
 }
 
-fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, impl_annotations: &Option<String>) {
-    if let Some(annotation) = impl_annotations {
+fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn) {
+    if let Some(annotation) = &out.opt.cxx_impl_annotations {
         write!(out, "{} ", annotation);
     }
     if efn.throws {
@@ -542,7 +542,7 @@ fn write_function_pointer_trampoline(
     write_rust_function_shim_impl(out, &c_trampoline, f, &r_trampoline, indirect_call);
 }
 
-fn write_rust_function_decl(out: &mut OutFile, efn: &ExternFn, _: &Option<String>) {
+fn write_rust_function_decl(out: &mut OutFile, efn: &ExternFn) {
     let link_name = mangle::extern_fn(efn, out.types);
     let indirect_call = false;
     write_rust_function_decl_impl(out, &link_name, efn, indirect_call);

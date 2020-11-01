@@ -1,11 +1,13 @@
 use crate::gen::builtin::Builtins;
 use crate::gen::include::Includes;
+use crate::gen::Opt;
 use crate::syntax::Types;
 use std::cell::RefCell;
 use std::fmt::{self, Arguments, Write};
 
 pub(crate) struct OutFile<'a> {
     pub header: bool,
+    pub opt: &'a Opt,
     pub types: &'a Types<'a>,
     pub include: Includes,
     pub builtin: Builtins,
@@ -20,9 +22,10 @@ pub struct Content {
 }
 
 impl<'a> OutFile<'a> {
-    pub fn new(header: bool, types: &'a Types) -> Self {
+    pub fn new(header: bool, opt: &'a Opt, types: &'a Types) -> Self {
         OutFile {
             header,
+            opt,
             types,
             include: Includes::new(),
             builtin: Builtins::new(),
