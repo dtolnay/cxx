@@ -11,7 +11,7 @@ pub struct NamespaceEntries<'a> {
 impl<'a> NamespaceEntries<'a> {
     pub fn new(apis: &'a [Api]) -> Self {
         let api_refs = Vec::from_iter(apis);
-        Self::sort_by_inner_namespace(api_refs, 0)
+        sort_by_inner_namespace(api_refs, 0)
     }
 
     pub fn direct_content(&self) -> &[&'a Api] {
@@ -21,31 +21,31 @@ impl<'a> NamespaceEntries<'a> {
     pub fn nested_content(&self) -> impl Iterator<Item = (&Ident, &NamespaceEntries)> {
         self.nested.iter().map(|(k, entries)| (*k, entries))
     }
+}
 
-    fn sort_by_inner_namespace(apis: Vec<&'a Api>, depth: usize) -> Self {
-        let mut direct = Vec::new();
-        let mut nested_namespaces = BTreeMap::new();
-        for api in apis {
-            if let Some(ns) = api.namespace() {
-                let first_ns_elem = ns.iter().nth(depth);
-                if let Some(first_ns_elem) = first_ns_elem {
-                    nested_namespaces
-                        .entry(first_ns_elem)
-                        .or_insert_with(Vec::new)
-                        .push(api);
-                    continue;
-                }
+fn sort_by_inner_namespace(apis: Vec<&Api>, depth: usize) -> NamespaceEntries {
+    let mut direct = Vec::new();
+    let mut nested_namespaces = BTreeMap::new();
+    for api in apis {
+        if let Some(ns) = api.namespace() {
+            let first_ns_elem = ns.iter().nth(depth);
+            if let Some(first_ns_elem) = first_ns_elem {
+                nested_namespaces
+                    .entry(first_ns_elem)
+                    .or_insert_with(Vec::new)
+                    .push(api);
+                continue;
             }
-            direct.push(api);
         }
-
-        let nested = nested_namespaces
-            .into_iter()
-            .map(|(k, apis)| (k, Self::sort_by_inner_namespace(apis, depth + 1)))
-            .collect();
-
-        NamespaceEntries { direct, nested }
+        direct.push(api);
     }
+
+    let nested = nested_namespaces
+        .into_iter()
+        .map(|(k, apis)| (k, sort_by_inner_namespace(apis, depth + 1)))
+        .collect();
+
+    NamespaceEntries { direct, nested }
 }
 
 #[cfg(test)]
