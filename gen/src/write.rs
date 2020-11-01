@@ -1,11 +1,11 @@
 use crate::gen::namespace_organizer::NamespaceEntries;
 use crate::gen::out::OutFile;
-use crate::gen::{ifndef, Opt};
+use crate::gen::{ifndef, include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    mangle, Api, CppName, Enum, ExternFn, ExternType, IncludeKind, ResolvableName, Signature,
-    Struct, Type, Types, Var,
+    mangle, Api, CppName, Enum, ExternFn, ExternType, ResolvableName, Signature, Struct, Type,
+    Types, Var,
 };
 use proc_macro2::Ident;
 use std::collections::HashMap;
@@ -32,7 +32,7 @@ pub(super) fn gen<'a>(apis: &[Api], types: &'a Types, opt: &Opt, header: bool) -
     }
 
     write_builtins(out);
-    write_includes(out);
+    include::write(out);
 
     out_file
 }
@@ -237,61 +237,6 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
             }
             _ => {}
         }
-    }
-}
-
-fn write_includes(out: &mut OutFile) {
-    let include = &mut out.include;
-    let out = &mut include.content;
-
-    for include in &include.custom {
-        match include.kind {
-            IncludeKind::Quoted => {
-                writeln!(out, "#include \"{}\"", include.path.escape_default());
-            }
-            IncludeKind::Bracketed => {
-                writeln!(out, "#include <{}>", include.path);
-            }
-        }
-    }
-
-    if include.array {
-        writeln!(out, "#include <array>");
-    }
-    if include.cstddef {
-        writeln!(out, "#include <cstddef>");
-    }
-    if include.cstdint {
-        writeln!(out, "#include <cstdint>");
-    }
-    if include.cstring {
-        writeln!(out, "#include <cstring>");
-    }
-    if include.exception {
-        writeln!(out, "#include <exception>");
-    }
-    if include.memory {
-        writeln!(out, "#include <memory>");
-    }
-    if include.new {
-        writeln!(out, "#include <new>");
-    }
-    if include.string {
-        writeln!(out, "#include <string>");
-    }
-    if include.type_traits {
-        writeln!(out, "#include <type_traits>");
-    }
-    if include.utility {
-        writeln!(out, "#include <utility>");
-    }
-    if include.vector {
-        writeln!(out, "#include <vector>");
-    }
-    if include.basetsd {
-        writeln!(out, "#if defined(_WIN32)");
-        writeln!(out, "#include <basetsd.h>");
-        writeln!(out, "#endif");
     }
 }
 

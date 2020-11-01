@@ -1,4 +1,4 @@
-use crate::gen::out::Content;
+use crate::gen::out::{Content, OutFile};
 use crate::syntax::{self, IncludeKind};
 use std::ops::{Deref, DerefMut};
 
@@ -43,6 +43,61 @@ impl Includes {
 
     pub fn insert(&mut self, include: impl Into<Include>) {
         self.custom.push(include.into());
+    }
+}
+
+pub(super) fn write(out: &mut OutFile) {
+    let include = &mut out.include;
+    let out = &mut include.content;
+
+    for include in &include.custom {
+        match include.kind {
+            IncludeKind::Quoted => {
+                writeln!(out, "#include \"{}\"", include.path.escape_default());
+            }
+            IncludeKind::Bracketed => {
+                writeln!(out, "#include <{}>", include.path);
+            }
+        }
+    }
+
+    if include.array {
+        writeln!(out, "#include <array>");
+    }
+    if include.cstddef {
+        writeln!(out, "#include <cstddef>");
+    }
+    if include.cstdint {
+        writeln!(out, "#include <cstdint>");
+    }
+    if include.cstring {
+        writeln!(out, "#include <cstring>");
+    }
+    if include.exception {
+        writeln!(out, "#include <exception>");
+    }
+    if include.memory {
+        writeln!(out, "#include <memory>");
+    }
+    if include.new {
+        writeln!(out, "#include <new>");
+    }
+    if include.string {
+        writeln!(out, "#include <string>");
+    }
+    if include.type_traits {
+        writeln!(out, "#include <type_traits>");
+    }
+    if include.utility {
+        writeln!(out, "#include <utility>");
+    }
+    if include.vector {
+        writeln!(out, "#include <vector>");
+    }
+    if include.basetsd {
+        writeln!(out, "#if defined(_WIN32)");
+        writeln!(out, "#include <basetsd.h>");
+        writeln!(out, "#endif");
     }
 }
 
