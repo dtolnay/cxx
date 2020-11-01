@@ -49,10 +49,10 @@ fn gen_namespace_forward_declarations(out: &mut OutFile, ns_entries: &NamespaceE
         }
     }
 
-    for (child_ns, child_ns_entries) in ns_entries.nested_content() {
-        writeln!(out, "namespace {} {{", child_ns);
-        gen_namespace_forward_declarations(out, child_ns_entries);
-        writeln!(out, "}} // namespace {}", child_ns);
+    for (namespace, nested_ns_entries) in ns_entries.nested_content() {
+        writeln!(out, "namespace {} {{", namespace);
+        gen_namespace_forward_declarations(out, nested_ns_entries);
+        writeln!(out, "}} // namespace {}", namespace);
     }
 }
 
@@ -128,10 +128,10 @@ fn gen_namespace_contents(out: &mut OutFile, ns_entries: &NamespaceEntries, opt:
         }
     }
 
-    for (child_ns, child_ns_entries) in ns_entries.nested_content() {
-        let block = format!("namespace {}", child_ns);
+    for (namespace, nested_ns_entries) in ns_entries.nested_content() {
+        let block = format!("namespace {}", namespace);
         out.begin_block(&block);
-        gen_namespace_contents(out, child_ns_entries, opt);
+        gen_namespace_contents(out, nested_ns_entries, opt);
         out.end_block(&block);
     }
 }
