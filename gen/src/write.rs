@@ -22,7 +22,6 @@ pub(super) fn gen<'a>(apis: &[Api], types: &'a Types, opt: &Opt, header: bool) -
     out.include.extend(&opt.include);
 
     let apis_by_namespace = NamespaceEntries::new(apis);
-
     gen_namespace_forward_declarations(out, &apis_by_namespace);
     gen_namespace_contents(out, &apis_by_namespace, opt);
 
@@ -132,12 +131,11 @@ fn gen_namespace_contents(out: &mut OutFile, ns_entries: &NamespaceEntries, opt:
         }
     }
 
-    out.next_section();
-
     for (child_ns, child_ns_entries) in ns_entries.children() {
-        writeln!(out, "namespace {} {{", child_ns);
+        let block = format!("namespace {}", child_ns);
+        out.begin_block(&block);
         gen_namespace_contents(out, child_ns_entries, opt);
-        writeln!(out, "}} // namespace {}", child_ns);
+        out.end_block(&block);
     }
 }
 
