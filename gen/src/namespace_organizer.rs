@@ -58,7 +58,7 @@ mod tests {
 
     #[test]
     fn test_ns_entries_sort() {
-        let entries = vec![
+        let apis = &[
             make_api(None, "C"),
             make_api(None, "A"),
             make_api(Some("G"), "E"),
@@ -70,58 +70,66 @@ mod tests {
             make_api(Some("D"), "I"),
             make_api(Some("D"), "J"),
         ];
-        let ns = NamespaceEntries::new(&entries);
-        let root_entries = ns.direct_content();
-        assert_eq!(root_entries.len(), 3);
-        assert_ident(root_entries[0], "C");
-        assert_ident(root_entries[1], "A");
-        assert_ident(root_entries[2], "B");
-        let mut kids = ns.nested_content();
-        let (d_id, d_nse) = kids.next().unwrap();
-        assert_eq!(d_id.to_string(), "D");
-        let (g_id, g_nse) = kids.next().unwrap();
-        assert_eq!(g_id.to_string(), "G");
-        assert!(kids.next().is_none());
-        let d_nse_entries = d_nse.direct_content();
-        assert_eq!(d_nse_entries.len(), 3);
-        assert_ident(d_nse_entries[0], "F");
-        assert_ident(d_nse_entries[1], "I");
-        assert_ident(d_nse_entries[2], "J");
-        let g_nse_entries = g_nse.direct_content();
-        assert_eq!(g_nse_entries.len(), 2);
-        assert_ident(g_nse_entries[0], "E");
-        assert_ident(g_nse_entries[1], "H");
-        let mut g_kids = g_nse.nested_content();
-        assert!(g_kids.next().is_none());
-        let mut d_kids = d_nse.nested_content();
-        let (k_id, k_nse) = d_kids.next().unwrap();
-        assert_eq!(k_id.to_string(), "K");
-        let k_nse_entries = k_nse.direct_content();
-        assert_eq!(k_nse_entries.len(), 2);
-        assert_ident(k_nse_entries[0], "L");
-        assert_ident(k_nse_entries[1], "M");
+
+        let root = NamespaceEntries::new(apis);
+
+        // ::
+        let root_direct = root.direct_content();
+        assert_eq!(root_direct.len(), 3);
+        assert_ident(root_direct[0], "C");
+        assert_ident(root_direct[1], "A");
+        assert_ident(root_direct[2], "B");
+
+        let mut root_nested = root.nested_content();
+        let (id, d) = root_nested.next().unwrap();
+        assert_eq!(id, "D");
+        let (id, g) = root_nested.next().unwrap();
+        assert_eq!(id, "G");
+        assert!(root_nested.next().is_none());
+
+        // ::D
+        let d_direct = d.direct_content();
+        assert_eq!(d_direct.len(), 3);
+        assert_ident(d_direct[0], "F");
+        assert_ident(d_direct[1], "I");
+        assert_ident(d_direct[2], "J");
+
+        let mut d_nested = d.nested_content();
+        let (id, k) = d_nested.next().unwrap();
+        assert_eq!(id, "K");
+
+        // ::D::K
+        let k_direct = k.direct_content();
+        assert_eq!(k_direct.len(), 2);
+        assert_ident(k_direct[0], "L");
+        assert_ident(k_direct[1], "M");
+
+        // ::G
+        let g_direct = g.direct_content();
+        assert_eq!(g_direct.len(), 2);
+        assert_ident(g_direct[0], "E");
+        assert_ident(g_direct[1], "H");
+
+        let mut g_nested = g.nested_content();
+        assert!(g_nested.next().is_none());
     }
 
     fn assert_ident(api: &Api, expected: &str) {
         if let Api::CxxType(cxx_type) = api {
-            assert_eq!(cxx_type.ident.cxx.ident.to_string(), expected);
+            assert_eq!(cxx_type.ident.cxx.ident, expected);
         } else {
             unreachable!()
         }
     }
 
     fn make_api(ns: Option<&str>, ident: &str) -> Api {
-        let ns = match ns {
-            Some(st) => Namespace::from_str(st),
-            None => Namespace::none(),
-        };
-        let ident = Pair::new(ns, Ident::new(ident, Span::call_site()));
+        let ns = ns.map_or_else(Namespace::none, Namespace::from_str);
         Api::CxxType(ExternType {
             doc: Doc::new(),
             type_token: Token![type](Span::call_site()),
-            ident,
+            ident: Pair::new(ns, Ident::new(ident, Span::call_site())),
             semi_token: Token![;](Span::call_site()),
-            trusted: true,
+            trusted: false,
         })
     }
 }
