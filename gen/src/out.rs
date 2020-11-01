@@ -102,7 +102,7 @@ impl<'a> Content<'a> {
 
     pub fn end_block(&mut self, block: Block<'a>) {
         if self.blocks_pending.pop().is_none() {
-            Block::write_end(&block, &mut self.bytes);
+            Block::write_end(block, &mut self.bytes);
             self.section_pending = true;
         }
     }
@@ -118,7 +118,7 @@ impl<'a> Content<'a> {
                     self.bytes.push('\n');
                 }
                 for block in self.blocks_pending.drain(..) {
-                    Block::write_begin(&block, &mut self.bytes);
+                    Block::write_begin(block, &mut self.bytes);
                 }
                 self.section_pending = false;
             } else if self.section_pending {

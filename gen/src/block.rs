@@ -10,7 +10,7 @@ pub enum Block<'a> {
 }
 
 impl<'a> Block<'a> {
-    pub fn write_begin(&self, out: &mut String) {
+    pub fn write_begin(self, out: &mut String) {
         if let Block::InlineNamespace(_) = self {
             out.push_str("inline ");
         }
@@ -18,13 +18,13 @@ impl<'a> Block<'a> {
         out.push_str(" {\n");
     }
 
-    pub fn write_end(&self, out: &mut String) {
+    pub fn write_end(self, out: &mut String) {
         out.push_str("} // ");
         self.write_common(out);
         out.push('\n');
     }
 
-    fn write_common(&self, out: &mut String) {
+    fn write_common(self, out: &mut String) {
         match self {
             Block::AnonymousNamespace => out.push_str("namespace"),
             Block::Namespace(name) => {
