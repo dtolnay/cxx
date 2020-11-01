@@ -33,23 +33,15 @@ impl<'a> OutFile<'a> {
 
     // Write a blank line if the preceding section had any contents.
     pub fn next_section(&mut self) {
-        let content = self.content.get_mut();
-        content.section_pending = true;
+        self.content.get_mut().next_section();
     }
 
     pub fn begin_block(&mut self, block: &'static str) {
-        let content = self.content.get_mut();
-        content.blocks_pending.push(block);
+        self.content.get_mut().begin_block(block);
     }
 
     pub fn end_block(&mut self, block: &'static str) {
-        let content = self.content.get_mut();
-        if content.blocks_pending.pop().is_none() {
-            content.bytes.push_str("} // ");
-            content.bytes.push_str(block);
-            content.bytes.push('\n');
-            content.section_pending = true;
-        }
+        self.content.get_mut().end_block(block);
     }
 
     pub fn write_fmt(&self, args: Arguments) {
@@ -82,16 +74,33 @@ impl Write for Content {
 }
 
 impl Content {
-    pub fn write_fmt(&mut self, args: Arguments) {
-        Write::write_fmt(self, args).unwrap();
-    }
-
     fn new() -> Self {
         Content {
             bytes: String::new(),
             section_pending: false,
             blocks_pending: Vec::new(),
         }
+    }
+
+    pub fn next_section(&mut self) {
+        self.section_pending = true;
+    }
+
+    pub fn begin_block(&mut self, block: &'static str) {
+        self.blocks_pending.push(block);
+    }
+
+    pub fn end_block(&mut self, block: &'static str) {
+        if self.blocks_pending.pop().is_none() {
+            self.bytes.push_str("} // ");
+            self.bytes.push_str(block);
+            self.bytes.push('\n');
+            self.section_pending = true;
+        }
+    }
+
+    pub fn write_fmt(&mut self, args: Arguments) {
+        Write::write_fmt(self, args).unwrap();
     }
 
     fn write(&mut self, b: &str) {
