@@ -155,19 +155,19 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
                 Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(I8) | Some(I16) | Some(I32)
                 | Some(I64) => out.include.cstdint = true,
                 Some(Usize) => out.include.cstddef = true,
+                Some(Isize) => {
+                    out.include.basetsd = true;
+                    out.builtin.rust_isize = true;
+                }
                 Some(CxxString) => out.include.string = true,
-                Some(Bool) | Some(Isize) | Some(F32) | Some(F64) | Some(RustString) | None => {}
+                Some(RustString) => {
+                    out.include.array = true;
+                    out.include.cstdint = true;
+                    out.include.string = true;
+                    out.builtin.rust_string = true;
+                }
+                Some(Bool) | Some(F32) | Some(F64) | None => {}
             },
-            Type::RustBox(_) => out.include.type_traits = true,
-            Type::UniquePtr(_) => out.include.memory = true,
-            Type::CxxVector(_) => out.include.vector = true,
-            Type::SliceRefU8(_) => out.include.cstdint = true,
-            _ => {}
-        }
-    }
-
-    for ty in out.types {
-        match ty {
             Type::RustBox(_) => {
                 out.include.new = true;
                 out.include.type_traits = true;
@@ -181,26 +181,22 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
                 out.builtin.rust_vec = true;
                 out.builtin.unsafe_bitcopy = true;
             }
+            Type::UniquePtr(_) => out.include.memory = true,
             Type::Str(_) => {
                 out.include.cstdint = true;
                 out.include.string = true;
                 out.builtin.rust_str = true;
             }
+            Type::CxxVector(_) => out.include.vector = true,
             Type::Fn(_) => {
                 out.builtin.rust_fn = true;
             }
-            Type::Slice(_) | Type::SliceRefU8(_) => {
+            Type::Slice(_) => {
                 out.builtin.rust_slice = true;
             }
-            ty if ty == Isize => {
-                out.include.basetsd = true;
-                out.builtin.rust_isize = true;
-            }
-            ty if ty == RustString => {
-                out.include.array = true;
+            Type::SliceRefU8(_) => {
                 out.include.cstdint = true;
-                out.include.string = true;
-                out.builtin.rust_string = true;
+                out.builtin.rust_slice = true;
             }
             _ => {}
         }
