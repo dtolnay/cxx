@@ -6,6 +6,7 @@ mod check;
 pub(super) mod error;
 mod file;
 pub(super) mod fs;
+mod ifndef;
 pub(super) mod include;
 mod namespace_organizer;
 pub(super) mod out;

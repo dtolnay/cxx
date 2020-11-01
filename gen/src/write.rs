@@ -1,6 +1,6 @@
 use crate::gen::namespace_organizer::NamespaceEntries;
 use crate::gen::out::OutFile;
-use crate::gen::{include, Opt};
+use crate::gen::{ifndef, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
@@ -308,7 +308,7 @@ fn write_builtins(out: &mut OutFile) {
     out.begin_block("inline namespace cxxbridge05");
     writeln!(out, "// #include \"rust/cxx.h\"");
 
-    include::write(out, builtin.panic, "CXXBRIDGE05_PANIC");
+    ifndef::write(out, builtin.panic, "CXXBRIDGE05_PANIC");
 
     if builtin.rust_string {
         out.next_section();
@@ -322,15 +322,15 @@ fn write_builtins(out: &mut OutFile) {
         out.end_block("namespace");
     }
 
-    include::write(out, builtin.rust_string, "CXXBRIDGE05_RUST_STRING");
-    include::write(out, builtin.rust_str, "CXXBRIDGE05_RUST_STR");
-    include::write(out, builtin.rust_slice, "CXXBRIDGE05_RUST_SLICE");
-    include::write(out, builtin.rust_box, "CXXBRIDGE05_RUST_BOX");
-    include::write(out, builtin.unsafe_bitcopy, "CXXBRIDGE05_RUST_BITCOPY");
-    include::write(out, builtin.rust_vec, "CXXBRIDGE05_RUST_VEC");
-    include::write(out, builtin.rust_fn, "CXXBRIDGE05_RUST_FN");
-    include::write(out, builtin.rust_error, "CXXBRIDGE05_RUST_ERROR");
-    include::write(out, builtin.rust_isize, "CXXBRIDGE05_RUST_ISIZE");
+    ifndef::write(out, builtin.rust_string, "CXXBRIDGE05_RUST_STRING");
+    ifndef::write(out, builtin.rust_str, "CXXBRIDGE05_RUST_STR");
+    ifndef::write(out, builtin.rust_slice, "CXXBRIDGE05_RUST_SLICE");
+    ifndef::write(out, builtin.rust_box, "CXXBRIDGE05_RUST_BOX");
+    ifndef::write(out, builtin.unsafe_bitcopy, "CXXBRIDGE05_RUST_BITCOPY");
+    ifndef::write(out, builtin.rust_vec, "CXXBRIDGE05_RUST_VEC");
+    ifndef::write(out, builtin.rust_fn, "CXXBRIDGE05_RUST_FN");
+    ifndef::write(out, builtin.rust_error, "CXXBRIDGE05_RUST_ERROR");
+    ifndef::write(out, builtin.rust_isize, "CXXBRIDGE05_RUST_ISIZE");
 
     if builtin.manually_drop {
         out.next_section();
