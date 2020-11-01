@@ -27,6 +27,7 @@ pub(super) fn gen<'a>(apis: &[Api], types: &'a Types, opt: &Opt, header: bool) -
 
     write_includes(out);
     write_include_cxxbridge(out, apis);
+    write_builtins(out);
 
     out.next_section();
 
@@ -251,7 +252,9 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
             _ => {}
         }
     }
+}
 
+fn write_builtins(out: &mut OutFile) {
     out.begin_block("namespace rust");
     out.begin_block("inline namespace cxxbridge05");
 
