@@ -1,11 +1,11 @@
-use crate::gen::out::{Content, OutFile};
+use crate::gen::out::Content;
 use crate::syntax::{self, IncludeKind};
 use std::ops::{Deref, DerefMut};
 
 /// The complete contents of the "rust/cxx.h" header.
 pub static HEADER: &str = include_str!("include/cxx.h");
 
-pub(super) fn write(out: &mut OutFile, needed: bool, guard: &str) {
+pub(super) fn write(out: &mut Content, needed: bool, guard: &str) {
     let ifndef = format!("#ifndef {}", guard);
     let define = format!("#define {}", guard);
     let endif = format!("#endif // {}", guard);

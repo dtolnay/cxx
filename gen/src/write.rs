@@ -303,40 +303,45 @@ fn write_includes(out: &mut OutFile) {
 }
 
 fn write_builtins(out: &mut OutFile) {
-    out.begin_block("namespace rust");
-    out.begin_block("inline namespace cxxbridge05");
-
-    if out.builtin != Default::default() {
-        writeln!(out, "// #include \"rust/cxx.h\"");
+    if out.builtin == Default::default() {
+        return;
     }
 
-    include::write(out, out.builtin.panic, "CXXBRIDGE05_PANIC");
+    let include = &mut out.include;
+    let builtin = &mut out.builtin;
+    let out = &mut builtin.content;
 
-    if out.builtin.rust_string {
+    out.begin_block("namespace rust");
+    out.begin_block("inline namespace cxxbridge05");
+    writeln!(out, "// #include \"rust/cxx.h\"");
+
+    include::write(out, builtin.panic, "CXXBRIDGE05_PANIC");
+
+    if builtin.rust_string {
         out.next_section();
         writeln!(out, "struct unsafe_bitcopy_t;");
     }
 
-    if out.builtin.rust_error {
+    if builtin.rust_error {
         out.begin_block("namespace");
         writeln!(out, "template <typename T>");
         writeln!(out, "class impl;");
         out.end_block("namespace");
     }
 
-    include::write(out, out.builtin.rust_string, "CXXBRIDGE05_RUST_STRING");
-    include::write(out, out.builtin.rust_str, "CXXBRIDGE05_RUST_STR");
-    include::write(out, out.builtin.rust_slice, "CXXBRIDGE05_RUST_SLICE");
-    include::write(out, out.builtin.rust_box, "CXXBRIDGE05_RUST_BOX");
-    include::write(out, out.builtin.unsafe_bitcopy, "CXXBRIDGE05_RUST_BITCOPY");
-    include::write(out, out.builtin.rust_vec, "CXXBRIDGE05_RUST_VEC");
-    include::write(out, out.builtin.rust_fn, "CXXBRIDGE05_RUST_FN");
-    include::write(out, out.builtin.rust_error, "CXXBRIDGE05_RUST_ERROR");
-    include::write(out, out.builtin.rust_isize, "CXXBRIDGE05_RUST_ISIZE");
+    include::write(out, builtin.rust_string, "CXXBRIDGE05_RUST_STRING");
+    include::write(out, builtin.rust_str, "CXXBRIDGE05_RUST_STR");
+    include::write(out, builtin.rust_slice, "CXXBRIDGE05_RUST_SLICE");
+    include::write(out, builtin.rust_box, "CXXBRIDGE05_RUST_BOX");
+    include::write(out, builtin.unsafe_bitcopy, "CXXBRIDGE05_RUST_BITCOPY");
+    include::write(out, builtin.rust_vec, "CXXBRIDGE05_RUST_VEC");
+    include::write(out, builtin.rust_fn, "CXXBRIDGE05_RUST_FN");
+    include::write(out, builtin.rust_error, "CXXBRIDGE05_RUST_ERROR");
+    include::write(out, builtin.rust_isize, "CXXBRIDGE05_RUST_ISIZE");
 
-    if out.builtin.manually_drop {
+    if builtin.manually_drop {
         out.next_section();
-        out.include.utility = true;
+        include.utility = true;
         writeln!(out, "template <typename T>");
         writeln!(out, "union ManuallyDrop {{");
         writeln!(out, "  T value;");
@@ -348,7 +353,7 @@ fn write_builtins(out: &mut OutFile) {
         writeln!(out, "}};");
     }
 
-    if out.builtin.maybe_uninit {
+    if builtin.maybe_uninit {
         out.next_section();
         writeln!(out, "template <typename T>");
         writeln!(out, "union MaybeUninit {{");
@@ -360,10 +365,10 @@ fn write_builtins(out: &mut OutFile) {
 
     out.begin_block("namespace");
 
-    if out.builtin.trycatch
-        || out.builtin.rust_error
-        || out.builtin.rust_str_new_unchecked
-        || out.builtin.rust_str_repr
+    if builtin.trycatch
+        || builtin.rust_error
+        || builtin.rust_str_new_unchecked
+        || builtin.rust_str_repr
     {
         out.begin_block("namespace repr");
         writeln!(out, "struct PtrLen final {{");
@@ -373,12 +378,12 @@ fn write_builtins(out: &mut OutFile) {
         out.end_block("namespace repr");
     }
 
-    if out.builtin.rust_str_new_unchecked || out.builtin.rust_str_repr {
+    if builtin.rust_str_new_unchecked || builtin.rust_str_repr {
         out.next_section();
         writeln!(out, "template <>");
         writeln!(out, "class impl<Str> final {{");
         writeln!(out, "public:");
-        if out.builtin.rust_str_new_unchecked {
+        if builtin.rust_str_new_unchecked {
             writeln!(
                 out,
                 "  static Str new_unchecked(repr::PtrLen repr) noexcept {{",
@@ -389,7 +394,7 @@ fn write_builtins(out: &mut OutFile) {
             writeln!(out, "    return str;");
             writeln!(out, "  }}");
         }
-        if out.builtin.rust_str_repr {
+        if builtin.rust_str_repr {
             writeln!(out, "  static repr::PtrLen repr(Str str) noexcept {{");
             writeln!(out, "    return repr::PtrLen{{str.ptr, str.len}};");
             writeln!(out, "  }}");
@@ -397,7 +402,7 @@ fn write_builtins(out: &mut OutFile) {
         writeln!(out, "}};");
     }
 
-    if out.builtin.rust_error {
+    if builtin.rust_error {
         out.next_section();
         writeln!(out, "template <>");
         writeln!(out, "class impl<Error> final {{");
@@ -414,11 +419,11 @@ fn write_builtins(out: &mut OutFile) {
     out.end_block("namespace");
     out.end_block("namespace cxxbridge05");
 
-    if out.builtin.trycatch {
+    if builtin.trycatch {
         out.begin_block("namespace behavior");
-        out.include.exception = true;
-        out.include.type_traits = true;
-        out.include.utility = true;
+        include.exception = true;
+        include.type_traits = true;
+        include.utility = true;
         writeln!(out, "class missing {{}};");
         writeln!(out, "missing trycatch(...);");
         writeln!(out);
