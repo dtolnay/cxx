@@ -16,7 +16,7 @@ pub(crate) struct OutFile<'a> {
 pub struct Content {
     bytes: String,
     section_pending: bool,
-    blocks_pending: Vec<&'static str>,
+    blocks_pending: Vec<String>,
 }
 
 impl<'a> OutFile<'a> {
@@ -35,11 +35,11 @@ impl<'a> OutFile<'a> {
         self.content.get_mut().next_section();
     }
 
-    pub fn begin_block(&mut self, block: &'static str) {
+    pub fn begin_block(&mut self, block: &str) {
         self.content.get_mut().begin_block(block);
     }
 
-    pub fn end_block(&mut self, block: &'static str) {
+    pub fn end_block(&mut self, block: &str) {
         self.content.get_mut().end_block(block);
     }
 
@@ -92,11 +92,11 @@ impl Content {
         self.section_pending = true;
     }
 
-    pub fn begin_block(&mut self, block: &'static str) {
-        self.blocks_pending.push(block);
+    pub fn begin_block(&mut self, block: &str) {
+        self.blocks_pending.push(block.to_owned());
     }
 
-    pub fn end_block(&mut self, block: &'static str) {
+    pub fn end_block(&mut self, block: &str) {
         if self.blocks_pending.pop().is_none() {
             self.bytes.push_str("} // ");
             self.bytes.push_str(block);
@@ -116,7 +116,7 @@ impl Content {
                     self.bytes.push('\n');
                 }
                 for block in self.blocks_pending.drain(..) {
-                    self.bytes.push_str(block);
+                    self.bytes.push_str(&block);
                     self.bytes.push_str(" {\n");
                 }
                 self.section_pending = false;
