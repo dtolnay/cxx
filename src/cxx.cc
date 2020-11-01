@@ -173,9 +173,11 @@ const char *cxxbridge05$error(const char *ptr, size_t len) {
 } // extern "C"
 
 Error::Error(const Error &other)
-    : msg(cxxbridge05$error(other.msg, other.len)), len(other.len) {}
+    : std::exception(other), msg(cxxbridge05$error(other.msg, other.len)),
+      len(other.len) {}
 
-Error::Error(Error &&other) noexcept : msg(other.msg), len(other.len) {
+Error::Error(Error &&other) noexcept
+    : std::exception(std::move(other)), msg(other.msg), len(other.len) {
   other.msg = nullptr;
   other.len = 0;
 }
