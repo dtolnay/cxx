@@ -104,20 +104,12 @@ public:
   Slice(const Slice<T> &) noexcept = default;
   ~Slice() noexcept = default;
 
-  // Repr is PRIVATE; must not be used other than by our generated code.
-  //
-  // At present this class is only used for &[u8] slices.
-  // Not necessarily ABI compatible with &[u8]. Codegen will translate to
-  // cxx::rust_sliceu8::RustSliceU8 which matches this layout.
-  struct Repr final {
-    const T *ptr;
-    size_t len;
-  };
-  Slice(Repr) noexcept;
-  explicit operator Repr() const noexcept;
-
 private:
-  Repr repr;
+  friend impl<Slice>;
+  // Not necessarily ABI compatible with &[T]. Codegen will translate to
+  // cxx::rust_sliceu8::RustSliceU8 which matches this layout.
+  const T *ptr;
+  size_t len;
 };
 #endif // CXXBRIDGE05_RUST_SLICE
 
@@ -332,32 +324,24 @@ inline size_t Str::length() const noexcept { return this->len; }
 #ifndef CXXBRIDGE05_RUST_SLICE
 #define CXXBRIDGE05_RUST_SLICE
 template <typename T>
-Slice<T>::Slice() noexcept : repr(Repr{reinterpret_cast<const T *>(this), 0}) {}
+Slice<T>::Slice() noexcept : ptr(reinterpret_cast<const T *>(this)), len(0) {}
 
 template <typename T>
-Slice<T>::Slice(const T *s, size_t count) noexcept : repr(Repr{s, count}) {}
+Slice<T>::Slice(const T *s, size_t count) noexcept : ptr(s), len(count) {}
 
 template <typename T>
 const T *Slice<T>::data() const noexcept {
-  return this->repr.ptr;
+  return this->ptr;
 }
 
 template <typename T>
 size_t Slice<T>::size() const noexcept {
-  return this->repr.len;
+  return this->len;
 }
 
 template <typename T>
 size_t Slice<T>::length() const noexcept {
-  return this->repr.len;
-}
-
-template <typename T>
-Slice<T>::Slice(Repr repr_) noexcept : repr(repr_) {}
-
-template <typename T>
-Slice<T>::operator Repr() const noexcept {
-  return this->repr;
+  return this->len;
 }
 #endif // CXXBRIDGE05_RUST_SLICE
 

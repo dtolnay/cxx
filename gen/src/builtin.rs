@@ -19,6 +19,8 @@ pub struct Builtins {
     pub ptr_len: bool,
     pub rust_str_new_unchecked: bool,
     pub rust_str_repr: bool,
+    pub rust_slice_new: bool,
+    pub rust_slice_repr: bool,
     pub content: Content,
 }
 
@@ -119,6 +121,33 @@ pub(super) fn write(out: &mut OutFile) {
         if builtin.rust_str_repr {
             writeln!(out, "  static repr::PtrLen repr(Str str) noexcept {{");
             writeln!(out, "    return repr::PtrLen{{str.ptr, str.len}};");
+            writeln!(out, "  }}");
+        }
+        writeln!(out, "}};");
+    }
+
+    if builtin.rust_slice_new || builtin.rust_slice_repr {
+        out.next_section();
+        writeln!(out, "template <typename T>");
+        writeln!(out, "class impl<Slice<T>> final {{");
+        writeln!(out, "public:");
+        if builtin.rust_slice_new {
+            writeln!(
+                out,
+                "  static Slice<T> slice(repr::PtrLen repr) noexcept {{",
+            );
+            writeln!(
+                out,
+                "    return {{static_cast<const T *>(repr.ptr), repr.len}};",
+            );
+            writeln!(out, "  }}");
+        }
+        if builtin.rust_slice_repr {
+            writeln!(
+                out,
+                "  static repr::PtrLen repr(Slice<T> slice) noexcept {{",
+            );
+            writeln!(out, "    return repr::PtrLen{{slice.ptr, slice.len}};");
             writeln!(out, "  }}");
         }
         writeln!(out, "}};");
