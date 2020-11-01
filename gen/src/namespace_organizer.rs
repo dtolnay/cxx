@@ -1,6 +1,7 @@
 use crate::syntax::Api;
 use proc_macro2::Ident;
 use std::collections::BTreeMap;
+use std::iter::FromIterator;
 
 pub struct NamespaceEntries<'a> {
     entries: Vec<&'a Api>,
@@ -9,7 +10,7 @@ pub struct NamespaceEntries<'a> {
 
 impl<'a> NamespaceEntries<'a> {
     pub fn new(apis: &'a [Api]) -> Self {
-        let api_refs = apis.iter().collect::<Vec<_>>();
+        let api_refs = Vec::from_iter(apis);
         Self::sort_by_inner_namespace(api_refs, 0)
     }
 
