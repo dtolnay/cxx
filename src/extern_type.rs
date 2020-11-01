@@ -28,7 +28,7 @@ use self::kind::{Kind, Opaque, Trivial};
 /// ```no_run
 /// // file1.rs
 /// # mod file1 {
-/// #[cxx::bridge(namespace = example)]
+/// #[cxx::bridge(namespace = "example")]
 /// pub mod ffi {
 ///     extern "C" {
 ///         type Demo;
@@ -39,7 +39,7 @@ use self::kind::{Kind, Opaque, Trivial};
 /// # }
 ///
 /// // file2.rs
-/// #[cxx::bridge(namespace = example)]
+/// #[cxx::bridge(namespace = "example")]
 /// pub mod ffi {
 ///     extern "C" {
 ///         type Demo = crate::file1::ffi::Demo;
@@ -78,7 +78,7 @@ use self::kind::{Kind, Opaque, Trivial};
 ///     type Kind = cxx::kind::Opaque;
 /// }
 ///
-/// #[cxx::bridge(namespace = folly)]
+/// #[cxx::bridge(namespace = "folly")]
 /// pub mod ffi {
 ///     extern "C" {
 ///         include!("rust_cxx_bindings.h");

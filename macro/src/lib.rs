@@ -32,7 +32,7 @@ use syn::parse_macro_input;
 /// attribute macro.
 ///
 /// ```
-/// #[cxx::bridge(namespace = mycompany::rust)]
+/// #[cxx::bridge(namespace = "mycompany::rust")]
 /// # mod ffi {}
 /// ```
 ///

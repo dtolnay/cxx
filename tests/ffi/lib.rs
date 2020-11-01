@@ -62,7 +62,7 @@ mod other {
     }
 }
 
-#[cxx::bridge(namespace = tests)]
+#[cxx::bridge(namespace = "tests")]
 pub mod ffi {
     #[derive(Clone)]
     struct Shared {

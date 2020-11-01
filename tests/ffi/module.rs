@@ -1,7 +1,7 @@
 // Rustfmt mangles the extern type alias.
 // https://github.com/rust-lang/rustfmt/issues/4159
 #[rustfmt::skip]
-#[cxx::bridge(namespace = tests)]
+#[cxx::bridge(namespace = "tests")]
 pub mod ffi {
     extern "C" {
         include!("tests/ffi/tests.h");
