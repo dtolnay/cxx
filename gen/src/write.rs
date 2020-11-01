@@ -20,11 +20,6 @@ pub(super) fn gen<'a>(apis: &[Api], types: &'a Types, opt: &Opt, header: bool) -
 
     pick_includes_and_builtins(out, apis);
     out.include.extend(&opt.include);
-    for api in apis {
-        if let Api::Include(include) = api {
-            out.include.insert(include);
-        }
-    }
 
     let apis_by_namespace = NamespaceEntries::new(apis);
 
@@ -48,6 +43,7 @@ fn gen_namespace_forward_declarations(out: &mut OutFile, ns_entries: &NamespaceE
     out.next_section();
     for api in apis {
         match api {
+            Api::Include(include) => out.include.insert(include),
             Api::Struct(strct) => write_struct_decl(out, &strct.ident.cxx.ident),
             Api::CxxType(ety) => write_struct_using(out, &ety.ident.cxx),
             Api::RustType(ety) => write_struct_decl(out, &ety.ident.cxx.ident),
