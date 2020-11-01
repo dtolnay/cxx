@@ -122,9 +122,9 @@ pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
     errors.propagate()?;
     check::typecheck(errors, apis, types);
     errors.propagate()?;
-    // Some callers may wish to generate both header and C++
-    // from the same token stream to avoid parsing twice. But others
-    // only need to generate one or the other.
+    // Some callers may wish to generate both header and implementation from the
+    // same token stream to avoid parsing twice. Others only need to generate
+    // one or the other.
     Ok(GeneratedCode {
         header: if opt.gen_header {
             write::gen(apis, types, opt, true).content()
