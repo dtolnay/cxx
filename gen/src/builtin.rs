@@ -1,3 +1,5 @@
+use crate::gen::out::Content;
+
 #[derive(Default, PartialEq)]
 pub struct Builtins {
     pub panic: bool,
@@ -15,6 +17,7 @@ pub struct Builtins {
     pub trycatch: bool,
     pub rust_str_new_unchecked: bool,
     pub rust_str_repr: bool,
+    pub content: Content,
 }
 
 impl Builtins {

@@ -50,11 +50,16 @@ impl<'a> OutFile<'a> {
 
     pub fn content(&self) -> Vec<u8> {
         let include = &self.include.content.bytes;
+        let builtin = &self.builtin.content.bytes;
         let content = &self.content.borrow().bytes;
-        let len = include.len() + content.len() + 1;
+        let len = include.len() + builtin.len() + content.len() + 2;
         let mut out = String::with_capacity(len);
         out.push_str(include);
-        if !include.is_empty() && !content.is_empty() {
+        if !out.is_empty() && !builtin.is_empty() {
+            out.push('\n');
+        }
+        out.push_str(builtin);
+        if !out.is_empty() && !content.is_empty() {
             out.push('\n');
         }
         out.push_str(content);
