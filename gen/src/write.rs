@@ -18,7 +18,7 @@ pub(super) fn gen<'a>(apis: &[Api], types: &'a Types, opt: &Opt, header: bool) -
         writeln!(out.include, "#pragma once");
     }
 
-    pick_includes_and_builtins(out, apis);
+    pick_includes_and_builtins(out);
     out.include.extend(&opt.include);
 
     let apis_by_namespace = NamespaceEntries::new(apis);
@@ -141,7 +141,7 @@ fn gen_namespace_contents(out: &mut OutFile, ns_entries: &NamespaceEntries, opt:
     }
 }
 
-fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
+fn pick_includes_and_builtins(out: &mut OutFile) {
     for ty in out.types {
         match ty {
             Type::Ident(ident) => match Atom::from(&ident.rust) {
@@ -190,50 +190,6 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
             Type::SliceRefU8(_) => {
                 out.include.cstdint = true;
                 out.builtin.rust_slice = true;
-            }
-            _ => {}
-        }
-    }
-
-    for api in apis {
-        match api {
-            Api::CxxFunction(efn) if !out.header => {
-                if efn.throws {
-                    out.builtin.trycatch = true;
-                } else if let Some(Type::Str(_)) = efn.ret {
-                    out.builtin.rust_str_repr = true;
-                }
-                for arg in &efn.args {
-                    match arg.ty {
-                        Type::Str(_) => out.builtin.rust_str_new_unchecked = true,
-                        Type::RustVec(_) => out.builtin.unsafe_bitcopy = true,
-                        _ => out.builtin.unsafe_bitcopy |= arg.ty == RustString,
-                    }
-                }
-            }
-            Api::RustFunction(efn) if !out.header => {
-                if efn.throws {
-                    out.include.exception = true;
-                    out.include.string = true;
-                    out.builtin.rust_str = true;
-                    out.builtin.rust_error = true;
-                    out.builtin.maybe_uninit = true;
-                }
-                for arg in &efn.args {
-                    if arg.ty != RustString && out.types.needs_indirect_abi(&arg.ty) {
-                        out.builtin.manually_drop = true;
-                    }
-                    if let Type::Str(_) = arg.ty {
-                        out.builtin.rust_str_repr = true;
-                    }
-                }
-                if let Some(ret) = &efn.ret {
-                    if out.types.needs_indirect_abi(ret) {
-                        out.builtin.maybe_uninit = true;
-                    } else if let Type::Str(_) = ret {
-                        out.builtin.rust_str_new_unchecked = true;
-                    }
-                }
             }
             _ => {}
         }
@@ -469,6 +425,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, impl_annotations: 
     writeln!(out, ";");
     write!(out, "  ");
     if efn.throws {
+        out.builtin.trycatch = true;
         writeln!(out, "::rust::repr::PtrLen throw$;");
         writeln!(out, "  ::rust::behavior::trycatch(");
         writeln!(out, "      [&] {{");
@@ -484,7 +441,10 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, impl_annotations: 
     }
     match &efn.ret {
         Some(Type::Ref(_)) => write!(out, "&"),
-        Some(Type::Str(_)) if !indirect_return => write!(out, "::rust::impl<::rust::Str>::repr("),
+        Some(Type::Str(_)) if !indirect_return => {
+            out.builtin.rust_str_repr = true;
+            write!(out, "::rust::impl<::rust::Str>::repr(");
+        }
         Some(Type::SliceRefU8(_)) if !indirect_return => {
             write!(out, "::rust::Slice<uint8_t>::Repr(")
         }
@@ -505,18 +465,21 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, impl_annotations: 
             write_type(out, &arg.ty);
             write!(out, "({})", arg.ident);
         } else if let Type::Str(_) = arg.ty {
+            out.builtin.rust_str_new_unchecked = true;
             write!(
                 out,
                 "::rust::impl<::rust::Str>::new_unchecked({})",
                 arg.ident,
             );
         } else if arg.ty == RustString {
+            out.builtin.unsafe_bitcopy = true;
             write!(
                 out,
                 "::rust::String(::rust::unsafe_bitcopy, *{})",
                 arg.ident,
             );
         } else if let Type::RustVec(_) = arg.ty {
+            out.builtin.unsafe_bitcopy = true;
             write_type(out, &arg.ty);
             write!(out, "(::rust::unsafe_bitcopy, *{})", arg.ident);
         } else if out.types.needs_indirect_abi(&arg.ty) {
@@ -698,6 +661,7 @@ fn write_rust_function_shim_impl(
     for arg in &sig.args {
         if arg.ty != RustString && out.types.needs_indirect_abi(&arg.ty) {
             out.include.utility = true;
+            out.builtin.manually_drop = true;
             write!(out, "  ::rust::ManuallyDrop<");
             write_type(out, &arg.ty);
             writeln!(out, "> {}$(::std::move({0}));", arg.ident);
@@ -706,6 +670,7 @@ fn write_rust_function_shim_impl(
     write!(out, "  ");
     let indirect_return = indirect_return(sig, out.types);
     if indirect_return {
+        out.builtin.maybe_uninit = true;
         write!(out, "::rust::MaybeUninit<");
         write_type(out, sig.ret.as_ref().unwrap());
         writeln!(out, "> return$;");
@@ -722,7 +687,10 @@ fn write_rust_function_shim_impl(
                 write!(out, "(");
             }
             Type::Ref(_) => write!(out, "*"),
-            Type::Str(_) => write!(out, "::rust::impl<::rust::Str>::new_unchecked("),
+            Type::Str(_) => {
+                out.builtin.rust_str_new_unchecked = true;
+                write!(out, "::rust::impl<::rust::Str>::new_unchecked(");
+            }
             _ => {}
         }
     }
@@ -738,7 +706,10 @@ fn write_rust_function_shim_impl(
             write!(out, ", ");
         }
         match &arg.ty {
-            Type::Str(_) => write!(out, "::rust::impl<::rust::Str>::repr("),
+            Type::Str(_) => {
+                out.builtin.rust_str_repr = true;
+                write!(out, "::rust::impl<::rust::Str>::repr(");
+            }
             Type::SliceRefU8(_) => write!(out, "::rust::Slice<uint8_t>::Repr("),
             ty if out.types.needs_indirect_abi(ty) => write!(out, "&"),
             _ => {}
@@ -774,6 +745,8 @@ fn write_rust_function_shim_impl(
     }
     writeln!(out, ";");
     if sig.throws {
+        out.include.exception = true;
+        out.builtin.rust_error = true;
         writeln!(out, "  if (error$.ptr) {{");
         writeln!(out, "    throw ::rust::impl<::rust::Error>::error(error$);");
         writeln!(out, "  }}");
