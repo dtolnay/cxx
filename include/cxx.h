@@ -66,7 +66,7 @@ public:
   Str(const char *, size_t);
   Str(std::string &&) = delete;
 
-  Str &operator=(Str) noexcept;
+  Str &operator=(const Str &) noexcept = default;
 
   explicit operator std::string() const;
 
@@ -94,7 +94,7 @@ public:
   Slice() noexcept;
   Slice(const T *, size_t count) noexcept;
 
-  Slice &operator=(Slice<T>) noexcept;
+  Slice &operator=(const Slice<T> &) noexcept = default;
 
   const T *data() const noexcept;
   size_t size() const noexcept;
@@ -327,12 +327,6 @@ Slice<T>::Slice() noexcept : repr(Repr{reinterpret_cast<const T *>(this), 0}) {}
 
 template <typename T>
 Slice<T>::Slice(const T *s, size_t count) noexcept : repr(Repr{s, count}) {}
-
-template <typename T>
-Slice<T> &Slice<T>::operator=(Slice<T> other) noexcept {
-  this->repr = other.repr;
-  return *this;
-}
 
 template <typename T>
 const T *Slice<T>::data() const noexcept {

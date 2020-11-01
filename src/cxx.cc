@@ -139,12 +139,6 @@ Str::Str(const char *s, size_t len)
   initStr(this->ptr, this->len);
 }
 
-Str &Str::operator=(Str other) noexcept {
-  this->ptr = other.ptr;
-  this->len = other.len;
-  return *this;
-}
-
 Str::operator std::string() const {
   return std::string(this->data(), this->size());
 }
