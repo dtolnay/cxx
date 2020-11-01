@@ -281,6 +281,13 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
         writeln!(out, "struct unsafe_bitcopy_t;");
     }
 
+    if needs_rust_error {
+        out.begin_block("namespace");
+        writeln!(out, "template <typename T>");
+        writeln!(out, "class impl;");
+        out.end_block("namespace");
+    }
+
     include::write(out, needs_rust_string, "CXXBRIDGE05_RUST_STRING");
     include::write(out, needs_rust_str, "CXXBRIDGE05_RUST_STR");
     include::write(out, needs_rust_slice, "CXXBRIDGE05_RUST_SLICE");
@@ -315,6 +322,31 @@ fn write_include_cxxbridge(out: &mut OutFile, apis: &[Api]) {
         writeln!(out, "}};");
     }
 
+    out.begin_block("namespace");
+
+    if needs_trycatch || needs_rust_error {
+        out.begin_block("namespace repr");
+        writeln!(out, "struct PtrLen final {{");
+        writeln!(out, "  const char *ptr;");
+        writeln!(out, "  size_t len;");
+        writeln!(out, "}};");
+        out.end_block("namespace repr");
+    }
+
+    if needs_rust_error {
+        writeln!(out, "template <>");
+        writeln!(out, "class impl<Error> final {{");
+        writeln!(out, "public:");
+        writeln!(out, "  static Error error(repr::PtrLen repr) noexcept {{");
+        writeln!(out, "    Error error;");
+        writeln!(out, "    error.msg = repr.ptr;");
+        writeln!(out, "    error.len = repr.len;");
+        writeln!(out, "    return error;");
+        writeln!(out, "  }}");
+        writeln!(out, "}};");
+    }
+
+    out.end_block("namespace");
     out.end_block("namespace cxxbridge05");
 
     if needs_trycatch {
@@ -500,7 +532,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, impl_annotations: 
         write!(out, "{} ", annotation);
     }
     if efn.throws {
-        write!(out, "::rust::Str::Repr ");
+        write!(out, "::rust::repr::PtrLen ");
     } else {
         write_extern_return_type_space(out, &efn.ret);
     }
@@ -572,7 +604,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn, impl_annotations: 
     writeln!(out, ";");
     write!(out, "  ");
     if efn.throws {
-        writeln!(out, "::rust::Str::Repr throw$;");
+        writeln!(out, "::rust::repr::PtrLen throw$;");
         writeln!(out, "  ::rust::behavior::trycatch(");
         writeln!(out, "      [&] {{");
         write!(out, "        ");
@@ -685,7 +717,7 @@ fn write_rust_function_decl_impl(
     indirect_call: bool,
 ) {
     if sig.throws {
-        write!(out, "::rust::Str::Repr ");
+        write!(out, "::rust::repr::PtrLen ");
     } else {
         write_extern_return_type_space(out, &sig.ret);
     }
@@ -823,7 +855,7 @@ fn write_rust_function_shim_impl(
         }
     }
     if sig.throws {
-        write!(out, "::rust::Str::Repr error$ = ");
+        write!(out, "::rust::repr::PtrLen error$ = ");
     }
     write!(out, "{}(", invoke);
     if sig.receiver.is_some() {
@@ -871,7 +903,7 @@ fn write_rust_function_shim_impl(
     writeln!(out, ";");
     if sig.throws {
         writeln!(out, "  if (error$.ptr) {{");
-        writeln!(out, "    throw ::rust::Error(error$);");
+        writeln!(out, "    throw ::rust::impl<::rust::Error>::error(error$);");
         writeln!(out, "  }}");
     }
     if indirect_return {
