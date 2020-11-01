@@ -11,6 +11,7 @@ pub mod file;
 pub mod ident;
 mod impls;
 pub mod mangle;
+mod names;
 pub mod namespace;
 mod parse;
 pub mod qualified;

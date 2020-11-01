@@ -1,4 +1,5 @@
 use crate::syntax::qualified::QualifiedName;
+use crate::syntax::Api;
 #[cfg(test)]
 use proc_macro2::Span;
 use quote::IdentFragment;
@@ -77,5 +78,19 @@ impl<'a> IntoIterator for &'a Namespace {
     type IntoIter = Iter<'a, Ident>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
+    }
+}
+
+impl Api {
+    pub fn get_namespace(&self) -> Option<&Namespace> {
+        match self {
+            Api::CxxFunction(cfn) => Some(&cfn.ident.cxx.ns),
+            Api::CxxType(cty) => Some(&cty.ident.cxx.ns),
+            Api::Enum(enm) => Some(&enm.ident.cxx.ns),
+            Api::Struct(strct) => Some(&strct.ident.cxx.ns),
+            Api::RustType(rty) => Some(&rty.ident.cxx.ns),
+            Api::RustFunction(rfn) => Some(&rfn.ident.cxx.ns),
+            Api::Impl(_) | Api::Include(_) | Api::TypeAlias(_) => None,
+        }
     }
 }
