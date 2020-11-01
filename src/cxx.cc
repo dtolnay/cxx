@@ -195,6 +195,17 @@ Error &Error::operator=(const Error &other) {
   return *this;
 }
 
+Error &Error::operator=(Error &&other) noexcept {
+  if (this != &other) {
+    std::exception::operator=(std::move(other));
+    this->msg = other.msg;
+    this->len = other.len;
+    other.msg = nullptr;
+    other.len = 0;
+  }
+  return *this;
+}
+
 const char *Error::what() const noexcept { return this->msg; }
 
 } // namespace cxxbridge05
