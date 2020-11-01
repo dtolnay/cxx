@@ -33,7 +33,7 @@ pub(super) fn gen<'a>(apis: &[Api], types: &'a Types, opt: &Opt, header: bool) -
     let apis_by_namespace = NamespaceEntries::new(apis);
 
     gen_namespace_forward_declarations(&apis_by_namespace, out);
-    gen_namespace_contents(&apis_by_namespace, types, opt, header, out);
+    gen_namespace_contents(&apis_by_namespace, opt, header, out);
 
     if !header {
         out.next_section();
@@ -69,7 +69,6 @@ fn gen_namespace_forward_declarations(ns_entries: &NamespaceEntries, out: &mut O
 
 fn gen_namespace_contents(
     ns_entries: &NamespaceEntries,
-    types: &Types,
     opt: &Opt,
     header: bool,
     out: &mut OutFile,
@@ -92,13 +91,13 @@ fn gen_namespace_contents(
         match api {
             Api::Struct(strct) => {
                 out.next_section();
-                if !types.cxx.contains(&strct.ident.rust) {
+                if !out.types.cxx.contains(&strct.ident.rust) {
                     write_struct(out, strct);
                 }
             }
             Api::Enum(enm) => {
                 out.next_section();
-                if types.cxx.contains(&enm.ident.rust) {
+                if out.types.cxx.contains(&enm.ident.rust) {
                     check_enum(out, enm);
                 } else {
                     write_enum(out, enm);
@@ -117,7 +116,7 @@ fn gen_namespace_contents(
     out.next_section();
     for api in apis {
         if let Api::TypeAlias(ety) = api {
-            if types.required_trivial.contains_key(&ety.ident.rust) {
+            if out.types.required_trivial.contains_key(&ety.ident.rust) {
                 check_trivial_extern_type(out, &ety.ident.cxx)
             }
         }
@@ -149,7 +148,7 @@ fn gen_namespace_contents(
 
     for (child_ns, child_ns_entries) in ns_entries.children() {
         writeln!(out, "namespace {} {{", child_ns);
-        gen_namespace_contents(&child_ns_entries, types, opt, header, out);
+        gen_namespace_contents(&child_ns_entries, opt, header, out);
         writeln!(out, "}} // namespace {}", child_ns);
     }
 }
