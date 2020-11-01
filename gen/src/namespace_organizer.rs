@@ -28,12 +28,12 @@ impl<'a> NamespaceEntries<'a> {
             nested: BTreeMap::new(),
         };
 
-        let mut kids_by_child_ns = BTreeMap::new();
+        let mut nested_namespaces = BTreeMap::new();
         for api in apis {
             if let Some(ns) = api.namespace() {
                 let first_ns_elem = ns.iter().nth(depth);
                 if let Some(first_ns_elem) = first_ns_elem {
-                    let list = kids_by_child_ns.entry(first_ns_elem).or_insert(Vec::new());
+                    let list = nested_namespaces.entry(first_ns_elem).or_insert(Vec::new());
                     list.push(api);
                     continue;
                 }
@@ -41,7 +41,7 @@ impl<'a> NamespaceEntries<'a> {
             root.direct.push(api);
         }
 
-        for (k, v) in kids_by_child_ns.into_iter() {
+        for (k, v) in nested_namespaces.into_iter() {
             root.nested
                 .insert(k, Self::sort_by_inner_namespace(v, depth + 1));
         }
