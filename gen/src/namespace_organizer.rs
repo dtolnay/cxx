@@ -23,30 +23,28 @@ impl<'a> NamespaceEntries<'a> {
     }
 
     fn sort_by_inner_namespace(apis: Vec<&'a Api>, depth: usize) -> Self {
-        let mut root = NamespaceEntries {
-            direct: Vec::new(),
-            nested: BTreeMap::new(),
-        };
-
+        let mut direct = Vec::new();
         let mut nested_namespaces = BTreeMap::new();
         for api in apis {
             if let Some(ns) = api.namespace() {
                 let first_ns_elem = ns.iter().nth(depth);
                 if let Some(first_ns_elem) = first_ns_elem {
-                    let list = nested_namespaces.entry(first_ns_elem).or_insert(Vec::new());
-                    list.push(api);
+                    nested_namespaces
+                        .entry(first_ns_elem)
+                        .or_insert_with(Vec::new)
+                        .push(api);
                     continue;
                 }
             }
-            root.direct.push(api);
+            direct.push(api);
         }
 
-        for (k, v) in nested_namespaces.into_iter() {
-            root.nested
-                .insert(k, Self::sort_by_inner_namespace(v, depth + 1));
-        }
+        let nested = nested_namespaces
+            .into_iter()
+            .map(|(k, apis)| (k, Self::sort_by_inner_namespace(apis, depth + 1)))
+            .collect();
 
-        root
+        NamespaceEntries { direct, nested }
     }
 }
 
