@@ -2,6 +2,7 @@ use crate::syntax::qualified::QualifiedName;
 use crate::syntax::Api;
 use quote::IdentFragment;
 use std::fmt::{self, Display};
+use std::iter::FromIterator;
 use std::slice::Iter;
 use syn::parse::{Parse, ParseStream, Result};
 use syn::{Ident, Token};
@@ -10,7 +11,7 @@ mod kw {
     syn::custom_keyword!(namespace);
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Namespace {
     segments: Vec<Ident>,
 }
@@ -34,6 +35,13 @@ impl Namespace {
         let ns = input.parse::<Namespace>()?;
         input.parse::<Option<Token![,]>>()?;
         Ok(ns)
+    }
+}
+
+impl Default for &Namespace {
+    fn default() -> Self {
+        const ROOT: &Namespace = &Namespace::ROOT;
+        ROOT
     }
 }
 
@@ -64,6 +72,16 @@ impl<'a> IntoIterator for &'a Namespace {
     type IntoIter = Iter<'a, Ident>;
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
+    }
+}
+
+impl<'a> FromIterator<&'a Ident> for Namespace {
+    fn from_iter<I>(idents: I) -> Self
+    where
+        I: IntoIterator<Item = &'a Ident>,
+    {
+        let segments = idents.into_iter().cloned().collect();
+        Namespace { segments }
     }
 }
 

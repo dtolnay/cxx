@@ -57,7 +57,8 @@ fn gen_namespace_forward_declarations(out: &mut OutFile, ns_entries: &NamespaceE
     }
 }
 
-fn gen_namespace_contents<'a>(out: &mut OutFile<'a>, ns_entries: &NamespaceEntries<'a>) {
+fn gen_namespace_contents<'a>(out: &mut OutFile<'a>, ns_entries: &'a NamespaceEntries<'a>) {
+    out.set_namespace(&ns_entries.namespace);
     let apis = ns_entries.direct_content();
 
     let mut methods_for_type = HashMap::new();
@@ -127,11 +128,8 @@ fn gen_namespace_contents<'a>(out: &mut OutFile<'a>, ns_entries: &NamespaceEntri
         }
     }
 
-    for (namespace, nested_ns_entries) in ns_entries.nested_content() {
-        let block = Block::UserDefinedNamespace(namespace);
-        out.begin_block(block);
+    for (_, nested_ns_entries) in ns_entries.nested_content() {
         gen_namespace_contents(out, nested_ns_entries);
-        out.end_block(block);
     }
 }
 
@@ -974,6 +972,7 @@ fn to_mangled(ty: &Type, types: &Types) -> Symbol {
 }
 
 fn write_generic_instantiations(out: &mut OutFile) {
+    out.set_namespace(Default::default());
     out.begin_block(Block::ExternC);
     for ty in out.types {
         if let Type::RustBox(ty) = ty {
