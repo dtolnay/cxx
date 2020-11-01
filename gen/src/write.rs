@@ -33,7 +33,7 @@ pub(super) fn gen<'a>(apis: &[Api], types: &'a Types, opt: &Opt, header: bool) -
     let apis_by_namespace = NamespaceEntries::new(apis);
 
     gen_namespace_forward_declarations(&apis_by_namespace, out);
-    gen_namespace_contents(&apis_by_namespace, opt, header, out);
+    gen_namespace_contents(&apis_by_namespace, opt, out);
 
     if !header {
         out.next_section();
@@ -67,12 +67,7 @@ fn gen_namespace_forward_declarations(ns_entries: &NamespaceEntries, out: &mut O
     }
 }
 
-fn gen_namespace_contents(
-    ns_entries: &NamespaceEntries,
-    opt: &Opt,
-    header: bool,
-    out: &mut OutFile,
-) {
+fn gen_namespace_contents(ns_entries: &NamespaceEntries, opt: &Opt, out: &mut OutFile) {
     let apis = ns_entries.entries();
 
     let mut methods_for_type = HashMap::new();
@@ -122,7 +117,7 @@ fn gen_namespace_contents(
         }
     }
 
-    if !header {
+    if !out.header {
         out.begin_block("extern \"C\"");
         write_exception_glue(out, apis);
         for api in apis {
@@ -148,7 +143,7 @@ fn gen_namespace_contents(
 
     for (child_ns, child_ns_entries) in ns_entries.children() {
         writeln!(out, "namespace {} {{", child_ns);
-        gen_namespace_contents(&child_ns_entries, opt, header, out);
+        gen_namespace_contents(&child_ns_entries, opt, out);
         writeln!(out, "}} // namespace {}", child_ns);
     }
 }
