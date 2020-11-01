@@ -54,7 +54,7 @@ fn gen_namespace_contents(
     let apis = ns_entries.entries();
 
     out.next_section();
-    for api in apis.iter() {
+    for api in apis {
         match api {
             Api::Struct(strct) => write_struct_decl(out, &strct.ident.cxx.ident),
             Api::CxxType(ety) => write_struct_using(out, &ety.ident.cxx),
@@ -64,7 +64,7 @@ fn gen_namespace_contents(
     }
 
     let mut methods_for_type = HashMap::new();
-    for api in apis.iter() {
+    for api in apis {
         if let Api::RustFunction(efn) = api {
             if let Some(receiver) = &efn.sig.receiver {
                 methods_for_type
