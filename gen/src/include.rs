@@ -1,6 +1,5 @@
 use crate::gen::out::OutFile;
 use crate::syntax::{self, IncludeKind};
-use std::fmt::{self, Display};
 
 /// The complete contents of the "rust/cxx.h" header.
 pub static HEADER: &str = include_str!("include/cxx.h");
@@ -64,7 +63,7 @@ pub struct Include {
 
 #[derive(Default, PartialEq)]
 pub struct Includes {
-    custom: Vec<Include>,
+    pub custom: Vec<Include>,
     pub array: bool,
     pub cstddef: bool,
     pub cstdint: bool,
@@ -101,59 +100,5 @@ impl<'a> From<&'a syntax::Include> for Include {
             path: include.path.clone(),
             kind: include.kind,
         }
-    }
-}
-
-impl Display for Includes {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for include in &self.custom {
-            match include.kind {
-                IncludeKind::Quoted => {
-                    writeln!(f, "#include \"{}\"", include.path.escape_default())?;
-                }
-                IncludeKind::Bracketed => {
-                    writeln!(f, "#include <{}>", include.path)?;
-                }
-            }
-        }
-        if self.array {
-            writeln!(f, "#include <array>")?;
-        }
-        if self.cstddef {
-            writeln!(f, "#include <cstddef>")?;
-        }
-        if self.cstdint {
-            writeln!(f, "#include <cstdint>")?;
-        }
-        if self.cstring {
-            writeln!(f, "#include <cstring>")?;
-        }
-        if self.exception {
-            writeln!(f, "#include <exception>")?;
-        }
-        if self.memory {
-            writeln!(f, "#include <memory>")?;
-        }
-        if self.new {
-            writeln!(f, "#include <new>")?;
-        }
-        if self.string {
-            writeln!(f, "#include <string>")?;
-        }
-        if self.type_traits {
-            writeln!(f, "#include <type_traits>")?;
-        }
-        if self.utility {
-            writeln!(f, "#include <utility>")?;
-        }
-        if self.vector {
-            writeln!(f, "#include <vector>")?;
-        }
-        if self.basetsd {
-            writeln!(f, "#if defined(_WIN32)")?;
-            writeln!(f, "#include <basetsd.h>")?;
-            writeln!(f, "#endif")?;
-        }
-        Ok(())
     }
 }
