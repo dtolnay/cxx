@@ -144,12 +144,6 @@ Str::operator std::string() const {
   return std::string(this->data(), this->size());
 }
 
-const char *Str::data() const noexcept { return this->ptr; }
-
-size_t Str::size() const noexcept { return this->len; }
-
-size_t Str::length() const noexcept { return this->len; }
-
 std::ostream &operator<<(std::ostream &os, const Str &s) {
   os.write(s.data(), s.size());
   return os;

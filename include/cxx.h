@@ -57,7 +57,6 @@ private:
 #endif // CXXBRIDGE05_RUST_STRING
 
 #ifndef CXXBRIDGE05_RUST_STR
-#define CXXBRIDGE05_RUST_STR
 class Str final {
 public:
   Str() noexcept;
@@ -319,6 +318,15 @@ struct unsafe_bitcopy_t final {
 
 constexpr unsafe_bitcopy_t unsafe_bitcopy{};
 #endif // CXXBRIDGE05_RUST_BITCOPY
+
+#ifndef CXXBRIDGE05_RUST_STR
+#define CXXBRIDGE05_RUST_STR
+inline const char *Str::data() const noexcept { return this->ptr; }
+
+inline size_t Str::size() const noexcept { return this->len; }
+
+inline size_t Str::length() const noexcept { return this->len; }
+#endif // CXXBRIDGE05_RUST_STR
 
 #ifndef CXXBRIDGE05_RUST_SLICE
 #define CXXBRIDGE05_RUST_SLICE
