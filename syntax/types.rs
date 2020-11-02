@@ -1,4 +1,5 @@
 use crate::syntax::atom::Atom::{self, *};
+use crate::syntax::improper::ImproperCtype;
 use crate::syntax::report::Errors;
 use crate::syntax::set::OrderedSet as Set;
 use crate::syntax::{
@@ -19,6 +20,7 @@ pub struct Types<'a> {
     pub required_trivial: Map<&'a Ident, TrivialReason<'a>>,
     pub explicit_impls: Set<&'a Impl>,
     pub resolutions: Map<&'a Ident, &'a Pair>,
+    pub struct_improper_ctypes: UnorderedSet<&'a Ident>,
 }
 
 impl<'a> Types<'a> {
@@ -32,6 +34,7 @@ impl<'a> Types<'a> {
         let mut untrusted = Map::new();
         let mut explicit_impls = Set::new();
         let mut resolutions = Map::new();
+        let struct_improper_ctypes = UnorderedSet::new();
 
         fn visit<'a>(all: &mut Set<&'a Type>, ty: &'a Type) {
             all.insert(ty);
@@ -190,7 +193,7 @@ impl<'a> Types<'a> {
             }
         }
 
-        Types {
+        let mut types = Types {
             all,
             structs,
             enums,
@@ -201,7 +204,34 @@ impl<'a> Types<'a> {
             required_trivial,
             explicit_impls,
             resolutions,
+            struct_improper_ctypes,
+        };
+
+        let mut unresolved_structs: Vec<&Ident> = types.structs.keys().copied().collect();
+        let mut new_information = true;
+        while new_information {
+            new_information = false;
+            unresolved_structs.retain(|ident| {
+                let mut retain = false;
+                for var in &types.structs[ident].fields {
+                    if match types.determine_improper_ctype(&var.ty) {
+                        ImproperCtype::Depends(inner) => {
+                            retain = true;
+                            types.struct_improper_ctypes.contains(inner)
+                        }
+                        ImproperCtype::Definite(improper) => improper,
+                    } {
+                        types.struct_improper_ctypes.insert(ident);
+                        new_information = true;
+                        return false;
+                    }
+                }
+                // If all fields definite false, remove from unresolved_structs.
+                retain
+            });
         }
+
+        types
     }
 
     pub fn needs_indirect_abi(&self, ty: &Type) -> bool {
@@ -234,35 +264,9 @@ impl<'a> Types<'a> {
     // Rust String, even though C could easily have obtained that pointer
     // legitimately from a Rust call.
     pub fn is_considered_improper_ctype(&self, ty: &Type) -> bool {
-        match ty {
-            Type::Ident(ident) => {
-                let ident = &ident.rust;
-                if let Some(atom) = Atom::from(ident) {
-                    atom == RustString
-                } else if self.rust.contains(ident) {
-                    true
-                } else if self.cxx.contains(ident) || self.enums.contains_key(ident) {
-                    false
-                } else if let Some(strct) = self.structs.get(ident) {
-                    for var in &strct.fields {
-                        if self.is_considered_improper_ctype(&var.ty) {
-                            return true;
-                        }
-                    }
-                    false
-                } else {
-                    false
-                }
-            }
-            Type::RustBox(_)
-            | Type::RustVec(_)
-            | Type::Str(_)
-            | Type::Fn(_)
-            | Type::Void(_)
-            | Type::Slice(_)
-            | Type::SliceRefU8(_) => true,
-            Type::UniquePtr(_) | Type::CxxVector(_) => false,
-            Type::Ref(ty) => self.is_considered_improper_ctype(&ty.inner),
+        match self.determine_improper_ctype(ty) {
+            ImproperCtype::Definite(improper) => improper,
+            ImproperCtype::Depends(ident) => self.struct_improper_ctypes.contains(ident),
         }
     }
 
