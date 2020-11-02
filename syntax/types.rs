@@ -70,7 +70,7 @@ impl<'a> Types<'a> {
             match api {
                 Api::Include(_) => {}
                 Api::Struct(strct) => {
-                    let ident = &strct.ident.rust;
+                    let ident = &strct.name.rust;
                     if !type_names.insert(ident)
                         && (!cxx.contains(ident)
                             || structs.contains_key(ident)
@@ -81,14 +81,14 @@ impl<'a> Types<'a> {
                         // type, then error.
                         duplicate_name(cx, strct, ident);
                     }
-                    structs.insert(&strct.ident.rust, strct);
+                    structs.insert(&strct.name.rust, strct);
                     for field in &strct.fields {
                         visit(&mut all, &field.ty);
                     }
-                    add_resolution(&strct.ident);
+                    add_resolution(&strct.name);
                 }
                 Api::Enum(enm) => {
-                    let ident = &enm.ident.rust;
+                    let ident = &enm.name.rust;
                     if !type_names.insert(ident)
                         && (!cxx.contains(ident)
                             || structs.contains_key(ident)
@@ -100,10 +100,10 @@ impl<'a> Types<'a> {
                         duplicate_name(cx, enm, ident);
                     }
                     enums.insert(ident, enm);
-                    add_resolution(&enm.ident);
+                    add_resolution(&enm.name);
                 }
                 Api::CxxType(ety) => {
-                    let ident = &ety.ident.rust;
+                    let ident = &ety.name.rust;
                     if !type_names.insert(ident)
                         && (cxx.contains(ident)
                             || !structs.contains_key(ident) && !enums.contains_key(ident))
@@ -117,21 +117,21 @@ impl<'a> Types<'a> {
                     if !ety.trusted {
                         untrusted.insert(ident, ety);
                     }
-                    add_resolution(&ety.ident);
+                    add_resolution(&ety.name);
                 }
                 Api::RustType(ety) => {
-                    let ident = &ety.ident.rust;
+                    let ident = &ety.name.rust;
                     if !type_names.insert(ident) {
                         duplicate_name(cx, ety, ident);
                     }
                     rust.insert(ident);
-                    add_resolution(&ety.ident);
+                    add_resolution(&ety.name);
                 }
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
                     // Note: duplication of the C++ name is fine because C++ has
                     // function overloading.
-                    if !function_names.insert((&efn.receiver, &efn.ident.rust)) {
-                        duplicate_name(cx, efn, &efn.ident.rust);
+                    if !function_names.insert((&efn.receiver, &efn.name.rust)) {
+                        duplicate_name(cx, efn, &efn.name.rust);
                     }
                     for arg in &efn.args {
                         visit(&mut all, &arg.ty);
@@ -141,13 +141,13 @@ impl<'a> Types<'a> {
                     }
                 }
                 Api::TypeAlias(alias) => {
-                    let ident = &alias.ident;
-                    if !type_names.insert(&ident.rust) {
-                        duplicate_name(cx, alias, &ident.rust);
+                    let ident = &alias.name.rust;
+                    if !type_names.insert(ident) {
+                        duplicate_name(cx, alias, ident);
                     }
-                    cxx.insert(&ident.rust);
-                    aliases.insert(&ident.rust, alias);
-                    add_resolution(&alias.ident);
+                    cxx.insert(ident);
+                    aliases.insert(ident, alias);
+                    add_resolution(&alias.name);
                 }
                 Api::Impl(imp) => {
                     visit(&mut all, &imp.ty);

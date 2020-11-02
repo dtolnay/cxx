@@ -167,16 +167,16 @@ fn check_type_slice(cx: &mut Check, ty: &Slice) {
 }
 
 fn check_api_struct(cx: &mut Check, strct: &Struct) {
-    let ident = &strct.ident;
-    check_reserved_name(cx, &ident.rust);
+    let name = &strct.name;
+    check_reserved_name(cx, &name.rust);
 
     if strct.fields.is_empty() {
         let span = span_for_struct_error(strct);
         cx.error(span, "structs without any fields are not supported");
     }
 
-    if cx.types.cxx.contains(&ident.rust) {
-        if let Some(ety) = cx.types.untrusted.get(&ident.rust) {
+    if cx.types.cxx.contains(&name.rust) {
+        if let Some(ety) = cx.types.untrusted.get(&name.rust) {
             let msg = "extern shared struct must be declared in an `unsafe extern` block";
             cx.error(ety, msg);
         }
@@ -198,7 +198,7 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
 }
 
 fn check_api_enum(cx: &mut Check, enm: &Enum) {
-    check_reserved_name(cx, &enm.ident.rust);
+    check_reserved_name(cx, &enm.name.rust);
 
     if enm.variants.is_empty() {
         let span = span_for_enum_error(enm);
@@ -207,13 +207,13 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
 }
 
 fn check_api_type(cx: &mut Check, ety: &ExternType) {
-    check_reserved_name(cx, &ety.ident.rust);
+    check_reserved_name(cx, &ety.name.rust);
 
-    if let Some(reason) = cx.types.required_trivial.get(&ety.ident.rust) {
+    if let Some(reason) = cx.types.required_trivial.get(&ety.name.rust) {
         let what = match reason {
-            TrivialReason::StructField(strct) => format!("a field of `{}`", strct.ident.rust),
-            TrivialReason::FunctionArgument(efn) => format!("an argument of `{}`", efn.ident.rust),
-            TrivialReason::FunctionReturn(efn) => format!("a return value of `{}`", efn.ident.rust),
+            TrivialReason::StructField(strct) => format!("a field of `{}`", strct.name.rust),
+            TrivialReason::FunctionArgument(efn) => format!("an argument of `{}`", efn.name.rust),
+            TrivialReason::FunctionReturn(efn) => format!("a return value of `{}`", efn.name.rust),
         };
         let msg = format!(
             "needs a cxx::ExternType impl in order to be used as {}",

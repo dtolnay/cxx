@@ -90,7 +90,7 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct, mut namespace: Namespace) -> 
         doc,
         derives,
         struct_token: item.struct_token,
-        ident: Pair::new(namespace.clone(), item.ident),
+        name: Pair::new(namespace.clone(), item.ident),
         brace_token: fields.brace_token,
         fields: fields
             .named
@@ -177,7 +177,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, mut namespace: Namespace) -> Resu
     Ok(Api::Enum(Enum {
         doc,
         enum_token,
-        ident: Pair::new(namespace, item.ident),
+        name: Pair::new(namespace, item.ident),
         brace_token,
         variants,
         repr,
@@ -241,8 +241,8 @@ fn parse_foreign_mod(
     }
 
     let mut types = items.iter().filter_map(|item| match item {
-        Api::CxxType(ety) | Api::RustType(ety) => Some(&ety.ident),
-        Api::TypeAlias(alias) => Some(&alias.ident),
+        Api::CxxType(ety) | Api::RustType(ety) => Some(&ety.name),
+        Api::TypeAlias(alias) => Some(&alias.name),
         _ => None,
     });
     if let (Some(single_type), None) = (types.next(), types.next()) {
@@ -305,7 +305,7 @@ fn parse_extern_type(
     Ok(api_type(ExternType {
         doc,
         type_token,
-        ident: Pair::new(namespace, ident),
+        name: Pair::new(namespace, ident),
         semi_token,
         trusted,
     }))
@@ -404,7 +404,7 @@ fn parse_extern_fn(
     let throws = throws_tokens.is_some();
     let unsafety = foreign_fn.sig.unsafety;
     let fn_token = foreign_fn.sig.fn_token;
-    let ident = Pair::new_from_differing_names(
+    let name = Pair::new_from_differing_names(
         namespace,
         cxx_name.unwrap_or(foreign_fn.sig.ident.clone()),
         rust_name.unwrap_or(foreign_fn.sig.ident.clone()),
@@ -419,7 +419,7 @@ fn parse_extern_fn(
     Ok(api_function(ExternFn {
         lang,
         doc,
-        ident,
+        name,
         sig: Signature {
             unsafety,
             fn_token,
@@ -468,7 +468,7 @@ fn parse_extern_verbatim(
         Ok(TypeAlias {
             doc,
             type_token,
-            ident: Pair::new(namespace, ident),
+            name: Pair::new(namespace, ident),
             eq_token,
             ty,
             semi_token,

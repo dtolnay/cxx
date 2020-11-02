@@ -15,13 +15,13 @@ pub fn extern_fn(efn: &ExternFn, types: &Types) -> Symbol {
         Some(receiver) => {
             let receiver_ident = types.resolve(&receiver.ty);
             join!(
-                efn.ident.namespace,
+                efn.name.namespace,
                 CXXBRIDGE,
                 receiver_ident.cxx,
-                efn.ident.rust
+                efn.name.rust
             )
         }
-        None => join!(efn.ident.namespace, CXXBRIDGE, efn.ident.rust),
+        None => join!(efn.name.namespace, CXXBRIDGE, efn.name.rust),
     }
 }
 

@@ -117,7 +117,7 @@ mod tests {
 
     fn assert_ident(api: &Api, expected: &str) {
         if let Api::CxxType(cxx_type) = api {
-            assert_eq!(cxx_type.ident.cxx.ident, expected);
+            assert_eq!(cxx_type.name.cxx, expected);
         } else {
             unreachable!()
         }
@@ -128,7 +128,7 @@ mod tests {
         Api::CxxType(ExternType {
             doc: Doc::new(),
             type_token: Token![type](Span::call_site()),
-            ident: Pair::new(ns, Ident::new(ident, Span::call_site())),
+            name: Pair::new(ns, Ident::new(ident, Span::call_site())),
             semi_token: Token![;](Span::call_site()),
             trusted: false,
         })

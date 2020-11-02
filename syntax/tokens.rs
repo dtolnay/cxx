@@ -85,7 +85,7 @@ impl ToTokens for ExternType {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         // Notional token range for error reporting purposes.
         self.type_token.to_tokens(tokens);
-        self.ident.to_tokens(tokens);
+        self.name.to_tokens(tokens);
     }
 }
 
@@ -93,7 +93,7 @@ impl ToTokens for TypeAlias {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         // Notional token range for error reporting purposes.
         self.type_token.to_tokens(tokens);
-        self.ident.to_tokens(tokens);
+        self.name.to_tokens(tokens);
     }
 }
 
@@ -101,7 +101,7 @@ impl ToTokens for Struct {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         // Notional token range for error reporting purposes.
         self.struct_token.to_tokens(tokens);
-        self.ident.to_tokens(tokens);
+        self.name.to_tokens(tokens);
     }
 }
 
@@ -109,7 +109,7 @@ impl ToTokens for Enum {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         // Notional token range for error reporting purposes.
         self.enum_token.to_tokens(tokens);
-        self.ident.to_tokens(tokens);
+        self.name.to_tokens(tokens);
     }
 }
 

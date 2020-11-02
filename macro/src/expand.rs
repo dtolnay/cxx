@@ -43,10 +43,8 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
             Api::Struct(strct) => expanded.extend(expand_struct(strct)),
             Api::Enum(enm) => expanded.extend(expand_enum(enm)),
             Api::CxxType(ety) => {
-                let ident = &ety.ident;
-                if !types.structs.contains_key(&ident.rust)
-                    && !types.enums.contains_key(&ident.rust)
-                {
+                let ident = &ety.name.rust;
+                if !types.structs.contains_key(ident) && !types.enums.contains_key(ident) {
                     expanded.extend(expand_cxx_type(ety));
                 }
             }
@@ -125,10 +123,10 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
 }
 
 fn expand_struct(strct: &Struct) -> TokenStream {
-    let ident = &strct.ident;
+    let ident = &strct.name.rust;
     let doc = &strct.doc;
     let derives = DeriveAttribute(&strct.derives);
-    let type_id = type_id(&strct.ident);
+    let type_id = type_id(&strct.name);
     let fields = strct.fields.iter().map(|field| {
         // This span on the pub makes "private type in public interface" errors
         // appear in the right place.
@@ -152,10 +150,10 @@ fn expand_struct(strct: &Struct) -> TokenStream {
 }
 
 fn expand_enum(enm: &Enum) -> TokenStream {
-    let ident = &enm.ident;
+    let ident = &enm.name.rust;
     let doc = &enm.doc;
     let repr = enm.repr;
-    let type_id = type_id(&enm.ident);
+    let type_id = type_id(&enm.name);
     let variants = enm.variants.iter().map(|variant| {
         let variant_ident = &variant.ident;
         let discriminant = &variant.discriminant;
@@ -185,9 +183,9 @@ fn expand_enum(enm: &Enum) -> TokenStream {
 }
 
 fn expand_cxx_type(ety: &ExternType) -> TokenStream {
-    let ident = &ety.ident;
+    let ident = &ety.name.rust;
     let doc = &ety.doc;
-    let type_id = type_id(&ety.ident);
+    let type_id = type_id(&ety.name);
 
     quote! {
         #doc
@@ -235,7 +233,7 @@ fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
         outparam = Some(quote!(__return: *mut #ret));
     }
     let link_name = mangle::extern_fn(efn, types);
-    let local_name = format_ident!("__{}", efn.ident.rust);
+    let local_name = format_ident!("__{}", efn.name.rust);
     quote! {
         #[link_name = #link_name]
         fn #local_name(#(#all_args,)* #outparam) #ret;
@@ -323,7 +321,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
             }
         })
         .collect::<TokenStream>();
-    let local_name = format_ident!("__{}", efn.ident.rust);
+    let local_name = format_ident!("__{}", efn.name.rust);
     let call = if indirect_return {
         let ret = expand_extern_type(efn.ret.as_ref().unwrap());
         setup.extend(quote! {
@@ -420,7 +418,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     if unsafety.is_none() {
         dispatch = quote!(unsafe { #dispatch });
     }
-    let ident = &efn.ident;
+    let ident = &efn.name.rust;
     let function_shim = quote! {
         #doc
         pub #unsafety fn #ident(#(#all_args,)*) #ret {
@@ -449,7 +447,7 @@ fn expand_function_pointer_trampoline(
     let c_trampoline = mangle::c_trampoline(efn, var, types);
     let r_trampoline = mangle::r_trampoline(efn, var, types);
     let local_name = parse_quote!(__);
-    let catch_unwind_label = format!("::{}::{}", efn.ident.rust, var);
+    let catch_unwind_label = format!("::{}::{}", efn.name.rust, var);
     let shim = expand_rust_function_shim_impl(
         sig,
         types,
@@ -475,7 +473,7 @@ fn expand_function_pointer_trampoline(
 }
 
 fn expand_rust_type(ety: &ExternType) -> TokenStream {
-    let ident = &ety.ident;
+    let ident = &ety.name.rust;
     quote! {
         use super::#ident;
     }
@@ -490,12 +488,12 @@ fn expand_rust_type_assert_sized(ety: &ExternType) -> TokenStream {
     //     |    doesn't have a size known at compile-time
     //     required by this bound in `ffi::_::__AssertSized`
 
-    let ident = &ety.ident;
+    let ident = &ety.name.rust;
     let begin_span = Token![::](ety.type_token.span);
     let sized = quote_spanned! {ety.semi_token.span=>
         #begin_span std::marker::Sized
     };
-    quote_spanned! {ident.rust.span()=>
+    quote_spanned! {ident.span()=>
         let _ = {
             fn __AssertSized<T: ?#sized + #sized>() {}
             __AssertSized::<#ident>
@@ -505,9 +503,9 @@ fn expand_rust_type_assert_sized(ety: &ExternType) -> TokenStream {
 
 fn expand_rust_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let link_name = mangle::extern_fn(efn, types);
-    let local_name = format_ident!("__{}", efn.ident.rust);
-    let catch_unwind_label = format!("::{}", efn.ident.rust);
-    let invoke = Some(&efn.ident.rust);
+    let local_name = format_ident!("__{}", efn.name.rust);
+    let catch_unwind_label = format!("::{}", efn.name.rust);
+    let invoke = Some(&efn.name.rust);
     expand_rust_function_shim_impl(
         efn,
         types,
@@ -675,7 +673,7 @@ fn expand_rust_function_shim_impl(
 
 fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
     let doc = &alias.doc;
-    let ident = &alias.ident;
+    let ident = &alias.name.rust;
     let ty = &alias.ty;
     quote! {
         #doc
@@ -684,8 +682,8 @@ fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
 }
 
 fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
-    let ident = &alias.ident;
-    let type_id = type_id(ident);
+    let ident = &alias.name.rust;
+    let type_id = type_id(&alias.name);
     let begin_span = alias.type_token.span;
     let end_span = alias.semi_token.span;
     let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_type::<);
@@ -695,7 +693,7 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
         const _: fn() = #begin #ident, #type_id #end;
     };
 
-    if types.required_trivial.contains_key(&alias.ident.rust) {
+    if types.required_trivial.contains_key(&alias.name.rust) {
         let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_kind::<);
         verify.extend(quote! {
             const _: fn() = #begin #ident, ::cxx::kind::Trivial #end;

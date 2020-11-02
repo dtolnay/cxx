@@ -32,7 +32,7 @@ pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u
 fn write_forward_declarations(out: &mut OutFile, apis: &[Api]) {
     let needs_forward_declaration = |api: &&Api| match api {
         Api::Struct(_) | Api::CxxType(_) | Api::RustType(_) => true,
-        Api::Enum(enm) => !out.types.cxx.contains(&enm.ident.rust),
+        Api::Enum(enm) => !out.types.cxx.contains(&enm.name.rust),
         _ => false,
     };
 
@@ -47,10 +47,10 @@ fn write_forward_declarations(out: &mut OutFile, apis: &[Api]) {
         for api in apis {
             write!(out, "{:1$}", "", indent);
             match api {
-                Api::Struct(strct) => write_struct_decl(out, &strct.ident.cxx),
+                Api::Struct(strct) => write_struct_decl(out, &strct.name.cxx),
                 Api::Enum(enm) => write_enum_decl(out, enm),
-                Api::CxxType(ety) => write_struct_using(out, &ety.ident),
-                Api::RustType(ety) => write_struct_decl(out, &ety.ident.cxx),
+                Api::CxxType(ety) => write_struct_using(out, &ety.name),
+                Api::RustType(ety) => write_struct_decl(out, &ety.name.cxx),
                 _ => unreachable!(),
             }
         }
@@ -80,20 +80,20 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
         match api {
             Api::Struct(strct) => {
                 out.next_section();
-                if !out.types.cxx.contains(&strct.ident.rust) {
+                if !out.types.cxx.contains(&strct.name.rust) {
                     write_struct(out, strct);
                 }
             }
             Api::Enum(enm) => {
                 out.next_section();
-                if out.types.cxx.contains(&enm.ident.rust) {
+                if out.types.cxx.contains(&enm.name.rust) {
                     check_enum(out, enm);
                 } else {
                     write_enum(out, enm);
                 }
             }
             Api::RustType(ety) => {
-                if let Some(methods) = methods_for_type.get(&ety.ident.rust) {
+                if let Some(methods) = methods_for_type.get(&ety.name.rust) {
                     out.next_section();
                     write_struct_with_methods(out, ety, methods);
                 }
@@ -105,8 +105,8 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
     out.next_section();
     for api in apis {
         if let Api::TypeAlias(ety) = api {
-            if out.types.required_trivial.contains_key(&ety.ident.rust) {
-                check_trivial_extern_type(out, &ety.ident)
+            if out.types.required_trivial.contains_key(&ety.name.rust) {
+                check_trivial_extern_type(out, &ety.name)
             }
         }
     }
@@ -193,14 +193,14 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
 }
 
 fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
-    out.set_namespace(&strct.ident.namespace);
-    let guard = format!("CXXBRIDGE05_STRUCT_{}", strct.ident.to_symbol());
+    out.set_namespace(&strct.name.namespace);
+    let guard = format!("CXXBRIDGE05_STRUCT_{}", strct.name.to_symbol());
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     for line in strct.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
-    writeln!(out, "struct {} final {{", strct.ident.cxx);
+    writeln!(out, "struct {} final {{", strct.name.cxx);
     for field in &strct.fields {
         write!(out, "  ");
         write_type_space(out, &field.ty);
@@ -215,7 +215,7 @@ fn write_struct_decl(out: &mut OutFile, ident: &Ident) {
 }
 
 fn write_enum_decl(out: &mut OutFile, enm: &Enum) {
-    write!(out, "enum class {} : ", enm.ident.cxx);
+    write!(out, "enum class {} : ", enm.name.cxx);
     write_atom(out, enm.repr);
     writeln!(out, ";");
 }
@@ -229,24 +229,24 @@ fn write_struct_with_methods<'a>(
     ety: &'a ExternType,
     methods: &[&ExternFn],
 ) {
-    out.set_namespace(&ety.ident.namespace);
-    let guard = format!("CXXBRIDGE05_STRUCT_{}", ety.ident.to_symbol());
+    out.set_namespace(&ety.name.namespace);
+    let guard = format!("CXXBRIDGE05_STRUCT_{}", ety.name.to_symbol());
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     for line in ety.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
-    writeln!(out, "struct {} final {{", ety.ident.cxx);
-    writeln!(out, "  {}() = delete;", ety.ident.cxx);
+    writeln!(out, "struct {} final {{", ety.name.cxx);
+    writeln!(out, "  {}() = delete;", ety.name.cxx);
     writeln!(
         out,
         "  {}(const {} &) = delete;",
-        ety.ident.cxx, ety.ident.cxx,
+        ety.name.cxx, ety.name.cxx,
     );
     for method in methods {
         write!(out, "  ");
         let sig = &method.sig;
-        let local_name = method.ident.cxx.to_string();
+        let local_name = method.name.cxx.to_string();
         write_rust_function_shim_decl(out, &local_name, sig, false);
         writeln!(out, ";");
     }
@@ -255,14 +255,14 @@ fn write_struct_with_methods<'a>(
 }
 
 fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
-    out.set_namespace(&enm.ident.namespace);
-    let guard = format!("CXXBRIDGE05_ENUM_{}", enm.ident.to_symbol());
+    out.set_namespace(&enm.name.namespace);
+    let guard = format!("CXXBRIDGE05_ENUM_{}", enm.name.to_symbol());
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     for line in enm.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
-    write!(out, "enum class {} : ", enm.ident.cxx);
+    write!(out, "enum class {} : ", enm.name.cxx);
     write_atom(out, enm.repr);
     writeln!(out, " {{");
     for variant in &enm.variants {
@@ -273,8 +273,8 @@ fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
 }
 
 fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
-    out.set_namespace(&enm.ident.namespace);
-    write!(out, "static_assert(sizeof({}) == sizeof(", enm.ident.cxx);
+    out.set_namespace(&enm.name.namespace);
+    write!(out, "static_assert(sizeof({}) == sizeof(", enm.name.cxx);
     write_atom(out, enm.repr);
     writeln!(out, "), \"incorrect size\");");
     for variant in &enm.variants {
@@ -283,7 +283,7 @@ fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
         writeln!(
             out,
             ">({}::{}) == {}, \"disagrees with the value in #[cxx::bridge]\");",
-            enm.ident.cxx, variant.ident, variant.discriminant,
+            enm.name.cxx, variant.ident, variant.discriminant,
         );
     }
 }
@@ -331,7 +331,7 @@ fn check_trivial_extern_type(out: &mut OutFile, id: &Pair) {
 
 fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     out.next_section();
-    out.set_namespace(&efn.ident.namespace);
+    out.set_namespace(&efn.name.namespace);
     out.begin_block(Block::ExternC);
     if let Some(annotation) = &out.opt.cxx_impl_annotations {
         write!(out, "{} ", annotation);
@@ -377,12 +377,12 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     write!(out, "  ");
     write_return_type(out, &efn.ret);
     match &efn.receiver {
-        None => write!(out, "(*{}$)(", efn.ident.rust),
+        None => write!(out, "(*{}$)(", efn.name.rust),
         Some(receiver) => write!(
             out,
             "({}::*{}$)(",
             out.types.resolve(&receiver.ty).to_fully_qualified(),
-            efn.ident.rust,
+            efn.name.rust,
         ),
     }
     for (i, arg) in efn.args.iter().enumerate() {
@@ -399,12 +399,12 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     }
     write!(out, " = ");
     match &efn.receiver {
-        None => write!(out, "{}", efn.ident.to_fully_qualified()),
+        None => write!(out, "{}", efn.name.to_fully_qualified()),
         Some(receiver) => write!(
             out,
             "&{}::{}",
             out.types.resolve(&receiver.ty).to_fully_qualified(),
-            efn.ident.cxx,
+            efn.name.cxx,
         ),
     }
     writeln!(out, ";");
@@ -438,8 +438,8 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         _ => {}
     }
     match &efn.receiver {
-        None => write!(out, "{}$(", efn.ident.rust),
-        Some(_) => write!(out, "(self.*{}$)(", efn.ident.rust),
+        None => write!(out, "{}$(", efn.name.rust),
+        Some(_) => write!(out, "(self.*{}$)(", efn.name.rust),
     }
     for (i, arg) in efn.args.iter().enumerate() {
         if i > 0 {
@@ -533,7 +533,7 @@ fn write_function_pointer_trampoline(
 }
 
 fn write_rust_function_decl<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
-    out.set_namespace(&efn.ident.namespace);
+    out.set_namespace(&efn.name.namespace);
     out.begin_block(Block::ExternC);
     let link_name = mangle::extern_fn(efn, out.types);
     let indirect_call = false;
@@ -592,13 +592,13 @@ fn write_rust_function_decl_impl(
 }
 
 fn write_rust_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
-    out.set_namespace(&efn.ident.namespace);
+    out.set_namespace(&efn.name.namespace);
     for line in efn.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
     let local_name = match &efn.sig.receiver {
-        None => efn.ident.cxx.to_string(),
-        Some(receiver) => format!("{}::{}", out.types.resolve(&receiver.ty).cxx, efn.ident.cxx),
+        None => efn.name.cxx.to_string(),
+        Some(receiver) => format!("{}::{}", out.types.resolve(&receiver.ty).cxx, efn.name.cxx),
     };
     let invoke = mangle::extern_fn(efn, out.types);
     let indirect_call = false;

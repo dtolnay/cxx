@@ -24,28 +24,28 @@ pub(crate) fn check_all(cx: &mut Check, apis: &[Api]) {
         match api {
             Api::Include(_) | Api::Impl(_) => {}
             Api::Struct(strct) => {
-                check_ident(cx, &strct.ident);
+                check_ident(cx, &strct.name);
                 for field in &strct.fields {
                     check(cx, &field.ident);
                 }
             }
             Api::Enum(enm) => {
-                check_ident(cx, &enm.ident);
+                check_ident(cx, &enm.name);
                 for variant in &enm.variants {
                     check(cx, &variant.ident);
                 }
             }
             Api::CxxType(ety) | Api::RustType(ety) => {
-                check_ident(cx, &ety.ident);
+                check_ident(cx, &ety.name);
             }
             Api::CxxFunction(efn) | Api::RustFunction(efn) => {
-                check(cx, &efn.ident.rust);
+                check(cx, &efn.name.rust);
                 for arg in &efn.args {
                     check(cx, &arg.ident);
                 }
             }
             Api::TypeAlias(alias) => {
-                check_ident(cx, &alias.ident);
+                check_ident(cx, &alias.name);
             }
         }
     }

@@ -67,7 +67,7 @@ pub enum IncludeKind {
 pub struct ExternType {
     pub doc: Doc,
     pub type_token: Token![type],
-    pub ident: Pair,
+    pub name: Pair,
     pub semi_token: Token![;],
     pub trusted: bool,
 }
@@ -76,7 +76,7 @@ pub struct Struct {
     pub doc: Doc,
     pub derives: Vec<Derive>,
     pub struct_token: Token![struct],
-    pub ident: Pair,
+    pub name: Pair,
     pub brace_token: Brace,
     pub fields: Vec<Var>,
 }
@@ -84,7 +84,7 @@ pub struct Struct {
 pub struct Enum {
     pub doc: Doc,
     pub enum_token: Token![enum],
-    pub ident: Pair,
+    pub name: Pair,
     pub brace_token: Brace,
     pub variants: Vec<Variant>,
     pub repr: Atom,
@@ -93,7 +93,7 @@ pub struct Enum {
 pub struct ExternFn {
     pub lang: Lang,
     pub doc: Doc,
-    pub ident: Pair,
+    pub name: Pair,
     pub sig: Signature,
     pub semi_token: Token![;],
 }
@@ -101,7 +101,7 @@ pub struct ExternFn {
 pub struct TypeAlias {
     pub doc: Doc,
     pub type_token: Token![type],
-    pub ident: Pair,
+    pub name: Pair,
     pub eq_token: Token![=],
     pub ty: RustType,
     pub semi_token: Token![;],
