@@ -602,15 +602,14 @@ fn parse_type_path(ty: &TypePath, namespace: &Namespace) -> Result<Type> {
     if ty.qself.is_none() && path.leading_colon.is_none() && path.segments.len() == 1 {
         let segment = &path.segments[0];
         let ident = segment.ident.clone();
-        let maybe_resolved_ident = ResolvableName::new(ident.clone());
         match &segment.arguments {
-            PathArguments::None => return Ok(Type::Ident(maybe_resolved_ident)),
+            PathArguments::None => return Ok(Type::Ident(ResolvableName::new(ident))),
             PathArguments::AngleBracketed(generic) => {
                 if ident == "UniquePtr" && generic.args.len() == 1 {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
                         let inner = parse_type(arg, namespace)?;
                         return Ok(Type::UniquePtr(Box::new(Ty1 {
-                            name: maybe_resolved_ident,
+                            name: ident,
                             langle: generic.lt_token,
                             inner,
                             rangle: generic.gt_token,
@@ -620,7 +619,7 @@ fn parse_type_path(ty: &TypePath, namespace: &Namespace) -> Result<Type> {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
                         let inner = parse_type(arg, namespace)?;
                         return Ok(Type::CxxVector(Box::new(Ty1 {
-                            name: maybe_resolved_ident,
+                            name: ident,
                             langle: generic.lt_token,
                             inner,
                             rangle: generic.gt_token,
@@ -630,7 +629,7 @@ fn parse_type_path(ty: &TypePath, namespace: &Namespace) -> Result<Type> {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
                         let inner = parse_type(arg, namespace)?;
                         return Ok(Type::RustBox(Box::new(Ty1 {
-                            name: maybe_resolved_ident,
+                            name: ident,
                             langle: generic.lt_token,
                             inner,
                             rangle: generic.gt_token,
@@ -640,7 +639,7 @@ fn parse_type_path(ty: &TypePath, namespace: &Namespace) -> Result<Type> {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
                         let inner = parse_type(arg, namespace)?;
                         return Ok(Type::RustVec(Box::new(Ty1 {
-                            name: maybe_resolved_ident,
+                            name: ident,
                             langle: generic.lt_token,
                             inner,
                             rangle: generic.gt_token,

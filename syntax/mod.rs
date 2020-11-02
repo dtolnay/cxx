@@ -160,7 +160,7 @@ pub enum Type {
 }
 
 pub struct Ty1 {
-    pub name: ResolvableName,
+    pub name: Ident,
     pub langle: Token![<],
     pub inner: Type,
     pub rangle: Token![>],
