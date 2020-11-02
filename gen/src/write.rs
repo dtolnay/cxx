@@ -15,10 +15,6 @@ pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u
     let mut out_file = OutFile::new(header, opt, types);
     let out = &mut out_file;
 
-    if header {
-        writeln!(out.include, "#pragma once");
-    }
-
     pick_includes_and_builtins(out);
     out.include.extend(&opt.include);
 

@@ -47,8 +47,13 @@ impl<'a> Includes<'a> {
 }
 
 pub(super) fn write(out: &mut OutFile) {
+    let header = out.header;
     let include = &mut out.include;
     let out = &mut include.content;
+
+    if header {
+        writeln!(out, "#pragma once");
+    }
 
     for include in &include.custom {
         match include.kind {
