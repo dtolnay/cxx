@@ -179,7 +179,7 @@ fn pick_includes_and_builtins(out: &mut OutFile) {
                 out.include.cstdint = true;
                 out.builtin.rust_slice = true;
             }
-            _ => {}
+            Type::Ref(_) | Type::Void(_) => {}
         }
     }
 }
