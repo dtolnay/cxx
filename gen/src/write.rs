@@ -23,8 +23,8 @@ pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u
     out.include.extend(&opt.include);
 
     let apis_by_namespace = NamespaceEntries::new(apis);
-    gen_namespace_forward_declarations(out, &apis_by_namespace);
-    gen_namespace_contents(out, &apis_by_namespace);
+    write_namespace_forward_declarations(out, &apis_by_namespace);
+    write_namespace_contents(out, &apis_by_namespace);
 
     if !header {
         out.next_section();
@@ -37,7 +37,7 @@ pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u
     out_file.content()
 }
 
-fn gen_namespace_forward_declarations(out: &mut OutFile, ns_entries: &NamespaceEntries) {
+fn write_namespace_forward_declarations(out: &mut OutFile, ns_entries: &NamespaceEntries) {
     let apis = ns_entries.direct_content();
 
     for api in apis {
@@ -52,12 +52,12 @@ fn gen_namespace_forward_declarations(out: &mut OutFile, ns_entries: &NamespaceE
 
     for (namespace, nested_ns_entries) in ns_entries.nested_content() {
         writeln!(out, "namespace {} {{", namespace);
-        gen_namespace_forward_declarations(out, nested_ns_entries);
+        write_namespace_forward_declarations(out, nested_ns_entries);
         writeln!(out, "}} // namespace {}", namespace);
     }
 }
 
-fn gen_namespace_contents<'a>(out: &mut OutFile<'a>, ns_entries: &'a NamespaceEntries<'a>) {
+fn write_namespace_contents<'a>(out: &mut OutFile<'a>, ns_entries: &'a NamespaceEntries<'a>) {
     out.set_namespace(&ns_entries.namespace);
     let apis = ns_entries.direct_content();
 
@@ -129,7 +129,7 @@ fn gen_namespace_contents<'a>(out: &mut OutFile<'a>, ns_entries: &'a NamespaceEn
     }
 
     for (_, nested_ns_entries) in ns_entries.nested_content() {
-        gen_namespace_contents(out, nested_ns_entries);
+        write_namespace_contents(out, nested_ns_entries);
     }
 }
 
