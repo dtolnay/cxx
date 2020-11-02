@@ -1,7 +1,6 @@
 use crate::syntax::Api;
 use proc_macro2::Ident;
 use std::collections::HashMap as Map;
-use std::iter::FromIterator;
 
 pub struct NamespaceEntries<'a> {
     direct: Vec<&'a Api>,
@@ -9,9 +8,8 @@ pub struct NamespaceEntries<'a> {
 }
 
 impl<'a> NamespaceEntries<'a> {
-    pub fn new(apis: &'a [Api]) -> Self {
-        let api_refs = Vec::from_iter(apis);
-        sort_by_inner_namespace(api_refs, 0)
+    pub fn new(apis: Vec<&'a Api>) -> Self {
+        sort_by_inner_namespace(apis, 0)
     }
 
     pub fn direct_content(&self) -> &[&'a Api] {
@@ -56,6 +54,7 @@ mod tests {
     use crate::syntax::namespace::Namespace;
     use crate::syntax::{Api, Doc, ExternType, Pair};
     use proc_macro2::{Ident, Span};
+    use std::iter::FromIterator;
     use syn::Token;
 
     #[test]
@@ -73,7 +72,7 @@ mod tests {
             make_api(Some("D"), "J"),
         ];
 
-        let root = NamespaceEntries::new(apis);
+        let root = NamespaceEntries::new(Vec::from_iter(apis));
 
         // ::
         let root_direct = root.direct_content();

@@ -18,8 +18,7 @@ pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u
     pick_includes_and_builtins(out);
     out.include.extend(&opt.include);
 
-    let apis_by_namespace = NamespaceEntries::new(apis);
-    write_namespace_forward_declarations(out, &apis_by_namespace);
+    write_forward_declarations(out, apis);
     write_data_structures(out, apis);
     write_functions(out, apis);
     write_generic_instantiations(out);
@@ -30,23 +29,34 @@ pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u
     out_file.content()
 }
 
-fn write_namespace_forward_declarations(out: &mut OutFile, ns_entries: &NamespaceEntries) {
-    let apis = ns_entries.direct_content();
+fn write_forward_declarations(out: &mut OutFile, apis: &[Api]) {
+    let needs_forward_declaration = |api: &&Api| match api {
+        Api::Struct(_) | Api::CxxType(_) | Api::RustType(_) => true,
+        _ => false,
+    };
 
-    for api in apis {
-        match api {
-            Api::Include(include) => out.include.insert(include),
-            Api::Struct(strct) => write_struct_decl(out, &strct.ident.cxx.ident),
-            Api::CxxType(ety) => write_struct_using(out, &ety.ident.cxx),
-            Api::RustType(ety) => write_struct_decl(out, &ety.ident.cxx.ident),
-            _ => {}
+    let apis_by_namespace =
+        NamespaceEntries::new(apis.iter().filter(needs_forward_declaration).collect());
+
+    write(out, &apis_by_namespace);
+
+    fn write(out: &mut OutFile, ns_entries: &NamespaceEntries) {
+        let apis = ns_entries.direct_content();
+
+        for api in apis {
+            match api {
+                Api::Struct(strct) => write_struct_decl(out, &strct.ident.cxx.ident),
+                Api::CxxType(ety) => write_struct_using(out, &ety.ident.cxx),
+                Api::RustType(ety) => write_struct_decl(out, &ety.ident.cxx.ident),
+                _ => unreachable!(),
+            }
         }
-    }
 
-    for (namespace, nested_ns_entries) in ns_entries.nested_content() {
-        writeln!(out, "namespace {} {{", namespace);
-        write_namespace_forward_declarations(out, nested_ns_entries);
-        writeln!(out, "}} // namespace {}", namespace);
+        for (namespace, nested_ns_entries) in ns_entries.nested_content() {
+            writeln!(out, "namespace {} {{", namespace);
+            write(out, nested_ns_entries);
+            writeln!(out, "}} // namespace {}", namespace);
+        }
     }
 }
 
@@ -65,6 +75,7 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
 
     for api in apis {
         match api {
+            Api::Include(include) => out.include.insert(include),
             Api::Struct(strct) => {
                 out.next_section();
                 if !out.types.cxx.contains(&strct.ident.rust) {
