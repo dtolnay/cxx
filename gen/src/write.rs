@@ -144,45 +144,18 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
                 Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(I8) | Some(I16) | Some(I32)
                 | Some(I64) => out.include.cstdint = true,
                 Some(Usize) => out.include.cstddef = true,
-                Some(Isize) => {
-                    out.include.basetsd = true;
-                    out.builtin.rust_isize = true;
-                }
+                Some(Isize) => out.builtin.rust_isize = true,
                 Some(CxxString) => out.include.string = true,
-                Some(RustString) => {
-                    out.include.array = true;
-                    out.include.cstdint = true;
-                    out.include.string = true;
-                    out.builtin.rust_string = true;
-                }
+                Some(RustString) => out.builtin.rust_string = true,
                 Some(Bool) | Some(F32) | Some(F64) | None => {}
             },
-            Type::RustBox(_) => {
-                out.include.new = true;
-                out.include.type_traits = true;
-                out.builtin.rust_box = true;
-            }
-            Type::RustVec(_) => {
-                out.include.array = true;
-                out.include.new = true;
-                out.include.type_traits = true;
-                out.builtin.panic = true;
-                out.builtin.rust_vec = true;
-                out.builtin.unsafe_bitcopy = true;
-            }
+            Type::RustBox(_) => out.builtin.rust_box = true,
+            Type::RustVec(_) => out.builtin.rust_vec = true,
             Type::UniquePtr(_) => out.include.memory = true,
-            Type::Str(_) => {
-                out.include.cstdint = true;
-                out.include.string = true;
-                out.builtin.rust_str = true;
-            }
+            Type::Str(_) => out.builtin.rust_str = true,
             Type::CxxVector(_) => out.include.vector = true,
-            Type::Fn(_) => {
-                out.builtin.rust_fn = true;
-            }
-            Type::Slice(_) => {
-                out.builtin.rust_slice = true;
-            }
+            Type::Fn(_) => out.builtin.rust_fn = true,
+            Type::Slice(_) => out.builtin.rust_slice = true,
             Type::SliceRefU8(_) => {
                 out.include.cstdint = true;
                 out.builtin.rust_slice = true;
@@ -750,7 +723,6 @@ fn write_rust_function_shim_impl(
     }
     writeln!(out, ";");
     if sig.throws {
-        out.include.exception = true;
         out.builtin.rust_error = true;
         writeln!(out, "  if (error$.ptr) {{");
         writeln!(out, "    throw ::rust::impl<::rust::Error>::error(error$);");

@@ -41,6 +41,38 @@ pub(super) fn write(out: &mut OutFile) {
     let builtin = &mut out.builtin;
     let out = &mut builtin.content;
 
+    if builtin.rust_string {
+        include.array = true;
+        include.cstdint = true;
+        include.string = true;
+    }
+
+    if builtin.rust_str {
+        include.cstdint = true;
+        include.string = true;
+    }
+
+    if builtin.rust_box {
+        include.new = true;
+        include.type_traits = true;
+    }
+
+    if builtin.rust_vec {
+        include.array = true;
+        include.new = true;
+        include.type_traits = true;
+        builtin.panic = true;
+        builtin.unsafe_bitcopy = true;
+    }
+
+    if builtin.rust_error {
+        include.exception = true;
+    }
+
+    if builtin.rust_isize {
+        include.basetsd = true;
+    }
+
     out.begin_block(Block::Namespace("rust"));
     out.begin_block(Block::InlineNamespace("cxxbridge05"));
     writeln!(out, "// #include \"rust/cxx.h\"");
