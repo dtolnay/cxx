@@ -29,7 +29,7 @@ fn sort_by_inner_namespace(apis: Vec<&Api>, depth: usize) -> NamespaceEntries {
     let mut index_of_namespace = Map::new();
 
     for api in &apis {
-        if let Some(first_ns_elem) = api.namespace().and_then(|ns| ns.iter().nth(depth)) {
+        if let Some(first_ns_elem) = api.namespace().iter().nth(depth) {
             match index_of_namespace.get(first_ns_elem) {
                 None => {
                     index_of_namespace.insert(first_ns_elem, nested_namespaces.len());
