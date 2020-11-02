@@ -26,18 +26,18 @@ impl<'a> NamespaceEntries<'a> {
 fn sort_by_inner_namespace(apis: Vec<&Api>, depth: usize) -> NamespaceEntries {
     let mut direct = Vec::new();
     let mut nested_namespaces = BTreeMap::new();
-    for api in apis {
+    for api in &apis {
         if let Some(ns) = api.namespace() {
             let first_ns_elem = ns.iter().nth(depth);
             if let Some(first_ns_elem) = first_ns_elem {
                 nested_namespaces
                     .entry(first_ns_elem)
                     .or_insert_with(Vec::new)
-                    .push(api);
+                    .push(*api);
                 continue;
             }
         }
-        direct.push(api);
+        direct.push(*api);
     }
 
     let nested = nested_namespaces
