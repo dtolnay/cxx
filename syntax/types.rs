@@ -2,8 +2,7 @@ use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::set::OrderedSet as Set;
 use crate::syntax::{
-    Api, CppName, Derive, Enum, ExternFn, ExternType, Impl, Pair, ResolvableName, Struct, Type,
-    TypeAlias,
+    Api, Derive, Enum, ExternFn, ExternType, Impl, Pair, ResolvableName, Struct, Type, TypeAlias,
 };
 use proc_macro2::Ident;
 use quote::ToTokens;
@@ -19,7 +18,7 @@ pub struct Types<'a> {
     pub untrusted: Map<&'a Ident, &'a ExternType>,
     pub required_trivial: Map<&'a Ident, TrivialReason<'a>>,
     pub explicit_impls: Set<&'a Impl>,
-    pub resolutions: Map<&'a Ident, &'a CppName>,
+    pub resolutions: Map<&'a Ident, &'a Pair>,
 }
 
 impl<'a> Types<'a> {
@@ -56,7 +55,7 @@ impl<'a> Types<'a> {
         }
 
         let mut add_resolution = |pair: &'a Pair| {
-            resolutions.insert(&pair.rust, &pair.cxx);
+            resolutions.insert(&pair.rust, pair);
         };
 
         let mut type_names = UnorderedSet::new();
@@ -228,7 +227,7 @@ impl<'a> Types<'a> {
         false
     }
 
-    pub fn resolve(&self, ident: &ResolvableName) -> &CppName {
+    pub fn resolve(&self, ident: &ResolvableName) -> &Pair {
         self.resolutions
             .get(&ident.rust)
             .expect("Unable to resolve type")

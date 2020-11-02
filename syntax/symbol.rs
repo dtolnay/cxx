@@ -1,5 +1,5 @@
 use crate::syntax::namespace::Namespace;
-use crate::syntax::CppName;
+use crate::syntax::Pair;
 use proc_macro2::{Ident, TokenStream};
 use quote::ToTokens;
 use std::fmt::{self, Display, Write};
@@ -79,10 +79,10 @@ impl Segment for Namespace {
     }
 }
 
-impl Segment for CppName {
+impl Segment for Pair {
     fn write(&self, symbol: &mut Symbol) {
         self.namespace.write(symbol);
-        self.ident.write(symbol);
+        self.cxx.write(symbol);
     }
 }
 

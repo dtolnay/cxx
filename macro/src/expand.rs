@@ -4,7 +4,7 @@ use crate::syntax::file::Module;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    self, check, mangle, Api, CppName, Enum, ExternFn, ExternType, Impl, ResolvableName, Signature,
+    self, check, mangle, Api, Enum, ExternFn, ExternType, Impl, Pair, ResolvableName, Signature,
     Struct, Type, TypeAlias, Types,
 };
 use proc_macro2::{Ident, Span, TokenStream};
@@ -125,11 +125,10 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
 }
 
 fn expand_struct(strct: &Struct) -> TokenStream {
-    let ident = &strct.ident.rust;
-    let cxx_ident = &strct.ident.cxx;
+    let ident = &strct.ident;
     let doc = &strct.doc;
     let derives = DeriveAttribute(&strct.derives);
-    let type_id = type_id(cxx_ident);
+    let type_id = type_id(&strct.ident);
     let fields = strct.fields.iter().map(|field| {
         // This span on the pub makes "private type in public interface" errors
         // appear in the right place.
@@ -153,11 +152,10 @@ fn expand_struct(strct: &Struct) -> TokenStream {
 }
 
 fn expand_enum(enm: &Enum) -> TokenStream {
-    let ident = &enm.ident.rust;
-    let cxx_ident = &enm.ident.cxx;
+    let ident = &enm.ident;
     let doc = &enm.doc;
     let repr = enm.repr;
-    let type_id = type_id(cxx_ident);
+    let type_id = type_id(&enm.ident);
     let variants = enm.variants.iter().map(|variant| {
         let variant_ident = &variant.ident;
         let discriminant = &variant.discriminant;
@@ -187,10 +185,9 @@ fn expand_enum(enm: &Enum) -> TokenStream {
 }
 
 fn expand_cxx_type(ety: &ExternType) -> TokenStream {
-    let ident = &ety.ident.rust;
-    let cxx_ident = &ety.ident.cxx;
+    let ident = &ety.ident;
     let doc = &ety.doc;
-    let type_id = type_id(&cxx_ident);
+    let type_id = type_id(&ety.ident);
 
     quote! {
         #doc
@@ -423,7 +420,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     if unsafety.is_none() {
         dispatch = quote!(unsafe { #dispatch });
     }
-    let ident = &efn.ident.rust;
+    let ident = &efn.ident;
     let function_shim = quote! {
         #doc
         pub #unsafety fn #ident(#(#all_args,)*) #ret {
@@ -688,7 +685,7 @@ fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
 
 fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
     let ident = &alias.ident;
-    let type_id = type_id(&ident.cxx);
+    let type_id = type_id(ident);
     let begin_span = alias.type_token.span;
     let end_span = alias.semi_token.span;
     let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_type::<);
@@ -708,8 +705,8 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
     verify
 }
 
-fn type_id(ident: &CppName) -> TokenStream {
-    let path = ident.to_fully_qualified();
+fn type_id(name: &Pair) -> TokenStream {
+    let path = name.to_fully_qualified();
     quote! {
         ::cxx::type_id!(#path)
     }

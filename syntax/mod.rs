@@ -188,17 +188,9 @@ pub enum Lang {
 // qualified C++ name.
 #[derive(Clone)]
 pub struct Pair {
-    pub cxx: CppName,
-    pub rust: Ident,
-}
-
-// A C++ identifier in a particular namespace. It is intentional that this does
-// not impl Display, because we want to force users actively to decide whether
-// to output it as a qualified name or as an unqualfied name.
-#[derive(Clone)]
-pub struct CppName {
     pub namespace: Namespace,
-    pub ident: Ident,
+    pub cxx: Ident,
+    pub rust: Ident,
 }
 
 // Wrapper for a type which needs to be resolved before it can be printed in

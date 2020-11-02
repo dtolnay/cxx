@@ -5,8 +5,8 @@ use crate::gen::{builtin, include, toposort, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    mangle, Api, CppName, Enum, ExternFn, ExternType, ResolvableName, Signature, Struct, Type,
-    Types, Var,
+    mangle, Api, Enum, ExternFn, ExternType, Pair, ResolvableName, Signature, Struct, Type, Types,
+    Var,
 };
 use proc_macro2::Ident;
 use std::collections::HashMap;
@@ -47,10 +47,10 @@ fn write_forward_declarations(out: &mut OutFile, apis: &[Api]) {
         for api in apis {
             write!(out, "{:1$}", "", indent);
             match api {
-                Api::Struct(strct) => write_struct_decl(out, &strct.ident.cxx.ident),
+                Api::Struct(strct) => write_struct_decl(out, &strct.ident.cxx),
                 Api::Enum(enm) => write_enum_decl(out, enm),
-                Api::CxxType(ety) => write_struct_using(out, &ety.ident.cxx),
-                Api::RustType(ety) => write_struct_decl(out, &ety.ident.cxx.ident),
+                Api::CxxType(ety) => write_struct_using(out, &ety.ident),
+                Api::RustType(ety) => write_struct_decl(out, &ety.ident.cxx),
                 _ => unreachable!(),
             }
         }
@@ -106,7 +106,7 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
     for api in apis {
         if let Api::TypeAlias(ety) = api {
             if out.types.required_trivial.contains_key(&ety.ident.rust) {
-                check_trivial_extern_type(out, &ety.ident.cxx)
+                check_trivial_extern_type(out, &ety.ident)
             }
         }
     }
@@ -193,14 +193,14 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
 }
 
 fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
-    out.set_namespace(&strct.ident.cxx.namespace);
-    let guard = format!("CXXBRIDGE05_STRUCT_{}", strct.ident.cxx.to_symbol());
+    out.set_namespace(&strct.ident.namespace);
+    let guard = format!("CXXBRIDGE05_STRUCT_{}", strct.ident.to_symbol());
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     for line in strct.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
-    writeln!(out, "struct {} final {{", strct.ident.cxx.ident);
+    writeln!(out, "struct {} final {{", strct.ident.cxx);
     for field in &strct.fields {
         write!(out, "  ");
         write_type_space(out, &field.ty);
@@ -215,18 +215,13 @@ fn write_struct_decl(out: &mut OutFile, ident: &Ident) {
 }
 
 fn write_enum_decl(out: &mut OutFile, enm: &Enum) {
-    write!(out, "enum class {} : ", enm.ident.cxx.ident);
+    write!(out, "enum class {} : ", enm.ident.cxx);
     write_atom(out, enm.repr);
     writeln!(out, ";");
 }
 
-fn write_struct_using(out: &mut OutFile, ident: &CppName) {
-    writeln!(
-        out,
-        "using {} = {};",
-        ident.ident,
-        ident.to_fully_qualified()
-    );
+fn write_struct_using(out: &mut OutFile, ident: &Pair) {
+    writeln!(out, "using {} = {};", ident.cxx, ident.to_fully_qualified());
 }
 
 fn write_struct_with_methods<'a>(
@@ -234,24 +229,24 @@ fn write_struct_with_methods<'a>(
     ety: &'a ExternType,
     methods: &[&ExternFn],
 ) {
-    out.set_namespace(&ety.ident.cxx.namespace);
-    let guard = format!("CXXBRIDGE05_STRUCT_{}", ety.ident.cxx.to_symbol());
+    out.set_namespace(&ety.ident.namespace);
+    let guard = format!("CXXBRIDGE05_STRUCT_{}", ety.ident.to_symbol());
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     for line in ety.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
-    writeln!(out, "struct {} final {{", ety.ident.cxx.ident);
-    writeln!(out, "  {}() = delete;", ety.ident.cxx.ident);
+    writeln!(out, "struct {} final {{", ety.ident.cxx);
+    writeln!(out, "  {}() = delete;", ety.ident.cxx);
     writeln!(
         out,
         "  {}(const {} &) = delete;",
-        ety.ident.cxx.ident, ety.ident.cxx.ident
+        ety.ident.cxx, ety.ident.cxx,
     );
     for method in methods {
         write!(out, "  ");
         let sig = &method.sig;
-        let local_name = method.ident.cxx.ident.to_string();
+        let local_name = method.ident.cxx.to_string();
         write_rust_function_shim_decl(out, &local_name, sig, false);
         writeln!(out, ";");
     }
@@ -260,14 +255,14 @@ fn write_struct_with_methods<'a>(
 }
 
 fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
-    out.set_namespace(&enm.ident.cxx.namespace);
-    let guard = format!("CXXBRIDGE05_ENUM_{}", enm.ident.cxx.to_symbol());
+    out.set_namespace(&enm.ident.namespace);
+    let guard = format!("CXXBRIDGE05_ENUM_{}", enm.ident.to_symbol());
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     for line in enm.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
-    write!(out, "enum class {} : ", enm.ident.cxx.ident);
+    write!(out, "enum class {} : ", enm.ident.cxx);
     write_atom(out, enm.repr);
     writeln!(out, " {{");
     for variant in &enm.variants {
@@ -278,12 +273,8 @@ fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
 }
 
 fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
-    out.set_namespace(&enm.ident.cxx.namespace);
-    write!(
-        out,
-        "static_assert(sizeof({}) == sizeof(",
-        enm.ident.cxx.ident
-    );
+    out.set_namespace(&enm.ident.namespace);
+    write!(out, "static_assert(sizeof({}) == sizeof(", enm.ident.cxx);
     write_atom(out, enm.repr);
     writeln!(out, "), \"incorrect size\");");
     for variant in &enm.variants {
@@ -292,12 +283,12 @@ fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
         writeln!(
             out,
             ">({}::{}) == {}, \"disagrees with the value in #[cxx::bridge]\");",
-            enm.ident.cxx.ident, variant.ident, variant.discriminant,
+            enm.ident.cxx, variant.ident, variant.discriminant,
         );
     }
 }
 
-fn check_trivial_extern_type(out: &mut OutFile, id: &CppName) {
+fn check_trivial_extern_type(out: &mut OutFile, id: &Pair) {
     // NOTE: The following two static assertions are just nice-to-have and not
     // necessary for soundness. That's because triviality is always declared by
     // the user in the form of an unsafe impl of cxx::ExternType:
@@ -340,7 +331,7 @@ fn check_trivial_extern_type(out: &mut OutFile, id: &CppName) {
 
 fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     out.next_section();
-    out.set_namespace(&efn.ident.cxx.namespace);
+    out.set_namespace(&efn.ident.namespace);
     out.begin_block(Block::ExternC);
     if let Some(annotation) = &out.opt.cxx_impl_annotations {
         write!(out, "{} ", annotation);
@@ -360,7 +351,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         write!(
             out,
             "{} &self",
-            out.types.resolve(&receiver.ty).to_fully_qualified()
+            out.types.resolve(&receiver.ty).to_fully_qualified(),
         );
     }
     for (i, arg) in efn.args.iter().enumerate() {
@@ -391,7 +382,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
             out,
             "({}::*{}$)(",
             out.types.resolve(&receiver.ty).to_fully_qualified(),
-            efn.ident.rust
+            efn.ident.rust,
         ),
     }
     for (i, arg) in efn.args.iter().enumerate() {
@@ -408,12 +399,12 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     }
     write!(out, " = ");
     match &efn.receiver {
-        None => write!(out, "{}", efn.ident.cxx.to_fully_qualified()),
+        None => write!(out, "{}", efn.ident.to_fully_qualified()),
         Some(receiver) => write!(
             out,
             "&{}::{}",
             out.types.resolve(&receiver.ty).to_fully_qualified(),
-            efn.ident.cxx.ident
+            efn.ident.cxx,
         ),
     }
     writeln!(out, ";");
@@ -542,7 +533,7 @@ fn write_function_pointer_trampoline(
 }
 
 fn write_rust_function_decl<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
-    out.set_namespace(&efn.ident.cxx.namespace);
+    out.set_namespace(&efn.ident.namespace);
     out.begin_block(Block::ExternC);
     let link_name = mangle::extern_fn(efn, out.types);
     let indirect_call = false;
@@ -572,7 +563,7 @@ fn write_rust_function_decl_impl(
         write!(
             out,
             "{} &self",
-            out.types.resolve(&receiver.ty).to_fully_qualified()
+            out.types.resolve(&receiver.ty).to_fully_qualified(),
         );
         needs_comma = true;
     }
@@ -601,17 +592,13 @@ fn write_rust_function_decl_impl(
 }
 
 fn write_rust_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
-    out.set_namespace(&efn.ident.cxx.namespace);
+    out.set_namespace(&efn.ident.namespace);
     for line in efn.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
     let local_name = match &efn.sig.receiver {
-        None => efn.ident.cxx.ident.to_string(),
-        Some(receiver) => format!(
-            "{}::{}",
-            out.types.resolve(&receiver.ty).ident,
-            efn.ident.cxx.ident
-        ),
+        None => efn.ident.cxx.to_string(),
+        Some(receiver) => format!("{}::{}", out.types.resolve(&receiver.ty).cxx, efn.ident.cxx),
     };
     let invoke = mangle::extern_fn(efn, out.types);
     let indirect_call = false;
@@ -1041,7 +1028,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
     out.end_block(Block::Namespace("rust"));
 }
 
-fn write_rust_box_extern(out: &mut OutFile, ident: &CppName) {
+fn write_rust_box_extern(out: &mut OutFile, ident: &Pair) {
     let inner = ident.to_fully_qualified();
     let instance = ident.to_symbol();
 
@@ -1095,7 +1082,7 @@ fn write_rust_vec_extern(out: &mut OutFile, element: &ResolvableName) {
     writeln!(out, "#endif // CXXBRIDGE05_RUST_VEC_{}", instance);
 }
 
-fn write_rust_box_impl(out: &mut OutFile, ident: &CppName) {
+fn write_rust_box_impl(out: &mut OutFile, ident: &Pair) {
     let inner = ident.to_fully_qualified();
     let instance = ident.to_symbol();
 
