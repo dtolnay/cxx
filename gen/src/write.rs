@@ -22,11 +22,7 @@ pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u
     write_namespace_forward_declarations(out, &apis_by_namespace);
     write_data_structures(out, apis);
     write_functions(out, apis);
-
-    if !header {
-        out.next_section();
-        write_generic_instantiations(out);
-    }
+    write_generic_instantiations(out);
 
     builtin::write(out);
     include::write(out);
@@ -957,6 +953,11 @@ fn to_mangled(ty: &Type, types: &Types) -> Symbol {
 }
 
 fn write_generic_instantiations(out: &mut OutFile) {
+    if out.header {
+        return;
+    }
+
+    out.next_section();
     out.set_namespace(Default::default());
     out.begin_block(Block::ExternC);
     for ty in out.types {
