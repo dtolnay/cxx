@@ -31,7 +31,8 @@ pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u
 
 fn write_forward_declarations(out: &mut OutFile, apis: &[Api]) {
     let needs_forward_declaration = |api: &&Api| match api {
-        Api::Struct(_) | Api::Enum(_) | Api::CxxType(_) | Api::RustType(_) => true,
+        Api::Struct(_) | Api::CxxType(_) | Api::RustType(_) => true,
+        Api::Enum(enm) => !out.types.cxx.contains(&enm.ident.rust),
         _ => false,
     };
 
