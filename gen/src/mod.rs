@@ -136,12 +136,12 @@ pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
     // one or the other.
     Ok(GeneratedCode {
         header: if opt.gen_header {
-            write::gen(apis, types, opt, true).content()
+            write::gen(apis, types, opt, true)
         } else {
             Vec::new()
         },
         implementation: if opt.gen_implementation {
-            write::gen(apis, types, opt, false).content()
+            write::gen(apis, types, opt, false)
         } else {
             Vec::new()
         },

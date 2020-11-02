@@ -10,7 +10,7 @@ use crate::syntax::{
 use proc_macro2::Ident;
 use std::collections::HashMap;
 
-pub(super) fn gen<'a>(apis: &[Api], types: &'a Types, opt: &'a Opt, header: bool) -> OutFile<'a> {
+pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u8> {
     let mut out_file = OutFile::new(header, opt, types);
     let out = &mut out_file;
 
@@ -33,7 +33,7 @@ pub(super) fn gen<'a>(apis: &[Api], types: &'a Types, opt: &'a Opt, header: bool
     builtin::write(out);
     include::write(out);
 
-    out_file
+    out_file.content()
 }
 
 fn gen_namespace_forward_declarations(out: &mut OutFile, ns_entries: &NamespaceEntries) {
