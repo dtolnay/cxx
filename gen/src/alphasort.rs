@@ -1,11 +1,11 @@
 use crate::syntax::Api;
 use proc_macro2::Ident;
-use std::collections::BTreeMap;
+use std::collections::HashMap as Map;
 use std::iter::FromIterator;
 
 pub struct NamespaceEntries<'a> {
     direct: Vec<&'a Api>,
-    nested: BTreeMap<&'a Ident, NamespaceEntries<'a>>,
+    nested: Vec<(&'a Ident, NamespaceEntries<'a>)>,
 }
 
 impl<'a> NamespaceEntries<'a> {
@@ -25,13 +25,18 @@ impl<'a> NamespaceEntries<'a> {
 
 fn sort_by_inner_namespace(apis: Vec<&Api>, depth: usize) -> NamespaceEntries {
     let mut direct = Vec::new();
-    let mut nested_namespaces = BTreeMap::new();
+    let mut nested_namespaces = Vec::new();
+    let mut index_of_namespace = Map::new();
+
     for api in &apis {
         if let Some(first_ns_elem) = api.namespace().and_then(|ns| ns.iter().nth(depth)) {
-            nested_namespaces
-                .entry(first_ns_elem)
-                .or_insert_with(Vec::new)
-                .push(*api);
+            match index_of_namespace.get(first_ns_elem) {
+                None => {
+                    index_of_namespace.insert(first_ns_elem, nested_namespaces.len());
+                    nested_namespaces.push((first_ns_elem, vec![*api]));
+                }
+                Some(&index) => nested_namespaces[index].1.push(*api),
+            }
             continue;
         }
         direct.push(*api);
