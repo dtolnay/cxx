@@ -2,6 +2,7 @@ use crate::gen::block::Block;
 use crate::gen::builtin::Builtins;
 use crate::gen::include::Includes;
 use crate::gen::Opt;
+use crate::syntax::namespace::Namespace;
 use crate::syntax::Types;
 use std::cell::RefCell;
 use std::fmt::{self, Arguments, Write};
@@ -18,6 +19,7 @@ pub(crate) struct OutFile<'a> {
 #[derive(Default)]
 pub struct Content<'a> {
     bytes: String,
+    namespace: &'a Namespace,
     blocks: Vec<BlockBoundary<'a>>,
     section_pending: bool,
     blocks_pending: usize,
@@ -52,6 +54,10 @@ impl<'a> OutFile<'a> {
 
     pub fn end_block(&mut self, block: Block<'a>) {
         self.content.get_mut().end_block(block);
+    }
+
+    pub fn set_namespace(&mut self, namespace: &'a Namespace) {
+        self.content.get_mut().set_namespace(namespace);
     }
 
     pub fn write_fmt(&self, args: Arguments) {
@@ -118,6 +124,16 @@ impl<'a> Content<'a> {
         self.push_block_boundary(BlockBoundary::End(block));
     }
 
+    pub fn set_namespace(&mut self, namespace: &'a Namespace) {
+        for name in self.namespace.iter().rev() {
+            self.end_block(Block::UserDefinedNamespace(name));
+        }
+        for name in namespace {
+            self.begin_block(Block::UserDefinedNamespace(name));
+        }
+        self.namespace = namespace;
+    }
+
     pub fn write_fmt(&mut self, args: Arguments) {
         Write::write_fmt(self, args).unwrap();
     }
@@ -147,6 +163,7 @@ impl<'a> Content<'a> {
     }
 
     fn flush(&mut self) {
+        self.set_namespace(Default::default());
         if self.blocks_pending > 0 {
             self.flush_blocks();
         }
