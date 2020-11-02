@@ -20,7 +20,8 @@ pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u
 
     let apis_by_namespace = NamespaceEntries::new(apis);
     write_namespace_forward_declarations(out, &apis_by_namespace);
-    write_namespace_contents(out, &apis_by_namespace);
+    write_namespace_data_structures(out, &apis_by_namespace);
+    write_namespace_functions(out, &apis_by_namespace);
 
     if !header {
         out.next_section();
@@ -53,7 +54,10 @@ fn write_namespace_forward_declarations(out: &mut OutFile, ns_entries: &Namespac
     }
 }
 
-fn write_namespace_contents<'a>(out: &mut OutFile<'a>, ns_entries: &'a NamespaceEntries<'a>) {
+fn write_namespace_data_structures<'a>(
+    out: &mut OutFile<'a>,
+    ns_entries: &'a NamespaceEntries<'a>,
+) {
     let apis = ns_entries.direct_content();
 
     let mut methods_for_type = HashMap::new();
@@ -103,6 +107,14 @@ fn write_namespace_contents<'a>(out: &mut OutFile<'a>, ns_entries: &'a Namespace
         }
     }
 
+    for (_, nested_ns_entries) in ns_entries.nested_content() {
+        write_namespace_data_structures(out, nested_ns_entries);
+    }
+}
+
+fn write_namespace_functions<'a>(out: &mut OutFile<'a>, ns_entries: &'a NamespaceEntries<'a>) {
+    let apis = ns_entries.direct_content();
+
     if !out.header {
         for api in apis {
             match api {
@@ -121,7 +133,7 @@ fn write_namespace_contents<'a>(out: &mut OutFile<'a>, ns_entries: &'a Namespace
     }
 
     for (_, nested_ns_entries) in ns_entries.nested_content() {
-        write_namespace_contents(out, nested_ns_entries);
+        write_namespace_functions(out, nested_ns_entries);
     }
 }
 
