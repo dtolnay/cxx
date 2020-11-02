@@ -1,6 +1,6 @@
 use crate::syntax::atom::Atom::*;
 use crate::syntax::{
-    Atom, Derive, Enum, ExternFn, ExternType, Impl, Pair, Receiver, Ref, ResolvableName, Signature,
+    Atom, Derive, Enum, ExternFn, ExternType, Impl, Receiver, Ref, ResolvableName, Signature,
     Slice, Struct, Ty1, Type, TypeAlias, Var,
 };
 use proc_macro2::{Ident, Span, TokenStream};
@@ -85,7 +85,7 @@ impl ToTokens for ExternType {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         // Notional token range for error reporting purposes.
         self.type_token.to_tokens(tokens);
-        self.name.to_tokens(tokens);
+        self.name.rust.to_tokens(tokens);
     }
 }
 
@@ -93,7 +93,7 @@ impl ToTokens for TypeAlias {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         // Notional token range for error reporting purposes.
         self.type_token.to_tokens(tokens);
-        self.name.to_tokens(tokens);
+        self.name.rust.to_tokens(tokens);
     }
 }
 
@@ -101,7 +101,7 @@ impl ToTokens for Struct {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         // Notional token range for error reporting purposes.
         self.struct_token.to_tokens(tokens);
-        self.name.to_tokens(tokens);
+        self.name.rust.to_tokens(tokens);
     }
 }
 
@@ -109,7 +109,7 @@ impl ToTokens for Enum {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         // Notional token range for error reporting purposes.
         self.enum_token.to_tokens(tokens);
-        self.name.to_tokens(tokens);
+        self.name.rust.to_tokens(tokens);
     }
 }
 
@@ -118,12 +118,6 @@ impl ToTokens for ExternFn {
         // Notional token range for error reporting purposes.
         self.sig.fn_token.to_tokens(tokens);
         self.semi_token.to_tokens(tokens);
-    }
-}
-
-impl ToTokens for Pair {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        self.rust.to_tokens(tokens);
     }
 }
 
