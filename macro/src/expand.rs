@@ -208,7 +208,7 @@ fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
     });
     let args = efn.args.iter().map(|arg| {
         let ident = &arg.ident;
-        let ty = expand_extern_type(&arg.ty);
+        let ty = expand_extern_type(&arg.ty, types);
         if arg.ty == RustString {
             quote!(#ident: *const #ty)
         } else if let Type::RustVec(_) = arg.ty {
@@ -229,7 +229,7 @@ fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
     };
     let mut outparam = None;
     if indirect_return(efn, types) {
-        let ret = expand_extern_type(efn.ret.as_ref().unwrap());
+        let ret = expand_extern_type(efn.ret.as_ref().unwrap(), types);
         outparam = Some(quote!(__return: *mut #ret));
     }
     let link_name = mangle::extern_fn(efn, types);
@@ -323,7 +323,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         .collect::<TokenStream>();
     let local_name = format_ident!("__{}", efn.name.rust);
     let call = if indirect_return {
-        let ret = expand_extern_type(efn.ret.as_ref().unwrap());
+        let ret = expand_extern_type(efn.ret.as_ref().unwrap(), types);
         setup.extend(quote! {
             let mut __return = ::std::mem::MaybeUninit::<#ret>::uninit();
         });
@@ -508,7 +508,7 @@ fn expand_rust_function_shim_impl(
     });
     let args = sig.args.iter().map(|arg| {
         let ident = &arg.ident;
-        let ty = expand_extern_type(&arg.ty);
+        let ty = expand_extern_type(&arg.ty, types);
         if types.needs_indirect_abi(&arg.ty) {
             quote!(#ident: *mut #ty)
         } else {
@@ -609,7 +609,7 @@ fn expand_rust_function_shim_impl(
     let mut outparam = None;
     let indirect_return = indirect_return(sig, types);
     if indirect_return {
-        let ret = expand_extern_type(sig.ret.as_ref().unwrap());
+        let ret = expand_extern_type(sig.ret.as_ref().unwrap(), types);
         outparam = Some(quote!(__return: *mut #ret,));
     }
     if sig.throws {
@@ -939,15 +939,15 @@ fn indirect_return(sig: &Signature, types: &Types) -> bool {
         .map_or(false, |ret| sig.throws || types.needs_indirect_abi(ret))
 }
 
-fn expand_extern_type(ty: &Type) -> TokenStream {
+fn expand_extern_type(ty: &Type, types: &Types) -> TokenStream {
     match ty {
         Type::Ident(ident) if ident.rust == RustString => quote!(::cxx::private::RustString),
         Type::RustBox(ty) | Type::UniquePtr(ty) => {
-            let inner = expand_extern_type(&ty.inner);
+            let inner = expand_extern_type(&ty.inner, types);
             quote!(*mut #inner)
         }
         Type::RustVec(ty) => {
-            let elem = expand_extern_type(&ty.inner);
+            let elem = expand_extern_type(&ty.inner, types);
             quote!(::cxx::private::RustVec<#elem>)
         }
         Type::Ref(ty) => {
@@ -957,7 +957,7 @@ fn expand_extern_type(ty: &Type) -> TokenStream {
                     quote!(&#mutability ::cxx::private::RustString)
                 }
                 Type::RustVec(ty) => {
-                    let inner = expand_extern_type(&ty.inner);
+                    let inner = expand_extern_type(&ty.inner, types);
                     quote!(&#mutability ::cxx::private::RustVec<#inner>)
                 }
                 _ => quote!(#ty),
@@ -974,6 +974,6 @@ fn expand_extern_return_type(ret: &Option<Type>, types: &Types) -> TokenStream {
         Some(ret) if !types.needs_indirect_abi(ret) => ret,
         _ => return TokenStream::new(),
     };
-    let ty = expand_extern_type(ret);
+    let ty = expand_extern_type(ret, types);
     quote!(-> #ty)
 }
