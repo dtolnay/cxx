@@ -1,6 +1,6 @@
 use proc_macro2::Ident;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum Block<'a> {
     AnonymousNamespace,
     Namespace(&'static str),

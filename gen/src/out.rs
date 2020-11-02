@@ -18,8 +18,9 @@ pub(crate) struct OutFile<'a> {
 #[derive(Default)]
 pub struct Content<'a> {
     bytes: String,
+    blocks: Vec<Block<'a>>,
     section_pending: bool,
-    blocks_pending: Vec<Block<'a>>,
+    blocks_pending: usize,
 }
 
 impl<'a> OutFile<'a> {
@@ -97,11 +98,18 @@ impl<'a> Content<'a> {
     }
 
     pub fn begin_block(&mut self, block: Block<'a>) {
-        self.blocks_pending.push(block);
+        self.blocks.push(block);
+        self.blocks_pending += 1;
     }
 
     pub fn end_block(&mut self, block: Block<'a>) {
-        if self.blocks_pending.pop().is_none() {
+        let begin_block = self.blocks.pop().unwrap();
+        let end_block = block;
+        assert_eq!(begin_block, end_block);
+
+        if self.blocks_pending > 0 {
+            self.blocks_pending -= 1;
+        } else {
             Block::write_end(block, &mut self.bytes);
             self.section_pending = true;
         }
@@ -113,21 +121,20 @@ impl<'a> Content<'a> {
 
     fn write(&mut self, b: &str) {
         if !b.is_empty() {
-            if !self.blocks_pending.is_empty() {
+            if self.blocks_pending > 0 {
                 if !self.bytes.is_empty() {
                     self.bytes.push('\n');
                 }
-                for block in self.blocks_pending.drain(..) {
-                    Block::write_begin(block, &mut self.bytes);
+                let pending = self.blocks.len() - self.blocks_pending..;
+                for block in &self.blocks[pending] {
+                    Block::write_begin(*block, &mut self.bytes);
                 }
-                self.section_pending = false;
-            } else if self.section_pending {
-                if !self.bytes.is_empty() {
-                    self.bytes.push('\n');
-                }
-                self.section_pending = false;
+            } else if self.section_pending && !self.bytes.is_empty() {
+                self.bytes.push('\n');
             }
             self.bytes.push_str(b);
+            self.section_pending = false;
+            self.blocks_pending = 0;
         }
     }
 }
