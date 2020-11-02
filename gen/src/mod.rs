@@ -134,16 +134,15 @@ pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
     // Some callers may wish to generate both header and implementation from the
     // same token stream to avoid parsing twice. Others only need to generate
     // one or the other.
+    let (mut header, mut implementation) = Default::default();
+    if opt.gen_header {
+        header = write::gen(apis, types, opt, true);
+    }
+    if opt.gen_implementation {
+        implementation = write::gen(apis, types, opt, false);
+    }
     Ok(GeneratedCode {
-        header: if opt.gen_header {
-            write::gen(apis, types, opt, true)
-        } else {
-            Vec::new()
-        },
-        implementation: if opt.gen_implementation {
-            write::gen(apis, types, opt, false)
-        } else {
-            Vec::new()
-        },
+        header,
+        implementation,
     })
 }
