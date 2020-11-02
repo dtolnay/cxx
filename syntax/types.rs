@@ -227,6 +227,45 @@ impl<'a> Types<'a> {
         false
     }
 
+    // Types that trigger rustc's default #[warn(improper_ctypes)] lint, even if
+    // they may be otherwise unproblematic to mention in an extern signature.
+    // For example in a signature like `extern "C" fn(*const String)`, rustc
+    // refuses to believe that C could know how to supply us with a pointer to a
+    // Rust String, even though C could easily have obtained that pointer
+    // legitimately from a Rust call.
+    pub fn is_considered_improper_ctype(&self, ty: &Type) -> bool {
+        match ty {
+            Type::Ident(ident) => {
+                let ident = &ident.rust;
+                if let Some(atom) = Atom::from(ident) {
+                    atom == RustString
+                } else if self.rust.contains(ident) {
+                    true
+                } else if self.cxx.contains(ident) || self.enums.contains_key(ident) {
+                    false
+                } else if let Some(strct) = self.structs.get(ident) {
+                    for var in &strct.fields {
+                        if self.is_considered_improper_ctype(&var.ty) {
+                            return true;
+                        }
+                    }
+                    false
+                } else {
+                    false
+                }
+            }
+            Type::RustBox(_)
+            | Type::RustVec(_)
+            | Type::Str(_)
+            | Type::Fn(_)
+            | Type::Void(_)
+            | Type::Slice(_)
+            | Type::SliceRefU8(_) => true,
+            Type::UniquePtr(_) | Type::CxxVector(_) => false,
+            Type::Ref(ty) => self.is_considered_improper_ctype(&ty.inner),
+        }
+    }
+
     pub fn resolve(&self, ident: &ResolvableName) -> &Pair {
         self.resolutions
             .get(&ident.rust)
