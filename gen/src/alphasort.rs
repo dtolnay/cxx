@@ -83,11 +83,20 @@ mod tests {
         assert_ident(root_direct[2], "B");
 
         let mut root_nested = root.nested_content();
-        let (id, d) = root_nested.next().unwrap();
-        assert_eq!(id, "D");
         let (id, g) = root_nested.next().unwrap();
         assert_eq!(id, "G");
+        let (id, d) = root_nested.next().unwrap();
+        assert_eq!(id, "D");
         assert!(root_nested.next().is_none());
+
+        // ::G
+        let g_direct = g.direct_content();
+        assert_eq!(g_direct.len(), 2);
+        assert_ident(g_direct[0], "E");
+        assert_ident(g_direct[1], "H");
+
+        let mut g_nested = g.nested_content();
+        assert!(g_nested.next().is_none());
 
         // ::D
         let d_direct = d.direct_content();
@@ -105,15 +114,6 @@ mod tests {
         assert_eq!(k_direct.len(), 2);
         assert_ident(k_direct[0], "L");
         assert_ident(k_direct[1], "M");
-
-        // ::G
-        let g_direct = g.direct_content();
-        assert_eq!(g_direct.len(), 2);
-        assert_ident(g_direct[0], "E");
-        assert_ident(g_direct[1], "H");
-
-        let mut g_nested = g.nested_content();
-        assert!(g_nested.next().is_none());
     }
 
     fn assert_ident(api: &Api, expected: &str) {
