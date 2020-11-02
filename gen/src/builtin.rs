@@ -23,6 +23,7 @@ pub struct Builtins<'a> {
     pub rust_slice_new: bool,
     pub rust_slice_repr: bool,
     pub exception: bool,
+    pub relocatable: bool,
     pub content: Content<'a>,
 }
 
@@ -73,6 +74,10 @@ pub(super) fn write(out: &mut OutFile) {
         include.basetsd = true;
     }
 
+    if builtin.relocatable {
+        include.type_traits = true;
+    }
+
     out.begin_block(Block::Namespace("rust"));
     out.begin_block(Block::InlineNamespace("cxxbridge05"));
     writeln!(out, "// #include \"rust/cxx.h\"");
@@ -100,6 +105,7 @@ pub(super) fn write(out: &mut OutFile) {
     ifndef::write(out, builtin.rust_fn, "CXXBRIDGE05_RUST_FN");
     ifndef::write(out, builtin.rust_error, "CXXBRIDGE05_RUST_ERROR");
     ifndef::write(out, builtin.rust_isize, "CXXBRIDGE05_RUST_ISIZE");
+    ifndef::write(out, builtin.relocatable, "CXXBRIDGE05_RELOCATABLE");
 
     if builtin.manually_drop {
         out.next_section();
