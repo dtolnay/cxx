@@ -15,7 +15,7 @@ pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u
     let mut out_file = OutFile::new(header, opt, types);
     let out = &mut out_file;
 
-    pick_includes_and_builtins(out);
+    pick_includes_and_builtins(out, apis);
     out.include.extend(&opt.include);
 
     write_forward_declarations(out, apis);
@@ -78,7 +78,6 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
 
     for api in apis {
         match api {
-            Api::Include(include) => out.include.insert(include),
             Api::Struct(strct) => {
                 out.next_section();
                 if !out.types.cxx.contains(&strct.ident.rust) {
@@ -132,7 +131,13 @@ fn write_functions<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
     }
 }
 
-fn pick_includes_and_builtins(out: &mut OutFile) {
+fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
+    for api in apis {
+        if let Api::Include(include) = api {
+            out.include.insert(include);
+        }
+    }
+
     for ty in out.types {
         match ty {
             Type::Ident(ident) => match Atom::from(&ident.rust) {
