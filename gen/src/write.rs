@@ -38,12 +38,13 @@ fn write_forward_declarations(out: &mut OutFile, apis: &[Api]) {
     let apis_by_namespace =
         NamespaceEntries::new(apis.iter().filter(needs_forward_declaration).collect());
 
-    write(out, &apis_by_namespace);
+    write(out, &apis_by_namespace, 0);
 
-    fn write(out: &mut OutFile, ns_entries: &NamespaceEntries) {
+    fn write(out: &mut OutFile, ns_entries: &NamespaceEntries, indent: usize) {
         let apis = ns_entries.direct_content();
 
         for api in apis {
+            write!(out, "{:1$}", "", indent);
             match api {
                 Api::Struct(strct) => write_struct_decl(out, &strct.ident.cxx.ident),
                 Api::CxxType(ety) => write_struct_using(out, &ety.ident.cxx),
@@ -53,9 +54,9 @@ fn write_forward_declarations(out: &mut OutFile, apis: &[Api]) {
         }
 
         for (namespace, nested_ns_entries) in ns_entries.nested_content() {
-            writeln!(out, "namespace {} {{", namespace);
-            write(out, nested_ns_entries);
-            writeln!(out, "}} // namespace {}", namespace);
+            writeln!(out, "{:2$}namespace {} {{", "", namespace, indent);
+            write(out, nested_ns_entries, indent + 2);
+            writeln!(out, "{:1$}}}", "", indent);
         }
     }
 }
