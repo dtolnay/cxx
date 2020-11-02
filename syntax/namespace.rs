@@ -1,5 +1,4 @@
 use crate::syntax::qualified::QualifiedName;
-use crate::syntax::Api;
 use quote::IdentFragment;
 use std::fmt::{self, Display};
 use std::iter::FromIterator;
@@ -82,17 +81,5 @@ impl<'a> FromIterator<&'a Ident> for Namespace {
     {
         let segments = idents.into_iter().cloned().collect();
         Namespace { segments }
-    }
-}
-
-impl Api {
-    pub fn namespace(&self) -> &Namespace {
-        match self {
-            Api::CxxFunction(efn) | Api::RustFunction(efn) => &efn.ident.cxx.namespace,
-            Api::CxxType(ety) | Api::RustType(ety) => &ety.ident.cxx.namespace,
-            Api::Enum(enm) => &enm.ident.cxx.namespace,
-            Api::Struct(strct) => &strct.ident.cxx.namespace,
-            Api::Impl(_) | Api::Include(_) | Api::TypeAlias(_) => Default::default(),
-        }
     }
 }
