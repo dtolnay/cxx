@@ -181,7 +181,7 @@ fn pick_includes_and_builtins(out: &mut OutFile) {
     }
 }
 
-fn write_struct(out: &mut OutFile, strct: &Struct) {
+fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
     let guard = format!("CXXBRIDGE05_STRUCT_{}", strct.ident.cxx.to_symbol());
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
@@ -211,7 +211,11 @@ fn write_struct_using(out: &mut OutFile, ident: &CppName) {
     );
 }
 
-fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &[&ExternFn]) {
+fn write_struct_with_methods<'a>(
+    out: &mut OutFile<'a>,
+    ety: &'a ExternType,
+    methods: &[&ExternFn],
+) {
     let guard = format!("CXXBRIDGE05_STRUCT_{}", ety.ident.cxx.to_symbol());
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
@@ -236,7 +240,7 @@ fn write_struct_with_methods(out: &mut OutFile, ety: &ExternType, methods: &[&Ex
     writeln!(out, "#endif // {}", guard);
 }
 
-fn write_enum(out: &mut OutFile, enm: &Enum) {
+fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
     let guard = format!("CXXBRIDGE05_ENUM_{}", enm.ident.cxx.to_symbol());
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
@@ -253,7 +257,7 @@ fn write_enum(out: &mut OutFile, enm: &Enum) {
     writeln!(out, "#endif // {}", guard);
 }
 
-fn check_enum(out: &mut OutFile, enm: &Enum) {
+fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
     write!(
         out,
         "static_assert(sizeof({}) == sizeof(",
@@ -313,7 +317,7 @@ fn check_trivial_extern_type(out: &mut OutFile, id: &CppName) {
     );
 }
 
-fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn) {
+fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     out.next_section();
     out.begin_block(Block::ExternC);
     if let Some(annotation) = &out.opt.cxx_impl_annotations {
@@ -515,7 +519,7 @@ fn write_function_pointer_trampoline(
     write_rust_function_shim_impl(out, &c_trampoline, f, &r_trampoline, indirect_call);
 }
 
-fn write_rust_function_decl(out: &mut OutFile, efn: &ExternFn) {
+fn write_rust_function_decl<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     out.begin_block(Block::ExternC);
     let link_name = mangle::extern_fn(efn, out.types);
     let indirect_call = false;
@@ -573,7 +577,7 @@ fn write_rust_function_decl_impl(
     writeln!(out, ") noexcept;");
 }
 
-fn write_rust_function_shim(out: &mut OutFile, efn: &ExternFn) {
+fn write_rust_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     for line in efn.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
