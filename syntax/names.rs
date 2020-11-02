@@ -5,19 +5,23 @@ use syn::Token;
 impl Pair {
     /// Use this constructor when the item can't have a different
     /// name in Rust and C++.
-    pub fn new(ns: Namespace, ident: Ident) -> Self {
+    pub fn new(namespace: Namespace, ident: Ident) -> Self {
         Self {
             rust: ident.clone(),
-            cxx: CppName::new(ns, ident),
+            cxx: CppName::new(namespace, ident),
         }
     }
 
     /// Use this constructor when attributes such as #[rust_name]
     /// can be used to potentially give a different name in Rust vs C++.
-    pub fn new_from_differing_names(ns: Namespace, cxx_ident: Ident, rust_ident: Ident) -> Self {
+    pub fn new_from_differing_names(
+        namespace: Namespace,
+        cxx_ident: Ident,
+        rust_ident: Ident,
+    ) -> Self {
         Self {
             rust: rust_ident,
-            cxx: CppName::new(ns, cxx_ident),
+            cxx: CppName::new(namespace, cxx_ident),
         }
     }
 }
@@ -47,12 +51,12 @@ impl ResolvableName {
 }
 
 impl CppName {
-    pub fn new(ns: Namespace, ident: Ident) -> Self {
-        Self { ns, ident }
+    pub fn new(namespace: Namespace, ident: Ident) -> Self {
+        Self { namespace, ident }
     }
 
     fn iter_all_segments(&self) -> impl Iterator<Item = &Ident> {
-        self.ns.iter().chain(std::iter::once(&self.ident))
+        self.namespace.iter().chain(std::iter::once(&self.ident))
     }
 
     fn join(&self, sep: &str) -> String {

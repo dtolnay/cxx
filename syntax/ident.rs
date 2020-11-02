@@ -13,7 +13,7 @@ fn check(cx: &mut Check, ident: &Ident) {
 }
 
 fn check_ident(cx: &mut Check, ident: &CppName) {
-    for segment in &ident.ns {
+    for segment in &ident.namespace {
         check(cx, segment);
     }
     check(cx, &ident.ident);

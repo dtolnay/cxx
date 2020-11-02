@@ -32,9 +32,9 @@ impl Namespace {
 
         input.parse::<kw::namespace>()?;
         input.parse::<Token![=]>()?;
-        let ns = input.parse::<Namespace>()?;
+        let namespace = input.parse::<Namespace>()?;
         input.parse::<Option<Token![,]>>()?;
-        Ok(ns)
+        Ok(namespace)
     }
 }
 
@@ -88,10 +88,10 @@ impl<'a> FromIterator<&'a Ident> for Namespace {
 impl Api {
     pub fn namespace(&self) -> Option<&Namespace> {
         match self {
-            Api::CxxFunction(efn) | Api::RustFunction(efn) => Some(&efn.ident.cxx.ns),
-            Api::CxxType(ety) | Api::RustType(ety) => Some(&ety.ident.cxx.ns),
-            Api::Enum(enm) => Some(&enm.ident.cxx.ns),
-            Api::Struct(strct) => Some(&strct.ident.cxx.ns),
+            Api::CxxFunction(efn) | Api::RustFunction(efn) => Some(&efn.ident.cxx.namespace),
+            Api::CxxType(ety) | Api::RustType(ety) => Some(&ety.ident.cxx.namespace),
+            Api::Enum(enm) => Some(&enm.ident.cxx.namespace),
+            Api::Struct(strct) => Some(&strct.ident.cxx.namespace),
             Api::Impl(_) | Api::Include(_) | Api::TypeAlias(_) => None,
         }
     }

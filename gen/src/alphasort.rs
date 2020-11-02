@@ -29,8 +29,8 @@ fn sort_by_inner_namespace(apis: Vec<&Api>, depth: usize) -> NamespaceEntries {
     let mut direct = Vec::new();
     let mut nested_namespaces = BTreeMap::new();
     for api in &apis {
-        if let Some(ns) = api.namespace() {
-            let first_ns_elem = ns.iter().nth(depth);
+        if let Some(namespace) = api.namespace() {
+            let first_ns_elem = namespace.iter().nth(depth);
             if let Some(first_ns_elem) = first_ns_elem {
                 nested_namespaces
                     .entry(first_ns_elem)

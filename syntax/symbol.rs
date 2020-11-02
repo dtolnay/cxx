@@ -81,7 +81,7 @@ impl Segment for Namespace {
 
 impl Segment for CppName {
     fn write(&self, symbol: &mut Symbol) {
-        self.ns.write(symbol);
+        self.namespace.write(symbol);
         self.ident.write(symbol);
     }
 }

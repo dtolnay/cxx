@@ -197,7 +197,7 @@ pub struct Pair {
 // to output it as a qualified name or as an unqualfied name.
 #[derive(Clone)]
 pub struct CppName {
-    pub ns: Namespace,
+    pub namespace: Namespace,
     pub ident: Ident,
 }
 
