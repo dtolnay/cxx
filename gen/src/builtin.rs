@@ -22,6 +22,7 @@ pub struct Builtins<'a> {
     pub rust_str_repr: bool,
     pub rust_slice_new: bool,
     pub rust_slice_repr: bool,
+    pub exception: bool,
     pub content: Content<'a>,
 }
 
@@ -195,4 +196,13 @@ pub(super) fn write(out: &mut OutFile) {
     }
 
     out.end_block(Block::Namespace("rust"));
+
+    if builtin.exception {
+        out.begin_block(Block::ExternC);
+        writeln!(
+            out,
+            "const char *cxxbridge05$exception(const char *, size_t);",
+        );
+        out.end_block(Block::ExternC);
+    }
 }

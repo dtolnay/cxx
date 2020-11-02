@@ -106,7 +106,6 @@ fn write_namespace_contents<'a>(out: &mut OutFile<'a>, ns_entries: &'a Namespace
 
     if !out.header {
         out.begin_block(Block::ExternC);
-        write_exception_glue(out, apis);
         for api in apis {
             match api {
                 Api::CxxFunction(efn) => write_cxx_function_shim(out, efn),
@@ -316,26 +315,6 @@ fn check_trivial_extern_type(out: &mut OutFile, id: &CppName) {
     );
 }
 
-fn write_exception_glue(out: &mut OutFile, apis: &[&Api]) {
-    let mut has_cxx_throws = false;
-    for api in apis {
-        if let Api::CxxFunction(efn) = api {
-            if efn.throws {
-                has_cxx_throws = true;
-                break;
-            }
-        }
-    }
-
-    if has_cxx_throws {
-        out.next_section();
-        writeln!(
-            out,
-            "const char *cxxbridge05$exception(const char *, size_t);",
-        );
-    }
-}
-
 fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn) {
     out.next_section();
     if let Some(annotation) = &out.opt.cxx_impl_annotations {
@@ -500,13 +479,14 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn) {
     writeln!(out, ";");
     if efn.throws {
         out.include.cstring = true;
+        out.builtin.exception = true;
         writeln!(out, "        throw$.ptr = nullptr;");
         writeln!(out, "      }},");
         writeln!(out, "      [&](const char *catch$) noexcept {{");
         writeln!(out, "        throw$.len = ::std::strlen(catch$);");
         writeln!(
             out,
-            "        throw$.ptr = cxxbridge05$exception(catch$, throw$.len);",
+            "        throw$.ptr = ::cxxbridge05$exception(catch$, throw$.len);",
         );
         writeln!(out, "      }});");
         writeln!(out, "  return throw$;");
