@@ -262,7 +262,7 @@ fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
 }
 
 fn check_trivial_extern_type(out: &mut OutFile, id: &Pair) {
-    // NOTE: The following two static assertions are just nice-to-have and not
+    // NOTE: The following static assertion is just nice-to-have and not
     // necessary for soundness. That's because triviality is always declared by
     // the user in the form of an unsafe impl of cxx::ExternType:
     //
@@ -273,31 +273,35 @@ fn check_trivial_extern_type(out: &mut OutFile, id: &Pair) {
     //
     // Since the user went on the record with their unsafe impl to unsafely
     // claim they KNOW that the type is trivial, it's fine for that to be on
-    // them if that were wrong.
+    // them if that were wrong. However, in practice correctly reasoning about
+    // the relocatability of C++ types is challenging, particularly if the type
+    // definition were to change over time, so for now we add this check.
     //
-    // There may be a legitimate reason we'll want to remove these assertions
-    // for support of types that the programmer knows are Rust-movable despite
-    // not being recognized as such by the C++ type system due to a move
-    // constructor or destructor.
+    // There may be legitimate reasons to opt out of this assertion for support
+    // of types that the programmer knows are soundly Rust-movable despite not
+    // being recognized as such by the C++ type system due to a move constructor
+    // or destructor. To opt out of the relocatability check, they need to do
+    // one of the following things in any header used by `include!` in their
+    // bridge.
+    //
+    //      --- if they define the type:
+    //      struct MyType {
+    //        ...
+    //    +   using IsRelocatable = std::true_type;
+    //      };
+    //
+    //      --- otherwise:
+    //    + template <>
+    //    + struct rust::IsRelocatable<MyType> : std::true_type {};
+    //
 
-    let id = &id.to_fully_qualified();
-    out.include.type_traits = true;
+    let id = id.to_fully_qualified();
+    out.builtin.relocatable = true;
     writeln!(out, "static_assert(");
+    writeln!(out, "    ::rust::IsRelocatable<{}>::value,", id);
     writeln!(
         out,
-        "    ::std::is_trivially_move_constructible<{}>::value,",
-        id,
-    );
-    writeln!(
-        out,
-        "    \"type {} marked as Trivial in Rust is not trivially move constructible in C++\");",
-        id,
-    );
-    writeln!(out, "static_assert(");
-    writeln!(out, "    ::std::is_trivially_destructible<{}>::value,", id);
-    writeln!(
-        out,
-        "    \"type {} marked as Trivial in Rust is not trivially destructible in C++\");",
+        "    \"type {} marked as Trivial in Rust is not trivially move constructible and trivially destructible in C++\");",
         id,
     );
 }

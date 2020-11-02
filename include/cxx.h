@@ -267,6 +267,27 @@ using isize = ssize_t;
 std::ostream &operator<<(std::ostream &, const String &);
 std::ostream &operator<<(std::ostream &, const Str &);
 
+// IsRelocatable<T> is used in assertions that a C++ type passed by value
+// between Rust and C++ is soundly relocatable by Rust.
+//
+// There may be legitimate reasons to opt out of the check for support of types
+// that the programmer knows are soundly Rust-movable despite not being
+// recognized as such by the C++ type system due to a move constructor or
+// destructor. To opt out of the relocatability check, do either of the
+// following things in any header used by `include!` in the bridge.
+//
+//      --- if you define the type:
+//      struct MyType {
+//        ...
+//    +   using IsRelocatable = std::true_type;
+//      };
+//
+//      --- otherwise:
+//    + template <>
+//    + struct rust::IsRelocatable<MyType> : std::true_type {};
+template <typename T>
+struct IsRelocatable;
+
 // Snake case aliases for use in code that uses this style for type names.
 using string = String;
 using str = Str;
@@ -281,6 +302,8 @@ template <typename Signature, bool Throws = false>
 using fn = Fn<Signature, Throws>;
 template <typename Signature>
 using try_fn = TryFn<Signature>;
+template <typename T>
+using is_relocatable = IsRelocatable<T>;
 
 
 
@@ -551,6 +574,43 @@ typename Vec<T>::const_iterator Vec<T>::end() const noexcept {
 template <typename T>
 Vec<T>::Vec(unsafe_bitcopy_t, const Vec &bits) noexcept : repr(bits.repr) {}
 #endif // CXXBRIDGE05_RUST_VEC
+
+#ifndef CXXBRIDGE05_RELOCATABLE
+#define CXXBRIDGE05_RELOCATABLE
+namespace detail {
+template <typename... Ts>
+struct make_void {
+  using type = void;
+};
+
+template <typename... Ts>
+using void_t = typename make_void<Ts...>::type;
+
+template <typename Void, template <typename...> class, typename...>
+struct detect : std::false_type {};
+template <template <typename...> class T, typename... A>
+struct detect<void_t<T<A...>>, T, A...> : std::true_type {};
+
+template <template <typename...> class T, typename... A>
+using is_detected = detect<void, T, A...>;
+
+template <typename T>
+using detect_IsRelocatable = typename T::IsRelocatable;
+
+template <typename T>
+struct get_IsRelocatable
+    : std::is_same<typename T::IsRelocatable, std::true_type> {};
+} // namespace detail
+
+template <typename T>
+struct IsRelocatable
+    : std::conditional<
+          detail::is_detected<detail::detect_IsRelocatable, T>::value,
+          detail::get_IsRelocatable<T>,
+          std::integral_constant<
+              bool, std::is_trivially_move_constructible<T>::value &&
+                        std::is_trivially_destructible<T>::value>>::type {};
+#endif // CXXBRIDGE05_RELOCATABLE
 
 } // namespace cxxbridge05
 } // namespace rust
