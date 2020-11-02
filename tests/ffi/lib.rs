@@ -69,6 +69,10 @@ pub mod ffi {
         z: usize,
     }
 
+    struct SharedString {
+        msg: String,
+    }
+
     enum Enum {
         AVal,
         BVal = 2020,
@@ -169,6 +173,7 @@ pub mod ffi {
         fn c_take_ref_rust_vec_string(v: &Vec<String>);
         fn c_take_ref_rust_vec_index(v: &Vec<u8>);
         fn c_take_ref_rust_vec_copy(v: &Vec<u8>);
+        fn c_take_ref_shared_string(s: &SharedString) -> &SharedString;
         fn c_take_callback(callback: fn(String) -> usize);
         fn c_take_enum(e: Enum);
         fn c_take_ns_enum(e: AEnum);
