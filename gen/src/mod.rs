@@ -12,6 +12,7 @@ pub(super) mod include;
 mod namespace;
 mod nested;
 pub(super) mod out;
+mod toposort;
 mod write;
 
 pub(super) use self::error::Error;

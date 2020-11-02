@@ -1,7 +1,7 @@
 use crate::gen::block::Block;
 use crate::gen::nested::NamespaceEntries;
 use crate::gen::out::OutFile;
-use crate::gen::{builtin, include, Opt};
+use crate::gen::{builtin, include, toposort, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
@@ -76,7 +76,7 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
         }
     }
 
-    for api in apis {
+    for api in toposort::sort(apis, out.types) {
         match api {
             Api::Struct(strct) => {
                 out.next_section();
