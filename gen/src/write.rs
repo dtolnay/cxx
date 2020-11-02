@@ -105,7 +105,6 @@ fn write_namespace_contents<'a>(out: &mut OutFile<'a>, ns_entries: &'a Namespace
     }
 
     if !out.header {
-        out.begin_block(Block::ExternC);
         for api in apis {
             match api {
                 Api::CxxFunction(efn) => write_cxx_function_shim(out, efn),
@@ -113,7 +112,6 @@ fn write_namespace_contents<'a>(out: &mut OutFile<'a>, ns_entries: &'a Namespace
                 _ => {}
             }
         }
-        out.end_block(Block::ExternC);
     }
 
     for api in apis {
@@ -317,6 +315,7 @@ fn check_trivial_extern_type(out: &mut OutFile, id: &CppName) {
 
 fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn) {
     out.next_section();
+    out.begin_block(Block::ExternC);
     if let Some(annotation) = &out.opt.cxx_impl_annotations {
         write!(out, "{} ", annotation);
     }
@@ -498,6 +497,7 @@ fn write_cxx_function_shim(out: &mut OutFile, efn: &ExternFn) {
             write_function_pointer_trampoline(out, efn, var, f);
         }
     }
+    out.end_block(Block::ExternC);
 }
 
 fn write_function_pointer_trampoline(
@@ -516,9 +516,11 @@ fn write_function_pointer_trampoline(
 }
 
 fn write_rust_function_decl(out: &mut OutFile, efn: &ExternFn) {
+    out.begin_block(Block::ExternC);
     let link_name = mangle::extern_fn(efn, out.types);
     let indirect_call = false;
     write_rust_function_decl_impl(out, &link_name, efn, indirect_call);
+    out.end_block(Block::ExternC);
 }
 
 fn write_rust_function_decl_impl(
