@@ -54,7 +54,6 @@ fn write_namespace_forward_declarations(out: &mut OutFile, ns_entries: &Namespac
 }
 
 fn write_namespace_contents<'a>(out: &mut OutFile<'a>, ns_entries: &'a NamespaceEntries<'a>) {
-    out.set_namespace(&ns_entries.namespace);
     let apis = ns_entries.direct_content();
 
     let mut methods_for_type = HashMap::new();
@@ -182,6 +181,7 @@ fn pick_includes_and_builtins(out: &mut OutFile) {
 }
 
 fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
+    out.set_namespace(&strct.ident.cxx.namespace);
     let guard = format!("CXXBRIDGE05_STRUCT_{}", strct.ident.cxx.to_symbol());
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
@@ -216,6 +216,7 @@ fn write_struct_with_methods<'a>(
     ety: &'a ExternType,
     methods: &[&ExternFn],
 ) {
+    out.set_namespace(&ety.ident.cxx.namespace);
     let guard = format!("CXXBRIDGE05_STRUCT_{}", ety.ident.cxx.to_symbol());
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
@@ -241,6 +242,7 @@ fn write_struct_with_methods<'a>(
 }
 
 fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
+    out.set_namespace(&enm.ident.cxx.namespace);
     let guard = format!("CXXBRIDGE05_ENUM_{}", enm.ident.cxx.to_symbol());
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
@@ -258,6 +260,7 @@ fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
 }
 
 fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
+    out.set_namespace(&enm.ident.cxx.namespace);
     write!(
         out,
         "static_assert(sizeof({}) == sizeof(",
@@ -319,6 +322,7 @@ fn check_trivial_extern_type(out: &mut OutFile, id: &CppName) {
 
 fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     out.next_section();
+    out.set_namespace(&efn.ident.cxx.namespace);
     out.begin_block(Block::ExternC);
     if let Some(annotation) = &out.opt.cxx_impl_annotations {
         write!(out, "{} ", annotation);
@@ -520,6 +524,7 @@ fn write_function_pointer_trampoline(
 }
 
 fn write_rust_function_decl<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
+    out.set_namespace(&efn.ident.cxx.namespace);
     out.begin_block(Block::ExternC);
     let link_name = mangle::extern_fn(efn, out.types);
     let indirect_call = false;
@@ -578,6 +583,7 @@ fn write_rust_function_decl_impl(
 }
 
 fn write_rust_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
+    out.set_namespace(&efn.ident.cxx.namespace);
     for line in efn.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
