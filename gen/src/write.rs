@@ -31,7 +31,7 @@ pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u
 
 fn write_forward_declarations(out: &mut OutFile, apis: &[Api]) {
     let needs_forward_declaration = |api: &&Api| match api {
-        Api::Struct(_) | Api::CxxType(_) | Api::RustType(_) => true,
+        Api::Struct(_) | Api::Enum(_) | Api::CxxType(_) | Api::RustType(_) => true,
         _ => false,
     };
 
@@ -47,6 +47,7 @@ fn write_forward_declarations(out: &mut OutFile, apis: &[Api]) {
             write!(out, "{:1$}", "", indent);
             match api {
                 Api::Struct(strct) => write_struct_decl(out, &strct.ident.cxx.ident),
+                Api::Enum(enm) => write_enum_decl(out, enm),
                 Api::CxxType(ety) => write_struct_using(out, &ety.ident.cxx),
                 Api::RustType(ety) => write_struct_decl(out, &ety.ident.cxx.ident),
                 _ => unreachable!(),
@@ -205,6 +206,12 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
 
 fn write_struct_decl(out: &mut OutFile, ident: &Ident) {
     writeln!(out, "struct {};", ident);
+}
+
+fn write_enum_decl(out: &mut OutFile, enm: &Enum) {
+    write!(out, "enum class {} : ", enm.ident.cxx.ident);
+    write_atom(out, enm.repr);
+    writeln!(out, ";");
 }
 
 fn write_struct_using(out: &mut OutFile, ident: &CppName) {
