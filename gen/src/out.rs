@@ -10,16 +10,16 @@ pub(crate) struct OutFile<'a> {
     pub header: bool,
     pub opt: &'a Opt,
     pub types: &'a Types<'a>,
-    pub include: Includes,
-    pub builtin: Builtins,
-    content: RefCell<Content>,
+    pub include: Includes<'a>,
+    pub builtin: Builtins<'a>,
+    content: RefCell<Content<'a>>,
 }
 
 #[derive(Default)]
-pub struct Content {
+pub struct Content<'a> {
     bytes: String,
     section_pending: bool,
-    blocks_pending: Vec<Block>,
+    blocks_pending: Vec<Block<'a>>,
 }
 
 impl<'a> OutFile<'a> {
@@ -39,11 +39,11 @@ impl<'a> OutFile<'a> {
         self.content.get_mut().next_section();
     }
 
-    pub fn begin_block(&mut self, block: Block) {
+    pub fn begin_block(&mut self, block: Block<'a>) {
         self.content.get_mut().begin_block(block);
     }
 
-    pub fn end_block(&mut self, block: Block) {
+    pub fn end_block(&mut self, block: Block<'a>) {
         self.content.get_mut().end_block(block);
     }
 
@@ -74,20 +74,20 @@ impl<'a> OutFile<'a> {
     }
 }
 
-impl Write for Content {
+impl<'a> Write for Content<'a> {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         self.write(s);
         Ok(())
     }
 }
 
-impl PartialEq for Content {
+impl<'a> PartialEq for Content<'a> {
     fn eq(&self, _other: &Content) -> bool {
         true
     }
 }
 
-impl Content {
+impl<'a> Content<'a> {
     fn new() -> Self {
         Content::default()
     }
@@ -96,11 +96,11 @@ impl Content {
         self.section_pending = true;
     }
 
-    pub fn begin_block(&mut self, block: Block) {
+    pub fn begin_block(&mut self, block: Block<'a>) {
         self.blocks_pending.push(block);
     }
 
-    pub fn end_block(&mut self, block: Block) {
+    pub fn end_block(&mut self, block: Block<'a>) {
         if self.blocks_pending.pop().is_none() {
             Block::write_end(&block, &mut self.bytes);
             self.section_pending = true;

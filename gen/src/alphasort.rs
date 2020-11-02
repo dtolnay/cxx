@@ -18,7 +18,7 @@ impl<'a> NamespaceEntries<'a> {
         &self.direct
     }
 
-    pub fn nested_content(&self) -> impl Iterator<Item = (&Ident, &NamespaceEntries)> {
+    pub fn nested_content(&self) -> impl Iterator<Item = (&'a Ident, &NamespaceEntries<'a>)> {
         self.nested.iter().map(|(k, entries)| (*k, entries))
     }
 }

@@ -1,14 +1,15 @@
 use proc_macro2::Ident;
 
-pub enum Block {
+#[derive(Copy, Clone)]
+pub enum Block<'a> {
     AnonymousNamespace,
     Namespace(&'static str),
-    UserDefinedNamespace(Ident),
+    UserDefinedNamespace(&'a Ident),
     InlineNamespace(&'static str),
     ExternC,
 }
 
-impl Block {
+impl<'a> Block<'a> {
     pub fn write_begin(&self, out: &mut String) {
         if let Block::InlineNamespace(_) = self {
             out.push_str("inline ");

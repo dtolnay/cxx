@@ -57,7 +57,7 @@ fn gen_namespace_forward_declarations(out: &mut OutFile, ns_entries: &NamespaceE
     }
 }
 
-fn gen_namespace_contents(out: &mut OutFile, ns_entries: &NamespaceEntries) {
+fn gen_namespace_contents<'a>(out: &mut OutFile<'a>, ns_entries: &NamespaceEntries<'a>) {
     let apis = ns_entries.direct_content();
 
     let mut methods_for_type = HashMap::new();
@@ -128,9 +128,10 @@ fn gen_namespace_contents(out: &mut OutFile, ns_entries: &NamespaceEntries) {
     }
 
     for (namespace, nested_ns_entries) in ns_entries.nested_content() {
-        out.begin_block(Block::UserDefinedNamespace(namespace.clone()));
+        let block = Block::UserDefinedNamespace(namespace);
+        out.begin_block(block);
         gen_namespace_contents(out, nested_ns_entries);
-        out.end_block(Block::UserDefinedNamespace(namespace.clone()));
+        out.end_block(block);
     }
 }
 
