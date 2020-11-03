@@ -327,17 +327,16 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         setup.extend(quote! {
             let mut __return = ::std::mem::MaybeUninit::<#ret>::uninit();
         });
-        if efn.throws {
-            setup.extend(quote! {
+        setup.extend(if efn.throws {
+            quote! {
                 #local_name(#(#vars,)* __return.as_mut_ptr()).exception()?;
-            });
-            quote!(::std::result::Result::Ok(__return.assume_init()))
+            }
         } else {
-            setup.extend(quote! {
+            quote! {
                 #local_name(#(#vars,)* __return.as_mut_ptr());
-            });
-            quote!(__return.assume_init())
-        }
+            }
+        });
+        quote!(__return.assume_init())
     } else if efn.throws {
         quote! {
             #local_name(#(#vars),*).exception()
@@ -347,72 +346,47 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
             #local_name(#(#vars),*)
         }
     };
-    let expr = if efn.throws {
-        efn.ret.as_ref().and_then(|ret| match ret {
-            Type::Ident(ident) if ident.rust == RustString => {
-                Some(quote!(#call.map(|r| r.into_string())))
-            }
-            Type::RustBox(_) => Some(quote!(#call.map(|r| ::std::boxed::Box::from_raw(r)))),
-            Type::RustVec(vec) => {
-                if vec.inner == RustString {
-                    Some(quote!(#call.map(|r| r.into_vec_string())))
-                } else {
-                    Some(quote!(#call.map(|r| r.into_vec())))
-                }
-            }
-            Type::UniquePtr(_) => Some(quote!(#call.map(|r| ::cxx::UniquePtr::from_raw(r)))),
-            Type::Ref(ty) => match &ty.inner {
-                Type::Ident(ident) if ident.rust == RustString => match ty.mutability {
-                    None => Some(quote!(#call.map(|r| r.as_string()))),
-                    Some(_) => Some(quote!(#call.map(|r| r.as_mut_string()))),
-                },
-                Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
-                    None => Some(quote!(#call.map(|r| r.as_vec_string()))),
-                    Some(_) => Some(quote!(#call.map(|r| r.as_mut_vec_string()))),
-                },
-                Type::RustVec(_) => match ty.mutability {
-                    None => Some(quote!(#call.map(|r| r.as_vec()))),
-                    Some(_) => Some(quote!(#call.map(|r| r.as_mut_vec()))),
-                },
-                _ => None,
-            },
-            Type::Str(_) => Some(quote!(#call.map(|r| r.as_str()))),
-            Type::SliceRefU8(_) => Some(quote!(#call.map(|r| r.as_slice()))),
-            _ => None,
-        })
+    let mut expr;
+    if efn.throws && efn.sig.ret.is_none() {
+        expr = call;
     } else {
-        efn.ret.as_ref().and_then(|ret| match ret {
-            Type::Ident(ident) if ident.rust == RustString => Some(quote!(#call.into_string())),
-            Type::RustBox(_) => Some(quote!(::std::boxed::Box::from_raw(#call))),
-            Type::RustVec(vec) => {
-                if vec.inner == RustString {
-                    Some(quote!(#call.into_vec_string()))
-                } else {
-                    Some(quote!(#call.into_vec()))
+        expr = match &efn.ret {
+            None => call,
+            Some(ret) => match ret {
+                Type::Ident(ident) if ident.rust == RustString => quote!(#call.into_string()),
+                Type::RustBox(_) => quote!(::std::boxed::Box::from_raw(#call)),
+                Type::RustVec(vec) => {
+                    if vec.inner == RustString {
+                        quote!(#call.into_vec_string())
+                    } else {
+                        quote!(#call.into_vec())
+                    }
                 }
-            }
-            Type::UniquePtr(_) => Some(quote!(::cxx::UniquePtr::from_raw(#call))),
-            Type::Ref(ty) => match &ty.inner {
-                Type::Ident(ident) if ident.rust == RustString => match ty.mutability {
-                    None => Some(quote!(#call.as_string())),
-                    Some(_) => Some(quote!(#call.as_mut_string())),
+                Type::UniquePtr(_) => quote!(::cxx::UniquePtr::from_raw(#call)),
+                Type::Ref(ty) => match &ty.inner {
+                    Type::Ident(ident) if ident.rust == RustString => match ty.mutability {
+                        None => quote!(#call.as_string()),
+                        Some(_) => quote!(#call.as_mut_string()),
+                    },
+                    Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
+                        None => quote!(#call.as_vec_string()),
+                        Some(_) => quote!(#call.as_mut_vec_string()),
+                    },
+                    Type::RustVec(_) => match ty.mutability {
+                        None => quote!(#call.as_vec()),
+                        Some(_) => quote!(#call.as_mut_vec()),
+                    },
+                    _ => call,
                 },
-                Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
-                    None => Some(quote!(#call.as_vec_string())),
-                    Some(_) => Some(quote!(#call.as_mut_vec_string())),
-                },
-                Type::RustVec(_) => match ty.mutability {
-                    None => Some(quote!(#call.as_vec())),
-                    Some(_) => Some(quote!(#call.as_mut_vec())),
-                },
-                _ => None,
+                Type::Str(_) => quote!(#call.as_str()),
+                Type::SliceRefU8(_) => quote!(#call.as_slice()),
+                _ => call,
             },
-            Type::Str(_) => Some(quote!(#call.as_str())),
-            Type::SliceRefU8(_) => Some(quote!(#call.as_slice())),
-            _ => None,
-        })
-    }
-    .unwrap_or(call);
+        };
+        if efn.throws {
+            expr = quote!(::std::result::Result::Ok(#expr));
+        }
+    };
     let mut dispatch = quote!(#setup #expr);
     let unsafety = &efn.sig.unsafety;
     if unsafety.is_none() {
