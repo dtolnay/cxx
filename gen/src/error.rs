@@ -4,6 +4,7 @@ use codespan_reporting::diagnostic::{Diagnostic, Label};
 use codespan_reporting::files::SimpleFiles;
 use codespan_reporting::term::termcolor::{ColorChoice, StandardStream, WriteColor};
 use codespan_reporting::term::{self, Config};
+use std::borrow::Cow;
 use std::error::Error as StdError;
 use std::fmt::{self, Display};
 use std::io::{self, Write};
@@ -134,8 +135,13 @@ fn display_syn_error(stderr: &mut dyn WriteColor, path: &Path, source: &str, err
         .map(char::len_utf8)
         .sum::<usize>();
 
+    let mut path = path.to_string_lossy();
+    if path == "-" {
+        path = Cow::Borrowed(if cfg!(unix) { "/dev/stdin" } else { "stdin" });
+    }
+
     let mut files = SimpleFiles::new();
-    let file = files.add(path.to_string_lossy(), source);
+    let file = files.add(path, source);
 
     let diagnostic = diagnose(file, start_offset..end_offset, error);
 
