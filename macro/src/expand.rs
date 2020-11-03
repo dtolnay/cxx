@@ -348,71 +348,76 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         }
     };
     let expr = if efn.throws {
-        efn.ret.as_ref().and_then(|ret| match ret {
-            Type::Ident(ident) if ident.rust == RustString => {
-                Some(quote!(#call.map(|r| r.into_string())))
-            }
-            Type::RustBox(_) => Some(quote!(#call.map(|r| ::std::boxed::Box::from_raw(r)))),
-            Type::RustVec(vec) => {
-                if vec.inner == RustString {
-                    Some(quote!(#call.map(|r| r.into_vec_string())))
-                } else {
-                    Some(quote!(#call.map(|r| r.into_vec())))
+        efn.ret
+            .as_ref()
+            .and_then(|ret| match ret {
+                Type::Ident(ident) if ident.rust == RustString => {
+                    Some(quote!(#call.map(|r| r.into_string())))
                 }
-            }
-            Type::UniquePtr(_) => Some(quote!(#call.map(|r| ::cxx::UniquePtr::from_raw(r)))),
-            Type::Ref(ty) => match &ty.inner {
-                Type::Ident(ident) if ident.rust == RustString => match ty.mutability {
-                    None => Some(quote!(#call.map(|r| r.as_string()))),
-                    Some(_) => Some(quote!(#call.map(|r| r.as_mut_string()))),
+                Type::RustBox(_) => Some(quote!(#call.map(|r| ::std::boxed::Box::from_raw(r)))),
+                Type::RustVec(vec) => {
+                    if vec.inner == RustString {
+                        Some(quote!(#call.map(|r| r.into_vec_string())))
+                    } else {
+                        Some(quote!(#call.map(|r| r.into_vec())))
+                    }
+                }
+                Type::UniquePtr(_) => Some(quote!(#call.map(|r| ::cxx::UniquePtr::from_raw(r)))),
+                Type::Ref(ty) => match &ty.inner {
+                    Type::Ident(ident) if ident.rust == RustString => match ty.mutability {
+                        None => Some(quote!(#call.map(|r| r.as_string()))),
+                        Some(_) => Some(quote!(#call.map(|r| r.as_mut_string()))),
+                    },
+                    Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
+                        None => Some(quote!(#call.map(|r| r.as_vec_string()))),
+                        Some(_) => Some(quote!(#call.map(|r| r.as_mut_vec_string()))),
+                    },
+                    Type::RustVec(_) => match ty.mutability {
+                        None => Some(quote!(#call.map(|r| r.as_vec()))),
+                        Some(_) => Some(quote!(#call.map(|r| r.as_mut_vec()))),
+                    },
+                    _ => None,
                 },
-                Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
-                    None => Some(quote!(#call.map(|r| r.as_vec_string()))),
-                    Some(_) => Some(quote!(#call.map(|r| r.as_mut_vec_string()))),
-                },
-                Type::RustVec(_) => match ty.mutability {
-                    None => Some(quote!(#call.map(|r| r.as_vec()))),
-                    Some(_) => Some(quote!(#call.map(|r| r.as_mut_vec()))),
-                },
+                Type::Str(_) => Some(quote!(#call.map(|r| r.as_str()))),
+                Type::SliceRefU8(_) => Some(quote!(#call.map(|r| r.as_slice()))),
                 _ => None,
-            },
-            Type::Str(_) => Some(quote!(#call.map(|r| r.as_str()))),
-            Type::SliceRefU8(_) => Some(quote!(#call.map(|r| r.as_slice()))),
-            _ => None,
-        })
+            })
+            .unwrap_or(call)
     } else {
-        efn.ret.as_ref().and_then(|ret| match ret {
-            Type::Ident(ident) if ident.rust == RustString => Some(quote!(#call.into_string())),
-            Type::RustBox(_) => Some(quote!(::std::boxed::Box::from_raw(#call))),
-            Type::RustVec(vec) => {
-                if vec.inner == RustString {
-                    Some(quote!(#call.into_vec_string()))
-                } else {
-                    Some(quote!(#call.into_vec()))
+        efn.ret
+            .as_ref()
+            .and_then(|ret| match ret {
+                Type::Ident(ident) if ident.rust == RustString => Some(quote!(#call.into_string())),
+                Type::RustBox(_) => Some(quote!(::std::boxed::Box::from_raw(#call))),
+                Type::RustVec(vec) => {
+                    if vec.inner == RustString {
+                        Some(quote!(#call.into_vec_string()))
+                    } else {
+                        Some(quote!(#call.into_vec()))
+                    }
                 }
-            }
-            Type::UniquePtr(_) => Some(quote!(::cxx::UniquePtr::from_raw(#call))),
-            Type::Ref(ty) => match &ty.inner {
-                Type::Ident(ident) if ident.rust == RustString => match ty.mutability {
-                    None => Some(quote!(#call.as_string())),
-                    Some(_) => Some(quote!(#call.as_mut_string())),
+                Type::UniquePtr(_) => Some(quote!(::cxx::UniquePtr::from_raw(#call))),
+                Type::Ref(ty) => match &ty.inner {
+                    Type::Ident(ident) if ident.rust == RustString => match ty.mutability {
+                        None => Some(quote!(#call.as_string())),
+                        Some(_) => Some(quote!(#call.as_mut_string())),
+                    },
+                    Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
+                        None => Some(quote!(#call.as_vec_string())),
+                        Some(_) => Some(quote!(#call.as_mut_vec_string())),
+                    },
+                    Type::RustVec(_) => match ty.mutability {
+                        None => Some(quote!(#call.as_vec())),
+                        Some(_) => Some(quote!(#call.as_mut_vec())),
+                    },
+                    _ => None,
                 },
-                Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
-                    None => Some(quote!(#call.as_vec_string())),
-                    Some(_) => Some(quote!(#call.as_mut_vec_string())),
-                },
-                Type::RustVec(_) => match ty.mutability {
-                    None => Some(quote!(#call.as_vec())),
-                    Some(_) => Some(quote!(#call.as_mut_vec())),
-                },
+                Type::Str(_) => Some(quote!(#call.as_str())),
+                Type::SliceRefU8(_) => Some(quote!(#call.as_slice())),
                 _ => None,
-            },
-            Type::Str(_) => Some(quote!(#call.as_str())),
-            Type::SliceRefU8(_) => Some(quote!(#call.as_slice())),
-            _ => None,
-        })
-    }
-    .unwrap_or(call);
+            })
+            .unwrap_or(call)
+    };
     let mut dispatch = quote!(#setup #expr);
     let unsafety = &efn.sig.unsafety;
     if unsafety.is_none() {
