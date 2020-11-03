@@ -287,6 +287,10 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                     None => quote!(::cxx::private::RustVec::from_ref(#var)),
                     Some(_) => quote!(::cxx::private::RustVec::from_mut(#var)),
                 },
+                inner if types.is_considered_improper_ctype(inner) => match ty.mutability {
+                    None => quote!(#var as *const #inner as *const ::std::ffi::c_void),
+                    Some(_) => quote!(#var as *mut #inner as *mut ::std::ffi::c_void),
+                },
                 _ => quote!(#var),
             },
             Type::Str(_) => quote!(::cxx::private::RustStr::from(#var)),
@@ -376,6 +380,10 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                         None => quote!(#call.as_vec()),
                         Some(_) => quote!(#call.as_mut_vec()),
                     },
+                    inner if types.is_considered_improper_ctype(inner) => {
+                        let mutability = ty.mutability;
+                        quote!(&#mutability *#call.cast())
+                    }
                     _ => call,
                 },
                 Type::Str(_) => quote!(#call.as_str()),
@@ -545,6 +553,10 @@ fn expand_rust_function_shim_impl(
                     None => quote!(#ident.as_vec()),
                     Some(_) => quote!(#ident.as_mut_vec()),
                 },
+                inner if types.is_considered_improper_ctype(inner) => {
+                    let mutability = ty.mutability;
+                    quote!(&#mutability *#ident.cast())
+                }
                 _ => quote!(#ident),
             },
             Type::Str(_) => quote!(#ident.as_str()),
@@ -592,6 +604,10 @@ fn expand_rust_function_shim_impl(
             Type::RustVec(_) => match ty.mutability {
                 None => Some(quote!(::cxx::private::RustVec::from_ref)),
                 Some(_) => Some(quote!(::cxx::private::RustVec::from_mut)),
+            },
+            inner if types.is_considered_improper_ctype(inner) => match ty.mutability {
+                None => Some(quote!((|v| v as *const #inner as *const ::std::ffi::c_void))),
+                Some(_) => Some(quote!((|v| v as *mut #inner as *mut ::std::ffi::c_void))),
             },
             _ => None,
         },
@@ -960,6 +976,10 @@ fn expand_extern_type(ty: &Type, types: &Types) -> TokenStream {
                     let inner = expand_extern_type(&ty.inner, types);
                     quote!(&#mutability ::cxx::private::RustVec<#inner>)
                 }
+                inner if types.is_considered_improper_ctype(inner) => match mutability {
+                    None => quote!(*const ::std::ffi::c_void),
+                    Some(_) => quote!(*#mutability ::std::ffi::c_void),
+                },
                 _ => quote!(#ty),
             }
         }
