@@ -76,14 +76,8 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
         }
     }
 
-    for api in toposort::sort(apis, out.types) {
+    for api in apis {
         match api {
-            Api::Struct(strct) => {
-                out.next_section();
-                if !out.types.cxx.contains(&strct.name.rust) {
-                    write_struct(out, strct);
-                }
-            }
             Api::Enum(enm) => {
                 out.next_section();
                 if out.types.cxx.contains(&enm.name.rust) {
@@ -99,6 +93,13 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
                 }
             }
             _ => {}
+        }
+    }
+
+    for strct in toposort::sort(apis, out.types) {
+        out.next_section();
+        if !out.types.cxx.contains(&strct.name.rust) {
+            write_struct(out, strct);
         }
     }
 
