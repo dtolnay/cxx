@@ -327,17 +327,16 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         setup.extend(quote! {
             let mut __return = ::std::mem::MaybeUninit::<#ret>::uninit();
         });
-        if efn.throws {
-            setup.extend(quote! {
+        setup.extend(if efn.throws {
+            quote! {
                 #local_name(#(#vars,)* __return.as_mut_ptr()).exception()?;
-            });
-            quote!(__return.assume_init())
+            }
         } else {
-            setup.extend(quote! {
+            quote! {
                 #local_name(#(#vars,)* __return.as_mut_ptr());
-            });
-            quote!(__return.assume_init())
-        }
+            }
+        });
+        quote!(__return.assume_init())
     } else if efn.throws {
         quote! {
             #local_name(#(#vars),*).exception()
@@ -351,40 +350,39 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     if efn.throws && efn.sig.ret.is_none() {
         expr = call;
     } else {
-        expr = efn
-            .ret
-            .as_ref()
-            .and_then(|ret| match ret {
-                Type::Ident(ident) if ident.rust == RustString => Some(quote!(#call.into_string())),
-                Type::RustBox(_) => Some(quote!(::std::boxed::Box::from_raw(#call))),
+        expr = match &efn.ret {
+            None => call,
+            Some(ret) => match ret {
+                Type::Ident(ident) if ident.rust == RustString => quote!(#call.into_string()),
+                Type::RustBox(_) => quote!(::std::boxed::Box::from_raw(#call)),
                 Type::RustVec(vec) => {
                     if vec.inner == RustString {
-                        Some(quote!(#call.into_vec_string()))
+                        quote!(#call.into_vec_string())
                     } else {
-                        Some(quote!(#call.into_vec()))
+                        quote!(#call.into_vec())
                     }
                 }
-                Type::UniquePtr(_) => Some(quote!(::cxx::UniquePtr::from_raw(#call))),
+                Type::UniquePtr(_) => quote!(::cxx::UniquePtr::from_raw(#call)),
                 Type::Ref(ty) => match &ty.inner {
                     Type::Ident(ident) if ident.rust == RustString => match ty.mutability {
-                        None => Some(quote!(#call.as_string())),
-                        Some(_) => Some(quote!(#call.as_mut_string())),
+                        None => quote!(#call.as_string()),
+                        Some(_) => quote!(#call.as_mut_string()),
                     },
                     Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
-                        None => Some(quote!(#call.as_vec_string())),
-                        Some(_) => Some(quote!(#call.as_mut_vec_string())),
+                        None => quote!(#call.as_vec_string()),
+                        Some(_) => quote!(#call.as_mut_vec_string()),
                     },
                     Type::RustVec(_) => match ty.mutability {
-                        None => Some(quote!(#call.as_vec())),
-                        Some(_) => Some(quote!(#call.as_mut_vec())),
+                        None => quote!(#call.as_vec()),
+                        Some(_) => quote!(#call.as_mut_vec()),
                     },
-                    _ => None,
+                    _ => call,
                 },
-                Type::Str(_) => Some(quote!(#call.as_str())),
-                Type::SliceRefU8(_) => Some(quote!(#call.as_slice())),
-                _ => None,
-            })
-            .unwrap_or(call);
+                Type::Str(_) => quote!(#call.as_str()),
+                Type::SliceRefU8(_) => quote!(#call.as_slice()),
+                _ => call,
+            },
+        };
         if efn.throws {
             expr = quote!(::std::result::Result::Ok(#expr));
         }
