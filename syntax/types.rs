@@ -1,4 +1,5 @@
 use crate::syntax::atom::Atom::{self, *};
+use crate::syntax::improper::ImproperCtype;
 use crate::syntax::report::Errors;
 use crate::syntax::set::OrderedSet as Set;
 use crate::syntax::{
@@ -19,6 +20,7 @@ pub struct Types<'a> {
     pub required_trivial: Map<&'a Ident, TrivialReason<'a>>,
     pub explicit_impls: Set<&'a Impl>,
     pub resolutions: Map<&'a Ident, &'a Pair>,
+    pub struct_improper_ctypes: UnorderedSet<&'a Ident>,
 }
 
 impl<'a> Types<'a> {
@@ -32,6 +34,7 @@ impl<'a> Types<'a> {
         let mut untrusted = Map::new();
         let mut explicit_impls = Set::new();
         let mut resolutions = Map::new();
+        let struct_improper_ctypes = UnorderedSet::new();
 
         fn visit<'a>(all: &mut Set<&'a Type>, ty: &'a Type) {
             all.insert(ty);
@@ -190,7 +193,7 @@ impl<'a> Types<'a> {
             }
         }
 
-        Types {
+        let mut types = Types {
             all,
             structs,
             enums,
@@ -201,7 +204,34 @@ impl<'a> Types<'a> {
             required_trivial,
             explicit_impls,
             resolutions,
+            struct_improper_ctypes,
+        };
+
+        let mut unresolved_structs: Vec<&Ident> = types.structs.keys().copied().collect();
+        let mut new_information = true;
+        while new_information {
+            new_information = false;
+            unresolved_structs.retain(|ident| {
+                let mut retain = false;
+                for var in &types.structs[ident].fields {
+                    if match types.determine_improper_ctype(&var.ty) {
+                        ImproperCtype::Depends(inner) => {
+                            retain = true;
+                            types.struct_improper_ctypes.contains(inner)
+                        }
+                        ImproperCtype::Definite(improper) => improper,
+                    } {
+                        types.struct_improper_ctypes.insert(ident);
+                        new_information = true;
+                        return false;
+                    }
+                }
+                // If all fields definite false, remove from unresolved_structs.
+                retain
+            });
         }
+
+        types
     }
 
     pub fn needs_indirect_abi(&self, ty: &Type) -> bool {
@@ -225,6 +255,19 @@ impl<'a> Types<'a> {
             }
         }
         false
+    }
+
+    // Types that trigger rustc's default #[warn(improper_ctypes)] lint, even if
+    // they may be otherwise unproblematic to mention in an extern signature.
+    // For example in a signature like `extern "C" fn(*const String)`, rustc
+    // refuses to believe that C could know how to supply us with a pointer to a
+    // Rust String, even though C could easily have obtained that pointer
+    // legitimately from a Rust call.
+    pub fn is_considered_improper_ctype(&self, ty: &Type) -> bool {
+        match self.determine_improper_ctype(ty) {
+            ImproperCtype::Definite(improper) => improper,
+            ImproperCtype::Depends(ident) => self.struct_improper_ctypes.contains(ident),
+        }
     }
 
     pub fn resolve(&self, ident: &ResolvableName) -> &Pair {

@@ -208,7 +208,7 @@ fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
     });
     let args = efn.args.iter().map(|arg| {
         let ident = &arg.ident;
-        let ty = expand_extern_type(&arg.ty, types);
+        let ty = expand_extern_type(&arg.ty, types, true);
         if arg.ty == RustString {
             quote!(#ident: *const #ty)
         } else if let Type::RustVec(_) = arg.ty {
@@ -225,11 +225,11 @@ fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
     let ret = if efn.throws {
         quote!(-> ::cxx::private::Result)
     } else {
-        expand_extern_return_type(&efn.ret, types)
+        expand_extern_return_type(&efn.ret, types, true)
     };
     let mut outparam = None;
     if indirect_return(efn, types) {
-        let ret = expand_extern_type(efn.ret.as_ref().unwrap(), types);
+        let ret = expand_extern_type(efn.ret.as_ref().unwrap(), types, true);
         outparam = Some(quote!(__return: *mut #ret));
     }
     let link_name = mangle::extern_fn(efn, types);
@@ -287,6 +287,10 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                     None => quote!(::cxx::private::RustVec::from_ref(#var)),
                     Some(_) => quote!(::cxx::private::RustVec::from_mut(#var)),
                 },
+                inner if types.is_considered_improper_ctype(inner) => match ty.mutability {
+                    None => quote!(#var as *const #inner as *const ::std::ffi::c_void),
+                    Some(_) => quote!(#var as *mut #inner as *mut ::std::ffi::c_void),
+                },
                 _ => quote!(#var),
             },
             Type::Str(_) => quote!(::cxx::private::RustStr::from(#var)),
@@ -323,7 +327,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         .collect::<TokenStream>();
     let local_name = format_ident!("__{}", efn.name.rust);
     let call = if indirect_return {
-        let ret = expand_extern_type(efn.ret.as_ref().unwrap(), types);
+        let ret = expand_extern_type(efn.ret.as_ref().unwrap(), types, true);
         setup.extend(quote! {
             let mut __return = ::std::mem::MaybeUninit::<#ret>::uninit();
         });
@@ -376,6 +380,10 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                         None => quote!(#call.as_vec()),
                         Some(_) => quote!(#call.as_mut_vec()),
                     },
+                    inner if types.is_considered_improper_ctype(inner) => {
+                        let mutability = ty.mutability;
+                        quote!(&#mutability *#call.cast())
+                    }
                     _ => call,
                 },
                 Type::Str(_) => quote!(#call.as_str()),
@@ -508,7 +516,7 @@ fn expand_rust_function_shim_impl(
     });
     let args = sig.args.iter().map(|arg| {
         let ident = &arg.ident;
-        let ty = expand_extern_type(&arg.ty, types);
+        let ty = expand_extern_type(&arg.ty, types, false);
         if types.needs_indirect_abi(&arg.ty) {
             quote!(#ident: *mut #ty)
         } else {
@@ -609,7 +617,7 @@ fn expand_rust_function_shim_impl(
     let mut outparam = None;
     let indirect_return = indirect_return(sig, types);
     if indirect_return {
-        let ret = expand_extern_type(sig.ret.as_ref().unwrap(), types);
+        let ret = expand_extern_type(sig.ret.as_ref().unwrap(), types, false);
         outparam = Some(quote!(__return: *mut #ret,));
     }
     if sig.throws {
@@ -627,7 +635,7 @@ fn expand_rust_function_shim_impl(
     let ret = if sig.throws {
         quote!(-> ::cxx::private::Result)
     } else {
-        expand_extern_return_type(&sig.ret, types)
+        expand_extern_return_type(&sig.ret, types, false)
     };
 
     let pointer = match invoke {
@@ -939,15 +947,15 @@ fn indirect_return(sig: &Signature, types: &Types) -> bool {
         .map_or(false, |ret| sig.throws || types.needs_indirect_abi(ret))
 }
 
-fn expand_extern_type(ty: &Type, types: &Types) -> TokenStream {
+fn expand_extern_type(ty: &Type, types: &Types, proper: bool) -> TokenStream {
     match ty {
         Type::Ident(ident) if ident.rust == RustString => quote!(::cxx::private::RustString),
         Type::RustBox(ty) | Type::UniquePtr(ty) => {
-            let inner = expand_extern_type(&ty.inner, types);
+            let inner = expand_extern_type(&ty.inner, types, proper);
             quote!(*mut #inner)
         }
         Type::RustVec(ty) => {
-            let elem = expand_extern_type(&ty.inner, types);
+            let elem = expand_extern_type(&ty.inner, types, proper);
             quote!(::cxx::private::RustVec<#elem>)
         }
         Type::Ref(ty) => {
@@ -957,9 +965,13 @@ fn expand_extern_type(ty: &Type, types: &Types) -> TokenStream {
                     quote!(&#mutability ::cxx::private::RustString)
                 }
                 Type::RustVec(ty) => {
-                    let inner = expand_extern_type(&ty.inner, types);
+                    let inner = expand_extern_type(&ty.inner, types, proper);
                     quote!(&#mutability ::cxx::private::RustVec<#inner>)
                 }
+                inner if proper && types.is_considered_improper_ctype(inner) => match mutability {
+                    None => quote!(*const ::std::ffi::c_void),
+                    Some(_) => quote!(*#mutability ::std::ffi::c_void),
+                },
                 _ => quote!(#ty),
             }
         }
@@ -969,11 +981,11 @@ fn expand_extern_type(ty: &Type, types: &Types) -> TokenStream {
     }
 }
 
-fn expand_extern_return_type(ret: &Option<Type>, types: &Types) -> TokenStream {
+fn expand_extern_return_type(ret: &Option<Type>, types: &Types, proper: bool) -> TokenStream {
     let ret = match ret {
         Some(ret) if !types.needs_indirect_abi(ret) => ret,
         _ => return TokenStream::new(),
     };
-    let ty = expand_extern_type(ret, types);
+    let ty = expand_extern_type(ret, types, proper);
     quote!(-> #ty)
 }

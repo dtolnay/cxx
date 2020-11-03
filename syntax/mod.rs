@@ -10,6 +10,7 @@ pub mod error;
 pub mod file;
 pub mod ident;
 mod impls;
+mod improper;
 pub mod mangle;
 mod names;
 pub mod namespace;

@@ -385,6 +385,13 @@ void c_take_ref_rust_vec_copy(const rust::Vec<uint8_t> &v) {
   }
 }
 
+const SharedString &c_take_ref_shared_string(const SharedString &s) {
+  if (std::string(s.msg) == "2020") {
+    cxx_test_suite_set_correct();
+  }
+  return s;
+}
+
 void c_take_callback(rust::Fn<size_t(rust::String)> callback) {
   callback("2020");
 }

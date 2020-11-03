@@ -137,6 +137,9 @@ fn test_c_take() {
     check!(ffi::c_take_ref_rust_vec(&test_vec));
     check!(ffi::c_take_ref_rust_vec_index(&test_vec));
     check!(ffi::c_take_ref_rust_vec_copy(&test_vec));
+    check!(ffi::c_take_ref_shared_string(&ffi::SharedString {
+        msg: "2020".to_owned()
+    }));
     let ns_shared_test_vec = vec![ffi::AShared { z: 1010 }, ffi::AShared { z: 1011 }];
     check!(ffi::c_take_rust_vec_ns_shared(ns_shared_test_vec));
     let nested_ns_shared_test_vec = vec![ffi::ABShared { z: 1010 }, ffi::ABShared { z: 1011 }];
