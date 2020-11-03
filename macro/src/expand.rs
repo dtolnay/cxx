@@ -331,7 +331,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
             setup.extend(quote! {
                 #local_name(#(#vars,)* __return.as_mut_ptr()).exception()?;
             });
-            quote!(::std::result::Result::Ok(__return.assume_init()))
+            quote!(__return.assume_init())
         } else {
             setup.extend(quote! {
                 #local_name(#(#vars,)* __return.as_mut_ptr());
@@ -347,44 +347,12 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
             #local_name(#(#vars),*)
         }
     };
-    let expr = if efn.throws {
-        efn.ret
-            .as_ref()
-            .and_then(|ret| match ret {
-                Type::Ident(ident) if ident.rust == RustString => {
-                    Some(quote!(#call.map(|r| r.into_string())))
-                }
-                Type::RustBox(_) => Some(quote!(#call.map(|r| ::std::boxed::Box::from_raw(r)))),
-                Type::RustVec(vec) => {
-                    if vec.inner == RustString {
-                        Some(quote!(#call.map(|r| r.into_vec_string())))
-                    } else {
-                        Some(quote!(#call.map(|r| r.into_vec())))
-                    }
-                }
-                Type::UniquePtr(_) => Some(quote!(#call.map(|r| ::cxx::UniquePtr::from_raw(r)))),
-                Type::Ref(ty) => match &ty.inner {
-                    Type::Ident(ident) if ident.rust == RustString => match ty.mutability {
-                        None => Some(quote!(#call.map(|r| r.as_string()))),
-                        Some(_) => Some(quote!(#call.map(|r| r.as_mut_string()))),
-                    },
-                    Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
-                        None => Some(quote!(#call.map(|r| r.as_vec_string()))),
-                        Some(_) => Some(quote!(#call.map(|r| r.as_mut_vec_string()))),
-                    },
-                    Type::RustVec(_) => match ty.mutability {
-                        None => Some(quote!(#call.map(|r| r.as_vec()))),
-                        Some(_) => Some(quote!(#call.map(|r| r.as_mut_vec()))),
-                    },
-                    _ => None,
-                },
-                Type::Str(_) => Some(quote!(#call.map(|r| r.as_str()))),
-                Type::SliceRefU8(_) => Some(quote!(#call.map(|r| r.as_slice()))),
-                _ => None,
-            })
-            .unwrap_or(call)
+    let mut expr;
+    if efn.throws && efn.sig.ret.is_none() {
+        expr = call;
     } else {
-        efn.ret
+        expr = efn
+            .ret
             .as_ref()
             .and_then(|ret| match ret {
                 Type::Ident(ident) if ident.rust == RustString => Some(quote!(#call.into_string())),
@@ -416,7 +384,10 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                 Type::SliceRefU8(_) => Some(quote!(#call.as_slice())),
                 _ => None,
             })
-            .unwrap_or(call)
+            .unwrap_or(call);
+        if efn.throws {
+            expr = quote!(::std::result::Result::Ok(#expr));
+        }
     };
     let mut dispatch = quote!(#setup #expr);
     let unsafety = &efn.sig.unsafety;
