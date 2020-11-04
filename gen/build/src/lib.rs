@@ -57,6 +57,7 @@
 mod cfg;
 mod error;
 mod gen;
+mod intern;
 mod out;
 mod paths;
 mod syntax;
