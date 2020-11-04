@@ -277,6 +277,27 @@ pub mod ffi {
         #[cxx_name = "rAliasedFunction"]
         fn r_aliased_function(x: i32) -> String;
     }
+
+    struct Dag0 {
+        i: i32,
+    }
+
+    struct Dag1 {
+        dag2: Dag2,
+        vec: Vec<Dag3>,
+    }
+
+    struct Dag2 {
+        dag4: Dag4,
+    }
+
+    struct Dag3 {
+        dag1: Dag1,
+    }
+
+    struct Dag4 {
+        dag0: Dag0,
+    }
 }
 
 pub type R = usize;

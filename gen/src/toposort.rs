@@ -1,8 +1,44 @@
-use crate::syntax::{Api, Types};
-use std::iter::FromIterator;
+use crate::syntax::{Api, Struct, Type, Types};
+use std::collections::btree_map::{BTreeMap as Map, Entry};
 
-pub fn sort<'a>(apis: &'a [Api], types: &Types) -> Vec<&'a Api> {
-    // TODO https://github.com/dtolnay/cxx/issues/292
-    let _ = types;
-    Vec::from_iter(apis)
+enum Mark {
+    Visiting,
+    Visited,
+}
+
+pub fn sort<'a>(apis: &'a [Api], types: &Types<'a>) -> Vec<&'a Struct> {
+    let mut sorted = Vec::new();
+    let ref mut marks = Map::new();
+    for api in apis {
+        if let Api::Struct(strct) = api {
+            visit(strct, &mut sorted, marks, types);
+        }
+    }
+    sorted
+}
+
+fn visit<'a>(
+    strct: &'a Struct,
+    sorted: &mut Vec<&'a Struct>,
+    marks: &mut Map<*const Struct, Mark>,
+    types: &Types<'a>,
+) {
+    match marks.entry(strct) {
+        Entry::Occupied(entry) => match entry.get() {
+            Mark::Visiting => panic!("not a DAG"), // FIXME
+            Mark::Visited => return,
+        },
+        Entry::Vacant(entry) => {
+            entry.insert(Mark::Visiting);
+        }
+    }
+    for field in &strct.fields {
+        if let Type::Ident(ident) = &field.ty {
+            if let Some(inner) = types.structs.get(&ident.rust) {
+                visit(inner, sorted, marks, types);
+            }
+        }
+    }
+    marks.insert(strct, Mark::Visited);
+    sorted.push(strct);
 }
