@@ -1,0 +1,5 @@
+error: unsupported cyclic data structure
+  --> $DIR/struct_cycle.rs:26:9
+   |
+26 |         node2: Node2,
+   |         ^^^^^^^^^^^^
