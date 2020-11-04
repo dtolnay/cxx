@@ -2,7 +2,7 @@ use lazy_static::lazy_static;
 use std::collections::HashSet;
 use std::sync::{Mutex, PoisonError};
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 pub struct InternedString(&'static str);
 
 impl InternedString {

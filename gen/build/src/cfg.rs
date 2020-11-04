@@ -79,6 +79,7 @@ pub use self::r#impl::Cfg::CFG;
 
 #[cfg(not(doc))]
 mod r#impl {
+    use crate::intern::{intern, InternedString};
     use lazy_static::lazy_static;
     use std::cell::RefCell;
     use std::collections::HashMap;
@@ -88,12 +89,11 @@ mod r#impl {
     use std::sync::{PoisonError, RwLock};
 
     lazy_static! {
-        static ref PACKAGE_NAME: Box<str> = {
+        static ref INCLUDE_PREFIX: RwLock<InternedString> = RwLock::new({
             crate::env_os("CARGO_PKG_NAME")
-                .map(|pkg| pkg.to_string_lossy().into_owned().into_boxed_str())
+                .map(|pkg| intern(&pkg.to_string_lossy()))
                 .unwrap_or_default()
-        };
-        static ref INCLUDE_PREFIX: RwLock<Vec<&'static str>> = RwLock::new(vec![&PACKAGE_NAME]);
+        });
     }
 
     thread_local! {
@@ -117,11 +117,10 @@ mod r#impl {
 
     impl<'a> Cfg<'a> {
         fn current() -> super::Cfg<'a> {
-            let include_prefix = *INCLUDE_PREFIX
+            let include_prefix = INCLUDE_PREFIX
                 .read()
                 .unwrap_or_else(PoisonError::into_inner)
-                .last()
-                .unwrap();
+                .str();
             super::Cfg {
                 include_prefix,
                 marker: PhantomData,
@@ -184,10 +183,9 @@ mod r#impl {
     impl<'a> Drop for Cfg<'a> {
         fn drop(&mut self) {
             if let Cfg::Mut(cfg) = self {
-                INCLUDE_PREFIX
+                *INCLUDE_PREFIX
                     .write()
-                    .unwrap_or_else(PoisonError::into_inner)
-                    .push(Box::leak(Box::from(cfg.include_prefix)));
+                    .unwrap_or_else(PoisonError::into_inner) = intern(cfg.include_prefix);
             } else {
                 CONST_DEREFS.with(|derefs| derefs.borrow_mut().remove(&self.handle()));
             }
