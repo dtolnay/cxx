@@ -1,7 +1,7 @@
 use crate::gen::block::Block;
 use crate::gen::nested::NamespaceEntries;
 use crate::gen::out::OutFile;
-use crate::gen::{builtin, include, toposort, Opt};
+use crate::gen::{builtin, include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
@@ -96,7 +96,7 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
         }
     }
 
-    for strct in toposort::sort(apis, out.types) {
+    for strct in &out.types.toposorted_structs {
         out.next_section();
         if !out.types.cxx.contains(&strct.name.rust) {
             write_struct(out, strct);
