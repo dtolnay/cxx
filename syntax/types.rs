@@ -211,7 +211,7 @@ impl<'a> Types<'a> {
             toposorted_structs,
         };
 
-        types.toposorted_structs = toposort::sort(apis, &types);
+        types.toposorted_structs = toposort::sort(cx, apis, &types);
 
         let mut unresolved_structs: Vec<&Ident> = types.structs.keys().copied().collect();
         let mut new_information = true;
