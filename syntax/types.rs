@@ -3,7 +3,8 @@ use crate::syntax::improper::ImproperCtype;
 use crate::syntax::report::Errors;
 use crate::syntax::set::OrderedSet as Set;
 use crate::syntax::{
-    Api, Derive, Enum, ExternFn, ExternType, Impl, Pair, ResolvableName, Struct, Type, TypeAlias,
+    toposort, Api, Derive, Enum, ExternFn, ExternType, Impl, Pair, ResolvableName, Struct, Type,
+    TypeAlias,
 };
 use proc_macro2::Ident;
 use quote::ToTokens;
@@ -21,6 +22,7 @@ pub struct Types<'a> {
     pub explicit_impls: Set<&'a Impl>,
     pub resolutions: Map<&'a Ident, &'a Pair>,
     pub struct_improper_ctypes: UnorderedSet<&'a Ident>,
+    pub toposorted_structs: Vec<&'a Struct>,
 }
 
 impl<'a> Types<'a> {
@@ -35,6 +37,7 @@ impl<'a> Types<'a> {
         let mut explicit_impls = Set::new();
         let mut resolutions = Map::new();
         let struct_improper_ctypes = UnorderedSet::new();
+        let toposorted_structs = Vec::new();
 
         fn visit<'a>(all: &mut Set<&'a Type>, ty: &'a Type) {
             all.insert(ty);
@@ -205,7 +208,10 @@ impl<'a> Types<'a> {
             explicit_impls,
             resolutions,
             struct_improper_ctypes,
+            toposorted_structs,
         };
+
+        types.toposorted_structs = toposort::sort(apis, &types);
 
         let mut unresolved_structs: Vec<&Ident> = types.structs.keys().copied().collect();
         let mut new_information = true;
