@@ -9,7 +9,7 @@ use crate::syntax::{
     Var,
 };
 use proc_macro2::Ident;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u8> {
     let mut out_file = OutFile::new(header, opt, types);
@@ -76,8 +76,22 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
         }
     }
 
+    let mut structs_written = HashSet::new();
+    let mut toposorted_structs = out.types.toposorted_structs.iter();
     for api in apis {
         match api {
+            Api::Struct(strct) if !structs_written.contains(&strct.name.rust) => {
+                for next in &mut toposorted_structs {
+                    if !out.types.cxx.contains(&strct.name.rust) {
+                        out.next_section();
+                        write_struct(out, next);
+                    }
+                    structs_written.insert(&next.name.rust);
+                    if next.name.rust == strct.name.rust {
+                        break;
+                    }
+                }
+            }
             Api::Enum(enm) => {
                 out.next_section();
                 if out.types.cxx.contains(&enm.name.rust) {
@@ -93,13 +107,6 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
                 }
             }
             _ => {}
-        }
-    }
-
-    for strct in &out.types.toposorted_structs {
-        out.next_section();
-        if !out.types.cxx.contains(&strct.name.rust) {
-            write_struct(out, strct);
         }
     }
 
