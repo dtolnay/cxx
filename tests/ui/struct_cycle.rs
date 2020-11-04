@@ -25,6 +25,10 @@ mod ffi {
     struct Node5 {
         node2: Node2,
     }
+
+    struct Node6 {
+        node2: Node2,
+    }
 }
 
 fn main() {}
