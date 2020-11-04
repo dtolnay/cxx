@@ -1,14 +1,14 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::improper::ImproperCtype;
 use crate::syntax::report::Errors;
-use crate::syntax::set::OrderedSet as Set;
+use crate::syntax::set::{OrderedSet as Set, UnorderedSet};
 use crate::syntax::{
     toposort, Api, Derive, Enum, ExternFn, ExternType, Impl, Pair, ResolvableName, Struct, Type,
     TypeAlias,
 };
 use proc_macro2::Ident;
 use quote::ToTokens;
-use std::collections::{BTreeMap as Map, HashSet as UnorderedSet};
+use std::collections::BTreeMap as Map;
 
 pub struct Types<'a> {
     pub all: Set<&'a Type>,
