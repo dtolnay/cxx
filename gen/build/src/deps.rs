@@ -1,15 +1,24 @@
 use std::collections::BTreeMap;
 use std::env;
+use std::ffi::OsString;
 use std::path::PathBuf;
 
 #[derive(Default)]
 pub struct Crate {
+    pub include_prefix: Option<PathBuf>,
+    pub links: Option<OsString>,
     pub crate_dir: Option<PathBuf>,
     pub include_dir: Option<PathBuf>,
 }
 
 impl Crate {
     pub fn print_to_cargo(&self) {
+        if let Some(include_prefix) = &self.include_prefix {
+            println!("cargo:CXXBRIDGE_PREFIX={}", include_prefix.to_string_lossy());
+        }
+        if let Some(links) = &self.links {
+            println!("cargo:CXXBRIDGE_LINKS={}", links.to_string_lossy());
+        }
         if let Some(crate_dir) = &self.crate_dir {
             println!("cargo:CXXBRIDGE_CRATE={}", crate_dir.to_string_lossy());
         }
@@ -40,7 +49,13 @@ pub fn direct_dependencies() -> Vec<Crate> {
         //   - https://doc.rust-lang.org/cargo/reference/build-scripts.html#the-links-manifest-key
         //   - https://doc.rust-lang.org/cargo/reference/build-script-examples.html#using-another-sys-crate
         if k.starts_with("DEP_") {
-            if k.ends_with("_CXXBRIDGE_CRATE") {
+            if k.ends_with("_CXXBRIDGE_PREFIX") {
+                k.truncate(k.len() - "_CXXBRIDGE_PREFIX".len());
+                crates.entry(k).or_default().include_prefix = Some(PathBuf::from(v));
+            } else if k.ends_with("_CXXBRIDGE_LINKS") {
+                k.truncate(k.len() - "_CXXBRIDGE_LINKS".len());
+                crates.entry(k).or_default().links = Some(v);
+            } else if k.ends_with("_CXXBRIDGE_CRATE") {
                 k.truncate(k.len() - "_CXXBRIDGE_CRATE".len());
                 crates.entry(k).or_default().crate_dir = Some(PathBuf::from(v));
             } else if k.ends_with("_CXXBRIDGE_INCLUDE") {

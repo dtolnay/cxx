@@ -181,6 +181,8 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
     let crate_dir = make_crate_dir(prj);
     let include_dir = make_include_dir(prj)?;
     let this_crate = Crate {
+        include_prefix: Some(prj.include_prefix.clone()),
+        links: env::var_os("CARGO_MANIFEST_LINKS"),
         crate_dir,
         include_dir: Some(include_dir),
     };
