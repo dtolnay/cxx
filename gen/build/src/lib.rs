@@ -193,6 +193,9 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
     this_crate.exported_header_dirs.push(include_dir);
     this_crate.exported_header_dirs.extend(crate_dir);
     for exported_dir in &CFG.exported_header_dirs {
+        if !exported_dir.is_absolute() {
+            return Err(Error::ExportedDirNotAbsolute(exported_dir));
+        }
         this_crate
             .exported_header_dirs
             .push(PathBuf::from(exported_dir));
