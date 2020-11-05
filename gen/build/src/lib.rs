@@ -62,6 +62,7 @@ mod out;
 mod paths;
 mod syntax;
 mod target;
+mod vec;
 
 use crate::error::{Error, Result};
 use crate::gen::error::report;

@@ -91,13 +91,13 @@ pub use self::r#impl::Cfg::CFG;
 #[cfg(not(doc))]
 mod r#impl {
     use crate::intern::{intern, InternedString};
+    use crate::vec::{self, InternedVec as _};
     use lazy_static::lazy_static;
     use std::cell::RefCell;
     use std::collections::HashMap;
     use std::fmt::{self, Debug};
     use std::marker::PhantomData;
     use std::ops::{Deref, DerefMut};
-    use std::path::Path;
     use std::sync::{PoisonError, RwLock};
 
     struct CurrentCfg {
@@ -151,25 +151,9 @@ mod r#impl {
         fn current() -> super::Cfg<'a> {
             let current = CURRENT.read().unwrap_or_else(PoisonError::into_inner);
             let include_prefix = current.include_prefix.str();
-            let exported_header_dirs = current
-                .exported_header_dirs
-                .iter()
-                .copied()
-                .map(InternedString::str)
-                .map(Path::new)
-                .collect();
-            let exported_header_prefixes = current
-                .exported_header_prefixes
-                .iter()
-                .copied()
-                .map(InternedString::str)
-                .collect();
-            let exported_header_links = current
-                .exported_header_links
-                .iter()
-                .copied()
-                .map(InternedString::str)
-                .collect();
+            let exported_header_dirs = current.exported_header_dirs.vec();
+            let exported_header_prefixes = current.exported_header_prefixes.vec();
+            let exported_header_links = current.exported_header_links.vec();
             super::Cfg {
                 include_prefix,
                 exported_header_dirs,
@@ -237,24 +221,9 @@ mod r#impl {
             if let Cfg::Mut(cfg) = self {
                 let mut current = CURRENT.write().unwrap_or_else(PoisonError::into_inner);
                 current.include_prefix = intern(cfg.include_prefix);
-                current.exported_header_dirs = cfg
-                    .exported_header_dirs
-                    .iter()
-                    .copied()
-                    .map(|path| intern(&path.to_string_lossy()))
-                    .collect();
-                current.exported_header_prefixes = cfg
-                    .exported_header_prefixes
-                    .iter()
-                    .copied()
-                    .map(intern)
-                    .collect();
-                current.exported_header_links = cfg
-                    .exported_header_links
-                    .iter()
-                    .copied()
-                    .map(intern)
-                    .collect();
+                current.exported_header_dirs = vec::intern(&cfg.exported_header_dirs);
+                current.exported_header_prefixes = vec::intern(&cfg.exported_header_prefixes);
+                current.exported_header_links = vec::intern(&cfg.exported_header_links);
             } else {
                 CONST_DEREFS.with(|derefs| derefs.borrow_mut().remove(&self.handle()));
             }
