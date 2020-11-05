@@ -8,6 +8,17 @@ pub struct Crate {
     pub include_dir: Option<PathBuf>,
 }
 
+impl Crate {
+    pub fn print_to_cargo(&self) {
+        if let Some(crate_dir) = &self.crate_dir {
+            println!("cargo:CXXBRIDGE_CRATE={}", crate_dir.to_string_lossy());
+        }
+        if let Some(include_dir) = &self.include_dir {
+            println!("cargo:CXXBRIDGE_INCLUDE={}", include_dir.to_string_lossy());
+        }
+    }
+}
+
 pub fn direct_dependencies() -> Vec<Crate> {
     let mut crates: BTreeMap<String, Crate> = BTreeMap::new();
 

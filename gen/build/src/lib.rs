@@ -180,6 +180,11 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
 
     let crate_dir = make_crate_dir(prj);
     let include_dir = make_include_dir(prj)?;
+    let this_crate = Crate {
+        crate_dir,
+        include_dir: Some(include_dir),
+    };
+    this_crate.print_to_cargo();
 
     let mut build = Build::new();
     build.cpp(true);
@@ -190,13 +195,7 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
     }
 
     let mut crates = deps::direct_dependencies();
-    crates.insert(
-        0,
-        Crate {
-            crate_dir,
-            include_dir: Some(include_dir),
-        },
-    );
+    crates.insert(0, this_crate);
 
     eprintln!("\nCXX include path:");
     for krate in crates {
@@ -219,14 +218,11 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
 
 fn make_crate_dir(prj: &Project) -> Option<PathBuf> {
     if prj.include_prefix.as_os_str().is_empty() {
-        let crate_dir = prj.manifest_dir.clone();
-        println!("cargo:CXXBRIDGE_CRATE={}", crate_dir.to_string_lossy());
-        return Some(crate_dir);
+        return Some(prj.manifest_dir.clone());
     }
     let crate_dir = prj.out_dir.join("cxxbridge").join("crate");
     let link = crate_dir.join(&prj.include_prefix);
     if out::symlink_dir(&prj.manifest_dir, link).is_ok() {
-        println!("cargo:CXXBRIDGE_CRATE={}", crate_dir.to_string_lossy());
         Some(crate_dir)
     } else {
         None
@@ -244,7 +240,6 @@ fn make_include_dir(prj: &Project) -> Result<PathBuf> {
         out::write(shared_cxx_h, gen::include::HEADER.as_bytes())?;
         out::symlink_file(shared_cxx_h, cxx_h)?;
     }
-    println!("cargo:CXXBRIDGE_INCLUDE={}", include_dir.to_string_lossy());
     Ok(include_dir)
 }
 
