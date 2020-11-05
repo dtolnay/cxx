@@ -1,3 +1,4 @@
+use crate::cfg::CFG;
 use crate::gen::fs;
 use std::error::Error as StdError;
 use std::ffi::OsString;
@@ -14,6 +15,13 @@ pub(super) enum Error {
     ExportedEmptyPrefix,
 }
 
+macro_rules! expr {
+    ($expr:expr) => {{
+        let _ = $expr; // ensure it doesn't fall out of sync with CFG definition
+        stringify!($expr)
+    }};
+}
+
 impl Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
@@ -23,12 +31,15 @@ impl Display for Error {
             Error::Fs(err) => err.fmt(f),
             Error::ExportedDirNotAbsolute(path) => write!(
                 f,
-                "element of CFG.exported_header_dirs must be absolute path, but was: {:?}",
+                "element of {} must be absolute path, but was: {:?}",
+                expr!(CFG.exported_header_dirs),
                 path,
             ),
-            Error::ExportedEmptyPrefix => {
-                f.write_str("element of CFG.exported_header_prefixes must not be empty string")
-            }
+            Error::ExportedEmptyPrefix => write!(
+                f,
+                "element of {} must not be empty string",
+                expr!(CFG.exported_header_prefixes),
+            ),
         }
     }
 }
