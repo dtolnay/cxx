@@ -226,7 +226,11 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
     for krate in crates {
         for header_dir in &krate.header_dirs {
             build.include(&header_dir.path);
-            eprintln!("  {}", header_dir.path.display());
+            if header_dir.exported {
+                eprintln!("  {}", header_dir.path.display());
+            } else {
+                eprintln!("  {} (private)", header_dir.path.display());
+            }
         }
     }
 
