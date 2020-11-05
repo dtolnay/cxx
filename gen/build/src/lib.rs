@@ -65,7 +65,7 @@ mod syntax;
 mod target;
 mod vec;
 
-use crate::deps::Crate;
+use crate::deps::{Crate, HeaderDir};
 use crate::error::{Error, Result};
 use crate::gen::error::report;
 use crate::gen::Opt;
@@ -183,22 +183,31 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
     let mut this_crate = Crate {
         include_prefix: Some(prj.include_prefix.clone()),
         links: env::var_os("CARGO_MANIFEST_LINKS"),
-        exported_header_dirs: Vec::new(),
+        header_dirs: Vec::new(),
     };
 
     // The generated code directory (include_dir) is placed in front of
     // crate_dir on the include line so that `#include "path/to/file.rs"` from
     // C++ "magically" works and refers to the API generated from that Rust
     // source file.
-    this_crate.exported_header_dirs.push(include_dir);
-    this_crate.exported_header_dirs.extend(crate_dir);
+    this_crate.header_dirs.push(HeaderDir {
+        exported: true,
+        path: include_dir,
+    });
+    if let Some(crate_dir) = crate_dir {
+        this_crate.header_dirs.push(HeaderDir {
+            exported: true,
+            path: crate_dir,
+        });
+    }
     for exported_dir in &CFG.exported_header_dirs {
         if !exported_dir.is_absolute() {
             return Err(Error::ExportedDirNotAbsolute(exported_dir));
         }
-        this_crate
-            .exported_header_dirs
-            .push(PathBuf::from(exported_dir));
+        this_crate.header_dirs.push(HeaderDir {
+            exported: true,
+            path: PathBuf::from(exported_dir),
+        });
     }
     this_crate.print_to_cargo();
 
@@ -215,9 +224,13 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
 
     eprintln!("\nCXX include path:");
     for krate in crates {
-        for header_dir in &krate.exported_header_dirs {
-            build.include(header_dir);
-            eprintln!("  {}", header_dir.display());
+        for header_dir in &krate.header_dirs {
+            build.include(&header_dir.path);
+            if header_dir.exported {
+                eprintln!("  {}", header_dir.path.display());
+            } else {
+                eprintln!("  {} (private)", header_dir.path.display());
+            }
         }
     }
 
