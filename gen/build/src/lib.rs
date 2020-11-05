@@ -176,6 +176,8 @@ impl Project {
 // current build as well as for downstream builds that have a direct dependency
 // on the current crate.
 fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Result<Build> {
+    validate_cfg()?;
+
     let ref prj = Project::init()?;
     let this_crate = make_this_crate(prj)?;
     this_crate.print_to_cargo();
@@ -199,6 +201,22 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
     }
 
     Ok(build)
+}
+
+fn validate_cfg() -> Result<()> {
+    for exported_dir in &CFG.exported_header_dirs {
+        if !exported_dir.is_absolute() {
+            return Err(Error::ExportedDirNotAbsolute(exported_dir));
+        }
+    }
+
+    for prefix in &CFG.exported_header_prefixes {
+        if prefix.is_empty() {
+            return Err(Error::ExportedEmptyPrefix);
+        }
+    }
+
+    Ok(())
 }
 
 fn make_this_crate(prj: &Project) -> Result<Crate> {
@@ -228,9 +246,6 @@ fn make_this_crate(prj: &Project) -> Result<Crate> {
     }
 
     for exported_dir in &CFG.exported_header_dirs {
-        if !exported_dir.is_absolute() {
-            return Err(Error::ExportedDirNotAbsolute(exported_dir));
-        }
         this_crate.header_dirs.push(HeaderDir {
             exported: true,
             path: PathBuf::from(exported_dir),

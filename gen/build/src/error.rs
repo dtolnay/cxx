@@ -11,6 +11,7 @@ pub(super) enum Error {
     NoEnv(OsString),
     Fs(fs::Error),
     ExportedDirNotAbsolute(&'static Path),
+    ExportedEmptyPrefix,
 }
 
 impl Display for Error {
@@ -25,6 +26,9 @@ impl Display for Error {
                 "element of CFG.exported_header_dirs must be absolute path, but was: {:?}",
                 path,
             ),
+            Error::ExportedEmptyPrefix => {
+                f.write_str("element of CFG.exported_header_prefixes must not be empty string")
+            }
         }
     }
 }
