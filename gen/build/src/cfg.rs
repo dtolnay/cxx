@@ -97,6 +97,7 @@ mod r#impl {
     use std::fmt::{self, Debug};
     use std::marker::PhantomData;
     use std::ops::{Deref, DerefMut};
+    use std::path::Path;
     use std::sync::{PoisonError, RwLock};
 
     lazy_static! {
@@ -105,6 +106,9 @@ mod r#impl {
                 .map(|pkg| intern(&pkg.to_string_lossy()))
                 .unwrap_or_default()
         });
+        static ref EXPORTED_HEADER_DIRS: RwLock<Vec<InternedString>> = RwLock::new(Vec::new());
+        static ref EXPORTED_HEADER_PREFIXES: RwLock<Vec<InternedString>> = RwLock::new(Vec::new());
+        static ref EXPORTED_HEADER_LINKS: RwLock<Vec<InternedString>> = RwLock::new(Vec::new());
     }
 
     thread_local! {
@@ -132,11 +136,33 @@ mod r#impl {
                 .read()
                 .unwrap_or_else(PoisonError::into_inner)
                 .str();
+            let exported_header_dirs = EXPORTED_HEADER_DIRS
+                .read()
+                .unwrap_or_else(PoisonError::into_inner)
+                .iter()
+                .copied()
+                .map(InternedString::str)
+                .map(Path::new)
+                .collect();
+            let exported_header_prefixes = EXPORTED_HEADER_PREFIXES
+                .read()
+                .unwrap_or_else(PoisonError::into_inner)
+                .iter()
+                .copied()
+                .map(InternedString::str)
+                .collect();
+            let exported_header_links = EXPORTED_HEADER_LINKS
+                .read()
+                .unwrap_or_else(PoisonError::into_inner)
+                .iter()
+                .copied()
+                .map(InternedString::str)
+                .collect();
             super::Cfg {
                 include_prefix,
-                exported_header_dirs: Vec::new(),
-                exported_header_prefixes: Vec::new(),
-                exported_header_links: Vec::new(),
+                exported_header_dirs,
+                exported_header_prefixes,
+                exported_header_links,
                 marker: PhantomData,
             }
         }
@@ -200,6 +226,30 @@ mod r#impl {
                 *INCLUDE_PREFIX
                     .write()
                     .unwrap_or_else(PoisonError::into_inner) = intern(cfg.include_prefix);
+                *EXPORTED_HEADER_DIRS
+                    .write()
+                    .unwrap_or_else(PoisonError::into_inner) = cfg
+                    .exported_header_dirs
+                    .iter()
+                    .copied()
+                    .map(|path| intern(&path.to_string_lossy()))
+                    .collect();
+                *EXPORTED_HEADER_PREFIXES
+                    .write()
+                    .unwrap_or_else(PoisonError::into_inner) = cfg
+                    .exported_header_prefixes
+                    .iter()
+                    .copied()
+                    .map(intern)
+                    .collect();
+                *EXPORTED_HEADER_LINKS
+                    .write()
+                    .unwrap_or_else(PoisonError::into_inner) = cfg
+                    .exported_header_links
+                    .iter()
+                    .copied()
+                    .map(intern)
+                    .collect();
             } else {
                 CONST_DEREFS.with(|derefs| derefs.borrow_mut().remove(&self.handle()));
             }
