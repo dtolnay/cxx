@@ -65,6 +65,7 @@ mod syntax;
 mod target;
 mod vec;
 
+use crate::deps::Crate;
 use crate::error::{Error, Result};
 use crate::gen::error::report;
 use crate::gen::Opt;
@@ -177,8 +178,8 @@ impl Project {
 fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Result<Build> {
     let ref prj = Project::init()?;
 
-    let ref crate_dir = make_crate_dir(prj);
-    let ref include_dir = make_include_dir(prj)?;
+    let crate_dir = make_crate_dir(prj);
+    let include_dir = make_include_dir(prj)?;
 
     let mut build = Build::new();
     build.cpp(true);
@@ -188,21 +189,31 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
         generate_bridge(prj, &mut build, path.as_ref())?;
     }
 
+    let mut crates = deps::direct_dependencies();
+    crates.insert(
+        0,
+        Crate {
+            crate_dir,
+            include_dir: Some(include_dir),
+        },
+    );
+
     eprintln!("\nCXX include path:");
-    build.include(include_dir);
-    eprintln!("  {}", include_dir.display());
-    if let Some(crate_dir) = crate_dir {
-        // Placed after the generated code directory (include_dir) on the
-        // include line so that `#include "path/to/file.rs"` from C++
-        // "magically" works and refers to the API generated from that Rust
-        // source file.
-        build.include(crate_dir);
-        eprintln!("  {}", crate_dir.display());
+    for krate in crates {
+        if let Some(include_dir) = &krate.include_dir {
+            build.include(include_dir);
+            eprintln!("  {}", include_dir.display());
+        }
+        if let Some(crate_dir) = &krate.crate_dir {
+            // Placed after the generated code directory (include_dir) on the
+            // include line so that `#include "path/to/file.rs"` from C++
+            // "magically" works and refers to the API generated from that Rust
+            // source file.
+            build.include(crate_dir);
+            eprintln!("  {}", crate_dir.display());
+        }
     }
-    for dep in deps::include_dirs() {
-        build.include(&dep);
-        eprintln!("  {}", dep.display());
-    }
+
     Ok(build)
 }
 
