@@ -7,7 +7,12 @@ use std::path::PathBuf;
 pub struct Crate {
     pub include_prefix: Option<PathBuf>,
     pub links: Option<OsString>,
-    pub exported_header_dirs: Vec<PathBuf>,
+    pub header_dirs: Vec<HeaderDir>,
+}
+
+pub struct HeaderDir {
+    pub exported: bool,
+    pub path: PathBuf,
 }
 
 impl Crate {
@@ -21,12 +26,14 @@ impl Crate {
         if let Some(links) = &self.links {
             println!("cargo:CXXBRIDGE_LINKS={}", links.to_string_lossy());
         }
-        for (i, exported_dir) in self.exported_header_dirs.iter().enumerate() {
-            println!(
-                "cargo:CXXBRIDGE_DIR{}={}",
-                i,
-                exported_dir.to_string_lossy(),
-            );
+        for (i, header_dir) in self.header_dirs.iter().enumerate() {
+            if header_dir.exported {
+                println!(
+                    "cargo:CXXBRIDGE_DIR{}={}",
+                    i,
+                    header_dir.path.to_string_lossy(),
+                );
+            }
         }
     }
 }
@@ -89,8 +96,11 @@ pub fn direct_dependencies() -> Vec<Crate> {
         crates
             .entry(k)
             .or_default()
-            .exported_header_dirs
-            .extend(dirs.into_iter().map(|(_sort_key, dir)| dir));
+            .header_dirs
+            .extend(dirs.into_iter().map(|(_sort_key, dir)| HeaderDir {
+                exported: true,
+                path: dir,
+            }));
     }
 
     crates.into_iter().map(|entry| entry.1).collect()
