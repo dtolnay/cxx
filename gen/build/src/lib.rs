@@ -192,6 +192,11 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
     // source file.
     this_crate.exported_header_dirs.push(include_dir);
     this_crate.exported_header_dirs.extend(crate_dir);
+    for exported_dir in &CFG.exported_header_dirs {
+        this_crate
+            .exported_header_dirs
+            .push(PathBuf::from(exported_dir));
+    }
     this_crate.print_to_cargo();
 
     let mut build = Build::new();
