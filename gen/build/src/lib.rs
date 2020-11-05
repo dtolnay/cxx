@@ -238,15 +238,15 @@ fn make_this_crate(prj: &Project) -> Result<Crate> {
     }
 
     for krate in deps::direct_dependencies() {
-        let links_attribute = match krate.links {
-            Some(links) => links,
-            None => continue,
+        let is_link_exported = || match &krate.links {
+            None => false,
+            Some(links_attribute) => CFG
+                .exported_header_links
+                .iter()
+                .any(|exported| links_attribute == *exported),
         };
 
-        let exported = CFG
-            .exported_header_links
-            .iter()
-            .any(|exported| links_attribute == *exported);
+        let exported = is_link_exported();
 
         this_crate
             .header_dirs
