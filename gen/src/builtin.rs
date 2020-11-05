@@ -24,6 +24,7 @@ pub struct Builtins<'a> {
     pub rust_slice_repr: bool,
     pub exception: bool,
     pub relocatable: bool,
+    pub friend_impl: bool,
     pub content: Content<'a>,
 }
 
@@ -51,6 +52,11 @@ pub(super) fn write(out: &mut OutFile) {
     if builtin.rust_str {
         include.cstdint = true;
         include.string = true;
+        builtin.friend_impl = true;
+    }
+
+    if builtin.rust_slice {
+        builtin.friend_impl = true;
     }
 
     if builtin.rust_box {
@@ -68,6 +74,7 @@ pub(super) fn write(out: &mut OutFile) {
 
     if builtin.rust_error {
         include.exception = true;
+        builtin.friend_impl = true;
     }
 
     if builtin.rust_isize {
@@ -89,7 +96,7 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "struct unsafe_bitcopy_t;");
     }
 
-    if builtin.rust_error {
+    if builtin.friend_impl {
         out.begin_block(Block::AnonymousNamespace);
         writeln!(out, "template <typename T>");
         writeln!(out, "class impl;");
