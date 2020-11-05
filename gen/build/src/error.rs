@@ -2,6 +2,7 @@ use crate::gen::fs;
 use std::error::Error as StdError;
 use std::ffi::OsString;
 use std::fmt::{self, Display};
+use std::path::Path;
 
 pub(super) type Result<T, E = Error> = std::result::Result<T, E>;
 
@@ -9,6 +10,7 @@ pub(super) type Result<T, E = Error> = std::result::Result<T, E>;
 pub(super) enum Error {
     NoEnv(OsString),
     Fs(fs::Error),
+    ExportedDirNotAbsolute(&'static Path),
 }
 
 impl Display for Error {
@@ -18,6 +20,11 @@ impl Display for Error {
                 write!(f, "missing {} environment variable", var.to_string_lossy())
             }
             Error::Fs(err) => err.fmt(f),
+            Error::ExportedDirNotAbsolute(path) => write!(
+                f,
+                "element of CFG.exported_header_dirs must be absolute path, but was: {:?}",
+                path,
+            ),
         }
     }
 }
