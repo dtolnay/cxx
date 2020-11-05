@@ -7,23 +7,26 @@ use std::path::PathBuf;
 pub struct Crate {
     pub include_prefix: Option<PathBuf>,
     pub links: Option<OsString>,
-    pub crate_dir: Option<PathBuf>,
-    pub include_dir: Option<PathBuf>,
+    pub exported_header_dirs: Vec<PathBuf>,
 }
 
 impl Crate {
     pub fn print_to_cargo(&self) {
         if let Some(include_prefix) = &self.include_prefix {
-            println!("cargo:CXXBRIDGE_PREFIX={}", include_prefix.to_string_lossy());
+            println!(
+                "cargo:CXXBRIDGE_PREFIX={}",
+                include_prefix.to_string_lossy(),
+            );
         }
         if let Some(links) = &self.links {
             println!("cargo:CXXBRIDGE_LINKS={}", links.to_string_lossy());
         }
-        if let Some(crate_dir) = &self.crate_dir {
-            println!("cargo:CXXBRIDGE_CRATE={}", crate_dir.to_string_lossy());
-        }
-        if let Some(include_dir) = &self.include_dir {
-            println!("cargo:CXXBRIDGE_INCLUDE={}", include_dir.to_string_lossy());
+        for (i, exported_dir) in self.exported_header_dirs.iter().enumerate() {
+            println!(
+                "cargo:CXXBRIDGE_DIR{}={}",
+                i,
+                exported_dir.to_string_lossy(),
+            );
         }
     }
 }
@@ -64,17 +67,18 @@ pub fn direct_dependencies() -> Vec<Crate> {
             continue;
         }
 
-        if k.ends_with("_CXXBRIDGE_CRATE") {
-            k.truncate(k.len() - "_CXXBRIDGE_CRATE".len());
-            crates.entry(k).or_default().crate_dir = Some(PathBuf::from(v));
+        let without_counter = k.trim_end_matches(|ch: char| ch.is_ascii_digit());
+        let counter_len = k.len() - without_counter.len();
+        if counter_len == 0 || !without_counter.ends_with("_CXXBRIDGE_DIR") {
             continue;
         }
 
-        if k.ends_with("_CXXBRIDGE_INCLUDE") {
-            k.truncate(k.len() - "_CXXBRIDGE_INCLUDE".len());
-            crates.entry(k).or_default().include_dir = Some(PathBuf::from(v));
-            continue;
-        }
+        k.truncate(k.len() - counter_len - "_CXXBRIDGE_DIR".len());
+        crates
+            .entry(k)
+            .or_default()
+            .exported_header_dirs
+            .push(PathBuf::from(v));
     }
 
     crates.into_iter().map(|entry| entry.1).collect()
