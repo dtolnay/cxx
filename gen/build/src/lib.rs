@@ -186,10 +186,10 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
         exported_header_dirs: Vec::new(),
     };
 
-    // The crate_dir is placed after the generated code directory (include_dir)
-    // on the include line so that `#include "path/to/file.rs"` from C++
-    // "magically" works and refers to the API generated from that Rust source
-    // file.
+    // The generated code directory (include_dir) is placed in front of
+    // crate_dir on the include line so that `#include "path/to/file.rs"` from
+    // C++ "magically" works and refers to the API generated from that Rust
+    // source file.
     this_crate.exported_header_dirs.push(include_dir);
     this_crate.exported_header_dirs.extend(crate_dir);
     this_crate.print_to_cargo();
