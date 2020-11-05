@@ -33,6 +33,7 @@ impl Crate {
 
 pub fn direct_dependencies() -> Vec<Crate> {
     let mut crates: BTreeMap<String, Crate> = BTreeMap::new();
+    let mut exported_header_dirs: BTreeMap<String, Vec<(usize, PathBuf)>> = BTreeMap::new();
 
     // Only variables set from a build script of direct dependencies are
     // observable. That's exactly what we want! Your crate needs to declare a
@@ -73,12 +74,23 @@ pub fn direct_dependencies() -> Vec<Crate> {
             continue;
         }
 
+        let sort_key = k[k.len() - counter_len..]
+            .parse::<usize>()
+            .unwrap_or(usize::MAX);
         k.truncate(k.len() - counter_len - "_CXXBRIDGE_DIR".len());
+        exported_header_dirs
+            .entry(k)
+            .or_default()
+            .push((sort_key, PathBuf::from(v)));
+    }
+
+    for (k, mut dirs) in exported_header_dirs {
+        dirs.sort_by_key(|(sort_key, _dir)| *sort_key);
         crates
             .entry(k)
             .or_default()
             .exported_header_dirs
-            .push(PathBuf::from(v));
+            .extend(dirs.into_iter().map(|(_sort_key, dir)| dir));
     }
 
     crates.into_iter().map(|entry| entry.1).collect()
