@@ -246,7 +246,15 @@ fn make_this_crate(prj: &Project) -> Result<Crate> {
                 .any(|exported| links_attribute == *exported),
         };
 
-        let exported = is_link_exported();
+        let is_prefix_exported = || match &krate.include_prefix {
+            None => false,
+            Some(include_prefix) => CFG
+                .exported_header_prefixes
+                .iter()
+                .any(|exported| include_prefix.starts_with(exported)),
+        };
+
+        let exported = is_link_exported() || is_prefix_exported();
 
         this_crate
             .header_dirs
