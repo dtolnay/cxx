@@ -188,18 +188,13 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
         generate_bridge(prj, &mut build, path.as_ref())?;
     }
 
-    let mut crates = deps::direct_dependencies();
-    crates.insert(0, this_crate);
-
     eprintln!("\nCXX include path:");
-    for krate in crates {
-        for header_dir in &krate.header_dirs {
-            build.include(&header_dir.path);
-            if header_dir.exported {
-                eprintln!("  {}", header_dir.path.display());
-            } else {
-                eprintln!("  {} (private)", header_dir.path.display());
-            }
+    for header_dir in this_crate.header_dirs {
+        build.include(&header_dir.path);
+        if header_dir.exported {
+            eprintln!("  {}", header_dir.path.display());
+        } else {
+            eprintln!("  {} (private)", header_dir.path.display());
         }
     }
 
@@ -240,6 +235,25 @@ fn make_this_crate(prj: &Project) -> Result<Crate> {
             exported: true,
             path: PathBuf::from(exported_dir),
         });
+    }
+
+    for krate in deps::direct_dependencies() {
+        let links_attribute = match krate.links {
+            Some(links) => links,
+            None => continue,
+        };
+
+        let exported = CFG
+            .exported_header_links
+            .iter()
+            .any(|exported| links_attribute == *exported);
+
+        this_crate
+            .header_dirs
+            .extend(krate.header_dirs.into_iter().map(|dir| HeaderDir {
+                exported,
+                path: dir.path,
+            }));
     }
 
     Ok(this_crate)
