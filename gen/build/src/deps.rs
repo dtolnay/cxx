@@ -7,29 +7,33 @@ use std::path::PathBuf;
 pub struct Crate {
     pub include_prefix: Option<PathBuf>,
     pub links: Option<OsString>,
-    pub crate_dir: Option<PathBuf>,
-    pub include_dir: Option<PathBuf>,
+    pub exported_header_dirs: Vec<PathBuf>,
 }
 
 impl Crate {
     pub fn print_to_cargo(&self) {
         if let Some(include_prefix) = &self.include_prefix {
-            println!("cargo:CXXBRIDGE_PREFIX={}", include_prefix.to_string_lossy());
+            println!(
+                "cargo:CXXBRIDGE_PREFIX={}",
+                include_prefix.to_string_lossy(),
+            );
         }
         if let Some(links) = &self.links {
             println!("cargo:CXXBRIDGE_LINKS={}", links.to_string_lossy());
         }
-        if let Some(crate_dir) = &self.crate_dir {
-            println!("cargo:CXXBRIDGE_CRATE={}", crate_dir.to_string_lossy());
-        }
-        if let Some(include_dir) = &self.include_dir {
-            println!("cargo:CXXBRIDGE_INCLUDE={}", include_dir.to_string_lossy());
+        for (i, exported_dir) in self.exported_header_dirs.iter().enumerate() {
+            println!(
+                "cargo:CXXBRIDGE_DIR{}={}",
+                i,
+                exported_dir.to_string_lossy(),
+            );
         }
     }
 }
 
 pub fn direct_dependencies() -> Vec<Crate> {
     let mut crates: BTreeMap<String, Crate> = BTreeMap::new();
+    let mut exported_header_dirs: BTreeMap<String, Vec<(usize, PathBuf)>> = BTreeMap::new();
 
     // Only variables set from a build script of direct dependencies are
     // observable. That's exactly what we want! Your crate needs to declare a
@@ -64,17 +68,29 @@ pub fn direct_dependencies() -> Vec<Crate> {
             continue;
         }
 
-        if k.ends_with("_CXXBRIDGE_CRATE") {
-            k.truncate(k.len() - "_CXXBRIDGE_CRATE".len());
-            crates.entry(k).or_default().crate_dir = Some(PathBuf::from(v));
+        let without_counter = k.trim_end_matches(|ch: char| ch.is_ascii_digit());
+        let counter_len = k.len() - without_counter.len();
+        if counter_len == 0 || !without_counter.ends_with("_CXXBRIDGE_DIR") {
             continue;
         }
 
-        if k.ends_with("_CXXBRIDGE_INCLUDE") {
-            k.truncate(k.len() - "_CXXBRIDGE_INCLUDE".len());
-            crates.entry(k).or_default().include_dir = Some(PathBuf::from(v));
-            continue;
-        }
+        let sort_key = k[k.len() - counter_len..]
+            .parse::<usize>()
+            .unwrap_or(usize::MAX);
+        k.truncate(k.len() - counter_len - "_CXXBRIDGE_DIR".len());
+        exported_header_dirs
+            .entry(k)
+            .or_default()
+            .push((sort_key, PathBuf::from(v)));
+    }
+
+    for (k, mut dirs) in exported_header_dirs {
+        dirs.sort_by_key(|(sort_key, _dir)| *sort_key);
+        crates
+            .entry(k)
+            .or_default()
+            .exported_header_dirs
+            .extend(dirs.into_iter().map(|(_sort_key, dir)| dir));
     }
 
     crates.into_iter().map(|entry| entry.1).collect()

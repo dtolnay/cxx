@@ -180,12 +180,18 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
 
     let crate_dir = make_crate_dir(prj);
     let include_dir = make_include_dir(prj)?;
-    let this_crate = Crate {
+    let mut this_crate = Crate {
         include_prefix: Some(prj.include_prefix.clone()),
         links: env::var_os("CARGO_MANIFEST_LINKS"),
-        crate_dir,
-        include_dir: Some(include_dir),
+        exported_header_dirs: Vec::new(),
     };
+
+    // The generated code directory (include_dir) is placed in front of
+    // crate_dir on the include line so that `#include "path/to/file.rs"` from
+    // C++ "magically" works and refers to the API generated from that Rust
+    // source file.
+    this_crate.exported_header_dirs.push(include_dir);
+    this_crate.exported_header_dirs.extend(crate_dir);
     this_crate.print_to_cargo();
 
     let mut build = Build::new();
@@ -201,17 +207,9 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
 
     eprintln!("\nCXX include path:");
     for krate in crates {
-        if let Some(include_dir) = &krate.include_dir {
-            build.include(include_dir);
-            eprintln!("  {}", include_dir.display());
-        }
-        if let Some(crate_dir) = &krate.crate_dir {
-            // Placed after the generated code directory (include_dir) on the
-            // include line so that `#include "path/to/file.rs"` from C++
-            // "magically" works and refers to the API generated from that Rust
-            // source file.
-            build.include(crate_dir);
-            eprintln!("  {}", crate_dir.display());
+        for header_dir in &krate.exported_header_dirs {
+            build.include(header_dir);
+            eprintln!("  {}", header_dir.display());
         }
     }
 
