@@ -1,6 +1,6 @@
 [package]
 name = "cxxbridge-macro"
-version = "0.5.3"
+version = "0.5.4"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
