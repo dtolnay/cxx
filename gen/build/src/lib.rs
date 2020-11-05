@@ -177,38 +177,7 @@ impl Project {
 // on the current crate.
 fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Result<Build> {
     let ref prj = Project::init()?;
-
-    let crate_dir = make_crate_dir(prj);
-    let include_dir = make_include_dir(prj)?;
-    let mut this_crate = Crate {
-        include_prefix: Some(prj.include_prefix.clone()),
-        links: env::var_os("CARGO_MANIFEST_LINKS"),
-        header_dirs: Vec::new(),
-    };
-
-    // The generated code directory (include_dir) is placed in front of
-    // crate_dir on the include line so that `#include "path/to/file.rs"` from
-    // C++ "magically" works and refers to the API generated from that Rust
-    // source file.
-    this_crate.header_dirs.push(HeaderDir {
-        exported: true,
-        path: include_dir,
-    });
-    if let Some(crate_dir) = crate_dir {
-        this_crate.header_dirs.push(HeaderDir {
-            exported: true,
-            path: crate_dir,
-        });
-    }
-    for exported_dir in &CFG.exported_header_dirs {
-        if !exported_dir.is_absolute() {
-            return Err(Error::ExportedDirNotAbsolute(exported_dir));
-        }
-        this_crate.header_dirs.push(HeaderDir {
-            exported: true,
-            path: PathBuf::from(exported_dir),
-        });
-    }
+    let this_crate = make_this_crate(prj)?;
     this_crate.print_to_cargo();
 
     let mut build = Build::new();
@@ -235,6 +204,45 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
     }
 
     Ok(build)
+}
+
+fn make_this_crate(prj: &Project) -> Result<Crate> {
+    let crate_dir = make_crate_dir(prj);
+    let include_dir = make_include_dir(prj)?;
+
+    let mut this_crate = Crate {
+        include_prefix: Some(prj.include_prefix.clone()),
+        links: env::var_os("CARGO_MANIFEST_LINKS"),
+        header_dirs: Vec::new(),
+    };
+
+    // The generated code directory (include_dir) is placed in front of
+    // crate_dir on the include line so that `#include "path/to/file.rs"` from
+    // C++ "magically" works and refers to the API generated from that Rust
+    // source file.
+    this_crate.header_dirs.push(HeaderDir {
+        exported: true,
+        path: include_dir,
+    });
+
+    if let Some(crate_dir) = crate_dir {
+        this_crate.header_dirs.push(HeaderDir {
+            exported: true,
+            path: crate_dir,
+        });
+    }
+
+    for exported_dir in &CFG.exported_header_dirs {
+        if !exported_dir.is_absolute() {
+            return Err(Error::ExportedDirNotAbsolute(exported_dir));
+        }
+        this_crate.header_dirs.push(HeaderDir {
+            exported: true,
+            path: PathBuf::from(exported_dir),
+        });
+    }
+
+    Ok(this_crate)
 }
 
 fn make_crate_dir(prj: &Project) -> Option<PathBuf> {
