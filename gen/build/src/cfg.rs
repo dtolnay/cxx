@@ -1,9 +1,17 @@
 use std::fmt::{self, Debug};
 use std::marker::PhantomData;
+use std::path::Path;
 
 /// Build configuration. See [CFG].
 pub struct Cfg<'a> {
     pub include_prefix: &'a str,
+    // Not implemented yet. https://github.com/dtolnay/cxx/issues/417
+    #[doc(hidden)]
+    pub exported_header_dirs: Vec<&'a Path>,
+    #[doc(hidden)]
+    pub exported_header_prefixes: Vec<&'a str>,
+    #[doc(hidden)]
+    pub exported_header_links: Vec<&'a str>,
     marker: PhantomData<*const ()>, // !Send + !Sync
 }
 
@@ -62,6 +70,9 @@ pub struct Cfg<'a> {
 #[cfg(doc)]
 pub static mut CFG: Cfg = Cfg {
     include_prefix: "",
+    exported_header_dirs: Vec::new(),
+    exported_header_prefixes: Vec::new(),
+    exported_header_links: Vec::new(),
     marker: PhantomData,
 };
 
@@ -123,6 +134,9 @@ mod r#impl {
                 .str();
             super::Cfg {
                 include_prefix,
+                exported_header_dirs: Vec::new(),
+                exported_header_prefixes: Vec::new(),
+                exported_header_links: Vec::new(),
                 marker: PhantomData,
             }
         }
