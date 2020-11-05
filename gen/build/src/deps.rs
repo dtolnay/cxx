@@ -2,8 +2,15 @@ use std::collections::BTreeMap;
 use std::env;
 use std::path::PathBuf;
 
-pub fn include_dirs() -> impl Iterator<Item = PathBuf> {
-    let mut env_include_dirs = BTreeMap::new();
+#[derive(Default)]
+pub struct Crate {
+    pub crate_dir: Option<PathBuf>,
+    pub include_dir: Option<PathBuf>,
+}
+
+pub fn direct_dependencies() -> Vec<Crate> {
+    let mut crates: BTreeMap<String, Crate> = BTreeMap::new();
+
     for (k, v) in env::vars_os() {
         let mut k = k.to_string_lossy().into_owned();
         // Only variables set from a build script of direct dependencies are
@@ -22,17 +29,15 @@ pub fn include_dirs() -> impl Iterator<Item = PathBuf> {
         //   - https://doc.rust-lang.org/cargo/reference/build-scripts.html#the-links-manifest-key
         //   - https://doc.rust-lang.org/cargo/reference/build-script-examples.html#using-another-sys-crate
         if k.starts_with("DEP_") {
-            if k.ends_with("_CXXBRIDGE_INCLUDE") {
-                // Tweak to ensure sorted before the other one, for the same
-                // reason as the comment on ordering of include_dir vs crate_dir
-                // above.
-                k.replace_range(k.len() - "INCLUDE".len().., "0");
-                env_include_dirs.insert(k, PathBuf::from(v));
-            } else if k.ends_with("_CXXBRIDGE_CRATE") {
-                k.replace_range(k.len() - "CRATE".len().., "1");
-                env_include_dirs.insert(k, PathBuf::from(v));
+            if k.ends_with("_CXXBRIDGE_CRATE") {
+                k.truncate(k.len() - "_CXXBRIDGE_CRATE".len());
+                crates.entry(k).or_default().crate_dir = Some(PathBuf::from(v));
+            } else if k.ends_with("_CXXBRIDGE_INCLUDE") {
+                k.truncate(k.len() - "_CXXBRIDGE_INCLUDE".len());
+                crates.entry(k).or_default().include_dir = Some(PathBuf::from(v));
             }
         }
     }
-    env_include_dirs.into_iter().map(|entry| entry.1)
+
+    crates.into_iter().map(|entry| entry.1).collect()
 }
