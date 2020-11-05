@@ -100,15 +100,32 @@ mod r#impl {
     use std::path::Path;
     use std::sync::{PoisonError, RwLock};
 
-    lazy_static! {
-        static ref INCLUDE_PREFIX: RwLock<InternedString> = RwLock::new({
-            crate::env_os("CARGO_PKG_NAME")
+    struct CurrentCfg {
+        include_prefix: InternedString,
+        exported_header_dirs: Vec<InternedString>,
+        exported_header_prefixes: Vec<InternedString>,
+        exported_header_links: Vec<InternedString>,
+    }
+
+    impl CurrentCfg {
+        fn default() -> Self {
+            let include_prefix = crate::env_os("CARGO_PKG_NAME")
                 .map(|pkg| intern(&pkg.to_string_lossy()))
-                .unwrap_or_default()
-        });
-        static ref EXPORTED_HEADER_DIRS: RwLock<Vec<InternedString>> = RwLock::new(Vec::new());
-        static ref EXPORTED_HEADER_PREFIXES: RwLock<Vec<InternedString>> = RwLock::new(Vec::new());
-        static ref EXPORTED_HEADER_LINKS: RwLock<Vec<InternedString>> = RwLock::new(Vec::new());
+                .unwrap_or_default();
+            let exported_header_dirs = Vec::new();
+            let exported_header_prefixes = Vec::new();
+            let exported_header_links = Vec::new();
+            CurrentCfg {
+                include_prefix,
+                exported_header_dirs,
+                exported_header_prefixes,
+                exported_header_links,
+            }
+        }
+    }
+
+    lazy_static! {
+        static ref CURRENT: RwLock<CurrentCfg> = RwLock::new(CurrentCfg::default());
     }
 
     thread_local! {
@@ -132,28 +149,23 @@ mod r#impl {
 
     impl<'a> Cfg<'a> {
         fn current() -> super::Cfg<'a> {
-            let include_prefix = INCLUDE_PREFIX
-                .read()
-                .unwrap_or_else(PoisonError::into_inner)
-                .str();
-            let exported_header_dirs = EXPORTED_HEADER_DIRS
-                .read()
-                .unwrap_or_else(PoisonError::into_inner)
+            let current = CURRENT.read().unwrap_or_else(PoisonError::into_inner);
+            let include_prefix = current.include_prefix.str();
+            let exported_header_dirs = current
+                .exported_header_dirs
                 .iter()
                 .copied()
                 .map(InternedString::str)
                 .map(Path::new)
                 .collect();
-            let exported_header_prefixes = EXPORTED_HEADER_PREFIXES
-                .read()
-                .unwrap_or_else(PoisonError::into_inner)
+            let exported_header_prefixes = current
+                .exported_header_prefixes
                 .iter()
                 .copied()
                 .map(InternedString::str)
                 .collect();
-            let exported_header_links = EXPORTED_HEADER_LINKS
-                .read()
-                .unwrap_or_else(PoisonError::into_inner)
+            let exported_header_links = current
+                .exported_header_links
                 .iter()
                 .copied()
                 .map(InternedString::str)
@@ -223,28 +235,21 @@ mod r#impl {
     impl<'a> Drop for Cfg<'a> {
         fn drop(&mut self) {
             if let Cfg::Mut(cfg) = self {
-                *INCLUDE_PREFIX
-                    .write()
-                    .unwrap_or_else(PoisonError::into_inner) = intern(cfg.include_prefix);
-                *EXPORTED_HEADER_DIRS
-                    .write()
-                    .unwrap_or_else(PoisonError::into_inner) = cfg
+                let mut current = CURRENT.write().unwrap_or_else(PoisonError::into_inner);
+                current.include_prefix = intern(cfg.include_prefix);
+                current.exported_header_dirs = cfg
                     .exported_header_dirs
                     .iter()
                     .copied()
                     .map(|path| intern(&path.to_string_lossy()))
                     .collect();
-                *EXPORTED_HEADER_PREFIXES
-                    .write()
-                    .unwrap_or_else(PoisonError::into_inner) = cfg
+                current.exported_header_prefixes = cfg
                     .exported_header_prefixes
                     .iter()
                     .copied()
                     .map(intern)
                     .collect();
-                *EXPORTED_HEADER_LINKS
-                    .write()
-                    .unwrap_or_else(PoisonError::into_inner) = cfg
+                current.exported_header_links = cfg
                     .exported_header_links
                     .iter()
                     .copied()
