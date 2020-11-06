@@ -92,4 +92,4 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@clippy
-      - run: cargo clippy --workspace -- -Dclippy::all
+      - run: cargo clippy --workspace --tests -- -Dclippy::all
