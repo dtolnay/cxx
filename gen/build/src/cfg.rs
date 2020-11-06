@@ -19,6 +19,8 @@ pub struct Cfg<'a> {
 ///
 /// <br>
 ///
+/// <div style="float:right;margin:22px 50px 0;font-size:1.15em;color:#444"><strong>&amp;str</strong></div>
+///
 /// ## **`CFG.include_prefix`**
 ///
 /// The prefix at which C++ code from your crate as well as directly dependent
@@ -68,6 +70,8 @@ pub struct Cfg<'a> {
 /// will not be importable from outside of the same crate.
 ///
 /// <br>
+///
+/// <div style="float:right;margin:22px 50px 0;font-size:1.15em;color:#444"><strong>Vec&lt;&amp;Path&gt;</strong></div>
 ///
 /// ## **`CFG.exported_header_dirs`**
 ///
@@ -140,7 +144,9 @@ pub struct Cfg<'a> {
 /// }
 /// ```
 ///
-/// <br>
+/// <p style="margin:0"><br><br></p>
+///
+/// <div style="float:right;margin:22px 50px 0;font-size:1.15em;color:#444"><strong>Vec&lt;&amp;str&gt;</strong></div>
 ///
 /// ## **`CFG.exported_header_prefixes`**
 ///
@@ -195,7 +201,9 @@ pub struct Cfg<'a> {
 /// }
 /// ```
 ///
-/// <br>
+/// <p style="margin:0"><br><br></p>
+///
+/// <div style="float:right;margin:22px 50px 0;font-size:1.15em;color:#444"><strong>Vec&lt;&amp;str&gt;</strong></div>
 ///
 /// ## **`CFG.exported_header_links`**
 ///
