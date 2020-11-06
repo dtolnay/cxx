@@ -21,12 +21,11 @@ pub struct Cfg<'a> {
 ///
 /// ## **`CFG.include_prefix`**
 ///
-/// Presently the only exposed configuration is the `include_prefix`, the prefix
-/// at which C++ code from your crate as well as directly dependent crates can
-/// access the code generated during this build.
+/// The prefix at which C++ code from your crate as well as directly dependent
+/// crates can access the code generated during this build.
 ///
 /// By default, the `include_prefix` is equal to the name of the current crate.
-/// That means if our crate is called `demo` and has Rust source files in a
+/// That means if your crate is called `demo` and has Rust source files in a
 /// *src/* directory and maybe some handwritten C++ header files in an
 /// *include/* directory, then the current crate as well as downstream crates
 /// might include them as follows:
@@ -67,6 +66,164 @@ pub struct Cfg<'a> {
 /// Additionally, headers from a direct dependency are only importable if the
 /// dependency's Cargo.toml manifest contains a `links` key. If not, its headers
 /// will not be importable from outside of the same crate.
+///
+/// <br>
+///
+/// ## **`CFG.exported_header_dirs`**
+///
+/// A vector of absolute paths. The current crate, directly dependent crates,
+/// and further crates to which this crate's headers are exported (see below)
+/// will be able to `#include` headers from these directories.
+///
+/// Adding a directory to `exported_header_dirs` is similar to adding it to the
+/// current build via the `cc` crate's [`Build::include`][cc::Build::include],
+/// but *also* makes the directory available to downstream crates that want to
+/// `#include` one of the headers from your crate. If the dir were added only
+/// using `Build::include`, the downstream crate including your header would
+/// need to manually add the same directory to their own build as well.
+///
+/// When using `exported_header_dirs`, your crate must also set a `links` key
+/// for itself in Cargo.toml. See [*the `links` manifest key*][links]. The
+/// reason is that Cargo imposes no ordering on the execution of build scripts
+/// without a `links` key, which means the downstream crate's build script might
+/// execute before yours decides what to put into `exported_header_dirs`.
+///
+/// [links]: https://doc.rust-lang.org/cargo/reference/build-scripts.html#the-links-manifest-key
+///
+/// ### Example
+///
+/// One of your crate's headers wants to include a system library, such as
+/// `#include "Python.h"`.
+///
+/// ```no_run
+/// // build.rs
+///
+/// use cxx_build::CFG;
+/// use std::path::PathBuf;
+///
+/// fn main() {
+///     let python3 = pkg_config::probe_library("python3").unwrap();
+///     let python_include_paths = python3.include_paths.iter().map(PathBuf::as_path);
+///     CFG.exported_header_dirs.extend(python_include_paths);
+///
+///     cxx_build::bridge("src/bridge.rs").compile("demo");
+/// }
+/// ```
+///
+/// ### Example
+///
+/// Your crate wants to rearrange the headers that it exports vs how they're
+/// laid out locally inside the crate's source directory.
+///
+/// Suppose the crate as published contains a file at `./include/myheader.h` but
+/// wants it available to downstream crates as `#include "foo/v1/public.h"`.
+///
+/// ```no_run
+/// // build.rs
+///
+/// use cxx_build::CFG;
+/// use std::path::Path;
+/// use std::{env, fs};
+///
+/// fn main() {
+///     let out_dir = env::var_os("OUT_DIR").unwrap();
+///     let headers = Path::new(&out_dir).join("headers");
+///     CFG.exported_header_dirs.push(&headers);
+///
+///     // We contain `include/myheader.h` locally, but
+///     // downstream will use `#include "foo/v1/public.h"`
+///     let foo = headers.join("foo").join("v1");
+///     fs::create_dir_all(&foo).unwrap();
+///     fs::copy("include/myheader.h", foo.join("public.h")).unwrap();
+///
+///     cxx_build::bridge("src/bridge.rs").compile("demo");
+/// }
+/// ```
+///
+/// <br>
+///
+/// ## **`CFG.exported_header_prefixes`**
+///
+/// Vector of strings. These each refer to the `include_prefix` of one of your
+/// direct dependencies, or a prefix thereof. They describe which of your
+/// dependencies participate in your crate's C++ public API, as opposed to
+/// private use by your crate's implementation.
+///
+/// As a general rule, if one of your headers `#include`s something from one of
+/// your dependencies, you need to put that dependency's `include_prefix` into
+/// `CFG.exported_header_prefixes` (*or* their `links` key into
+/// `CFG.exported_header_links`; see below). On the other hand if only your C++
+/// implementation files and *not* your headers are importing from the
+/// dependency, you do not export that dependency.
+///
+/// The significance of exported headers is that if downstream code (crate 𝒜)
+/// contains an `#include` of a header from your crate (ℬ) and your header
+/// contains an `#include` of something from your dependency (𝒞), the exported
+/// dependency 𝒞 becomes available during the downstream crate 𝒜's build.
+/// Otherwise the downstream crate 𝒜 doesn't know about 𝒞 and wouldn't be able
+/// to find what header your header is referring to, and would fail to build.
+///
+/// When using `exported_header_prefixes`, your crate must also set a `links`
+/// key for itself in Cargo.toml.
+///
+/// ### Example
+///
+/// Suppose you have a crate with 5 direct dependencies and the `include_prefix`
+/// for each one are:
+///
+/// - "crate0"
+/// - "group/api/crate1"
+/// - "group/api/crate2"
+/// - "group/api/contrib/crate3"
+/// - "detail/crate4"
+///
+/// Your header involves types from the first four so we re-export those as part
+/// of your public API, while crate4 is only used internally by your cc file not
+/// your header, so we do not export:
+///
+/// ```no_run
+/// // build.rs
+///
+/// use cxx_build::CFG;
+///
+/// fn main() {
+///     CFG.exported_header_prefixes = vec!["crate0", "group/api"];
+///
+///     cxx_build::bridge("src/bridge.rs")
+///         .file("src/impl.cc")
+///         .compile("demo");
+/// }
+/// ```
+///
+/// <br>
+///
+/// ## **`CFG.exported_header_links`**
+///
+/// Vector of strings. These each refer to the `links` attribute ([*the `links`
+/// manifest key*][links]) of one of your crate's direct dependencies.
+///
+/// This achieves an equivalent result to `CFG.exported_header_prefixes` by
+/// re-exporting a dependency as part of your crate's public API, except with
+/// finer grained control for cases when multiple crates might be sharing the
+/// same `include_prefix` and you'd like to export some but not others. Links
+/// attributes are guaranteed to be unique identifiers by Cargo.
+///
+/// When using `exported_header_links`, your crate must also set a `links` key
+/// for itself in Cargo.toml.
+///
+/// ### Example
+///
+/// ```no_run
+/// // build.rs
+///
+/// use cxx_build::CFG;
+///
+/// fn main() {
+///     CFG.exported_header_links.push("git2");
+///
+///     cxx_build::bridge("src/bridge.rs").compile("demo");
+/// }
+/// ```
 #[cfg(doc)]
 pub static mut CFG: Cfg = Cfg {
     include_prefix: "",

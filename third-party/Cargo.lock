@@ -80,6 +80,7 @@ dependencies = [
  "codespan-reporting",
  "cxx-gen",
  "lazy_static",
+ "pkg-config",
  "proc-macro2",
  "quote",
  "scratch",
@@ -186,6 +187,12 @@ checksum = "f96aa785c87218ec773df6c510af203872b34e2df2cf47d6e908e5f36231e354"
 dependencies = [
  "cc",
 ]
+
+[[package]]
+name = "pkg-config"
+version = "0.3.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3831453b3449ceb48b6d9c7ad7c96d5ea673e9b470a1dc578c2ce6521230884c"
 
 [[package]]
 name = "proc-macro2"

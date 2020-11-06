@@ -21,6 +21,7 @@ syn = { version = "1.0.20", default-features = false, features = ["parsing", "pr
 
 [dev-dependencies]
 cxx-gen = { version = "0.6", path = "../lib" }
+pkg-config = "0.3"
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
