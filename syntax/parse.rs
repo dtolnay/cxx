@@ -106,30 +106,40 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct, mut namespace: Namespace) -> 
 }
 
 fn parse_enum(cx: &mut Errors, item: ItemEnum, mut namespace: Namespace) -> Result<Api> {
-    let generics = &item.generics;
-    if !generics.params.is_empty() || generics.where_clause.is_some() {
-        let enum_token = item.enum_token;
-        let ident = &item.ident;
-        let where_clause = &generics.where_clause;
-        let span = quote!(#enum_token #ident #generics #where_clause);
-        return Err(Error::new_spanned(
-            span,
-            "enums with generic parameters are not allowed",
-        ));
-    }
-
     let mut doc = Doc::new();
     let mut repr = None;
+    let mut cxx_name = None;
+    let mut rust_name = None;
     attrs::parse(
         cx,
         &item.attrs,
         attrs::Parser {
             doc: Some(&mut doc),
             repr: Some(&mut repr),
+            cxx_name: Some(&mut cxx_name),
+            rust_name: Some(&mut rust_name),
             namespace: Some(&mut namespace),
             ..Default::default()
         },
     );
+
+    let name = Pair::new_from_differing_names(
+        namespace.clone(),
+        cxx_name.unwrap_or(item.ident.clone()),
+        rust_name.unwrap_or(item.ident),
+    );
+
+    let generics = &item.generics;
+    if !generics.params.is_empty() || generics.where_clause.is_some() {
+        let enum_token = item.enum_token;
+        let where_clause = &generics.where_clause;
+        let ident_cxx = name.cxx;
+        let span = quote!(#enum_token #ident_cxx #generics #where_clause);
+        return Err(Error::new_spanned(
+            span,
+            "enums with generic parameters are not allowed",
+        ));
+    }
 
     let mut variants = Vec::new();
     let mut discriminants = DiscriminantSet::new(repr);
@@ -154,8 +164,25 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, mut namespace: Namespace) -> Resu
             }
         };
         let expr = variant.discriminant.map(|(_, expr)| expr);
+
+        let mut cxx_name = None;
+        let mut rust_name = None;
+        attrs::parse(
+            cx,
+            &variant.attrs,
+            attrs::Parser {
+                cxx_name: Some(&mut cxx_name),
+                rust_name: Some(&mut rust_name),
+                ..Default::default()
+            },
+        );
+
         variants.push(Variant {
-            ident: variant.ident,
+            ident: Pair::new_from_differing_names(
+                namespace.clone(),
+                cxx_name.unwrap_or(variant.ident.clone()),
+                rust_name.unwrap_or(variant.ident),
+            ),
             discriminant,
             expr,
         });
@@ -177,7 +204,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, mut namespace: Namespace) -> Resu
     Ok(Api::Enum(Enum {
         doc,
         enum_token,
-        name: Pair::new(namespace, item.ident),
+        name,
         brace_token,
         variants,
         repr,

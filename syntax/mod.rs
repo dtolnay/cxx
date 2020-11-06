@@ -142,7 +142,7 @@ pub struct Receiver {
 }
 
 pub struct Variant {
-    pub ident: Ident,
+    pub ident: Pair,
     pub discriminant: Discriminant,
     pub expr: Option<Expr>,
 }

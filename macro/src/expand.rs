@@ -155,7 +155,7 @@ fn expand_enum(enm: &Enum) -> TokenStream {
     let repr = enm.repr;
     let type_id = type_id(&enm.name);
     let variants = enm.variants.iter().map(|variant| {
-        let variant_ident = &variant.ident;
+        let variant_ident = &variant.ident.rust;
         let discriminant = &variant.discriminant;
         Some(quote! {
             pub const #variant_ident: Self = #ident { repr: #discriminant };
