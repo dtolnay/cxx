@@ -4,13 +4,13 @@ use std::path::Path;
 
 /// Build configuration. See [CFG].
 pub struct Cfg<'a> {
+    /// See [`CFG.include_prefix`][CFG#cfginclude_prefix].
     pub include_prefix: &'a str,
-    // Not implemented yet. https://github.com/dtolnay/cxx/issues/417
-    #[doc(hidden)]
+    /// See [`CFG.exported_header_dirs`][CFG#cfgexported_header_dirs].
     pub exported_header_dirs: Vec<&'a Path>,
-    #[doc(hidden)]
+    /// See [`CFG.exported_header_prefixes`][CFG#cfgexported_header_prefixes].
     pub exported_header_prefixes: Vec<&'a str>,
-    #[doc(hidden)]
+    /// See [`CFG.exported_header_links`][CFG#cfgexported_header_links].
     pub exported_header_links: Vec<&'a str>,
     marker: PhantomData<*const ()>, // !Send + !Sync
 }
