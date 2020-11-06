@@ -346,6 +346,21 @@
 //! <tr><td><sup><i>tbd</i></sup></td><td>std::shared_ptr&lt;T&gt;</td></tr>
 //! </table>
 //!
+//! ## `Result` and exceptions
+//! 
+//! For Rust functions called from C++, anything with a `Display` impl can be
+//! returned as an `Err`. You'll need to declare the function signature inside the
+//! mod `ffi` as returning `-> Result<T>` without an explicit error type, but the
+//! actual implementation outside of the mod ffi can have any error type that
+//! implements `Display`. Returning an error will turn into an exception in C++ with
+//! type `rust::Error` whose message is the `Display` of your Rust error.
+//! 
+//! For C++ functions called from Rust, if you declare the return type `->
+//! Result<T>` then the error type you get when calling is always `cxx::Exception`.
+//! The `Display` impl of `Exception` will give you the message of the exception
+//! thrown by C++ according to
+//! [`std::exception::what()`](https://en.cppreference.com/w/cpp/error/exception/what).
+//! 
 //! [https://github.com/dtolnay/cxx]: https://github.com/dtolnay/cxx
 
 #![no_std]
