@@ -68,13 +68,13 @@ impl Display for Error {
             ),
             Error::UnusedExportedPrefix(unused) => write!(
                 f,
-                "unused element in {}: {} does not match the include prefix of any direct dependency",
+                "unused element in {}: {:?} does not match the include prefix of any direct dependency",
                 expr!(CFG.exported_header_prefixes),
                 unused,
             ),
             Error::UnusedExportedLinks(unused) => write!(
                 f,
-                "unused element in {}: {} does not match the `links` attribute any direct dependency",
+                "unused element in {}: {:?} does not match the `links` attribute any direct dependency",
                 expr!(CFG.exported_header_links),
                 unused,
             ),
