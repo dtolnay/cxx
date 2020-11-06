@@ -72,6 +72,7 @@ use crate::gen::Opt;
 use crate::paths::PathExt;
 use crate::target::TargetDir;
 use cc::Build;
+use std::collections::btree_map::{BTreeMap, Entry};
 use std::env;
 use std::ffi::{OsStr, OsString};
 use std::io::{self, Write};
@@ -252,6 +253,7 @@ fn make_this_crate(prj: &Project) -> Result<Crate> {
         });
     }
 
+    let mut header_dirs_index = BTreeMap::new();
     for krate in deps::direct_dependencies() {
         let is_link_exported = || match &krate.links {
             None => false,
@@ -271,12 +273,22 @@ fn make_this_crate(prj: &Project) -> Result<Crate> {
 
         let exported = is_link_exported() || is_prefix_exported();
 
-        this_crate
-            .header_dirs
-            .extend(krate.header_dirs.into_iter().map(|dir| HeaderDir {
-                exported,
-                path: dir.path,
-            }));
+        for dir in krate.header_dirs {
+            // Deduplicate dirs reachable via multiple transitive dependencies.
+            match header_dirs_index.entry(dir.path.clone()) {
+                Entry::Vacant(entry) => {
+                    entry.insert(this_crate.header_dirs.len());
+                    this_crate.header_dirs.push(HeaderDir {
+                        exported,
+                        path: dir.path,
+                    });
+                }
+                Entry::Occupied(entry) => {
+                    let index = *entry.get();
+                    this_crate.header_dirs[index].exported |= exported;
+                }
+            }
+        }
     }
 
     Ok(this_crate)
