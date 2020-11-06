@@ -243,9 +243,19 @@ pub static mut CFG: Cfg = Cfg {
 
 impl<'a> Debug for Cfg<'a> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let Self {
+            include_prefix,
+            exported_header_dirs,
+            exported_header_prefixes,
+            exported_header_links,
+            marker: _,
+        } = self;
         formatter
             .debug_struct("Cfg")
-            .field("include_prefix", &self.include_prefix)
+            .field("include_prefix", include_prefix)
+            .field("exported_header_dirs", exported_header_dirs)
+            .field("exported_header_prefixes", exported_header_prefixes)
+            .field("exported_header_links", exported_header_links)
             .finish()
     }
 }
