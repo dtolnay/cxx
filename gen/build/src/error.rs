@@ -13,6 +13,9 @@ pub(super) enum Error {
     Fs(fs::Error),
     ExportedDirNotAbsolute(&'static Path),
     ExportedEmptyPrefix,
+    ExportedDirsWithoutLinks,
+    ExportedPrefixesWithoutLinks,
+    ExportedLinksWithoutLinks,
 }
 
 macro_rules! expr {
@@ -21,6 +24,9 @@ macro_rules! expr {
         stringify!($expr)
     }};
 }
+
+const LINKS_DOCUMENTATION: &str =
+    "https://doc.rust-lang.org/cargo/reference/build-scripts.html#the-links-manifest-key";
 
 impl Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -39,6 +45,24 @@ impl Display for Error {
                 f,
                 "element of {} must not be empty string",
                 expr!(CFG.exported_header_prefixes),
+            ),
+            Error::ExportedDirsWithoutLinks => write!(
+                f,
+                "if {} is nonempty then `links` needs to be set in Cargo.toml; see {}",
+                expr!(CFG.exported_header_dirs),
+                LINKS_DOCUMENTATION,
+            ),
+            Error::ExportedPrefixesWithoutLinks => write!(
+                f,
+                "if {} is nonempty then `links` needs to be set in Cargo.toml; see {}",
+                expr!(CFG.exported_header_prefixes),
+                LINKS_DOCUMENTATION,
+            ),
+            Error::ExportedLinksWithoutLinks => write!(
+                f,
+                "if {} is nonempty then `links` needs to be set in Cargo.toml; see {}",
+                expr!(CFG.exported_header_links),
+                LINKS_DOCUMENTATION,
             ),
         }
     }
