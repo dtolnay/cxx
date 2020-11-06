@@ -72,7 +72,8 @@ use crate::gen::Opt;
 use crate::paths::PathExt;
 use crate::target::TargetDir;
 use cc::Build;
-use std::collections::btree_map::{BTreeMap, Entry};
+use std::collections::btree_map::Entry;
+use std::collections::{BTreeMap, BTreeSet};
 use std::env;
 use std::ffi::{OsStr, OsString};
 use std::io::{self, Write};
@@ -270,21 +271,29 @@ fn make_this_crate(prj: &Project) -> Result<Crate> {
     }
 
     let mut header_dirs_index = BTreeMap::new();
+    let mut used_header_links = BTreeSet::new();
+    let mut used_header_prefixes = BTreeSet::new();
     for krate in deps::direct_dependencies() {
-        let is_link_exported = || match &krate.links {
+        let mut is_link_exported = || match &krate.links {
             None => false,
-            Some(links_attribute) => CFG
-                .exported_header_links
-                .iter()
-                .any(|exported| links_attribute == *exported),
+            Some(links_attribute) => CFG.exported_header_links.iter().any(|&exported| {
+                let matches = links_attribute == exported;
+                if matches {
+                    used_header_links.insert(exported);
+                }
+                matches
+            }),
         };
 
-        let is_prefix_exported = || match &krate.include_prefix {
+        let mut is_prefix_exported = || match &krate.include_prefix {
             None => false,
-            Some(include_prefix) => CFG
-                .exported_header_prefixes
-                .iter()
-                .any(|exported| include_prefix.starts_with(exported)),
+            Some(include_prefix) => CFG.exported_header_prefixes.iter().any(|&exported| {
+                let matches = include_prefix.starts_with(exported);
+                if matches {
+                    used_header_prefixes.insert(exported);
+                }
+                matches
+            }),
         };
 
         let exported = is_link_exported() || is_prefix_exported();
@@ -305,6 +314,22 @@ fn make_this_crate(prj: &Project) -> Result<Crate> {
                 }
             }
         }
+    }
+
+    if let Some(unused) = CFG
+        .exported_header_links
+        .iter()
+        .find(|&exported| !used_header_links.contains(exported))
+    {
+        return Err(Error::UnusedExportedLinks(unused));
+    }
+
+    if let Some(unused) = CFG
+        .exported_header_prefixes
+        .iter()
+        .find(|&exported| !used_header_prefixes.contains(exported))
+    {
+        return Err(Error::UnusedExportedPrefix(unused));
     }
 
     Ok(this_crate)
