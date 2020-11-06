@@ -16,6 +16,8 @@ pub(super) enum Error {
     ExportedDirsWithoutLinks,
     ExportedPrefixesWithoutLinks,
     ExportedLinksWithoutLinks,
+    UnusedExportedPrefix(&'static str),
+    UnusedExportedLinks(&'static str),
 }
 
 macro_rules! expr {
@@ -63,6 +65,18 @@ impl Display for Error {
                 "if {} is nonempty then `links` needs to be set in Cargo.toml; see {}",
                 expr!(CFG.exported_header_links),
                 LINKS_DOCUMENTATION,
+            ),
+            Error::UnusedExportedPrefix(unused) => write!(
+                f,
+                "unused element in {}: {} does not match the include prefix of any direct dependency",
+                expr!(CFG.exported_header_prefixes),
+                unused,
+            ),
+            Error::UnusedExportedLinks(unused) => write!(
+                f,
+                "unused element in {}: {} does not match the `links` attribute any direct dependency",
+                expr!(CFG.exported_header_links),
+                unused,
             ),
         }
     }
