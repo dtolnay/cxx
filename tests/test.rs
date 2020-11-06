@@ -43,9 +43,13 @@ fn test_c_return() {
         200_u8,
         ffi::c_return_unique_ptr_vector_u8().into_iter().sum(),
     );
-    assert_eq!(
-        200.5_f64,
-        ffi::c_return_unique_ptr_vector_f64().into_iter().sum(),
+    assert!(
+        (200.5_f64
+            - ffi::c_return_unique_ptr_vector_f64()
+                .into_iter()
+                .sum::<f64>())
+        .abs()
+            <= f64::EPSILON
     );
     assert_eq!(2, ffi::c_return_unique_ptr_vector_shared().len());
     assert_eq!(
@@ -59,29 +63,29 @@ fn test_c_return() {
     assert_eq!(2021, ffi::c_return_sum(2020, 1));
     match ffi::c_return_enum(0) {
         enm @ ffi::Enum::AVal => assert_eq!(0, enm.repr),
-        _ => assert!(false),
+        _ => unreachable!(),
     }
     match ffi::c_return_enum(1) {
         enm @ ffi::Enum::BVal => assert_eq!(2020, enm.repr),
-        _ => assert!(false),
+        _ => unreachable!(),
     }
     match ffi::c_return_enum(2021) {
         enm @ ffi::Enum::CVal => assert_eq!(2021, enm.repr),
-        _ => assert!(false),
+        _ => unreachable!(),
     }
     match ffi::c_return_ns_enum(0) {
         enm @ ffi::AEnum::AAVal => assert_eq!(0, enm.repr),
-        _ => assert!(false),
+        _ => unreachable!(),
     }
     match ffi::c_return_nested_ns_enum(0) {
         enm @ ffi::ABEnum::ABAVal => assert_eq!(0, enm.repr),
-        _ => assert!(false),
+        _ => unreachable!(),
     }
 }
 
 #[test]
 fn test_c_try_return() {
-    assert_eq!((), ffi::c_try_return_void().unwrap());
+    assert!(ffi::c_try_return_void().is_ok());
     assert_eq!(2020, ffi::c_try_return_primitive().unwrap());
     assert_eq!(
         "logic error",
