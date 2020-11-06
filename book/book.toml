@@ -10,4 +10,5 @@ edition = "2018"
 build-dir = "build"
 
 [output.html]
+cname = "cxx.rs"
 git-repository-url = "https://github.com/dtolnay/cxx"
