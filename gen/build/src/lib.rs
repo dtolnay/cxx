@@ -114,6 +114,8 @@ pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) ->
 struct Project {
     include_prefix: PathBuf,
     manifest_dir: PathBuf,
+    // The `links = "..."` value from Cargo.toml.
+    links_attribute: Option<OsString>,
     // Output directory as received from Cargo.
     out_dir: PathBuf,
     // Directory into which to symlink all generated code.
@@ -137,6 +139,8 @@ impl Project {
         assert!(include_prefix.is_relative());
         let include_prefix = include_prefix.components().collect();
 
+        let links_attribute = env::var_os("CARGO_MANIFEST_LINKS");
+
         let manifest_dir = paths::manifest_dir()?;
         let out_dir = paths::out_dir()?;
 
@@ -148,6 +152,7 @@ impl Project {
         Ok(Project {
             include_prefix,
             manifest_dir,
+            links_attribute,
             out_dir,
             shared_dir,
         })
@@ -177,9 +182,8 @@ impl Project {
 // current build as well as for downstream builds that have a direct dependency
 // on the current crate.
 fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Result<Build> {
-    validate_cfg()?;
-
     let ref prj = Project::init()?;
+    validate_cfg(prj)?;
     let this_crate = make_this_crate(prj)?;
     this_crate.print_to_cargo();
 
@@ -204,7 +208,7 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
     Ok(build)
 }
 
-fn validate_cfg() -> Result<()> {
+fn validate_cfg(prj: &Project) -> Result<()> {
     for exported_dir in &CFG.exported_header_dirs {
         if !exported_dir.is_absolute() {
             return Err(Error::ExportedDirNotAbsolute(exported_dir));
@@ -217,6 +221,18 @@ fn validate_cfg() -> Result<()> {
         }
     }
 
+    if prj.links_attribute.is_none() {
+        if !CFG.exported_header_dirs.is_empty() {
+            return Err(Error::ExportedDirsWithoutLinks);
+        }
+        if !CFG.exported_header_prefixes.is_empty() {
+            return Err(Error::ExportedPrefixesWithoutLinks);
+        }
+        if !CFG.exported_header_links.is_empty() {
+            return Err(Error::ExportedLinksWithoutLinks);
+        }
+    }
+
     Ok(())
 }
 
@@ -226,7 +242,7 @@ fn make_this_crate(prj: &Project) -> Result<Crate> {
 
     let mut this_crate = Crate {
         include_prefix: Some(prj.include_prefix.clone()),
-        links: env::var_os("CARGO_MANIFEST_LINKS"),
+        links: prj.links_attribute.clone(),
         header_dirs: Vec::new(),
     };
 
