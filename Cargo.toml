@@ -1,0 +1,29 @@
+[package]
+name = "mmscenegraph"
+version = "0.1.0"
+authors = ["david-cattermole <cattermole91@gmail.com>"]
+edition = "2018"
+publish = false
+
+[lib]
+name = "mmscenegraph"
+path = "./src/lib.rs"
+# NOTE: 'lib' is used to link with Rust crates, staticlib'' is used to
+# link with C++.
+crate_type = ["staticlib", "lib"]
+
+
+[dependencies]
+cxx = "0.5.5"
+libc = "0.2.0"
+
+[profile.release]
+opt-level = 3
+debug = false
+rpath = false
+lto = true
+# NOTE: If we use 'panic = "abort"' then we are unable to produce tests.
+# # https://github.com/rust-lang/cargo/issues/6313
+#
+# panic = "abort"
+debug-assertions = false
