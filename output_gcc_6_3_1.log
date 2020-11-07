@@ -1,0 +1,88 @@
+$ bash build_linux.bash
+   Compiling cc v1.0.61
+   Compiling proc-macro2 v1.0.24
+   Compiling unicode-xid v0.2.1
+   Compiling syn v1.0.48
+   Compiling cxxbridge-flags v0.5.5
+   Compiling libc v0.2.80
+   Compiling link-cplusplus v1.0.4
+   Compiling cxx v0.5.5
+   Compiling quote v1.0.7
+   Compiling cxxbridge-macro v0.5.5
+   Compiling mmscenegraph v0.1.0 (/media/share/Users/catte/dev/cxx-demo-example)
+    Finished release [optimized] target(s) in 12.34s
+-- The C compiler identification is GNU 6.3.1
+-- The CXX compiler identification is GNU 6.3.1
+-- Check for working C compiler: /opt/rh/devtoolset-6/root/usr/bin/gcc
+-- Check for working C compiler: /opt/rh/devtoolset-6/root/usr/bin/gcc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working CXX compiler: /opt/rh/devtoolset-6/root/usr/bin/g++
+-- Check for working CXX compiler: /opt/rh/devtoolset-6/root/usr/bin/g++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+Finding: libmmscenegraph.a
+RUST BUILD DIR: /media/dev/cxx-demo-example/target/release
+Rust Library: /media/dev/cxx-demo-example/target/release/libmmscenegraph.a
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /media/dev/cxx-demo-example/build
+Scanning dependencies of target libmmscenegraph
+[ 14%] Building CXX object CMakeFiles/libmmscenegraph.dir/src/_cxxbridge.cpp.o
+[ 28%] Building CXX object CMakeFiles/libmmscenegraph.dir/src/lib.cpp.o
+Linking CXX shared library liblibmmscenegraph.so
+[ 28%] Built target libmmscenegraph
+Scanning dependencies of target mmscenegraph_tests
+[ 42%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/tests/main.cpp.o
+[ 57%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/tests/test_a.cpp.o
+[ 71%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/tests/test_b.cpp.o
+[ 85%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o
+[100%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/src/lib.cpp.o
+Linking CXX executable mmscenegraph_tests
+CMakeFiles/mmscenegraph_tests.dir/tests/test_b.cpp.o: In function `test_b()':
+test_b.cpp:(.text+0x65): undefined reference to `rust::cxxbridge05::Str::Str(std::string const&)'
+CMakeFiles/mmscenegraph_tests.dir/src/lib.cpp.o: In function `mmscenegraph::make_demo(rust::cxxbridge05::Str)':
+lib.cpp:(.text+0x14b): undefined reference to `rust::cxxbridge05::Str::operator std::string() const'
+CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `mmscenegraph$cxxbridge05$make_demo':
+_cxxbridge.cpp:(.text+0x10): undefined reference to `rust::cxxbridge05::Str::Str()'
+CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `mmscenegraph$cxxbridge05$do_thing':
+_cxxbridge.cpp:(.text+0x9c): undefined reference to `cxxbridge05$box$mmscenegraph$ThingR$drop'
+CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `mmscenegraph::print_r(mmscenegraph::ThingR const&)':
+_cxxbridge.cpp:(.text+0xb1): undefined reference to `mmscenegraph$cxxbridge05$print_r'
+CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `rust::cxxbridge05::Box<mmscenegraph::ThingR>::uninit()':
+_cxxbridge.cpp:(.text+0x131): undefined reference to `cxxbridge05$box$mmscenegraph$ThingR$uninit'
+CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `rust::cxxbridge05::Box<mmscenegraph::ThingR>::drop()':
+_cxxbridge.cpp:(.text+0x141): undefined reference to `cxxbridge05$box$mmscenegraph$ThingR$drop'
+collect2: error: ld returned 1 exit status
+CMakeFiles/mmscenegraph_tests.dir/build.make:190: recipe for target 'mmscenegraph_tests' failed
+make[2]: *** [mmscenegraph_tests] Error 1
+CMakeFiles/Makefile2:98: recipe for target 'CMakeFiles/mmscenegraph_tests.dir/all' failed
+make[1]: *** [CMakeFiles/mmscenegraph_tests.dir/all] Error 2
+Makefile:116: recipe for target 'all' failed
+make: *** [all] Error 2
+[ 28%] Built target libmmscenegraph
+Linking CXX executable mmscenegraph_tests
+CMakeFiles/mmscenegraph_tests.dir/tests/test_b.cpp.o: In function `test_b()':
+test_b.cpp:(.text+0x65): undefined reference to `rust::cxxbridge05::Str::Str(std::string const&)'
+CMakeFiles/mmscenegraph_tests.dir/src/lib.cpp.o: In function `mmscenegraph::make_demo(rust::cxxbridge05::Str)':
+lib.cpp:(.text+0x14b): undefined reference to `rust::cxxbridge05::Str::operator std::string() const'
+CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `mmscenegraph$cxxbridge05$make_demo':
+_cxxbridge.cpp:(.text+0x10): undefined reference to `rust::cxxbridge05::Str::Str()'
+CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `mmscenegraph$cxxbridge05$do_thing':
+_cxxbridge.cpp:(.text+0x9c): undefined reference to `cxxbridge05$box$mmscenegraph$ThingR$drop'
+CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `mmscenegraph::print_r(mmscenegraph::ThingR const&)':
+_cxxbridge.cpp:(.text+0xb1): undefined reference to `mmscenegraph$cxxbridge05$print_r'
+CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `rust::cxxbridge05::Box<mmscenegraph::ThingR>::uninit()':
+_cxxbridge.cpp:(.text+0x131): undefined reference to `cxxbridge05$box$mmscenegraph$ThingR$uninit'
+CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `rust::cxxbridge05::Box<mmscenegraph::ThingR>::drop()':
+_cxxbridge.cpp:(.text+0x141): undefined reference to `cxxbridge05$box$mmscenegraph$ThingR$drop'
+collect2: error: ld returned 1 exit status
+CMakeFiles/mmscenegraph_tests.dir/build.make:190: recipe for target 'mmscenegraph_tests' failed
+make[2]: *** [mmscenegraph_tests] Error 1
+CMakeFiles/Makefile2:98: recipe for target 'CMakeFiles/mmscenegraph_tests.dir/all' failed
+make[1]: *** [CMakeFiles/mmscenegraph_tests.dir/all] Error 2
+Makefile:116: recipe for target 'all' failed
+make: *** [all] Error 2
+
+$ cxxbridge --version
+cxxbridge 0.5.5

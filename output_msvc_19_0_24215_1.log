@@ -1,0 +1,84 @@
+>build_windows64.bat
+Package Root: C:\Users\catte\dev\cxx-demo-example\
+   Compiling cc v1.0.61
+   Compiling proc-macro2 v1.0.24
+   Compiling unicode-xid v0.2.1
+   Compiling syn v1.0.48
+   Compiling cxxbridge-flags v0.5.5
+   Compiling libc v0.2.80
+   Compiling quote v1.0.7
+   Compiling link-cplusplus v1.0.4
+   Compiling cxx v0.5.5
+   Compiling cxxbridge-macro v0.5.5
+   Compiling mmscenegraph v0.1.0 (C:\Users\catte\dev\cxx-demo-example)
+    Finished release [optimized] target(s) in 47.27s
+-- The C compiler identification is MSVC 19.0.24215.1
+-- The CXX compiler identification is MSVC 19.0.24215.1
+-- Check for working C compiler: C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/x86_amd64/cl.exe
+-- Check for working C compiler: C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/x86_amd64/cl.exe -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/x86_amd64/cl.exe
+-- Check for working CXX compiler: C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/x86_amd64/cl.exe -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+Finding: mmscenegraph.lib
+RUST BUILD DIR: C:/Users/catte/dev/cxx-demo-example/target/release
+Rust Library: C:/Users/catte/dev/cxx-demo-example/target/release/mmscenegraph.lib
+-- Configuring done
+-- Generating done
+-- Build files have been written to: C:/Users/catte/dev/cxx-demo-example/build
+
+Microsoft (R) Program Maintenance Utility Version 14.00.24210.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Microsoft (R) Program Maintenance Utility Version 14.00.24210.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+Scanning dependencies of target libmmscenegraph
+[ 11%] Building CXX object CMakeFiles/libmmscenegraph.dir/src/_cxxbridge.cpp.obj
+_cxxbridge.cpp
+[ 22%] Building CXX object CMakeFiles/libmmscenegraph.dir/src/lib.cpp.obj
+lib.cpp
+[ 33%] Linking CXX shared library libmmscenegraph.dll
+LINK: command "C:\PROGRA~2\MICROS~2.0\VC\bin\X86_AM~1\link.exe /nologo @CMakeFiles\libmmscenegraph.dir\objects1.rsp /out:libmmscenegraph.dll /implib:libmmscenegraph.lib /pdb:C:\Users\catte\dev\cxx-demo-example\build\libmmscenegraph.pdb /dll /version:0.0 /machine:x64 /INCREMENTAL:NO ..\target\release\mmscenegraph.lib ws2_32.lib userenv.lib advapi32.lib shell32.lib msvcrt.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:libmmscenegraph.dll.manifest" failed (exit code 1120) with the following output:
+   Creating library libmmscenegraph.lib and object libmmscenegraph.exp
+_cxxbridge.cpp.obj : error LNK2019: unresolved external symbol "public: __cdecl rust::cxxbridge05::Str::Str(void)" (??0Str@cxxbridge05@rust@@QEAA@XZ) referenced in function "public: static class rust::cxxbridge05::Str __cdecl rust::cxxbridge05::`anonymous namespace'::impl<class rust::cxxbridge05::Str>::new_unchecked(struct rust::cxxbridge05::A0xebb24fd7::repr::PtrLen)" (?new_unchecked@?$impl@VStr@cxxbridge05@rust@@@?A0xebb24fd7@cxxbridge05@rust@@SA?AVStr@34@UPtrLen@repr@234@@Z)
+_cxxbridge.cpp.obj : error LNK2019: unresolved external symbol mmscenegraph$cxxbridge05$print_r referenced in function "void __cdecl mmscenegraph::print_r(struct mmscenegraph::ThingR const &)" (?print_r@mmscenegraph@@YAXAEBUThingR@1@@Z)
+_cxxbridge.cpp.obj : error LNK2019: unresolved external symbol cxxbridge05$box$mmscenegraph$ThingR$uninit referenced in function "private: void __cdecl rust::cxxbridge05::Box<struct mmscenegraph::ThingR>::uninit(void)" (?uninit@?$Box@UThingR@mmscenegraph@@@cxxbridge05@rust@@AEAAXXZ)
+_cxxbridge.cpp.obj : error LNK2019: unresolved external symbol cxxbridge05$box$mmscenegraph$ThingR$drop referenced in function "public: __cdecl rust::cxxbridge05::Box<struct mmscenegraph::ThingR>::~Box<struct mmscenegraph::ThingR>(void)" (??1?$Box@UThingR@mmscenegraph@@@cxxbridge05@rust@@QEAA@XZ)
+lib.cpp.obj : error LNK2019: unresolved external symbol "public: __cdecl rust::cxxbridge05::Str::operator class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >(void)const " (??BStr@cxxbridge05@rust@@QEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ) referenced in function "class std::unique_ptr<class mmscenegraph::ThingC,struct std::default_delete<class mmscenegraph::ThingC> > __cdecl mmscenegraph::make_demo(class rust::cxxbridge05::Str)" (?make_demo@mmscenegraph@@YA?AV?$unique_ptr@VThingC@mmscenegraph@@U?$default_delete@VThingC@mmscenegraph@@@std@@@std@@VStr@cxxbridge05@rust@@@Z)
+libmmscenegraph.dll : fatal error LNK1120: 5 unresolved externals
+NMAKE : fatal error U1077: '"C:\Program Files\CMake\bin\cmake.exe"' : return code '0xffffffff'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\BIN\nmake.exe"' : return code '0x2'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\BIN\nmake.exe"' : return code '0x2'
+Stop.
+
+Microsoft (R) Program Maintenance Utility Version 14.00.24210.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+[ 11%] Linking CXX shared library libmmscenegraph.dll
+LINK: command "C:\PROGRA~2\MICROS~2.0\VC\bin\X86_AM~1\link.exe /nologo @CMakeFiles\libmmscenegraph.dir\objects1.rsp /out:libmmscenegraph.dll /implib:libmmscenegraph.lib /pdb:C:\Users\catte\dev\cxx-demo-example\build\libmmscenegraph.pdb /dll /version:0.0 /machine:x64 /INCREMENTAL:NO ..\target\release\mmscenegraph.lib ws2_32.lib userenv.lib advapi32.lib shell32.lib msvcrt.lib kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTFILE:libmmscenegraph.dll.manifest" failed (exit code 1120) with the following output:
+   Creating library libmmscenegraph.lib and object libmmscenegraph.exp
+_cxxbridge.cpp.obj : error LNK2019: unresolved external symbol "public: __cdecl rust::cxxbridge05::Str::Str(void)" (??0Str@cxxbridge05@rust@@QEAA@XZ) referenced in function "public: static class rust::cxxbridge05::Str __cdecl rust::cxxbridge05::`anonymous namespace'::impl<class rust::cxxbridge05::Str>::new_unchecked(struct rust::cxxbridge05::A0xebb24fd7::repr::PtrLen)" (?new_unchecked@?$impl@VStr@cxxbridge05@rust@@@?A0xebb24fd7@cxxbridge05@rust@@SA?AVStr@34@UPtrLen@repr@234@@Z)
+_cxxbridge.cpp.obj : error LNK2019: unresolved external symbol mmscenegraph$cxxbridge05$print_r referenced in function "void __cdecl mmscenegraph::print_r(struct mmscenegraph::ThingR const &)" (?print_r@mmscenegraph@@YAXAEBUThingR@1@@Z)
+_cxxbridge.cpp.obj : error LNK2019: unresolved external symbol cxxbridge05$box$mmscenegraph$ThingR$uninit referenced in function "private: void __cdecl rust::cxxbridge05::Box<struct mmscenegraph::ThingR>::uninit(void)" (?uninit@?$Box@UThingR@mmscenegraph@@@cxxbridge05@rust@@AEAAXXZ)
+_cxxbridge.cpp.obj : error LNK2019: unresolved external symbol cxxbridge05$box$mmscenegraph$ThingR$drop referenced in function "public: __cdecl rust::cxxbridge05::Box<struct mmscenegraph::ThingR>::~Box<struct mmscenegraph::ThingR>(void)" (??1?$Box@UThingR@mmscenegraph@@@cxxbridge05@rust@@QEAA@XZ)
+lib.cpp.obj : error LNK2019: unresolved external symbol "public: __cdecl rust::cxxbridge05::Str::operator class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >(void)const " (??BStr@cxxbridge05@rust@@QEBA?AV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@XZ) referenced in function "class std::unique_ptr<class mmscenegraph::ThingC,struct std::default_delete<class mmscenegraph::ThingC> > __cdecl mmscenegraph::make_demo(class rust::cxxbridge05::Str)" (?make_demo@mmscenegraph@@YA?AV?$unique_ptr@VThingC@mmscenegraph@@U?$default_delete@VThingC@mmscenegraph@@@std@@@std@@VStr@cxxbridge05@rust@@@Z)
+libmmscenegraph.dll : fatal error LNK1120: 5 unresolved externals
+NMAKE : fatal error U1077: '"C:\Program Files\CMake\bin\cmake.exe"' : return code '0xffffffff'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\BIN\nmake.exe"' : return code '0x2'
+Stop.
+NMAKE : fatal error U1077: '"C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\BIN\nmake.exe"' : return code '0x2'
+Stop.
+
+>cxxbridge --version
+cxxbridge 0.5.5
