@@ -18,9 +18,9 @@ SET RUST_INCLUDE_DIR="%ROOT%\include"
 :: Build Rust
 ::
 :: Assumes 'cxxbridge-cmd' and 'cbindgen' is installed.
-cxxbridge --header > "%ROOT%\include\cxx.h"
-cxxbridge src/cxxbridge.rs --header > "%ROOT%\include\mmscenegraph\_cxxbridge.h"
-cxxbridge src/cxxbridge.rs --cxx-impl-annotations "__declspec(dllexport)" > "%ROOT%\src\_cxxbridge.cpp"
+cxxbridge --header --output "%ROOT%\include\cxx.h"
+cxxbridge src/cxxbridge.rs --header --output "%ROOT%\include\mmscenegraph\_cxxbridge.h"
+cxxbridge src/cxxbridge.rs --cxx-impl-annotations "__declspec(dllexport)" --output "%ROOT%\src\_cxxbridge.cpp"
 cbindgen --config cbindgen.toml ^
          --crate mmscenegraph ^
          --output "%ROOT%\include\mmscenegraph\_cbindgen.h"
