@@ -26,6 +26,7 @@ set(RUST_INCLUDE_DIR "/path/to/rust/include/directory/" CACHE PATH
 # C++ Source Code
 set(lib_source_files
   src/_cxxbridge.cpp
+  src/cxx.cc
   src/lib.cpp
   )
 
