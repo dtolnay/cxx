@@ -141,19 +141,16 @@ tab_width = 2
 # "feature = serde" = "DEFINE_SERDE"
 
 
-
-
-
-# [export]
-# # A list of additional items to always include in the generated bindings if they're
-# # found but otherwise don't appear to be used by the public API.
-# #
-# # default: []
+[export]
+# A list of additional items to always include in the generated bindings if they're
+# found but otherwise don't appear to be used by the public API.
+#
+# default: []
 # include = ["MyOrphanStruct", "MyGreatTypeRename"]
 
-# # A list of items to not include in the generated bindings
-# # default: []
-# exclude = ["Bad"]
+# A list of items to not include in the generated bindings
+# default: []
+exclude = ["SharedThing", "do_thing", "get_name", "make_demo"]
 
 # # A prefix to add before the name of every item
 # # default: no prefix is added
