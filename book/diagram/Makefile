@@ -1,13 +1,10 @@
 all: overview.svg
 
-bin/asciitosvg:
-	rm -rf build
-	mkdir -p bin build/src/github.com/asciitosvg
-	git clone https://github.com/dtolnay/asciitosvg build/src/github.com/asciitosvg/asciitosvg
-	GOPATH=${CURDIR}/build go build -o $@ ./build/src/github.com/asciitosvg/asciitosvg/cmd/a2s
+build/bin/svgbob:
+	cargo install --git https://github.com/ivanceras/svgbob --rev df01674c47350665158ececa476e63f51c58a9c7 --root build
 
-%.svg: %.ascii bin/asciitosvg
-	bin/asciitosvg -i $< -o $@ -b
+%.svg: %.ascii build/bin/svgbob
+	build/bin/svgbob $< > $@
 
 clean:
 	rm -f *.svg

@@ -1,65 +1,132 @@
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<!-- Created with ASCIItoSVG -->
-<svg width="756px" height="272px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-  <defs>
-    <filter id="dsFilter" width="150%" height="150%">
-      <feOffset result="offOut" in="SourceGraphic" dx="2" dy="2"/>
-      <feColorMatrix result="matrixOut" in="offOut" type="matrix" values="0.2 0 0 0 0 0 0.2 0 0 0 0 0 0.2 0 0 0 0 0 1 0"/>
-      <feGaussianBlur result="blurOut" in="matrixOut" stdDeviation="3"/>
-      <feBlend in="SourceGraphic" in2="blurOut" mode="normal"/>
-    </filter>
-    <marker id="iPointer"
-      viewBox="0 0 10 10" refX="5" refY="5"
-      markerUnits="strokeWidth"
-      markerWidth="8" markerHeight="15"
-      orient="auto">
-      <path d="M 10 0 L 10 10 L 0 5 z" />
-    </marker>
-    <marker id="Pointer"
-      viewBox="0 0 10 10" refX="5" refY="5"
-      markerUnits="strokeWidth"
-      markerWidth="8" markerHeight="15"
-      orient="auto">
-      <path d="M 0 0 L 10 5 L 0 10 z" />
-    </marker>
-  </defs>
-  <g id="closed" stroke="#000" stroke-width="2" fill="none">
-    <path id="closed0" fill="#fff" d="M 229.5 18 Q 229.5 8 239.5 8 L 238.5 8 L 247.5 8 L 256.5 8 L 265.5 8 L 274.5 8 L 283.5 8 L 292.5 8 L 301.5 8 L 310.5 8 L 319.5 8 L 328.5 8 L 337.5 8 L 346.5 8 L 355.5 8 L 364.5 8 L 373.5 8 L 382.5 8 L 391.5 8 L 400.5 8 L 409.5 8 L 418.5 8 L 427.5 8 L 436.5 8 L 445.5 8 L 454.5 8 L 463.5 8 L 472.5 8 L 481.5 8 L 490.5 8 L 499.5 8 L 508.5 8 L 507.5 8 Q 517.5 8 517.5 18 L 517.5 24 L 517.5 40 L 517.5 56 L 517.5 62 Q 517.5 72 507.5 72 L 508.5 72 L 499.5 72 L 490.5 72 L 481.5 72 L 472.5 72 L 463.5 72 L 454.5 72 L 445.5 72 L 436.5 72 L 427.5 72 L 418.5 72 L 409.5 72 L 400.5 72 L 391.5 72 L 382.5 72 L 373.5 72 L 364.5 72 L 355.5 72 L 346.5 72 L 337.5 72 L 328.5 72 L 319.5 72 L 310.5 72 L 301.5 72 L 292.5 72 L 283.5 72 L 274.5 72 L 265.5 72 L 256.5 72 L 247.5 72 L 238.5 72 L 239.5 72 Q 229.5 72 229.5 62 L 229.5 56 L 229.5 40 L 229.5 24 Z" />
-    <path id="closed3" fill="#fff" d="M 166.5 210 Q 166.5 200 176.5 200 L 175.5 200 L 184.5 200 L 193.5 200 L 202.5 200 L 211.5 200 L 220.5 200 L 229.5 200 L 238.5 200 L 247.5 200 L 256.5 200 L 265.5 200 L 274.5 200 L 283.5 200 L 282.5 200 Q 292.5 200 292.5 210 L 292.5 216 L 292.5 222 Q 292.5 232 282.5 232 L 283.5 232 L 274.5 232 L 265.5 232 L 256.5 232 L 247.5 232 L 238.5 232 L 229.5 232 L 220.5 232 L 211.5 232 L 202.5 232 L 193.5 232 L 184.5 232 L 175.5 232 L 176.5 232 Q 166.5 232 166.5 222 L 166.5 216 Z" />
-    <path id="closed4" fill="#fff" d="M 463.5 210 Q 463.5 200 473.5 200 L 472.5 200 L 481.5 200 L 490.5 200 L 499.5 200 L 508.5 200 L 517.5 200 L 526.5 200 L 535.5 200 L 544.5 200 L 553.5 200 L 562.5 200 L 571.5 200 L 570.5 200 Q 580.5 200 580.5 210 L 580.5 216 L 580.5 222 Q 580.5 232 570.5 232 L 571.5 232 L 562.5 232 L 553.5 232 L 544.5 232 L 535.5 232 L 526.5 232 L 517.5 232 L 508.5 232 L 499.5 232 L 490.5 232 L 481.5 232 L 472.5 232 L 473.5 232 Q 463.5 232 463.5 222 L 463.5 216 Z" />
-  </g>
-  <g id="lines" stroke="#000" stroke-width="2" fill="none">
-    <path id="open1" marker-end="url(#Pointer)" d="M 229.5 18 Q 229.5 8 239.5 8 L 238.5 8 L 247.5 8 L 256.5 8 L 265.5 8 L 274.5 8 L 283.5 8 L 292.5 8 L 301.5 8 L 310.5 8 L 319.5 8 L 328.5 8 L 337.5 8 L 346.5 8 L 355.5 8 L 364.5 8 L 373.5 8 L 382.5 8 L 391.5 8 L 400.5 8 L 409.5 8 L 418.5 8 L 427.5 8 L 436.5 8 L 445.5 8 L 454.5 8 L 463.5 8 L 472.5 8 L 481.5 8 L 490.5 8 L 499.5 8 L 508.5 8 L 507.5 8 Q 517.5 8 517.5 18 L 517.5 24 L 517.5 40 L 517.5 56 L 517.5 62 Q 517.5 72 507.5 72 L 508.5 72 L 499.5 72 L 490.5 72 L 481.5 72 L 472.5 72 L 463.5 72 L 454.5 72 L 445.5 72 L 436.5 72 L 427.5 72 L 418.5 72 L 409.5 72 L 400.5 72 L 391.5 72 L 382.5 72 L 373.5 72 L 373.5 88 L 373.5 104 L 373.5 120 L 373.5 136 L 364.5 136 L 355.5 136 L 346.5 136 L 337.5 136 L 328.5 136 L 319.5 136 L 310.5 136 L 301.5 136 L 292.5 136 L 283.5 136 L 274.5 136 L 265.5 136 L 256.5 136 L 247.5 136 L 238.5 136 L 229.5 136 L 229.5 152 L 229.5 168 L 229.5 184 " />
-    <path id="open2" marker-end="url(#Pointer)" d="M 229.5 18 Q 229.5 8 239.5 8 L 238.5 8 L 247.5 8 L 256.5 8 L 265.5 8 L 274.5 8 L 283.5 8 L 292.5 8 L 301.5 8 L 310.5 8 L 319.5 8 L 328.5 8 L 337.5 8 L 346.5 8 L 355.5 8 L 364.5 8 L 373.5 8 L 382.5 8 L 391.5 8 L 400.5 8 L 409.5 8 L 418.5 8 L 427.5 8 L 436.5 8 L 445.5 8 L 454.5 8 L 463.5 8 L 472.5 8 L 481.5 8 L 490.5 8 L 499.5 8 L 508.5 8 L 507.5 8 Q 517.5 8 517.5 18 L 517.5 24 L 517.5 40 L 517.5 56 L 517.5 62 Q 517.5 72 507.5 72 L 508.5 72 L 499.5 72 L 490.5 72 L 481.5 72 L 472.5 72 L 463.5 72 L 454.5 72 L 445.5 72 L 436.5 72 L 427.5 72 L 418.5 72 L 409.5 72 L 400.5 72 L 391.5 72 L 382.5 72 L 373.5 72 L 373.5 88 L 373.5 104 L 373.5 120 L 373.5 136 L 382.5 136 L 391.5 136 L 400.5 136 L 409.5 136 L 418.5 136 L 427.5 136 L 436.5 136 L 445.5 136 L 454.5 136 L 463.5 136 L 472.5 136 L 481.5 136 L 490.5 136 L 499.5 136 L 508.5 136 L 517.5 136 L 517.5 152 L 517.5 168 L 517.5 184 " />
-    <path id="open5" d="M 616.5 200 L 625.5 200 " />
-    <path id="open6" marker-start="url(#iPointer)" marker-end="url(#Pointer)" d="M 49.5 216 L 58.5 216 L 67.5 216 L 76.5 216 L 85.5 216 L 94.5 216 L 103.5 216 L 112.5 216 L 121.5 216 L 130.5 216 L 139.5 216 L 148.5 216 L 157.5 216 " />
-    <path id="open7" stroke-dasharray="5 5" marker-start="url(#iPointer)" marker-end="url(#Pointer)" d="M 301.5 216 L 310.5 216 L 319.5 216 L 328.5 216 L 337.5 216 L 346.5 216 L 355.5 216 L 364.5 216 L 373.5 216 L 382.5 216 L 391.5 216 L 400.5 216 L 409.5 216 L 418.5 216 L 427.5 216 L 436.5 216 L 445.5 216 L 454.5 216 " />
-    <path id="open8" d="M 481.5 216 L 490.5 216 " />
-    <path id="open9" marker-start="url(#iPointer)" marker-end="url(#Pointer)" d="M 589.5 216 L 598.5 216 L 607.5 216 L 616.5 216 L 625.5 216 L 634.5 216 L 643.5 216 L 652.5 216 L 661.5 216 L 670.5 216 L 679.5 216 L 688.5 216 L 697.5 216 " />
-    <path id="open10" d="M 724.5 216 L 733.5 216 " />
-    <circle cx="724.5" cy="232" r="3" fill="#000" />
-    <path id="open11" d="M 724.5 216 L 724.5 232 " />
-  </g>
-  <g id="text" stroke="none" style="font-family:Consolas,Monaco,Anonymous Pro,Anonymous,Bitstream Sans Mono,monospace;font-size:15.2px" >
-    <text id="obj12" x="301.5" y="40" fill="#000">[cxx::bridge] mod</text>
-    <text id="obj13" x="247.5" y="56" fill="#000">definitions and declarations</text>
-    <text id="obj14" x="220.5" y="120" fill="#000">Macro expansion</text>
-    <text id="obj15" x="391.5" y="120" fill="#000">Code generation (cxx_build, etc)</text>
-    <text id="obj16" x="85.5" y="168" fill="#000">Safe</text>
-    <text id="obj17" x="40.5" y="184" fill="#000">straightforward</text>
-    <text id="obj18" x="319.5" y="184" fill="#000">C ABI (hidden</text>
-    <text id="obj19" x="580.5" y="184" fill="#000">Straightforward</text>
-    <text id="obj20" x="67.5" y="200" fill="#000">Rust APIs</text>
-    <text id="obj21" x="337.5" y="200" fill="#000">to users)</text>
-    <text id="obj22" x="607.5" y="200" fill="#000">C</text>
-    <text id="obj23" x="643.5" y="200" fill="#000">APIs</text>
-    <text id="obj24" x="4.5" y="216" fill="#000">Rust</text>
-    <text id="obj25" x="175.5" y="216" fill="#000">Rust bindings</text>
-    <text id="obj26" x="472.5" y="216" fill="#000">C</text>
-    <text id="obj27" x="508.5" y="216" fill="#000">bindings</text>
-    <text id="obj28" x="715.5" y="216" fill="#000">C</text>
-    <text id="obj29" x="4.5" y="232" fill="#000">code</text>
-    <text id="obj30" x="715.5" y="232" fill="#000">c</text>
-    <text id="obj31" x="733.5" y="232" fill="#000">de</text>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="696" height="224">
+    <style>line, path, circle,rect,polygon {
+                          stroke: black;
+                          stroke-width: 2;
+                          stroke-opacity: 1;
+                          fill-opacity: 1;
+                          stroke-linecap: round;
+                          stroke-linejoin: miter;
+                        }
+
+                    text {
+                        fill: black;
+                        }
+                        rect.backdrop{
+                            stroke: none;
+                            fill: white;
+                        }
+                        .broken{
+                            stroke-dasharray: 8;
+                        }
+                        .filled{
+                            fill: black;
+                        }
+                        .bg_filled{
+                            fill: white;
+                        }
+                        .nofill{
+                            fill: white;
+                        }
+
+                        text {
+                         font-family: monospace;
+                         font-size: 14px;
+                        }
+
+                        .end_marked_arrow{
+                            marker-end: url(#arrow);
+                         }
+                        .start_marked_arrow{
+                            marker-start: url(#arrow);
+                         }
+
+                        .end_marked_diamond{
+                            marker-end: url(#diamond);
+                         }
+                        .start_marked_diamond{
+                            marker-start: url(#diamond);
+                         }
+
+                        .end_marked_circle{
+                            marker-end: url(#circle);
+                         }
+                        .start_marked_circle{
+                            marker-start: url(#circle);
+                         }
+
+                        .end_marked_open_circle{
+                            marker-end: url(#open_circle);
+                         }
+                        .start_marked_open_circle{
+                            marker-start: url(#open_circle);
+                         }
+
+                        .end_marked_big_open_circle{
+                            marker-end: url(#big_open_circle);
+                         }
+                        .start_marked_big_open_circle{
+                            marker-start: url(#big_open_circle);
+                         }
+
+                         
+                        </style>
+    <defs>
+        <marker id="arrow" viewBox="-2 -2 8 8" refX="4" refY="2" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,0 0,4 4,2 0,0"></polygon>
+        </marker>
+        <marker id="diamond" viewBox="-2 -2 8 8" refX="4" refY="2" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <polygon points="0,2 2,0 4,2 2,4 0,2"></polygon>
+        </marker>
+        <marker id="circle" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <circle cx="4" cy="4" r="2" class="filled"></circle>
+        </marker>
+        <marker id="open_circle" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <circle cx="4" cy="4" r="2" class="bg_filled"></circle>
+        </marker>
+        <marker id="big_open_circle" viewBox="0 0 8 8" refX="4" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <circle cx="4" cy="4" r="3" class="bg_filled"></circle>
+        </marker>
+    </defs>
+    <rect class="backdrop" x="0" y="0" width="696" height="224"></rect>
+    <rect x="148" y="168" width="136" height="32" class="solid nofill" rx="4"></rect>
+    <text x="162" y="188" >Rust bindings</text>
+    <rect x="412" y="168" width="128" height="32" class="solid nofill" rx="4"></rect>
+    <text x="426" y="188" >C++ bindings</text>
+    <text x="266" y="28" >#[cxx::bridge]</text>
+    <text x="394" y="28" >mod</text>
+    <text x="234" y="44" >definitions</text>
+    <text x="330" y="44" >and</text>
+    <text x="362" y="44" >declarations</text>
+    <line x1="220" y1="120" x2="220" y2="160" class="solid end_marked_arrow"></line>
+    <line x1="476" y1="120" x2="476" y2="160" class="solid end_marked_arrow"></line>
+    <text x="74" y="140" >Safe</text>
+    <text x="34" y="156" >straightforward</text>
+    <text x="530" y="156" >Straightforward</text>
+    <polygon points="48,180 40,184 48,188" class="filled"></polygon>
+    <line x1="48" y1="184" x2="144" y2="184" class="solid end_marked_arrow"></line>
+    <polygon points="296,180 288,184 296,188" class="filled"></polygon>
+    <line x1="296" y1="184" x2="408" y2="184" class="broken end_marked_arrow"></line>
+    <polygon points="552,180 544,184 552,188" class="filled"></polygon>
+    <line x1="552" y1="184" x2="648" y2="184" class="solid end_marked_arrow"></line>
+    <text x="2" y="188" >Rust</text>
+    <text x="2" y="204" >code</text>
+    <text x="658" y="204" >code</text>
+    <text x="202" y="108" >Macro expansion</text>
+    <text x="370" y="108" >Code generation</text>
+    <text x="58" y="172" >Rust APIs</text>
+    <text x="298" y="172" >Hidden C ABI</text>
+    <text x="562" y="172" >C++ APIs</text>
+    <text x="658" y="188" >C++</text>
+    <g>
+        <path d="M 228,8 A 8,8 0,0,0 220,16" class="nofill"></path>
+        <line x1="228" y1="8" x2="468" y2="8" class="solid"></line>
+        <path d="M 468,8 A 8,8 0,0,1 476,16" class="nofill"></path>
+        <line x1="220" y1="16" x2="220" y2="48" class="solid"></line>
+        <line x1="476" y1="16" x2="476" y2="48" class="solid"></line>
+        <path d="M 220,48 A 8,8 0,0,0 228,56" class="nofill"></path>
+        <line x1="228" y1="56" x2="468" y2="56" class="solid"></line>
+        <line x1="348" y1="56" x2="348" y2="120" class="solid"></line>
+        <path d="M 476,48 A 8,8 0,0,1 468,56" class="nofill"></path>
+        <line x1="220" y1="120" x2="476" y2="120" class="solid"></line>
+    </g>
 </svg>
