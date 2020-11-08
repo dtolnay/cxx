@@ -39,6 +39,11 @@ Make sure the following commands are run in the Visual Studio 2015 enabled Comma
 > build_windows64.bat
 
 > install\bin\mmscenegraph_tests.exe
+2 + 2 = 4
+SCENEGRAPH: Add SceneGraph 42
+SCENEGRAPH: Remove SceneGraph 0x1ffc8819410
+my awesome demo
+done with ThingC
 ```
 
 # Dependencies
