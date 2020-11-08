@@ -13,15 +13,17 @@ set(PROJECT_COPYRIGHT "2020, David Cattermole.")
 
 
 # Static build information.
-set(target_release_lib_name "libmmscenegraph")
+set(target_release_lib_name "mmscenegraph")
 set(target_test_exe_name "mmscenegraph_tests")
-set(rust_lib_name "mmscenegraph")
+set(rust_lib_name "mmscenegraph_rs")
+
 
 # Expected inputs.
 set(RUST_BUILD_DIR "/path/to/rust/build/directory/" CACHE PATH
   "The path to the compiled rust directory.")
 set(RUST_INCLUDE_DIR "/path/to/rust/include/directory/" CACHE PATH
   "The path to the generated include.")
+
 
 # C++ Source Code
 set(lib_source_files
@@ -36,6 +38,7 @@ set(test_source_files
   tests/test_b.cpp
   )
 
+
 # Enable c++11
 if (CMAKE_VERSION VERSION_LESS "3.1")
   if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -44,6 +47,7 @@ if (CMAKE_VERSION VERSION_LESS "3.1")
 else ()
   set (CMAKE_CXX_STANDARD 11)
 endif ()
+
 
 # Find the Rust compiled library
 if (MSVC)
@@ -126,6 +130,7 @@ target_include_directories(${target_test_exe_name}
   )
 set_rpath_to_cwd(${target_test_exe_name})
 
+
 # Include public header files for installation
 set(header_files
   # C++ public header files.
@@ -137,6 +142,7 @@ set(header_files
   include/mmscenegraph/_cbindgen.h
   include/mmscenegraph/_cxxbridge.h
   )
+
 
 # Install
 install(FILES

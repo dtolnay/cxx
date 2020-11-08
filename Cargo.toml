@@ -1,12 +1,12 @@
 [package]
-name = "mmscenegraph"
+name = "mmscenegraph-rs"
 version = "0.1.0"
-authors = ["david-cattermole <cattermole91@gmail.com>"]
+authors = ["David Cattermole <cattermole91@gmail.com>"]
 edition = "2018"
 publish = false
 
 [lib]
-name = "mmscenegraph"
+name = "mmscenegraph_rs"
 path = "./src/lib.rs"
 # NOTE: 'lib' is used to link with Rust crates, 'staticlib' is used to
 # link with C++.
