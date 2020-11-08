@@ -33,7 +33,7 @@ cxxbridge src/cxxbridge.rs \
 cbindgen --config cbindgen.toml \
          --crate mmscenegraph \
          --output "${ROOT}/include/mmscenegraph/_cbindgen.h"
-cargo build --release
+cargo build --release --verbose
 
 # Build C++
 mkdir -p build
