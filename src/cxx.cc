@@ -1,4 +1,4 @@
-#include "../include/cxx.h"
+#include <cxx.h>
 #include <cassert>
 #include <cstring>
 #include <exception>
