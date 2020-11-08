@@ -23,7 +23,7 @@ $ cd /path/to/project/root/
 # Enable Red Hat Developer Toolset 6
 $ scl enable devtoolset-6 bash
 
-$ bash build_linux.bash
+$ ./build_linux.bash
 
 # Run tests
 $ ./install/bin/mmscenegraph_tests
