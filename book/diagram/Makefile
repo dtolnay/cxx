@@ -1,4 +1,4 @@
-all:
+all: overview.svg
 
 bin/asciitosvg:
 	rm -rf build

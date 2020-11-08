@@ -1,0 +1,15 @@
+                         .-------------------------------.
+                         |                               |
+                         |      #[cxx::bridge] mod       |
+                         | definitions and declarations  |
+                         '---------------+---------------'
+                                         |
+                                         |
+                        Macro expansion  | Code generation (cxx_build, etc)
+                         +---------------+---------------+
+                         |                               |
+         Safe            |                               |
+    straightforward      v         C ABI (hidden         v      Straightforward
+       Rust APIs  .-------------.    to users)     .------------.  C++ APIs
+Rust <----------->|Rust bindings|<================>|C++ bindings|<-----------> C++
+code              '-------------'                  '------------'              code
