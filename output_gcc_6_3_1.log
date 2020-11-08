@@ -1,16 +1,37 @@
-$ bash build_linux.bash
-   Compiling cc v1.0.61
+$ ./build_linux.bash 
    Compiling proc-macro2 v1.0.24
+   Compiling cc v1.0.61
    Compiling unicode-xid v0.2.1
    Compiling syn v1.0.48
+     Running `rustc --crate-name build_script_build --edition=2018 /home/davidc/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/build.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type bin --emit=dep-info,link -C embed-bitcode=no -C debug-assertions=off --cfg 'feature="default"' --cfg 'feature="proc-macro"' -C metadata=ff056746b6efe8b4 -C extra-filename=-ff056746b6efe8b4 --out-dir /media/share/Users/catte/dev/cxx-demo-example/target/release/build/proc-macro2-ff056746b6efe8b4 -L dependency=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps --cap-lints allow`
+     Running `rustc --crate-name build_script_build --edition=2018 /home/davidc/.cargo/registry/src/github.com-1ecc6299db9ec823/syn-1.0.48/build.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type bin --emit=dep-info,link -C embed-bitcode=no -C debug-assertions=off --cfg 'feature="clone-impls"' --cfg 'feature="default"' --cfg 'feature="derive"' --cfg 'feature="full"' --cfg 'feature="parsing"' --cfg 'feature="printing"' --cfg 'feature="proc-macro"' --cfg 'feature="quote"' -C metadata=d45e33bc90b78ee8 -C extra-filename=-d45e33bc90b78ee8 --out-dir /media/share/Users/catte/dev/cxx-demo-example/target/release/build/syn-d45e33bc90b78ee8 -L dependency=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps --cap-lints allow`
+     Running `rustc --crate-name cc --edition=2018 /home/davidc/.cargo/registry/src/github.com-1ecc6299db9ec823/cc-1.0.61/src/lib.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type lib --emit=dep-info,metadata,link -C embed-bitcode=no -C debug-assertions=off -C metadata=dbf56aa7ca45ef1c -C extra-filename=-dbf56aa7ca45ef1c --out-dir /media/share/Users/catte/dev/cxx-demo-example/target/release/deps -L dependency=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps --cap-lints allow`
+     Running `rustc --crate-name unicode_xid /home/davidc/.cargo/registry/src/github.com-1ecc6299db9ec823/unicode-xid-0.2.1/src/lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts --crate-type lib --emit=dep-info,metadata,link -C embed-bitcode=no -C debug-assertions=off --cfg 'feature="default"' -C metadata=a06dfae64cf4d8b5 -C extra-filename=-a06dfae64cf4d8b5 --out-dir /media/share/Users/catte/dev/cxx-demo-example/target/release/deps -L dependency=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps --cap-lints allow`
    Compiling cxxbridge-flags v0.5.5
+     Running `rustc --crate-name cxxbridge_flags --edition=2018 /home/davidc/.cargo/registry/src/github.com-1ecc6299db9ec823/cxxbridge-flags-0.5.5/src/lib.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type lib --emit=dep-info,metadata,link -C embed-bitcode=no -C debug-assertions=off --cfg 'feature="default"' -C metadata=6288382847500469 -C extra-filename=-6288382847500469 --out-dir /media/share/Users/catte/dev/cxx-demo-example/target/release/deps -L dependency=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps --cap-lints allow`
    Compiling libc v0.2.80
+     Running `rustc --crate-name build_script_build /home/davidc/.cargo/registry/src/github.com-1ecc6299db9ec823/libc-0.2.80/build.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type bin --emit=dep-info,link -C embed-bitcode=no -C debug-assertions=off --cfg 'feature="default"' --cfg 'feature="std"' -C metadata=03fda4408e86ee29 -C extra-filename=-03fda4408e86ee29 --out-dir /media/share/Users/catte/dev/cxx-demo-example/target/release/build/libc-03fda4408e86ee29 -L dependency=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps --cap-lints allow`
+     Running `/media/share/Users/catte/dev/cxx-demo-example/target/release/build/syn-d45e33bc90b78ee8/build-script-build`
+     Running `/media/share/Users/catte/dev/cxx-demo-example/target/release/build/proc-macro2-ff056746b6efe8b4/build-script-build`
+     Running `rustc --crate-name proc_macro2 --edition=2018 /home/davidc/.cargo/registry/src/github.com-1ecc6299db9ec823/proc-macro2-1.0.24/src/lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts --crate-type lib --emit=dep-info,metadata,link -C embed-bitcode=no -C debug-assertions=off --cfg 'feature="default"' --cfg 'feature="proc-macro"' -C metadata=65815d9eb2a98cb5 -C extra-filename=-65815d9eb2a98cb5 --out-dir /media/share/Users/catte/dev/cxx-demo-example/target/release/deps -L dependency=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps --extern unicode_xid=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps/libunicode_xid-a06dfae64cf4d8b5.rmeta --cap-lints allow --cfg lexerror_display --cfg hygiene --cfg use_proc_macro --cfg wrap_proc_macro`
+     Running `/media/share/Users/catte/dev/cxx-demo-example/target/release/build/libc-03fda4408e86ee29/build-script-build`
+     Running `rustc --crate-name libc /home/davidc/.cargo/registry/src/github.com-1ecc6299db9ec823/libc-0.2.80/src/lib.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type lib --emit=dep-info,metadata,link -C opt-level=3 -C linker-plugin-lto --cfg 'feature="default"' --cfg 'feature="std"' -C metadata=361a3c5ce6540cad -C extra-filename=-361a3c5ce6540cad --out-dir /media/share/Users/catte/dev/cxx-demo-example/target/release/deps -L dependency=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps --cap-lints allow --cfg freebsd11 --cfg libc_priv_mod_use --cfg libc_union --cfg libc_const_size_of --cfg libc_align --cfg libc_core_cvoid --cfg libc_packedN --cfg libc_cfg_target_vendor`
    Compiling link-cplusplus v1.0.4
    Compiling cxx v0.5.5
+     Running `rustc --crate-name build_script_build --edition=2018 /home/davidc/.cargo/registry/src/github.com-1ecc6299db9ec823/link-cplusplus-1.0.4/build.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type bin --emit=dep-info,link -C embed-bitcode=no -C debug-assertions=off --cfg 'feature="default"' -C metadata=a1f4ef9eea9fa5f1 -C extra-filename=-a1f4ef9eea9fa5f1 --out-dir /media/share/Users/catte/dev/cxx-demo-example/target/release/build/link-cplusplus-a1f4ef9eea9fa5f1 -L dependency=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps --extern cc=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps/libcc-dbf56aa7ca45ef1c.rlib --cap-lints allow`
+     Running `rustc --crate-name build_script_build --edition=2018 /home/davidc/.cargo/registry/src/github.com-1ecc6299db9ec823/cxx-0.5.5/build.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type bin --emit=dep-info,link -C embed-bitcode=no -C debug-assertions=off --cfg 'feature="default"' -C metadata=977a9ac4e3e602b6 -C extra-filename=-977a9ac4e3e602b6 --out-dir /media/share/Users/catte/dev/cxx-demo-example/target/release/build/cxx-977a9ac4e3e602b6 -L dependency=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps --extern cc=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps/libcc-dbf56aa7ca45ef1c.rlib --extern cxxbridge_flags=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps/libcxxbridge_flags-6288382847500469.rlib --cap-lints allow`
    Compiling quote v1.0.7
+     Running `rustc --crate-name quote --edition=2018 /home/davidc/.cargo/registry/src/github.com-1ecc6299db9ec823/quote-1.0.7/src/lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts --crate-type lib --emit=dep-info,metadata,link -C embed-bitcode=no -C debug-assertions=off --cfg 'feature="default"' --cfg 'feature="proc-macro"' -C metadata=c3aad48449cd053f -C extra-filename=-c3aad48449cd053f --out-dir /media/share/Users/catte/dev/cxx-demo-example/target/release/deps -L dependency=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps --extern proc_macro2=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps/libproc_macro2-65815d9eb2a98cb5.rmeta --cap-lints allow`
+     Running `/media/share/Users/catte/dev/cxx-demo-example/target/release/build/link-cplusplus-a1f4ef9eea9fa5f1/build-script-build`
+     Running `rustc --crate-name link_cplusplus --edition=2018 /home/davidc/.cargo/registry/src/github.com-1ecc6299db9ec823/link-cplusplus-1.0.4/src/lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts --crate-type lib --emit=dep-info,metadata,link -C opt-level=3 -C linker-plugin-lto --cfg 'feature="default"' -C metadata=cb54377016360d67 -C extra-filename=-cb54377016360d67 --out-dir /media/share/Users/catte/dev/cxx-demo-example/target/release/deps -L dependency=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps --cap-lints allow -L native=/media/share/Users/catte/dev/cxx-demo-example/target/release/build/link-cplusplus-de23d72125796e79/out -l static=link-cplusplus -l stdc++`
+     Running `/media/share/Users/catte/dev/cxx-demo-example/target/release/build/cxx-977a9ac4e3e602b6/build-script-build`
+     Running `rustc --crate-name syn --edition=2018 /home/davidc/.cargo/registry/src/github.com-1ecc6299db9ec823/syn-1.0.48/src/lib.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type lib --emit=dep-info,metadata,link -C embed-bitcode=no -C debug-assertions=off --cfg 'feature="clone-impls"' --cfg 'feature="default"' --cfg 'feature="derive"' --cfg 'feature="full"' --cfg 'feature="parsing"' --cfg 'feature="printing"' --cfg 'feature="proc-macro"' --cfg 'feature="quote"' -C metadata=5dab2d508d3d4f69 -C extra-filename=-5dab2d508d3d4f69 --out-dir /media/share/Users/catte/dev/cxx-demo-example/target/release/deps -L dependency=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps --extern proc_macro2=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps/libproc_macro2-65815d9eb2a98cb5.rmeta --extern quote=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps/libquote-c3aad48449cd053f.rmeta --extern unicode_xid=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps/libunicode_xid-a06dfae64cf4d8b5.rmeta --cap-lints allow --cfg syn_disable_nightly_tests`
    Compiling cxxbridge-macro v0.5.5
+     Running `rustc --crate-name cxxbridge_macro --edition=2018 /home/davidc/.cargo/registry/src/github.com-1ecc6299db9ec823/cxxbridge-macro-0.5.5/src/lib.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type proc-macro --emit=dep-info,link -C prefer-dynamic -C embed-bitcode=no -C debug-assertions=off -C metadata=8a61fca67a57777d -C extra-filename=-8a61fca67a57777d --out-dir /media/share/Users/catte/dev/cxx-demo-example/target/release/deps -L dependency=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps --extern proc_macro2=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps/libproc_macro2-65815d9eb2a98cb5.rlib --extern quote=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps/libquote-c3aad48449cd053f.rlib --extern syn=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps/libsyn-5dab2d508d3d4f69.rlib --extern proc_macro --cap-lints allow`
+     Running `rustc --crate-name cxx --edition=2018 /home/davidc/.cargo/registry/src/github.com-1ecc6299db9ec823/cxx-0.5.5/src/lib.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type lib --emit=dep-info,metadata,link -C opt-level=3 -C linker-plugin-lto --cfg 'feature="default"' -C metadata=b80e69994e400d7f -C extra-filename=-b80e69994e400d7f --out-dir /media/share/Users/catte/dev/cxx-demo-example/target/release/deps -L dependency=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps --extern cxxbridge_macro=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps/libcxxbridge_macro-8a61fca67a57777d.so --extern link_cplusplus=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps/liblink_cplusplus-cb54377016360d67.rmeta --cap-lints allow -L native=/media/share/Users/catte/dev/cxx-demo-example/target/release/build/cxx-508e5b54a6d41dd6/out --cfg built_with_cargo -l static=cxxbridge05 -L native=/media/share/Users/catte/dev/cxx-demo-example/target/release/build/link-cplusplus-de23d72125796e79/out`
    Compiling mmscenegraph v0.1.0 (/media/share/Users/catte/dev/cxx-demo-example)
-    Finished release [optimized] target(s) in 12.34s
+     Running `rustc --crate-name mmscenegraph --edition=2018 src/lib.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type staticlib --emit=dep-info,link -C opt-level=3 -C lto -C metadata=fbe696749187f091 -C extra-filename=-fbe696749187f091 --out-dir /media/share/Users/catte/dev/cxx-demo-example/target/release/deps -L dependency=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps --extern cxx=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps/libcxx-b80e69994e400d7f.rlib --extern libc=/media/share/Users/catte/dev/cxx-demo-example/target/release/deps/liblibc-361a3c5ce6540cad.rlib -L native=/media/share/Users/catte/dev/cxx-demo-example/target/release/build/cxx-508e5b54a6d41dd6/out -L native=/media/share/Users/catte/dev/cxx-demo-example/target/release/build/link-cplusplus-de23d72125796e79/out`
+    Finished release [optimized] target(s) in 16.28s
 -- The C compiler identification is GNU 6.3.1
 -- The CXX compiler identification is GNU 6.3.1
 -- Check for working C compiler: /opt/rh/devtoolset-6/root/usr/bin/gcc
@@ -28,61 +49,33 @@ Rust Library: /media/dev/cxx-demo-example/target/release/libmmscenegraph.a
 -- Generating done
 -- Build files have been written to: /media/dev/cxx-demo-example/build
 Scanning dependencies of target libmmscenegraph
-[ 14%] Building CXX object CMakeFiles/libmmscenegraph.dir/src/_cxxbridge.cpp.o
-[ 28%] Building CXX object CMakeFiles/libmmscenegraph.dir/src/lib.cpp.o
+[ 11%] Building CXX object CMakeFiles/libmmscenegraph.dir/src/_cxxbridge.cpp.o
+[ 22%] Building CXX object CMakeFiles/libmmscenegraph.dir/src/cxx.cc.o
+[ 33%] Building CXX object CMakeFiles/libmmscenegraph.dir/src/lib.cpp.o
 Linking CXX shared library liblibmmscenegraph.so
-[ 28%] Built target libmmscenegraph
+[ 33%] Built target libmmscenegraph
 Scanning dependencies of target mmscenegraph_tests
-[ 42%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/tests/main.cpp.o
-[ 57%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/tests/test_a.cpp.o
-[ 71%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/tests/test_b.cpp.o
-[ 85%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o
+[ 44%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/tests/main.cpp.o
+[ 55%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/tests/test_a.cpp.o
+[ 66%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/tests/test_b.cpp.o
+[ 77%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o
+[ 88%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/src/cxx.cc.o
 [100%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/src/lib.cpp.o
 Linking CXX executable mmscenegraph_tests
-CMakeFiles/mmscenegraph_tests.dir/tests/test_b.cpp.o: In function `test_b()':
-test_b.cpp:(.text+0x65): undefined reference to `rust::cxxbridge05::Str::Str(std::string const&)'
-CMakeFiles/mmscenegraph_tests.dir/src/lib.cpp.o: In function `mmscenegraph::make_demo(rust::cxxbridge05::Str)':
-lib.cpp:(.text+0x14b): undefined reference to `rust::cxxbridge05::Str::operator std::string() const'
-CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `mmscenegraph$cxxbridge05$make_demo':
-_cxxbridge.cpp:(.text+0x10): undefined reference to `rust::cxxbridge05::Str::Str()'
-CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `mmscenegraph$cxxbridge05$do_thing':
-_cxxbridge.cpp:(.text+0x9c): undefined reference to `cxxbridge05$box$mmscenegraph$ThingR$drop'
-CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `mmscenegraph::print_r(mmscenegraph::ThingR const&)':
-_cxxbridge.cpp:(.text+0xb1): undefined reference to `mmscenegraph$cxxbridge05$print_r'
-CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `rust::cxxbridge05::Box<mmscenegraph::ThingR>::uninit()':
-_cxxbridge.cpp:(.text+0x131): undefined reference to `cxxbridge05$box$mmscenegraph$ThingR$uninit'
-CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `rust::cxxbridge05::Box<mmscenegraph::ThingR>::drop()':
-_cxxbridge.cpp:(.text+0x141): undefined reference to `cxxbridge05$box$mmscenegraph$ThingR$drop'
-collect2: error: ld returned 1 exit status
-CMakeFiles/mmscenegraph_tests.dir/build.make:190: recipe for target 'mmscenegraph_tests' failed
-make[2]: *** [mmscenegraph_tests] Error 1
-CMakeFiles/Makefile2:98: recipe for target 'CMakeFiles/mmscenegraph_tests.dir/all' failed
-make[1]: *** [CMakeFiles/mmscenegraph_tests.dir/all] Error 2
-Makefile:116: recipe for target 'all' failed
-make: *** [all] Error 2
-[ 28%] Built target libmmscenegraph
-Linking CXX executable mmscenegraph_tests
-CMakeFiles/mmscenegraph_tests.dir/tests/test_b.cpp.o: In function `test_b()':
-test_b.cpp:(.text+0x65): undefined reference to `rust::cxxbridge05::Str::Str(std::string const&)'
-CMakeFiles/mmscenegraph_tests.dir/src/lib.cpp.o: In function `mmscenegraph::make_demo(rust::cxxbridge05::Str)':
-lib.cpp:(.text+0x14b): undefined reference to `rust::cxxbridge05::Str::operator std::string() const'
-CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `mmscenegraph$cxxbridge05$make_demo':
-_cxxbridge.cpp:(.text+0x10): undefined reference to `rust::cxxbridge05::Str::Str()'
-CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `mmscenegraph$cxxbridge05$do_thing':
-_cxxbridge.cpp:(.text+0x9c): undefined reference to `cxxbridge05$box$mmscenegraph$ThingR$drop'
-CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `mmscenegraph::print_r(mmscenegraph::ThingR const&)':
-_cxxbridge.cpp:(.text+0xb1): undefined reference to `mmscenegraph$cxxbridge05$print_r'
-CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `rust::cxxbridge05::Box<mmscenegraph::ThingR>::uninit()':
-_cxxbridge.cpp:(.text+0x131): undefined reference to `cxxbridge05$box$mmscenegraph$ThingR$uninit'
-CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.o: In function `rust::cxxbridge05::Box<mmscenegraph::ThingR>::drop()':
-_cxxbridge.cpp:(.text+0x141): undefined reference to `cxxbridge05$box$mmscenegraph$ThingR$drop'
-collect2: error: ld returned 1 exit status
-CMakeFiles/mmscenegraph_tests.dir/build.make:190: recipe for target 'mmscenegraph_tests' failed
-make[2]: *** [mmscenegraph_tests] Error 1
-CMakeFiles/Makefile2:98: recipe for target 'CMakeFiles/mmscenegraph_tests.dir/all' failed
-make[1]: *** [CMakeFiles/mmscenegraph_tests.dir/all] Error 2
-Makefile:116: recipe for target 'all' failed
-make: *** [all] Error 2
+[100%] Built target mmscenegraph_tests
+[ 33%] Built target libmmscenegraph
+[100%] Built target mmscenegraph_tests
+Install the project...
+-- Install configuration: "Release"
+-- Installing: /media/dev/cxx-demo-example/install/include
+-- Installing: /media/dev/cxx-demo-example/install/include/cxx.h
+-- Installing: /media/dev/cxx-demo-example/install/include/mmscenegraph
+-- Up-to-date: /media/dev/cxx-demo-example/install/include/mmscenegraph/_cbindgen.h
+-- Up-to-date: /media/dev/cxx-demo-example/install/include/mmscenegraph/_cpp.h
+-- Installing: /media/dev/cxx-demo-example/install/include/mmscenegraph/_cxxbridge.h
+-- Up-to-date: /media/dev/cxx-demo-example/install/include/mmscenegraph.h
+-- Installing: /media/dev/cxx-demo-example/install/lib/liblibmmscenegraph.so
+-- Installing: /media/dev/cxx-demo-example/install/bin/mmscenegraph_tests
 
 $ cxxbridge --version
 cxxbridge 0.5.5
