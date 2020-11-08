@@ -16,11 +16,6 @@ INSTALL_DIR="${ROOT}/install"
 RUST_BUILD_DIR="${ROOT}/target/release/"
 RUST_INCLUDE_DIR="${ROOT}/include/"
 
-# Set up environment for compatiblity with VFX Reference Platform
-export CC=/opt/rh/devtoolset-6/root/usr/bin/gcc
-export CXX=/opt/rh/devtoolset-6/root/usr/bin/g++
-export _GLIBCXX_USE_CXX11_ABI=0  # Use the old std::string and std::list ABI.
-
 # Build Rust
 #
 # Assumes 'cxxbridge-cmd' and 'cbindgen' is installed.

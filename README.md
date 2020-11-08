@@ -12,18 +12,12 @@ for it's strengths too.
 
 # Compile and Test (GNU Linux)
 
-The build environment assumes to be running on CentOS Linux release
-7.8.2003 with GCC 6.3.1 as the C++ compiler (using Red Hat Developer
-Toolset 6), and aims for compatiblity with the VFX Reference Platform
-CY2018. https://vfxplatform.com/
+The build environment assumes to be running on Linux with GCC 6.3.1.
 
 ``` shell
 $ cd /path/to/project/root/
 
-# Enable Red Hat Developer Toolset 6
-$ scl enable devtoolset-6 bash
-
-$ ./build_linux.bash
+$ bash build_linux.bash
 
 # Run tests
 $ ./install/bin/mmscenegraph_tests
@@ -34,13 +28,25 @@ my awesome demo
 done with ThingC
 ```
 
+Note: If you are using CentOS 7.8 and require the Red Hat Developer
+Toolset 6 (GCC 6.3.1) for compatiblity with the VFX Reference Platform CY2018,
+then you cause use the following commands prior to running `build_linux.bash`:
+```
+$ export CC=/opt/rh/devtoolset-6/root/usr/bin/gcc
+$ export CXX=/opt/rh/devtoolset-6/root/usr/bin/g++
+$ export _GLIBCXX_USE_CXX11_ABI=0  # Use the old std::string and std::list ABI.
+
+# Enable Red Hat Developer Toolset 6
+$ scl enable devtoolset-6 bash
+```
+
 # Compile and Test (Microsoft Windows)
 
 This has been tested on Windows 10, with Visual Studio 2015.
 
 Make sure the following commands are run in the Visual Studio 2015 enabled Command Prompt.
 ``` shell
-> CHDIR C:\path\to\project\root\
+> cd C:\path\to\project\root\
 
 > build_windows64.bat
 
@@ -58,9 +64,9 @@ You will need the Rust compiler and a C/C++ compiler.  Below are the
 tested dependancy versions, for both Linux and Windows (MacOSX has not
 been tested).
 
-This demo targets C++11.
+This demo targets the C++11 standard.
 
-- Linux - CentOS 7.8
+- Linux
   - GCC 6.3.1
   - CMake 2.8.12+
   - Rust 1.47
