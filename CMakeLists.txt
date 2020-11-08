@@ -119,7 +119,7 @@ set(header_files
 
   # Include internal generated headers, using 'cbindgen' and 'cxx'.
   include/cxx.h
-  include/mmscenegraph/_mmscenegraph.h
+  include/mmscenegraph/_cpp.h
   include/mmscenegraph/_cbindgen.h
   include/mmscenegraph/_cxxbridge.h
   )
