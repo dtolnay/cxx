@@ -21,6 +21,11 @@ $ bash build_linux.bash
 
 # Run tests
 $ ./install/bin/mmscenegraph_tests
+2 + 2 = 4
+SCENEGRAPH: Add SceneGraph 42
+SCENEGRAPH: Remove SceneGraph 0x96b5b0
+my awesome demo
+done with ThingC
 ```
 
 # Compile and Test (Microsoft Windows)
