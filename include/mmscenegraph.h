@@ -6,5 +6,4 @@
 #include <mmscenegraph/_cxxbridge.h>
 #include <mmscenegraph/_cpp.h>
 
-
 #endif // MMSCENEGRAPH_H
