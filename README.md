@@ -130,20 +130,13 @@ The details of the `cbindgen` command is controlled by the
 The `cxxbridge` command parses the `src/cxxbridge.rs` file and outputs
 `src/_cxxbridge.cpp` and `include/_cxxbridge.h` files. `cxxbridge` Can
 also generate a C++ shim header `include/cxx.h` to aid in the
-transition between C++ and Rust functions. The `src/cxx.cc` file must
-also be present, but must be downloaded this from the cxx GitHub
-repository. When you do this, make sure you download the file for your
-version of the `cxx` crate, and the `cxxbridge` command from the
-`cxxbridge-cmd` crate.
-
-https://github.com/dtolnay/cxx/blob/0.5.5/src/cxx.cc
+transition between C++ and Rust functions.
 
 Files:
 ```
 src/ffi.rs
 src/cxxbridge.rs
 src/_cxxbridge.cpp
-src/cxx.cc
 include/cxx.h
 include/_cbindgen.h
 include/_cxxbridge.h
