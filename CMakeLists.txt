@@ -81,22 +81,23 @@ elseif (UNIX)
 else ()
   message(FATAL_ERROR "Only Linux and Windows are supported.")
 endif ()
-
 message("Rust Library: " ${RUST_LINKTIME_LIBRARY_FILE})
 
+
 macro(set_rpath_to_cwd target)
-# HACK: We must change the RPATH variable for the library so that a
-# binary can find the shared object, even if it's not in the
-# $LD_LIBRARY_PATH.
-if (UNIX)
- # We must escape the '$' symbol to make sure it is passed to the
- # compiler.
- set_target_properties(${target} PROPERTIES
-   BUILD_WITH_INSTALL_RPATH ON
-   INSTALL_RPATH "\$ORIGIN/../lib/"
-   )
-endif ()
+  # HACK: We must change the RPATH variable for the library so that a
+  # binary can find the shared object, even if it's not in the
+  # $LD_LIBRARY_PATH.
+  if (UNIX)
+    # We must escape the '$' symbol to make sure it is passed to the
+    # compiler.
+    set_target_properties(${target} PROPERTIES
+      BUILD_WITH_INSTALL_RPATH ON
+      INSTALL_RPATH "\$ORIGIN/../lib/"
+      )
+  endif ()
 endmacro()
+
 
 # Add 'mmscenegraph' library as a C++ wrapper around the Rust library.
 add_library(${target_release_lib_name} SHARED ${lib_source_files})
