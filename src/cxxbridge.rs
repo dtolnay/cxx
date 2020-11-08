@@ -8,7 +8,6 @@ mod ffi {
 
     extern "C" {
         include!("mmscenegraph/_cpp.h");
-
         include!("mmscenegraph.h");
 
         type ThingC;
@@ -29,7 +28,8 @@ fn print_r(r: &ThingR) {
     println!("called back with r={}", r.0);
 }
 
-fn main() {
+#[allow(dead_code)]
+fn my_test() {
     let x = ffi::make_demo("demo of cxx::bridge");
     println!("this is a {}", ffi::get_name(x.as_ref().unwrap()));
 
