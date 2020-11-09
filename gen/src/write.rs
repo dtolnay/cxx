@@ -66,7 +66,7 @@ fn write_forward_declarations(out: &mut OutFile, apis: &[Api]) {
 fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
     let mut methods_for_type = HashMap::new();
     for api in apis {
-        if let Api::RustFunction(efn) = api {
+        if let Api::CxxFunction(efn) | Api::RustFunction(efn) = api {
             if let Some(receiver) = &efn.sig.receiver {
                 methods_for_type
                     .entry(&receiver.ty.rust)
@@ -84,7 +84,11 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
                 for next in &mut toposorted_structs {
                     if !out.types.cxx.contains(&strct.name.rust) {
                         out.next_section();
-                        write_struct(out, next);
+                        let methods = methods_for_type
+                            .get(&strct.name.rust)
+                            .map(Vec::as_slice)
+                            .unwrap_or_default();
+                        write_struct(out, next, methods);
                     }
                     structs_written.insert(&next.name.rust);
                     if next.name.rust == strct.name.rust {
@@ -173,7 +177,7 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
     }
 }
 
-fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
+fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&ExternFn]) {
     out.set_namespace(&strct.name.namespace);
     let guard = format!("CXXBRIDGE05_STRUCT_{}", strct.name.to_symbol());
     writeln!(out, "#ifndef {}", guard);
@@ -186,6 +190,16 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
         write!(out, "  ");
         write_type_space(out, &field.ty);
         writeln!(out, "{};", field.ident);
+    }
+    if !methods.is_empty() {
+        writeln!(out);
+    }
+    for method in methods {
+        write!(out, "  ");
+        let sig = &method.sig;
+        let local_name = method.name.cxx.to_string();
+        write_rust_function_shim_decl(out, &local_name, sig, false);
+        writeln!(out, ";");
     }
     writeln!(out, "}};");
     writeln!(out, "#endif // {}", guard);

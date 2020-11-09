@@ -193,6 +193,7 @@ fn test_c_method_calls() {
     assert_eq!(old_value, unique_ptr.get2());
     assert_eq!(2022, unique_ptr.set_succeed(2022).unwrap());
     assert!(unique_ptr.get_fail().is_err());
+    assert_eq!(2021, ffi::Shared { z: 0 }.method_on_shared());
 }
 
 #[test]

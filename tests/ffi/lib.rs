@@ -202,6 +202,7 @@ pub mod ffi {
         fn set2(&mut self, n: usize) -> usize;
         fn set_succeed(&mut self, n: usize) -> Result<usize>;
         fn get_fail(&mut self) -> Result<usize>;
+        fn method_on_shared(self: &Shared) -> usize;
 
         #[rust_name = "i32_overloaded_method"]
         fn cOverloadedMethod(&self, x: i32) -> String;

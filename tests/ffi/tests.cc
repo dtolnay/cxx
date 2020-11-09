@@ -35,6 +35,8 @@ size_t C::set_succeed(size_t n) { return this->set2(n); }
 
 size_t C::get_fail() { throw std::runtime_error("unimplemented"); }
 
+size_t Shared::method_on_shared() const noexcept { return 2021; }
+
 const std::vector<uint8_t> &C::get_v() const { return this->v; }
 
 std::vector<uint8_t> &C::get_v() { return this->v; }
