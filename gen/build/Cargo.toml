@@ -1,6 +1,6 @@
 [package]
 name = "cxx-build"
-version = "0.5.5"
+version = "0.5.6"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
