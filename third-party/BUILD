@@ -13,7 +13,7 @@ rust_library(
 
 rust_library(
     name = "cc",
-    srcs = glob(["vendor/cc-1.0.61/src/**"]),
+    srcs = glob(["vendor/cc-1.0.62/src/**"]),
     visibility = ["//visibility:public"],
 )
 
