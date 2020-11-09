@@ -202,7 +202,7 @@ pub mod ffi {
         fn set2(&mut self, n: usize) -> usize;
         fn set_succeed(&mut self, n: usize) -> Result<usize>;
         fn get_fail(&mut self) -> Result<usize>;
-        fn method_on_shared(self: &Shared) -> usize;
+        fn c_method_on_shared(self: &Shared) -> usize;
 
         #[rust_name = "i32_overloaded_method"]
         fn cOverloadedMethod(&self, x: i32) -> String;
@@ -274,6 +274,7 @@ pub mod ffi {
         fn r_return_r2(n: usize) -> Box<R2>;
         fn get(self: &R2) -> usize;
         fn set(self: &mut R2, n: usize) -> usize;
+        fn r_method_on_shared(self: &Shared) -> usize;
 
         #[cxx_name = "rAliasedFunction"]
         fn r_aliased_function(x: i32) -> String;
@@ -313,6 +314,12 @@ impl R2 {
     fn set(&mut self, n: usize) -> usize {
         self.0 = n;
         n
+    }
+}
+
+impl ffi::Shared {
+    fn r_method_on_shared(&self) -> usize {
+        2020
     }
 }
 
