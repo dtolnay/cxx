@@ -35,6 +35,8 @@ size_t C::set_succeed(size_t n) { return this->set2(n); }
 
 size_t C::get_fail() { throw std::runtime_error("unimplemented"); }
 
+size_t Shared::c_method_on_shared() const noexcept { return 2021; }
+
 const std::vector<uint8_t> &C::get_v() const { return this->v; }
 
 std::vector<uint8_t> &C::get_v() { return this->v; }
@@ -624,6 +626,7 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(r2->get() == 2021);
   ASSERT(r2->set(2020) == 2020);
   ASSERT(r2->get() == 2020);
+  ASSERT(Shared{0}.r_method_on_shared() == 2020);
 
   ASSERT(std::string(rAliasedFunction(2020)) == "2020");
 
