@@ -670,12 +670,14 @@ fn expand_rust_function_shim_super(
     let args = sig.args.iter().map(|arg| quote!(#arg));
     let all_args = receiver.chain(args);
 
-    let ret = if sig.throws {
+    let ret = if let Some((result, _langle, rangle)) = sig.throws_tokens {
         let ok = match &sig.ret {
             Some(ret) => quote!(#ret),
             None => quote!(()),
         };
-        quote!(-> ::std::result::Result<#ok, impl ::std::fmt::Display>)
+        let impl_trait = quote_spanned!(result.span=> impl);
+        let display = quote_spanned!(rangle.span=> ::std::fmt::Display);
+        quote!(-> ::std::result::Result<#ok, #impl_trait #display>)
     } else {
         expand_return_type(&sig.ret)
     };
