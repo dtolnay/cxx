@@ -698,11 +698,13 @@ fn write_rust_function_shim_impl(
         write!(out, "::rust::repr::PtrLen error$ = ");
     }
     write!(out, "{}(", invoke);
+    let mut needs_comma = false;
     if sig.receiver.is_some() {
         write!(out, "*this");
+        needs_comma = true;
     }
-    for (i, arg) in sig.args.iter().enumerate() {
-        if i > 0 || sig.receiver.is_some() {
+    for arg in &sig.args {
+        if needs_comma {
             write!(out, ", ");
         }
         match &arg.ty {
@@ -725,15 +727,17 @@ fn write_rust_function_shim_impl(
             ty if ty != RustString && out.types.needs_indirect_abi(ty) => write!(out, "$.value"),
             _ => {}
         }
+        needs_comma = true;
     }
     if indirect_return {
-        if !sig.args.is_empty() {
+        if needs_comma {
             write!(out, ", ");
         }
         write!(out, "&return$.value");
+        needs_comma = true;
     }
     if indirect_call {
-        if !sig.args.is_empty() || indirect_return {
+        if needs_comma {
             write!(out, ", ");
         }
         write!(out, "extern$");

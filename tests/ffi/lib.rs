@@ -275,7 +275,7 @@ pub mod ffi {
         fn r_return_r2(n: usize) -> Box<R2>;
         fn get(self: &R2) -> usize;
         fn set(self: &mut R2, n: usize) -> usize;
-        fn r_method_on_shared(self: &Shared) -> usize;
+        fn r_method_on_shared(self: &Shared) -> String;
 
         #[cxx_name = "rAliasedFunction"]
         fn r_aliased_function(x: i32) -> String;
@@ -319,8 +319,8 @@ impl R2 {
 }
 
 impl ffi::Shared {
-    fn r_method_on_shared(&self) -> usize {
-        2020
+    fn r_method_on_shared(&self) -> String {
+        "2020".to_owned()
     }
 }
 
