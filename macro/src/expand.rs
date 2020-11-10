@@ -563,14 +563,10 @@ fn expand_rust_function_shim_impl(
     });
     let vars = receiver_var.into_iter().chain(arg_vars);
 
+    let wrap_super = invoke.map(|invoke| expand_rust_function_shim_super(sig, &local_name, invoke));
+
     let mut call = match invoke {
-        Some(ident) => match &sig.receiver {
-            None => quote!(super::#ident),
-            Some(receiver) => {
-                let receiver_type = &receiver.ty;
-                quote!(#receiver_type::#ident)
-            }
-        },
+        Some(_) => quote!(#local_name),
         None => quote!(::std::mem::transmute::<*const (), #sig>(__extern)),
     };
     call.extend(quote! { (#(#vars),*) });
@@ -648,7 +644,57 @@ fn expand_rust_function_shim_impl(
         #[export_name = #link_name]
         unsafe extern "C" fn #local_name(#(#all_args,)* #outparam #pointer) #ret {
             let __fn = concat!(module_path!(), #catch_unwind_label);
+            #wrap_super
             #expr
+        }
+    }
+}
+
+// A wrapper like `fn f(x: Arg) { super::f(x) }` just to ensure we have the
+// accurate unsafety declaration and no problematic elided lifetimes.
+fn expand_rust_function_shim_super(
+    sig: &Signature,
+    local_name: &Ident,
+    invoke: &Ident,
+) -> TokenStream {
+    let unsafety = sig.unsafety;
+
+    let receiver_var = sig
+        .receiver
+        .as_ref()
+        .map(|receiver| Ident::new("__self", receiver.var.span));
+    let receiver = sig.receiver.iter().map(|receiver| {
+        let receiver_type = receiver.ty();
+        quote!(#receiver_var: #receiver_type)
+    });
+    let args = sig.args.iter().map(|arg| quote!(#arg));
+    let all_args = receiver.chain(args);
+
+    let ret = if sig.throws {
+        let ok = match &sig.ret {
+            Some(ret) => quote!(#ret),
+            None => quote!(()),
+        };
+        quote!(-> ::std::result::Result<#ok, impl ::std::fmt::Display>)
+    } else {
+        expand_return_type(&sig.ret)
+    };
+
+    let arg_vars = sig.args.iter().map(|arg| &arg.ident);
+    let vars = receiver_var.iter().chain(arg_vars);
+
+    let span = invoke.span();
+    let call = match &sig.receiver {
+        None => quote_spanned!(span=> super::#invoke),
+        Some(receiver) => {
+            let receiver_type = &receiver.ty;
+            quote_spanned!(span=> #receiver_type::#invoke)
+        }
+    };
+
+    quote_spanned! {span=>
+        #unsafety fn #local_name(#(#all_args,)*) #ret {
+            #call(#(#vars,)*)
         }
     }
 }

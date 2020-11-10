@@ -1,14 +1,8 @@
 error[E0277]: `NonError` doesn't implement `std::fmt::Display`
-  --> $DIR/result_no_display.rs:1:1
-   |
-1  | #[cxx::bridge]
-   | ^^^^^^^^^^^^^^ `NonError` cannot be formatted with the default formatter
-   |
-  ::: $WORKSPACE/src/result.rs
-   |
-   |     E: Display,
-   |        ------- required by this bound in `cxx::private::r#try`
-   |
-   = help: the trait `std::fmt::Display` is not implemented for `NonError`
-   = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
-   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+ --> $DIR/result_no_display.rs:1:1
+  |
+1 | #[cxx::bridge]
+  | ^^^^^^^^^^^^^^ `NonError` cannot be formatted with the default formatter
+  |
+  = help: the trait `std::fmt::Display` is not implemented for `NonError`
+  = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
