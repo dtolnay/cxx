@@ -69,6 +69,7 @@ pub(super) fn write(out: &mut OutFile) {
         include.array = true;
         include.new = true;
         include.type_traits = true;
+        include.utility = true;
         builtin.panic = true;
         builtin.unsafe_bitcopy = true;
     }

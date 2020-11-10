@@ -1078,6 +1078,16 @@ fn write_rust_vec_extern(out: &mut OutFile, element: &ResolvableName) {
     );
     writeln!(
         out,
+        "void cxxbridge05$rust_vec${}$reserve_total(::rust::Vec<{}> *ptr, size_t cap) noexcept;",
+        instance, inner,
+    );
+    writeln!(
+        out,
+        "void cxxbridge05$rust_vec${}$set_len(::rust::Vec<{}> *ptr, size_t len) noexcept;",
+        instance, inner,
+    );
+    writeln!(
+        out,
         "size_t cxxbridge05$rust_vec${}$stride() noexcept;",
         instance,
     );
@@ -1128,6 +1138,28 @@ fn write_rust_vec_impl(out: &mut OutFile, element: &ResolvableName) {
     writeln!(
         out,
         "  return cxxbridge05$rust_vec${}$data(this);",
+        instance,
+    );
+    writeln!(out, "}}");
+
+    writeln!(out, "template <>");
+    writeln!(
+        out,
+        "void Vec<{}>::reserve_total(size_t cap) noexcept {{",
+        inner,
+    );
+    writeln!(
+        out,
+        "  return cxxbridge05$rust_vec${}$reserve_total(this, cap);",
+        instance,
+    );
+    writeln!(out, "}}");
+
+    writeln!(out, "template <>");
+    writeln!(out, "void Vec<{}>::set_len(size_t len) noexcept {{", inner);
+    writeln!(
+        out,
+        "  return cxxbridge05$rust_vec${}$set_len(this, len);",
         instance,
     );
     writeln!(out, "}}");

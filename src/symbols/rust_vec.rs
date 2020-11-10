@@ -35,6 +35,18 @@ macro_rules! rust_vec_shims {
                 }
             }
             attr! {
+                #[export_name = concat!("cxxbridge05$rust_vec$", $segment, "$reserve_total")]
+                unsafe extern "C" fn __reserve_total(this: *mut RustVec<$ty>, cap: usize) {
+                    (*this).reserve_total(cap);
+                }
+            }
+            attr! {
+                #[export_name = concat!("cxxbridge05$rust_vec$", $segment, "$set_len")]
+                unsafe extern "C" fn __set_len(this: *mut RustVec<$ty>, len: usize) {
+                    (*this).repr.set_len(len);
+                }
+            }
+            attr! {
                 #[export_name = concat!("cxxbridge05$rust_vec$", $segment, "$stride")]
                 unsafe extern "C" fn __stride() -> usize {
                     mem::size_of::<$ty>()

@@ -44,6 +44,17 @@ impl<T> RustVec<T> {
     pub fn as_ptr(&self) -> *const T {
         self.repr.as_ptr()
     }
+
+    pub fn reserve_total(&mut self, cap: usize) {
+        let len = self.repr.len();
+        if cap > len {
+            self.repr.reserve(cap - len);
+        }
+    }
+
+    pub unsafe fn set_len(&mut self, len: usize) {
+        self.repr.set_len(len);
+    }
 }
 
 impl RustVec<RustString> {
