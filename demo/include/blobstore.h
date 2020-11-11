@@ -16,8 +16,8 @@ public:
   BlobMetadata metadata(uint64_t blobid) const;
 
 private:
-  class Impl;
-  std::shared_ptr<Impl> impl;
+  class impl;
+  std::shared_ptr<impl> impl;
 };
 
 std::unique_ptr<BlobstoreClient> new_blobstore_client();
