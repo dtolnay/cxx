@@ -151,7 +151,7 @@ items:
 - **Functions** &mdash; implemented in either language, callable from the other
   language.
 
-Within the `extern "C"` part of the CXX bridge we list the types and functions
+Within the `extern "C++"` part of the CXX bridge we list the types and functions
 for which C++ is the source of truth, as well as the header(s) that declare
 those APIs. In the future it's possible that this section could be generated
 bindgen-style from the headers but for now we need the signatures written out;

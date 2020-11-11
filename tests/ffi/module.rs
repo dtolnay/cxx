@@ -3,7 +3,7 @@
 #[rustfmt::skip]
 #[cxx::bridge(namespace = "tests")]
 pub mod ffi {
-    extern "C" {
+    extern "C++" {
         include!("tests/ffi/tests.h");
 
         type C = crate::ffi::C;

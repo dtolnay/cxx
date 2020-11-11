@@ -6,7 +6,7 @@ fn test_positive() {
     let rs = quote! {
         #[cxx::bridge]
         mod ffi {
-            extern "C" {
+            extern "C++" {
                 fn in_C();
             }
             extern "Rust" {

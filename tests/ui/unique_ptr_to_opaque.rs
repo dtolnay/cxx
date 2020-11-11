@@ -11,7 +11,7 @@ mod outside {
 
 #[cxx::bridge]
 mod ffi {
-    extern "C" {
+    extern "C++" {
         type C = crate::outside::C;
     }
 

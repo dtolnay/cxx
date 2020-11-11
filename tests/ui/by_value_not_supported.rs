@@ -6,7 +6,7 @@ mod ffi {
         s: CxxString,
     }
 
-    extern "C" {
+    extern "C++" {
         type C;
     }
 

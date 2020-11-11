@@ -1,6 +1,6 @@
 #[cxx::bridge]
 mod ffi {
-    extern "C" {
+    extern "C++" {
         type ThingC;
         fn repro_c(t: &&ThingC);
     }

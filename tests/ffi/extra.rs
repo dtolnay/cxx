@@ -15,7 +15,7 @@ pub mod ffi2 {
     impl UniquePtr<F> {}
     impl UniquePtr<G> {}
 
-    extern "C" {
+    extern "C++" {
         include!("tests/ffi/tests.h");
 
         type D = crate::other::D;

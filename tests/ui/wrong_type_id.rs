@@ -1,13 +1,13 @@
 #[cxx::bridge(namespace = "folly")]
 mod here {
-    extern "C" {
+    extern "C++" {
         type StringPiece;
     }
 }
 
 #[cxx::bridge(namespace = "folly")]
 mod there {
-    extern "C" {
+    extern "C++" {
         type ByteRange = crate::here::StringPiece;
     }
 }

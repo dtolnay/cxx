@@ -4,7 +4,7 @@ mod ffi {
         val: usize,
     }
 
-    extern "C" {
+    extern "C++" {
         type Box;
     }
 

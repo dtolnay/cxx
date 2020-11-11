@@ -27,7 +27,7 @@ use syn::parse_macro_input;
 /// is intended to be used.
 ///
 /// The only additional thing to note here is namespace support &mdash; if the
-/// types and functions on the `extern "C"` side of our bridge are in a
+/// types and functions on the `extern "C++"` side of our bridge are in a
 /// namespace, specify that namespace as an argument of the cxx::bridge
 /// attribute macro.
 ///
