@@ -1,6 +1,6 @@
 #[cxx::bridge]
 mod here {
-    extern "C" {
+    extern "C++" {
         type C;
     }
 
@@ -9,7 +9,7 @@ mod here {
 
 #[cxx::bridge]
 mod there {
-    extern "C" {
+    extern "C++" {
         type C = crate::here::C;
     }
 

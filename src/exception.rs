@@ -1,7 +1,7 @@
 use alloc::boxed::Box;
 use core::fmt::{self, Debug, Display};
 
-/// Exception thrown from an `extern "C"` function.
+/// Exception thrown from an `extern "C++"` function.
 #[derive(Debug)]
 pub struct Exception {
     pub(crate) what: Box<str>,

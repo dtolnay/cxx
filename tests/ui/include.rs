@@ -1,6 +1,6 @@
 #[cxx::bridge]
 mod ffi {
-    extern "C" {
+    extern "C++" {
         include!("path/to" what);
         include!(<path/to> what);
         include!(<path/to);

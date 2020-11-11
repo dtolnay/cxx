@@ -280,7 +280,7 @@ fn parse_lang(abi: &Abi) -> Result<Lang> {
         None => {
             return Err(Error::new_spanned(
                 abi,
-                "ABI name is required, extern \"C\" or extern \"Rust\"",
+                "ABI name is required, extern \"C++\" or extern \"Rust\"",
             ));
         }
     };

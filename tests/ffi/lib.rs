@@ -115,7 +115,7 @@ pub mod ffi {
         i: i32,
     }
 
-    extern "C" {
+    extern "C++" {
         include!("tests/ffi/tests.h");
 
         type C;
@@ -218,7 +218,7 @@ pub mod ffi {
         fn ns_c_take_ns_shared(shared: AShared);
     }
 
-    extern "C" {
+    extern "C++" {
         type COwnedEnum;
     }
 
