@@ -90,13 +90,16 @@ private:
 #ifndef CXXBRIDGE05_RUST_SLICE
 template <typename T>
 class Slice final {
+  static_assert(std::is_const<T>::value,
+                "&[T] needs to be written as rust::Slice<const T> in C++");
+
 public:
   Slice() noexcept;
-  Slice(const T *, size_t count) noexcept;
+  Slice(T *, size_t count) noexcept;
 
   Slice &operator=(const Slice<T> &) noexcept = default;
 
-  const T *data() const noexcept;
+  T *data() const noexcept;
   size_t size() const noexcept;
   size_t length() const noexcept;
 
@@ -108,7 +111,7 @@ private:
   friend impl<Slice>;
   // Not necessarily ABI compatible with &[T]. Codegen will translate to
   // cxx::rust_sliceu8::RustSliceU8 which matches this layout.
-  const T *ptr;
+  T *ptr;
   size_t len;
 };
 #endif // CXXBRIDGE05_RUST_SLICE
@@ -358,13 +361,13 @@ inline size_t Str::length() const noexcept { return this->len; }
 #ifndef CXXBRIDGE05_RUST_SLICE
 #define CXXBRIDGE05_RUST_SLICE
 template <typename T>
-Slice<T>::Slice() noexcept : ptr(reinterpret_cast<const T *>(this)), len(0) {}
+Slice<T>::Slice() noexcept : ptr(reinterpret_cast<T *>(this)), len(0) {}
 
 template <typename T>
-Slice<T>::Slice(const T *s, size_t count) noexcept : ptr(s), len(count) {}
+Slice<T>::Slice(T *s, size_t count) noexcept : ptr(s), len(count) {}
 
 template <typename T>
-const T *Slice<T>::data() const noexcept {
+T *Slice<T>::data() const noexcept {
   return this->ptr;
 }
 

@@ -432,7 +432,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         }
         Some(Type::SliceRefU8(_)) if !indirect_return => {
             out.builtin.rust_slice_repr = true;
-            write!(out, "::rust::impl<::rust::Slice<uint8_t>>::repr(")
+            write!(out, "::rust::impl<::rust::Slice<const uint8_t>>::repr(")
         }
         _ => {}
     }
@@ -471,7 +471,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         } else if let Type::SliceRefU8(_) = arg.ty {
             write!(
                 out,
-                "::rust::Slice<uint8_t>(static_cast<const uint8_t *>({0}.ptr), {0}.len)",
+                "::rust::Slice<const uint8_t>(static_cast<const uint8_t *>({0}.ptr), {0}.len)",
                 arg.ident,
             );
         } else if out.types.needs_indirect_abi(&arg.ty) {
@@ -688,7 +688,7 @@ fn write_rust_function_shim_impl(
             }
             Type::SliceRefU8(_) => {
                 out.builtin.rust_slice_new = true;
-                write!(out, "::rust::impl<::rust::Slice<uint8_t>>::slice(");
+                write!(out, "::rust::impl<::rust::Slice<const uint8_t>>::slice(");
             }
             _ => {}
         }
@@ -714,7 +714,7 @@ fn write_rust_function_shim_impl(
             }
             Type::SliceRefU8(_) => {
                 out.builtin.rust_slice_repr = true;
-                write!(out, "::rust::impl<::rust::Slice<uint8_t>>::repr(");
+                write!(out, "::rust::impl<::rust::Slice<const uint8_t>>::repr(");
             }
             ty if out.types.needs_indirect_abi(ty) => write!(out, "&"),
             _ => {}
@@ -885,7 +885,7 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write!(out, "::rust::Str");
         }
         Type::SliceRefU8(_) => {
-            write!(out, "::rust::Slice<uint8_t>");
+            write!(out, "::rust::Slice<const uint8_t>");
         }
         Type::Fn(f) => {
             write!(out, "::rust::{}<", if f.throws { "TryFn" } else { "Fn" });

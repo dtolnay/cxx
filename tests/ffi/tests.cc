@@ -76,10 +76,10 @@ rust::Str c_return_str(const Shared &shared) {
   return "2020";
 }
 
-rust::Slice<uint8_t> c_return_sliceu8(const Shared &shared) {
+rust::Slice<const uint8_t> c_return_sliceu8(const Shared &shared) {
   (void)shared;
-  return rust::Slice<uint8_t>(reinterpret_cast<const uint8_t *>(SLICE_DATA),
-                              sizeof(SLICE_DATA));
+  return rust::Slice<const uint8_t>(
+      reinterpret_cast<const uint8_t *>(SLICE_DATA), sizeof(SLICE_DATA));
 }
 
 rust::String c_return_rust_string() { return "2020"; }
@@ -240,7 +240,7 @@ void c_take_str(rust::Str s) {
   }
 }
 
-void c_take_sliceu8(rust::Slice<uint8_t> s) {
+void c_take_sliceu8(rust::Slice<const uint8_t> s) {
   if (std::string(reinterpret_cast<const char *>(s.data()), s.size()) ==
       "2020") {
     cxx_test_suite_set_correct();
@@ -436,7 +436,9 @@ const rust::String &c_try_return_ref(const rust::String &s) { return s; }
 
 rust::Str c_try_return_str(rust::Str s) { return s; }
 
-rust::Slice<uint8_t> c_try_return_sliceu8(rust::Slice<uint8_t> s) { return s; }
+rust::Slice<const uint8_t> c_try_return_sliceu8(rust::Slice<const uint8_t> s) {
+  return s;
+}
 
 rust::String c_try_return_rust_string() { return c_return_rust_string(); }
 
@@ -608,7 +610,7 @@ extern "C" const char *cxx_run_test() noexcept {
   r_take_unique_ptr(std::unique_ptr<C>(new C{2020}));
   r_take_ref_c(C{2020});
   r_take_str(rust::Str("2020"));
-  r_take_sliceu8(rust::Slice<uint8_t>(
+  r_take_sliceu8(rust::Slice<const uint8_t>(
       reinterpret_cast<const uint8_t *>(SLICE_DATA), sizeof(SLICE_DATA)));
   r_take_rust_string(rust::String("2020"));
   r_take_unique_ptr_string(
