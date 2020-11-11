@@ -63,6 +63,12 @@ function calls Rust's `len()`.
 
 ## Example
 
+In this example we are writing a Rust application that wishes to take advantage
+of an existing C++ client for a large-file blobstore service. The blobstore
+supports a `put` operation for a discontiguous buffer upload. For example we
+might be uploading snapshots of a circular buffer which would tend to consist of
+2 chunks, or fragments of a file spread across memory for some other reason.
+
 A runnable version of this example is provided under the *demo* directory of
 this repo. To try it out, run `cargo run` from that directory.
 
@@ -70,49 +76,49 @@ this repo. To try it out, run `cargo run` from that directory.
 #[cxx::bridge]
 mod ffi {
     // Any shared structs, whose fields will be visible to both languages.
-    struct SharedThing {
-        z: i32,
-        y: Box<ThingR>,
-        x: UniquePtr<ThingC>,
-    }
-
-    extern "C" {
-        // One or more headers with the matching C++ declarations. Our code
-        // generators don't read it but it gets #include'd and used in static
-        // assertions to ensure our picture of the FFI boundary is accurate.
-        include!("demo/include/demo.h");
-
-        // Zero or more opaque types which both languages can pass around but
-        // only C++ can see the fields.
-        type ThingC;
-
-        // Functions implemented in C++.
-        fn make_demo(appname: &str) -> UniquePtr<ThingC>;
-        fn get_name(thing: &ThingC) -> &CxxString;
-        fn do_thing(state: SharedThing);
+    struct BlobMetadata {
+        size: usize,
+        tags: Vec<String>,
     }
 
     extern "Rust" {
         // Zero or more opaque types which both languages can pass around but
         // only Rust can see the fields.
-        type ThingR;
+        type MultiBuf;
 
         // Functions implemented in Rust.
-        fn print_r(r: &ThingR);
+        fn next_chunk(buf: &mut MultiBuf) -> &[u8];
+    }
+
+    extern "C++" {
+        // One or more headers with the matching C++ declarations. Our code
+        // generators don't read it but it gets #include'd and used in static
+        // assertions to ensure our picture of the FFI boundary is accurate.
+        include!("demo/include/blobstore.h");
+
+        // Zero or more opaque types which both languages can pass around but
+        // only C++ can see the fields.
+        type BlobstoreClient;
+
+        // Functions implemented in C++.
+        fn new_blobstore_client() -> UniquePtr<BlobstoreClient>;
+        fn put(&self, parts: &mut MultiBuf) -> u64;
+        fn tag(&self, blobid: u64, tag: &str);
+        fn metadata(&self, blobid: u64) -> BlobMetadata;
     }
 }
 ```
 
-Now we simply provide C++ definitions of all the things in the `extern "C"`
-block and Rust definitions of all the things in the `extern "Rust"` block, and
-get to call back and forth safely.
+Now we simply provide Rust definitions of all the things in the `extern "Rust"`
+block and C++ definitions of all the things in the `extern "C++"` block, and get
+to call back and forth safely.
 
 Here are links to the complete set of source files involved in the demo:
 
 - [demo/src/main.rs](demo/src/main.rs)
 - [demo/build.rs](demo/build.rs)
-- [demo/include/demo.h](demo/include/demo.h)
-- [demo/src/demo.cc](demo/src/demo.cc)
+- [demo/include/blobstore.h](demo/include/blobstore.h)
+- [demo/src/blobstore.cc](demo/src/blobstore.cc)
 
 To look at the code generated in both languages for the example by the CXX code
 generators:

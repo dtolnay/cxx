@@ -6,8 +6,8 @@ rust_binary(
     name = "demo",
     srcs = glob(["src/**/*.rs"]),
     deps = [
+        ":blobstore-sys",
         ":bridge",
-        ":demo-sys",
         "//:cxx",
     ],
 )
@@ -15,21 +15,21 @@ rust_binary(
 rust_cxx_bridge(
     name = "bridge",
     src = "src/main.rs",
-    deps = [":demo-include"],
+    deps = [":blobstore-include"],
 )
 
 cc_library(
-    name = "demo-sys",
-    srcs = ["src/demo.cc"],
+    name = "blobstore-sys",
+    srcs = ["src/blobstore.cc"],
     copts = ["-std=c++14"],
     deps = [
+        ":blobstore-include",
         ":bridge/include",
-        ":demo-include",
     ],
 )
 
 cc_library(
-    name = "demo-include",
-    hdrs = ["include/demo.h"],
+    name = "blobstore-include",
+    hdrs = ["include/blobstore.h"],
     deps = ["//:core"],
 )

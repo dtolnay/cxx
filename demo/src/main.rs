@@ -1,39 +1,59 @@
-#[cxx::bridge(namespace = "org::example")]
+#[cxx::bridge(namespace = "org::blobstore")]
 mod ffi {
-    struct SharedThing {
-        z: i32,
-        y: Box<ThingR>,
-        x: UniquePtr<ThingC>,
+    // Shared structs with fields visible to both languages.
+    struct BlobMetadata {
+        size: usize,
+        tags: Vec<String>,
     }
 
-    extern "C" {
-        include!("demo/include/demo.h");
-
-        type ThingC;
-        fn make_demo(appname: &str) -> UniquePtr<ThingC>;
-        fn get_name(thing: &ThingC) -> &CxxString;
-        fn do_thing(state: SharedThing);
-    }
-
+    // Rust types and signatures exposed to C++.
     extern "Rust" {
-        type ThingR;
-        fn print_r(r: &ThingR);
+        type MultiBuf;
+
+        fn next_chunk(buf: &mut MultiBuf) -> &[u8];
+    }
+
+    // C++ types and signatures exposed to Rust.
+    extern "C++" {
+        include!("demo/include/blobstore.h");
+
+        type BlobstoreClient;
+
+        fn new_blobstore_client() -> UniquePtr<BlobstoreClient>;
+        fn put(&self, parts: &mut MultiBuf) -> u64;
+        fn tag(&self, blobid: u64, tag: &str);
+        fn metadata(&self, blobid: u64) -> BlobMetadata;
     }
 }
 
-pub struct ThingR(usize);
-
-fn print_r(r: &ThingR) {
-    println!("called back with r={}", r.0);
+// An iterator over contiguous chunks of a discontiguous file object.
+//
+// Toy implementation uses a Vec<Vec<u8>> but in reality this might be iterating
+// over some more complex Rust data structure like a rope, or maybe loading
+// chunks lazily from somewhere.
+pub struct MultiBuf {
+    chunks: Vec<Vec<u8>>,
+    pos: usize,
+}
+pub fn next_chunk(buf: &mut MultiBuf) -> &[u8] {
+    let next = buf.chunks.get(buf.pos);
+    buf.pos += 1;
+    next.map(Vec::as_slice).unwrap_or(&[])
 }
 
 fn main() {
-    let x = ffi::make_demo("demo of cxx::bridge");
-    println!("this is a {}", ffi::get_name(x.as_ref().unwrap()));
+    let client = ffi::new_blobstore_client();
 
-    ffi::do_thing(ffi::SharedThing {
-        z: 222,
-        y: Box::new(ThingR(333)),
-        x,
-    });
+    // Upload a blob.
+    let chunks = vec![b"fearless".to_vec(), b"concurrency".to_vec()];
+    let mut buf = MultiBuf { chunks, pos: 0 };
+    let blobid = client.put(&mut buf);
+    println!("blobid = {}", blobid);
+
+    // Add a tag.
+    client.tag(blobid, "rust");
+
+    // Read back the tags.
+    let metadata = client.metadata(blobid);
+    println!("tags = {:?}", metadata.tags);
 }
