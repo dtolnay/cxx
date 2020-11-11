@@ -22,7 +22,7 @@ class BlobstoreClient::impl {
   std::unordered_map<uint64_t, Blob> blobs;
 };
 
-BlobstoreClient::BlobstoreClient() : impl(new typename BlobstoreClient::impl) {}
+BlobstoreClient::BlobstoreClient() : impl(new class BlobstoreClient::impl) {}
 
 // Upload a new blob and return a blobid that serves as a handle to the blob.
 uint64_t BlobstoreClient::put(MultiBuf &buf) const {
