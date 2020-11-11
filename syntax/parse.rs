@@ -214,16 +214,26 @@ fn parse_foreign_mod(
 
     let trusted = trusted || foreign_mod.unsafety.is_some();
 
+    let mut namespace = namespace.clone();
+    attrs::parse(
+        cx,
+        &foreign_mod.attrs,
+        attrs::Parser {
+            namespace: Some(&mut namespace),
+            ..Default::default()
+        },
+    );
+
     let mut items = Vec::new();
     for foreign in &foreign_mod.items {
         match foreign {
             ForeignItem::Type(foreign) => {
-                match parse_extern_type(cx, foreign, lang, trusted, namespace) {
+                match parse_extern_type(cx, foreign, lang, trusted, &namespace) {
                     Ok(ety) => items.push(ety),
                     Err(err) => cx.push(err),
                 }
             }
-            ForeignItem::Fn(foreign) => match parse_extern_fn(cx, foreign, lang, namespace) {
+            ForeignItem::Fn(foreign) => match parse_extern_fn(cx, foreign, lang, &namespace) {
                 Ok(efn) => items.push(efn),
                 Err(err) => cx.push(err),
             },
@@ -234,7 +244,7 @@ fn parse_foreign_mod(
                 }
             }
             ForeignItem::Verbatim(tokens) => {
-                match parse_extern_verbatim(cx, tokens, lang, namespace) {
+                match parse_extern_verbatim(cx, tokens, lang, &namespace) {
                     Ok(api) => items.push(api),
                     Err(err) => cx.push(err),
                 }

@@ -94,7 +94,7 @@ impl Parse for Item {
             RustItem::Struct(item) => Ok(Item::Struct(ItemStruct { attrs, ..item })),
             RustItem::Enum(item) => Ok(Item::Enum(ItemEnum { attrs, ..item })),
             RustItem::ForeignMod(item) => Ok(Item::ForeignMod(ItemForeignMod {
-                attrs: item.attrs,
+                attrs,
                 unsafety,
                 abi: item.abi,
                 brace_token: item.brace_token,
