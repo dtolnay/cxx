@@ -72,6 +72,10 @@ pub(super) fn write(out: &mut OutFile) {
         builtin.unsafe_bitcopy = true;
     }
 
+    if builtin.rust_fn {
+        include.utility = true;
+    }
+
     if builtin.rust_error {
         include.exception = true;
         builtin.friend_impl = true;

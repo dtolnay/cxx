@@ -215,7 +215,6 @@ private:
 #endif // CXXBRIDGE05_RUST_VEC
 
 #ifndef CXXBRIDGE05_RUST_FN
-#define CXXBRIDGE05_RUST_FN
 template <typename Signature, bool Throws = false>
 class Fn;
 
@@ -316,6 +315,8 @@ template <typename Exception>
 void panic [[noreturn]] (const char *msg);
 #endif // CXXBRIDGE05_PANIC
 
+#ifndef CXXBRIDGE05_RUST_FN
+#define CXXBRIDGE05_RUST_FN
 template <typename Ret, typename... Args, bool Throws>
 Ret Fn<Ret(Args...), Throws>::operator()(Args... args) const noexcept(!Throws) {
   return (*this->trampoline)(std::move(args)..., this->fn);
@@ -325,6 +326,7 @@ template <typename Ret, typename... Args, bool Throws>
 Fn<Ret(Args...), Throws> Fn<Ret(Args...), Throws>::operator*() const noexcept {
   return *this;
 }
+#endif // CXXBRIDGE05_RUST_FN
 
 #ifndef CXXBRIDGE05_RUST_BITCOPY
 #define CXXBRIDGE05_RUST_BITCOPY
