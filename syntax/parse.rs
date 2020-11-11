@@ -30,11 +30,11 @@ pub fn parse_items(
     let mut apis = Vec::new();
     for item in items {
         match item {
-            Item::Struct(item) => match parse_struct(cx, item, namespace.clone()) {
+            Item::Struct(item) => match parse_struct(cx, item, namespace) {
                 Ok(strct) => apis.push(strct),
                 Err(err) => cx.push(err),
             },
-            Item::Enum(item) => match parse_enum(cx, item, namespace.clone()) {
+            Item::Enum(item) => match parse_enum(cx, item, namespace) {
                 Ok(enm) => apis.push(enm),
                 Err(err) => cx.push(err),
             },
@@ -52,7 +52,7 @@ pub fn parse_items(
     apis
 }
 
-fn parse_struct(cx: &mut Errors, item: ItemStruct, mut namespace: Namespace) -> Result<Api> {
+fn parse_struct(cx: &mut Errors, item: ItemStruct, namespace: &Namespace) -> Result<Api> {
     let generics = &item.generics;
     if !generics.params.is_empty() || generics.where_clause.is_some() {
         let struct_token = item.struct_token;
@@ -67,6 +67,7 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct, mut namespace: Namespace) -> 
 
     let mut doc = Doc::new();
     let mut derives = Vec::new();
+    let mut namespace = namespace.clone();
     attrs::parse(
         cx,
         &item.attrs,
@@ -78,7 +79,7 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct, mut namespace: Namespace) -> 
         },
     );
 
-    let fields = match item.fields {
+    let named_fields = match item.fields {
         Fields::Named(fields) => fields,
         Fields::Unit => return Err(Error::new_spanned(item, "unit structs are not supported")),
         Fields::Unnamed(_) => {
@@ -86,26 +87,28 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct, mut namespace: Namespace) -> 
         }
     };
 
+    let fields = named_fields
+        .named
+        .into_iter()
+        .map(|field| {
+            Ok(Var {
+                ident: field.ident.unwrap(),
+                ty: parse_type(&field.ty, &namespace)?,
+            })
+        })
+        .collect::<Result<_>>()?;
+
     Ok(Api::Struct(Struct {
         doc,
         derives,
         struct_token: item.struct_token,
-        name: Pair::new(namespace.clone(), item.ident),
-        brace_token: fields.brace_token,
-        fields: fields
-            .named
-            .into_iter()
-            .map(|field| {
-                Ok(Var {
-                    ident: field.ident.unwrap(),
-                    ty: parse_type(&field.ty, &namespace)?,
-                })
-            })
-            .collect::<Result<_>>()?,
+        name: Pair::new(namespace, item.ident),
+        brace_token: named_fields.brace_token,
+        fields,
     }))
 }
 
-fn parse_enum(cx: &mut Errors, item: ItemEnum, mut namespace: Namespace) -> Result<Api> {
+fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<Api> {
     let generics = &item.generics;
     if !generics.params.is_empty() || generics.where_clause.is_some() {
         let enum_token = item.enum_token;
@@ -120,6 +123,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, mut namespace: Namespace) -> Resu
 
     let mut doc = Doc::new();
     let mut repr = None;
+    let mut namespace = namespace.clone();
     attrs::parse(
         cx,
         &item.attrs,
@@ -214,13 +218,12 @@ fn parse_foreign_mod(
     for foreign in &foreign_mod.items {
         match foreign {
             ForeignItem::Type(foreign) => {
-                match parse_extern_type(cx, foreign, lang, trusted, namespace.clone()) {
+                match parse_extern_type(cx, foreign, lang, trusted, namespace) {
                     Ok(ety) => items.push(ety),
                     Err(err) => cx.push(err),
                 }
             }
-            ForeignItem::Fn(foreign) => match parse_extern_fn(cx, foreign, lang, namespace.clone())
-            {
+            ForeignItem::Fn(foreign) => match parse_extern_fn(cx, foreign, lang, namespace) {
                 Ok(efn) => items.push(efn),
                 Err(err) => cx.push(err),
             },
@@ -231,7 +234,7 @@ fn parse_foreign_mod(
                 }
             }
             ForeignItem::Verbatim(tokens) => {
-                match parse_extern_verbatim(cx, tokens, lang, namespace.clone()) {
+                match parse_extern_verbatim(cx, tokens, lang, namespace) {
                     Ok(api) => items.push(api),
                     Err(err) => cx.push(err),
                 }
@@ -283,9 +286,10 @@ fn parse_extern_type(
     foreign_type: &ForeignItemType,
     lang: Lang,
     trusted: bool,
-    mut namespace: Namespace,
+    namespace: &Namespace,
 ) -> Result<Api> {
     let mut doc = Doc::new();
+    let mut namespace = namespace.clone();
     attrs::parse(
         cx,
         &foreign_type.attrs,
@@ -315,7 +319,7 @@ fn parse_extern_fn(
     cx: &mut Errors,
     foreign_fn: &ForeignItemFn,
     lang: Lang,
-    mut namespace: Namespace,
+    namespace: &Namespace,
 ) -> Result<Api> {
     let generics = &foreign_fn.sig.generics;
     if !generics.params.is_empty() || generics.where_clause.is_some() {
@@ -334,6 +338,7 @@ fn parse_extern_fn(
     let mut doc = Doc::new();
     let mut cxx_name = None;
     let mut rust_name = None;
+    let mut namespace = namespace.clone();
     attrs::parse(
         cx,
         &foreign_fn.attrs,
@@ -438,7 +443,7 @@ fn parse_extern_verbatim(
     cx: &mut Errors,
     tokens: &TokenStream,
     lang: Lang,
-    mut namespace: Namespace,
+    namespace: &Namespace,
 ) -> Result<Api> {
     // type Alias = crate::path::to::Type;
     let parse = |input: ParseStream| -> Result<TypeAlias> {
@@ -455,6 +460,7 @@ fn parse_extern_verbatim(
         let ty: RustType = input.parse()?;
         let semi_token: Token![;] = input.parse()?;
         let mut doc = Doc::new();
+        let mut namespace = namespace.clone();
         attrs::parse(
             cx,
             &attrs,
