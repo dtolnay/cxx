@@ -58,7 +58,7 @@
 //! # Example
 //!
 //! A runnable version of this example is provided under the *demo* directory of
-//! [https://github.com/dtolnay/cxx]. To try it out, run `cargo run` from that
+//! <https://github.com/dtolnay/cxx>. To try it out, run `cargo run` from that
 //! directory.
 //!
 //! ```no_run
@@ -253,7 +253,7 @@
 //! For use in non-Cargo builds like Bazel or Buck, CXX provides an alternate
 //! way of invoking the C++ code generator as a standalone command line tool.
 //! The tool is packaged as the `cxxbridge-cmd` crate on crates.io or can be
-//! built from the *gen/cmd* directory of [https://github.com/dtolnay/cxx].
+//! built from the *gen/cmd* directory of <https://github.com/dtolnay/cxx>.
 //!
 //! ```bash
 //! $ cargo install cxxbridge-cmd
@@ -328,7 +328,7 @@
 //! </table>
 //!
 //! The C++ API of the `rust` namespace is defined by the *include/cxx.h* file
-//! in [https://github.com/dtolnay/cxx]. You will need to include this header in
+//! in <https://github.com/dtolnay/cxx>. You will need to include this header in
 //! your C++ code when working with those types.
 //!
 //! The following types are intended to be supported "soon" but are just not
@@ -345,8 +345,6 @@
 //! <tr><td><sup><i>tbd</i></sup></td><td>std::unordered_map&lt;K, V&gt;</td></tr>
 //! <tr><td><sup><i>tbd</i></sup></td><td>std::shared_ptr&lt;T&gt;</td></tr>
 //! </table>
-//!
-//! [https://github.com/dtolnay/cxx]: https://github.com/dtolnay/cxx
 
 #![no_std]
 #![doc(html_root_url = "https://docs.rs/cxx/0.5.8")]
