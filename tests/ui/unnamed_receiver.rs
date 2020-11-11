@@ -1,6 +1,6 @@
 #[cxx::bridge]
 mod ffi {
-    extern "C++" {
+    unsafe extern "C++" {
         type One;
         type Two;
         fn f(&mut self);

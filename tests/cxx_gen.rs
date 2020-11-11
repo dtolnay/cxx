@@ -6,7 +6,7 @@ use std::str;
 const BRIDGE0: &str = r#"
     #[cxx::bridge]
     mod ffi {
-        extern "C++" {
+        unsafe extern "C++" {
             pub fn do_cpp_thing(foo: &str);
         }
     }

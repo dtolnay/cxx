@@ -90,7 +90,7 @@ mod ffi {
         fn next_chunk(buf: &mut MultiBuf) -> &[u8];
     }
 
-    extern "C++" {
+    unsafe extern "C++" {
         // One or more headers with the matching C++ declarations. Our code
         // generators don't read it but it gets #include'd and used in static
         // assertions to ensure our picture of the FFI boundary is accurate.
