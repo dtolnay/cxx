@@ -4,7 +4,7 @@ error: struct with generic parameters is not supported yet
 3 |     struct Monad<T>;
   |     ^^^^^^^^^^^^^^^
 
-error: unrecognized ABI
+error: unrecognized ABI, requires either "C++" or "Rust"
  --> $DIR/multiple_parse_error.rs:5:5
   |
 5 |     extern "Haskell" {}
