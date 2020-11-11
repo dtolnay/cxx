@@ -62,6 +62,7 @@ pub(super) fn write(out: &mut OutFile) {
     if builtin.rust_box {
         include.new = true;
         include.type_traits = true;
+        include.utility = true;
     }
 
     if builtin.rust_vec {
