@@ -169,12 +169,19 @@ public:
   size_t size() const noexcept;
   bool empty() const noexcept;
   const T *data() const noexcept;
+  T *data() noexcept;
 
   const T &operator[](size_t n) const noexcept;
   const T &at(size_t n) const;
 
   const T &front() const;
   const T &back() const;
+
+  void reserve(size_t new_cap);
+  void push_back(const T &value);
+  void push_back(T &&value);
+  template <class... Args>
+  void emplace_back(Args &&... args);
 
   class const_iterator final {
   public:
@@ -207,6 +214,8 @@ public:
 
 private:
   static size_t stride() noexcept;
+  void reserve_total(size_t cap) noexcept;
+  void set_len(size_t len) noexcept;
   void drop() noexcept;
 
   // Size and alignment statically verified by rust_vec.rs.
@@ -498,6 +507,11 @@ bool Vec<T>::empty() const noexcept {
 }
 
 template <typename T>
+T *Vec<T>::data() noexcept {
+  return const_cast<T *>(const_cast<const Vec<T> *>(this)->data());
+}
+
+template <typename T>
 const T &Vec<T>::operator[](size_t n) const noexcept {
   auto data = reinterpret_cast<const char *>(this->data());
   return *reinterpret_cast<const T *>(data + n * this->stride());
@@ -519,6 +533,32 @@ const T &Vec<T>::front() const {
 template <typename T>
 const T &Vec<T>::back() const {
   return (*this)[this->size() - 1];
+}
+
+template <typename T>
+void Vec<T>::reserve(size_t new_cap) {
+  this->reserve_total(new_cap);
+}
+
+template <typename T>
+void Vec<T>::push_back(const T &value) {
+  this->emplace_back(value);
+}
+
+template <typename T>
+void Vec<T>::push_back(T &&value) {
+  this->emplace_back(std::move(value));
+}
+
+template <typename T>
+template <typename... Args>
+void Vec<T>::emplace_back(Args &&... args) {
+  auto size = this->size();
+  this->reserve_total(size + 1);
+  ::new (reinterpret_cast<T *>(reinterpret_cast<char *>(this->data()) +
+                               size * this->stride()))
+      T(std::forward<Args>(args)...);
+  this->set_len(size + 1);
 }
 
 template <typename T>

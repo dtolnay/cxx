@@ -267,6 +267,10 @@ void cxxbridge05$unique_ptr$std$string$drop(
       const rust::Vec<CXX_TYPE> *ptr) noexcept;                                \
   const CXX_TYPE *cxxbridge05$rust_vec$##RUST_TYPE##$data(                     \
       const rust::Vec<CXX_TYPE> *ptr) noexcept;                                \
+  void cxxbridge05$rust_vec$##RUST_TYPE##$reserve_total(                       \
+      rust::Vec<CXX_TYPE> *ptr, size_t cap) noexcept;                          \
+  void cxxbridge05$rust_vec$##RUST_TYPE##$set_len(rust::Vec<CXX_TYPE> *ptr,    \
+                                                  size_t len) noexcept;        \
   size_t cxxbridge05$rust_vec$##RUST_TYPE##$stride() noexcept;
 
 #define RUST_VEC_OPS(RUST_TYPE, CXX_TYPE)                                      \
@@ -285,6 +289,14 @@ void cxxbridge05$unique_ptr$std$string$drop(
   template <>                                                                  \
   const CXX_TYPE *Vec<CXX_TYPE>::data() const noexcept {                       \
     return cxxbridge05$rust_vec$##RUST_TYPE##$data(this);                      \
+  }                                                                            \
+  template <>                                                                  \
+  void Vec<CXX_TYPE>::reserve_total(size_t cap) noexcept {                     \
+    cxxbridge05$rust_vec$##RUST_TYPE##$reserve_total(this, cap);               \
+  }                                                                            \
+  template <>                                                                  \
+  void Vec<CXX_TYPE>::set_len(size_t len) noexcept {                           \
+    cxxbridge05$rust_vec$##RUST_TYPE##$set_len(this, len);                     \
   }                                                                            \
   template <>                                                                  \
   size_t Vec<CXX_TYPE>::stride() noexcept {                                    \

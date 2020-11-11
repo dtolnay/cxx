@@ -356,6 +356,14 @@ void c_take_rust_vec_shared_index(rust::Vec<Shared> v) {
   }
 }
 
+void c_take_rust_vec_shared_push(rust::Vec<Shared> v) {
+  v.push_back(Shared{3});
+  v.emplace_back(Shared{2});
+  if (v[v.size() - 2].z == 3 && v.back().z == 2) {
+    cxx_test_suite_set_correct();
+  }
+}
+
 void c_take_ref_rust_vec(const rust::Vec<uint8_t> &v) {
   uint8_t sum = std::accumulate(v.begin(), v.end(), 0);
   if (sum == 200) {

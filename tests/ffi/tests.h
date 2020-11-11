@@ -130,6 +130,7 @@ void c_take_rust_vec_ns_shared(rust::Vec<::A::AShared> v);
 void c_take_rust_vec_nested_ns_shared(rust::Vec<::A::B::ABShared> v);
 void c_take_rust_vec_string(rust::Vec<rust::String> v);
 void c_take_rust_vec_shared_index(rust::Vec<Shared> v);
+void c_take_rust_vec_shared_push(rust::Vec<Shared> v);
 void c_take_rust_vec_shared_forward_iterator(rust::Vec<Shared> v);
 void c_take_ref_rust_vec(const rust::Vec<uint8_t> &v);
 void c_take_ref_rust_vec_string(const rust::Vec<rust::String> &v);

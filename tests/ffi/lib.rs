@@ -169,6 +169,7 @@ pub mod ffi {
         fn c_take_rust_vec_string(v: Vec<String>);
         fn c_take_rust_vec_index(v: Vec<u8>);
         fn c_take_rust_vec_shared_index(v: Vec<Shared>);
+        fn c_take_rust_vec_shared_push(v: Vec<Shared>);
         fn c_take_rust_vec_shared_forward_iterator(v: Vec<Shared>);
         fn c_take_ref_rust_vec(v: &Vec<u8>);
         fn c_take_ref_rust_vec_string(v: &Vec<String>);
