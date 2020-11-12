@@ -1,0 +1,119 @@
+> build_windows64.bat
+Package Root: C:\Users\catte\dev\cxx-demo-example\
+   Compiling proc-macro2 v1.0.24
+   Compiling cc v1.0.61
+     Running `rustc --crate-name build_script_build --edition=2018 C:\Users\catte\.cargo\registry\src\github.com-1ecc6299db9ec823\proc-macro2-1.0.24\build.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type bin --emit=dep-info,link -C embed-bitcode=no -C debug-assertions=off --cfg "feature=\"default\"" --cfg "feature=\"proc-macro\"" -C metadata=13f86e5e0fe368cb -C extra-filename=-13f86e5e0fe368cb --out-dir C:\Users\catte\dev\cxx-demo-example\target\release\build\proc-macro2-13f86e5e0fe368cb -L dependency=C:\Users\catte\dev\cxx-demo-example\target\release\deps --cap-lints allow -C target-feature=+crt-static`
+   Compiling unicode-xid v0.2.1
+   Compiling syn v1.0.48
+     Running `rustc --crate-name cc --edition=2018 C:\Users\catte\.cargo\registry\src\github.com-1ecc6299db9ec823\cc-1.0.61\src\lib.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type lib --emit=dep-info,metadata,link -C embed-bitcode=no -C debug-assertions=off -C metadata=d081c06d81b64862 -C extra-filename=-d081c06d81b64862 --out-dir C:\Users\catte\dev\cxx-demo-example\target\release\deps -L dependency=C:\Users\catte\dev\cxx-demo-example\target\release\deps --cap-lints allow -C target-feature=+crt-static`
+     Running `rustc --crate-name unicode_xid C:\Users\catte\.cargo\registry\src\github.com-1ecc6299db9ec823\unicode-xid-0.2.1\src\lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts --crate-type lib --emit=dep-info,metadata,link -C embed-bitcode=no -C debug-assertions=off --cfg "feature=\"default\"" -C metadata=0f6b40a70e544655 -C extra-filename=-0f6b40a70e544655 --out-dir C:\Users\catte\dev\cxx-demo-example\target\release\deps -L dependency=C:\Users\catte\dev\cxx-demo-example\target\release\deps --cap-lints allow -C target-feature=+crt-static`
+     Running `rustc --crate-name build_script_build --edition=2018 C:\Users\catte\.cargo\registry\src\github.com-1ecc6299db9ec823\syn-1.0.48\build.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type bin --emit=dep-info,link -C embed-bitcode=no -C debug-assertions=off --cfg "feature=\"clone-impls\"" --cfg "feature=\"default\"" --cfg "feature=\"derive\"" --cfg "feature=\"full\"" --cfg "feature=\"parsing\"" --cfg "feature=\"printing\"" --cfg "feature=\"proc-macro\"" --cfg "feature=\"quote\"" -C metadata=06a1e9409aa51c4e -C extra-filename=-06a1e9409aa51c4e --out-dir C:\Users\catte\dev\cxx-demo-example\target\release\build\syn-06a1e9409aa51c4e -L dependency=C:\Users\catte\dev\cxx-demo-example\target\release\deps --cap-lints allow -C target-feature=+crt-static`
+   Compiling cxxbridge-flags v0.5.5
+     Running `rustc --crate-name cxxbridge_flags --edition=2018 C:\Users\catte\.cargo\registry\src\github.com-1ecc6299db9ec823\cxxbridge-flags-0.5.5\src\lib.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type lib --emit=dep-info,metadata,link -C embed-bitcode=no -C debug-assertions=off --cfg "feature=\"default\"" -C metadata=8f20da15e530f0d1 -C extra-filename=-8f20da15e530f0d1 --out-dir C:\Users\catte\dev\cxx-demo-example\target\release\deps -L dependency=C:\Users\catte\dev\cxx-demo-example\target\release\deps --cap-lints allow -C target-feature=+crt-static`
+   Compiling libc v0.2.80
+     Running `rustc --crate-name build_script_build C:\Users\catte\.cargo\registry\src\github.com-1ecc6299db9ec823\libc-0.2.80\build.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type bin --emit=dep-info,link -C embed-bitcode=no -C debug-assertions=off --cfg "feature=\"default\"" --cfg "feature=\"std\"" -C metadata=916a30184cbca72d -C extra-filename=-916a30184cbca72d --out-dir C:\Users\catte\dev\cxx-demo-example\target\release\build\libc-916a30184cbca72d -L dependency=C:\Users\catte\dev\cxx-demo-example\target\release\deps --cap-lints allow -C target-feature=+crt-static`
+     Running `C:\Users\catte\dev\cxx-demo-example\target\release\build\proc-macro2-13f86e5e0fe368cb\build-script-build`
+     Running `C:\Users\catte\dev\cxx-demo-example\target\release\build\syn-06a1e9409aa51c4e\build-script-build`
+     Running `C:\Users\catte\dev\cxx-demo-example\target\release\build\libc-916a30184cbca72d\build-script-build`
+     Running `rustc --crate-name proc_macro2 --edition=2018 C:\Users\catte\.cargo\registry\src\github.com-1ecc6299db9ec823\proc-macro2-1.0.24\src\lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts --crate-type lib --emit=dep-info,metadata,link -C embed-bitcode=no -C debug-assertions=off --cfg "feature=\"default\"" --cfg "feature=\"proc-macro\"" -C metadata=f873ba8da138a850 -C extra-filename=-f873ba8da138a850 --out-dir C:\Users\catte\dev\cxx-demo-example\target\release\deps -L dependency=C:\Users\catte\dev\cxx-demo-example\target\release\deps --extern unicode_xid=C:\Users\catte\dev\cxx-demo-example\target\release\deps\libunicode_xid-0f6b40a70e544655.rmeta --cap-lints allow -C target-feature=+crt-static --cfg lexerror_display --cfg hygiene --cfg use_proc_macro --cfg wrap_proc_macro`
+   Compiling link-cplusplus v1.0.4
+     Running `rustc --crate-name build_script_build --edition=2018 C:\Users\catte\.cargo\registry\src\github.com-1ecc6299db9ec823\link-cplusplus-1.0.4\build.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type bin --emit=dep-info,link -C embed-bitcode=no -C debug-assertions=off --cfg "feature=\"default\"" -C metadata=7473087eb709e4ba -C extra-filename=-7473087eb709e4ba --out-dir C:\Users\catte\dev\cxx-demo-example\target\release\build\link-cplusplus-7473087eb709e4ba -L dependency=C:\Users\catte\dev\cxx-demo-example\target\release\deps --extern cc=C:\Users\catte\dev\cxx-demo-example\target\release\deps\libcc-d081c06d81b64862.rlib --cap-lints allow -C target-feature=+crt-static`
+   Compiling cxx v0.5.5
+     Running `rustc --crate-name build_script_build --edition=2018 C:\Users\catte\.cargo\registry\src\github.com-1ecc6299db9ec823\cxx-0.5.5\build.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type bin --emit=dep-info,link -C embed-bitcode=no -C debug-assertions=off --cfg "feature=\"default\"" -C metadata=9378145c025f5d03 -C extra-filename=-9378145c025f5d03 --out-dir C:\Users\catte\dev\cxx-demo-example\target\release\build\cxx-9378145c025f5d03 -L dependency=C:\Users\catte\dev\cxx-demo-example\target\release\deps --extern cc=C:\Users\catte\dev\cxx-demo-example\target\release\deps\libcc-d081c06d81b64862.rlib --extern cxxbridge_flags=C:\Users\catte\dev\cxx-demo-example\target\release\deps\libcxxbridge_flags-8f20da15e530f0d1.rlib --cap-lints allow -C target-feature=+crt-static`
+     Running `rustc --crate-name libc C:\Users\catte\.cargo\registry\src\github.com-1ecc6299db9ec823\libc-0.2.80\src\lib.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type lib --emit=dep-info,metadata,link -C opt-level=3 -C linker-plugin-lto --cfg "feature=\"default\"" --cfg "feature=\"std\"" -C metadata=d221f76ec62f403d -C extra-filename=-d221f76ec62f403d --out-dir C:\Users\catte\dev\cxx-demo-example\target\release\deps -L dependency=C:\Users\catte\dev\cxx-demo-example\target\release\deps --cap-lints allow -C target-feature=+crt-static --cfg freebsd11 --cfg libc_priv_mod_use --cfg libc_union --cfg libc_const_size_of --cfg libc_align --cfg libc_core_cvoid --cfg libc_packedN --cfg libc_cfg_target_vendor`
+   Compiling quote v1.0.7
+     Running `rustc --crate-name quote --edition=2018 C:\Users\catte\.cargo\registry\src\github.com-1ecc6299db9ec823\quote-1.0.7\src\lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts --crate-type lib --emit=dep-info,metadata,link -C embed-bitcode=no -C debug-assertions=off --cfg "feature=\"default\"" --cfg "feature=\"proc-macro\"" -C metadata=a208c7a41c00bb4a -C extra-filename=-a208c7a41c00bb4a --out-dir C:\Users\catte\dev\cxx-demo-example\target\release\deps -L dependency=C:\Users\catte\dev\cxx-demo-example\target\release\deps --extern proc_macro2=C:\Users\catte\dev\cxx-demo-example\target\release\deps\libproc_macro2-f873ba8da138a850.rmeta --cap-lints allow -C target-feature=+crt-static`
+     Running `rustc --crate-name syn --edition=2018 C:\Users\catte\.cargo\registry\src\github.com-1ecc6299db9ec823\syn-1.0.48\src\lib.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type lib --emit=dep-info,metadata,link -C embed-bitcode=no -C debug-assertions=off --cfg "feature=\"clone-impls\"" --cfg "feature=\"default\"" --cfg "feature=\"derive\"" --cfg "feature=\"full\"" --cfg "feature=\"parsing\"" --cfg "feature=\"printing\"" --cfg "feature=\"proc-macro\"" --cfg "feature=\"quote\"" -C metadata=97b39eff06538581 -C extra-filename=-97b39eff06538581 --out-dir C:\Users\catte\dev\cxx-demo-example\target\release\deps -L dependency=C:\Users\catte\dev\cxx-demo-example\target\release\deps --extern proc_macro2=C:\Users\catte\dev\cxx-demo-example\target\release\deps\libproc_macro2-f873ba8da138a850.rmeta --extern quote=C:\Users\catte\dev\cxx-demo-example\target\release\deps\libquote-a208c7a41c00bb4a.rmeta --extern unicode_xid=C:\Users\catte\dev\cxx-demo-example\target\release\deps\libunicode_xid-0f6b40a70e544655.rmeta --cap-lints allow -C target-feature=+crt-static --cfg syn_disable_nightly_tests`
+     Running `C:\Users\catte\dev\cxx-demo-example\target\release\build\link-cplusplus-7473087eb709e4ba\build-script-build`
+     Running `C:\Users\catte\dev\cxx-demo-example\target\release\build\cxx-9378145c025f5d03\build-script-build`
+     Running `rustc --crate-name link_cplusplus --edition=2018 C:\Users\catte\.cargo\registry\src\github.com-1ecc6299db9ec823\link-cplusplus-1.0.4\src\lib.rs --error-format=json --json=diagnostic-rendered-ansi,artifacts --crate-type lib --emit=dep-info,metadata,link -C opt-level=3 -C linker-plugin-lto --cfg "feature=\"default\"" -C metadata=52445e4aa70cdae3 -C extra-filename=-52445e4aa70cdae3 --out-dir C:\Users\catte\dev\cxx-demo-example\target\release\deps -L dependency=C:\Users\catte\dev\cxx-demo-example\target\release\deps --cap-lints allow -C target-feature=+crt-static -L native=C:\Users\catte\dev\cxx-demo-example\target\release\build\link-cplusplus-795cd500ba05563b\out -l static=link-cplusplus`
+   Compiling cxxbridge-macro v0.5.5
+     Running `rustc --crate-name cxxbridge_macro --edition=2018 C:\Users\catte\.cargo\registry\src\github.com-1ecc6299db9ec823\cxxbridge-macro-0.5.5\src\lib.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type proc-macro --emit=dep-info,link -C prefer-dynamic -C embed-bitcode=no -C debug-assertions=off -C metadata=3618294a3a44e520 -C extra-filename=-3618294a3a44e520 --out-dir C:\Users\catte\dev\cxx-demo-example\target\release\deps -L dependency=C:\Users\catte\dev\cxx-demo-example\target\release\deps --extern proc_macro2=C:\Users\catte\dev\cxx-demo-example\target\release\deps\libproc_macro2-f873ba8da138a850.rlib --extern quote=C:\Users\catte\dev\cxx-demo-example\target\release\deps\libquote-a208c7a41c00bb4a.rlib --extern syn=C:\Users\catte\dev\cxx-demo-example\target\release\deps\libsyn-97b39eff06538581.rlib --extern proc_macro --cap-lints allow -C target-feature=+crt-static`
+     Running `rustc --crate-name cxx --edition=2018 C:\Users\catte\.cargo\registry\src\github.com-1ecc6299db9ec823\cxx-0.5.5\src\lib.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type lib --emit=dep-info,metadata,link -C opt-level=3 -C linker-plugin-lto --cfg "feature=\"default\"" -C metadata=653b6325079312a8 -C extra-filename=-653b6325079312a8 --out-dir C:\Users\catte\dev\cxx-demo-example\target\release\deps -L dependency=C:\Users\catte\dev\cxx-demo-example\target\release\deps --extern cxxbridge_macro=C:\Users\catte\dev\cxx-demo-example\target\release\deps\cxxbridge_macro-3618294a3a44e520.dll --extern link_cplusplus=C:\Users\catte\dev\cxx-demo-example\target\release\deps\liblink_cplusplus-52445e4aa70cdae3.rmeta --cap-lints allow -C target-feature=+crt-static -L native=C:\Users\catte\dev\cxx-demo-example\target\release\build\cxx-1b693f5f650e00b3\out --cfg built_with_cargo -l static=cxxbridge05 -L native=C:\Users\catte\dev\cxx-demo-example\target\release\build\link-cplusplus-795cd500ba05563b\out`
+   Compiling mmscenegraph v0.1.0 (C:\Users\catte\dev\cxx-demo-example)
+     Running `rustc --crate-name mmscenegraph --edition=2018 src/lib.rs --error-format=json --json=diagnostic-rendered-ansi --crate-type staticlib --emit=dep-info,link -C opt-level=3 -C lto -C metadata=7d6b936107a15c20 -C extra-filename=-7d6b936107a15c20 --out-dir C:\Users\catte\dev\cxx-demo-example\target\release\deps -L dependency=C:\Users\catte\dev\cxx-demo-example\target\release\deps --extern cxx=C:\Users\catte\dev\cxx-demo-example\target\release\deps\libcxx-653b6325079312a8.rlib --extern libc=C:\Users\catte\dev\cxx-demo-example\target\release\deps\liblibc-d221f76ec62f403d.rlib -C target-feature=+crt-static -L native=C:\Users\catte\dev\cxx-demo-example\target\release\build\cxx-1b693f5f650e00b3\out -L native=C:\Users\catte\dev\cxx-demo-example\target\release\build\link-cplusplus-795cd500ba05563b\out`
+    Finished release [optimized] target(s) in 34.06s
+-- The C compiler identification is MSVC 19.0.24215.1
+-- The CXX compiler identification is MSVC 19.0.24215.1
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/x86_amd64/cl.exe - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/bin/x86_amd64/cl.exe - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+Finding: mmscenegraph.lib
+RUST BUILD DIR: C:/Users/catte/dev/cxx-demo-example/target/release
+Rust Library: C:/Users/catte/dev/cxx-demo-example/target/release/mmscenegraph.lib
+-- Configuring done
+-- Generating done
+-- Build files have been written to: C:/Users/catte/dev/cxx-demo-example/build
+
+Microsoft (R) Program Maintenance Utility Version 14.00.24210.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+Microsoft (R) Program Maintenance Utility Version 14.00.24210.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+Scanning dependencies of target libmmscenegraph
+[  9%] Building CXX object CMakeFiles/libmmscenegraph.dir/src/_cxxbridge.cpp.obj
+_cxxbridge.cpp
+[ 18%] Building CXX object CMakeFiles/libmmscenegraph.dir/src/cxx.cc.obj
+cxx.cc
+C:\Users\catte\dev\cxx-demo-example\src\cxx.cc(161): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Program Files (x86)\Windows Kits\10\include\10.0.10586.0\ucrt\string.h(335): note: see declaration of 'strncpy'
+[ 27%] Building CXX object CMakeFiles/libmmscenegraph.dir/src/lib.cpp.obj
+lib.cpp
+[ 36%] Linking CXX shared library libmmscenegraph.dll
+   Creating library libmmscenegraph.lib and object libmmscenegraph.exp
+[ 36%] Built target libmmscenegraph
+Scanning dependencies of target mmscenegraph_tests
+[ 45%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/tests/main.cpp.obj
+main.cpp
+[ 54%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/tests/test_a.cpp.obj
+test_a.cpp
+[ 63%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/tests/test_b.cpp.obj
+test_b.cpp
+[ 72%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/src/_cxxbridge.cpp.obj
+_cxxbridge.cpp
+[ 81%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/src/cxx.cc.obj
+cxx.cc
+C:\Users\catte\dev\cxx-demo-example\src\cxx.cc(161): warning C4996: 'strncpy': This function or variable may be unsafe. Consider using strncpy_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+C:\Program Files (x86)\Windows Kits\10\include\10.0.10586.0\ucrt\string.h(335): note: see declaration of 'strncpy'
+[ 90%] Building CXX object CMakeFiles/mmscenegraph_tests.dir/src/lib.cpp.obj
+lib.cpp
+[100%] Linking CXX executable mmscenegraph_tests.exe
+   Creating library mmscenegraph_tests.lib and object mmscenegraph_tests.exp
+[100%] Built target mmscenegraph_tests
+
+Microsoft (R) Program Maintenance Utility Version 14.00.24210.0
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+[ 36%] Built target libmmscenegraph
+[100%] Built target mmscenegraph_tests
+Install the project...
+-- Install configuration: "Release"
+-- Up-to-date: C:/Users/catte/dev/cxx-demo-example/install/include
+-- Installing: C:/Users/catte/dev/cxx-demo-example/install/include/cxx.h
+-- Up-to-date: C:/Users/catte/dev/cxx-demo-example/install/include/mmscenegraph
+-- Up-to-date: C:/Users/catte/dev/cxx-demo-example/install/include/mmscenegraph/_cbindgen.h
+-- Up-to-date: C:/Users/catte/dev/cxx-demo-example/install/include/mmscenegraph/_cpp.h
+-- Installing: C:/Users/catte/dev/cxx-demo-example/install/include/mmscenegraph/_cxxbridge.h
+-- Up-to-date: C:/Users/catte/dev/cxx-demo-example/install/include/mmscenegraph.h
+-- Installing: C:/Users/catte/dev/cxx-demo-example/install/lib/libmmscenegraph.lib
+-- Installing: C:/Users/catte/dev/cxx-demo-example/install/bin/libmmscenegraph.dll
+-- Installing: C:/Users/catte/dev/cxx-demo-example/install/bin/mmscenegraph_tests.exe
+
+> install\bin\mmscenegraph_tests.exe
+2 + 2 = 4
+SCENEGRAPH: Add SceneGraph 42
+SCENEGRAPH: Remove SceneGraph 0x1ffc8819410
+my awesome demo
+done with ThingC
+
+> cxxbridge --version
+cxxbridge 0.5.5
