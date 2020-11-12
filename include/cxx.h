@@ -183,7 +183,7 @@ public:
   void reserve(size_t new_cap);
   void push_back(const T &value);
   void push_back(T &&value);
-  template <class... Args>
+  template <typename... Args>
   void emplace_back(Args &&... args);
 
   class const_iterator final {
@@ -302,11 +302,11 @@ struct IsRelocatable;
 // Snake case aliases for use in code that uses this style for type names.
 using string = String;
 using str = Str;
-template <class T>
+template <typename T>
 using slice = Slice<T>;
-template <class T>
+template <typename T>
 using box = Box<T>;
-template <class T>
+template <typename T>
 using vec = Vec<T>;
 using error = Error;
 template <typename Signature, bool Throws = false>

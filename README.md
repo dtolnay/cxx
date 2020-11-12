@@ -151,19 +151,19 @@ items:
 - **Functions** &mdash; implemented in either language, callable from the other
   language.
 
-Within the `extern "C++"` part of the CXX bridge we list the types and functions
-for which C++ is the source of truth, as well as the header(s) that declare
-those APIs. In the future it's possible that this section could be generated
-bindgen-style from the headers but for now we need the signatures written out;
-static assertions will verify that they are accurate.
+Within the `extern "Rust"` part of the CXX bridge we list the types and
+functions for which Rust is the source of truth. These all implicitly refer to
+the `super` module, the parent module of the CXX bridge. You can think of the
+two items listed in the example above as being like `use super::MultiBuf` and
+`use super::next_chunk` except re-exported to C++. The parent module will either
+contain the definitions directly for simple things, or contain the relevant
+`use` statements to bring them into scope from elsewhere.
 
-Within the `extern "Rust"` part, we list types and functions for which Rust is
-the source of truth. These all implicitly refer to the `super` module, the
-parent module of the CXX bridge. You can think of the two items listed in the
-example above as being like `use super::ThingR` and `use super::print_r` except
-re-exported to C++. The parent module will either contain the definitions
-directly for simple things, or contain the relevant `use` statements to bring
-them into scope from elsewhere.
+Within the `extern "C++"` part, we list types and functions for which C++ is the
+source of truth, as well as the header(s) that declare those APIs. In the future
+it's possible that this section could be generated bindgen-style from the
+headers but for now we need the signatures written out; static assertions will
+verify that they are accurate.
 
 Your function implementations themselves, whether in C++ or Rust, *do not* need
 to be defined as `extern "C"` ABI or no\_mangle. CXX will put in the right shims

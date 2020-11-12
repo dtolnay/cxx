@@ -13,7 +13,7 @@ namespace blobstore {
 //
 // In reality the implementation of BlobstoreClient could be a large complex C++
 // library.
-class BlobstoreClient::Impl {
+class BlobstoreClient::impl {
   friend BlobstoreClient;
   using Blob = struct {
     std::string data;
@@ -22,7 +22,7 @@ class BlobstoreClient::Impl {
   std::unordered_map<uint64_t, Blob> blobs;
 };
 
-BlobstoreClient::BlobstoreClient() : impl(new BlobstoreClient::Impl) {}
+BlobstoreClient::BlobstoreClient() : impl(new class BlobstoreClient::impl) {}
 
 // Upload a new blob and return a blobid that serves as a handle to the blob.
 uint64_t BlobstoreClient::put(MultiBuf &buf) const {
@@ -57,7 +57,7 @@ BlobMetadata BlobstoreClient::metadata(uint64_t blobid) const {
   auto blob = impl->blobs.find(blobid);
   if (blob != impl->blobs.end()) {
     metadata.size = blob->second.data.size();
-    std::for_each(blob->second.tags.begin(), blob->second.tags.end(),
+    std::for_each(blob->second.tags.cbegin(), blob->second.tags.cend(),
                   [&](auto &t) { metadata.tags.emplace_back(t); });
   }
   return metadata;
