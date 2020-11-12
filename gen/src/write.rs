@@ -172,6 +172,9 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
                 out.include.cstdint = true;
                 out.builtin.rust_slice = true;
             }
+            Type::Array(_) => {
+                out.include.array = true;
+            }
             Type::Ref(_) | Type::Void(_) => {}
         }
     }
@@ -902,6 +905,11 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             }
             write!(out, ")>");
         }
+        Type::Array(a) => {
+            write!(out, "::std::array<");
+            write_type(out, &a.inner);
+            write!(out, ", {}>", &a.len);
+        }
         Type::Void(_) => unreachable!(),
     }
 }
@@ -940,7 +948,8 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
         | Type::CxxVector(_)
         | Type::RustVec(_)
         | Type::SliceRefU8(_)
-        | Type::Fn(_) => write!(out, " "),
+        | Type::Fn(_)
+        | Type::Array(_) => write!(out, " "),
         Type::Ref(_) => {}
         Type::Void(_) | Type::Slice(_) => unreachable!(),
     }

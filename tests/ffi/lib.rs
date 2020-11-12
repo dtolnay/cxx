@@ -116,6 +116,10 @@ pub mod ffi {
         i: i32,
     }
 
+    pub struct Array {
+        a: [i32; 4],
+    }
+
     unsafe extern "C++" {
         include!("tests/ffi/tests.h");
 
@@ -204,6 +208,7 @@ pub mod ffi {
         fn set_succeed(self: Pin<&mut C>, n: usize) -> Result<usize>;
         fn get_fail(self: Pin<&mut C>) -> Result<usize>;
         fn c_method_on_shared(self: &Shared) -> usize;
+        fn c_set_array(self: &mut Array, value: i32);
 
         #[rust_name = "i32_overloaded_method"]
         fn cOverloadedMethod(&self, x: i32) -> String;
@@ -274,6 +279,7 @@ pub mod ffi {
         fn get(self: &R) -> usize;
         fn set(self: &mut R, n: usize) -> usize;
         fn r_method_on_shared(self: &Shared) -> String;
+        fn r_get_array_sum(self: &Array) -> i32;
 
         #[cxx_name = "rAliasedFunction"]
         fn r_aliased_function(x: i32) -> String;
@@ -318,6 +324,12 @@ impl R {
 impl ffi::Shared {
     fn r_method_on_shared(&self) -> String {
         "2020".to_owned()
+    }
+}
+
+impl ffi::Array {
+    pub fn r_get_array_sum(&self) -> i32 {
+        self.a.iter().sum()
     }
 }
 

@@ -1,4 +1,4 @@
-use crate::syntax::{ExternFn, Impl, Include, Receiver, Ref, Signature, Slice, Ty1, Type};
+use crate::syntax::{Array, ExternFn, Impl, Include, Receiver, Ref, Signature, Slice, Ty1, Type};
 use std::borrow::Borrow;
 use std::hash::{Hash, Hasher};
 use std::mem;
@@ -50,6 +50,7 @@ impl Hash for Type {
             Type::Fn(t) => t.hash(state),
             Type::Slice(t) => t.hash(state),
             Type::SliceRefU8(t) => t.hash(state),
+            Type::Array(t) => t.hash(state),
             Type::Void(_) => {}
         }
     }
@@ -170,6 +171,37 @@ impl Hash for Slice {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let Slice { bracket: _, inner } = self;
         inner.hash(state);
+    }
+}
+
+impl Eq for Array {}
+impl PartialEq for Array {
+    fn eq(&self, other: &Array) -> bool {
+        let Array {
+            bracket: _,
+            inner,
+            semi_token: _,
+            len,
+        } = self;
+        let Array {
+            bracket: _,
+            inner: inner2,
+            semi_token: _,
+            len: len2,
+        } = other;
+        inner == inner2 && len == len2
+    }
+}
+impl Hash for Array {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let Array {
+            bracket: _,
+            inner,
+            semi_token: _,
+            len,
+        } = self;
+        inner.hash(state);
+        len.to_string().hash(state);
     }
 }
 

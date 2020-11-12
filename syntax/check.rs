@@ -2,7 +2,7 @@ use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::types::TrivialReason;
 use crate::syntax::{
-    error, ident, Api, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Signature, Slice,
+    error, ident, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Signature, Slice,
     Struct, Ty1, Type, Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
@@ -35,6 +35,7 @@ fn do_typecheck(cx: &mut Check) {
             Type::CxxVector(ptr) => check_type_cxx_vector(cx, ptr),
             Type::Ref(ty) => check_type_ref(cx, ty),
             Type::Slice(ty) => check_type_slice(cx, ty),
+            Type::Array(array) => check_type_array(cx, array),
             Type::Fn(ty) => check_type_fn(cx, ty),
             Type::Str(_) | Type::Void(_) | Type::SliceRefU8(_) => {}
         }
@@ -179,6 +180,21 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
 
 fn check_type_slice(cx: &mut Check, ty: &Slice) {
     cx.error(ty, "only &[u8] is supported so far, not other slice types");
+}
+
+fn check_type_array(cx: &mut Check, ty: &Array) {
+    match &ty.inner {
+        Type::Ident(ident) => {
+            if cx.types.rust.contains(&ident.rust) || cx.types.cxx.contains(&ident.rust) {
+                cx.error(ty, "Only shared structs are supported in array yet");
+            }
+        }
+        Type::RustBox(ty1) => check_type_box(cx, ty1),
+        Type::RustVec(ty1) => check_type_rust_vec(cx, ty1),
+        Type::CxxVector(ty1) => check_type_cxx_vector(cx, ty1),
+        Type::UniquePtr(ty1) => check_type_unique_ptr(cx, ty1),
+        _ => cx.error(ty, "unsupported array target type"),
+    };
 }
 
 fn check_type_fn(cx: &mut Check, ty: &Signature) {
@@ -480,5 +496,6 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         Type::SliceRefU8(_) => "&[u8]".to_owned(),
         Type::Fn(_) => "function pointer".to_owned(),
         Type::Void(_) => "()".to_owned(),
+        Type::Array(_) => "array".to_owned(),
     }
 }

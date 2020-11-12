@@ -32,6 +32,10 @@ size_t C::get_fail() { throw std::runtime_error("unimplemented"); }
 
 size_t Shared::c_method_on_shared() const noexcept { return 2021; }
 
+void Array::c_set_array(int32_t val) noexcept {
+  this->a = {val, val, val, val};
+}
+
 const std::vector<uint8_t> &C::get_v() const { return this->v; }
 
 std::vector<uint8_t> &C::get_v() { return this->v; }

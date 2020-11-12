@@ -165,6 +165,7 @@ pub enum Type {
     Void(Span),
     Slice(Box<Slice>),
     SliceRefU8(Box<Ref>),
+    Array(Box<Array>),
 }
 
 pub struct Ty1 {
@@ -187,6 +188,13 @@ pub struct Ref {
 pub struct Slice {
     pub bracket: Bracket,
     pub inner: Type,
+}
+
+pub struct Array {
+    pub bracket: Bracket,
+    pub inner: Type,
+    pub semi_token: Token![;],
+    pub len: usize,
 }
 
 #[derive(Copy, Clone, PartialEq)]

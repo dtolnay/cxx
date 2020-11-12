@@ -3,7 +3,7 @@ use crate::syntax::file::{Item, ItemForeignMod};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
-    attrs, error, Api, Doc, Enum, ExternFn, ExternType, Impl, Include, IncludeKind, Lang,
+    attrs, error, Api, Array, Doc, Enum, ExternFn, ExternType, Impl, Include, IncludeKind, Lang,
     Namespace, Pair, Receiver, Ref, ResolvableName, Signature, Slice, Struct, Ty1, Type, TypeAlias,
     Var, Variant,
 };
@@ -12,10 +12,10 @@ use quote::{format_ident, quote, quote_spanned};
 use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::{
-    Abi, Attribute, Error, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
-    GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, LitStr, Pat,
-    PathArguments, Result, ReturnType, Token, Type as RustType, TypeBareFn, TypePath,
-    TypeReference, TypeSlice,
+    Abi, Attribute, Error, Expr, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
+    GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lit, LitStr,
+    Pat, PathArguments, Result, ReturnType, Token, Type as RustType, TypeArray, TypeBareFn,
+    TypePath, TypeReference, TypeSlice,
 };
 
 pub mod kw {
@@ -623,7 +623,46 @@ fn parse_type(ty: &RustType, namespace: &Namespace) -> Result<Type> {
         RustType::Slice(ty) => parse_type_slice(ty, namespace),
         RustType::BareFn(ty) => parse_type_fn(ty, namespace),
         RustType::Tuple(ty) if ty.elems.is_empty() => Ok(Type::Void(ty.paren_token.span)),
+        RustType::Array(ty) => parse_type_array(ty, namespace),
         _ => Err(Error::new_spanned(ty, "unsupported type")),
+    }
+}
+
+fn parse_type_array(ty: &TypeArray, namespace: &Namespace) -> Result<Type> {
+    let inner = parse_type(&ty.elem, namespace)?;
+    match &ty.len {
+        Expr::Lit(lit) => {
+            if !lit.attrs.is_empty() {
+                return Err(Error::new_spanned(
+                    ty,
+                    "attribute not allowed in length field",
+                ));
+            }
+            match &lit.lit {
+                Lit::Int(v) => {
+                    let v = match v.base10_parse::<usize>() {
+                        Ok(n_v) => n_v,
+                        Err(_) => {
+                            return Err(Error::new_spanned(
+                                ty,
+                                "Cannot parse integer literal to base10",
+                            ))
+                        }
+                    };
+                    Ok(Type::Array(Box::new(Array {
+                        bracket: ty.bracket_token,
+                        inner,
+                        semi_token: ty.semi_token,
+                        len: v,
+                    })))
+                }
+                _ => Err(Error::new_spanned(ty, "length literal must be a integer")),
+            }
+        }
+        _ => Err(Error::new_spanned(
+            ty,
+            "only literal is currently supported in len field",
+        )),
     }
 }
 
