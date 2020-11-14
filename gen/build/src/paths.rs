@@ -66,14 +66,6 @@ pub(crate) fn symlink_or_copy(
     Ok(())
 }
 
-#[cfg(any(unix, windows))]
-pub(crate) use self::fs::symlink_dir;
-
-#[cfg(not(any(unix, windows)))]
-pub(crate) fn symlink_dir(_original: impl AsRef<Path>, _link: impl AsRef<Path>) -> fs::Result<()> {
-    Ok(())
-}
-
 #[cfg(not(windows))]
 pub(crate) use self::fs::remove_file as remove_symlink_dir;
 

@@ -60,7 +60,7 @@ pub(crate) fn symlink_dir(original: impl AsRef<Path>, link: impl AsRef<Path>) ->
         create_dir_error = fs::create_dir_all(parent).err();
     }
 
-    match paths::symlink_dir(original, link) {
+    match fs::symlink_dir(original, link) {
         // As long as symlink_dir succeeded, ignore any create_dir_all error.
         Ok(()) => Ok(()),
         // If create_dir_all and symlink_dir both failed, prefer the first error.

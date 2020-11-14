@@ -9,7 +9,7 @@ pub(crate) type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug)]
 pub(crate) struct Error {
-    source: io::Error,
+    source: Option<io::Error>,
     message: String,
 }
 
@@ -21,14 +21,15 @@ impl Display for Error {
 
 impl StdError for Error {
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
-        Some(&self.source)
+        let source = self.source.as_ref()?;
+        Some(source)
     }
 }
 
 macro_rules! err {
     ($io_error:expr, $fmt:expr $(, $path:expr)* $(,)?) => {
         Err(Error {
-            source: $io_error,
+            source: Option::from($io_error),
             message: format!($fmt $(, $path.display())*),
         })
     }
@@ -106,9 +107,22 @@ fn symlink<'a>(
     }
 }
 
+pub(crate) fn symlink_fail(original: impl AsRef<Path>, link: impl AsRef<Path>) -> Result<()> {
+    err!(
+        None,
+        "Failed to create symlink `{}` pointing to `{}`",
+        link.as_ref(),
+        original.as_ref(),
+    )
+}
+
 #[cfg(unix)]
 #[allow(unused_imports)]
 pub(crate) use self::symlink_file as symlink_dir;
+
+#[cfg(not(any(unix, windows)))]
+#[allow(unused_imports)]
+pub(crate) use self::symlink_fail as symlink_dir;
 
 #[cfg(unix)]
 pub(crate) fn symlink_file(original: impl AsRef<Path>, link: impl AsRef<Path>) -> Result<()> {
