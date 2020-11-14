@@ -58,7 +58,13 @@ pub(crate) fn symlink_or_copy(
 }
 
 #[cfg(not(any(unix, windows)))]
-pub(crate) use self::fs::copy as symlink_or_copy;
+pub(crate) fn symlink_or_copy(
+    original: impl AsRef<Path>,
+    copy: impl AsRef<Path>,
+) -> fs::Result<()> {
+    fs::copy(original, copy)?;
+    Ok(())
+}
 
 #[cfg(any(unix, windows))]
 pub(crate) use self::fs::symlink_dir;
