@@ -9,7 +9,7 @@ const entities = new Entities();
 const githublink = `\
 <li class="part-title">\
 <a href="https://github.com/dtolnay/cxx">\
-<i class="fa fa-github" style="font-size:20px;padding-right:5px;padding-top:12px;position:relative;top:1px"></i>\
+<i class="fa fa-github"></i>\
 https://github.com/dtolnay/cxx\
 </a>\
 </li>`;
