@@ -43,13 +43,16 @@ impl PathExt for Path {
 pub(crate) use self::fs::symlink_file as symlink_or_copy;
 
 #[cfg(windows)]
-pub(crate) fn symlink_or_copy(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> fs::Result<()> {
+pub(crate) fn symlink_or_copy(
+    original: impl AsRef<Path>,
+    link: impl AsRef<Path>,
+) -> fs::Result<()> {
     // Pre-Windows 10, symlinks require admin privileges. Since Windows 10, they
     // require Developer Mode. If it fails, fall back to copying the file.
-    let src = src.as_ref();
-    let dst = dst.as_ref();
-    if fs::symlink_file(src, dst).is_err() {
-        fs::copy(src, dst)?;
+    let original = original.as_ref();
+    let link = link.as_ref();
+    if fs::symlink_file(original, link).is_err() {
+        fs::copy(original, link)?;
     }
     Ok(())
 }
@@ -61,7 +64,7 @@ pub(crate) use self::fs::copy as symlink_or_copy;
 pub(crate) use self::fs::symlink_dir;
 
 #[cfg(not(any(unix, windows)))]
-pub(crate) fn symlink_dir(_src: impl AsRef<Path>, _dst: impl AsRef<Path>) -> fs::Result<()> {
+pub(crate) fn symlink_dir(_original: impl AsRef<Path>, _link: impl AsRef<Path>) -> fs::Result<()> {
     Ok(())
 }
 

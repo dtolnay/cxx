@@ -28,19 +28,19 @@ pub(crate) fn write(path: impl AsRef<Path>, content: &[u8]) -> Result<()> {
     }
 }
 
-pub(crate) fn symlink_file(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> Result<()> {
-    let src = src.as_ref();
-    let dst = dst.as_ref();
+pub(crate) fn symlink_file(original: impl AsRef<Path>, link: impl AsRef<Path>) -> Result<()> {
+    let original = original.as_ref();
+    let link = link.as_ref();
 
     let mut create_dir_error = None;
-    if dst.exists() {
-        let _ = fs::remove_file(dst).unwrap();
+    if link.exists() {
+        let _ = fs::remove_file(link).unwrap();
     } else {
-        let parent = dst.parent().unwrap();
+        let parent = link.parent().unwrap();
         create_dir_error = fs::create_dir_all(parent).err();
     }
 
-    match paths::symlink_or_copy(src, dst) {
+    match paths::symlink_or_copy(original, link) {
         // As long as symlink_or_copy succeeded, ignore any create_dir_all error.
         Ok(()) => Ok(()),
         // If create_dir_all and symlink_or_copy both failed, prefer the first error.
@@ -48,19 +48,19 @@ pub(crate) fn symlink_file(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> Resu
     }
 }
 
-pub(crate) fn symlink_dir(src: impl AsRef<Path>, dst: impl AsRef<Path>) -> Result<()> {
-    let src = src.as_ref();
-    let dst = dst.as_ref();
+pub(crate) fn symlink_dir(original: impl AsRef<Path>, link: impl AsRef<Path>) -> Result<()> {
+    let original = original.as_ref();
+    let link = link.as_ref();
 
     let mut create_dir_error = None;
-    if dst.exists() {
-        let _ = paths::remove_symlink_dir(dst).unwrap();
+    if link.exists() {
+        let _ = paths::remove_symlink_dir(link).unwrap();
     } else {
-        let parent = dst.parent().unwrap();
+        let parent = link.parent().unwrap();
         create_dir_error = fs::create_dir_all(parent).err();
     }
 
-    match paths::symlink_dir(src, dst) {
+    match paths::symlink_dir(original, link) {
         // As long as symlink_dir succeeded, ignore any create_dir_all error.
         Ok(()) => Ok(()),
         // If create_dir_all and symlink_dir both failed, prefer the first error.

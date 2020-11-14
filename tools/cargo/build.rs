@@ -58,11 +58,11 @@ fn main() {
     #[cfg(windows)]
     if let Some(out_dir) = env::var_os("OUT_DIR") {
         let parent_dir = Path::new(&out_dir).join("symlink");
-        let from_dir = parent_dir.join("from");
-        let to_dir = parent_dir.join("to");
-        if fs::create_dir_all(&from_dir).is_ok()
-            && (!to_dir.exists() || fs::remove_dir(&to_dir).is_ok())
-            && windows::symlink_dir(&from_dir, &to_dir).is_err()
+        let original_dir = parent_dir.join("original");
+        let link_dir = parent_dir.join("link");
+        if fs::create_dir_all(&original_dir).is_ok()
+            && (!link_dir.exists() || fs::remove_dir(&link_dir).is_ok())
+            && windows::symlink_dir(&original_dir, &link_dir).is_err()
         {
             message = DENIED;
         }
