@@ -9,3 +9,9 @@ if [ -f ./mdbook ]; then
 else
     mdbook build
 fi
+
+if [ ! -d node_modules ]; then
+    npm install
+fi
+
+./build.js
