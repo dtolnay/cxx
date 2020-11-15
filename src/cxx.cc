@@ -17,6 +17,11 @@ size_t cxxbridge05$cxx_string$length(const std::string &s) noexcept {
   return s.length();
 }
 
+void cxxbridge05$cxx_string$push(std::string &s, const uint8_t *ptr,
+                                 size_t len) noexcept {
+  s.append(reinterpret_cast<const char *>(ptr), len);
+}
+
 // rust::String
 void cxxbridge05$string$new(rust::String *self) noexcept;
 void cxxbridge05$string$clone(rust::String *self,

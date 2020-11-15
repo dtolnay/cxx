@@ -6,9 +6,11 @@ use core::str::{self, Utf8Error};
 
 extern "C" {
     #[link_name = "cxxbridge05$cxx_string$data"]
-    fn string_data(_: &CxxString) -> *const u8;
+    fn string_data(this: &CxxString) -> *const u8;
     #[link_name = "cxxbridge05$cxx_string$length"]
-    fn string_length(_: &CxxString) -> usize;
+    fn string_length(this: &CxxString) -> usize;
+    #[link_name = "cxxbridge05$cxx_string$push"]
+    fn string_push(this: &mut CxxString, ptr: *const u8, len: usize);
 }
 
 /// Binding to C++ `std::string`.
@@ -81,6 +83,11 @@ impl CxxString {
     /// [replacement character]: https://doc.rust-lang.org/std/char/constant.REPLACEMENT_CHARACTER.html
     pub fn to_string_lossy(&self) -> Cow<str> {
         String::from_utf8_lossy(self.as_bytes())
+    }
+
+    /// Appends a given string slice onto the end of this C++ string.
+    pub fn push_str(&mut self, s: &str) {
+        unsafe { string_push(self, s.as_ptr(), s.len()) }
     }
 }
 
