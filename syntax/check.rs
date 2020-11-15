@@ -151,6 +151,24 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
         cx.error(ty, "references with explicit lifetimes are not supported");
     }
 
+    if ty.mutability.is_some() && !ty.pinned {
+        if let Some(requires_pin) = match &ty.inner {
+            Type::Ident(ident) if ident.rust == CxxString || is_opaque_cxx(cx, &ident.rust) => {
+                Some(ident.rust.to_string())
+            }
+            Type::CxxVector(_) => Some("CxxVector<...>".to_owned()),
+            _ => None,
+        } {
+            cx.error(
+                ty,
+                format!(
+                    "mutable reference to C++ type requires a pin -- use Pin<&mut {}>",
+                    requires_pin,
+                ),
+            );
+        }
+    }
+
     match ty.inner {
         Type::Fn(_) | Type::Void(_) => {}
         Type::Ref(_) => {
@@ -370,13 +388,14 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
         Type::CxxVector(_) | Type::Slice(_) | Type::Void(_) => return true,
         _ => return false,
     };
-    ident == CxxString
-        || cx.types.cxx.contains(ident)
-            && !cx.types.structs.contains_key(ident)
-            && !cx.types.enums.contains_key(ident)
-            && !(cx.types.aliases.contains_key(ident)
-                && cx.types.required_trivial.contains_key(ident))
-        || cx.types.rust.contains(ident)
+    ident == CxxString || is_opaque_cxx(cx, ident) || cx.types.rust.contains(ident)
+}
+
+fn is_opaque_cxx(cx: &mut Check, ty: &Ident) -> bool {
+    cx.types.cxx.contains(ty)
+        && !cx.types.structs.contains_key(ty)
+        && !cx.types.enums.contains_key(ty)
+        && !(cx.types.aliases.contains_key(ty) && cx.types.required_trivial.contains_key(ty))
 }
 
 fn span_for_struct_error(strct: &Struct) -> TokenStream {
