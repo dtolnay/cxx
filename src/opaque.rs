@@ -1,3 +1,4 @@
+use core::marker::{PhantomData, PhantomPinned};
 use core::mem;
 
 // . size = 0
@@ -5,9 +6,11 @@ use core::mem;
 // . ffi-safe
 // . !Send
 // . !Sync
+// . !Unpin
 #[repr(C, packed)]
 pub struct Opaque {
     _private: [*const u8; 0],
+    _pinned: PhantomData<PhantomPinned>,
 }
 
 const_assert_eq!(0, mem::size_of::<Opaque>());

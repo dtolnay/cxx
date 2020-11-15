@@ -1,6 +1,7 @@
 use alloc::borrow::Cow;
 use alloc::string::String;
 use core::fmt::{self, Debug, Display};
+use core::marker::{PhantomData, PhantomPinned};
 use core::slice;
 use core::str::{self, Utf8Error};
 
@@ -26,6 +27,7 @@ extern "C" {
 #[repr(C)]
 pub struct CxxString {
     _private: [u8; 0],
+    _pinned: PhantomData<PhantomPinned>,
 }
 
 impl CxxString {

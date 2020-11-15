@@ -1,7 +1,7 @@
 use crate::cxx_string::CxxString;
 use core::ffi::c_void;
 use core::fmt::{self, Display};
-use core::marker::PhantomData;
+use core::marker::{PhantomData, PhantomPinned};
 use core::mem;
 use core::ptr;
 use core::slice;
@@ -17,6 +17,7 @@ use core::slice;
 #[repr(C, packed)]
 pub struct CxxVector<T> {
     _private: [T; 0],
+    _pinned: PhantomData<PhantomPinned>,
 }
 
 impl<T> CxxVector<T>
