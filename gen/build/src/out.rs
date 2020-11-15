@@ -14,7 +14,7 @@ pub(crate) fn write(path: impl AsRef<Path>, content: &[u8]) -> Result<()> {
                 return Ok(());
             }
         }
-        let _ = fs::remove_file(path);
+        best_effort_remove(path);
     } else {
         let parent = path.parent().unwrap();
         create_dir_error = fs::create_dir_all(parent).err();
@@ -34,7 +34,7 @@ pub(crate) fn symlink_file(original: impl AsRef<Path>, link: impl AsRef<Path>) -
 
     let mut create_dir_error = None;
     if link.exists() {
-        let _ = fs::remove_file(link).unwrap();
+        best_effort_remove(link);
     } else {
         let parent = link.parent().unwrap();
         create_dir_error = fs::create_dir_all(parent).err();
@@ -54,7 +54,7 @@ pub(crate) fn symlink_dir(original: impl AsRef<Path>, link: impl AsRef<Path>) ->
 
     let mut create_dir_error = None;
     if link.exists() {
-        let _ = paths::remove_symlink_dir(link).unwrap();
+        best_effort_remove(link);
     } else {
         let parent = link.parent().unwrap();
         create_dir_error = fs::create_dir_all(parent).err();
@@ -65,5 +65,30 @@ pub(crate) fn symlink_dir(original: impl AsRef<Path>, link: impl AsRef<Path>) ->
         Ok(()) => Ok(()),
         // If create_dir_all and symlink_dir both failed, prefer the first error.
         Err(err) => Err(Error::Fs(create_dir_error.unwrap_or(err))),
+    }
+}
+
+fn best_effort_remove(path: &Path) {
+    use std::fs;
+
+    let file_type = match if cfg!(windows) {
+        // On Windows, the correct choice of remove_file vs remove_dir needs to
+        // be used according to what the symlink *points to*. Trying to use
+        // remove_file to remove a symlink which points to a directory fails
+        // with "Access is denied".
+        fs::metadata(path)
+    } else {
+        // On non-Windows, we check metadata not following symlinks. All
+        // symlinks are removed using remove_file.
+        fs::symlink_metadata(path)
+    } {
+        Ok(metadata) => metadata.file_type(),
+        Err(_) => return,
+    };
+
+    if file_type.is_dir() {
+        let _ = fs::remove_dir_all(path);
+    } else {
+        let _ = fs::remove_file(path);
     }
 }

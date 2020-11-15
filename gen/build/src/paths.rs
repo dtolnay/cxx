@@ -65,11 +65,3 @@ pub(crate) fn symlink_or_copy(
     fs::copy(original, copy)?;
     Ok(())
 }
-
-#[cfg(not(windows))]
-pub(crate) use self::fs::remove_file as remove_symlink_dir;
-
-// On Windows, trying to use remove_file to remove a symlink which points to a
-// directory fails with "Access is denied".
-#[cfg(windows)]
-pub(crate) use self::fs::remove_dir as remove_symlink_dir;
