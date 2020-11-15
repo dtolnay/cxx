@@ -256,12 +256,10 @@ fn make_this_crate(prj: &Project) -> Result<Crate> {
         path: include_dir,
     });
 
-    if let Some(crate_dir) = crate_dir {
-        this_crate.header_dirs.push(HeaderDir {
-            exported: true,
-            path: crate_dir,
-        });
-    }
+    this_crate.header_dirs.push(HeaderDir {
+        exported: true,
+        path: crate_dir,
+    });
 
     for exported_dir in &CFG.exported_header_dirs {
         this_crate.header_dirs.push(HeaderDir {
@@ -335,17 +333,23 @@ fn make_this_crate(prj: &Project) -> Result<Crate> {
     Ok(this_crate)
 }
 
-fn make_crate_dir(prj: &Project) -> Option<PathBuf> {
+fn make_crate_dir(prj: &Project) -> PathBuf {
     if prj.include_prefix.as_os_str().is_empty() {
-        return Some(prj.manifest_dir.clone());
+        return prj.manifest_dir.clone();
     }
     let crate_dir = prj.out_dir.join("cxxbridge").join("crate");
-    let link = crate_dir.join(&prj.include_prefix);
-    if out::symlink_dir(&prj.manifest_dir, link).is_ok() {
-        Some(crate_dir)
-    } else {
-        None
+    let ref link = crate_dir.join(&prj.include_prefix);
+    let ref manifest_dir = prj.manifest_dir;
+    if out::symlink_dir(manifest_dir, link).is_err() && cfg!(not(unix)) {
+        let cachedir_tag = "\
+        Signature: 8a477f597d28d172789f06886806bc55\n\
+        # This file is a cache directory tag created by cxx.\n\
+        # For information about cache directory tags see https://bford.info/cachedir/\n";
+        let _ = out::write(crate_dir.join("CACHEDIR.TAG"), cachedir_tag.as_bytes());
+        let max_depth = 6;
+        best_effort_copy_headers(manifest_dir, link, max_depth);
     }
+    crate_dir
 }
 
 fn make_include_dir(prj: &Project) -> Result<PathBuf> {
@@ -391,6 +395,48 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
     let _ = out::symlink_file(header_path, shared_h);
     let _ = out::symlink_file(implementation_path, shared_cc);
     Ok(())
+}
+
+fn best_effort_copy_headers(src: &Path, dst: &Path, max_depth: usize) {
+    // Not using crate::gen::fs because we aren't reporting the errors.
+    use std::fs;
+
+    let mut dst_created = false;
+    let mut entries = match fs::read_dir(src) {
+        Ok(entries) => entries,
+        Err(_) => return,
+    };
+
+    while let Some(Ok(entry)) = entries.next() {
+        let file_name = entry.file_name();
+        if file_name.to_string_lossy().starts_with('.') {
+            continue;
+        }
+        match entry.file_type() {
+            Ok(file_type) if file_type.is_dir() && max_depth > 0 => {
+                let src = entry.path();
+                if src.join("Cargo.toml").exists() || src.join("CACHEDIR.TAG").exists() {
+                    continue;
+                }
+                let dst = dst.join(file_name);
+                best_effort_copy_headers(&src, &dst, max_depth - 1);
+            }
+            Ok(file_type) if file_type.is_file() => {
+                let src = entry.path();
+                if src.extension() != Some(OsStr::new("h")) {
+                    continue;
+                }
+                if !dst_created && fs::create_dir_all(dst).is_err() {
+                    return;
+                }
+                dst_created = true;
+                let dst = dst.join(file_name);
+                let _ = fs::remove_file(&dst);
+                let _ = fs::copy(src, dst);
+            }
+            _ => {}
+        }
+    }
 }
 
 fn env_os(key: impl AsRef<OsStr>) -> Result<OsString> {
