@@ -5,7 +5,7 @@ use crate::syntax::{
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote_spanned, ToTokens};
-use syn::Token;
+use syn::{token, Token};
 
 impl ToTokens for Type {
     fn to_tokens(&self, tokens: &mut TokenStream) {
@@ -145,6 +145,12 @@ impl ToTokens for Signature {
             } else {
                 ret.to_tokens(tokens);
             }
+        } else if let Some((result, langle, rangle)) = self.throws_tokens {
+            Token![->](self.paren_token.span).to_tokens(tokens);
+            result.to_tokens(tokens);
+            langle.to_tokens(tokens);
+            token::Paren(langle.span).surround(tokens, |_| ());
+            rangle.to_tokens(tokens);
         }
     }
 }
