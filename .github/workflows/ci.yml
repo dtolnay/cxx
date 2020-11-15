@@ -42,7 +42,8 @@ jobs:
         # still ensure the test is kept passing on the basis of the scheduled
         # builds.
         if: matrix.os && github.event_name != 'schedule'
-        run: echo '::set-env name=RUSTFLAGS::--cfg skip_ui_tests'
+        run: echo 'RUSTFLAGS=--cfg skip_ui_tests' >> $GITHUB_ENV
+        shell: bash
       - run: cargo run --manifest-path demo/Cargo.toml
       - run: cargo test --workspace --exclude cxx-test-suite
 
