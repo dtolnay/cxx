@@ -30,7 +30,7 @@ use self::kind::{Kind, Opaque, Trivial};
 /// # mod file1 {
 /// #[cxx::bridge(namespace = "example")]
 /// pub mod ffi {
-///     extern "C++" {
+///     unsafe extern "C++" {
 ///         type Demo;
 ///
 ///         fn create_demo() -> UniquePtr<Demo>;
@@ -41,7 +41,7 @@ use self::kind::{Kind, Opaque, Trivial};
 /// // file2.rs
 /// #[cxx::bridge(namespace = "example")]
 /// pub mod ffi {
-///     extern "C++" {
+///     unsafe extern "C++" {
 ///         type Demo = crate::file1::ffi::Demo;
 ///
 ///         fn take_ref_demo(demo: &Demo);
@@ -80,7 +80,7 @@ use self::kind::{Kind, Opaque, Trivial};
 ///
 /// #[cxx::bridge(namespace = "folly")]
 /// pub mod ffi {
-///     extern "C++" {
+///     unsafe extern "C++" {
 ///         include!("rust_cxx_bindings.h");
 ///
 ///         type StringPiece = crate::folly_sys::StringPiece;

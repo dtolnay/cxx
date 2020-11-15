@@ -116,7 +116,7 @@ pub mod ffi {
         i: i32,
     }
 
-    extern "C++" {
+    unsafe extern "C++" {
         include!("tests/ffi/tests.h");
 
         type C;

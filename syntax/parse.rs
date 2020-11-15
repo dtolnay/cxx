@@ -204,7 +204,7 @@ fn parse_foreign_mod(
         Lang::Rust => {
             if foreign_mod.unsafety.is_some() {
                 let unsafety = foreign_mod.unsafety;
-                let abi = foreign_mod.abi;
+                let abi = &foreign_mod.abi;
                 let span = quote!(#unsafety #abi);
                 cx.error(span, "extern \"Rust\" block does not need to be unsafe");
             }
@@ -253,6 +253,18 @@ fn parse_foreign_mod(
             }
             _ => cx.error(foreign, "unsupported foreign item"),
         }
+    }
+
+    if !trusted
+        && items.iter().any(|api| match api {
+            Api::CxxFunction(efn) => efn.unsafety.is_none(),
+            _ => false,
+        })
+    {
+        cx.error(
+            foreign_mod.abi,
+            "block must be declared `unsafe extern \"C++\"` if it contains any safe-to-call C++ functions",
+        );
     }
 
     let mut types = items.iter().filter_map(|item| match item {

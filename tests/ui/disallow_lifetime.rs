@@ -1,6 +1,6 @@
 #[cxx::bridge]
 mod ffi {
-    extern "C++" {
+    unsafe extern "C++" {
         type C;
         fn f(&'static self);
     }

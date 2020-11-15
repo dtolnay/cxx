@@ -18,7 +18,7 @@
 //!
 //! <br>
 //!
-//! *Compiler support: requires rustc 1.43+ and c++11 or newer*<br>
+//! *Compiler support: requires rustc 1.48+ and c++11 or newer*<br>
 //! *[Release notes](https://github.com/dtolnay/cxx/releases)*
 //!
 //! <br>
@@ -86,7 +86,7 @@
 //!         fn next_chunk(buf: &mut MultiBuf) -> &[u8];
 //!     }
 //!
-//!     extern "C++" {
+//!     unsafe extern "C++" {
 //!         // One or more headers with the matching C++ declarations. Our code
 //!         // generators don't read it but it gets #include'd and used in static
 //!         // assertions to ensure our picture of the FFI boundary is accurate.
