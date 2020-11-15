@@ -233,10 +233,12 @@ fn parse_foreign_mod(
                     Err(err) => cx.push(err),
                 }
             }
-            ForeignItem::Fn(foreign) => match parse_extern_fn(cx, foreign, lang, &namespace) {
-                Ok(efn) => items.push(efn),
-                Err(err) => cx.push(err),
-            },
+            ForeignItem::Fn(foreign) => {
+                match parse_extern_fn(cx, foreign, lang, trusted, &namespace) {
+                    Ok(efn) => items.push(efn),
+                    Err(err) => cx.push(err),
+                }
+            }
             ForeignItem::Macro(foreign) if foreign.mac.path.is_ident("include") => {
                 match foreign.mac.parse_body_with(parse_include) {
                     Ok(include) => items.push(Api::Include(include)),
@@ -332,6 +334,7 @@ fn parse_extern_fn(
     cx: &mut Errors,
     foreign_fn: &ForeignItemFn,
     lang: Lang,
+    trusted: bool,
     namespace: &Namespace,
 ) -> Result<Api> {
     let generics = &foreign_fn.sig.generics;
@@ -449,6 +452,7 @@ fn parse_extern_fn(
             throws_tokens,
         },
         semi_token,
+        trusted,
     }))
 }
 

@@ -325,6 +325,10 @@ fn check_mut_return_restriction(cx: &mut Check, efn: &ExternFn) {
 }
 
 fn check_multiple_arg_lifetimes(cx: &mut Check, efn: &ExternFn) {
+    if efn.lang == Lang::Cxx && efn.trusted {
+        return;
+    }
+
     match &efn.ret {
         Some(Type::Ref(_)) => {}
         _ => return,

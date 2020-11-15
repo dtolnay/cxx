@@ -98,6 +98,7 @@ pub struct ExternFn {
     pub name: Pair,
     pub sig: Signature,
     pub semi_token: Token![;],
+    pub trusted: bool,
 }
 
 pub struct TypeAlias {
