@@ -87,7 +87,12 @@ impl CxxString {
 
     /// Appends a given string slice onto the end of this C++ string.
     pub fn push_str(&mut self, s: &str) {
-        unsafe { string_push(self, s.as_ptr(), s.len()) }
+        self.push_bytes(s.as_bytes());
+    }
+
+    /// Appends arbitrary bytes onto the end of this C++ string.
+    pub fn push_bytes(&mut self, bytes: &[u8]) {
+        unsafe { string_push(self, bytes.as_ptr(), bytes.len()) }
     }
 }
 
