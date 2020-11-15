@@ -2,8 +2,8 @@ use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::types::TrivialReason;
 use crate::syntax::{
-    error, ident, Api, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Slice, Struct, Ty1,
-    Type, Types,
+    error, ident, Api, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Signature, Slice,
+    Struct, Ty1, Type, Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
@@ -35,7 +35,8 @@ fn do_typecheck(cx: &mut Check) {
             Type::CxxVector(ptr) => check_type_cxx_vector(cx, ptr),
             Type::Ref(ty) => check_type_ref(cx, ty),
             Type::Slice(ty) => check_type_slice(cx, ty),
-            Type::Str(_) | Type::Fn(_) | Type::Void(_) | Type::SliceRefU8(_) => {}
+            Type::Fn(ty) => check_type_fn(cx, ty),
+            Type::Str(_) | Type::Void(_) | Type::SliceRefU8(_) => {}
         }
     }
 
@@ -164,6 +165,12 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
 
 fn check_type_slice(cx: &mut Check, ty: &Slice) {
     cx.error(ty, "only &[u8] is supported so far, not other slice types");
+}
+
+fn check_type_fn(cx: &mut Check, ty: &Signature) {
+    if ty.throws {
+        cx.error(ty, "function pointer returning Result is not supported yet");
+    }
 }
 
 fn check_api_struct(cx: &mut Check, strct: &Struct) {
