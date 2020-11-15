@@ -683,6 +683,17 @@ fn parse_type_path(ty: &TypePath, namespace: &Namespace) -> Result<Type> {
                             rangle: generic.gt_token,
                         })));
                     }
+                } else if ident == "Pin" && generic.args.len() == 1 {
+                    if let GenericArgument::Type(arg) = &generic.args[0] {
+                        let inner = parse_type(arg, namespace)?;
+                        if let Type::Ref(mut inner) = inner {
+                            let pin_token = kw::Pin(ident.span());
+                            inner.pinned = true;
+                            inner.pin_tokens =
+                                Some((pin_token, generic.lt_token, generic.gt_token));
+                            return Ok(Type::Ref(inner));
+                        }
+                    }
                 }
             }
             PathArguments::Parenthesized(_) => {}
