@@ -18,6 +18,7 @@ use syn::{
 };
 
 pub mod kw {
+    syn::custom_keyword!(Pin);
     syn::custom_keyword!(Result);
 }
 
@@ -625,10 +626,12 @@ fn parse_type_reference(ty: &TypeReference, namespace: &Namespace) -> Result<Typ
         _ => Type::Ref,
     };
     Ok(which(Box::new(Ref {
+        pinned: false,
         ampersand: ty.and_token,
         lifetime: ty.lifetime.clone(),
         mutability: ty.mutability,
         inner,
+        pin_tokens: None,
     })))
 }
 
