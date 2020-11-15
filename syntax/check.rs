@@ -35,7 +35,7 @@ fn do_typecheck(cx: &mut Check) {
             Type::CxxVector(ptr) => check_type_cxx_vector(cx, ptr),
             Type::Ref(ty) => check_type_ref(cx, ty),
             Type::Slice(ty) => check_type_slice(cx, ty),
-            _ => {}
+            Type::Str(_) | Type::Fn(_) | Type::Void(_) | Type::SliceRefU8(_) => {}
         }
     }
 
@@ -46,7 +46,7 @@ fn do_typecheck(cx: &mut Check) {
             Api::CxxType(ety) | Api::RustType(ety) => check_api_type(cx, ety),
             Api::CxxFunction(efn) | Api::RustFunction(efn) => check_api_fn(cx, efn),
             Api::Impl(imp) => check_api_impl(cx, imp),
-            _ => {}
+            Api::Include(_) | Api::TypeAlias(_) => {}
         }
     }
 }
