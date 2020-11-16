@@ -47,6 +47,7 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
                 let ident = &ety.name.rust;
                 if !types.structs.contains_key(ident) && !types.enums.contains_key(ident) {
                     expanded.extend(expand_cxx_type(ety));
+                    hidden.extend(expand_cxx_type_assert_pinned(ety));
                 }
             }
             Api::CxxFunction(efn) => {
@@ -201,6 +202,33 @@ fn expand_cxx_type(ety: &ExternType) -> TokenStream {
             type Id = #type_id;
             type Kind = ::cxx::kind::Opaque;
         }
+    }
+}
+
+fn expand_cxx_type_assert_pinned(ety: &ExternType) -> TokenStream {
+    let ident = &ety.name.rust;
+    let infer = Token![_](ident.span());
+
+    quote! {
+        let _ = {
+            // Derived from https://github.com/nvzqz/static-assertions-rs.
+            trait __AmbiguousIfImpl<A> {
+                fn infer() {}
+            }
+
+            impl<T: ?Sized> __AmbiguousIfImpl<()> for T {}
+
+            #[allow(dead_code)]
+            struct __Invalid;
+
+            impl<T: ?Sized + Unpin> __AmbiguousIfImpl<__Invalid> for T {}
+
+            // If there is only one specialized trait impl, type inference with
+            // `_` can be resolved and this can compile. Fails to compile if
+            // user has added a manual Unpin impl for their opaque C++ type as
+            // then `__AmbiguousIfImpl<__Invalid>` also exists.
+            <#ident as __AmbiguousIfImpl<#infer>>::infer
+        };
     }
 }
 
