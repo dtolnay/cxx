@@ -244,10 +244,15 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let doc = &efn.doc;
     let decl = expand_cxx_function_decl(efn, types);
     let receiver = efn.receiver.iter().map(|receiver| {
-        let ampersand = receiver.ampersand;
-        let mutability = receiver.mutability;
         let var = receiver.var;
-        quote!(#ampersand #mutability #var)
+        if receiver.pinned {
+            let ty = receiver.ty();
+            quote!(#var: #ty)
+        } else {
+            let ampersand = receiver.ampersand;
+            let mutability = receiver.mutability;
+            quote!(#ampersand #mutability #var)
+        }
     });
     let args = efn.args.iter().map(|arg| quote!(#arg));
     let all_args = receiver.chain(args);
