@@ -1,12 +1,18 @@
+use crate::actually_private::Private;
 use alloc::borrow::Cow;
 use alloc::string::String;
 use core::fmt::{self, Debug, Display};
 use core::marker::{PhantomData, PhantomPinned};
+use core::mem::MaybeUninit;
 use core::pin::Pin;
 use core::slice;
 use core::str::{self, Utf8Error};
 
 extern "C" {
+    #[link_name = "cxxbridge05$cxx_string$init"]
+    fn string_init(this: &mut MaybeUninit<CxxString>, ptr: *const u8, len: usize);
+    #[link_name = "cxxbridge05$cxx_string$destroy"]
+    fn string_destroy(this: &mut MaybeUninit<CxxString>);
     #[link_name = "cxxbridge05$cxx_string$data"]
     fn string_data(this: &CxxString) -> *const u8;
     #[link_name = "cxxbridge05$cxx_string$length"]
@@ -31,7 +37,53 @@ pub struct CxxString {
     _pinned: PhantomData<PhantomPinned>,
 }
 
+/// Construct a C++ std::string on the Rust stack.
+///
+/// # Syntax
+///
+/// In statement position:
+///
+/// ```
+/// # use cxx::let_cxx_string;
+/// # let expression = "";
+/// let_cxx_string!(var = expression);
+/// ```
+///
+/// The `expression` may have any type that implements `AsRef<[u8]>`. Commonly
+/// it will be a string literal, but for example `&[u8]` and `String` would work
+/// as well.
+///
+/// The macro expands to something resembling `let $var: Pin<&mut CxxString> =
+/// /*???*/;`. The resulting [`Pin`] can be deref'd to `&CxxString` as needed.
+///
+/// # Example
+///
+/// ```
+/// use cxx::{let_cxx_string, CxxString};
+///
+/// fn f(s: &CxxString) {/* ... */}
+///
+/// fn main() {
+///     let_cxx_string!(s = "example");
+///     f(&s);
+/// }
+/// ```
+#[macro_export]
+macro_rules! let_cxx_string {
+    ($var:ident = $value:expr $(,)?) => {
+        let mut $var = $crate::private::StackString::new();
+        #[allow(unused_mut, unused_unsafe)]
+        let mut $var = unsafe { $var.init($value) };
+    };
+}
+
 impl CxxString {
+    /// `CxxString` is not constructible via `new`. Instead, use the
+    /// [`let_cxx_string!`] macro.
+    pub fn new<T: Private>() -> Self {
+        unreachable!()
+    }
+
     /// Returns the length of the string in bytes.
     ///
     /// Matches the behavior of C++ [std::string::size][size].
@@ -126,5 +178,37 @@ impl PartialEq<CxxString> for str {
 impl PartialEq<str> for CxxString {
     fn eq(&self, other: &str) -> bool {
         self.as_bytes() == other.as_bytes()
+    }
+}
+
+#[doc(hidden)]
+#[repr(C)]
+pub struct StackString {
+    // Static assertions in cxx.cc validate that this is large enough and
+    // aligned enough.
+    space: MaybeUninit<[*const (); 8]>,
+}
+
+impl StackString {
+    pub fn new() -> Self {
+        StackString {
+            space: MaybeUninit::uninit(),
+        }
+    }
+
+    pub unsafe fn init(&mut self, value: impl AsRef<[u8]>) -> Pin<&mut CxxString> {
+        let value = value.as_ref();
+        let this = &mut *self.space.as_mut_ptr().cast::<MaybeUninit<CxxString>>();
+        string_init(this, value.as_ptr(), value.len());
+        Pin::new_unchecked(&mut *this.as_mut_ptr())
+    }
+}
+
+impl Drop for StackString {
+    fn drop(&mut self) {
+        unsafe {
+            let this = &mut *self.space.as_mut_ptr().cast::<MaybeUninit<CxxString>>();
+            string_destroy(this);
+        }
     }
 }

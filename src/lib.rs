@@ -426,6 +426,7 @@ pub type Vector<T> = CxxVector<T>;
 // Not public API.
 #[doc(hidden)]
 pub mod private {
+    pub use crate::cxx_string::StackString;
     pub use crate::cxx_vector::VectorElement;
     pub use crate::extern_type::{verify_extern_kind, verify_extern_type};
     pub use crate::function::FatFunction;
@@ -437,6 +438,10 @@ pub mod private {
     pub use crate::rust_vec::RustVec;
     pub use crate::unique_ptr::UniquePtrTarget;
     pub use crate::unwind::catch_unwind;
+}
+
+mod actually_private {
+    pub trait Private {}
 }
 
 macro_rules! chars {
