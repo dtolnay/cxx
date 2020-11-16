@@ -90,6 +90,7 @@ pub struct Enum {
     pub brace_token: Brace,
     pub variants: Vec<Variant>,
     pub repr: Atom,
+    pub repr_type: Type,
 }
 
 pub struct ExternFn {
