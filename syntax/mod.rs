@@ -30,7 +30,7 @@ use self::symbol::Symbol;
 use proc_macro2::{Ident, Span};
 use syn::punctuated::Punctuated;
 use syn::token::{Brace, Bracket, Paren};
-use syn::{Expr, Lifetime, Token, Type as RustType};
+use syn::{Expr, Generics, Lifetime, Token, Type as RustType};
 
 pub use self::atom::Atom;
 pub use self::derive::Derive;
@@ -119,6 +119,7 @@ pub struct Impl {
 pub struct Signature {
     pub unsafety: Option<Token![unsafe]>,
     pub fn_token: Token![fn],
+    pub generics: Generics,
     pub receiver: Option<Receiver>,
     pub args: Punctuated<Var, Token![,]>,
     pub ret: Option<Type>,

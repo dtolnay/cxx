@@ -147,10 +147,6 @@ fn check_type_cxx_vector(cx: &mut Check, ptr: &Ty1) {
 }
 
 fn check_type_ref(cx: &mut Check, ty: &Ref) {
-    if ty.lifetime.is_some() {
-        cx.error(ty, "references with explicit lifetimes are not supported");
-    }
-
     if ty.mutability.is_some() && !ty.pinned {
         if let Some(requires_pin) = match &ty.inner {
             Type::Ident(ident) if ident.rust == CxxString || is_opaque_cxx(cx, &ident.rust) => {
@@ -249,6 +245,25 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
 }
 
 fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
+    match efn.lang {
+        Lang::Cxx => {
+            if !efn.generics.params.is_empty() && !efn.trusted {
+                let ref span = span_for_generics_error(efn);
+                cx.error(span, "extern C++ function with lifetimes must be declared in `unsafe extern \"C++\"` block");
+            }
+        }
+        Lang::Rust => {
+            if !efn.generics.params.is_empty() && efn.unsafety.is_none() {
+                let ref span = span_for_generics_error(efn);
+                let message = format!(
+                    "must be `unsafe fn {}` in order to expose explicit lifetimes to C++",
+                    efn.name.rust,
+                );
+                cx.error(span, message);
+            }
+        }
+    }
+
     if let Some(receiver) = &efn.receiver {
         let ref span = span_for_receiver_error(receiver);
 
@@ -280,10 +295,6 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
                     receiver.ty.rust,
                 ),
             );
-        }
-
-        if receiver.lifetime.is_some() {
-            cx.error(span, "references with explicit lifetimes are not supported");
         }
     }
 
@@ -434,6 +445,13 @@ fn span_for_receiver_error(receiver: &Receiver) -> TokenStream {
         let ty = &receiver.ty;
         quote!(#ampersand #lifetime #mutability #ty)
     }
+}
+
+fn span_for_generics_error(efn: &ExternFn) -> TokenStream {
+    let unsafety = efn.unsafety;
+    let fn_token = efn.fn_token;
+    let generics = &efn.generics;
+    quote!(#unsafety #fn_token #generics)
 }
 
 fn describe(cx: &mut Check, ty: &Type) -> String {

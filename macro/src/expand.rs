@@ -233,6 +233,7 @@ fn expand_cxx_type_assert_pinned(ety: &ExternType) -> TokenStream {
 }
 
 fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
+    let generics = &efn.generics;
     let receiver = efn.receiver.iter().map(|receiver| {
         let receiver_type = receiver.ty();
         quote!(_: #receiver_type)
@@ -267,7 +268,7 @@ fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
     let local_name = format_ident!("__{}", efn.name.rust);
     quote! {
         #[link_name = #link_name]
-        fn #local_name(#(#all_args,)* #outparam) #ret;
+        fn #local_name #generics(#(#all_args,)* #outparam) #ret;
     }
 }
 
@@ -281,8 +282,9 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
             quote!(#var: #ty)
         } else {
             let ampersand = receiver.ampersand;
+            let lifetime = &receiver.lifetime;
             let mutability = receiver.mutability;
-            quote!(#ampersand #mutability #var)
+            quote!(#ampersand #lifetime #mutability #var)
         }
     });
     let args = efn.args.iter().map(|arg| quote!(#arg));
@@ -443,9 +445,10 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         dispatch = quote!(unsafe { #dispatch });
     }
     let ident = &efn.name.rust;
+    let generics = &efn.generics;
     let function_shim = quote! {
         #doc
-        pub #unsafety fn #ident(#(#all_args,)*) #ret {
+        pub #unsafety fn #ident #generics(#(#all_args,)*) #ret {
             extern "C" {
                 #decl
             }
@@ -552,6 +555,7 @@ fn expand_rust_function_shim_impl(
     catch_unwind_label: String,
     invoke: Option<&Ident>,
 ) -> TokenStream {
+    let generics = &sig.generics;
     let receiver_var = sig
         .receiver
         .as_ref()
@@ -694,7 +698,7 @@ fn expand_rust_function_shim_impl(
     quote! {
         #[doc(hidden)]
         #[export_name = #link_name]
-        unsafe extern "C" fn #local_name(#(#all_args,)* #outparam #pointer) #ret {
+        unsafe extern "C" fn #local_name #generics(#(#all_args,)* #outparam #pointer) #ret {
             let __fn = concat!(module_path!(), #catch_unwind_label);
             #wrap_super
             #expr
@@ -710,6 +714,7 @@ fn expand_rust_function_shim_super(
     invoke: &Ident,
 ) -> TokenStream {
     let unsafety = sig.unsafety;
+    let generics = &sig.generics;
 
     let receiver_var = sig
         .receiver
@@ -747,7 +752,7 @@ fn expand_rust_function_shim_super(
     };
 
     quote_spanned! {span=>
-        #unsafety fn #local_name(#(#all_args,)*) #ret {
+        #unsafety fn #local_name #generics(#(#all_args,)*) #ret {
             #call(#(#vars,)*)
         }
     }

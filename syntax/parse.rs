@@ -13,8 +13,9 @@ use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::{
     Abi, Attribute, Error, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
-    GenericArgument, Ident, ItemEnum, ItemImpl, ItemStruct, LitStr, Pat, PathArguments, Result,
-    ReturnType, Token, Type as RustType, TypeBareFn, TypePath, TypeReference, TypeSlice,
+    GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, LitStr, Pat,
+    PathArguments, Result, ReturnType, Token, Type as RustType, TypeBareFn, TypePath,
+    TypeReference, TypeSlice,
 };
 
 pub mod kw {
@@ -351,7 +352,12 @@ fn parse_extern_fn(
     namespace: &Namespace,
 ) -> Result<Api> {
     let generics = &foreign_fn.sig.generics;
-    if !generics.params.is_empty() || generics.where_clause.is_some() {
+    if generics.where_clause.is_some()
+        || generics.params.iter().any(|param| match param {
+            GenericParam::Lifetime(lifetime) => !lifetime.bounds.is_empty(),
+            GenericParam::Type(_) | GenericParam::Const(_) => true,
+        })
+    {
         return Err(Error::new_spanned(
             foreign_fn,
             "extern function with generic parameters is not supported yet",
@@ -447,6 +453,7 @@ fn parse_extern_fn(
         cxx_name.unwrap_or(foreign_fn.sig.ident.clone()),
         rust_name.unwrap_or(foreign_fn.sig.ident.clone()),
     );
+    let generics = generics.clone();
     let paren_token = foreign_fn.sig.paren_token;
     let semi_token = foreign_fn.semi_token;
     let api_function = match lang {
@@ -461,6 +468,7 @@ fn parse_extern_fn(
         sig: Signature {
             unsafety,
             fn_token,
+            generics,
             receiver,
             args,
             ret,
@@ -759,6 +767,7 @@ fn parse_type_fn(ty: &TypeBareFn, namespace: &Namespace) -> Result<Type> {
     Ok(Type::Fn(Box::new(Signature {
         unsafety: ty.unsafety,
         fn_token: ty.fn_token,
+        generics: Generics::default(),
         receiver: None,
         args,
         ret,

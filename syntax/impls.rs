@@ -187,6 +187,7 @@ impl PartialEq for Signature {
         let Signature {
             unsafety,
             fn_token: _,
+            generics: _,
             receiver,
             args,
             ret,
@@ -197,6 +198,7 @@ impl PartialEq for Signature {
         let Signature {
             unsafety: unsafety2,
             fn_token: _,
+            generics: _,
             receiver: receiver2,
             args: args2,
             ret: ret2,
@@ -218,6 +220,7 @@ impl Hash for Signature {
         let Signature {
             unsafety,
             fn_token: _,
+            generics: _,
             receiver,
             args,
             ret,
