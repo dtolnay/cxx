@@ -81,29 +81,36 @@ impl Eq for Ty1 {}
 impl PartialEq for Ty1 {
     fn eq(&self, other: &Ty1) -> bool {
         let Ty1 {
+            pinned,
             name,
             langle: _,
             inner,
             rangle: _,
+            pin_tokens: _,
         } = self;
         let Ty1 {
+            pinned: pinned2,
             name: name2,
             langle: _,
             inner: inner2,
             rangle: _,
+            pin_tokens: _,
         } = other;
-        name == name2 && inner == inner2
+        pinned == pinned2 && name == name2 && inner == inner2
     }
 }
 
 impl Hash for Ty1 {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let Ty1 {
+            pinned,
             name,
             langle: _,
             inner,
             rangle: _,
+            pin_tokens: _,
         } = self;
+        pinned.hash(state);
         name.hash(state);
         inner.hash(state);
     }

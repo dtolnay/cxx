@@ -9,6 +9,7 @@ use crate::syntax::{
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
+use std::collections::BTreeSet as Set;
 use std::mem;
 use syn::{parse_quote, Result, Token};
 
@@ -59,6 +60,7 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
         }
     }
 
+    let mut expanded_unique_ptr = Set::new();
     for ty in types {
         let explicit_impl = types.explicit_impls.get(ty);
         if let Type::RustBox(ty) = ty {
@@ -77,6 +79,7 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
             if let Type::Ident(ident) = &ptr.inner {
                 if Atom::from(&ident.rust).is_none()
                     && (explicit_impl.is_some() || !types.aliases.contains_key(&ident.rust))
+                    && expanded_unique_ptr.insert(&ident.rust)
                 {
                     expanded.extend(expand_unique_ptr(ident, types, explicit_impl));
                 }
