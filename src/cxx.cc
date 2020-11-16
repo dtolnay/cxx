@@ -9,6 +9,16 @@
 #include <vector>
 
 extern "C" {
+void cxxbridge05$cxx_string$init(std::string *s, const uint8_t *ptr,
+                                 size_t len) noexcept {
+  new (s) std::string(reinterpret_cast<const char *>(ptr), len);
+}
+
+void cxxbridge05$cxx_string$destroy(std::string *s) noexcept {
+  using std::string;
+  s->~string();
+}
+
 const char *cxxbridge05$cxx_string$data(const std::string &s) noexcept {
   return s.data();
 }
@@ -229,6 +239,11 @@ void cxxbridge05$unique_ptr$std$string$drop(
   ptr->~unique_ptr();
 }
 } // extern "C"
+
+static_assert(alignof(std::string) <= alignof(void *),
+              "unexpectedly large std::string alignment");
+static_assert(sizeof(std::string) <= 8 * sizeof(void *),
+              "unexpectedly large std::string size");
 
 #define STD_VECTOR_OPS(RUST_TYPE, CXX_TYPE)                                    \
   size_t cxxbridge05$std$vector$##RUST_TYPE##$size(                            \
