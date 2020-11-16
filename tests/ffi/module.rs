@@ -8,6 +8,6 @@ pub mod ffi {
 
         type C = crate::ffi::C;
 
-        fn c_take_unique_ptr(c: UniquePtr<C>);
+        fn c_take_unique_ptr(c: Pin<UniquePtr<C>>);
     }
 }
