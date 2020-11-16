@@ -12,7 +12,7 @@ extern "C" {
     #[link_name = "cxxbridge05$cxx_string$length"]
     fn string_length(this: &CxxString) -> usize;
     #[link_name = "cxxbridge05$cxx_string$push"]
-    fn string_push(this: &mut CxxString, ptr: *const u8, len: usize);
+    fn string_push(this: Pin<&mut CxxString>, ptr: *const u8, len: usize);
 }
 
 /// Binding to C++ `std::string`.
@@ -95,10 +95,7 @@ impl CxxString {
 
     /// Appends arbitrary bytes onto the end of this C++ string.
     pub fn push_bytes(self: Pin<&mut Self>, bytes: &[u8]) {
-        unsafe {
-            let this = Pin::into_inner_unchecked(self);
-            string_push(this, bytes.as_ptr(), bytes.len())
-        }
+        unsafe { string_push(self, bytes.as_ptr(), bytes.len()) }
     }
 }
 
