@@ -233,35 +233,45 @@ impl Eq for Receiver {}
 impl PartialEq for Receiver {
     fn eq(&self, other: &Receiver) -> bool {
         let Receiver {
+            pinned,
             ampersand: _,
             lifetime,
             mutability,
             var: _,
             ty,
             shorthand: _,
+            pin_tokens: _,
         } = self;
         let Receiver {
+            pinned: pinned2,
             ampersand: _,
             lifetime: lifetime2,
             mutability: mutability2,
             var: _,
             ty: ty2,
             shorthand: _,
+            pin_tokens: _,
         } = other;
-        lifetime == lifetime2 && mutability.is_some() == mutability2.is_some() && ty == ty2
+        pinned == pinned2
+            && lifetime == lifetime2
+            && mutability.is_some() == mutability2.is_some()
+            && ty == ty2
     }
 }
 
 impl Hash for Receiver {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let Receiver {
+            pinned,
             ampersand: _,
             lifetime,
             mutability,
             var: _,
             ty,
             shorthand: _,
+            pin_tokens: _,
         } = self;
+        pinned.hash(state);
         lifetime.hash(state);
         mutability.is_some().hash(state);
         ty.hash(state);

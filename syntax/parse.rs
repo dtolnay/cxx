@@ -388,12 +388,14 @@ fn parse_extern_fn(
             FnArg::Receiver(arg) => {
                 if let Some((ampersand, lifetime)) = &arg.reference {
                     receiver = Some(Receiver {
+                        pinned: false,
                         ampersand: *ampersand,
                         lifetime: lifetime.clone(),
                         mutability: arg.mutability,
                         var: arg.self_token,
                         ty: ResolvableName::make_self(arg.self_token.span),
                         shorthand: true,
+                        pin_tokens: None,
                     });
                     continue;
                 }
@@ -418,12 +420,14 @@ fn parse_extern_fn(
                 if let Type::Ref(reference) = ty {
                     if let Type::Ident(ident) = reference.inner {
                         receiver = Some(Receiver {
+                            pinned: reference.pinned,
                             ampersand: reference.ampersand,
                             lifetime: reference.lifetime,
                             mutability: reference.mutability,
                             var: Token![self](ident.rust.span()),
                             ty: ident,
                             shorthand: false,
+                            pin_tokens: reference.pin_tokens,
                         });
                         continue;
                     }
