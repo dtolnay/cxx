@@ -82,6 +82,11 @@ where
             unsafe { slice::from_raw_parts(ptr, len) }
         }
     }
+
+    /// Returns an iterator over elements of type `&T`.
+    pub fn iter(&self) -> Iter<T> {
+        Iter { v: self, index: 0 }
+    }
 }
 
 pub struct Iter<'a, T> {
@@ -97,7 +102,7 @@ where
     type IntoIter = Iter<'a, T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        Iter { v: self, index: 0 }
+        self.iter()
     }
 }
 
