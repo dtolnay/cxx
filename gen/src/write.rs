@@ -344,7 +344,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     let mangled = mangle::extern_fn(efn, out.types);
     write!(out, "{}(", mangled);
     if let Some(receiver) = &efn.receiver {
-        if receiver.mutability.is_none() {
+        if !receiver.mutable {
             write!(out, "const ");
         }
         write!(
@@ -392,7 +392,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     }
     write!(out, ")");
     if let Some(receiver) = &efn.receiver {
-        if receiver.mutability.is_none() {
+        if !receiver.mutable {
             write!(out, " const");
         }
     }
@@ -556,7 +556,7 @@ fn write_rust_function_decl_impl(
     write!(out, "{}(", link_name);
     let mut needs_comma = false;
     if let Some(receiver) = &sig.receiver {
-        if receiver.mutability.is_none() {
+        if !receiver.mutable {
             write!(out, "const ");
         }
         write!(
@@ -627,7 +627,7 @@ fn write_rust_function_shim_decl(
     }
     write!(out, ")");
     if let Some(receiver) = &sig.receiver {
-        if receiver.mutability.is_none() {
+        if !receiver.mutable {
             write!(out, " const");
         }
     }
@@ -785,7 +785,7 @@ fn write_indirect_return_type(out: &mut OutFile, ty: &Type) {
             write!(out, "*");
         }
         Type::Ref(ty) => {
-            if ty.mutability.is_none() {
+            if !ty.mutable {
                 write!(out, "const ");
             }
             write_type(out, &ty.inner);
@@ -811,7 +811,7 @@ fn write_extern_return_type_space(out: &mut OutFile, ty: &Option<Type>) {
             write!(out, "*");
         }
         Some(Type::Ref(ty)) => {
-            if ty.mutability.is_none() {
+            if !ty.mutable {
                 write!(out, "const ");
             }
             write_type(out, &ty.inner);
@@ -871,7 +871,7 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write!(out, ">");
         }
         Type::Ref(r) => {
-            if r.mutability.is_none() {
+            if !r.mutable {
                 write!(out, "const ");
             }
             write_type(out, &r.inner);

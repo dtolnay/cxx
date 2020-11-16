@@ -316,21 +316,21 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
             },
             Type::RustVec(_) => quote!(#var.as_mut_ptr() as *const ::cxx::private::RustVec<_>),
             Type::Ref(ty) => match &ty.inner {
-                Type::Ident(ident) if ident.rust == RustString => match ty.mutability {
-                    None => quote!(::cxx::private::RustString::from_ref(#var)),
-                    Some(_) => quote!(::cxx::private::RustString::from_mut(#var)),
+                Type::Ident(ident) if ident.rust == RustString => match ty.mutable {
+                    false => quote!(::cxx::private::RustString::from_ref(#var)),
+                    true => quote!(::cxx::private::RustString::from_mut(#var)),
                 },
-                Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
-                    None => quote!(::cxx::private::RustVec::from_ref_vec_string(#var)),
-                    Some(_) => quote!(::cxx::private::RustVec::from_mut_vec_string(#var)),
+                Type::RustVec(vec) if vec.inner == RustString => match ty.mutable {
+                    false => quote!(::cxx::private::RustVec::from_ref_vec_string(#var)),
+                    true => quote!(::cxx::private::RustVec::from_mut_vec_string(#var)),
                 },
-                Type::RustVec(_) => match ty.mutability {
-                    None => quote!(::cxx::private::RustVec::from_ref(#var)),
-                    Some(_) => quote!(::cxx::private::RustVec::from_mut(#var)),
+                Type::RustVec(_) => match ty.mutable {
+                    false => quote!(::cxx::private::RustVec::from_ref(#var)),
+                    true => quote!(::cxx::private::RustVec::from_mut(#var)),
                 },
-                inner if types.is_considered_improper_ctype(inner) => match ty.mutability {
-                    None => quote!(#var as *const #inner as *const ::std::ffi::c_void),
-                    Some(_) => quote!(#var as *mut #inner as *mut ::std::ffi::c_void),
+                inner if types.is_considered_improper_ctype(inner) => match ty.mutable {
+                    false => quote!(#var as *const #inner as *const ::std::ffi::c_void),
+                    true => quote!(#var as *mut #inner as *mut ::std::ffi::c_void),
                 },
                 _ => quote!(#var),
             },
@@ -412,17 +412,17 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                     true => quote!(::cxx::UniquePtr::__pin_from_raw(#call)),
                 },
                 Type::Ref(ty) => match &ty.inner {
-                    Type::Ident(ident) if ident.rust == RustString => match ty.mutability {
-                        None => quote!(#call.as_string()),
-                        Some(_) => quote!(#call.as_mut_string()),
+                    Type::Ident(ident) if ident.rust == RustString => match ty.mutable {
+                        false => quote!(#call.as_string()),
+                        true => quote!(#call.as_mut_string()),
                     },
-                    Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
-                        None => quote!(#call.as_vec_string()),
-                        Some(_) => quote!(#call.as_mut_vec_string()),
+                    Type::RustVec(vec) if vec.inner == RustString => match ty.mutable {
+                        false => quote!(#call.as_vec_string()),
+                        true => quote!(#call.as_mut_vec_string()),
                     },
-                    Type::RustVec(_) => match ty.mutability {
-                        None => quote!(#call.as_vec()),
-                        Some(_) => quote!(#call.as_mut_vec()),
+                    Type::RustVec(_) => match ty.mutable {
+                        false => quote!(#call.as_vec()),
+                        true => quote!(#call.as_mut_vec()),
                     },
                     inner if types.is_considered_improper_ctype(inner) => {
                         let mutability = ty.mutability;
@@ -594,17 +594,17 @@ fn expand_rust_function_shim_impl(
                 true => quote!(::cxx::UniquePtr::__pin_from_raw(#ident)),
             },
             Type::Ref(ty) => match &ty.inner {
-                Type::Ident(i) if i.rust == RustString => match ty.mutability {
-                    None => quote!(#ident.as_string()),
-                    Some(_) => quote!(#ident.as_mut_string()),
+                Type::Ident(i) if i.rust == RustString => match ty.mutable {
+                    false => quote!(#ident.as_string()),
+                    true => quote!(#ident.as_mut_string()),
                 },
-                Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
-                    None => quote!(#ident.as_vec_string()),
-                    Some(_) => quote!(#ident.as_mut_vec_string()),
+                Type::RustVec(vec) if vec.inner == RustString => match ty.mutable {
+                    false => quote!(#ident.as_vec_string()),
+                    true => quote!(#ident.as_mut_vec_string()),
                 },
-                Type::RustVec(_) => match ty.mutability {
-                    None => quote!(#ident.as_vec()),
-                    Some(_) => quote!(#ident.as_mut_vec()),
+                Type::RustVec(_) => match ty.mutable {
+                    false => quote!(#ident.as_vec()),
+                    true => quote!(#ident.as_mut_vec()),
                 },
                 _ => quote!(#ident),
             },
@@ -641,17 +641,17 @@ fn expand_rust_function_shim_impl(
             true => Some(quote!(::cxx::UniquePtr::__pin_into_raw)),
         },
         Type::Ref(ty) => match &ty.inner {
-            Type::Ident(ident) if ident.rust == RustString => match ty.mutability {
-                None => Some(quote!(::cxx::private::RustString::from_ref)),
-                Some(_) => Some(quote!(::cxx::private::RustString::from_mut)),
+            Type::Ident(ident) if ident.rust == RustString => match ty.mutable {
+                false => Some(quote!(::cxx::private::RustString::from_ref)),
+                true => Some(quote!(::cxx::private::RustString::from_mut)),
             },
-            Type::RustVec(vec) if vec.inner == RustString => match ty.mutability {
-                None => Some(quote!(::cxx::private::RustVec::from_ref_vec_string)),
-                Some(_) => Some(quote!(::cxx::private::RustVec::from_mut_vec_string)),
+            Type::RustVec(vec) if vec.inner == RustString => match ty.mutable {
+                false => Some(quote!(::cxx::private::RustVec::from_ref_vec_string)),
+                true => Some(quote!(::cxx::private::RustVec::from_mut_vec_string)),
             },
-            Type::RustVec(_) => match ty.mutability {
-                None => Some(quote!(::cxx::private::RustVec::from_ref)),
-                Some(_) => Some(quote!(::cxx::private::RustVec::from_mut)),
+            Type::RustVec(_) => match ty.mutable {
+                false => Some(quote!(::cxx::private::RustVec::from_ref)),
+                true => Some(quote!(::cxx::private::RustVec::from_mut)),
             },
             _ => None,
         },
@@ -1087,9 +1087,9 @@ fn expand_extern_type(ty: &Type, types: &Types, proper: bool) -> TokenStream {
                     let inner = expand_extern_type(&ty.inner, types, proper);
                     quote!(&#mutability ::cxx::private::RustVec<#inner>)
                 }
-                inner if proper && types.is_considered_improper_ctype(inner) => match mutability {
-                    None => quote!(*const ::std::ffi::c_void),
-                    Some(_) => quote!(*#mutability ::std::ffi::c_void),
+                inner if proper && types.is_considered_improper_ctype(inner) => match ty.mutable {
+                    false => quote!(*const ::std::ffi::c_void),
+                    true => quote!(*#mutability ::std::ffi::c_void),
                 },
                 _ => quote!(#ty),
             }

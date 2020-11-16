@@ -138,11 +138,12 @@ pub struct Receiver {
     pub pinned: bool,
     pub ampersand: Token![&],
     pub lifetime: Option<Lifetime>,
-    pub mutability: Option<Token![mut]>,
+    pub mutable: bool,
     pub var: Token![self],
     pub ty: ResolvableName,
     pub shorthand: bool,
     pub pin_tokens: Option<(kw::Pin, Token![<], Token![>])>,
+    pub mutability: Option<Token![mut]>,
 }
 
 pub struct Variant {
@@ -178,9 +179,10 @@ pub struct Ref {
     pub pinned: bool,
     pub ampersand: Token![&],
     pub lifetime: Option<Lifetime>,
-    pub mutability: Option<Token![mut]>,
+    pub mutable: bool,
     pub inner: Type,
     pub pin_tokens: Option<(kw::Pin, Token![<], Token![>])>,
+    pub mutability: Option<Token![mut]>,
 }
 
 pub struct Slice {

@@ -397,11 +397,12 @@ fn parse_extern_fn(
                         pinned: false,
                         ampersand: *ampersand,
                         lifetime: lifetime.clone(),
-                        mutability: arg.mutability,
+                        mutable: arg.mutability.is_some(),
                         var: arg.self_token,
                         ty: ResolvableName::make_self(arg.self_token.span),
                         shorthand: true,
                         pin_tokens: None,
+                        mutability: arg.mutability,
                     });
                     continue;
                 }
@@ -429,11 +430,12 @@ fn parse_extern_fn(
                             pinned: reference.pinned,
                             ampersand: reference.ampersand,
                             lifetime: reference.lifetime,
-                            mutability: reference.mutability,
+                            mutable: reference.mutable,
                             var: Token![self](ident.rust.span()),
                             ty: ident,
                             shorthand: false,
                             pin_tokens: reference.pin_tokens,
+                            mutability: reference.mutability,
                         });
                         continue;
                     }
@@ -641,9 +643,10 @@ fn parse_type_reference(ty: &TypeReference, namespace: &Namespace) -> Result<Typ
         pinned: false,
         ampersand: ty.and_token,
         lifetime: ty.lifetime.clone(),
-        mutability: ty.mutability,
+        mutable: ty.mutability.is_some(),
         inner,
         pin_tokens: None,
+        mutability: ty.mutability,
     })))
 }
 

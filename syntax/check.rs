@@ -147,7 +147,7 @@ fn check_type_cxx_vector(cx: &mut Check, ptr: &Ty1) {
 }
 
 fn check_type_ref(cx: &mut Check, ty: &Ref) {
-    if ty.mutability.is_some() && !ty.pinned {
+    if ty.mutable && !ty.pinned {
         if let Some(requires_pin) = match &ty.inner {
             Type::Ident(ident) if ident.rust == CxxString || is_opaque_cxx(cx, &ident.rust) => {
                 Some(ident.rust.to_string())
@@ -268,9 +268,9 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
         let ref span = span_for_receiver_error(receiver);
 
         if receiver.ty.is_self() {
-            let mutability = match receiver.mutability {
-                Some(_) => "mut ",
-                None => "",
+            let mutability = match receiver.mutable {
+                true => "mut ",
+                false => "",
             };
             let msg = format!(
                 "unnamed receiver type is only allowed if the surrounding \
@@ -284,10 +284,7 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
             && !cx.types.rust.contains(&receiver.ty.rust)
         {
             cx.error(span, "unrecognized receiver type");
-        } else if receiver.mutability.is_some()
-            && !receiver.pinned
-            && is_opaque_cxx(cx, &receiver.ty.rust)
-        {
+        } else if receiver.mutable && !receiver.pinned && is_opaque_cxx(cx, &receiver.ty.rust) {
             cx.error(
                 span,
                 format!(
@@ -346,13 +343,13 @@ fn check_api_impl(cx: &mut Check, imp: &Impl) {
 
 fn check_mut_return_restriction(cx: &mut Check, efn: &ExternFn) {
     match &efn.ret {
-        Some(Type::Ref(ty)) if ty.mutability.is_some() => {}
+        Some(Type::Ref(ty)) if ty.mutable => {}
         _ => return,
     }
 
     for arg in &efn.args {
         if let Type::Ref(ty) = &arg.ty {
-            if ty.mutability.is_some() {
+            if ty.mutable {
                 return;
             }
         }

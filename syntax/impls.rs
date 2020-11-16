@@ -124,22 +124,21 @@ impl PartialEq for Ref {
             pinned,
             ampersand: _,
             lifetime,
-            mutability,
+            mutable,
             inner,
             pin_tokens: _,
+            mutability: _,
         } = self;
         let Ref {
             pinned: pinned2,
             ampersand: _,
             lifetime: lifetime2,
-            mutability: mutability2,
+            mutable: mutable2,
             inner: inner2,
             pin_tokens: _,
+            mutability: _,
         } = other;
-        pinned == pinned2
-            && lifetime == lifetime2
-            && mutability.is_some() == mutability2.is_some()
-            && inner == inner2
+        pinned == pinned2 && lifetime == lifetime2 && mutable == mutable2 && inner == inner2
     }
 }
 
@@ -149,13 +148,14 @@ impl Hash for Ref {
             pinned,
             ampersand: _,
             lifetime,
-            mutability,
+            mutable,
             inner,
             pin_tokens: _,
+            mutability: _,
         } = self;
         pinned.hash(state);
         lifetime.hash(state);
-        mutability.is_some().hash(state);
+        mutable.hash(state);
         inner.hash(state);
     }
 }
@@ -246,26 +246,25 @@ impl PartialEq for Receiver {
             pinned,
             ampersand: _,
             lifetime,
-            mutability,
+            mutable,
             var: _,
             ty,
             shorthand: _,
             pin_tokens: _,
+            mutability: _,
         } = self;
         let Receiver {
             pinned: pinned2,
             ampersand: _,
             lifetime: lifetime2,
-            mutability: mutability2,
+            mutable: mutable2,
             var: _,
             ty: ty2,
             shorthand: _,
             pin_tokens: _,
+            mutability: _,
         } = other;
-        pinned == pinned2
-            && lifetime == lifetime2
-            && mutability.is_some() == mutability2.is_some()
-            && ty == ty2
+        pinned == pinned2 && lifetime == lifetime2 && mutable == mutable2 && ty == ty2
     }
 }
 
@@ -275,15 +274,16 @@ impl Hash for Receiver {
             pinned,
             ampersand: _,
             lifetime,
-            mutability,
+            mutable,
             var: _,
             ty,
             shorthand: _,
             pin_tokens: _,
+            mutability: _,
         } = self;
         pinned.hash(state);
         lifetime.hash(state);
-        mutability.is_some().hash(state);
+        mutable.hash(state);
         ty.hash(state);
     }
 }
