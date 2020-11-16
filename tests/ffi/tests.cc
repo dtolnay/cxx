@@ -26,12 +26,7 @@ size_t C::set(size_t n) {
   return this->n;
 }
 
-size_t C::set2(size_t n) {
-  this->n = n;
-  return this->n;
-}
-
-size_t C::set_succeed(size_t n) { return this->set2(n); }
+size_t C::set_succeed(size_t n) { return this->set(n); }
 
 size_t C::get_fail() { throw std::runtime_error("unimplemented"); }
 

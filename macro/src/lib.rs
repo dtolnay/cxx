@@ -2,6 +2,7 @@
     clippy::inherent_to_string,
     clippy::large_enum_variant,
     clippy::new_without_default,
+    clippy::nonminimal_bool,
     clippy::or_fun_call,
     clippy::toplevel_ref_arg,
     clippy::useless_let_if_seq

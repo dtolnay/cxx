@@ -9,6 +9,7 @@ use crate::syntax::{
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
+use std::collections::BTreeSet as Set;
 use std::mem;
 use syn::{parse_quote, Result, Token};
 
@@ -59,6 +60,7 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
         }
     }
 
+    let mut expanded_unique_ptr = Set::new();
     for ty in types {
         let explicit_impl = types.explicit_impls.get(ty);
         if let Type::RustBox(ty) = ty {
@@ -77,6 +79,7 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
             if let Type::Ident(ident) = &ptr.inner {
                 if Atom::from(&ident.rust).is_none()
                     && (explicit_impl.is_some() || !types.aliases.contains_key(&ident.rust))
+                    && expanded_unique_ptr.insert(&ident.rust)
                 {
                     expanded.extend(expand_unique_ptr(ident, types, explicit_impl));
                 }
@@ -244,10 +247,15 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let doc = &efn.doc;
     let decl = expand_cxx_function_decl(efn, types);
     let receiver = efn.receiver.iter().map(|receiver| {
-        let ampersand = receiver.ampersand;
-        let mutability = receiver.mutability;
         let var = receiver.var;
-        quote!(#ampersand #mutability #var)
+        if receiver.pinned {
+            let ty = receiver.ty();
+            quote!(#var: #ty)
+        } else {
+            let ampersand = receiver.ampersand;
+            let mutability = receiver.mutability;
+            quote!(#ampersand #mutability #var)
+        }
     });
     let args = efn.args.iter().map(|arg| quote!(#arg));
     let all_args = receiver.chain(args);
@@ -272,7 +280,10 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                 quote!(#var.as_mut_ptr() as *const ::cxx::private::RustString)
             }
             Type::RustBox(_) => quote!(::std::boxed::Box::into_raw(#var)),
-            Type::UniquePtr(_) => quote!(::cxx::UniquePtr::into_raw(#var)),
+            Type::UniquePtr(ptr) => match ptr.pinned {
+                false => quote!(::cxx::UniquePtr::into_raw(#var)),
+                true => quote!(::cxx::UniquePtr::__pin_into_raw(#var)),
+            },
             Type::RustVec(_) => quote!(#var.as_mut_ptr() as *const ::cxx::private::RustVec<_>),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(ident) if ident.rust == RustString => match ty.mutability {
@@ -366,7 +377,10 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                         quote!(#call.into_vec())
                     }
                 }
-                Type::UniquePtr(_) => quote!(::cxx::UniquePtr::from_raw(#call)),
+                Type::UniquePtr(ptr) => match ptr.pinned {
+                    false => quote!(::cxx::UniquePtr::from_raw(#call)),
+                    true => quote!(::cxx::UniquePtr::__pin_from_raw(#call)),
+                },
                 Type::Ref(ty) => match &ty.inner {
                     Type::Ident(ident) if ident.rust == RustString => match ty.mutability {
                         None => quote!(#call.as_string()),
@@ -539,7 +553,10 @@ fn expand_rust_function_shim_impl(
                     quote!(::std::mem::take((*#ident).as_mut_vec()))
                 }
             }
-            Type::UniquePtr(_) => quote!(::cxx::UniquePtr::from_raw(#ident)),
+            Type::UniquePtr(ptr) => match ptr.pinned {
+                false => quote!(::cxx::UniquePtr::from_raw(#ident)),
+                true => quote!(::cxx::UniquePtr::__pin_from_raw(#ident)),
+            },
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(i) if i.rust == RustString => match ty.mutability {
                     None => quote!(#ident.as_string()),
@@ -583,7 +600,10 @@ fn expand_rust_function_shim_impl(
                 Some(quote!(::cxx::private::RustVec::from))
             }
         }
-        Type::UniquePtr(_) => Some(quote!(::cxx::UniquePtr::into_raw)),
+        Type::UniquePtr(ptr) => match ptr.pinned {
+            false => Some(quote!(::cxx::UniquePtr::into_raw)),
+            true => Some(quote!(::cxx::UniquePtr::__pin_into_raw)),
+        },
         Type::Ref(ty) => match &ty.inner {
             Type::Ident(ident) if ident.rust == RustString => match ty.mutability {
                 None => Some(quote!(::cxx::private::RustString::from_ref)),

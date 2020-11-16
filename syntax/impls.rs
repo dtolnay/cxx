@@ -81,29 +81,36 @@ impl Eq for Ty1 {}
 impl PartialEq for Ty1 {
     fn eq(&self, other: &Ty1) -> bool {
         let Ty1 {
+            pinned,
             name,
             langle: _,
             inner,
             rangle: _,
+            pin_tokens: _,
         } = self;
         let Ty1 {
+            pinned: pinned2,
             name: name2,
             langle: _,
             inner: inner2,
             rangle: _,
+            pin_tokens: _,
         } = other;
-        name == name2 && inner == inner2
+        pinned == pinned2 && name == name2 && inner == inner2
     }
 }
 
 impl Hash for Ty1 {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let Ty1 {
+            pinned,
             name,
             langle: _,
             inner,
             rangle: _,
+            pin_tokens: _,
         } = self;
+        pinned.hash(state);
         name.hash(state);
         inner.hash(state);
     }
@@ -114,29 +121,39 @@ impl Eq for Ref {}
 impl PartialEq for Ref {
     fn eq(&self, other: &Ref) -> bool {
         let Ref {
+            pinned,
             ampersand: _,
             lifetime,
             mutability,
             inner,
+            pin_tokens: _,
         } = self;
         let Ref {
+            pinned: pinned2,
             ampersand: _,
             lifetime: lifetime2,
             mutability: mutability2,
             inner: inner2,
+            pin_tokens: _,
         } = other;
-        lifetime == lifetime2 && mutability.is_some() == mutability2.is_some() && inner == inner2
+        pinned == pinned2
+            && lifetime == lifetime2
+            && mutability.is_some() == mutability2.is_some()
+            && inner == inner2
     }
 }
 
 impl Hash for Ref {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let Ref {
+            pinned,
             ampersand: _,
             lifetime,
             mutability,
             inner,
+            pin_tokens: _,
         } = self;
+        pinned.hash(state);
         lifetime.hash(state);
         mutability.is_some().hash(state);
         inner.hash(state);
@@ -223,35 +240,45 @@ impl Eq for Receiver {}
 impl PartialEq for Receiver {
     fn eq(&self, other: &Receiver) -> bool {
         let Receiver {
+            pinned,
             ampersand: _,
             lifetime,
             mutability,
             var: _,
             ty,
             shorthand: _,
+            pin_tokens: _,
         } = self;
         let Receiver {
+            pinned: pinned2,
             ampersand: _,
             lifetime: lifetime2,
             mutability: mutability2,
             var: _,
             ty: ty2,
             shorthand: _,
+            pin_tokens: _,
         } = other;
-        lifetime == lifetime2 && mutability.is_some() == mutability2.is_some() && ty == ty2
+        pinned == pinned2
+            && lifetime == lifetime2
+            && mutability.is_some() == mutability2.is_some()
+            && ty == ty2
     }
 }
 
 impl Hash for Receiver {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let Receiver {
+            pinned,
             ampersand: _,
             lifetime,
             mutability,
             var: _,
             ty,
             shorthand: _,
+            pin_tokens: _,
         } = self;
+        pinned.hash(state);
         lifetime.hash(state);
         mutability.is_some().hash(state);
         ty.hash(state);

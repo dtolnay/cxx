@@ -134,12 +134,14 @@ pub struct Var {
 }
 
 pub struct Receiver {
+    pub pinned: bool,
     pub ampersand: Token![&],
     pub lifetime: Option<Lifetime>,
     pub mutability: Option<Token![mut]>,
     pub var: Token![self],
     pub ty: ResolvableName,
     pub shorthand: bool,
+    pub pin_tokens: Option<(kw::Pin, Token![<], Token![>])>,
 }
 
 pub struct Variant {
@@ -163,17 +165,21 @@ pub enum Type {
 }
 
 pub struct Ty1 {
+    pub pinned: bool,
     pub name: Ident,
     pub langle: Token![<],
     pub inner: Type,
     pub rangle: Token![>],
+    pub pin_tokens: Option<(kw::Pin, Token![<], Token![>])>,
 }
 
 pub struct Ref {
+    pub pinned: bool,
     pub ampersand: Token![&],
     pub lifetime: Option<Lifetime>,
     pub mutability: Option<Token![mut]>,
     pub inner: Type,
+    pub pin_tokens: Option<(kw::Pin, Token![<], Token![>])>,
 }
 
 pub struct Slice {
