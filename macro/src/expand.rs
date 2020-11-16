@@ -489,10 +489,14 @@ fn expand_rust_type_assert_sized(ety: &ExternType) -> TokenStream {
     let sized = quote_spanned! {ety.semi_token.span=>
         #begin_span std::marker::Sized
     };
+    let unpin = quote_spanned! {ety.semi_token.span=>
+        #begin_span std::marker::Unpin
+    };
     quote_spanned! {ident.span()=>
         let _ = {
             fn __AssertSized<T: ?#sized + #sized>() {}
-            __AssertSized::<#ident>
+            fn __AssertUnpin<T: #unpin>() {}
+            (__AssertSized::<#ident>, __AssertUnpin::<#ident>)
         };
     }
 }
