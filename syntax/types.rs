@@ -94,6 +94,7 @@ impl<'a> Types<'a> {
                     add_resolution(&strct.name);
                 }
                 Api::Enum(enm) => {
+                    all.insert(&enm.repr_type);
                     let ident = &enm.name.rust;
                     if !type_names.insert(ident)
                         && (!cxx.contains(ident)

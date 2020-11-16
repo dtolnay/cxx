@@ -7,7 +7,7 @@ use crate::syntax::{
     Namespace, Pair, Receiver, Ref, ResolvableName, Signature, Slice, Struct, Ty1, Type, TypeAlias,
     Var, Variant,
 };
-use proc_macro2::{Delimiter, Group, TokenStream, TokenTree};
+use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
 use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
@@ -180,6 +180,9 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
         }
     }
 
+    let ident = Ident::new(repr.as_ref(), Span::call_site());
+    let repr_type = Type::Ident(ResolvableName::new(ident));
+
     Ok(Api::Enum(Enum {
         doc,
         enum_token,
@@ -187,6 +190,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
         brace_token,
         variants,
         repr,
+        repr_type,
     }))
 }
 
