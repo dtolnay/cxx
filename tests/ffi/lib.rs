@@ -137,10 +137,10 @@ pub mod ffi {
         fn c_return_unique_ptr_vector_shared() -> UniquePtr<CxxVector<Shared>>;
         fn c_return_unique_ptr_vector_opaque() -> UniquePtr<CxxVector<C>>;
         fn c_return_ref_vector(c: &C) -> &CxxVector<u8>;
-        fn c_return_mut_vector(c: &mut C) -> &mut CxxVector<u8>;
+        fn c_return_mut_vector(c: Pin<&mut C>) -> Pin<&mut CxxVector<u8>>;
         fn c_return_rust_vec() -> Vec<u8>;
         fn c_return_ref_rust_vec(c: &C) -> &Vec<u8>;
-        fn c_return_mut_rust_vec(c: &mut C) -> &mut Vec<u8>;
+        fn c_return_mut_rust_vec(c: Pin<&mut C>) -> &mut Vec<u8>;
         fn c_return_rust_vec_string() -> Vec<String>;
         fn c_return_identity(_: usize) -> usize;
         fn c_return_sum(_: usize, _: usize) -> usize;
@@ -199,11 +199,10 @@ pub mod ffi {
         fn c_try_return_ref_rust_vec(c: &C) -> Result<&Vec<u8>>;
 
         fn get(self: &C) -> usize;
-        fn set(self: &mut C, n: usize) -> usize;
+        fn set(self: Pin<&mut C>, n: usize) -> usize;
         fn get2(&self) -> usize;
-        fn set2(&mut self, n: usize) -> usize;
-        fn set_succeed(&mut self, n: usize) -> Result<usize>;
-        fn get_fail(&mut self) -> Result<usize>;
+        fn set_succeed(self: Pin<&mut C>, n: usize) -> Result<usize>;
+        fn get_fail(self: Pin<&mut C>) -> Result<usize>;
         fn c_method_on_shared(self: &Shared) -> usize;
 
         #[rust_name = "i32_overloaded_method"]

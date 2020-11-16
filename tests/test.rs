@@ -190,8 +190,7 @@ fn test_c_method_calls() {
     assert_eq!(2020, old_value);
     assert_eq!(2021, unique_ptr.set(2021));
     assert_eq!(2021, unique_ptr.get());
-    assert_eq!(old_value, unique_ptr.set2(old_value));
-    assert_eq!(old_value, unique_ptr.get2());
+    assert_eq!(2021, unique_ptr.get2());
     assert_eq!(2022, unique_ptr.set_succeed(2022).unwrap());
     assert!(unique_ptr.get_fail().is_err());
     assert_eq!(2021, ffi::Shared { z: 0 }.c_method_on_shared());
