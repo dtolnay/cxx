@@ -7,6 +7,7 @@ use core::fmt::{self, Debug, Display};
 use core::marker::PhantomData;
 use core::mem;
 use core::ops::{Deref, DerefMut};
+use core::pin::Pin;
 use core::ptr;
 
 /// Binding to C++ `std::unique_ptr<T, std::default_delete<T>>`.
@@ -86,6 +87,16 @@ where
             repr: T::__raw(raw),
             ty: PhantomData,
         }
+    }
+
+    #[doc(hidden)]
+    pub unsafe fn __pin_into_raw(ptr: Pin<UniquePtr<T>>) -> *mut T {
+        Self::into_raw(Pin::into_inner_unchecked(ptr))
+    }
+
+    #[doc(hidden)]
+    pub unsafe fn __pin_from_raw(raw: *mut T) -> Pin<Self> {
+        Pin::new_unchecked(Self::from_raw(raw))
     }
 }
 
