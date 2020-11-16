@@ -2,6 +2,7 @@ use alloc::borrow::Cow;
 use alloc::string::String;
 use core::fmt::{self, Debug, Display};
 use core::marker::{PhantomData, PhantomPinned};
+use core::pin::Pin;
 use core::slice;
 use core::str::{self, Utf8Error};
 
@@ -88,13 +89,16 @@ impl CxxString {
     }
 
     /// Appends a given string slice onto the end of this C++ string.
-    pub fn push_str(&mut self, s: &str) {
+    pub fn push_str(self: Pin<&mut Self>, s: &str) {
         self.push_bytes(s.as_bytes());
     }
 
     /// Appends arbitrary bytes onto the end of this C++ string.
-    pub fn push_bytes(&mut self, bytes: &[u8]) {
-        unsafe { string_push(self, bytes.as_ptr(), bytes.len()) }
+    pub fn push_bytes(self: Pin<&mut Self>, bytes: &[u8]) {
+        unsafe {
+            let this = Pin::into_inner_unchecked(self);
+            string_push(this, bytes.as_ptr(), bytes.len())
+        }
     }
 }
 
