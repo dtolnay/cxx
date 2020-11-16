@@ -269,6 +269,17 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
             && !cx.types.rust.contains(&receiver.ty.rust)
         {
             cx.error(span, "unrecognized receiver type");
+        } else if receiver.mutability.is_some()
+            && !receiver.pinned
+            && is_opaque_cxx(cx, &receiver.ty.rust)
+        {
+            cx.error(
+                span,
+                format!(
+                    "mutable reference to C++ type requires a pin -- use `self: Pin<&mut {}>`",
+                    receiver.ty.rust,
+                ),
+            );
         }
 
         if receiver.lifetime.is_some() {
