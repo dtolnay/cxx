@@ -32,14 +32,14 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
 
     for api in apis {
         if let Api::RustType(ety) = api {
-            expanded.extend(expand_rust_type(ety));
+            expanded.extend(expand_rust_type_import(ety));
             hidden.extend(expand_rust_type_assert_sized(ety));
         }
     }
 
     for api in apis {
         match api {
-            Api::Include(_) | Api::RustType(_) | Api::Impl(_) => {}
+            Api::Include(_) | Api::Impl(_) => {}
             Api::Struct(strct) => expanded.extend(expand_struct(strct)),
             Api::Enum(enm) => expanded.extend(expand_enum(enm)),
             Api::CxxType(ety) => {
@@ -52,6 +52,7 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
             Api::CxxFunction(efn) => {
                 expanded.extend(expand_cxx_function_shim(efn, types));
             }
+            Api::RustType(ety) => expanded.extend(expand_rust_type_impl(ety)),
             Api::RustFunction(efn) => hidden.extend(expand_rust_function_shim(efn, types)),
             Api::TypeAlias(alias) => {
                 expanded.extend(expand_type_alias(alias));
@@ -490,10 +491,22 @@ fn expand_function_pointer_trampoline(
     }
 }
 
-fn expand_rust_type(ety: &ExternType) -> TokenStream {
+fn expand_rust_type_import(ety: &ExternType) -> TokenStream {
     let ident = &ety.name.rust;
-    quote! {
+    let span = ident.span();
+
+    quote_spanned! {span=>
         use super::#ident;
+    }
+}
+
+fn expand_rust_type_impl(ety: &ExternType) -> TokenStream {
+    let ident = &ety.name.rust;
+    let span = ident.span();
+    let unsafe_impl = quote_spanned!(ety.type_token.span=> unsafe impl);
+
+    quote_spanned! {span=>
+        #unsafe_impl ::cxx::private::RustType for #ident {}
     }
 }
 

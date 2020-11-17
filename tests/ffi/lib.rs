@@ -230,7 +230,6 @@ pub mod ffi {
 
     extern "Rust" {
         type R;
-        type R2;
 
         fn r_return_primitive() -> usize;
         fn r_return_shared() -> Shared;
@@ -272,9 +271,8 @@ pub mod ffi {
         fn r_try_return_box() -> Result<Box<R>>;
         fn r_fail_return_primitive() -> Result<usize>;
 
-        fn r_return_r2(n: usize) -> Box<R2>;
-        fn get(self: &R2) -> usize;
-        fn set(self: &mut R2, n: usize) -> usize;
+        fn get(self: &R) -> usize;
+        fn set(self: &mut R, n: usize) -> usize;
         fn r_method_on_shared(self: &Shared) -> String;
 
         #[cxx_name = "rAliasedFunction"]
@@ -303,11 +301,10 @@ pub mod ffi {
     }
 }
 
-pub type R = usize;
+#[derive(PartialEq, Debug)]
+pub struct R(pub usize);
 
-pub struct R2(usize);
-
-impl R2 {
+impl R {
     fn get(&self) -> usize {
         self.0
     }
@@ -344,7 +341,7 @@ fn r_return_shared() -> ffi::Shared {
 }
 
 fn r_return_box() -> Box<R> {
-    Box::new(2020)
+    Box::new(R(2020))
 }
 
 fn r_return_unique_ptr() -> UniquePtr<ffi::C> {
@@ -494,15 +491,11 @@ fn r_try_return_primitive() -> Result<usize, Error> {
 }
 
 fn r_try_return_box() -> Result<Box<R>, Error> {
-    Ok(Box::new(2020))
+    Ok(Box::new(R(2020)))
 }
 
 fn r_fail_return_primitive() -> Result<usize, Error> {
     Err(Error)
-}
-
-fn r_return_r2(n: usize) -> Box<R2> {
-    Box::new(R2(n))
 }
 
 fn r_aliased_function(x: i32) -> String {

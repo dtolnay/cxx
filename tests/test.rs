@@ -1,7 +1,7 @@
 #![allow(clippy::assertions_on_constants, clippy::float_cmp, clippy::unit_cmp)]
 
 use cxx_test_suite::extra::ffi2;
-use cxx_test_suite::ffi;
+use cxx_test_suite::{ffi, R};
 use std::cell::Cell;
 use std::ffi::CStr;
 
@@ -30,7 +30,7 @@ fn test_c_return() {
 
     assert_eq!(2020, ffi::c_return_primitive());
     assert_eq!(2020, ffi::c_return_shared().z);
-    assert_eq!(2020, *ffi::c_return_box());
+    assert_eq!(2020, ffi::c_return_box().0);
     ffi::c_return_unique_ptr();
     ffi2::c_return_ns_unique_ptr();
     assert_eq!(2020, *ffi::c_return_ref(&shared));
@@ -89,7 +89,7 @@ fn test_c_try_return() {
         "logic error",
         ffi::c_fail_return_primitive().unwrap_err().what(),
     );
-    assert_eq!(2020, *ffi::c_try_return_box().unwrap());
+    assert_eq!(2020, ffi::c_try_return_box().unwrap().0);
     assert_eq!("2020", *ffi::c_try_return_ref(&"2020".to_owned()).unwrap());
     assert_eq!("2020", ffi::c_try_return_str("2020").unwrap());
     assert_eq!(b"2020", ffi::c_try_return_sliceu8(b"2020").unwrap());
@@ -107,7 +107,7 @@ fn test_c_take() {
     check!(ffi::c_take_ns_shared(ffi::AShared { z: 2020 }));
     check!(ffi::ns_c_take_ns_shared(ffi::AShared { z: 2020 }));
     check!(ffi::c_take_nested_ns_shared(ffi::ABShared { z: 2020 }));
-    check!(ffi::c_take_box(Box::new(2020)));
+    check!(ffi::c_take_box(Box::new(R(2020))));
     check!(ffi::c_take_ref_c(&unique_ptr));
     check!(ffi2::c_take_ref_ns_c(&unique_ptr_ns));
     check!(cxx_test_suite::module::ffi::c_take_unique_ptr(unique_ptr));
@@ -215,13 +215,13 @@ fn test_enum_representations() {
 }
 
 #[no_mangle]
-extern "C" fn cxx_test_suite_get_box() -> *mut cxx_test_suite::R {
-    Box::into_raw(Box::new(2020usize))
+extern "C" fn cxx_test_suite_get_box() -> *mut R {
+    Box::into_raw(Box::new(R(2020usize)))
 }
 
 #[no_mangle]
-unsafe extern "C" fn cxx_test_suite_r_is_correct(r: *const cxx_test_suite::R) -> bool {
-    *r == 2020
+unsafe extern "C" fn cxx_test_suite_r_is_correct(r: *const R) -> bool {
+    (*r).0 == 2020
 }
 
 #[test]

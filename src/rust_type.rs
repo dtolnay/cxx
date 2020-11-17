@@ -1,0 +1,1 @@
+pub unsafe trait RustType {}
