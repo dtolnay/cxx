@@ -8,8 +8,11 @@ edition = "2018"
 
 [build]
 build-dir = "build"
+create-missing = false
 
 [output.html]
 additional-css = ["css/cxx.css"]
 cname = "cxx.rs"
 git-repository-url = "https://github.com/dtolnay/cxx"
+playground = { copyable = false }
+print = { enable = false }

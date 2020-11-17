@@ -94,9 +94,9 @@
     <text x="426" y="188" >C++ bindings</text>
     <text x="266" y="28" >#[cxx::bridge]</text>
     <text x="394" y="28" >mod</text>
-    <text x="234" y="44" >definitions</text>
-    <text x="330" y="44" >and</text>
-    <text x="362" y="44" >declarations</text>
+    <text x="250" y="44" >description</text>
+    <text x="346" y="44" >of</text>
+    <text x="370" y="44" >boundary</text>
     <line x1="220" y1="120" x2="220" y2="160" class="solid end_marked_arrow"></line>
     <line x1="476" y1="120" x2="476" y2="160" class="solid end_marked_arrow"></line>
     <text x="74" y="140" >Safe</text>

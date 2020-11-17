@@ -1,6 +1,6 @@
                             .-----------------------------.
                            |     #[cxx::bridge]  mod       |
-                           | definitions and declarations  |
+                           |   description of boundary     |
                             '--------------+--------------'
                                            |
                                            |
