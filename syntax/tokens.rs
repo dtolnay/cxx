@@ -40,10 +40,6 @@ impl ToTokens for Ty1 {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let span = self.name.span();
         let name = self.name.to_string();
-        if let Some((pin, langle, _rangle)) = self.pin_tokens {
-            tokens.extend(quote_spanned!(pin.span=> ::std::pin::Pin));
-            langle.to_tokens(tokens);
-        }
         if let "UniquePtr" | "CxxVector" = name.as_str() {
             tokens.extend(quote_spanned!(span=> ::cxx::));
         } else if name == "Vec" {
@@ -53,9 +49,6 @@ impl ToTokens for Ty1 {
         self.langle.to_tokens(tokens);
         self.inner.to_tokens(tokens);
         self.rangle.to_tokens(tokens);
-        if let Some((_pin, _langle, rangle)) = self.pin_tokens {
-            rangle.to_tokens(tokens);
-        }
     }
 }
 

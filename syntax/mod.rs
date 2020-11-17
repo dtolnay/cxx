@@ -168,12 +168,10 @@ pub enum Type {
 }
 
 pub struct Ty1 {
-    pub pinned: bool,
     pub name: Ident,
     pub langle: Token![<],
     pub inner: Type,
     pub rangle: Token![>],
-    pub pin_tokens: Option<(kw::Pin, Token![<], Token![>])>,
 }
 
 pub struct Ref {

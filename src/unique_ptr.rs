@@ -91,16 +91,6 @@ where
             ty: PhantomData,
         }
     }
-
-    #[doc(hidden)]
-    pub unsafe fn __pin_into_raw(ptr: Pin<UniquePtr<T>>) -> *mut T {
-        Self::into_raw(Pin::into_inner_unchecked(ptr))
-    }
-
-    #[doc(hidden)]
-    pub unsafe fn __pin_from_raw(raw: *mut T) -> Pin<Self> {
-        Pin::new_unchecked(Self::from_raw(raw))
-    }
 }
 
 unsafe impl<T> Send for UniquePtr<T> where T: Send + UniquePtrTarget {}

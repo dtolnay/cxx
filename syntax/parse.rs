@@ -666,48 +666,40 @@ fn parse_type_path(ty: &TypePath, namespace: &Namespace) -> Result<Type> {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
                         let inner = parse_type(arg, namespace)?;
                         return Ok(Type::UniquePtr(Box::new(Ty1 {
-                            pinned: false,
                             name: ident,
                             langle: generic.lt_token,
                             inner,
                             rangle: generic.gt_token,
-                            pin_tokens: None,
                         })));
                     }
                 } else if ident == "CxxVector" && generic.args.len() == 1 {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
                         let inner = parse_type(arg, namespace)?;
                         return Ok(Type::CxxVector(Box::new(Ty1 {
-                            pinned: false,
                             name: ident,
                             langle: generic.lt_token,
                             inner,
                             rangle: generic.gt_token,
-                            pin_tokens: None,
                         })));
                     }
                 } else if ident == "Box" && generic.args.len() == 1 {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
                         let inner = parse_type(arg, namespace)?;
                         return Ok(Type::RustBox(Box::new(Ty1 {
-                            pinned: false,
                             name: ident,
                             langle: generic.lt_token,
                             inner,
                             rangle: generic.gt_token,
-                            pin_tokens: None,
                         })));
                     }
                 } else if ident == "Vec" && generic.args.len() == 1 {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
                         let inner = parse_type(arg, namespace)?;
                         return Ok(Type::RustVec(Box::new(Ty1 {
-                            pinned: false,
                             name: ident,
                             langle: generic.lt_token,
                             inner,
                             rangle: generic.gt_token,
-                            pin_tokens: None,
                         })));
                     }
                 } else if ident == "Pin" && generic.args.len() == 1 {
@@ -719,11 +711,6 @@ fn parse_type_path(ty: &TypePath, namespace: &Namespace) -> Result<Type> {
                             inner.pin_tokens =
                                 Some((pin_token, generic.lt_token, generic.gt_token));
                             return Ok(Type::Ref(inner));
-                        } else if let Type::UniquePtr(mut inner) = inner {
-                            inner.pinned = true;
-                            inner.pin_tokens =
-                                Some((pin_token, generic.lt_token, generic.gt_token));
-                            return Ok(Type::UniquePtr(inner));
                         }
                     }
                 }
