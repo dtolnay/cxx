@@ -1,7 +1,7 @@
 [book]
-title = "CXX"
+#title = "Rust ♡ C++"
 authors = ["David Tolnay"]
-description = "Guide for the `cxx` crate, a safe approach to FFI between Rust and C++."
+description = "CXX — safe interop between Rust and C++"
 
 [rust]
 edition = "2018"

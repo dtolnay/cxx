@@ -14,6 +14,15 @@ https://github.com/dtolnay/cxx\
 </a>\
 </li>`;
 
+const opengraph = `\
+<meta property="og:image" content="https://cxx.rs/cxx.png" />\
+<meta property="og:site_name" content="CXX" />\
+<meta property="og:title" content="CXX — safe interop between Rust and C++" />\
+<meta name="twitter:image:src" content="https://cxx.rs/cxx.png" />\
+<meta name="twitter:site" content="@davidtolnay" />\
+<meta name="twitter:card" content="summary" />\
+<meta name="twitter:title" content="CXX — safe interop between Rust and C++" />`;
+
 const htmljs = `\
 var html = document.querySelector('html');
 html.classList.remove('no-js');
@@ -37,6 +46,7 @@ while (dirs.length) {
     const index = fs.readFileSync(path, 'utf8');
     const $ = cheerio.load(index, { decodeEntities: false });
 
+    $('head').append(opengraph);
     $('script:nth-of-type(3)').text(htmljs);
     $('nav#sidebar ol.chapter').append(githublink);
     $('head link[href="tomorrow-night.css"]').attr('disabled', true);
