@@ -16,3 +16,7 @@ cname = "cxx.rs"
 git-repository-url = "https://github.com/dtolnay/cxx"
 playground = { copyable = false }
 print = { enable = false }
+
+[output.html.redirect]
+"binding/index.html" = "../bindings.html"
+"build/index.html" = "../building.html"
