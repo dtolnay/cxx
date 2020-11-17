@@ -357,7 +357,7 @@ fn make_include_dir(prj: &Project) -> Result<PathBuf> {
     let include_dir = prj.out_dir.join("cxxbridge").join("include");
     let cxx_h = include_dir.join("rust").join("cxx.h");
     let ref shared_cxx_h = prj.shared_dir.join("rust").join("cxx.h");
-    if let Some(ref original) = env::var_os("DEP_CXXBRIDGE05_HEADER") {
+    if let Some(ref original) = env::var_os("DEP_CXXBRIDGE1_HEADER") {
         out::symlink_file(original, cxx_h)?;
         out::symlink_file(original, shared_cxx_h)?;
     } else {

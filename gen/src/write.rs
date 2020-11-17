@@ -179,7 +179,7 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
 
 fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&ExternFn]) {
     out.set_namespace(&strct.name.namespace);
-    let guard = format!("CXXBRIDGE05_STRUCT_{}", strct.name.to_symbol());
+    let guard = format!("CXXBRIDGE1_STRUCT_{}", strct.name.to_symbol());
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     for line in strct.doc.to_string().lines() {
@@ -225,7 +225,7 @@ fn write_struct_with_methods<'a>(
     methods: &[&ExternFn],
 ) {
     out.set_namespace(&ety.name.namespace);
-    let guard = format!("CXXBRIDGE05_STRUCT_{}", ety.name.to_symbol());
+    let guard = format!("CXXBRIDGE1_STRUCT_{}", ety.name.to_symbol());
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     for line in ety.doc.to_string().lines() {
@@ -251,7 +251,7 @@ fn write_struct_with_methods<'a>(
 
 fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
     out.set_namespace(&enm.name.namespace);
-    let guard = format!("CXXBRIDGE05_ENUM_{}", enm.name.to_symbol());
+    let guard = format!("CXXBRIDGE1_ENUM_{}", enm.name.to_symbol());
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     for line in enm.doc.to_string().lines() {
@@ -501,7 +501,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         writeln!(out, "        throw$.len = ::std::strlen(catch$);");
         writeln!(
             out,
-            "        throw$.ptr = ::cxxbridge05$exception(catch$, throw$.len);",
+            "        throw$.ptr = ::cxxbridge1$exception(catch$, throw$.len);",
         );
         writeln!(out, "      }});");
         writeln!(out, "  return throw$;");
@@ -1012,7 +1012,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
     out.end_block(Block::ExternC);
 
     out.begin_block(Block::Namespace("rust"));
-    out.begin_block(Block::InlineNamespace("cxxbridge05"));
+    out.begin_block(Block::InlineNamespace("cxxbridge1"));
     for ty in out.types {
         if let Type::RustBox(ty) = ty {
             if let Type::Ident(inner) = &ty.inner {
@@ -1026,7 +1026,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
             }
         }
     }
-    out.end_block(Block::InlineNamespace("cxxbridge05"));
+    out.end_block(Block::InlineNamespace("cxxbridge1"));
     out.end_block(Block::Namespace("rust"));
 }
 
@@ -1034,19 +1034,19 @@ fn write_rust_box_extern(out: &mut OutFile, ident: &Pair) {
     let inner = ident.to_fully_qualified();
     let instance = ident.to_symbol();
 
-    writeln!(out, "#ifndef CXXBRIDGE05_RUST_BOX_{}", instance);
-    writeln!(out, "#define CXXBRIDGE05_RUST_BOX_{}", instance);
+    writeln!(out, "#ifndef CXXBRIDGE1_RUST_BOX_{}", instance);
+    writeln!(out, "#define CXXBRIDGE1_RUST_BOX_{}", instance);
     writeln!(
         out,
-        "void cxxbridge05$box${}$uninit(::rust::Box<{}> *ptr) noexcept;",
+        "void cxxbridge1$box${}$uninit(::rust::Box<{}> *ptr) noexcept;",
         instance, inner,
     );
     writeln!(
         out,
-        "void cxxbridge05$box${}$drop(::rust::Box<{}> *ptr) noexcept;",
+        "void cxxbridge1$box${}$drop(::rust::Box<{}> *ptr) noexcept;",
         instance, inner,
     );
-    writeln!(out, "#endif // CXXBRIDGE05_RUST_BOX_{}", instance);
+    writeln!(out, "#endif // CXXBRIDGE1_RUST_BOX_{}", instance);
 }
 
 fn write_rust_vec_extern(out: &mut OutFile, element: &ResolvableName) {
@@ -1054,44 +1054,44 @@ fn write_rust_vec_extern(out: &mut OutFile, element: &ResolvableName) {
     let inner = to_typename(&element, out.types);
     let instance = to_mangled(&element, out.types);
 
-    writeln!(out, "#ifndef CXXBRIDGE05_RUST_VEC_{}", instance);
-    writeln!(out, "#define CXXBRIDGE05_RUST_VEC_{}", instance);
+    writeln!(out, "#ifndef CXXBRIDGE1_RUST_VEC_{}", instance);
+    writeln!(out, "#define CXXBRIDGE1_RUST_VEC_{}", instance);
     writeln!(
         out,
-        "void cxxbridge05$rust_vec${}$new(const ::rust::Vec<{}> *ptr) noexcept;",
+        "void cxxbridge1$rust_vec${}$new(const ::rust::Vec<{}> *ptr) noexcept;",
         instance, inner,
     );
     writeln!(
         out,
-        "void cxxbridge05$rust_vec${}$drop(::rust::Vec<{}> *ptr) noexcept;",
+        "void cxxbridge1$rust_vec${}$drop(::rust::Vec<{}> *ptr) noexcept;",
         instance, inner,
     );
     writeln!(
         out,
-        "size_t cxxbridge05$rust_vec${}$len(const ::rust::Vec<{}> *ptr) noexcept;",
+        "size_t cxxbridge1$rust_vec${}$len(const ::rust::Vec<{}> *ptr) noexcept;",
         instance, inner,
     );
     writeln!(
         out,
-        "const {} *cxxbridge05$rust_vec${}$data(const ::rust::Vec<{0}> *ptr) noexcept;",
+        "const {} *cxxbridge1$rust_vec${}$data(const ::rust::Vec<{0}> *ptr) noexcept;",
         inner, instance,
     );
     writeln!(
         out,
-        "void cxxbridge05$rust_vec${}$reserve_total(::rust::Vec<{}> *ptr, size_t cap) noexcept;",
+        "void cxxbridge1$rust_vec${}$reserve_total(::rust::Vec<{}> *ptr, size_t cap) noexcept;",
         instance, inner,
     );
     writeln!(
         out,
-        "void cxxbridge05$rust_vec${}$set_len(::rust::Vec<{}> *ptr, size_t len) noexcept;",
+        "void cxxbridge1$rust_vec${}$set_len(::rust::Vec<{}> *ptr, size_t len) noexcept;",
         instance, inner,
     );
     writeln!(
         out,
-        "size_t cxxbridge05$rust_vec${}$stride() noexcept;",
+        "size_t cxxbridge1$rust_vec${}$stride() noexcept;",
         instance,
     );
-    writeln!(out, "#endif // CXXBRIDGE05_RUST_VEC_{}", instance);
+    writeln!(out, "#endif // CXXBRIDGE1_RUST_VEC_{}", instance);
 }
 
 fn write_rust_box_impl(out: &mut OutFile, ident: &Pair) {
@@ -1100,12 +1100,12 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Pair) {
 
     writeln!(out, "template <>");
     writeln!(out, "void Box<{}>::uninit() noexcept {{", inner);
-    writeln!(out, "  cxxbridge05$box${}$uninit(this);", instance);
+    writeln!(out, "  cxxbridge1$box${}$uninit(this);", instance);
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
     writeln!(out, "void Box<{}>::drop() noexcept {{", inner);
-    writeln!(out, "  cxxbridge05$box${}$drop(this);", instance);
+    writeln!(out, "  cxxbridge1$box${}$drop(this);", instance);
     writeln!(out, "}}");
 }
 
@@ -1116,30 +1116,22 @@ fn write_rust_vec_impl(out: &mut OutFile, element: &ResolvableName) {
 
     writeln!(out, "template <>");
     writeln!(out, "Vec<{}>::Vec() noexcept {{", inner);
-    writeln!(out, "  cxxbridge05$rust_vec${}$new(this);", instance);
+    writeln!(out, "  cxxbridge1$rust_vec${}$new(this);", instance);
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
     writeln!(out, "void Vec<{}>::drop() noexcept {{", inner);
-    writeln!(
-        out,
-        "  return cxxbridge05$rust_vec${}$drop(this);",
-        instance,
-    );
+    writeln!(out, "  return cxxbridge1$rust_vec${}$drop(this);", instance);
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
     writeln!(out, "size_t Vec<{}>::size() const noexcept {{", inner);
-    writeln!(out, "  return cxxbridge05$rust_vec${}$len(this);", instance);
+    writeln!(out, "  return cxxbridge1$rust_vec${}$len(this);", instance);
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
     writeln!(out, "const {} *Vec<{0}>::data() const noexcept {{", inner);
-    writeln!(
-        out,
-        "  return cxxbridge05$rust_vec${}$data(this);",
-        instance,
-    );
+    writeln!(out, "  return cxxbridge1$rust_vec${}$data(this);", instance);
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
@@ -1150,7 +1142,7 @@ fn write_rust_vec_impl(out: &mut OutFile, element: &ResolvableName) {
     );
     writeln!(
         out,
-        "  return cxxbridge05$rust_vec${}$reserve_total(this, cap);",
+        "  return cxxbridge1$rust_vec${}$reserve_total(this, cap);",
         instance,
     );
     writeln!(out, "}}");
@@ -1159,14 +1151,14 @@ fn write_rust_vec_impl(out: &mut OutFile, element: &ResolvableName) {
     writeln!(out, "void Vec<{}>::set_len(size_t len) noexcept {{", inner);
     writeln!(
         out,
-        "  return cxxbridge05$rust_vec${}$set_len(this, len);",
+        "  return cxxbridge1$rust_vec${}$set_len(this, len);",
         instance,
     );
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
     writeln!(out, "size_t Vec<{}>::stride() noexcept {{", inner);
-    writeln!(out, "  return cxxbridge05$rust_vec${}$stride();", instance);
+    writeln!(out, "  return cxxbridge1$rust_vec${}$stride();", instance);
     writeln!(out, "}}");
 }
 
@@ -1174,12 +1166,12 @@ fn write_unique_ptr(out: &mut OutFile, ident: &ResolvableName) {
     let ty = Type::Ident(ident.clone());
     let instance = to_mangled(&ty, out.types);
 
-    writeln!(out, "#ifndef CXXBRIDGE05_UNIQUE_PTR_{}", instance);
-    writeln!(out, "#define CXXBRIDGE05_UNIQUE_PTR_{}", instance);
+    writeln!(out, "#ifndef CXXBRIDGE1_UNIQUE_PTR_{}", instance);
+    writeln!(out, "#define CXXBRIDGE1_UNIQUE_PTR_{}", instance);
 
     write_unique_ptr_common(out, &ty);
 
-    writeln!(out, "#endif // CXXBRIDGE05_UNIQUE_PTR_{}", instance);
+    writeln!(out, "#endif // CXXBRIDGE1_UNIQUE_PTR_{}", instance);
 }
 
 // Shared by UniquePtr<T> and UniquePtr<CxxVector<T>>.
@@ -1213,7 +1205,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: &Type) {
     );
     writeln!(
         out,
-        "void cxxbridge05$unique_ptr${}$null(::std::unique_ptr<{}> *ptr) noexcept {{",
+        "void cxxbridge1$unique_ptr${}$null(::std::unique_ptr<{}> *ptr) noexcept {{",
         instance, inner,
     );
     writeln!(out, "  new (ptr) ::std::unique_ptr<{}>();", inner);
@@ -1221,7 +1213,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: &Type) {
     if can_construct_from_value {
         writeln!(
             out,
-            "void cxxbridge05$unique_ptr${}$new(::std::unique_ptr<{}> *ptr, {} *value) noexcept {{",
+            "void cxxbridge1$unique_ptr${}$new(::std::unique_ptr<{}> *ptr, {} *value) noexcept {{",
             instance, inner, inner,
         );
         writeln!(
@@ -1233,28 +1225,28 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: &Type) {
     }
     writeln!(
         out,
-        "void cxxbridge05$unique_ptr${}$raw(::std::unique_ptr<{}> *ptr, {} *raw) noexcept {{",
+        "void cxxbridge1$unique_ptr${}$raw(::std::unique_ptr<{}> *ptr, {} *raw) noexcept {{",
         instance, inner, inner,
     );
     writeln!(out, "  new (ptr) ::std::unique_ptr<{}>(raw);", inner);
     writeln!(out, "}}");
     writeln!(
         out,
-        "const {} *cxxbridge05$unique_ptr${}$get(const ::std::unique_ptr<{}>& ptr) noexcept {{",
+        "const {} *cxxbridge1$unique_ptr${}$get(const ::std::unique_ptr<{}>& ptr) noexcept {{",
         inner, instance, inner,
     );
     writeln!(out, "  return ptr.get();");
     writeln!(out, "}}");
     writeln!(
         out,
-        "{} *cxxbridge05$unique_ptr${}$release(::std::unique_ptr<{}>& ptr) noexcept {{",
+        "{} *cxxbridge1$unique_ptr${}$release(::std::unique_ptr<{}>& ptr) noexcept {{",
         inner, instance, inner,
     );
     writeln!(out, "  return ptr.release();");
     writeln!(out, "}}");
     writeln!(
         out,
-        "void cxxbridge05$unique_ptr${}$drop(::std::unique_ptr<{}> *ptr) noexcept {{",
+        "void cxxbridge1$unique_ptr${}$drop(::std::unique_ptr<{}> *ptr) noexcept {{",
         instance, inner,
     );
     writeln!(out, "  ptr->~unique_ptr();");
@@ -1266,18 +1258,18 @@ fn write_cxx_vector(out: &mut OutFile, vector_ty: &Type, element: &ResolvableNam
     let inner = to_typename(&element, out.types);
     let instance = to_mangled(&element, out.types);
 
-    writeln!(out, "#ifndef CXXBRIDGE05_VECTOR_{}", instance);
-    writeln!(out, "#define CXXBRIDGE05_VECTOR_{}", instance);
+    writeln!(out, "#ifndef CXXBRIDGE1_VECTOR_{}", instance);
+    writeln!(out, "#define CXXBRIDGE1_VECTOR_{}", instance);
     writeln!(
         out,
-        "size_t cxxbridge05$std$vector${}$size(const ::std::vector<{}> &s) noexcept {{",
+        "size_t cxxbridge1$std$vector${}$size(const ::std::vector<{}> &s) noexcept {{",
         instance, inner,
     );
     writeln!(out, "  return s.size();");
     writeln!(out, "}}");
     writeln!(
         out,
-        "const {} *cxxbridge05$std$vector${}$get_unchecked(const ::std::vector<{}> &s, size_t pos) noexcept {{",
+        "const {} *cxxbridge1$std$vector${}$get_unchecked(const ::std::vector<{}> &s, size_t pos) noexcept {{",
         inner, instance, inner,
     );
     writeln!(out, "  return &s[pos];");
@@ -1285,5 +1277,5 @@ fn write_cxx_vector(out: &mut OutFile, vector_ty: &Type, element: &ResolvableNam
 
     write_unique_ptr_common(out, vector_ty);
 
-    writeln!(out, "#endif // CXXBRIDGE05_VECTOR_{}", instance);
+    writeln!(out, "#endif // CXXBRIDGE1_VECTOR_{}", instance);
 }

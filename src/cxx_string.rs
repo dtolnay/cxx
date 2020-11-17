@@ -9,15 +9,15 @@ use core::slice;
 use core::str::{self, Utf8Error};
 
 extern "C" {
-    #[link_name = "cxxbridge05$cxx_string$init"]
+    #[link_name = "cxxbridge1$cxx_string$init"]
     fn string_init(this: &mut MaybeUninit<CxxString>, ptr: *const u8, len: usize);
-    #[link_name = "cxxbridge05$cxx_string$destroy"]
+    #[link_name = "cxxbridge1$cxx_string$destroy"]
     fn string_destroy(this: &mut MaybeUninit<CxxString>);
-    #[link_name = "cxxbridge05$cxx_string$data"]
+    #[link_name = "cxxbridge1$cxx_string$data"]
     fn string_data(this: &CxxString) -> *const u8;
-    #[link_name = "cxxbridge05$cxx_string$length"]
+    #[link_name = "cxxbridge1$cxx_string$length"]
     fn string_length(this: &CxxString) -> usize;
-    #[link_name = "cxxbridge05$cxx_string$push"]
+    #[link_name = "cxxbridge1$cxx_string$push"]
     fn string_push(this: Pin<&mut CxxString>, ptr: *const u8, len: usize);
 }
 

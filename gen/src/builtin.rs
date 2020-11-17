@@ -92,10 +92,10 @@ pub(super) fn write(out: &mut OutFile) {
     }
 
     out.begin_block(Block::Namespace("rust"));
-    out.begin_block(Block::InlineNamespace("cxxbridge05"));
+    out.begin_block(Block::InlineNamespace("cxxbridge1"));
     writeln!(out, "// #include \"rust/cxx.h\"");
 
-    ifndef::write(out, builtin.panic, "CXXBRIDGE05_PANIC");
+    ifndef::write(out, builtin.panic, "CXXBRIDGE1_PANIC");
 
     if builtin.rust_string {
         out.next_section();
@@ -109,16 +109,16 @@ pub(super) fn write(out: &mut OutFile) {
         out.end_block(Block::AnonymousNamespace);
     }
 
-    ifndef::write(out, builtin.rust_string, "CXXBRIDGE05_RUST_STRING");
-    ifndef::write(out, builtin.rust_str, "CXXBRIDGE05_RUST_STR");
-    ifndef::write(out, builtin.rust_slice, "CXXBRIDGE05_RUST_SLICE");
-    ifndef::write(out, builtin.rust_box, "CXXBRIDGE05_RUST_BOX");
-    ifndef::write(out, builtin.unsafe_bitcopy, "CXXBRIDGE05_RUST_BITCOPY");
-    ifndef::write(out, builtin.rust_vec, "CXXBRIDGE05_RUST_VEC");
-    ifndef::write(out, builtin.rust_fn, "CXXBRIDGE05_RUST_FN");
-    ifndef::write(out, builtin.rust_error, "CXXBRIDGE05_RUST_ERROR");
-    ifndef::write(out, builtin.rust_isize, "CXXBRIDGE05_RUST_ISIZE");
-    ifndef::write(out, builtin.relocatable, "CXXBRIDGE05_RELOCATABLE");
+    ifndef::write(out, builtin.rust_string, "CXXBRIDGE1_RUST_STRING");
+    ifndef::write(out, builtin.rust_str, "CXXBRIDGE1_RUST_STR");
+    ifndef::write(out, builtin.rust_slice, "CXXBRIDGE1_RUST_SLICE");
+    ifndef::write(out, builtin.rust_box, "CXXBRIDGE1_RUST_BOX");
+    ifndef::write(out, builtin.unsafe_bitcopy, "CXXBRIDGE1_RUST_BITCOPY");
+    ifndef::write(out, builtin.rust_vec, "CXXBRIDGE1_RUST_VEC");
+    ifndef::write(out, builtin.rust_fn, "CXXBRIDGE1_RUST_FN");
+    ifndef::write(out, builtin.rust_error, "CXXBRIDGE1_RUST_ERROR");
+    ifndef::write(out, builtin.rust_isize, "CXXBRIDGE1_RUST_ISIZE");
+    ifndef::write(out, builtin.relocatable, "CXXBRIDGE1_RELOCATABLE");
 
     if builtin.manually_drop {
         out.next_section();
@@ -221,7 +221,7 @@ pub(super) fn write(out: &mut OutFile) {
     }
 
     out.end_block(Block::AnonymousNamespace);
-    out.end_block(Block::InlineNamespace("cxxbridge05"));
+    out.end_block(Block::InlineNamespace("cxxbridge1"));
 
     if builtin.trycatch {
         out.begin_block(Block::Namespace("behavior"));
@@ -252,7 +252,7 @@ pub(super) fn write(out: &mut OutFile) {
         out.begin_block(Block::ExternC);
         writeln!(
             out,
-            "const char *cxxbridge05$exception(const char *, size_t);",
+            "const char *cxxbridge1$exception(const char *, size_t);",
         );
         out.end_block(Block::ExternC);
     }

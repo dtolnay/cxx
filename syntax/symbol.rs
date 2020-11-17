@@ -5,7 +5,7 @@ use quote::ToTokens;
 use std::fmt::{self, Display, Write};
 
 // A mangled symbol consisting of segments separated by '$'.
-// For example: cxxbridge05$string$new
+// For example: cxxbridge1$string$new
 pub struct Symbol(String);
 
 impl Display for Symbol {
