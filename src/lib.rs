@@ -23,6 +23,13 @@
 //!
 //! <br>
 //!
+//! # Guide
+//!
+//! Please see **<https://cxx.rs>** for a tutorial, reference material, and
+//! example code.
+//!
+//! <br>
+//!
 //! # Overview
 //!
 //! The idea is that we define the signatures of both sides of our FFI boundary
