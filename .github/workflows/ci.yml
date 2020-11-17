@@ -94,3 +94,13 @@ jobs:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@clippy
       - run: cargo clippy --workspace --tests -- -Dclippy::all
+
+    clang-tidy:
+      name: Clang Tidy
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - name: Install clang-tidy
+          run: sudo apt install clang-tidy-10
+        - name: Run clang-tidy
+          run: clang-tidy-10 src/cxx.cc --header-filter='cxx\.h' -- -Iinclude -xc++ -std=c++11
