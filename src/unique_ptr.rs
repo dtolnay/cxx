@@ -6,7 +6,7 @@ use core::ffi::c_void;
 use core::fmt::{self, Debug, Display};
 use core::marker::PhantomData;
 use core::mem;
-use core::ops::{Deref, DerefMut};
+use core::ops::Deref;
 use core::pin::Pin;
 use core::ptr;
 
@@ -59,10 +59,13 @@ where
         unsafe { T::__get(self.repr).as_ref() }
     }
 
-    /// Returns a mutable reference to the object owned by this UniquePtr if
-    /// any, otherwise None.
-    pub fn as_mut(&mut self) -> Option<&mut T> {
-        unsafe { (T::__get(self.repr) as *mut T).as_mut() }
+    /// Returns a mutable pinned reference to the object owned by this UniquePtr
+    /// if any, otherwise None.
+    pub fn as_mut(&mut self) -> Option<Pin<&mut T>> {
+        unsafe {
+            let mut_reference = (T::__get(self.repr) as *mut T).as_mut()?;
+            Some(Pin::new_unchecked(mut_reference))
+        }
     }
 
     /// Consumes the UniquePtr, releasing its ownership of the heap-allocated T.
@@ -122,18 +125,6 @@ where
         match self.as_ref() {
             Some(target) => target,
             None => panic!("called deref on a null UniquePtr<{}>", T::__NAME),
-        }
-    }
-}
-
-impl<T> DerefMut for UniquePtr<T>
-where
-    T: UniquePtrTarget,
-{
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        match self.as_mut() {
-            Some(target) => target,
-            None => panic!("called deref_mut on a null UniquePtr<{}>", T::__NAME),
         }
     }
 }
