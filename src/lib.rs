@@ -242,7 +242,7 @@
 //! # Cargo.toml
 //!
 //! [build-dependencies]
-//! cxx-build = "0.5"
+//! cxx-build = "1.0"
 //! ```
 //!
 //! ```no_run
@@ -361,7 +361,7 @@
 //! </table>
 
 #![no_std]
-#![doc(html_root_url = "https://docs.rs/cxx/0.5.10")]
+#![doc(html_root_url = "https://docs.rs/cxx/1.0.0")]
 #![deny(improper_ctypes)]
 #![allow(non_camel_case_types)]
 #![allow(
