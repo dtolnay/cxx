@@ -89,9 +89,6 @@ private:
 #ifndef CXXBRIDGE1_RUST_SLICE
 template <typename T>
 class Slice final {
-  static_assert(std::is_const<T>::value,
-                "&[T] needs to be written as rust::Slice<const T> in C++");
-
 public:
   Slice() noexcept;
   Slice(T *, size_t count) noexcept;

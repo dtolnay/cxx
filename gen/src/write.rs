@@ -436,9 +436,13 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
             out.builtin.rust_str_repr = true;
             write!(out, "::rust::impl<::rust::Str>::repr(");
         }
-        Some(Type::SliceRefU8(_)) if !indirect_return => {
+        Some(Type::SliceRefU8(ty)) if !indirect_return && ty.mutability.is_none() => {
             out.builtin.rust_slice_repr = true;
             write!(out, "::rust::impl<::rust::Slice<const uint8_t>>::repr(")
+        }
+        Some(Type::SliceRefU8(_)) if !indirect_return => {
+            out.builtin.rust_slice_repr = true;
+            write!(out, "::rust::impl<::rust::Slice<uint8_t>>::repr(")
         }
         _ => {}
     }
@@ -474,12 +478,19 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
             out.builtin.unsafe_bitcopy = true;
             write_type(out, &arg.ty);
             write!(out, "(::rust::unsafe_bitcopy, *{})", arg.ident);
-        } else if let Type::SliceRefU8(_) = arg.ty {
-            write!(
-                out,
-                "::rust::Slice<const uint8_t>(static_cast<const uint8_t *>({0}.ptr), {0}.len)",
-                arg.ident,
-            );
+        } else if let Type::SliceRefU8(ref ty) = arg.ty {
+            match ty.mutability {
+                None => write!(
+                    out,
+                    "::rust::Slice<const uint8_t>(static_cast<const uint8_t *>({0}.ptr), {0}.len)",
+                    arg.ident,
+                ),
+                Some(_) => write!(
+                    out,
+                    "::rust::Slice<uint8_t>(static_cast<uint8_t *>({0}.ptr), {0}.len)",
+                    arg.ident,
+                )
+            }
         } else if out.types.needs_indirect_abi(&arg.ty) {
             out.include.utility = true;
             write!(out, "::std::move(*{})", arg.ident);
@@ -718,9 +729,13 @@ fn write_rust_function_shim_impl(
                 out.builtin.rust_str_repr = true;
                 write!(out, "::rust::impl<::rust::Str>::repr(");
             }
-            Type::SliceRefU8(_) => {
+            Type::SliceRefU8(ty) => {
                 out.builtin.rust_slice_repr = true;
-                write!(out, "::rust::impl<::rust::Slice<const uint8_t>>::repr(");
+                if ty.mutability.is_none() {
+                    write!(out, "::rust::impl<::rust::Slice<const uint8_t>>::repr(");
+                } else {
+                    write!(out, "::rust::impl<::rust::Slice<uint8_t>>::repr(");
+                }
             }
             ty if out.types.needs_indirect_abi(ty) => write!(out, "&"),
             _ => {}
@@ -890,8 +905,11 @@ fn write_type(out: &mut OutFile, ty: &Type) {
         Type::Str(_) => {
             write!(out, "::rust::Str");
         }
-        Type::SliceRefU8(_) => {
+        Type::SliceRefU8(ty) if ty.mutability.is_none() => {
             write!(out, "::rust::Slice<const uint8_t>");
+        }
+        Type::SliceRefU8(_) => {
+            write!(out, "::rust::Slice<uint8_t>");
         }
         Type::Fn(f) => {
             write!(out, "::rust::{}<", if f.throws { "TryFn" } else { "Fn" });

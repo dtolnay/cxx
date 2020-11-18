@@ -178,7 +178,7 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
 }
 
 fn check_type_slice(cx: &mut Check, ty: &Slice) {
-    cx.error(ty, "only &[u8] is supported so far, not other slice types");
+    cx.error(ty, "only &[u8] and &mut [u8] are supported so far, not other slice types");
 }
 
 fn check_type_fn(cx: &mut Check, ty: &Signature) {
@@ -489,7 +489,8 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         Type::Str(_) => "&str".to_owned(),
         Type::CxxVector(_) => "C++ vector".to_owned(),
         Type::Slice(_) => "slice".to_owned(),
-        Type::SliceRefU8(_) => "&[u8]".to_owned(),
+        Type::SliceRefU8(ty) if ty.mutability.is_none() => "&[u8]".to_owned(),
+        Type::SliceRefU8(_) => "&mut [u8]".to_owned(),
         Type::Fn(_) => "function pointer".to_owned(),
         Type::Void(_) => "()".to_owned(),
     }
