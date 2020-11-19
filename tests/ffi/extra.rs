@@ -5,9 +5,6 @@
 // for testing aliasing between cxx::bridge mods, so we'll keep it that way and
 // start a new mod here.
 
-// Rustfmt mangles the extern type alias.
-// https://github.com/rust-lang/rustfmt/issues/4159
-#[rustfmt::skip]
 #[cxx::bridge(namespace = "tests")]
 pub mod ffi2 {
     impl UniquePtr<D> {}
@@ -43,7 +40,7 @@ pub mod ffi2 {
         fn c_return_trivial_ns_ptr() -> UniquePtr<G>;
         fn c_return_trivial_ns() -> G;
         fn c_return_opaque_ptr() -> UniquePtr<E>;
-        fn c_return_ns_opaque_ptr() -> UniquePtr<F>;  
+        fn c_return_ns_opaque_ptr() -> UniquePtr<F>;
         fn c_return_ns_unique_ptr() -> UniquePtr<H>;
         fn c_take_ref_ns_c(h: &H);
 
