@@ -170,7 +170,10 @@ impl<'a> Types<'a> {
         let mut required_trivial = Map::new();
         let mut insist_alias_types_are_trivial = |ty: &'a Type, reason| {
             if let Type::Ident(ident) = ty {
-                if cxx.contains(&ident.rust) {
+                if cxx.contains(&ident.rust)
+                    && !structs.contains_key(&ident.rust)
+                    && !enums.contains_key(&ident.rust)
+                {
                     required_trivial.entry(&ident.rust).or_insert(reason);
                 }
             }
