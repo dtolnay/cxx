@@ -373,6 +373,12 @@ fn parse_extern_fn(
             "variadic function is not supported yet",
         ));
     }
+    if foreign_fn.sig.asyncness.is_some() {
+        return Err(Error::new_spanned(
+            foreign_fn,
+            "async function is not directly supported yet, but see https://cxx.rs/async.html for a working approach",
+        ));
+    }
 
     let mut doc = Doc::new();
     let mut cxx_name = None;
