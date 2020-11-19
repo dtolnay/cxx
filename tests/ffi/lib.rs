@@ -5,7 +5,6 @@
     clippy::trivially_copy_pass_by_ref
 )]
 
-pub mod extra;
 pub mod module;
 
 use cxx::{CxxString, CxxVector, UniquePtr};

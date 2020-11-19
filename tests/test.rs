@@ -1,6 +1,6 @@
 #![allow(clippy::assertions_on_constants, clippy::float_cmp, clippy::unit_cmp)]
 
-use cxx_test_suite::extra::ffi2;
+use cxx_test_suite::module::ffi2;
 use cxx_test_suite::{ffi, R};
 use std::cell::Cell;
 use std::ffi::CStr;
