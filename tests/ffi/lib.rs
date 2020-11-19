@@ -113,6 +113,7 @@ pub mod ffi {
     #[namespace = "second"]
     struct Second {
         i: i32,
+        e: COwnedEnum,
     }
 
     unsafe extern "C++" {
