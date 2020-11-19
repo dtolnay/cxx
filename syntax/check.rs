@@ -395,6 +395,7 @@ fn check_reserved_name(cx: &mut Check, ident: &Ident) {
         || ident == "UniquePtr"
         || ident == "Vec"
         || ident == "CxxVector"
+        || ident == "str"
         || Atom::from(ident).is_some()
     {
         cx.error(ident, "reserved name");
