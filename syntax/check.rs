@@ -402,12 +402,20 @@ fn check_reserved_name(cx: &mut Check, ident: &Ident) {
 }
 
 fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
-    let ident = match ty {
-        Type::Ident(ident) => &ident.rust,
+    match ty {
+        Type::Ident(ident) => {
+            let ident = &ident.rust;
+            ident == CxxString || is_opaque_cxx(cx, ident) || cx.types.rust.contains(ident)
+        }
         Type::CxxVector(_) | Type::Slice(_) | Type::Void(_) => return true,
-        _ => return false,
-    };
-    ident == CxxString || is_opaque_cxx(cx, ident) || cx.types.rust.contains(ident)
+        Type::RustBox(_)
+        | Type::RustVec(_)
+        | Type::UniquePtr(_)
+        | Type::Ref(_)
+        | Type::Str(_)
+        | Type::Fn(_)
+        | Type::SliceRefU8(_) => return false,
+    }
 }
 
 fn is_opaque_cxx(cx: &mut Check, ty: &Ident) -> bool {
