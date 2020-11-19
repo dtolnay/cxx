@@ -379,6 +379,18 @@ fn parse_extern_fn(
             "async function is not directly supported yet, but see https://cxx.rs/async.html for a working approach",
         ));
     }
+    if foreign_fn.sig.constness.is_some() {
+        return Err(Error::new_spanned(
+            foreign_fn,
+            "const extern function is not supported",
+        ));
+    }
+    if let Some(abi) = &foreign_fn.sig.abi {
+        return Err(Error::new_spanned(
+            abi,
+            "explicit ABI on extern function is not supported",
+        ));
+    }
 
     let mut doc = Doc::new();
     let mut cxx_name = None;
