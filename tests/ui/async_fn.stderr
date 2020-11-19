@@ -1,0 +1,22 @@
+error[E0308]: mismatched types
+ --> $DIR/async_fn.rs:4:18
+  |
+4 |         async fn f();
+  |                  ^
+  |                  |
+  |                  expected `()`, found opaque type
+  |                  possibly return type missing here?
+...
+8 | async fn f() {}
+  |              - the `Output` of this `async fn`'s found opaque type
+  |
+  = note: expected unit type `()`
+           found opaque type `impl Future`
+help: consider `await`ing on the `Future`
+  |
+4 |         async fn f.await();
+  |                   ^^^^^^
+help: try adding a semicolon
+  |
+4 |         async fn f;();
+  |                   ^
