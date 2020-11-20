@@ -13,7 +13,7 @@ rust_library(
 
 rust_library(
     name = "cc",
-    srcs = glob(["vendor/cc-1.0.62/src/**"]),
+    srcs = glob(["vendor/cc-1.0.63/src/**"]),
     visibility = ["//visibility:public"],
 )
 
@@ -97,7 +97,7 @@ rust_library(
 
 rust_library(
     name = "termcolor",
-    srcs = glob(["vendor/termcolor-1.1.0/src/**"]),
+    srcs = glob(["vendor/termcolor-1.1.2/src/**"]),
 )
 
 rust_library(
