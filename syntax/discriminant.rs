@@ -133,13 +133,9 @@ fn insert(set: &mut DiscriminantSet, discriminant: Discriminant) -> Result<Discr
             }
         }
     }
-    if set.values.insert(discriminant) {
-        set.previous = Some(discriminant);
-        Ok(discriminant)
-    } else {
-        let msg = format!("discriminant value `{}` already exists", discriminant);
-        Err(Error::new(Span::call_site(), msg))
-    }
+    set.values.insert(discriminant);
+    set.previous = Some(discriminant);
+    Ok(discriminant)
 }
 
 impl Discriminant {
