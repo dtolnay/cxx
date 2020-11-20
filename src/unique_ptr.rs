@@ -6,7 +6,7 @@ use core::ffi::c_void;
 use core::fmt::{self, Debug, Display};
 use core::marker::PhantomData;
 use core::mem;
-use core::ops::Deref;
+use core::ops::{Deref, DerefMut};
 use core::pin::Pin;
 use core::ptr;
 
@@ -115,6 +115,18 @@ where
         match self.as_ref() {
             Some(target) => target,
             None => panic!("called deref on a null UniquePtr<{}>", T::__NAME),
+        }
+    }
+}
+
+impl<T> DerefMut for UniquePtr<T>
+where
+    T: UniquePtrTarget + Unpin,
+{
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        match self.as_mut() {
+            Some(target) => Pin::into_inner(target),
+            None => panic!("called deref_mut on a null UniquePtr<{}>", T::__NAME),
         }
     }
 }
