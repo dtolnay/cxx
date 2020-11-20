@@ -269,6 +269,12 @@ fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
 
 fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
     out.set_namespace(&enm.name.namespace);
+    out.include.type_traits = true;
+    writeln!(
+        out,
+        "static_assert(::std::is_enum<{}>::value, \"expected enum\");",
+        enm.name.cxx,
+    );
     write!(out, "static_assert(sizeof({}) == sizeof(", enm.name.cxx);
     write_atom(out, enm.repr);
     writeln!(out, "), \"incorrect size\");");
