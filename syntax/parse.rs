@@ -170,6 +170,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
     let enum_token = item.enum_token;
     let brace_token = item.brace_token;
 
+    let explicit_repr = repr.is_some();
     let mut repr = U8;
     match discriminants.inferred_repr() {
         Ok(inferred) => repr = inferred,
@@ -191,6 +192,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
         variants,
         repr,
         repr_type,
+        explicit_repr,
     }))
 }
 

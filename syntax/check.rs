@@ -221,9 +221,9 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
 fn check_api_enum(cx: &mut Check, enm: &Enum) {
     check_reserved_name(cx, &enm.name.rust);
 
-    if enm.variants.is_empty() {
+    if enm.variants.is_empty() && !enm.explicit_repr {
         let span = span_for_enum_error(enm);
-        cx.error(span, "enums without any variants are not supported");
+        cx.error(span, "explicit #[repr(...)] is required for enum without any variants");
     }
 }
 

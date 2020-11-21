@@ -91,6 +91,7 @@ pub struct Enum {
     pub variants: Vec<Variant>,
     pub repr: Atom,
     pub repr_type: Type,
+    pub explicit_repr: bool,
 }
 
 pub struct ExternFn {
