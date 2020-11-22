@@ -93,14 +93,22 @@ public:
   Slice() noexcept;
   Slice(T *, size_t count) noexcept;
 
-  Slice &operator=(const Slice<T> &) noexcept = default;
+  template <typename = std::enable_if<std::is_const<T>::value>>
+  Slice &operator=(const Slice<T> &that) noexcept {
+    this->ptr = that.ptr;
+    this->len = that.len;
+  }
 
   T *data() const noexcept;
   size_t size() const noexcept;
   size_t length() const noexcept;
 
   // Important in order for System V ABI to pass in registers.
-  Slice(const Slice<T> &) noexcept = default;
+  template <typename = std::enable_if<std::is_const<T>::value>>
+  Slice(const Slice<T> &that) noexcept {
+    this->ptr = that.ptr;
+    this->len = that.len;
+  }
   ~Slice() noexcept = default;
 
 private:
