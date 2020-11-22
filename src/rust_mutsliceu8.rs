@@ -19,7 +19,7 @@ impl RustMutSliceU8 {
         }
     }
 
-    pub unsafe fn as_slice<'a>(self) -> &'a mut [u8] {
+    pub unsafe fn as_mut_slice<'a>(self) -> &'a mut [u8] {
         slice::from_raw_parts_mut(self.ptr.as_ptr(), self.len)
     }
 }
