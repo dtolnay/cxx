@@ -148,8 +148,9 @@ pub(super) fn write(out: &mut OutFile) {
 
     if builtin.ptr_len {
         out.begin_block(Block::Namespace("repr"));
+        writeln!(out, "template <typename T>");
         writeln!(out, "struct PtrLen final {{");
-        writeln!(out, "  const void *ptr;");
+        writeln!(out, "  T *ptr;");
         writeln!(out, "  size_t len;");
         writeln!(out, "}};");
         out.end_block(Block::Namespace("repr"));
@@ -163,7 +164,7 @@ pub(super) fn write(out: &mut OutFile) {
         if builtin.rust_str_new_unchecked {
             writeln!(
                 out,
-                "  static Str new_unchecked(repr::PtrLen repr) noexcept {{",
+                "  static Str new_unchecked(repr::PtrLen<const void> repr) noexcept {{",
             );
             writeln!(out, "    Str str;");
             writeln!(out, "    str.ptr = static_cast<const char *>(repr.ptr);");
@@ -172,8 +173,8 @@ pub(super) fn write(out: &mut OutFile) {
             writeln!(out, "  }}");
         }
         if builtin.rust_str_repr {
-            writeln!(out, "  static repr::PtrLen repr(Str str) noexcept {{");
-            writeln!(out, "    return repr::PtrLen{{str.ptr, str.len}};");
+            writeln!(out, "  static repr::PtrLen<const void> repr(Str str) noexcept {{");
+            writeln!(out, "    return repr::PtrLen<const void>{{str.ptr, str.len}};");
             writeln!(out, "  }}");
         }
         writeln!(out, "}};");
@@ -187,7 +188,7 @@ pub(super) fn write(out: &mut OutFile) {
         if builtin.rust_slice_new {
             writeln!(
                 out,
-                "  static Slice<T> slice(repr::PtrLen repr) noexcept {{",
+                "  static Slice<T> slice(repr::PtrLen<const void> repr) noexcept {{",
             );
             writeln!(
                 out,
@@ -196,11 +197,20 @@ pub(super) fn write(out: &mut OutFile) {
             writeln!(out, "  }}");
         }
         if builtin.rust_slice_repr {
+            writeln!(out, "  template <typename U = T>");
             writeln!(
                 out,
-                "  static repr::PtrLen repr(Slice<T> slice) noexcept {{",
+                "  static typename std::enable_if<std::is_const<U>::value, repr::PtrLen<const void>>::type repr(Slice<T> slice) noexcept {{",
             );
-            writeln!(out, "    return repr::PtrLen{{slice.ptr, slice.len}};");
+            writeln!(out, "    return repr::PtrLen<const void>{{slice.ptr, slice.len}};");
+            writeln!(out, "  }}");
+
+            writeln!(out, "  template <typename U = T>");
+            writeln!(
+                out,
+                "  static typename std::enable_if<!std::is_const<U>::value, repr::PtrLen<void>>::type repr(Slice<T> slice) noexcept {{",
+            );
+            writeln!(out, "    return repr::PtrLen<void>{{slice.ptr, slice.len}};");
             writeln!(out, "  }}");
         }
         writeln!(out, "}};");
@@ -211,7 +221,7 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "template <>");
         writeln!(out, "class impl<Error> final {{");
         writeln!(out, "public:");
-        writeln!(out, "  static Error error(repr::PtrLen repr) noexcept {{");
+        writeln!(out, "  static Error error(repr::PtrLen<const void> repr) noexcept {{");
         writeln!(out, "    Error error;");
         writeln!(out, "    error.msg = static_cast<const char *>(repr.ptr);");
         writeln!(out, "    error.len = repr.len;");

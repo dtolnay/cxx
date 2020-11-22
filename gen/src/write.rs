@@ -343,7 +343,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     }
     if efn.throws {
         out.builtin.ptr_len = true;
-        write!(out, "::rust::repr::PtrLen ");
+        write!(out, "::rust::repr::PtrLen<const void> ");
     } else {
         write_extern_return_type_space(out, &efn.ret);
     }
@@ -417,7 +417,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     if efn.throws {
         out.builtin.ptr_len = true;
         out.builtin.trycatch = true;
-        writeln!(out, "::rust::repr::PtrLen throw$;");
+        writeln!(out, "::rust::repr::PtrLen<const void> throw$;");
         writeln!(out, "  ::rust::behavior::trycatch(");
         writeln!(out, "      [&] {{");
         write!(out, "        ");
@@ -566,7 +566,7 @@ fn write_rust_function_decl_impl(
     out.next_section();
     if sig.throws {
         out.builtin.ptr_len = true;
-        write!(out, "::rust::repr::PtrLen ");
+        write!(out, "::rust::repr::PtrLen<const void> ");
     } else {
         write_extern_return_type_space(out, &sig.ret);
     }
@@ -712,7 +712,7 @@ fn write_rust_function_shim_impl(
     }
     if sig.throws {
         out.builtin.ptr_len = true;
-        write!(out, "::rust::repr::PtrLen error$ = ");
+        write!(out, "::rust::repr::PtrLen<const void> error$ = ");
     }
     write!(out, "{}(", invoke);
     let mut needs_comma = false;
@@ -838,9 +838,14 @@ fn write_extern_return_type_space(out: &mut OutFile, ty: &Option<Type>) {
             write_type(out, &ty.inner);
             write!(out, " *");
         }
-        Some(Type::Str(_)) | Some(Type::SliceRefU8(_)) => {
+        Some(Type::Str(ty)) | Some(Type::SliceRefU8(ty)) => {
             out.builtin.ptr_len = true;
-            write!(out, "::rust::repr::PtrLen ");
+
+            if ty.mutable {
+                write!(out, "::rust::repr::PtrLen<void> ");
+            } else {
+                write!(out, "::rust::repr::PtrLen<const void> ");
+            }
         }
         Some(ty) if out.types.needs_indirect_abi(ty) => write!(out, "void "),
         _ => write_return_type(out, ty),
@@ -853,9 +858,13 @@ fn write_extern_arg(out: &mut OutFile, arg: &Var) {
             write_type_space(out, &ty.inner);
             write!(out, "*");
         }
-        Type::Str(_) | Type::SliceRefU8(_) => {
+        Type::Str(ty) | Type::SliceRefU8(ty) => {
             out.builtin.ptr_len = true;
-            write!(out, "::rust::repr::PtrLen ");
+            if ty.mutable {
+                write!(out, "::rust::repr::PtrLen<void> ");
+            } else {
+                write!(out, "::rust::repr::PtrLen<const void> ");
+            }
         }
         _ => write_type_space(out, &arg.ty),
     }

@@ -150,7 +150,7 @@ rust::Box<R> c_try_return_box();
 const rust::String &c_try_return_ref(const rust::String &);
 rust::Str c_try_return_str(rust::Str);
 rust::Slice<const uint8_t> c_try_return_sliceu8(rust::Slice<const uint8_t>);
-rust::Slice<uint8_t> c_try_return_sliceu8(rust::Slice<uint8_t>);
+rust::Slice<uint8_t> c_try_return_mutsliceu8(rust::Slice<uint8_t>);
 rust::String c_try_return_rust_string();
 std::unique_ptr<std::string> c_try_return_unique_ptr_string();
 rust::Vec<uint8_t> c_try_return_rust_vec();
