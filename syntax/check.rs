@@ -223,7 +223,10 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
 
     if enm.variants.is_empty() && !enm.explicit_repr {
         let span = span_for_enum_error(enm);
-        cx.error(span, "explicit #[repr(...)] is required for enum without any variants");
+        cx.error(
+            span,
+            "explicit #[repr(...)] is required for enum without any variants",
+        );
     }
 }
 
