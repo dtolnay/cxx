@@ -68,6 +68,19 @@ where
         }
     }
 
+    /// Returns a mutable pinned reference to the object owned by this
+    /// UniquePtr.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the UniquePtr holds a null pointer.
+    pub fn pin_mut(&mut self) -> Pin<&mut T> {
+        match self.as_mut() {
+            Some(target) => target,
+            None => panic!("called pin_mut on a null UniquePtr<{}>", T::__NAME),
+        }
+    }
+
     /// Consumes the UniquePtr, releasing its ownership of the heap-allocated T.
     ///
     /// Matches the behavior of [std::unique_ptr\<T\>::release](https://en.cppreference.com/w/cpp/memory/unique_ptr/release).
