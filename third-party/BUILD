@@ -13,7 +13,7 @@ rust_library(
 
 rust_library(
     name = "cc",
-    srcs = glob(["vendor/cc-1.0.63/src/**"]),
+    srcs = glob(["vendor/cc-1.0.65/src/**"]),
     visibility = ["//visibility:public"],
 )
 
@@ -78,7 +78,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.48/src/**"]),
+    srcs = glob(["vendor/syn-1.0.50/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
