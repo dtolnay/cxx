@@ -612,7 +612,8 @@ fn expand_rust_function_shim_impl(
                 _ => quote!(#ident),
             },
             Type::Str(_) => quote!(#ident.as_str()),
-            Type::SliceRefU8(_) => quote!(#ident.as_slice()),
+            Type::SliceRefU8(ty) if ty.mutability.is_none() => quote!(#ident.as_slice()),
+            Type::SliceRefU8(ty) if ty.mutability.is_some() => quote!(#ident.as_mut_slice()),
             ty if types.needs_indirect_abi(ty) => quote!(::std::ptr::read(#ident)),
             _ => quote!(#ident),
         }
