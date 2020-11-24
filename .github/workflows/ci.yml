@@ -103,4 +103,4 @@ jobs:
         - name: Install clang-tidy
           run: sudo apt install clang-tidy-10
         - name: Run clang-tidy
-          run: clang-tidy-10 src/cxx.cc --header-filter='cxx\.h' -- -std=c++11
+          run: clang-tidy-10 src/cxx.cc --header-filter='cxx\.h'
