@@ -245,7 +245,7 @@ static_assert(alignof(std::string) <= alignof(void *),
               "unexpectedly large std::string alignment");
 static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
               "unexpectedly large std::string size");
-}
+} // namespace
 
 #define STD_VECTOR_OPS(RUST_TYPE, CXX_TYPE)                                    \
   size_t cxxbridge1$std$vector$##RUST_TYPE##$size(                             \
