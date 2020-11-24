@@ -483,8 +483,7 @@ Box<T>::Box() noexcept {}
 #ifndef CXXBRIDGE1_RUST_VEC
 #define CXXBRIDGE1_RUST_VEC
 template <typename T>
-Vec<T>::Vec(Vec &&other) noexcept {
-  this->repr = other.repr;
+Vec<T>::Vec(Vec &&other) noexcept : repr(other.repr) {
   new (&other) Vec();
 }
 

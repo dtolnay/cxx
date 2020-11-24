@@ -67,8 +67,7 @@ String::String(const String &other) noexcept {
   cxxbridge1$string$clone(this, other);
 }
 
-String::String(String &&other) noexcept {
-  this->repr = other.repr;
+String::String(String &&other) noexcept : repr(other.repr) {
   cxxbridge1$string$new(&other);
 }
 
