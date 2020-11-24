@@ -10,58 +10,6 @@ pub mod module;
 use cxx::{CxxString, CxxVector, UniquePtr};
 use std::fmt::{self, Display};
 
-mod other {
-    use cxx::kind::{Opaque, Trivial};
-    use cxx::{type_id, CxxString, ExternType};
-
-    #[repr(C)]
-    pub struct D {
-        pub d: u64,
-    }
-
-    #[repr(C)]
-    pub struct E {
-        e: u64,
-        e_str: CxxString,
-    }
-
-    pub mod f {
-        use cxx::kind::Opaque;
-        use cxx::{type_id, CxxString, ExternType};
-
-        #[repr(C)]
-        pub struct F {
-            e: u64,
-            e_str: CxxString,
-        }
-
-        unsafe impl ExternType for F {
-            type Id = type_id!("F::F");
-            type Kind = Opaque;
-        }
-    }
-
-    #[repr(C)]
-    pub struct G {
-        pub g: u64,
-    }
-
-    unsafe impl ExternType for G {
-        type Id = type_id!("G::G");
-        type Kind = Trivial;
-    }
-
-    unsafe impl ExternType for D {
-        type Id = type_id!("tests::D");
-        type Kind = Trivial;
-    }
-
-    unsafe impl ExternType for E {
-        type Id = type_id!("tests::E");
-        type Kind = Opaque;
-    }
-}
-
 #[cxx::bridge(namespace = "tests")]
 pub mod ffi {
     #[derive(Clone)]
@@ -298,6 +246,58 @@ pub mod ffi {
 
     struct Dag4 {
         dag0: Dag0,
+    }
+}
+
+mod other {
+    use cxx::kind::{Opaque, Trivial};
+    use cxx::{type_id, CxxString, ExternType};
+
+    #[repr(C)]
+    pub struct D {
+        pub d: u64,
+    }
+
+    #[repr(C)]
+    pub struct E {
+        e: u64,
+        e_str: CxxString,
+    }
+
+    pub mod f {
+        use cxx::kind::Opaque;
+        use cxx::{type_id, CxxString, ExternType};
+
+        #[repr(C)]
+        pub struct F {
+            e: u64,
+            e_str: CxxString,
+        }
+
+        unsafe impl ExternType for F {
+            type Id = type_id!("F::F");
+            type Kind = Opaque;
+        }
+    }
+
+    #[repr(C)]
+    pub struct G {
+        pub g: u64,
+    }
+
+    unsafe impl ExternType for G {
+        type Id = type_id!("G::G");
+        type Kind = Trivial;
+    }
+
+    unsafe impl ExternType for D {
+        type Id = type_id!("tests::D");
+        type Kind = Trivial;
+    }
+
+    unsafe impl ExternType for E {
+        type Id = type_id!("tests::E");
+        type Kind = Opaque;
     }
 }
 
