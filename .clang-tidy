@@ -1,2 +1,3 @@
 Checks: clang-diagnostic-*,clang-analyzer-*,modernize-*,cppcoreguidelines-*,
     -modernize-use-trailing-return-type,-cppcoreguidelines-pro-type-reinterpret-cast
+HeaderFilterRegex: cxx\.h
