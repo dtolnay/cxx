@@ -330,7 +330,10 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                 _ => quote!(#var),
             },
             Type::Str(_) => quote!(::cxx::private::RustStr::from(#var)),
-            Type::SliceRefU8(_) => quote!(::cxx::private::RustSliceU8::from(#var)),
+            Type::SliceRefU8(ty) => match ty.mutable {
+                false => quote!(::cxx::private::RustSliceU8::from_ref(#var)),
+                true => quote!(::cxx::private::RustSliceU8::from_mut(#var)),
+            },
             ty if types.needs_indirect_abi(ty) => quote!(#var.as_mut_ptr()),
             _ => quote!(#var),
         }
@@ -423,7 +426,10 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                     _ => call,
                 },
                 Type::Str(_) => quote!(#call.as_str()),
-                Type::SliceRefU8(_) => quote!(#call.as_slice()),
+                Type::SliceRefU8(ty) => match ty.mutable {
+                    false => quote!(#call.as_slice()),
+                    true => quote!(#call.as_mut_slice()),
+                },
                 _ => call,
             },
         };
@@ -610,7 +616,10 @@ fn expand_rust_function_shim_impl(
                 _ => quote!(#ident),
             },
             Type::Str(_) => quote!(#ident.as_str()),
-            Type::SliceRefU8(_) => quote!(#ident.as_slice()),
+            Type::SliceRefU8(ty) => match ty.mutable {
+                false => quote!(#ident.as_slice()),
+                true => quote!(#ident.as_mut_slice()),
+            },
             ty if types.needs_indirect_abi(ty) => quote!(::std::ptr::read(#ident)),
             _ => quote!(#ident),
         }
@@ -654,7 +663,10 @@ fn expand_rust_function_shim_impl(
             _ => None,
         },
         Type::Str(_) => Some(quote!(::cxx::private::RustStr::from)),
-        Type::SliceRefU8(_) => Some(quote!(::cxx::private::RustSliceU8::from)),
+        Type::SliceRefU8(ty) => match ty.mutable {
+            false => Some(quote!(::cxx::private::RustSliceU8::from_ref)),
+            true => Some(quote!(::cxx::private::RustSliceU8::from_mut)),
+        },
         _ => None,
     });
 
