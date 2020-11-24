@@ -186,6 +186,7 @@ pub mod ffi {
         fn r_return_ref(shared: &Shared) -> &usize;
         fn r_return_mut(shared: &mut Shared) -> &mut usize;
         fn r_return_str(shared: &Shared) -> &str;
+        fn r_return_sliceu8(shared: &Shared) -> &[u8];
         fn r_return_rust_string() -> String;
         fn r_return_unique_ptr_string() -> UniquePtr<CxxString>;
         fn r_return_rust_vec() -> Vec<u8>;
@@ -218,6 +219,7 @@ pub mod ffi {
         fn r_try_return_primitive() -> Result<usize>;
         fn r_try_return_box() -> Result<Box<R>>;
         fn r_fail_return_primitive() -> Result<usize>;
+        fn r_try_return_sliceu8(s: &[u8]) -> Result<&[u8]>;
 
         fn get(self: &R) -> usize;
         fn set(self: &mut R, n: usize) -> usize;
@@ -364,6 +366,11 @@ fn r_return_str(shared: &ffi::Shared) -> &str {
     "2020"
 }
 
+fn r_return_sliceu8(shared: &ffi::Shared) -> &[u8] {
+    let _ = shared;
+    b"2020"
+}
+
 fn r_return_rust_string() -> String {
     "2020".to_owned()
 }
@@ -496,6 +503,10 @@ fn r_try_return_box() -> Result<Box<R>, Error> {
 
 fn r_fail_return_primitive() -> Result<usize, Error> {
     Err(Error)
+}
+
+fn r_try_return_sliceu8(slice: &[u8]) -> Result<&[u8], Error> {
+    Ok(slice)
 }
 
 fn r_aliased_function(x: i32) -> String {
