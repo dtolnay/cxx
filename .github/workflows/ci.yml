@@ -15,8 +15,8 @@ jobs:
         include:
           - rust: nightly
           - rust: beta
-          #- rust: stable
-          #- rust: 1.48.0
+          - rust: stable
+          - rust: 1.48.0
           - name: macOS
             rust: nightly
             os: macos
@@ -52,7 +52,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: dtolnay/rust-toolchain@beta
+      - uses: dtolnay/rust-toolchain@stable
       - uses: actions/setup-java@v1
         with:
           java-version: 11
