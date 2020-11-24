@@ -103,4 +103,4 @@ jobs:
       - name: Install clang-tidy
         run: sudo apt-get install clang-tidy-10
       - name: Run clang-tidy
-        run: clang-tidy-10 src/cxx.cc
+        run: clang-tidy-10 src/cxx.cc --warnings-as-errors=*
