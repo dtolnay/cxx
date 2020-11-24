@@ -144,6 +144,49 @@ manifest key][links]* in the Cargo reference.
 
 [links]: https://doc.rust-lang.org/cargo/reference/build-scripts.html#the-links-manifest-key
 
+## Features
+
+CXX provides features to enable additional functionality such as compiling
+the CXX lib with a different standard.
+
+Features are enabled on the CXX crate for Cargo-based setups, and with compiler
+options for non-Cargo setups.
+
+The following features are available, see `[features]` section in [Cargo.toml](https://github.com/dtolnay/cxx/blob/master/Cargo.toml) for a full list:
+<table>
+<tr><th>feature</th><th>compiler option</th><th>description</th></tr>
+<tr><td>c++14</td><td>-std=c++14 (gcc, clang), /std:c++14 (msvc)</td><td>Compile CXX lib with c++14</td></tr>
+<tr><td>c++17</td><td>-std=c++17 (gcc, clang), /std:c++17 (msvc)</td><td>Compile CXX lib with c++17</td></tr>
+</table>
+
+## Additional C++ standard features
+Some addition APIs are available if compiling your code with a newer C++ standard.
+
+Please note, that these additional APIs are automatically enabled in the `cxx.h`
+header if your code is compiled with the required minimal C++ standard. They do
+not depend on building the actual CXX lib against the newer standard at this time.
+
+<table>
+<tr><th>Minimal C++ standard</th><th>Description</th></tr>
+<tr><td>c++17</td><td>Enables additional `string_view` APIs for `rust::str` and `rust::String`</td></tr>
+</table>
+
+Example to e.g. enable the `string_view` APIs for your code, build at least with C++17:
+```rust,noplayground
+// build.rs
+
+fn main() {
+    cxx_build::bridge("src/main.rs")  // returns a cc::Build
+        .file("src/demo.cc")
+        .flag_if_supported("-std=c++17")
+        .compile("cxxbridge-demo");
+
+    println!("cargo:rerun-if-changed=src/main.rs");
+    println!("cargo:rerun-if-changed=src/demo.cc");
+    println!("cargo:rerun-if-changed=include/demo.h");
+}
+```
+
 <br><br><br>
 
 # Advanced features
