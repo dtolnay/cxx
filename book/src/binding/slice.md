@@ -1,5 +1,8 @@
 {{#title rust::Slice<T> — Rust ♡ C++}}
-# rust::Slice\<T\>
+# rust::Slice\<const T\>,&ensp;rust::Slice\<T\>
+
+- Rust `&[T]` is written `rust::Slice<const T>` in C++
+- Rust `&mut [T]` is written `rust::Slice<T>` in C++
 
 ### Public API:
 
@@ -15,7 +18,10 @@ public:
   Slice(const Slice<T> &) noexcept;
   Slice(T *, size_t count) noexcept;
 
+  // if std::is_const<T> {
   Slice &operator=(const Slice<T> &) noexcept;
+  // }
+  Slice &operator=(Slice<T> &&) noexcept;
 
   T *data() const noexcept;
   size_t size() const noexcept;
@@ -27,11 +33,14 @@ public:
 
 ### Restrictions:
 
-Only &amp;\[u8\] i.e. rust::Slice\<const uint8\_t\> is currently implemented.
-Support for arbitrary &amp;\[T\] is coming.
+Only T=u8 i.e. rust::Slice\<const uint8\_t\> and rust::Slice\<uint8\_t\> are
+currently implemented. Support for arbitrary T is coming.
 
 Allowed as function argument or return value. Not supported in shared structs.
-&amp;mut \[T\] is not supported yet.
+
+Only rust::Slice\<const T\> is copy-assignable, not rust::Slice\<T\>. (Both are
+move-assignable.) You'll need to write std::move occasionally as a reminder that
+accidentally exposing overlapping &amp;mut \[T\] to Rust is UB.
 
 ## Example
 

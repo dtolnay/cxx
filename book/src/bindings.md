@@ -12,6 +12,7 @@ returns of extern functions.
 <tr><td style="padding:3px 6px">String</td><td style="padding:3px 6px"><b><a href="binding/string.md">rust::String</a></b></td><td style="padding:3px 6px"></td></tr>
 <tr><td style="padding:3px 6px">&amp;str</td><td style="padding:3px 6px"><b><a href="binding/str.md">rust::Str</a></b></td><td style="padding:3px 6px"></td></tr>
 <tr><td style="padding:3px 6px">&amp;[u8]</td><td style="padding:3px 6px"><b><a href="binding/slice.md">rust::Slice&lt;const&nbsp;uint8_t&gt;</a></b></td><td style="padding:3px 6px"><sup><i>arbitrary &amp;[T] not implemented yet</i></sup></td></tr>
+<tr><td style="padding:3px 6px">&amp;mut [u8]</td><td style="padding:3px 6px"><b><a href="binding/slice.md">rust::Slice&lt;uint8_t&gt;</a></b></td><td style="padding:3px 6px"><sup><i>arbitrary &amp;mut [T] not implemented yet</i></sup></td></tr>
 <tr><td style="padding:3px 6px"><b><a href="binding/cxxstring.md">CxxString</a></b></td><td style="padding:3px 6px">std::string</td><td style="padding:3px 6px"><sup><i>cannot be passed by value</i></sup></td></tr>
 <tr><td style="padding:3px 6px">Box&lt;T&gt;</td><td style="padding:3px 6px"><b><a href="binding/box.md">rust::Box&lt;T&gt;</a></b></td><td style="padding:3px 6px"><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
 <tr><td style="padding:3px 6px"><b><a href="binding/uniqueptr.md">UniquePtr&lt;T&gt;</a></b></td><td style="padding:3px 6px">std::unique_ptr&lt;T&gt;</td><td style="padding:3px 6px"><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
@@ -43,7 +44,6 @@ matter of designing a nice API for each in its non-native language.
 
 <table>
 <tr><th>name in Rust</th><th>name in C++</th></tr>
-<tr><td>&amp;mut [T]</td><td>rust::Slice&lt;T&gt;</td></tr>
 <tr><td>BTreeMap&lt;K, V&gt;</td><td><sup><i>tbd</i></sup></td></tr>
 <tr><td>HashMap&lt;K, V&gt;</td><td><sup><i>tbd</i></sup></td></tr>
 <tr><td>Arc&lt;T&gt;</td><td><sup><i>tbd</i></sup></td></tr>
