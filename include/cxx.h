@@ -250,7 +250,7 @@ class Error final : public std::exception {
 public:
   Error(const Error &);
   Error(Error &&) noexcept;
-  ~Error() noexcept;
+  ~Error() noexcept override;
 
   Error &operator=(const Error &);
   Error &operator=(Error &&) noexcept;
