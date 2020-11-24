@@ -477,7 +477,7 @@ T *Box<T>::into_raw() noexcept {
 }
 
 template <typename T>
-Box<T>::Box() noexcept {}
+Box<T>::Box() noexcept = default;
 #endif // CXXBRIDGE1_RUST_BOX
 
 #ifndef CXXBRIDGE1_RUST_VEC
