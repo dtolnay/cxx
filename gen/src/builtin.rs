@@ -149,7 +149,7 @@ pub(super) fn write(out: &mut OutFile) {
     if builtin.ptr_len {
         out.begin_block(Block::Namespace("repr"));
         writeln!(out, "struct PtrLen final {{");
-        writeln!(out, "  const void *ptr;");
+        writeln!(out, "  void *ptr;");
         writeln!(out, "  size_t len;");
         writeln!(out, "}};");
         out.end_block(Block::Namespace("repr"));
@@ -173,7 +173,10 @@ pub(super) fn write(out: &mut OutFile) {
         }
         if builtin.rust_str_repr {
             writeln!(out, "  static repr::PtrLen repr(Str str) noexcept {{");
-            writeln!(out, "    return repr::PtrLen{{str.ptr, str.len}};");
+            writeln!(
+                out,
+                "    return repr::PtrLen{{const_cast<char *>(str.ptr), str.len}};",
+            );
             writeln!(out, "  }}");
         }
         writeln!(out, "}};");
@@ -189,18 +192,21 @@ pub(super) fn write(out: &mut OutFile) {
                 out,
                 "  static Slice<T> slice(repr::PtrLen repr) noexcept {{",
             );
-            writeln!(
-                out,
-                "    return {{static_cast<const T *>(repr.ptr), repr.len}};",
-            );
+            writeln!(out, "    return {{static_cast<T *>(repr.ptr), repr.len}};");
             writeln!(out, "  }}");
         }
         if builtin.rust_slice_repr {
+            include.type_traits = true;
             writeln!(
                 out,
                 "  static repr::PtrLen repr(Slice<T> slice) noexcept {{",
             );
-            writeln!(out, "    return repr::PtrLen{{slice.ptr, slice.len}};");
+            writeln!(out, "    return repr::PtrLen{{");
+            writeln!(
+                out,
+                "        const_cast<typename ::std::remove_const<T>::type *>(slice.ptr),",
+            );
+            writeln!(out, "        slice.len}};");
             writeln!(out, "  }}");
         }
         writeln!(out, "}};");

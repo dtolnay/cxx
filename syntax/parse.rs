@@ -658,7 +658,7 @@ fn parse_type_reference(ty: &TypeReference, namespace: &Namespace) -> Result<Typ
             }
         }
         Type::Slice(slice) => match &slice.inner {
-            Type::Ident(ident) if ident.rust == U8 && ty.mutability.is_none() => Type::SliceRefU8,
+            Type::Ident(ident) if ident.rust == U8 => Type::SliceRefU8,
             _ => Type::Ref,
         },
         _ => Type::Ref,

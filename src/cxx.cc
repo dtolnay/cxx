@@ -180,6 +180,17 @@ static_assert(std::is_trivially_move_assignable<Slice<const uint8_t>>::value,
 static_assert(std::is_trivially_destructible<Slice<const uint8_t>>::value,
               "trivial ~Slice()");
 
+static_assert(std::is_trivially_copy_constructible<Slice<uint8_t>>::value,
+              "trivial Slice(const Slice &)");
+static_assert(std::is_trivially_move_constructible<Slice<uint8_t>>::value,
+              "trivial Slice(Slice &&)");
+static_assert(!std::is_copy_assignable<Slice<uint8_t>>::value,
+              "delete Slice::operator=(const Slice &) for mut slices");
+static_assert(std::is_trivially_move_assignable<Slice<uint8_t>>::value,
+              "trivial Slice::operator=(Slice &&)");
+static_assert(std::is_trivially_destructible<Slice<uint8_t>>::value,
+              "trivial ~Slice()");
+
 extern "C" {
 const char *cxxbridge1$error(const char *ptr, size_t len) {
   char *copy = new char[len];
