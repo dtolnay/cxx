@@ -1,3 +1,8 @@
-Checks: clang-diagnostic-*,clang-analyzer-*,modernize-*,cppcoreguidelines-*,
-    -modernize-use-trailing-return-type,-cppcoreguidelines-pro-type-reinterpret-cast
+Checks:
+  clang-analyzer-*,
+  clang-diagnostic-*,
+  cppcoreguidelines-*,
+  modernize-*,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
+  -modernize-use-trailing-return-type,
 HeaderFilterRegex: cxx\.h
