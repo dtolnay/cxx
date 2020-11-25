@@ -254,7 +254,7 @@ impl<'a> Types<'a> {
                     Atom::from(&ident.rust) == Some(RustString)
                 }
             }
-            Type::RustVec(_) => true,
+            Type::RustVec(_) | Type::Array(_) => true,
             _ => false,
         }
     }
