@@ -909,22 +909,24 @@ fn expand_unique_ptr(
     let link_release = format!("{}release", prefix);
     let link_drop = format!("{}drop", prefix);
 
-    let new_method =
-        if types.structs.contains_key(&ident.rust) || types.aliases.contains_key(&ident.rust) {
-            Some(quote! {
-                fn __new(mut value: Self) -> *mut ::std::ffi::c_void {
-                    extern "C" {
-                        #[link_name = #link_new]
-                        fn __new(this: *mut *mut ::std::ffi::c_void, value: *mut #ident);
-                    }
-                    let mut repr = ::std::ptr::null_mut::<::std::ffi::c_void>();
-                    unsafe { __new(&mut repr, &mut value) }
-                    repr
+    let can_construct_from_value = types.structs.contains_key(&ident.rust)
+        || types.enums.contains_key(&ident.rust)
+        || types.aliases.contains_key(&ident.rust);
+    let new_method = if can_construct_from_value {
+        Some(quote! {
+            fn __new(mut value: Self) -> *mut ::std::ffi::c_void {
+                extern "C" {
+                    #[link_name = #link_new]
+                    fn __new(this: *mut *mut ::std::ffi::c_void, value: *mut #ident);
                 }
-            })
-        } else {
-            None
-        };
+                let mut repr = ::std::ptr::null_mut::<::std::ffi::c_void>();
+                unsafe { __new(&mut repr, &mut value) }
+                repr
+            }
+        })
+    } else {
+        None
+    };
 
     let begin_span =
         explicit_impl.map_or_else(Span::call_site, |explicit| explicit.impl_token.span);

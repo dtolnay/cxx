@@ -1212,6 +1212,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: &Type) {
         // for Opaque types because the 'new' method is not implemented.
         Type::Ident(ident) => {
             out.types.structs.contains_key(&ident.rust)
+                || out.types.enums.contains_key(&ident.rust)
                 || out.types.aliases.contains_key(&ident.rust)
         }
         _ => false,
