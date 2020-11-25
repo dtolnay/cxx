@@ -639,49 +639,10 @@ fn parse_type(ty: &RustType, namespace: &Namespace) -> Result<Type> {
         RustType::Reference(ty) => parse_type_reference(ty, namespace),
         RustType::Path(ty) => parse_type_path(ty, namespace),
         RustType::Slice(ty) => parse_type_slice(ty, namespace),
+        RustType::Array(ty) => parse_type_array(ty, namespace),
         RustType::BareFn(ty) => parse_type_fn(ty, namespace),
         RustType::Tuple(ty) if ty.elems.is_empty() => Ok(Type::Void(ty.paren_token.span)),
-        RustType::Array(ty) => parse_type_array(ty, namespace),
         _ => Err(Error::new_spanned(ty, "unsupported type")),
-    }
-}
-
-fn parse_type_array(ty: &TypeArray, namespace: &Namespace) -> Result<Type> {
-    let inner = parse_type(&ty.elem, namespace)?;
-    match &ty.len {
-        Expr::Lit(lit) => {
-            if !lit.attrs.is_empty() {
-                return Err(Error::new_spanned(
-                    ty,
-                    "attribute not allowed in length field",
-                ));
-            }
-            match &lit.lit {
-                Lit::Int(len_token) => {
-                    let v = match len_token.base10_parse::<usize>() {
-                        Ok(n_v) => n_v,
-                        Err(_) => {
-                            return Err(Error::new_spanned(
-                                ty,
-                                "Cannot parse integer literal to base10",
-                            ))
-                        }
-                    };
-                    Ok(Type::Array(Box::new(Array {
-                        bracket: ty.bracket_token,
-                        inner,
-                        semi_token: ty.semi_token,
-                        len: v,
-                        len_token: len_token.clone(),
-                    })))
-                }
-                _ => Err(Error::new_spanned(ty, "length literal must be a integer")),
-            }
-        }
-        _ => Err(Error::new_spanned(
-            ty,
-            "only literal is currently supported in len field",
-        )),
     }
 }
 
@@ -785,6 +746,45 @@ fn parse_type_slice(ty: &TypeSlice, namespace: &Namespace) -> Result<Type> {
         bracket: ty.bracket_token,
         inner,
     })))
+}
+
+fn parse_type_array(ty: &TypeArray, namespace: &Namespace) -> Result<Type> {
+    let inner = parse_type(&ty.elem, namespace)?;
+    match &ty.len {
+        Expr::Lit(lit) => {
+            if !lit.attrs.is_empty() {
+                return Err(Error::new_spanned(
+                    ty,
+                    "attribute not allowed in length field",
+                ));
+            }
+            match &lit.lit {
+                Lit::Int(len_token) => {
+                    let v = match len_token.base10_parse::<usize>() {
+                        Ok(n_v) => n_v,
+                        Err(_) => {
+                            return Err(Error::new_spanned(
+                                ty,
+                                "Cannot parse integer literal to base10",
+                            ))
+                        }
+                    };
+                    Ok(Type::Array(Box::new(Array {
+                        bracket: ty.bracket_token,
+                        inner,
+                        semi_token: ty.semi_token,
+                        len: v,
+                        len_token: len_token.clone(),
+                    })))
+                }
+                _ => Err(Error::new_spanned(ty, "length literal must be a integer")),
+            }
+        }
+        _ => Err(Error::new_spanned(
+            ty,
+            "only literal is currently supported in len field",
+        )),
+    }
 }
 
 fn parse_type_fn(ty: &TypeBareFn, namespace: &Namespace) -> Result<Type> {
