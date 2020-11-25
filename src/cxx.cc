@@ -191,6 +191,16 @@ static_assert(std::is_trivially_move_assignable<Slice<uint8_t>>::value,
 static_assert(std::is_trivially_destructible<Slice<uint8_t>>::value,
               "trivial ~Slice()");
 
+static_assert(std::is_same<Vec<uint8_t>::const_iterator,
+                           Vec<const uint8_t>::iterator>::value,
+              "Vec<T>::const_iterator == Vec<const T>::iterator");
+static_assert(std::is_same<Vec<const uint8_t>::const_iterator,
+                           Vec<const uint8_t>::iterator>::value,
+              "Vec<const T>::const_iterator == Vec<const T>::iterator");
+static_assert(
+    !std::is_same<Vec<uint8_t>::const_iterator, Vec<uint8_t>::iterator>::value,
+    "Vec<T>::const_iterator != Vec<T>::iterator");
+
 extern "C" {
 const char *cxxbridge1$error(const char *ptr, size_t len) {
   char *copy = new char[len];
