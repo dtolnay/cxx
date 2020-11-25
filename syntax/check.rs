@@ -186,14 +186,13 @@ fn check_type_slice(cx: &mut Check, ty: &Slice) {
 }
 
 fn check_type_array(cx: &mut Check, ty: &Array) {
-    match &ty.inner {
-        Type::Ident(ident) => {
-            if cx.types.rust.contains(&ident.rust) || cx.types.cxx.contains(&ident.rust) {
-                cx.error(ty, "Only shared structs are supported in array yet");
-            }
-        }
-        Type::RustBox(_) | Type::RustVec(_) | Type::CxxVector(_) | Type::UniquePtr(_) => {}
-        _ => cx.error(ty, "unsupported array target type"),
+    let supported = match &ty.inner {
+        Type::Fn(_) => false,
+        element => !is_unsized(cx, element),
+    };
+
+    if !supported {
+        cx.error(ty, "unsupported array element type");
     }
 }
 
