@@ -197,9 +197,15 @@ public:
   template <typename... Args>
   void emplace_back(Args &&... args);
 
+  class iterator;
+  iterator begin() noexcept;
+  iterator end() noexcept;
+
   class const_iterator;
   const_iterator begin() const noexcept;
   const_iterator end() const noexcept;
+  const_iterator cbegin() const noexcept;
+  const_iterator cend() const noexcept;
 
   // Internal API only intended for the cxxbridge code generator.
   Vec(unsafe_bitcopy_t, const Vec &) noexcept;
@@ -212,6 +218,28 @@ private:
 
   // Size and alignment statically verified by rust_vec.rs.
   std::array<uintptr_t, 3> repr;
+};
+
+template <typename T>
+class Vec<T>::iterator final {
+public:
+  using difference_type = ptrdiff_t;
+  using value_type = T;
+  using pointer = typename std::add_pointer<T>::type;
+  using reference = typename std::add_lvalue_reference<T>::type;
+  using iterator_category = std::forward_iterator_tag;
+
+  T &operator*() const noexcept;
+  T *operator->() const noexcept;
+  iterator &operator++() noexcept;
+  iterator operator++(int) noexcept;
+  bool operator==(const iterator &) const noexcept;
+  bool operator!=(const iterator &) const noexcept;
+
+private:
+  friend class Vec;
+  void *pos;
+  size_t stride;
 };
 
 template <typename T>
@@ -577,6 +605,39 @@ void Vec<T>::emplace_back(Args &&... args) {
 }
 
 template <typename T>
+T &Vec<T>::iterator::operator*() const noexcept {
+  return *static_cast<T *>(this->pos);
+}
+
+template <typename T>
+T *Vec<T>::iterator::operator->() const noexcept {
+  return static_cast<T *>(this->pos);
+}
+
+template <typename T>
+typename Vec<T>::iterator &Vec<T>::iterator::operator++() noexcept {
+  this->pos = static_cast<uint8_t *>(this->pos) + this->stride;
+  return *this;
+}
+
+template <typename T>
+typename Vec<T>::iterator Vec<T>::iterator::operator++(int) noexcept {
+  auto ret = iterator(*this);
+  this->pos = static_cast<uint8_t *>(this->pos) + this->stride;
+  return ret;
+}
+
+template <typename T>
+bool Vec<T>::iterator::operator==(const iterator &other) const noexcept {
+  return this->pos == other.pos;
+}
+
+template <typename T>
+bool Vec<T>::iterator::operator!=(const iterator &other) const noexcept {
+  return this->pos != other.pos;
+}
+
+template <typename T>
 const T &Vec<T>::const_iterator::operator*() const noexcept {
   return *static_cast<const T *>(this->pos);
 }
@@ -613,7 +674,32 @@ bool Vec<T>::const_iterator::operator!=(
 }
 
 template <typename T>
+typename Vec<T>::iterator Vec<T>::begin() noexcept {
+  iterator it;
+  it.pos = this->data();
+  it.stride = this->stride();
+  return it;
+}
+
+template <typename T>
+typename Vec<T>::iterator Vec<T>::end() noexcept {
+  iterator it = this->begin();
+  it.pos = static_cast<uint8_t *>(it.pos) + it.stride * this->size();
+  return it;
+}
+
+template <typename T>
 typename Vec<T>::const_iterator Vec<T>::begin() const noexcept {
+  return this->cbegin();
+}
+
+template <typename T>
+typename Vec<T>::const_iterator Vec<T>::end() const noexcept {
+  return this->cend();
+}
+
+template <typename T>
+typename Vec<T>::const_iterator Vec<T>::cbegin() const noexcept {
   const_iterator it;
   it.pos = this->data();
   it.stride = this->stride();
@@ -621,8 +707,8 @@ typename Vec<T>::const_iterator Vec<T>::begin() const noexcept {
 }
 
 template <typename T>
-typename Vec<T>::const_iterator Vec<T>::end() const noexcept {
-  const_iterator it = this->begin();
+typename Vec<T>::const_iterator Vec<T>::cend() const noexcept {
+  const_iterator it = this->cbegin();
   it.pos = static_cast<const uint8_t *>(it.pos) + it.stride * this->size();
   return it;
 }

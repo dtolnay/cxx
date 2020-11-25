@@ -39,9 +39,32 @@ public:
   template <typename... Args>
   void emplace_back(Args &&... args);
 
+  class iterator;
+  iterator begin() noexcept;
+  iterator end() noexcept;
+
   class const_iterator;
   const_iterator begin() const noexcept;
   const_iterator end() const noexcept;
+  const_iterator cbegin() const noexcept;
+  const_iterator cend() const noexcept;
+};
+
+template <typename T>
+class Vec<T>::iterator final {
+public:
+  using difference_type = ptrdiff_t;
+  using value_type = T;
+  using pointer = typename std::add_pointer<T>::type;
+  using reference = typename std::add_lvalue_reference<T>::type;
+  using iterator_category = std::forward_iterator_tag;
+
+  T &operator*() const noexcept;
+  T *operator->() const noexcept;
+  iterator &operator++() noexcept;
+  iterator operator++(int) noexcept;
+  bool operator==(const iterator &) const noexcept;
+  bool operator!=(const iterator &) const noexcept;
 };
 
 template <typename T>
