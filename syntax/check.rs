@@ -427,6 +427,7 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
             let ident = &ident.rust;
             ident == CxxString || is_opaque_cxx(cx, ident) || cx.types.rust.contains(ident)
         }
+        Type::Array(array) => is_unsized(cx, &array.inner),
         Type::CxxVector(_) | Type::Slice(_) | Type::Void(_) => true,
         Type::RustBox(_)
         | Type::RustVec(_)
