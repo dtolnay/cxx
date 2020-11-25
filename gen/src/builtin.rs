@@ -25,6 +25,8 @@ pub struct Builtins<'a> {
     pub exception: bool,
     pub relocatable: bool,
     pub friend_impl: bool,
+    pub is_complete: bool,
+    pub deleter_if: bool,
     pub content: Content<'a>,
 }
 
@@ -223,6 +225,33 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "    error.len = repr.len;");
         writeln!(out, "    return error;");
         writeln!(out, "  }}");
+        writeln!(out, "}};");
+    }
+
+    if builtin.is_complete {
+        include.type_traits = true;
+        out.next_section();
+        writeln!(out, "template <typename T, typename = size_t>");
+        writeln!(out, "struct is_complete : std::false_type {{}};");
+        out.next_section();
+        writeln!(out, "template <typename T>");
+        writeln!(
+            out,
+            "struct is_complete<T, decltype(sizeof(T))> : std::true_type {{}};",
+        );
+    }
+
+    if builtin.deleter_if {
+        out.next_section();
+        writeln!(out, "template <bool> struct deleter_if {{");
+        writeln!(out, "  template <typename T> void operator()(T *) {{}}");
+        writeln!(out, "}};");
+        out.next_section();
+        writeln!(out, "template <> struct deleter_if<true> {{");
+        writeln!(
+            out,
+            "  template <typename T> void operator()(T *ptr) {{ ptr->~T(); }}",
+        );
         writeln!(out, "}};");
     }
 

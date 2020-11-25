@@ -1242,6 +1242,26 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
         UniquePtr::CxxVector(_) => false,
     };
 
+    let conditional_delete = match ty {
+        UniquePtr::Ident(ident) => {
+            !out.types.structs.contains_key(&ident.rust)
+                && !out.types.enums.contains_key(&ident.rust)
+        }
+        UniquePtr::CxxVector(_) => false,
+    };
+
+    if conditional_delete {
+        out.builtin.is_complete = true;
+        let definition = match ty {
+            UniquePtr::Ident(ty) => &out.types.resolve(ty).cxx,
+            UniquePtr::CxxVector(_) => unreachable!(),
+        };
+        writeln!(
+            out,
+            "static_assert(::rust::is_complete<{}>::value, \"definition of {} is required\");",
+            inner, definition,
+        );
+    }
     writeln!(
         out,
         "static_assert(sizeof(::std::unique_ptr<{}>) == sizeof(void *), \"\");",
@@ -1298,7 +1318,16 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
         "void cxxbridge1$unique_ptr${}$drop(::std::unique_ptr<{}> *ptr) noexcept {{",
         instance, inner,
     );
-    writeln!(out, "  ptr->~unique_ptr();");
+    if conditional_delete {
+        out.builtin.deleter_if = true;
+        writeln!(
+            out,
+            "  ::rust::deleter_if<::rust::is_complete<{}>::value>{{}}(ptr);",
+            inner,
+        );
+    } else {
+        writeln!(out, "  ptr->~unique_ptr();");
+    }
     writeln!(out, "}}");
 }
 
