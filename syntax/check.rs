@@ -192,10 +192,7 @@ fn check_type_array(cx: &mut Check, ty: &Array) {
                 cx.error(ty, "Only shared structs are supported in array yet");
             }
         }
-        Type::RustBox(ty1) => check_type_box(cx, ty1),
-        Type::RustVec(ty1) => check_type_rust_vec(cx, ty1),
-        Type::CxxVector(ty1) => check_type_cxx_vector(cx, ty1),
-        Type::UniquePtr(ty1) => check_type_unique_ptr(cx, ty1),
+        Type::RustBox(_) | Type::RustVec(_) | Type::CxxVector(_) | Type::UniquePtr(_) => {}
         _ => cx.error(ty, "unsupported array target type"),
     };
 }
