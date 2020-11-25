@@ -1,8 +1,8 @@
 #[cxx::bridge]
 mod ffi {
-    unsafe extern "C++" {
-        fn arraystr() -> [String; "13"];
-        fn arraysub() -> [String; 15 - 1];
+    struct Shared {
+        arraystr: [String; "13"],
+        arraysub: [String; 15 - 1],
     }
 }
 
