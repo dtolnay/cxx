@@ -175,6 +175,7 @@ impl Hash for Slice {
 }
 
 impl Eq for Array {}
+
 impl PartialEq for Array {
     fn eq(&self, other: &Array) -> bool {
         let Array {
@@ -192,6 +193,7 @@ impl PartialEq for Array {
         inner == inner2 && len == len2
     }
 }
+
 impl Hash for Array {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let Array {
@@ -201,7 +203,7 @@ impl Hash for Array {
             len,
         } = self;
         inner.hash(state);
-        len.to_string().hash(state);
+        len.hash(state);
     }
 }
 

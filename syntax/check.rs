@@ -2,8 +2,8 @@ use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::types::TrivialReason;
 use crate::syntax::{
-    error, ident, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Signature, Slice,
-    Struct, Ty1, Type, Types,
+    error, ident, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Signature,
+    Slice, Struct, Ty1, Type, Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
@@ -194,7 +194,7 @@ fn check_type_array(cx: &mut Check, ty: &Array) {
         }
         Type::RustBox(_) | Type::RustVec(_) | Type::CxxVector(_) | Type::UniquePtr(_) => {}
         _ => cx.error(ty, "unsupported array target type"),
-    };
+    }
 }
 
 fn check_type_fn(cx: &mut Check, ty: &Signature) {

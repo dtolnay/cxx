@@ -172,9 +172,7 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
                 out.include.cstdint = true;
                 out.builtin.rust_slice = true;
             }
-            Type::Array(_) => {
-                out.include.array = true;
-            }
+            Type::Array(_) => out.include.array = true,
             Type::Ref(_) | Type::Void(_) => {}
         }
     }
