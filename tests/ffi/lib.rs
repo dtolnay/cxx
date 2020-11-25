@@ -2,7 +2,8 @@
     clippy::boxed_local,
     clippy::just_underscores_and_digits,
     clippy::ptr_arg,
-    clippy::trivially_copy_pass_by_ref
+    clippy::trivially_copy_pass_by_ref,
+    clippy::unnecessary_wraps
 )]
 
 pub mod module;

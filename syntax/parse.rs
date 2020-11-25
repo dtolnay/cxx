@@ -236,10 +236,8 @@ fn parse_foreign_mod(
     for foreign in &foreign_mod.items {
         match foreign {
             ForeignItem::Type(foreign) => {
-                match parse_extern_type(cx, foreign, lang, trusted, &namespace) {
-                    Ok(ety) => items.push(ety),
-                    Err(err) => cx.push(err),
-                }
+                let ety = parse_extern_type(cx, foreign, lang, trusted, &namespace);
+                items.push(ety);
             }
             ForeignItem::Fn(foreign) => {
                 match parse_extern_fn(cx, foreign, lang, trusted, &namespace) {
@@ -322,7 +320,7 @@ fn parse_extern_type(
     lang: Lang,
     trusted: bool,
     namespace: &Namespace,
-) -> Result<Api> {
+) -> Api {
     let mut doc = Doc::new();
     let mut namespace = namespace.clone();
     attrs::parse(
@@ -341,13 +339,13 @@ fn parse_extern_type(
         Lang::Cxx => Api::CxxType,
         Lang::Rust => Api::RustType,
     };
-    Ok(api_type(ExternType {
+    api_type(ExternType {
         doc,
         type_token,
         name: Pair::new(namespace, ident),
         semi_token,
         trusted,
-    }))
+    })
 }
 
 fn parse_extern_fn(
