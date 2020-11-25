@@ -970,23 +970,49 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
     }
 }
 
-// Only called for legal referent types of unique_ptr and element types of
-// std::vector and Vec.
-fn to_typename(ty: &Type, types: &Types) -> String {
-    match ty {
-        Type::Ident(ident) => types.resolve(&ident).to_fully_qualified(),
-        Type::CxxVector(ptr) => format!("::std::vector<{}>", to_typename(&ptr.inner, types)),
-        _ => unreachable!(),
+#[derive(Copy, Clone)]
+enum UniquePtr<'a> {
+    Ident(&'a ResolvableName),
+    CxxVector(&'a ResolvableName),
+}
+
+trait ToTypename {
+    fn to_typename(&self, types: &Types) -> String;
+}
+
+impl ToTypename for ResolvableName {
+    fn to_typename(&self, types: &Types) -> String {
+        types.resolve(self).to_fully_qualified()
     }
 }
 
-// Only called for legal referent types of unique_ptr and element types of
-// std::vector and Vec.
-fn to_mangled(ty: &Type, types: &Types) -> Symbol {
-    match ty {
-        Type::Ident(ident) => ident.to_symbol(types),
-        Type::CxxVector(ptr) => to_mangled(&ptr.inner, types).prefix_with("std$vector$"),
-        _ => unreachable!(),
+impl<'a> ToTypename for UniquePtr<'a> {
+    fn to_typename(&self, types: &Types) -> String {
+        match self {
+            UniquePtr::Ident(ident) => ident.to_typename(types),
+            UniquePtr::CxxVector(element) => {
+                format!("::std::vector<{}>", element.to_typename(types))
+            }
+        }
+    }
+}
+
+trait ToMangled {
+    fn to_mangled(&self, types: &Types) -> Symbol;
+}
+
+impl ToMangled for ResolvableName {
+    fn to_mangled(&self, types: &Types) -> Symbol {
+        self.to_symbol(types)
+    }
+}
+
+impl<'a> ToMangled for UniquePtr<'a> {
+    fn to_mangled(&self, types: &Types) -> Symbol {
+        match self {
+            UniquePtr::Ident(ident) => ident.to_mangled(types),
+            UniquePtr::CxxVector(element) => element.to_mangled(types).prefix_with("std$vector$"),
+        }
     }
 }
 
@@ -1028,7 +1054,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
                         || out.types.explicit_impls.contains(ty))
                 {
                     out.next_section();
-                    write_cxx_vector(out, ty, inner);
+                    write_cxx_vector(out, inner);
                 }
             }
         }
@@ -1074,9 +1100,8 @@ fn write_rust_box_extern(out: &mut OutFile, ident: &Pair) {
 }
 
 fn write_rust_vec_extern(out: &mut OutFile, element: &ResolvableName) {
-    let element = Type::Ident(element.clone());
-    let inner = to_typename(&element, out.types);
-    let instance = to_mangled(&element, out.types);
+    let inner = element.to_typename(out.types);
+    let instance = element.to_mangled(out.types);
 
     writeln!(out, "#ifndef CXXBRIDGE1_RUST_VEC_{}", instance);
     writeln!(out, "#define CXXBRIDGE1_RUST_VEC_{}", instance);
@@ -1134,9 +1159,8 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Pair) {
 }
 
 fn write_rust_vec_impl(out: &mut OutFile, element: &ResolvableName) {
-    let element = Type::Ident(element.clone());
-    let inner = to_typename(&element, out.types);
-    let instance = to_mangled(&element, out.types);
+    let inner = element.to_typename(out.types);
+    let instance = element.to_mangled(out.types);
 
     writeln!(out, "template <>");
     writeln!(out, "Vec<{}>::Vec() noexcept {{", inner);
@@ -1187,35 +1211,35 @@ fn write_rust_vec_impl(out: &mut OutFile, element: &ResolvableName) {
 }
 
 fn write_unique_ptr(out: &mut OutFile, ident: &ResolvableName) {
-    let ty = Type::Ident(ident.clone());
-    let instance = to_mangled(&ty, out.types);
+    let ty = UniquePtr::Ident(ident);
+    let instance = ty.to_mangled(out.types);
 
     writeln!(out, "#ifndef CXXBRIDGE1_UNIQUE_PTR_{}", instance);
     writeln!(out, "#define CXXBRIDGE1_UNIQUE_PTR_{}", instance);
 
-    write_unique_ptr_common(out, &ty);
+    write_unique_ptr_common(out, ty);
 
     writeln!(out, "#endif // CXXBRIDGE1_UNIQUE_PTR_{}", instance);
 }
 
 // Shared by UniquePtr<T> and UniquePtr<CxxVector<T>>.
-fn write_unique_ptr_common(out: &mut OutFile, ty: &Type) {
+fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     out.include.new = true;
     out.include.utility = true;
-    let inner = to_typename(ty, out.types);
-    let instance = to_mangled(ty, out.types);
+    let inner = ty.to_typename(out.types);
+    let instance = ty.to_mangled(out.types);
 
     let can_construct_from_value = match ty {
         // Some aliases are to opaque types; some are to trivial types. We can't
         // know at code generation time, so we generate both C++ and Rust side
         // bindings for a "new" method anyway. But the Rust code can't be called
         // for Opaque types because the 'new' method is not implemented.
-        Type::Ident(ident) => {
+        UniquePtr::Ident(ident) => {
             out.types.structs.contains_key(&ident.rust)
                 || out.types.enums.contains_key(&ident.rust)
                 || out.types.aliases.contains_key(&ident.rust)
         }
-        _ => false,
+        UniquePtr::CxxVector(_) => false,
     };
 
     writeln!(
@@ -1278,10 +1302,9 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: &Type) {
     writeln!(out, "}}");
 }
 
-fn write_cxx_vector(out: &mut OutFile, vector_ty: &Type, element: &ResolvableName) {
-    let element = Type::Ident(element.clone());
-    let inner = to_typename(&element, out.types);
-    let instance = to_mangled(&element, out.types);
+fn write_cxx_vector(out: &mut OutFile, element: &ResolvableName) {
+    let inner = element.to_typename(out.types);
+    let instance = element.to_mangled(out.types);
 
     writeln!(out, "#ifndef CXXBRIDGE1_VECTOR_{}", instance);
     writeln!(out, "#define CXXBRIDGE1_VECTOR_{}", instance);
@@ -1300,7 +1323,7 @@ fn write_cxx_vector(out: &mut OutFile, vector_ty: &Type, element: &ResolvableNam
     writeln!(out, "  return &s[pos];");
     writeln!(out, "}}");
 
-    write_unique_ptr_common(out, vector_ty);
+    write_unique_ptr_common(out, UniquePtr::CxxVector(element));
 
     writeln!(out, "#endif // CXXBRIDGE1_VECTOR_{}", instance);
 }
