@@ -183,12 +183,14 @@ impl PartialEq for Array {
             inner,
             semi_token: _,
             len,
+            len_token: _,
         } = self;
         let Array {
             bracket: _,
             inner: inner2,
             semi_token: _,
             len: len2,
+            len_token: _,
         } = other;
         inner == inner2 && len == len2
     }
@@ -201,6 +203,7 @@ impl Hash for Array {
             inner,
             semi_token: _,
             len,
+            len_token: _,
         } = self;
         inner.hash(state);
         len.hash(state);

@@ -657,8 +657,8 @@ fn parse_type_array(ty: &TypeArray, namespace: &Namespace) -> Result<Type> {
                 ));
             }
             match &lit.lit {
-                Lit::Int(v) => {
-                    let v = match v.base10_parse::<usize>() {
+                Lit::Int(len_token) => {
+                    let v = match len_token.base10_parse::<usize>() {
                         Ok(n_v) => n_v,
                         Err(_) => {
                             return Err(Error::new_spanned(
@@ -672,6 +672,7 @@ fn parse_type_array(ty: &TypeArray, namespace: &Namespace) -> Result<Type> {
                         inner,
                         semi_token: ty.semi_token,
                         len: v,
+                        len_token: len_token.clone(),
                     })))
                 }
                 _ => Err(Error::new_spanned(ty, "length literal must be a integer")),

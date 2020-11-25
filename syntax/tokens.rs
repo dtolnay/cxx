@@ -74,7 +74,7 @@ impl ToTokens for Array {
         self.bracket.surround(tokens, |tokens| {
             self.inner.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
-            self.len.to_tokens(tokens);
+            self.len_token.to_tokens(tokens);
         });
     }
 }
