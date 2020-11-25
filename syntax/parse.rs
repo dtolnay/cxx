@@ -752,22 +752,11 @@ fn parse_type_array(ty: &TypeArray, namespace: &Namespace) -> Result<Type> {
     let inner = parse_type(&ty.elem, namespace)?;
     match &ty.len {
         Expr::Lit(lit) => {
-            if !lit.attrs.is_empty() {
-                return Err(Error::new_spanned(
-                    ty,
-                    "attribute not allowed in length field",
-                ));
-            }
             match &lit.lit {
                 Lit::Int(len_token) => {
                     let v = match len_token.base10_parse::<usize>() {
                         Ok(n_v) => n_v,
-                        Err(_) => {
-                            return Err(Error::new_spanned(
-                                ty,
-                                "Cannot parse integer literal to base10",
-                            ))
-                        }
+                        Err(err) => return Err(Error::new_spanned(len_token, err)),
                     };
                     Ok(Type::Array(Box::new(Array {
                         bracket: ty.bracket_token,
@@ -777,12 +766,12 @@ fn parse_type_array(ty: &TypeArray, namespace: &Namespace) -> Result<Type> {
                         len_token: len_token.clone(),
                     })))
                 }
-                _ => Err(Error::new_spanned(ty, "length literal must be a integer")),
+                _ => Err(Error::new_spanned(lit, "array length must be an integer literal")),
             }
         }
         _ => Err(Error::new_spanned(
-            ty,
-            "only literal is currently supported in len field",
+            &ty.len,
+            "unsupported expression, array length must be an integer literal",
         )),
     }
 }
