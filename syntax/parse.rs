@@ -767,9 +767,14 @@ fn parse_type_array(ty: &TypeArray) -> Result<Type> {
         return Err(Error::new_spanned(len_expr, msg));
     };
 
+    let len = len_token.base10_parse::<usize>()?;
+    if len == 0 {
+        let msg = "array with zero size is not supported";
+        return Err(Error::new_spanned(ty, msg));
+    }
+
     let bracket = ty.bracket_token;
     let semi_token = ty.semi_token;
-    let len = len_token.base10_parse::<usize>()?;
 
     Ok(Type::Array(Box::new(Array {
         bracket,

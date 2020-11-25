@@ -9,3 +9,9 @@ error: unsupported expression, array length must be an integer literal
   |
 5 |         arraysub: [String; 15 - 1],
   |                            ^^^^^^
+
+error: array with zero size is not supported
+ --> $DIR/array_len_expr.rs:6:20
+  |
+6 |         arrayzero: [String; 0],
+  |                    ^^^^^^^^^^^
