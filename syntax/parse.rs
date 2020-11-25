@@ -750,30 +750,32 @@ fn parse_type_slice(ty: &TypeSlice, namespace: &Namespace) -> Result<Type> {
 
 fn parse_type_array(ty: &TypeArray, namespace: &Namespace) -> Result<Type> {
     let inner = parse_type(&ty.elem, namespace)?;
-    match &ty.len {
-        Expr::Lit(lit) => {
-            match &lit.lit {
-                Lit::Int(len_token) => {
-                    let v = match len_token.base10_parse::<usize>() {
-                        Ok(n_v) => n_v,
-                        Err(err) => return Err(Error::new_spanned(len_token, err)),
-                    };
-                    Ok(Type::Array(Box::new(Array {
-                        bracket: ty.bracket_token,
-                        inner,
-                        semi_token: ty.semi_token,
-                        len: v,
-                        len_token: len_token.clone(),
-                    })))
-                }
-                _ => Err(Error::new_spanned(lit, "array length must be an integer literal")),
-            }
-        }
-        _ => Err(Error::new_spanned(
-            &ty.len,
-            "unsupported expression, array length must be an integer literal",
-        )),
-    }
+
+    let len_expr = if let Expr::Lit(lit) = &ty.len {
+        lit
+    } else {
+        let msg = "unsupported expression, array length must be an integer literal";
+        return Err(Error::new_spanned(&ty.len, msg));
+    };
+
+    let len_token = if let Lit::Int(int) = &len_expr.lit {
+        int.clone()
+    } else {
+        let msg = "array length must be an integer literal";
+        return Err(Error::new_spanned(len_expr, msg));
+    };
+
+    let bracket = ty.bracket_token;
+    let semi_token = ty.semi_token;
+    let len = len_token.base10_parse::<usize>()?;
+
+    Ok(Type::Array(Box::new(Array {
+        bracket,
+        inner,
+        semi_token,
+        len,
+        len_token,
+    })))
 }
 
 fn parse_type_fn(ty: &TypeBareFn, namespace: &Namespace) -> Result<Type> {
