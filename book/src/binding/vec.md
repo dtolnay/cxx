@@ -39,26 +39,28 @@ public:
   template <typename... Args>
   void emplace_back(Args &&... args);
 
-  class const_iterator final {
-  public:
-    using difference_type = ptrdiff_t;
-    using value_type = typename std::add_const<T>::type;
-    using pointer =
-        typename std::add_pointer<typename std::add_const<T>::type>::type;
-    using reference = typename std::add_lvalue_reference<
-        typename std::add_const<T>::type>::type;
-    using iterator_category = std::forward_iterator_tag;
-
-    const T &operator*() const noexcept;
-    const T *operator->() const noexcept;
-    const_iterator &operator++() noexcept;
-    const_iterator operator++(int) noexcept;
-    bool operator==(const const_iterator &) const noexcept;
-    bool operator!=(const const_iterator &) const noexcept;
-  };
-
+  class const_iterator;
   const_iterator begin() const noexcept;
   const_iterator end() const noexcept;
+};
+
+template <typename T>
+class Vec<T>::const_iterator final {
+public:
+  using difference_type = ptrdiff_t;
+  using value_type = typename std::add_const<T>::type;
+  using pointer =
+      typename std::add_pointer<typename std::add_const<T>::type>::type;
+  using reference = typename std::add_lvalue_reference<
+      typename std::add_const<T>::type>::type;
+  using iterator_category = std::forward_iterator_tag;
+
+  const T &operator*() const noexcept;
+  const T *operator->() const noexcept;
+  const_iterator &operator++() noexcept;
+  const_iterator operator++(int) noexcept;
+  bool operator==(const const_iterator &) const noexcept;
+  bool operator!=(const const_iterator &) const noexcept;
 };
 #
 # } // namespace rust
