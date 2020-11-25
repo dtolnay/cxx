@@ -68,6 +68,13 @@ pub(super) fn format_err(path: &Path, source: &str, error: Error) -> ! {
                 display_syn_error(stderr, path, source, error);
             }
         }
+        Error::NoBridgeMod => {
+            let _ = writeln!(
+                io::stderr(),
+                "cxxbridge: no #[cxx::bridge] module found in {}",
+                path.display(),
+            );
+        }
         _ => {
             let _ = writeln!(io::stderr(), "cxxbridge: {}", report(error));
         }
