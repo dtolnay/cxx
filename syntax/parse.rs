@@ -89,16 +89,18 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct, namespace: &Namespace) -> Res
         }
     };
 
-    let fields = named_fields
-        .named
-        .into_iter()
-        .map(|field| {
-            Ok(Var {
-                ident: field.ident.unwrap(),
-                ty: parse_type(&field.ty)?,
-            })
-        })
-        .collect::<Result<_>>()?;
+    let mut fields = Vec::new();
+    for field in named_fields.named {
+        let ident = field.ident.unwrap();
+        let ty = match parse_type(&field.ty) {
+            Ok(ty) => ty,
+            Err(err) => {
+                cx.push(err);
+                continue;
+            }
+        };
+        fields.push(Var { ident, ty });
+    }
 
     Ok(Api::Struct(Struct {
         doc,

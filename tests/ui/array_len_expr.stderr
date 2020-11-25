@@ -3,3 +3,9 @@ error: array length must be an integer literal
   |
 4 |         arraystr: [String; "13"],
   |                            ^^^^
+
+error: unsupported expression, array length must be an integer literal
+ --> $DIR/array_len_expr.rs:5:28
+  |
+5 |         arraysub: [String; 15 - 1],
+  |                            ^^^^^^
