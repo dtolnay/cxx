@@ -53,11 +53,9 @@ public:
 template <typename T>
 class Vec<T>::iterator final {
 public:
-  using difference_type = ptrdiff_t;
   using value_type = T;
-  using pointer = typename std::add_pointer<T>::type;
-  using reference = typename std::add_lvalue_reference<T>::type;
-  using iterator_category = std::forward_iterator_tag;
+  using pointer = T *;
+  using reference = T &;
 
   T &operator*() const noexcept;
   T *operator->() const noexcept;
@@ -70,13 +68,9 @@ public:
 template <typename T>
 class Vec<T>::const_iterator final {
 public:
-  using difference_type = ptrdiff_t;
-  using value_type = typename std::add_const<T>::type;
-  using pointer =
-      typename std::add_pointer<typename std::add_const<T>::type>::type;
-  using reference = typename std::add_lvalue_reference<
-      typename std::add_const<T>::type>::type;
-  using iterator_category = std::forward_iterator_tag;
+  using value_type = const T;
+  using pointer = const T *;
+  using reference = const T &;
 
   const T &operator*() const noexcept;
   const T *operator->() const noexcept;
