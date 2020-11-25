@@ -88,7 +88,7 @@ private:
 
 #ifndef CXXBRIDGE1_RUST_SLICE
 namespace detail {
-template <bool cond>
+template <bool>
 struct copy_assignable_if {};
 
 template <>
