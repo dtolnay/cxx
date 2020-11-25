@@ -1,0 +1,17 @@
+Checks:
+  # TODO: many of these need to be resolved.
+  # https://github.com/dtolnay/cxx/issues/500
+  clang-analyzer-*,
+  clang-diagnostic-*,
+  cppcoreguidelines-*,
+  modernize-*,
+  -cppcoreguidelines-macro-usage,
+  -cppcoreguidelines-owning-memory,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-type-const-cast,
+  -cppcoreguidelines-pro-type-member-init,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
+  -cppcoreguidelines-special-member-functions,
+  -modernize-use-default-member-init,
+  -modernize-use-trailing-return-type,
+HeaderFilterRegex: cxx\.h

@@ -81,6 +81,10 @@ rust::Slice<const uint8_t> c_return_sliceu8(const Shared &shared) {
       reinterpret_cast<const uint8_t *>(SLICE_DATA), sizeof(SLICE_DATA));
 }
 
+rust::Slice<uint8_t> c_return_mutsliceu8(rust::Slice<uint8_t> slice) {
+  return slice;
+}
+
 rust::String c_return_rust_string() { return "2020"; }
 
 std::unique_ptr<std::string> c_return_unique_ptr_string() {
@@ -436,6 +440,10 @@ const rust::String &c_try_return_ref(const rust::String &s) { return s; }
 rust::Str c_try_return_str(rust::Str s) { return s; }
 
 rust::Slice<const uint8_t> c_try_return_sliceu8(rust::Slice<const uint8_t> s) {
+  return s;
+}
+
+rust::Slice<uint8_t> c_try_return_mutsliceu8(rust::Slice<uint8_t> s) {
   return s;
 }
 

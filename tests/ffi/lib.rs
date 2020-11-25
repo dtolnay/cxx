@@ -2,66 +2,14 @@
     clippy::boxed_local,
     clippy::just_underscores_and_digits,
     clippy::ptr_arg,
-    clippy::trivially_copy_pass_by_ref
+    clippy::trivially_copy_pass_by_ref,
+    clippy::unnecessary_wraps
 )]
 
-pub mod extra;
 pub mod module;
 
 use cxx::{CxxString, CxxVector, UniquePtr};
 use std::fmt::{self, Display};
-
-mod other {
-    use cxx::kind::{Opaque, Trivial};
-    use cxx::{type_id, CxxString, ExternType};
-
-    #[repr(C)]
-    pub struct D {
-        pub d: u64,
-    }
-
-    #[repr(C)]
-    pub struct E {
-        e: u64,
-        e_str: CxxString,
-    }
-
-    pub mod f {
-        use cxx::kind::Opaque;
-        use cxx::{type_id, CxxString, ExternType};
-
-        #[repr(C)]
-        pub struct F {
-            e: u64,
-            e_str: CxxString,
-        }
-
-        unsafe impl ExternType for F {
-            type Id = type_id!("F::F");
-            type Kind = Opaque;
-        }
-    }
-
-    #[repr(C)]
-    pub struct G {
-        pub g: u64,
-    }
-
-    unsafe impl ExternType for G {
-        type Id = type_id!("G::G");
-        type Kind = Trivial;
-    }
-
-    unsafe impl ExternType for D {
-        type Id = type_id!("tests::D");
-        type Kind = Trivial;
-    }
-
-    unsafe impl ExternType for E {
-        type Id = type_id!("tests::E");
-        type Kind = Opaque;
-    }
-}
 
 #[cxx::bridge(namespace = "tests")]
 pub mod ffi {
@@ -114,6 +62,7 @@ pub mod ffi {
     #[namespace = "second"]
     struct Second {
         i: i32,
+        e: COwnedEnum,
     }
 
     pub struct Array {
@@ -133,6 +82,7 @@ pub mod ffi {
         fn c_return_mut(shared: &mut Shared) -> &mut usize;
         fn c_return_str(shared: &Shared) -> &str;
         fn c_return_sliceu8(shared: &Shared) -> &[u8];
+        fn c_return_mutsliceu8(slice: &mut [u8]) -> &mut [u8];
         fn c_return_rust_string() -> String;
         fn c_return_unique_ptr_string() -> UniquePtr<CxxString>;
         fn c_return_unique_ptr_vector_u8() -> UniquePtr<CxxVector<u8>>;
@@ -196,6 +146,7 @@ pub mod ffi {
         fn c_try_return_ref(s: &String) -> Result<&String>;
         fn c_try_return_str(s: &str) -> Result<&str>;
         fn c_try_return_sliceu8(s: &[u8]) -> Result<&[u8]>;
+        fn c_try_return_mutsliceu8(s: &mut [u8]) -> Result<&mut [u8]>;
         fn c_try_return_rust_string() -> Result<String>;
         fn c_try_return_unique_ptr_string() -> Result<UniquePtr<CxxString>>;
         fn c_try_return_rust_vec() -> Result<Vec<u8>>;
@@ -243,6 +194,8 @@ pub mod ffi {
         fn r_return_ref(shared: &Shared) -> &usize;
         fn r_return_mut(shared: &mut Shared) -> &mut usize;
         fn r_return_str(shared: &Shared) -> &str;
+        fn r_return_sliceu8(shared: &Shared) -> &[u8];
+        fn r_return_mutsliceu8(slice: &mut [u8]) -> &mut [u8];
         fn r_return_rust_string() -> String;
         fn r_return_unique_ptr_string() -> UniquePtr<CxxString>;
         fn r_return_rust_vec() -> Vec<u8>;
@@ -275,6 +228,8 @@ pub mod ffi {
         fn r_try_return_primitive() -> Result<usize>;
         fn r_try_return_box() -> Result<Box<R>>;
         fn r_fail_return_primitive() -> Result<usize>;
+        fn r_try_return_sliceu8(s: &[u8]) -> Result<&[u8]>;
+        fn r_try_return_mutsliceu8(s: &mut [u8]) -> Result<&mut [u8]>;
 
         fn get(self: &R) -> usize;
         fn set(self: &mut R, n: usize) -> usize;
@@ -304,6 +259,58 @@ pub mod ffi {
 
     struct Dag4 {
         dag0: Dag0,
+    }
+}
+
+mod other {
+    use cxx::kind::{Opaque, Trivial};
+    use cxx::{type_id, CxxString, ExternType};
+
+    #[repr(C)]
+    pub struct D {
+        pub d: u64,
+    }
+
+    #[repr(C)]
+    pub struct E {
+        e: u64,
+        e_str: CxxString,
+    }
+
+    pub mod f {
+        use cxx::kind::Opaque;
+        use cxx::{type_id, CxxString, ExternType};
+
+        #[repr(C)]
+        pub struct F {
+            e: u64,
+            e_str: CxxString,
+        }
+
+        unsafe impl ExternType for F {
+            type Id = type_id!("F::F");
+            type Kind = Opaque;
+        }
+    }
+
+    #[repr(C)]
+    pub struct G {
+        pub g: u64,
+    }
+
+    unsafe impl ExternType for G {
+        type Id = type_id!("G::G");
+        type Kind = Trivial;
+    }
+
+    unsafe impl ExternType for D {
+        type Id = type_id!("tests::D");
+        type Kind = Trivial;
+    }
+
+    unsafe impl ExternType for E {
+        type Id = type_id!("tests::E");
+        type Kind = Opaque;
     }
 }
 
@@ -374,6 +381,15 @@ fn r_return_mut(shared: &mut ffi::Shared) -> &mut usize {
 fn r_return_str(shared: &ffi::Shared) -> &str {
     let _ = shared;
     "2020"
+}
+
+fn r_return_sliceu8(shared: &ffi::Shared) -> &[u8] {
+    let _ = shared;
+    b"2020"
+}
+
+fn r_return_mutsliceu8(slice: &mut [u8]) -> &mut [u8] {
+    slice
 }
 
 fn r_return_rust_string() -> String {
@@ -508,6 +524,14 @@ fn r_try_return_box() -> Result<Box<R>, Error> {
 
 fn r_fail_return_primitive() -> Result<usize, Error> {
     Err(Error)
+}
+
+fn r_try_return_sliceu8(slice: &[u8]) -> Result<&[u8], Error> {
+    Ok(slice)
+}
+
+fn r_try_return_mutsliceu8(slice: &mut [u8]) -> Result<&mut [u8], Error> {
+    Ok(slice)
 }
 
 fn r_aliased_function(x: i32) -> String {

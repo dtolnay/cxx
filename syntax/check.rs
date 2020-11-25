@@ -179,7 +179,10 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
 }
 
 fn check_type_slice(cx: &mut Check, ty: &Slice) {
-    cx.error(ty, "only &[u8] is supported so far, not other slice types");
+    cx.error(
+        ty,
+        "only &[u8] and &mut [u8] are supported so far, not other slice types",
+    );
 }
 
 fn check_type_array(cx: &mut Check, ty: &Array) {
@@ -237,9 +240,12 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
 fn check_api_enum(cx: &mut Check, enm: &Enum) {
     check_reserved_name(cx, &enm.name.rust);
 
-    if enm.variants.is_empty() {
+    if enm.variants.is_empty() && !enm.explicit_repr {
         let span = span_for_enum_error(enm);
-        cx.error(span, "enums without any variants are not supported");
+        cx.error(
+            span,
+            "explicit #[repr(...)] is required for enum without any variants",
+        );
     }
 }
 
@@ -411,6 +417,7 @@ fn check_reserved_name(cx: &mut Check, ident: &Ident) {
         || ident == "UniquePtr"
         || ident == "Vec"
         || ident == "CxxVector"
+        || ident == "str"
         || Atom::from(ident).is_some()
     {
         cx.error(ident, "reserved name");
@@ -418,12 +425,20 @@ fn check_reserved_name(cx: &mut Check, ident: &Ident) {
 }
 
 fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
-    let ident = match ty {
-        Type::Ident(ident) => &ident.rust,
-        Type::CxxVector(_) | Type::Slice(_) | Type::Void(_) => return true,
-        _ => return false,
-    };
-    ident == CxxString || is_opaque_cxx(cx, ident) || cx.types.rust.contains(ident)
+    match ty {
+        Type::Ident(ident) => {
+            let ident = &ident.rust;
+            ident == CxxString || is_opaque_cxx(cx, ident) || cx.types.rust.contains(ident)
+        }
+        Type::CxxVector(_) | Type::Slice(_) | Type::Void(_) => true,
+        Type::RustBox(_)
+        | Type::RustVec(_)
+        | Type::UniquePtr(_)
+        | Type::Ref(_)
+        | Type::Str(_)
+        | Type::Fn(_)
+        | Type::SliceRefU8(_) => false,
+    }
 }
 
 fn is_opaque_cxx(cx: &mut Check, ty: &Ident) -> bool {
@@ -493,7 +508,10 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         Type::Str(_) => "&str".to_owned(),
         Type::CxxVector(_) => "C++ vector".to_owned(),
         Type::Slice(_) => "slice".to_owned(),
-        Type::SliceRefU8(_) => "&[u8]".to_owned(),
+        Type::SliceRefU8(ty) => match ty.mutable {
+            false => "&[u8]".to_owned(),
+            true => "&mut [u8]".to_owned(),
+        },
         Type::Fn(_) => "function pointer".to_owned(),
         Type::Void(_) => "()".to_owned(),
         Type::Array(_) => "array".to_owned(),

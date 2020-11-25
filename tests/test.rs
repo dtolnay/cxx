@@ -1,6 +1,6 @@
 #![allow(clippy::assertions_on_constants, clippy::float_cmp, clippy::unit_cmp)]
 
-use cxx_test_suite::extra::ffi2;
+use cxx_test_suite::module::ffi2;
 use cxx_test_suite::{ffi, R};
 use std::cell::Cell;
 use std::ffi::CStr;
@@ -18,7 +18,11 @@ macro_rules! check {
     ($run:expr) => {{
         CORRECT.with(|correct| correct.set(false));
         $run;
-        assert!(CORRECT.with(|correct| correct.get()), stringify!($run));
+        assert!(
+            CORRECT.with(|correct| correct.get()),
+            "{}",
+            stringify!($run),
+        );
     }};
 }
 
@@ -188,14 +192,11 @@ fn test_c_method_calls() {
 
     let old_value = unique_ptr.get();
     assert_eq!(2020, old_value);
-    assert_eq!(2021, unique_ptr.as_mut().unwrap().set(2021));
+    assert_eq!(2021, unique_ptr.pin_mut().set(2021));
     assert_eq!(2021, unique_ptr.get());
     assert_eq!(2021, unique_ptr.get2());
-    assert_eq!(
-        2022,
-        unique_ptr.as_mut().unwrap().set_succeed(2022).unwrap(),
-    );
-    assert!(unique_ptr.as_mut().unwrap().get_fail().is_err());
+    assert_eq!(2022, unique_ptr.pin_mut().set_succeed(2022).unwrap(),);
+    assert!(unique_ptr.pin_mut().get_fail().is_err());
     assert_eq!(2021, ffi::Shared { z: 0 }.c_method_on_shared());
 
     let val = 42;

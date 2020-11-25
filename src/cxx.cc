@@ -67,8 +67,7 @@ String::String(const String &other) noexcept {
   cxxbridge1$string$clone(this, other);
 }
 
-String::String(String &&other) noexcept {
-  this->repr = other.repr;
+String::String(String &&other) noexcept : repr(other.repr) {
   cxxbridge1$string$new(&other);
 }
 
@@ -170,6 +169,28 @@ static_assert(std::is_trivially_copy_assignable<Str>::value,
               "trivial operator=(const Str &)");
 static_assert(std::is_trivially_destructible<Str>::value, "trivial ~Str()");
 
+static_assert(std::is_trivially_copy_constructible<Slice<const uint8_t>>::value,
+              "trivial Slice(const Slice &)");
+static_assert(std::is_trivially_move_constructible<Slice<const uint8_t>>::value,
+              "trivial Slice(Slice &&)");
+static_assert(std::is_trivially_copy_assignable<Slice<const uint8_t>>::value,
+              "trivial Slice::operator=(const Slice &) for const slices");
+static_assert(std::is_trivially_move_assignable<Slice<const uint8_t>>::value,
+              "trivial Slice::operator=(Slice &&)");
+static_assert(std::is_trivially_destructible<Slice<const uint8_t>>::value,
+              "trivial ~Slice()");
+
+static_assert(std::is_trivially_copy_constructible<Slice<uint8_t>>::value,
+              "trivial Slice(const Slice &)");
+static_assert(std::is_trivially_move_constructible<Slice<uint8_t>>::value,
+              "trivial Slice(Slice &&)");
+static_assert(!std::is_copy_assignable<Slice<uint8_t>>::value,
+              "delete Slice::operator=(const Slice &) for mut slices");
+static_assert(std::is_trivially_move_assignable<Slice<uint8_t>>::value,
+              "trivial Slice::operator=(Slice &&)");
+static_assert(std::is_trivially_destructible<Slice<uint8_t>>::value,
+              "trivial ~Slice()");
+
 extern "C" {
 const char *cxxbridge1$error(const char *ptr, size_t len) {
   char *copy = new char[len];
@@ -240,10 +261,13 @@ void cxxbridge1$unique_ptr$std$string$drop(
 }
 } // extern "C"
 
+namespace {
+const size_t kMaxExpectedWordsInString = 8;
 static_assert(alignof(std::string) <= alignof(void *),
               "unexpectedly large std::string alignment");
-static_assert(sizeof(std::string) <= 8 * sizeof(void *),
+static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
               "unexpectedly large std::string size");
+} // namespace
 
 #define STD_VECTOR_OPS(RUST_TYPE, CXX_TYPE)                                    \
   size_t cxxbridge1$std$vector$##RUST_TYPE##$size(                             \

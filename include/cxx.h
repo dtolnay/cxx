@@ -63,7 +63,6 @@ public:
   Str(const std::string &);
   Str(const char *);
   Str(const char *, size_t);
-  Str(std::string &&) = delete;
 
   Str &operator=(const Str &) noexcept = default;
 
@@ -88,16 +87,28 @@ private:
 #endif // CXXBRIDGE1_RUST_STR
 
 #ifndef CXXBRIDGE1_RUST_SLICE
-template <typename T>
-class Slice final {
-  static_assert(std::is_const<T>::value,
-                "&[T] needs to be written as rust::Slice<const T> in C++");
+namespace detail {
+template <bool cond>
+struct copy_assignable_if {};
 
+template <>
+struct copy_assignable_if<false> {
+  copy_assignable_if() noexcept = default;
+  copy_assignable_if(const copy_assignable_if &) noexcept = default;
+  copy_assignable_if &operator=(const copy_assignable_if &) noexcept = delete;
+  copy_assignable_if &operator=(copy_assignable_if &&) noexcept = default;
+};
+} // namespace detail
+
+template <typename T>
+class Slice final
+    : private detail::copy_assignable_if<std::is_const<T>::value> {
 public:
   Slice() noexcept;
   Slice(T *, size_t count) noexcept;
 
   Slice &operator=(const Slice<T> &) noexcept = default;
+  Slice &operator=(Slice<T> &&) noexcept = default;
 
   T *data() const noexcept;
   size_t size() const noexcept;
@@ -251,7 +262,7 @@ class Error final : public std::exception {
 public:
   Error(const Error &);
   Error(Error &&) noexcept;
-  ~Error() noexcept;
+  ~Error() noexcept override;
 
   Error &operator=(const Error &);
   Error &operator=(Error &&) noexcept;
@@ -478,14 +489,13 @@ T *Box<T>::into_raw() noexcept {
 }
 
 template <typename T>
-Box<T>::Box() noexcept {}
+Box<T>::Box() noexcept = default;
 #endif // CXXBRIDGE1_RUST_BOX
 
 #ifndef CXXBRIDGE1_RUST_VEC
 #define CXXBRIDGE1_RUST_VEC
 template <typename T>
-Vec<T>::Vec(Vec &&other) noexcept {
-  this->repr = other.repr;
+Vec<T>::Vec(Vec &&other) noexcept : repr(other.repr) {
   new (&other) Vec();
 }
 

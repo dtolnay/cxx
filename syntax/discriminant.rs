@@ -16,8 +16,14 @@ pub struct DiscriminantSet {
 
 #[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Discriminant {
-    negative: bool,
+    sign: Sign,
     magnitude: u64,
+}
+
+#[derive(Copy, Clone, Eq, PartialEq)]
+enum Sign {
+    Negative,
+    Positive,
 }
 
 impl DiscriminantSet {
@@ -59,21 +65,23 @@ impl DiscriminantSet {
     pub fn insert_next(&mut self) -> Result<Discriminant> {
         let discriminant = match self.previous {
             None => Discriminant::zero(),
-            Some(mut discriminant) if discriminant.negative => {
-                discriminant.magnitude -= 1;
-                if discriminant.magnitude == 0 {
-                    discriminant.negative = false;
+            Some(mut discriminant) => match discriminant.sign {
+                Sign::Negative => {
+                    discriminant.magnitude -= 1;
+                    if discriminant.magnitude == 0 {
+                        discriminant.sign = Sign::Positive;
+                    }
+                    discriminant
                 }
-                discriminant
-            }
-            Some(mut discriminant) => {
-                if discriminant.magnitude == u64::MAX {
-                    let msg = format!("discriminant overflow on value after {}", u64::MAX);
-                    return Err(Error::new(Span::call_site(), msg));
+                Sign::Positive => {
+                    if discriminant.magnitude == u64::MAX {
+                        let msg = format!("discriminant overflow on value after {}", u64::MAX);
+                        return Err(Error::new(Span::call_site(), msg));
+                    }
+                    discriminant.magnitude += 1;
+                    discriminant
                 }
-                discriminant.magnitude += 1;
-                discriminant
-            }
+            },
         };
         insert(self, discriminant)
     }
@@ -109,7 +117,10 @@ fn expr_to_discriminant(expr: &Expr) -> Result<(Discriminant, Option<Atom>)> {
         Expr::Unary(unary) => {
             if let UnOp::Neg(_) = unary.op {
                 let (mut discriminant, repr) = expr_to_discriminant(&unary.expr)?;
-                discriminant.negative ^= true;
+                discriminant.sign = match discriminant.sign {
+                    Sign::Positive => Sign::Negative,
+                    Sign::Negative => Sign::Positive,
+                };
                 return Ok((discriminant, repr));
             }
         }
@@ -133,33 +144,33 @@ fn insert(set: &mut DiscriminantSet, discriminant: Discriminant) -> Result<Discr
             }
         }
     }
-    if set.values.insert(discriminant) {
-        set.previous = Some(discriminant);
-        Ok(discriminant)
-    } else {
-        let msg = format!("discriminant value `{}` already exists", discriminant);
-        Err(Error::new(Span::call_site(), msg))
-    }
+    set.values.insert(discriminant);
+    set.previous = Some(discriminant);
+    Ok(discriminant)
 }
 
 impl Discriminant {
     const fn zero() -> Self {
         Discriminant {
-            negative: false,
+            sign: Sign::Positive,
             magnitude: 0,
         }
     }
 
     const fn pos(u: u64) -> Self {
         Discriminant {
-            negative: false,
+            sign: Sign::Positive,
             magnitude: u,
         }
     }
 
     const fn neg(i: i64) -> Self {
         Discriminant {
-            negative: i < 0,
+            sign: if i < 0 {
+                Sign::Negative
+            } else {
+                Sign::Positive
+            },
             // This is `i.abs() as u64` but without overflow on MIN. Uses the
             // fact that MIN.wrapping_abs() wraps back to MIN whose binary
             // representation is 1<<63, and thus the `as u64` conversion
@@ -172,7 +183,7 @@ impl Discriminant {
 
 impl Display for Discriminant {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        if self.negative {
+        if self.sign == Sign::Negative {
             f.write_str("-")?;
         }
         Display::fmt(&self.magnitude, f)
@@ -181,7 +192,7 @@ impl Display for Discriminant {
 
 impl ToTokens for Discriminant {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        if self.negative {
+        if self.sign == Sign::Negative {
             Token![-](Span::call_site()).to_tokens(tokens);
         }
         Literal::u64_unsuffixed(self.magnitude).to_tokens(tokens);
@@ -192,15 +203,14 @@ impl FromStr for Discriminant {
     type Err = Error;
 
     fn from_str(mut s: &str) -> Result<Self> {
-        let negative = s.starts_with('-');
-        if negative {
+        let sign = if s.starts_with('-') {
             s = &s[1..];
-        }
+            Sign::Negative
+        } else {
+            Sign::Positive
+        };
         match s.parse::<u64>() {
-            Ok(magnitude) => Ok(Discriminant {
-                negative,
-                magnitude,
-            }),
+            Ok(magnitude) => Ok(Discriminant { sign, magnitude }),
             Err(_) => Err(Error::new(
                 Span::call_site(),
                 "discriminant value outside of supported range",
@@ -211,11 +221,12 @@ impl FromStr for Discriminant {
 
 impl Ord for Discriminant {
     fn cmp(&self, other: &Self) -> Ordering {
-        match (self.negative, other.negative) {
-            (true, true) => self.magnitude.cmp(&other.magnitude).reverse(),
-            (true, false) => Ordering::Less, // negative < positive
-            (false, true) => Ordering::Greater, // positive > negative
-            (false, false) => self.magnitude.cmp(&other.magnitude),
+        use self::Sign::{Negative, Positive};
+        match (self.sign, other.sign) {
+            (Negative, Negative) => self.magnitude.cmp(&other.magnitude).reverse(),
+            (Negative, Positive) => Ordering::Less, // negative < positive
+            (Positive, Negative) => Ordering::Greater, // positive > negative
+            (Positive, Positive) => self.magnitude.cmp(&other.magnitude),
         }
     }
 }

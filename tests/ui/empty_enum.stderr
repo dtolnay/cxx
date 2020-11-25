@@ -1,4 +1,4 @@
-error: enums without any variants are not supported
+error: explicit #[repr(...)] is required for enum without any variants
  --> $DIR/empty_enum.rs:3:5
   |
 3 |     enum A {}

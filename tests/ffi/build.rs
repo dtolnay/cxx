@@ -6,7 +6,7 @@ fn main() {
     }
 
     CFG.include_prefix = "tests/ffi";
-    let sources = vec!["lib.rs", "extra.rs", "module.rs"];
+    let sources = vec!["lib.rs", "module.rs"];
     cxx_build::bridges(sources)
         .file("tests.cc")
         .flag_if_supported(cxxbridge_flags::STD)

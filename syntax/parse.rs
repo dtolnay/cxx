@@ -170,6 +170,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
     let enum_token = item.enum_token;
     let brace_token = item.brace_token;
 
+    let explicit_repr = repr.is_some();
     let mut repr = U8;
     match discriminants.inferred_repr() {
         Ok(inferred) => repr = inferred,
@@ -191,6 +192,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
         variants,
         repr,
         repr_type,
+        explicit_repr,
     }))
 }
 
@@ -234,10 +236,8 @@ fn parse_foreign_mod(
     for foreign in &foreign_mod.items {
         match foreign {
             ForeignItem::Type(foreign) => {
-                match parse_extern_type(cx, foreign, lang, trusted, &namespace) {
-                    Ok(ety) => items.push(ety),
-                    Err(err) => cx.push(err),
-                }
+                let ety = parse_extern_type(cx, foreign, lang, trusted, &namespace);
+                items.push(ety);
             }
             ForeignItem::Fn(foreign) => {
                 match parse_extern_fn(cx, foreign, lang, trusted, &namespace) {
@@ -320,7 +320,7 @@ fn parse_extern_type(
     lang: Lang,
     trusted: bool,
     namespace: &Namespace,
-) -> Result<Api> {
+) -> Api {
     let mut doc = Doc::new();
     let mut namespace = namespace.clone();
     attrs::parse(
@@ -339,13 +339,13 @@ fn parse_extern_type(
         Lang::Cxx => Api::CxxType,
         Lang::Rust => Api::RustType,
     };
-    Ok(api_type(ExternType {
+    api_type(ExternType {
         doc,
         type_token,
         name: Pair::new(namespace, ident),
         semi_token,
         trusted,
-    }))
+    })
 }
 
 fn parse_extern_fn(
@@ -371,6 +371,24 @@ fn parse_extern_fn(
         return Err(Error::new_spanned(
             variadic,
             "variadic function is not supported yet",
+        ));
+    }
+    if foreign_fn.sig.asyncness.is_some() {
+        return Err(Error::new_spanned(
+            foreign_fn,
+            "async function is not directly supported yet, but see https://cxx.rs/async.html for a working approach",
+        ));
+    }
+    if foreign_fn.sig.constness.is_some() {
+        return Err(Error::new_spanned(
+            foreign_fn,
+            "const extern function is not supported",
+        ));
+    }
+    if let Some(abi) = &foreign_fn.sig.abi {
+        return Err(Error::new_spanned(
+            abi,
+            "explicit ABI on extern function is not supported",
         ));
     }
 
@@ -677,7 +695,7 @@ fn parse_type_reference(ty: &TypeReference, namespace: &Namespace) -> Result<Typ
             }
         }
         Type::Slice(slice) => match &slice.inner {
-            Type::Ident(ident) if ident.rust == U8 && ty.mutability.is_none() => Type::SliceRefU8,
+            Type::Ident(ident) if ident.rust == U8 => Type::SliceRefU8,
             _ => Type::Ref,
         },
         _ => Type::Ref,

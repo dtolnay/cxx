@@ -6,7 +6,7 @@ use core::ffi::c_void;
 use core::fmt::{self, Debug, Display};
 use core::marker::PhantomData;
 use core::mem;
-use core::ops::Deref;
+use core::ops::{Deref, DerefMut};
 use core::pin::Pin;
 use core::ptr;
 
@@ -68,6 +68,19 @@ where
         }
     }
 
+    /// Returns a mutable pinned reference to the object owned by this
+    /// UniquePtr.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the UniquePtr holds a null pointer.
+    pub fn pin_mut(&mut self) -> Pin<&mut T> {
+        match self.as_mut() {
+            Some(target) => target,
+            None => panic!("called pin_mut on a null UniquePtr<{}>", T::__NAME),
+        }
+    }
+
     /// Consumes the UniquePtr, releasing its ownership of the heap-allocated T.
     ///
     /// Matches the behavior of [std::unique_ptr\<T\>::release](https://en.cppreference.com/w/cpp/memory/unique_ptr/release).
@@ -115,6 +128,18 @@ where
         match self.as_ref() {
             Some(target) => target,
             None => panic!("called deref on a null UniquePtr<{}>", T::__NAME),
+        }
+    }
+}
+
+impl<T> DerefMut for UniquePtr<T>
+where
+    T: UniquePtrTarget + Unpin,
+{
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        match self.as_mut() {
+            Some(target) => Pin::into_inner(target),
+            None => panic!("called deref_mut on a null UniquePtr<{}>", T::__NAME),
         }
     }
 }

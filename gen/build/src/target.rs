@@ -1,4 +1,5 @@
 use std::env;
+use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 
 pub(crate) enum TargetDir {
@@ -24,7 +25,13 @@ pub(crate) fn find_target_dir(out_dir: &Path) -> TargetDir {
 
     let mut dir = out_dir.to_owned();
     loop {
-        if dir.join(".rustc_info.json").exists() || dir.join("CACHEDIR.TAG").exists() {
+        if dir.join(".rustc_info.json").exists()
+            || dir.join("CACHEDIR.TAG").exists()
+            || dir.file_name() == Some(OsStr::new("target"))
+                && dir
+                    .parent()
+                    .map_or(false, |parent| parent.join("Cargo.toml").exists())
+        {
             return TargetDir::Path(dir);
         }
         if dir.pop() {

@@ -11,15 +11,26 @@ pub struct RustSliceU8 {
 }
 
 impl RustSliceU8 {
-    pub fn from(s: &[u8]) -> Self {
+    pub fn from_ref(s: &[u8]) -> Self {
         RustSliceU8 {
             ptr: NonNull::from(s).cast::<u8>(),
             len: s.len(),
         }
     }
 
+    pub fn from_mut(s: &mut [u8]) -> Self {
+        RustSliceU8 {
+            len: s.len(),
+            ptr: NonNull::from(s).cast::<u8>(),
+        }
+    }
+
     pub unsafe fn as_slice<'a>(self) -> &'a [u8] {
         slice::from_raw_parts(self.ptr.as_ptr(), self.len)
+    }
+
+    pub unsafe fn as_mut_slice<'a>(self) -> &'a mut [u8] {
+        slice::from_raw_parts_mut(self.ptr.as_ptr(), self.len)
     }
 }
 

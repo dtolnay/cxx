@@ -25,7 +25,7 @@
 - [Reference: built-in bindings](bindings.md)
     - [String &mdash; rust::String](binding/string.md)
     - [&str &mdash; rust::Str](binding/str.md)
-    - [&&#91;T&#93; &mdash; rust::Slice\<const T\>](binding/slice.md)
+    - [&&#91;T&#93;, &mut &#91;T&#93; &mdash; rust::Slice\<T\>](binding/slice.md)
     - [CxxString &mdash; std::string](binding/cxxstring.md)
     - [Box\<T\> &mdash; rust::Box\<T\>](binding/box.md)
     - [UniquePtr\<T\> &mdash; std::unique\_ptr\<T\>](binding/uniqueptr.md)

@@ -13,7 +13,7 @@ rust_library(
 
 rust_library(
     name = "cc",
-    srcs = glob(["vendor/cc-1.0.62/src/**"]),
+    srcs = glob(["vendor/cc-1.0.65/src/**"]),
     visibility = ["//visibility:public"],
 )
 
@@ -78,7 +78,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.48/src/**"]),
+    srcs = glob(["vendor/syn-1.0.51/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
@@ -97,7 +97,7 @@ rust_library(
 
 rust_library(
     name = "termcolor",
-    srcs = glob(["vendor/termcolor-1.1.0/src/**"]),
+    srcs = glob(["vendor/termcolor-1.1.2/src/**"]),
 )
 
 rust_library(
