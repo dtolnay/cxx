@@ -3,7 +3,7 @@ use crate::syntax::file::{Item, ItemForeignMod};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
-    attrs, error, Api, Doc, Enum, ExternFn, ExternType, Impl, Include, IncludeKind, Lang,
+    attrs, error, Api, Array, Doc, Enum, ExternFn, ExternType, Impl, Include, IncludeKind, Lang,
     Namespace, Pair, Receiver, Ref, ResolvableName, Signature, Slice, Struct, Ty1, Type, TypeAlias,
     Var, Variant,
 };
@@ -12,10 +12,10 @@ use quote::{format_ident, quote, quote_spanned};
 use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::{
-    Abi, Attribute, Error, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
-    GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, LitStr, Pat,
-    PathArguments, Result, ReturnType, Token, Type as RustType, TypeBareFn, TypePath,
-    TypeReference, TypeSlice,
+    Abi, Attribute, Error, Expr, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
+    GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lit, LitStr,
+    Pat, PathArguments, Result, ReturnType, Token, Type as RustType, TypeArray, TypeBareFn,
+    TypePath, TypeReference, TypeSlice,
 };
 
 pub mod kw {
@@ -639,6 +639,7 @@ fn parse_type(ty: &RustType, namespace: &Namespace) -> Result<Type> {
         RustType::Reference(ty) => parse_type_reference(ty, namespace),
         RustType::Path(ty) => parse_type_path(ty, namespace),
         RustType::Slice(ty) => parse_type_slice(ty, namespace),
+        RustType::Array(ty) => parse_type_array(ty, namespace),
         RustType::BareFn(ty) => parse_type_fn(ty, namespace),
         RustType::Tuple(ty) if ty.elems.is_empty() => Ok(Type::Void(ty.paren_token.span)),
         _ => Err(Error::new_spanned(ty, "unsupported type")),
@@ -744,6 +745,36 @@ fn parse_type_slice(ty: &TypeSlice, namespace: &Namespace) -> Result<Type> {
     Ok(Type::Slice(Box::new(Slice {
         bracket: ty.bracket_token,
         inner,
+    })))
+}
+
+fn parse_type_array(ty: &TypeArray, namespace: &Namespace) -> Result<Type> {
+    let inner = parse_type(&ty.elem, namespace)?;
+
+    let len_expr = if let Expr::Lit(lit) = &ty.len {
+        lit
+    } else {
+        let msg = "unsupported expression, array length must be an integer literal";
+        return Err(Error::new_spanned(&ty.len, msg));
+    };
+
+    let len_token = if let Lit::Int(int) = &len_expr.lit {
+        int.clone()
+    } else {
+        let msg = "array length must be an integer literal";
+        return Err(Error::new_spanned(len_expr, msg));
+    };
+
+    let bracket = ty.bracket_token;
+    let semi_token = ty.semi_token;
+    let len = len_token.base10_parse::<usize>()?;
+
+    Ok(Type::Array(Box::new(Array {
+        bracket,
+        inner,
+        semi_token,
+        len,
+        len_token,
     })))
 }
 

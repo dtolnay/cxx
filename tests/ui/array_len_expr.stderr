@@ -1,0 +1,11 @@
+error: array length must be an integer literal
+ --> $DIR/array_len_expr.rs:4:35
+  |
+4 |         fn arraystr() -> [String; "13"];
+  |                                   ^^^^
+
+error: unsupported expression, array length must be an integer literal
+ --> $DIR/array_len_expr.rs:5:35
+  |
+5 |         fn arraysub() -> [String; 15 - 1];
+  |                                   ^^^^^^
