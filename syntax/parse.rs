@@ -4,8 +4,8 @@ use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
     attrs, error, Api, Array, Doc, Enum, ExternFn, ExternType, Impl, Include, IncludeKind, Lang,
-    Namespace, Pair, Receiver, Ref, ResolvableName, Signature, Slice, Struct, Ty1, Type, TypeAlias,
-    Var, Variant,
+    Namespace, Pair, Receiver, Ref, ResolvableName, Signature, SliceRef, Struct, Ty1, Type,
+    TypeAlias, Var, Variant,
 };
 use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
@@ -15,7 +15,7 @@ use syn::{
     Abi, Attribute, Error, Expr, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
     GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lit, LitStr,
     Pat, PathArguments, Result, ReturnType, Token, Type as RustType, TypeArray, TypeBareFn,
-    TypePath, TypeReference, TypeSlice,
+    TypePath, TypeReference,
 };
 
 pub mod kw {
@@ -640,7 +640,6 @@ fn parse_type(ty: &RustType) -> Result<Type> {
     match ty {
         RustType::Reference(ty) => parse_type_reference(ty),
         RustType::Path(ty) => parse_type_path(ty),
-        RustType::Slice(ty) => parse_type_slice(ty),
         RustType::Array(ty) => parse_type_array(ty),
         RustType::BareFn(ty) => parse_type_fn(ty),
         RustType::Tuple(ty) if ty.elems.is_empty() => Ok(Type::Void(ty.paren_token.span)),
@@ -649,6 +648,24 @@ fn parse_type(ty: &RustType) -> Result<Type> {
 }
 
 fn parse_type_reference(ty: &TypeReference) -> Result<Type> {
+    if let RustType::Slice(slice) = ty.elem.as_ref() {
+        let inner = parse_type(&slice.elem)?;
+        return match &inner {
+            Type::Ident(ident) if ident.rust == U8 => Ok(Type::SliceRefU8(Box::new(SliceRef {
+                ampersand: ty.and_token,
+                lifetime: ty.lifetime.clone(),
+                mutable: ty.mutability.is_some(),
+                bracket: slice.bracket_token,
+                inner,
+                mutability: ty.mutability,
+            }))),
+            _ => Err(Error::new_spanned(
+                ty,
+                "only &[u8] and &mut [u8] are supported so far, not other slice types",
+            )),
+        };
+    }
+
     let inner = parse_type(&ty.elem)?;
     let which = match &inner {
         Type::Ident(ident) if ident.rust == "str" => {
@@ -658,10 +675,6 @@ fn parse_type_reference(ty: &TypeReference) -> Result<Type> {
                 Type::Str
             }
         }
-        Type::Slice(slice) => match &slice.inner {
-            Type::Ident(ident) if ident.rust == U8 => Type::SliceRefU8,
-            _ => Type::Ref,
-        },
         _ => Type::Ref,
     };
     Ok(which(Box::new(Ref {
@@ -740,14 +753,6 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
         }
     }
     Err(Error::new_spanned(ty, "unsupported type"))
-}
-
-fn parse_type_slice(ty: &TypeSlice) -> Result<Type> {
-    let inner = parse_type(&ty.elem)?;
-    Ok(Type::Slice(Box::new(Slice {
-        bracket: ty.bracket_token,
-        inner,
-    })))
 }
 
 fn parse_type_array(ty: &TypeArray) -> Result<Type> {

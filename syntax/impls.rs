@@ -1,4 +1,6 @@
-use crate::syntax::{Array, ExternFn, Impl, Include, Receiver, Ref, Signature, Slice, Ty1, Type};
+use crate::syntax::{
+    Array, ExternFn, Impl, Include, Receiver, Ref, Signature, SliceRef, Ty1, Type,
+};
 use std::borrow::Borrow;
 use std::hash::{Hash, Hasher};
 use std::mem;
@@ -48,7 +50,6 @@ impl Hash for Type {
             Type::RustVec(t) => t.hash(state),
             Type::CxxVector(t) => t.hash(state),
             Type::Fn(t) => t.hash(state),
-            Type::Slice(t) => t.hash(state),
             Type::SliceRefU8(t) => t.hash(state),
             Type::Array(t) => t.hash(state),
             Type::Void(_) => {}
@@ -69,7 +70,6 @@ impl PartialEq for Type {
             (Type::RustVec(lhs), Type::RustVec(rhs)) => lhs == rhs,
             (Type::CxxVector(lhs), Type::CxxVector(rhs)) => lhs == rhs,
             (Type::Fn(lhs), Type::Fn(rhs)) => lhs == rhs,
-            (Type::Slice(lhs), Type::Slice(rhs)) => lhs == rhs,
             (Type::SliceRefU8(lhs), Type::SliceRefU8(rhs)) => lhs == rhs,
             (Type::Void(_), Type::Void(_)) => true,
             (_, _) => false,
@@ -154,22 +154,42 @@ impl Hash for Ref {
     }
 }
 
-impl Eq for Slice {}
+impl Eq for SliceRef {}
 
-impl PartialEq for Slice {
-    fn eq(&self, other: &Slice) -> bool {
-        let Slice { bracket: _, inner } = self;
-        let Slice {
+impl PartialEq for SliceRef {
+    fn eq(&self, other: &SliceRef) -> bool {
+        let SliceRef {
+            ampersand: _,
+            lifetime,
+            mutable,
+            bracket: _,
+            inner,
+            mutability: _,
+        } = self;
+        let SliceRef {
+            ampersand: _,
+            lifetime: lifetime2,
+            mutable: mutable2,
             bracket: _,
             inner: inner2,
+            mutability: _,
         } = other;
-        inner == inner2
+        lifetime == lifetime2 && mutable == mutable2 && inner == inner2
     }
 }
 
-impl Hash for Slice {
+impl Hash for SliceRef {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        let Slice { bracket: _, inner } = self;
+        let SliceRef {
+            ampersand: _,
+            lifetime,
+            mutable,
+            bracket: _,
+            inner,
+            mutability: _,
+        } = self;
+        lifetime.hash(state);
+        mutable.hash(state);
         inner.hash(state);
     }
 }

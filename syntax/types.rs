@@ -48,7 +48,6 @@ impl<'a> Types<'a> {
                 | Type::CxxVector(ty)
                 | Type::RustVec(ty) => visit(all, &ty.inner),
                 Type::Ref(r) => visit(all, &r.inner),
-                Type::Slice(s) => visit(all, &s.inner),
                 Type::Array(a) => visit(all, &a.inner),
                 Type::Fn(f) => {
                     if let Some(ret) = &f.ret {

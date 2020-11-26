@@ -164,8 +164,7 @@ pub enum Type {
     CxxVector(Box<Ty1>),
     Fn(Box<Signature>),
     Void(Span),
-    Slice(Box<Slice>),
-    SliceRefU8(Box<Ref>),
+    SliceRefU8(Box<SliceRef>),
     Array(Box<Array>),
 }
 
@@ -186,9 +185,13 @@ pub struct Ref {
     pub mutability: Option<Token![mut]>,
 }
 
-pub struct Slice {
+pub struct SliceRef {
+    pub ampersand: Token![&],
+    pub lifetime: Option<Lifetime>,
+    pub mutable: bool,
     pub bracket: Bracket,
     pub inner: Type,
+    pub mutability: Option<Token![mut]>,
 }
 
 pub struct Array {

@@ -3,7 +3,7 @@ use crate::syntax::report::Errors;
 use crate::syntax::types::TrivialReason;
 use crate::syntax::{
     error, ident, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Signature,
-    Slice, Struct, Ty1, Type, Types,
+    Struct, Ty1, Type, Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
@@ -34,7 +34,6 @@ fn do_typecheck(cx: &mut Check) {
             Type::UniquePtr(ptr) => check_type_unique_ptr(cx, ptr),
             Type::CxxVector(ptr) => check_type_cxx_vector(cx, ptr),
             Type::Ref(ty) => check_type_ref(cx, ty),
-            Type::Slice(ty) => check_type_slice(cx, ty),
             Type::Array(array) => check_type_array(cx, array),
             Type::Fn(ty) => check_type_fn(cx, ty),
             Type::Str(_) | Type::Void(_) | Type::SliceRefU8(_) => {}
@@ -176,13 +175,6 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
     }
 
     cx.error(ty, "unsupported reference type");
-}
-
-fn check_type_slice(cx: &mut Check, ty: &Slice) {
-    cx.error(
-        ty,
-        "only &[u8] and &mut [u8] are supported so far, not other slice types",
-    );
 }
 
 fn check_type_array(cx: &mut Check, ty: &Array) {
@@ -424,7 +416,7 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
             ident == CxxString || is_opaque_cxx(cx, ident) || cx.types.rust.contains(ident)
         }
         Type::Array(array) => is_unsized(cx, &array.inner),
-        Type::CxxVector(_) | Type::Slice(_) | Type::Fn(_) | Type::Void(_) => true,
+        Type::CxxVector(_) | Type::Fn(_) | Type::Void(_) => true,
         Type::RustBox(_)
         | Type::RustVec(_)
         | Type::UniquePtr(_)
@@ -500,7 +492,6 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         Type::Ref(_) => "reference".to_owned(),
         Type::Str(_) => "&str".to_owned(),
         Type::CxxVector(_) => "C++ vector".to_owned(),
-        Type::Slice(_) => "slice".to_owned(),
         Type::SliceRefU8(ty) => match ty.mutable {
             false => "&[u8]".to_owned(),
             true => "&mut [u8]".to_owned(),

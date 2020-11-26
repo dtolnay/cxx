@@ -167,7 +167,6 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
             Type::Str(_) => out.builtin.rust_str = true,
             Type::CxxVector(_) => out.include.vector = true,
             Type::Fn(_) => out.builtin.rust_fn = true,
-            Type::Slice(_) => out.builtin.rust_slice = true,
             Type::SliceRefU8(_) => {
                 out.include.cstdint = true;
                 out.builtin.rust_slice = true;
@@ -890,10 +889,6 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write_type(out, &r.inner);
             write!(out, " &");
         }
-        Type::Slice(_) => {
-            // For now, only U8 slices are supported, which are covered separately below
-            unreachable!()
-        }
         Type::Str(_) => {
             write!(out, "::rust::Str");
         }
@@ -965,7 +960,7 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
         | Type::Fn(_)
         | Type::Array(_) => write!(out, " "),
         Type::Ref(_) => {}
-        Type::Void(_) | Type::Slice(_) => unreachable!(),
+        Type::Void(_) => unreachable!(),
     }
 }
 

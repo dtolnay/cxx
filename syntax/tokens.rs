@@ -1,7 +1,7 @@
 use crate::syntax::atom::Atom::*;
 use crate::syntax::{
     Array, Atom, Derive, Enum, ExternFn, ExternType, Impl, Receiver, Ref, ResolvableName,
-    Signature, Slice, Struct, Ty1, Type, TypeAlias, Var,
+    Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote_spanned, ToTokens};
@@ -20,11 +20,11 @@ impl ToTokens for Type {
             Type::RustBox(ty) | Type::UniquePtr(ty) | Type::CxxVector(ty) | Type::RustVec(ty) => {
                 ty.to_tokens(tokens)
             }
-            Type::Ref(r) | Type::Str(r) | Type::SliceRefU8(r) => r.to_tokens(tokens),
-            Type::Slice(s) => s.to_tokens(tokens),
+            Type::Ref(r) | Type::Str(r) => r.to_tokens(tokens),
             Type::Array(a) => a.to_tokens(tokens),
             Type::Fn(f) => f.to_tokens(tokens),
             Type::Void(span) => tokens.extend(quote_spanned!(*span=> ())),
+            Type::SliceRefU8(r) => r.to_tokens(tokens),
         }
     }
 }
@@ -69,20 +69,23 @@ impl ToTokens for Ref {
     }
 }
 
+impl ToTokens for SliceRef {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        self.ampersand.to_tokens(tokens);
+        self.lifetime.to_tokens(tokens);
+        self.mutability.to_tokens(tokens);
+        self.bracket.surround(tokens, |tokens| {
+            self.inner.to_tokens(tokens);
+        });
+    }
+}
+
 impl ToTokens for Array {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         self.bracket.surround(tokens, |tokens| {
             self.inner.to_tokens(tokens);
             self.semi_token.to_tokens(tokens);
             self.len_token.to_tokens(tokens);
-        });
-    }
-}
-
-impl ToTokens for Slice {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        self.bracket.surround(tokens, |tokens| {
-            self.inner.to_tokens(tokens);
         });
     }
 }
