@@ -12,6 +12,7 @@ pub struct Builtins<'a> {
     pub rust_vec: bool,
     pub rust_fn: bool,
     pub rust_isize: bool,
+    pub opaque: bool,
     pub unsafe_bitcopy: bool,
     pub rust_error: bool,
     pub manually_drop: bool,
@@ -120,6 +121,7 @@ pub(super) fn write(out: &mut OutFile) {
     ifndef::write(out, builtin.rust_fn, "CXXBRIDGE1_RUST_FN");
     ifndef::write(out, builtin.rust_error, "CXXBRIDGE1_RUST_ERROR");
     ifndef::write(out, builtin.rust_isize, "CXXBRIDGE1_RUST_ISIZE");
+    ifndef::write(out, builtin.opaque, "CXXBRIDGE1_RUST_OPAQUE");
     ifndef::write(out, builtin.relocatable, "CXXBRIDGE1_RELOCATABLE");
 
     if builtin.manually_drop {
