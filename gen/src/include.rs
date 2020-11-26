@@ -67,43 +67,61 @@ pub(super) fn write(out: &mut OutFile) {
         }
     }
 
-    if include.array {
+    let Includes {
+        custom: _,
+        array,
+        cstddef,
+        cstdint,
+        cstring,
+        exception,
+        iterator,
+        memory,
+        new,
+        string,
+        type_traits,
+        utility,
+        vector,
+        basetsd,
+        content: _,
+    } = *include;
+
+    if array {
         writeln!(out, "#include <array>");
     }
-    if include.cstddef {
+    if cstddef {
         writeln!(out, "#include <cstddef>");
     }
-    if include.cstdint {
+    if cstdint {
         writeln!(out, "#include <cstdint>");
     }
-    if include.cstring {
+    if cstring {
         writeln!(out, "#include <cstring>");
     }
-    if include.exception {
+    if exception {
         writeln!(out, "#include <exception>");
     }
-    if include.iterator {
+    if iterator {
         writeln!(out, "#include <iterator>");
     }
-    if include.memory {
+    if memory {
         writeln!(out, "#include <memory>");
     }
-    if include.new {
+    if new {
         writeln!(out, "#include <new>");
     }
-    if include.string {
+    if string {
         writeln!(out, "#include <string>");
     }
-    if include.type_traits {
+    if type_traits {
         writeln!(out, "#include <type_traits>");
     }
-    if include.utility {
+    if utility {
         writeln!(out, "#include <utility>");
     }
-    if include.vector {
+    if vector {
         writeln!(out, "#include <vector>");
     }
-    if include.basetsd {
+    if basetsd {
         writeln!(out, "#if defined(_WIN32)");
         writeln!(out, "#include <basetsd.h>");
         writeln!(out, "#endif");
