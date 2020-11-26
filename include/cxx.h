@@ -118,12 +118,37 @@ public:
   Slice(const Slice<T> &) noexcept = default;
   ~Slice() noexcept = default;
 
+  class iterator;
+  iterator begin() const noexcept;
+  iterator end() const noexcept;
+
 private:
   friend impl<Slice>;
   // Not necessarily ABI compatible with &[T]. Codegen will translate to
   // cxx::rust_slice::RustSlice which matches this layout.
   T *ptr;
   size_t len;
+};
+
+template <typename T>
+class Slice<T>::iterator final {
+public:
+  using difference_type = ptrdiff_t;
+  using value_type = T;
+  using pointer = typename std::add_pointer<T>::type;
+  using reference = typename std::add_lvalue_reference<T>::type;
+  using iterator_category = std::forward_iterator_tag;
+
+  T &operator*() const noexcept;
+  T *operator->() const noexcept;
+  iterator &operator++() noexcept;
+  iterator operator++(int) noexcept;
+  bool operator==(const iterator &) const noexcept;
+  bool operator!=(const iterator &) const noexcept;
+
+private:
+  friend class Slice;
+  T *pos;
 };
 #endif // CXXBRIDGE1_RUST_SLICE
 
@@ -408,6 +433,53 @@ size_t Slice<T>::size() const noexcept {
 template <typename T>
 size_t Slice<T>::length() const noexcept {
   return this->len;
+}
+
+template <typename T>
+T &Slice<T>::iterator::operator*() const noexcept {
+  return *this->pos;
+}
+
+template <typename T>
+T *Slice<T>::iterator::operator->() const noexcept {
+  return this->pos;
+}
+
+template <typename T>
+typename Slice<T>::iterator &Slice<T>::iterator::operator++() noexcept {
+  ++this->pos;
+  return *this;
+}
+
+template <typename T>
+typename Slice<T>::iterator Slice<T>::iterator::operator++(int) noexcept {
+  auto ret = iterator(*this);
+  ++this->pos;
+  return ret;
+}
+
+template <typename T>
+bool Slice<T>::iterator::operator==(const iterator &other) const noexcept {
+  return this->pos == other.pos;
+}
+
+template <typename T>
+bool Slice<T>::iterator::operator!=(const iterator &other) const noexcept {
+  return this->pos != other.pos;
+}
+
+template <typename T>
+typename Slice<T>::iterator Slice<T>::begin() const noexcept {
+  iterator it;
+  it.pos = this->ptr;
+  return it;
+}
+
+template <typename T>
+typename Slice<T>::iterator Slice<T>::end() const noexcept {
+  iterator it = this->begin();
+  it.pos += this->len;
+  return it;
 }
 #endif // CXXBRIDGE1_RUST_SLICE
 
