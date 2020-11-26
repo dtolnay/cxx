@@ -181,10 +181,14 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
 fn check_type_slice_ref(cx: &mut Check, ty: &SliceRef) {
     match &ty.inner {
         Type::Ident(ident) if ident.rust == U8 => {}
-        _ => cx.error(
-            ty,
-            "only &[u8] and &mut [u8] are supported so far, not other slice types",
-        ),
+        _ => {
+            let mutable = if ty.mutable { "mut " } else { "" };
+            let msg = format!(
+                "only &{}[u8] is supported so far, not other slice types",
+                mutable,
+            );
+            cx.error(ty, msg);
+        }
     }
 }
 
