@@ -122,6 +122,24 @@ size_t String::size() const noexcept { return cxxbridge1$string$len(this); }
 
 size_t String::length() const noexcept { return cxxbridge1$string$len(this); }
 
+String::iterator String::begin() noexcept {
+  return const_cast<char *>(this->data());
+}
+
+String::iterator String::end() noexcept {
+  return const_cast<char *>(this->data()) + this->size();
+}
+
+String::const_iterator String::begin() const noexcept { return this->cbegin(); }
+
+String::const_iterator String::end() const noexcept { return this->cend(); }
+
+String::const_iterator String::cbegin() const noexcept { return this->data(); }
+
+String::const_iterator String::cend() const noexcept {
+  return this->data() + this->size();
+}
+
 String::String(unsafe_bitcopy_t, const String &bits) noexcept
     : repr(bits.repr) {}
 
@@ -157,6 +175,14 @@ Str::Str(const char *s, size_t len)
 Str::operator std::string() const {
   return std::string(this->data(), this->size());
 }
+
+Str::const_iterator Str::begin() const noexcept { return this->cbegin(); }
+
+Str::const_iterator Str::end() const noexcept { return this->cend(); }
+
+Str::const_iterator Str::cbegin() const noexcept { return this->ptr; }
+
+Str::const_iterator Str::cend() const noexcept { return this->ptr + this->len; }
 
 std::ostream &operator<<(std::ostream &os, const Str &s) {
   os.write(s.data(), s.size());

@@ -32,6 +32,16 @@ public:
   const char *data() const noexcept;
   size_t size() const noexcept;
   size_t length() const noexcept;
+
+  using iterator = char *;
+  iterator begin() noexcept;
+  iterator end() noexcept;
+
+  using const_iterator = const char *;
+  const_iterator begin() const noexcept;
+  const_iterator end() const noexcept;
+  const_iterator cbegin() const noexcept;
+  const_iterator cend() const noexcept;
 };
 
 std::ostream &operator<<(std::ostream &, const String &);

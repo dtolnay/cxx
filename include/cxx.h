@@ -48,6 +48,16 @@ public:
   size_t size() const noexcept;
   size_t length() const noexcept;
 
+  using iterator = char *;
+  iterator begin() noexcept;
+  iterator end() noexcept;
+
+  using const_iterator = const char *;
+  const_iterator begin() const noexcept;
+  const_iterator end() const noexcept;
+  const_iterator cbegin() const noexcept;
+  const_iterator cend() const noexcept;
+
   // Internal API only intended for the cxxbridge code generator.
   String(unsafe_bitcopy_t, const String &) noexcept;
 
@@ -77,6 +87,13 @@ public:
   // Important in order for System V ABI to pass in registers.
   Str(const Str &) noexcept = default;
   ~Str() noexcept = default;
+
+  using iterator = const char *;
+  using const_iterator = const char *;
+  const_iterator begin() const noexcept;
+  const_iterator end() const noexcept;
+  const_iterator cbegin() const noexcept;
+  const_iterator cend() const noexcept;
 
 private:
   friend impl<Str>;
