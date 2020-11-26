@@ -300,6 +300,7 @@ std::ostream &operator<<(std::ostream &, const Str &);
 #define CXXBRIDGE1_RUST_OPAQUE
 // Base class of generated opaque Rust types.
 class Opaque {
+public:
   Opaque() = delete;
   Opaque(const Opaque &) = delete;
   ~Opaque() = delete;
