@@ -1,0 +1,5 @@
+error: unsupported &mut [T] element type: opaque C++ type is not supported yet
+ --> $DIR/slice_unsupported.rs:6:17
+  |
+6 |         fn f(_: &mut [Opaque]);
+  |                 ^^^^^^^^^^^^^

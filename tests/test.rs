@@ -117,6 +117,10 @@ fn test_c_take() {
     check!(cxx_test_suite::module::ffi::c_take_unique_ptr(unique_ptr));
     check!(ffi::c_take_str("2020"));
     check!(ffi::c_take_sliceu8(b"2020"));
+    check!(ffi::c_take_slice_shared(&[
+        ffi::Shared { z: 2020 },
+        ffi::Shared { z: 2021 },
+    ]));
     check!(ffi::c_take_rust_string("2020".to_owned()));
     check!(ffi::c_take_unique_ptr_string(
         ffi::c_return_unique_ptr_string()

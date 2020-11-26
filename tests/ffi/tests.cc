@@ -250,6 +250,12 @@ void c_take_sliceu8(rust::Slice<const uint8_t> s) {
   }
 }
 
+void c_take_slice_shared(rust::Slice<const Shared> s) {
+  if (s.size() == 2 && s.data()->z == 2020 && (s.data() + 1)->z == 2021) {
+    cxx_test_suite_set_correct();
+  }
+}
+
 void c_take_rust_string(rust::String s) {
   if (std::string(s) == "2020") {
     cxx_test_suite_set_correct();
