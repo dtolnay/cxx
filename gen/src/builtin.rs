@@ -59,6 +59,7 @@ pub(super) fn write(out: &mut OutFile) {
     }
 
     if builtin.rust_slice {
+        include.type_traits = true;
         builtin.friend_impl = true;
     }
 
