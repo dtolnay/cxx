@@ -1,7 +1,7 @@
 #![allow(clippy::assertions_on_constants, clippy::float_cmp, clippy::unit_cmp)]
 
 use cxx_test_suite::module::ffi2;
-use cxx_test_suite::{ffi, R};
+use cxx_test_suite::{cast, ffi, R};
 use std::cell::Cell;
 use std::ffi::CStr;
 
@@ -41,7 +41,10 @@ fn test_c_return() {
     assert_eq!(2020, *ffi::c_return_ns_ref(&ns_shared));
     assert_eq!(2020, *ffi::c_return_nested_ns_ref(&nested_ns_shared));
     assert_eq!("2020", ffi::c_return_str(&shared));
-    assert_eq!(b"2020\0", ffi::c_return_sliceu8(&shared));
+    assert_eq!(
+        b"2020\0",
+        cast::c_char_to_unsigned(ffi::c_return_slice_char(&shared)),
+    );
     assert_eq!("2020", ffi::c_return_rust_string());
     assert_eq!("2020", ffi::c_return_unique_ptr_string().to_str().unwrap());
     assert_eq!(4, ffi::c_return_unique_ptr_vector_u8().len());
@@ -116,7 +119,7 @@ fn test_c_take() {
     check!(ffi2::c_take_ref_ns_c(&unique_ptr_ns));
     check!(cxx_test_suite::module::ffi::c_take_unique_ptr(unique_ptr));
     check!(ffi::c_take_str("2020"));
-    check!(ffi::c_take_sliceu8(b"2020"));
+    check!(ffi::c_take_slice_char(cast::unsigned_to_c_char(b"2020")));
     check!(ffi::c_take_slice_shared(&[
         ffi::Shared { z: 2020 },
         ffi::Shared { z: 2021 },
