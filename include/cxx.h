@@ -604,14 +604,14 @@ T *Vec<T>::iterator::operator->() const noexcept {
 
 template <typename T>
 typename Vec<T>::iterator &Vec<T>::iterator::operator++() noexcept {
-  this->pos = static_cast<uint8_t *>(this->pos) + this->stride;
+  this->pos = static_cast<char *>(this->pos) + this->stride;
   return *this;
 }
 
 template <typename T>
 typename Vec<T>::iterator Vec<T>::iterator::operator++(int) noexcept {
   auto ret = iterator(*this);
-  this->pos = static_cast<uint8_t *>(this->pos) + this->stride;
+  this->pos = static_cast<char *>(this->pos) + this->stride;
   return ret;
 }
 
@@ -636,7 +636,7 @@ typename Vec<T>::iterator Vec<T>::begin() noexcept {
 template <typename T>
 typename Vec<T>::iterator Vec<T>::end() noexcept {
   iterator it = this->begin();
-  it.pos = static_cast<uint8_t *>(it.pos) + it.stride * this->size();
+  it.pos = static_cast<char *>(it.pos) + it.stride * this->size();
   return it;
 }
 
@@ -661,7 +661,7 @@ typename Vec<T>::const_iterator Vec<T>::cbegin() const noexcept {
 template <typename T>
 typename Vec<T>::const_iterator Vec<T>::cend() const noexcept {
   const_iterator it = this->cbegin();
-  it.pos = static_cast<uint8_t *>(it.pos) + it.stride * this->size();
+  it.pos = static_cast<char *>(it.pos) + it.stride * this->size();
   return it;
 }
 
