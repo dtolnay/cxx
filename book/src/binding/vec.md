@@ -49,36 +49,36 @@ public:
   const_iterator cbegin() const noexcept;
   const_iterator cend() const noexcept;
 };
-
-template <typename T>
-class Vec<T>::iterator final {
-public:
-  using value_type = T;
-  using pointer = T *;
-  using reference = T &;
-
-  T &operator*() const noexcept;
-  T *operator->() const noexcept;
-  iterator &operator++() noexcept;
-  iterator operator++(int) noexcept;
-  bool operator==(const iterator &) const noexcept;
-  bool operator!=(const iterator &) const noexcept;
-};
-
-template <typename T>
-class Vec<T>::const_iterator final {
-public:
-  using value_type = const T;
-  using pointer = const T *;
-  using reference = const T &;
-
-  const T &operator*() const noexcept;
-  const T *operator->() const noexcept;
-  const_iterator &operator++() noexcept;
-  const_iterator operator++(int) noexcept;
-  bool operator==(const const_iterator &) const noexcept;
-  bool operator!=(const const_iterator &) const noexcept;
-};
+#
+# template <typename T>
+# class Vec<T>::iterator final {
+# public:
+#   using value_type = T;
+#   using pointer = T *;
+#   using reference = T &;
+#
+#   T &operator*() const noexcept;
+#   T *operator->() const noexcept;
+#   iterator &operator++() noexcept;
+#   iterator operator++(int) noexcept;
+#   bool operator==(const iterator &) const noexcept;
+#   bool operator!=(const iterator &) const noexcept;
+# };
+#
+# template <typename T>
+# class Vec<T>::const_iterator final {
+# public:
+#   using value_type = const T;
+#   using pointer = const T *;
+#   using reference = const T &;
+#
+#   const T &operator*() const noexcept;
+#   const T *operator->() const noexcept;
+#   const_iterator &operator++() noexcept;
+#   const_iterator operator++(int) noexcept;
+#   bool operator==(const const_iterator &) const noexcept;
+#   bool operator!=(const const_iterator &) const noexcept;
+# };
 #
 # } // namespace rust
 ```

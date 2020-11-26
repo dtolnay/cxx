@@ -31,21 +31,21 @@ public:
   iterator begin() const noexcept;
   iterator end() const noexcept;
 };
-
-template <typename T>
-class Slice<T>::iterator final {
-public:
-  using value_type = T;
-  using pointer = T *;
-  using reference = T &;
-
-  T &operator*() const noexcept;
-  T *operator->() const noexcept;
-  iterator &operator++() noexcept;
-  iterator operator++(int) noexcept;
-  bool operator==(const iterator &) const noexcept;
-  bool operator!=(const iterator &) const noexcept;
-};
+#
+# template <typename T>
+# class Slice<T>::iterator final {
+# public:
+#   using value_type = T;
+#   using pointer = T *;
+#   using reference = T &;
+#
+#   T &operator*() const noexcept;
+#   T *operator->() const noexcept;
+#   iterator &operator++() noexcept;
+#   iterator operator++(int) noexcept;
+#   bool operator==(const iterator &) const noexcept;
+#   bool operator!=(const iterator &) const noexcept;
+# };
 #
 # } // namespace rust
 ```
