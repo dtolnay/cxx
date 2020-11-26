@@ -99,10 +99,10 @@ fn check_type_rust_vec(cx: &mut Check, ty: &Ty1) {
         }
 
         match Atom::from(&ident.rust) {
-            None | Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize) | Some(I8)
-            | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32) | Some(F64)
-            | Some(RustString) => return,
-            Some(Bool) | Some(Char) => { /* todo */ }
+            None | Some(Char) | Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize)
+            | Some(I8) | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32)
+            | Some(F64) | Some(RustString) => return,
+            Some(Bool) => { /* todo */ }
             Some(CxxString) => {}
         }
     }

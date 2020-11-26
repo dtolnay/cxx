@@ -3,6 +3,7 @@ use crate::rust_vec::RustVec;
 use alloc::vec::Vec;
 use core::mem;
 use core::ptr;
+use std::os::raw::c_char;
 
 macro_rules! rust_vec_shims {
     ($segment:expr, $ty:ty) => {
@@ -74,4 +75,5 @@ rust_vec_shims_for_primitive!(i64);
 rust_vec_shims_for_primitive!(f32);
 rust_vec_shims_for_primitive!(f64);
 
+rust_vec_shims!("char", c_char);
 rust_vec_shims!("string", RustString);
