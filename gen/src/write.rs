@@ -233,7 +233,11 @@ fn write_struct_with_methods<'a>(
         writeln!(out, "//{}", line);
     }
     out.builtin.opaque = true;
-    writeln!(out, "struct {} final : public ::rust::Opaque {{", ety.name.cxx);
+    writeln!(
+        out,
+        "struct {} final : public ::rust::Opaque {{",
+        ety.name.cxx,
+    );
     for method in methods {
         write!(out, "  ");
         let sig = &method.sig;
