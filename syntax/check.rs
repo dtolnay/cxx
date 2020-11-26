@@ -102,7 +102,7 @@ fn check_type_rust_vec(cx: &mut Check, ty: &Ty1) {
             None | Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize) | Some(I8)
             | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32) | Some(F64)
             | Some(RustString) => return,
-            Some(Bool) => { /* todo */ }
+            Some(Bool) | Some(Char) => { /* todo */ }
             Some(CxxString) => {}
         }
     }
@@ -140,6 +140,7 @@ fn check_type_cxx_vector(cx: &mut Check, ptr: &Ty1) {
             None | Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize) | Some(I8)
             | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32) | Some(F64)
             | Some(CxxString) => return,
+            Some(Char) => { /* todo */ }
             Some(Bool) | Some(RustString) => {}
         }
     }
@@ -503,6 +504,8 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
                 "opaque Rust type".to_owned()
             } else if Atom::from(&ident.rust) == Some(CxxString) {
                 "C++ string".to_owned()
+            } else if Atom::from(&ident.rust) == Some(Char) {
+                "C char".to_owned()
             } else {
                 ident.rust.to_string()
             }
