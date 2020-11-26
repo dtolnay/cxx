@@ -6,10 +6,12 @@
     clippy::unnecessary_wraps
 )]
 
+pub mod cast;
 pub mod module;
 
 use cxx::{CxxString, CxxVector, UniquePtr};
 use std::fmt::{self, Display};
+use std::os::raw::c_char;
 
 #[cxx::bridge(namespace = "tests")]
 pub mod ffi {
@@ -81,7 +83,7 @@ pub mod ffi {
         fn c_return_ref(shared: &Shared) -> &usize;
         fn c_return_mut(shared: &mut Shared) -> &mut usize;
         fn c_return_str(shared: &Shared) -> &str;
-        fn c_return_sliceu8(shared: &Shared) -> &[u8];
+        fn c_return_slice_char(shared: &Shared) -> &[c_char];
         fn c_return_mutsliceu8(slice: &mut [u8]) -> &mut [u8];
         fn c_return_rust_string() -> String;
         fn c_return_unique_ptr_string() -> UniquePtr<CxxString>;
@@ -110,7 +112,7 @@ pub mod ffi {
         fn c_take_ref_r(r: &R);
         fn c_take_ref_c(c: &C);
         fn c_take_str(s: &str);
-        fn c_take_sliceu8(s: &[u8]);
+        fn c_take_slice_char(s: &[c_char]);
         fn c_take_slice_shared(s: &[Shared]);
         fn c_take_rust_string(s: String);
         fn c_take_unique_ptr_string(s: UniquePtr<CxxString>);
@@ -214,7 +216,7 @@ pub mod ffi {
         fn r_take_ref_r(r: &R);
         fn r_take_ref_c(c: &C);
         fn r_take_str(s: &str);
-        fn r_take_sliceu8(s: &[u8]);
+        fn r_take_slice_char(s: &[c_char]);
         fn r_take_rust_string(s: String);
         fn r_take_unique_ptr_string(s: UniquePtr<CxxString>);
         fn r_take_ref_vector(v: &CxxVector<u8>);
@@ -472,8 +474,9 @@ fn r_take_rust_string(s: String) {
     assert_eq!(s, "2020");
 }
 
-fn r_take_sliceu8(s: &[u8]) {
+fn r_take_slice_char(s: &[c_char]) {
     assert_eq!(s.len(), 5);
+    let s = cast::c_char_to_unsigned(s);
     assert_eq!(std::str::from_utf8(s).unwrap(), "2020\0");
 }
 

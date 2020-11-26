@@ -15,6 +15,7 @@ rust_test(
 rust_library(
     name = "cxx_test_suite",
     srcs = [
+        "ffi/cast.rs",
         "ffi/lib.rs",
         "ffi/module.rs",
     ],

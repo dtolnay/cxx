@@ -12,6 +12,7 @@ rust_test(
 rust_library(
     name = "ffi",
     srcs = [
+        "ffi/cast.rs",
         "ffi/lib.rs",
         "ffi/module.rs",
     ],
