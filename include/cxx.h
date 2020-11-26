@@ -296,6 +296,16 @@ using isize = ssize_t;
 std::ostream &operator<<(std::ostream &, const String &);
 std::ostream &operator<<(std::ostream &, const Str &);
 
+#ifndef CXXBRIDGE1_RUST_OPAQUE
+#define CXXBRIDGE1_RUST_OPAQUE
+// Base class of generated opaque Rust types.
+class Opaque {
+  Opaque() = delete;
+  Opaque(const Opaque &) = delete;
+  ~Opaque() = delete;
+};
+#endif // CXXBRIDGE1_RUST_OPAQUE
+
 // IsRelocatable<T> is used in assertions that a C++ type passed by value
 // between Rust and C++ is soundly relocatable by Rust.
 //

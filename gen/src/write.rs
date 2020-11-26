@@ -232,13 +232,8 @@ fn write_struct_with_methods<'a>(
     for line in ety.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
-    writeln!(out, "struct {} final {{", ety.name.cxx);
-    writeln!(out, "  {}() = delete;", ety.name.cxx);
-    writeln!(
-        out,
-        "  {}(const {} &) = delete;",
-        ety.name.cxx, ety.name.cxx,
-    );
+    out.builtin.opaque = true;
+    writeln!(out, "struct {} final : public ::rust::Opaque {{", ety.name.cxx);
     for method in methods {
         write!(out, "  ");
         let sig = &method.sig;
