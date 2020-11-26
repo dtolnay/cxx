@@ -59,6 +59,7 @@ pub(super) fn write(out: &mut OutFile) {
     }
 
     if builtin.rust_slice {
+        include.iterator = true;
         include.type_traits = true;
         builtin.friend_impl = true;
     }
@@ -71,6 +72,7 @@ pub(super) fn write(out: &mut OutFile) {
 
     if builtin.rust_vec {
         include.array = true;
+        include.iterator = true;
         include.new = true;
         include.type_traits = true;
         include.utility = true;

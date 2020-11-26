@@ -26,6 +26,7 @@ pub struct Includes<'a> {
     pub cstdint: bool,
     pub cstring: bool,
     pub exception: bool,
+    pub iterator: bool,
     pub memory: bool,
     pub new: bool,
     pub string: bool,
@@ -80,6 +81,9 @@ pub(super) fn write(out: &mut OutFile) {
     }
     if include.exception {
         writeln!(out, "#include <exception>");
+    }
+    if include.iterator {
+        writeln!(out, "#include <iterator>");
     }
     if include.memory {
         writeln!(out, "#include <memory>");
