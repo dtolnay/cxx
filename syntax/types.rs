@@ -42,13 +42,14 @@ impl<'a> Types<'a> {
         fn visit<'a>(all: &mut Set<&'a Type>, ty: &'a Type) {
             all.insert(ty);
             match ty {
-                Type::Ident(_) | Type::Str(_) | Type::Void(_) | Type::SliceRef(_) => {}
+                Type::Ident(_) | Type::Str(_) | Type::Void(_) => {}
                 Type::RustBox(ty)
                 | Type::UniquePtr(ty)
                 | Type::CxxVector(ty)
                 | Type::RustVec(ty) => visit(all, &ty.inner),
                 Type::Ref(r) => visit(all, &r.inner),
                 Type::Array(a) => visit(all, &a.inner),
+                Type::SliceRef(s) => visit(all, &s.inner),
                 Type::Fn(f) => {
                     if let Some(ret) = &f.ret {
                         visit(all, ret);

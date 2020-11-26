@@ -167,10 +167,7 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
             Type::Str(_) => out.builtin.rust_str = true,
             Type::CxxVector(_) => out.include.vector = true,
             Type::Fn(_) => out.builtin.rust_fn = true,
-            Type::SliceRef(_) => {
-                out.include.cstdint = true;
-                out.builtin.rust_slice = true;
-            }
+            Type::SliceRef(_) => out.builtin.rust_slice = true,
             Type::Array(_) => out.include.array = true,
             Type::Ref(_) | Type::Void(_) => {}
         }
@@ -481,7 +478,8 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
             if slice.mutability.is_none() {
                 write!(out, "const ");
             }
-            write!(out, "uint8_t *>({0}.ptr), {0}.len)", arg.ident);
+            write_type_space(out, &slice.inner);
+            write!(out, "*>({0}.ptr), {0}.len)", arg.ident);
         } else if out.types.needs_indirect_abi(&arg.ty) {
             out.include.utility = true;
             write!(out, "::std::move(*{})", arg.ident);
@@ -891,12 +889,13 @@ fn write_type(out: &mut OutFile, ty: &Type) {
         Type::Str(_) => {
             write!(out, "::rust::Str");
         }
-        Type::SliceRef(ty) => {
+        Type::SliceRef(slice) => {
             write!(out, "::rust::Slice<");
-            if ty.mutability.is_none() {
+            if slice.mutability.is_none() {
                 write!(out, "const ");
             }
-            write!(out, "uint8_t>");
+            write_type(out, &slice.inner);
+            write!(out, ">");
         }
         Type::Fn(f) => {
             write!(out, "::rust::{}<", if f.throws { "TryFn" } else { "Fn" });

@@ -33,8 +33,8 @@ public:
 
 ### Restrictions:
 
-Only T=u8 i.e. rust::Slice\<const uint8\_t\> and rust::Slice\<uint8\_t\> are
-currently implemented. Support for arbitrary T is coming.
+T must not be an opaque Rust type or opaque C++ type. Support for opaque Rust
+types in slices is coming.
 
 Allowed as function argument or return value. Not supported in shared structs.
 

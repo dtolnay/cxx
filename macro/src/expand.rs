@@ -331,8 +331,8 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
             },
             Type::Str(_) => quote!(::cxx::private::RustStr::from(#var)),
             Type::SliceRef(ty) => match ty.mutable {
-                false => quote!(::cxx::private::RustSliceU8::from_ref(#var)),
-                true => quote!(::cxx::private::RustSliceU8::from_mut(#var)),
+                false => quote!(::cxx::private::RustSlice::from_ref(#var)),
+                true => quote!(::cxx::private::RustSlice::from_mut(#var)),
             },
             ty if types.needs_indirect_abi(ty) => quote!(#var.as_mut_ptr()),
             _ => quote!(#var),
@@ -426,10 +426,13 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                     _ => call,
                 },
                 Type::Str(_) => quote!(#call.as_str()),
-                Type::SliceRef(ty) => match ty.mutable {
-                    false => quote!(#call.as_slice()),
-                    true => quote!(#call.as_mut_slice()),
-                },
+                Type::SliceRef(slice) => {
+                    let inner = &slice.inner;
+                    match slice.mutable {
+                        false => quote!(#call.as_slice::<#inner>()),
+                        true => quote!(#call.as_mut_slice::<#inner>()),
+                    }
+                }
                 _ => call,
             },
         };
@@ -616,10 +619,13 @@ fn expand_rust_function_shim_impl(
                 _ => quote!(#ident),
             },
             Type::Str(_) => quote!(#ident.as_str()),
-            Type::SliceRef(ty) => match ty.mutable {
-                false => quote!(#ident.as_slice()),
-                true => quote!(#ident.as_mut_slice()),
-            },
+            Type::SliceRef(slice) => {
+                let inner = &slice.inner;
+                match slice.mutable {
+                    false => quote!(#ident.as_slice::<#inner>()),
+                    true => quote!(#ident.as_mut_slice::<#inner>()),
+                }
+            }
             ty if types.needs_indirect_abi(ty) => quote!(::std::ptr::read(#ident)),
             _ => quote!(#ident),
         }
@@ -664,8 +670,8 @@ fn expand_rust_function_shim_impl(
         },
         Type::Str(_) => Some(quote!(::cxx::private::RustStr::from)),
         Type::SliceRef(ty) => match ty.mutable {
-            false => Some(quote!(::cxx::private::RustSliceU8::from_ref)),
-            true => Some(quote!(::cxx::private::RustSliceU8::from_mut)),
+            false => Some(quote!(::cxx::private::RustSlice::from_ref)),
+            true => Some(quote!(::cxx::private::RustSlice::from_mut)),
         },
         _ => None,
     });
@@ -1107,7 +1113,7 @@ fn expand_extern_type(ty: &Type, types: &Types, proper: bool) -> TokenStream {
             }
         }
         Type::Str(_) => quote!(::cxx::private::RustStr),
-        Type::SliceRef(_) => quote!(::cxx::private::RustSliceU8),
+        Type::SliceRef(_) => quote!(::cxx::private::RustSlice),
         _ => quote!(#ty),
     }
 }

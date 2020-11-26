@@ -121,7 +121,7 @@ public:
 private:
   friend impl<Slice>;
   // Not necessarily ABI compatible with &[T]. Codegen will translate to
-  // cxx::rust_sliceu8::RustSliceU8 which matches this layout.
+  // cxx::rust_slice::RustSlice which matches this layout.
   T *ptr;
   size_t len;
 };

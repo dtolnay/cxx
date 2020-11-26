@@ -179,16 +179,22 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
 }
 
 fn check_type_slice_ref(cx: &mut Check, ty: &SliceRef) {
-    match &ty.inner {
-        Type::Ident(ident) if ident.rust == U8 => {}
-        _ => {
-            let mutable = if ty.mutable { "mut " } else { "" };
-            let msg = format!(
-                "only &{}[u8] is supported so far, not other slice types",
-                mutable,
-            );
-            cx.error(ty, msg);
+    let supported = match &ty.inner {
+        Type::Str(_) | Type::SliceRef(_) => false,
+        element => !is_unsized(cx, element),
+    };
+
+    if !supported {
+        let mutable = if ty.mutable { "mut " } else { "" };
+        let mut msg = format!("unsupported &{}[T] element type", mutable);
+        if let Type::Ident(ident) = &ty.inner {
+            if cx.types.rust.contains(&ident.rust) {
+                msg += ": opaque Rust type is not supported yet";
+            } else if is_opaque_cxx(cx, &ident.rust) {
+                msg += ": opaque C++ type is not supported yet";
+            }
         }
+        cx.error(ty, msg);
     }
 }
 
@@ -507,10 +513,7 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         Type::Ref(_) => "reference".to_owned(),
         Type::Str(_) => "&str".to_owned(),
         Type::CxxVector(_) => "C++ vector".to_owned(),
-        Type::SliceRef(ty) => match ty.mutable {
-            false => "&[u8]".to_owned(),
-            true => "&mut [u8]".to_owned(),
-        },
+        Type::SliceRef(_) => "slice".to_owned(),
         Type::Fn(_) => "function pointer".to_owned(),
         Type::Void(_) => "()".to_owned(),
         Type::Array(_) => "array".to_owned(),
