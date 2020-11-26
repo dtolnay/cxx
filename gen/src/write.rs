@@ -167,7 +167,7 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
             Type::Str(_) => out.builtin.rust_str = true,
             Type::CxxVector(_) => out.include.vector = true,
             Type::Fn(_) => out.builtin.rust_fn = true,
-            Type::SliceRefU8(_) => {
+            Type::SliceRef(_) => {
                 out.include.cstdint = true;
                 out.builtin.rust_slice = true;
             }
@@ -435,7 +435,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
             out.builtin.rust_str_repr = true;
             write!(out, "::rust::impl<::rust::Str>::repr(");
         }
-        Some(ty @ Type::SliceRefU8(_)) if !indirect_return => {
+        Some(ty @ Type::SliceRef(_)) if !indirect_return => {
             out.builtin.rust_slice_repr = true;
             write!(out, "::rust::impl<");
             write_type(out, ty);
@@ -475,7 +475,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
             out.builtin.unsafe_bitcopy = true;
             write_type(out, &arg.ty);
             write!(out, "(::rust::unsafe_bitcopy, *{})", arg.ident);
-        } else if let Type::SliceRefU8(slice) = &arg.ty {
+        } else if let Type::SliceRef(slice) = &arg.ty {
             write_type(out, &arg.ty);
             write!(out, "(static_cast<");
             if slice.mutability.is_none() {
@@ -493,7 +493,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     match &efn.ret {
         Some(Type::RustBox(_)) => write!(out, ".into_raw()"),
         Some(Type::UniquePtr(_)) => write!(out, ".release()"),
-        Some(Type::Str(_)) | Some(Type::SliceRefU8(_)) if !indirect_return => write!(out, ")"),
+        Some(Type::Str(_)) | Some(Type::SliceRef(_)) if !indirect_return => write!(out, ")"),
         _ => {}
     }
     if indirect_return {
@@ -694,7 +694,7 @@ fn write_rust_function_shim_impl(
                 out.builtin.rust_str_new_unchecked = true;
                 write!(out, "::rust::impl<::rust::Str>::new_unchecked(");
             }
-            Type::SliceRefU8(_) => {
+            Type::SliceRef(_) => {
                 out.builtin.rust_slice_new = true;
                 write!(out, "::rust::impl<");
                 write_type(out, ret);
@@ -722,7 +722,7 @@ fn write_rust_function_shim_impl(
                 out.builtin.rust_str_repr = true;
                 write!(out, "::rust::impl<::rust::Str>::repr(");
             }
-            Type::SliceRefU8(_) => {
+            Type::SliceRef(_) => {
                 out.builtin.rust_slice_repr = true;
                 write!(out, "::rust::impl<");
                 write_type(out, &arg.ty);
@@ -735,7 +735,7 @@ fn write_rust_function_shim_impl(
         match &arg.ty {
             Type::RustBox(_) => write!(out, ".into_raw()"),
             Type::UniquePtr(_) => write!(out, ".release()"),
-            Type::Str(_) | Type::SliceRefU8(_) => write!(out, ")"),
+            Type::Str(_) | Type::SliceRef(_) => write!(out, ")"),
             ty if ty != RustString && out.types.needs_indirect_abi(ty) => write!(out, "$.value"),
             _ => {}
         }
@@ -757,8 +757,7 @@ fn write_rust_function_shim_impl(
     write!(out, ")");
     if !indirect_return {
         if let Some(ret) = &sig.ret {
-            if let Type::RustBox(_) | Type::UniquePtr(_) | Type::Str(_) | Type::SliceRefU8(_) = ret
-            {
+            if let Type::RustBox(_) | Type::UniquePtr(_) | Type::Str(_) | Type::SliceRef(_) = ret {
                 write!(out, ")");
             }
         }
@@ -811,7 +810,7 @@ fn write_indirect_return_type_space(out: &mut OutFile, ty: &Type) {
     write_indirect_return_type(out, ty);
     match ty {
         Type::RustBox(_) | Type::UniquePtr(_) | Type::Ref(_) => {}
-        Type::Str(_) | Type::SliceRefU8(_) => write!(out, " "),
+        Type::Str(_) | Type::SliceRef(_) => write!(out, " "),
         _ => write_space_after_type(out, ty),
     }
 }
@@ -829,7 +828,7 @@ fn write_extern_return_type_space(out: &mut OutFile, ty: &Option<Type>) {
             write_type(out, &ty.inner);
             write!(out, " *");
         }
-        Some(Type::Str(_)) | Some(Type::SliceRefU8(_)) => {
+        Some(Type::Str(_)) | Some(Type::SliceRef(_)) => {
             out.builtin.ptr_len = true;
             write!(out, "::rust::repr::PtrLen ");
         }
@@ -844,7 +843,7 @@ fn write_extern_arg(out: &mut OutFile, arg: &Var) {
             write_type_space(out, &ty.inner);
             write!(out, "*");
         }
-        Type::Str(_) | Type::SliceRefU8(_) => {
+        Type::Str(_) | Type::SliceRef(_) => {
             out.builtin.ptr_len = true;
             write!(out, "::rust::repr::PtrLen ");
         }
@@ -892,7 +891,7 @@ fn write_type(out: &mut OutFile, ty: &Type) {
         Type::Str(_) => {
             write!(out, "::rust::Str");
         }
-        Type::SliceRefU8(ty) => {
+        Type::SliceRef(ty) => {
             write!(out, "::rust::Slice<");
             if ty.mutability.is_none() {
                 write!(out, "const ");
@@ -956,7 +955,7 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
         | Type::Str(_)
         | Type::CxxVector(_)
         | Type::RustVec(_)
-        | Type::SliceRefU8(_)
+        | Type::SliceRef(_)
         | Type::Fn(_)
         | Type::Array(_) => write!(out, " "),
         Type::Ref(_) => {}

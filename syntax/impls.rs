@@ -50,7 +50,7 @@ impl Hash for Type {
             Type::RustVec(t) => t.hash(state),
             Type::CxxVector(t) => t.hash(state),
             Type::Fn(t) => t.hash(state),
-            Type::SliceRefU8(t) => t.hash(state),
+            Type::SliceRef(t) => t.hash(state),
             Type::Array(t) => t.hash(state),
             Type::Void(_) => {}
         }
@@ -70,7 +70,7 @@ impl PartialEq for Type {
             (Type::RustVec(lhs), Type::RustVec(rhs)) => lhs == rhs,
             (Type::CxxVector(lhs), Type::CxxVector(rhs)) => lhs == rhs,
             (Type::Fn(lhs), Type::Fn(rhs)) => lhs == rhs,
-            (Type::SliceRefU8(lhs), Type::SliceRefU8(rhs)) => lhs == rhs,
+            (Type::SliceRef(lhs), Type::SliceRef(rhs)) => lhs == rhs,
             (Type::Void(_), Type::Void(_)) => true,
             (_, _) => false,
         }

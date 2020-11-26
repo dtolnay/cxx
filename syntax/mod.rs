@@ -164,7 +164,7 @@ pub enum Type {
     CxxVector(Box<Ty1>),
     Fn(Box<Signature>),
     Void(Span),
-    SliceRefU8(Box<SliceRef>),
+    SliceRef(Box<SliceRef>),
     Array(Box<Array>),
 }
 

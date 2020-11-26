@@ -27,7 +27,7 @@ impl<'a> Types<'a> {
             | Type::Str(_)
             | Type::Fn(_)
             | Type::Void(_)
-            | Type::SliceRefU8(_) => Definite(true),
+            | Type::SliceRef(_) => Definite(true),
             Type::UniquePtr(_) | Type::CxxVector(_) => Definite(false),
             Type::Ref(ty) => self.determine_improper_ctype(&ty.inner),
             Type::Array(ty) => self.determine_improper_ctype(&ty.inner),

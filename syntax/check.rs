@@ -36,7 +36,7 @@ fn do_typecheck(cx: &mut Check) {
             Type::Ref(ty) => check_type_ref(cx, ty),
             Type::Array(array) => check_type_array(cx, array),
             Type::Fn(ty) => check_type_fn(cx, ty),
-            Type::Str(_) | Type::Void(_) | Type::SliceRefU8(_) => {}
+            Type::Str(_) | Type::Void(_) | Type::SliceRef(_) => {}
         }
     }
 
@@ -179,7 +179,7 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
 
 fn check_type_array(cx: &mut Check, ty: &Array) {
     let supported = match &ty.inner {
-        Type::Str(_) | Type::SliceRefU8(_) => false,
+        Type::Str(_) | Type::SliceRef(_) => false,
         element => !is_unsized(cx, element),
     };
 
@@ -422,7 +422,7 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
         | Type::UniquePtr(_)
         | Type::Ref(_)
         | Type::Str(_)
-        | Type::SliceRefU8(_) => false,
+        | Type::SliceRef(_) => false,
     }
 }
 
@@ -492,7 +492,7 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         Type::Ref(_) => "reference".to_owned(),
         Type::Str(_) => "&str".to_owned(),
         Type::CxxVector(_) => "C++ vector".to_owned(),
-        Type::SliceRefU8(ty) => match ty.mutable {
+        Type::SliceRef(ty) => match ty.mutable {
             false => "&[u8]".to_owned(),
             true => "&mut [u8]".to_owned(),
         },

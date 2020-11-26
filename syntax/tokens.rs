@@ -24,7 +24,7 @@ impl ToTokens for Type {
             Type::Array(a) => a.to_tokens(tokens),
             Type::Fn(f) => f.to_tokens(tokens),
             Type::Void(span) => tokens.extend(quote_spanned!(*span=> ())),
-            Type::SliceRefU8(r) => r.to_tokens(tokens),
+            Type::SliceRef(r) => r.to_tokens(tokens),
         }
     }
 }
