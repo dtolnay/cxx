@@ -3,7 +3,7 @@ use crate::syntax::report::Errors;
 use crate::syntax::types::TrivialReason;
 use crate::syntax::{
     error, ident, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Signature,
-    Struct, Ty1, Type, Types,
+    SliceRef, Struct, Ty1, Type, Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
@@ -36,7 +36,8 @@ fn do_typecheck(cx: &mut Check) {
             Type::Ref(ty) => check_type_ref(cx, ty),
             Type::Array(array) => check_type_array(cx, array),
             Type::Fn(ty) => check_type_fn(cx, ty),
-            Type::Str(_) | Type::Void(_) | Type::SliceRef(_) => {}
+            Type::SliceRef(ty) => check_type_slice_ref(cx, ty),
+            Type::Str(_) | Type::Void(_) => {}
         }
     }
 
@@ -175,6 +176,16 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
     }
 
     cx.error(ty, "unsupported reference type");
+}
+
+fn check_type_slice_ref(cx: &mut Check, ty: &SliceRef) {
+    match &ty.inner {
+        Type::Ident(ident) if ident.rust == U8 => {}
+        _ => cx.error(
+            ty,
+            "only &[u8] and &mut [u8] are supported so far, not other slice types",
+        ),
+    }
 }
 
 fn check_type_array(cx: &mut Check, ty: &Array) {

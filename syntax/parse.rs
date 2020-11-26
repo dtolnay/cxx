@@ -650,20 +650,14 @@ fn parse_type(ty: &RustType) -> Result<Type> {
 fn parse_type_reference(ty: &TypeReference) -> Result<Type> {
     if let RustType::Slice(slice) = ty.elem.as_ref() {
         let inner = parse_type(&slice.elem)?;
-        return match &inner {
-            Type::Ident(ident) if ident.rust == U8 => Ok(Type::SliceRef(Box::new(SliceRef {
-                ampersand: ty.and_token,
-                lifetime: ty.lifetime.clone(),
-                mutable: ty.mutability.is_some(),
-                bracket: slice.bracket_token,
-                inner,
-                mutability: ty.mutability,
-            }))),
-            _ => Err(Error::new_spanned(
-                ty,
-                "only &[u8] and &mut [u8] are supported so far, not other slice types",
-            )),
-        };
+        return Ok(Type::SliceRef(Box::new(SliceRef {
+            ampersand: ty.and_token,
+            lifetime: ty.lifetime.clone(),
+            mutable: ty.mutability.is_some(),
+            bracket: slice.bracket_token,
+            inner,
+            mutability: ty.mutability,
+        })));
     }
 
     let inner = parse_type(&ty.elem)?;
