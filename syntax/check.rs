@@ -186,7 +186,12 @@ fn check_type_slice(cx: &mut Check, ty: &Slice) {
 }
 
 fn check_type_array(cx: &mut Check, ty: &Array) {
-    if is_unsized(cx, &ty.inner) {
+    let supported = match &ty.inner {
+        Type::Str(_) | Type::SliceRefU8(_) => false,
+        element => !is_unsized(cx, element),
+    };
+
+    if !supported {
         cx.error(ty, "unsupported array element type");
     }
 }
