@@ -186,12 +186,7 @@ fn check_type_slice(cx: &mut Check, ty: &Slice) {
 }
 
 fn check_type_array(cx: &mut Check, ty: &Array) {
-    let supported = match &ty.inner {
-        Type::Fn(_) => false,
-        element => !is_unsized(cx, element),
-    };
-
-    if !supported {
+    if is_unsized(cx, &ty.inner) {
         cx.error(ty, "unsupported array element type");
     }
 }
@@ -219,16 +214,15 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
     }
 
     for field in &strct.fields {
-        if is_unsized(cx, &field.ty) {
-            let desc = describe(cx, &field.ty);
-            let msg = format!("using {} by value is not supported", desc);
-            cx.error(field, msg);
-        }
         if let Type::Fn(_) = field.ty {
             cx.error(
                 field,
                 "function pointers in a struct field are not implemented yet",
             );
+        } else if is_unsized(cx, &field.ty) {
+            let desc = describe(cx, &field.ty);
+            let msg = format!("using {} by value is not supported", desc);
+            cx.error(field, msg);
         }
     }
 }
@@ -314,11 +308,6 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
     }
 
     for arg in &efn.args {
-        if is_unsized(cx, &arg.ty) {
-            let desc = describe(cx, &arg.ty);
-            let msg = format!("passing {} by value is not supported", desc);
-            cx.error(arg, msg);
-        }
         if let Type::Fn(_) = arg.ty {
             if efn.lang == Lang::Rust {
                 cx.error(
@@ -326,17 +315,20 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
                     "passing a function pointer from C++ to Rust is not implemented yet",
                 );
             }
+        } else if is_unsized(cx, &arg.ty) {
+            let desc = describe(cx, &arg.ty);
+            let msg = format!("passing {} by value is not supported", desc);
+            cx.error(arg, msg);
         }
     }
 
     if let Some(ty) = &efn.ret {
-        if is_unsized(cx, ty) {
+        if let Type::Fn(_) = ty {
+            cx.error(ty, "returning a function pointer is not implemented yet");
+        } else if is_unsized(cx, ty) {
             let desc = describe(cx, ty);
             let msg = format!("returning {} by value is not supported", desc);
             cx.error(ty, msg);
-        }
-        if let Type::Fn(_) = ty {
-            cx.error(ty, "returning a function pointer is not implemented yet");
         }
     }
 
@@ -427,13 +419,12 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
             ident == CxxString || is_opaque_cxx(cx, ident) || cx.types.rust.contains(ident)
         }
         Type::Array(array) => is_unsized(cx, &array.inner),
-        Type::CxxVector(_) | Type::Slice(_) | Type::Void(_) => true,
+        Type::CxxVector(_) | Type::Slice(_) | Type::Fn(_) | Type::Void(_) => true,
         Type::RustBox(_)
         | Type::RustVec(_)
         | Type::UniquePtr(_)
         | Type::Ref(_)
         | Type::Str(_)
-        | Type::Fn(_)
         | Type::SliceRefU8(_) => false,
     }
 }
