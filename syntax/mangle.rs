@@ -5,8 +5,8 @@ use proc_macro2::Ident;
 const CXXBRIDGE: &str = "cxxbridge1";
 
 macro_rules! join {
-    ($($segment:expr),*) => {
-        symbol::join(&[$(&$segment),*])
+    ($($segment:expr),+ $(,)?) => {
+        symbol::join(&[$(&$segment),+])
     };
 }
 
@@ -18,7 +18,7 @@ pub fn extern_fn(efn: &ExternFn, types: &Types) -> Symbol {
                 efn.name.namespace,
                 CXXBRIDGE,
                 receiver_ident.cxx,
-                efn.name.rust
+                efn.name.rust,
             )
         }
         None => join!(efn.name.namespace, CXXBRIDGE, efn.name.rust),
