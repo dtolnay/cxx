@@ -169,6 +169,7 @@ fn expand_enum(enm: &Enum) -> TokenStream {
         // usable in patterns.
         #[derive(::std::cmp::PartialEq, ::std::cmp::Eq)]
     };
+    let derived_traits = derive::expand_enum(enm);
 
     quote! {
         #doc
@@ -188,13 +189,7 @@ fn expand_enum(enm: &Enum) -> TokenStream {
             type Kind = ::cxx::kind::Trivial;
         }
 
-        impl ::std::marker::Copy for #ident {}
-
-        impl ::std::clone::Clone for #ident {
-            fn clone(&self) -> Self {
-                *self
-            }
-        }
+        #derived_traits
     }
 }
 

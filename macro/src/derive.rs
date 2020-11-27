@@ -1,4 +1,4 @@
-use crate::syntax::{Struct, Trait};
+use crate::syntax::{Enum, Struct, Trait};
 use proc_macro2::{Span, TokenStream};
 use quote::{quote, quote_spanned, ToTokens};
 
@@ -11,6 +11,36 @@ pub fn expand_struct(strct: &Struct) -> TokenStream {
             Trait::Copy => expanded.extend(struct_copy(strct, span)),
             Trait::Clone => expanded.extend(struct_clone(strct, span)),
         }
+    }
+
+    expanded
+}
+
+pub fn expand_enum(enm: &Enum) -> TokenStream {
+    let mut expanded = TokenStream::new();
+    let mut has_copy = false;
+    let mut has_clone = false;
+
+    for derive in &enm.derives {
+        let span = derive.span;
+        match derive.what {
+            Trait::Copy => {
+                expanded.extend(enum_copy(enm, span));
+                has_copy = true;
+            }
+            Trait::Clone => {
+                expanded.extend(enum_clone(enm, span));
+                has_clone = true;
+            }
+        }
+    }
+
+    let span = enm.name.rust.span();
+    if !has_copy {
+        expanded.extend(enum_copy(enm, span));
+    }
+    if !has_clone {
+        expanded.extend(enum_clone(enm, span));
     }
 
     expanded
@@ -51,6 +81,26 @@ fn struct_clone(strct: &Struct, span: Span) -> TokenStream {
         impl ::std::clone::Clone for #ident {
             fn clone(&self) -> Self {
                 #body
+            }
+        }
+    }
+}
+
+fn enum_copy(enm: &Enum, span: Span) -> TokenStream {
+    let ident = &enm.name.rust;
+
+    quote_spanned! {span=>
+        impl ::std::marker::Copy for #ident {}
+    }
+}
+
+fn enum_clone(enm: &Enum, span: Span) -> TokenStream {
+    let ident = &enm.name.rust;
+
+    quote_spanned! {span=>
+        impl ::std::clone::Clone for #ident {
+            fn clone(&self) -> Self {
+                *self
             }
         }
     }

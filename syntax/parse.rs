@@ -126,6 +126,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
     }
 
     let mut doc = Doc::new();
+    let mut derives = Vec::new();
     let mut repr = None;
     let mut namespace = namespace.clone();
     attrs::parse(
@@ -133,6 +134,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
         &item.attrs,
         attrs::Parser {
             doc: Some(&mut doc),
+            derives: Some(&mut derives),
             repr: Some(&mut repr),
             namespace: Some(&mut namespace),
             ..Default::default()
@@ -188,6 +190,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
 
     Ok(Api::Enum(Enum {
         doc,
+        derives,
         enum_token,
         name: Pair::new(namespace, item.ident),
         brace_token,
