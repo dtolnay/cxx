@@ -29,7 +29,7 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
                 Err(err) => return cx.push(err),
             }
         } else if attr.path.is_ident("derive") {
-            match attr.parse_args_with(parse_derive_attribute) {
+            match attr.parse_args_with(|attr: ParseStream| parse_derive_attribute(cx, attr)) {
                 Ok(attr) => {
                     if let Some(derives) = &mut parser.derives {
                         derives.extend(attr);
@@ -89,19 +89,20 @@ fn parse_doc_attribute(input: ParseStream) -> Result<LitStr> {
     Ok(lit)
 }
 
-fn parse_derive_attribute(input: ParseStream) -> Result<Vec<Derive>> {
-    input
-        .parse_terminated::<Path, Token![,]>(Path::parse_mod_style)?
-        .into_iter()
-        .map(|path| {
-            if let Some(ident) = path.get_ident() {
-                if let Some(derive) = Derive::from(ident) {
-                    return Ok(derive);
-                }
+fn parse_derive_attribute(cx: &mut Errors, input: ParseStream) -> Result<Vec<Derive>> {
+    let paths = input.parse_terminated::<Path, Token![,]>(Path::parse_mod_style)?;
+
+    let mut derives = Vec::new();
+    for path in paths {
+        if let Some(ident) = path.get_ident() {
+            if let Some(derive) = Derive::from(ident) {
+                derives.push(derive);
+                continue;
             }
-            Err(Error::new_spanned(path, "unsupported derive"))
-        })
-        .collect()
+        }
+        cx.error(path, "unsupported derive");
+    }
+    Ok(derives)
 }
 
 fn parse_repr_attribute(input: ParseStream) -> Result<Atom> {
