@@ -1,10 +1,11 @@
+use crate::derive;
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::file::Module;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
     self, check, mangle, Api, Enum, ExternFn, ExternType, Impl, Pair, ResolvableName, Signature,
-    Struct, Trait, Type, TypeAlias, Types,
+    Struct, Type, TypeAlias, Types,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
@@ -133,8 +134,9 @@ fn expand_struct(strct: &Struct) -> TokenStream {
         let vis = Token![pub](field.ident.span());
         quote!(#vis #field)
     });
+    let derived_traits = derive::expand_struct(strct);
 
-    let mut expanded = quote! {
+    quote! {
         #doc
         #[repr(C)]
         pub struct #ident {
@@ -145,46 +147,9 @@ fn expand_struct(strct: &Struct) -> TokenStream {
             type Id = #type_id;
             type Kind = ::cxx::kind::Trivial;
         }
-    };
 
-    let is_copy = strct
-        .derives
-        .iter()
-        .any(|derive| derive.what == Trait::Copy);
-    for derive in &strct.derives {
-        match derive.what {
-            Trait::Copy => {
-                expanded.extend(quote_spanned! {derive.span=>
-                    impl ::std::marker::Copy for #ident {}
-                });
-            }
-            Trait::Clone => {
-                let body = if is_copy {
-                    quote!(*self)
-                } else {
-                    let fields = strct.fields.iter().map(|field| &field.ident);
-                    let values = strct.fields.iter().map(|field| {
-                        let ident = &field.ident;
-                        let ty = field.ty.to_token_stream();
-                        let span = ty.into_iter().last().unwrap().span();
-                        quote_spanned!(span=> &self.#ident)
-                    });
-                    quote_spanned!(derive.span=> #ident {
-                        #(#fields: ::std::clone::Clone::clone(#values),)*
-                    })
-                };
-                expanded.extend(quote_spanned! {derive.span=>
-                    impl ::std::clone::Clone for #ident {
-                        fn clone(&self) -> Self {
-                            #body
-                        }
-                    }
-                });
-            }
-        }
+        #derived_traits
     }
-
-    expanded
 }
 
 fn expand_enum(enm: &Enum) -> TokenStream {
