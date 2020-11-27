@@ -164,12 +164,8 @@ fn expand_enum(enm: &Enum) -> TokenStream {
             pub const #variant_ident: Self = #ident { repr: #discriminant };
         })
     });
-    let derives = quote! {
-        // Required to be derived in order for the enum's "variants" to be
-        // usable in patterns.
-        #[derive(::std::cmp::PartialEq, ::std::cmp::Eq)]
-    };
-    let derived_traits = derive::expand_enum(enm);
+    let mut derives = None;
+    let derived_traits = derive::expand_enum(enm, &mut derives);
 
     quote! {
         #doc

@@ -17,7 +17,7 @@ pub fn expand_struct(strct: &Struct) -> TokenStream {
     expanded
 }
 
-pub fn expand_enum(enm: &Enum) -> TokenStream {
+pub fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) -> TokenStream {
     let mut expanded = TokenStream::new();
     let mut has_copy = false;
     let mut has_clone = false;
@@ -44,6 +44,12 @@ pub fn expand_enum(enm: &Enum) -> TokenStream {
     if !has_clone {
         expanded.extend(enum_clone(enm, span));
     }
+
+    *actual_derives = Some(quote! {
+        // Required to be derived in order for the enum's "variants" to be
+        // usable in patterns.
+        #[derive(::std::cmp::PartialEq, ::std::cmp::Eq)]
+    });
 
     expanded
 }
