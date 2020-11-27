@@ -163,8 +163,14 @@ fn expand_struct(strct: &Struct) -> TokenStream {
                     quote!(*self)
                 } else {
                     let fields = strct.fields.iter().map(|field| &field.ident);
-                    quote!(#ident {
-                        #(#fields: ::std::clone::Clone::clone(&self.#fields),)*
+                    let values = strct.fields.iter().map(|field| {
+                        let ident = &field.ident;
+                        let ty = field.ty.to_token_stream();
+                        let span = ty.into_iter().last().unwrap().span();
+                        quote_spanned!(span=> &self.#ident)
+                    });
+                    quote_spanned!(derive.span=> #ident {
+                        #(#fields: ::std::clone::Clone::clone(#values),)*
                     })
                 };
                 expanded.extend(quote_spanned! {derive.span=>
