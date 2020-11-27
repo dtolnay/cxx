@@ -3,8 +3,8 @@ use crate::syntax::file::Module;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    self, check, mangle, Api, Derive, Enum, ExternFn, ExternType, Impl, Pair, ResolvableName,
-    Signature, Struct, Type, TypeAlias, Types,
+    self, check, mangle, Api, Enum, ExternFn, ExternType, Impl, Pair, ResolvableName, Signature,
+    Struct, Trait, Type, TypeAlias, Types,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
@@ -147,15 +147,18 @@ fn expand_struct(strct: &Struct) -> TokenStream {
         }
     };
 
-    let is_copy = strct.derives.contains(&Derive::Copy);
+    let is_copy = strct
+        .derives
+        .iter()
+        .any(|derive| derive.what == Trait::Copy);
     for derive in &strct.derives {
-        match derive {
-            Derive::Copy => {
-                expanded.extend(quote! {
+        match derive.what {
+            Trait::Copy => {
+                expanded.extend(quote_spanned! {derive.span=>
                     impl ::std::marker::Copy for #ident {}
                 });
             }
-            Derive::Clone => {
+            Trait::Clone => {
                 let body = if is_copy {
                     quote!(*self)
                 } else {
@@ -164,7 +167,7 @@ fn expand_struct(strct: &Struct) -> TokenStream {
                         #(#fields: ::std::clone::Clone::clone(&self.#fields),)*
                     })
                 };
-                expanded.extend(quote! {
+                expanded.extend(quote_spanned! {derive.span=>
                     impl ::std::clone::Clone for #ident {
                         fn clone(&self) -> Self {
                             #body

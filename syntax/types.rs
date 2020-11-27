@@ -3,7 +3,7 @@ use crate::syntax::improper::ImproperCtype;
 use crate::syntax::report::Errors;
 use crate::syntax::set::{OrderedSet as Set, UnorderedSet};
 use crate::syntax::{
-    toposort, Api, Derive, Enum, ExternFn, ExternType, Impl, Pair, ResolvableName, Struct, Type,
+    toposort, Api, Enum, ExternFn, ExternType, Impl, Pair, ResolvableName, Struct, Trait, Type,
     TypeAlias,
 };
 use proc_macro2::Ident;
@@ -261,7 +261,7 @@ impl<'a> Types<'a> {
 
     pub fn is_pod(&self, strct: &Struct) -> bool {
         for derive in &strct.derives {
-            if *derive == Derive::Copy {
+            if derive.what == Trait::Copy {
                 return true;
             }
         }

@@ -33,7 +33,7 @@ use syn::token::{Brace, Bracket, Paren};
 use syn::{Expr, Generics, Lifetime, LitInt, Token, Type as RustType};
 
 pub use self::atom::Atom;
-pub use self::derive::Derive;
+pub use self::derive::{Derive, Trait};
 pub use self::doc::Doc;
 pub use self::parse::parse_items;
 pub use self::types::Types;
