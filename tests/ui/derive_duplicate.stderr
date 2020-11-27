@@ -1,0 +1,10 @@
+error[E0119]: conflicting implementations of trait `std::clone::Clone` for type `ffi::Struct`:
+ --> $DIR/derive_duplicate.rs:1:1
+  |
+1 | #[cxx::bridge]
+  | ^^^^^^^^^^^^^^
+  | |
+  | first implementation here
+  | conflicting implementation for `ffi::Struct`
+  |
+  = note: this error originates in a derive macro (in Nightly builds, run with -Z macro-backtrace for more info)
