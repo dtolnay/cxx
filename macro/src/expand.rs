@@ -5,7 +5,7 @@ use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
     self, check, mangle, Api, Enum, ExternFn, ExternType, Impl, Pair, ResolvableName, Signature,
-    Struct, Type, TypeAlias, Types,
+    Struct, Trait, Type, TypeAlias, Types,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
@@ -40,7 +40,10 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
     for api in apis {
         match api {
             Api::Include(_) | Api::Impl(_) => {}
-            Api::Struct(strct) => expanded.extend(expand_struct(strct)),
+            Api::Struct(strct) => {
+                expanded.extend(expand_struct(strct));
+                hidden.extend(expand_struct_operators(strct));
+            }
             Api::Enum(enm) => expanded.extend(expand_enum(enm)),
             Api::CxxType(ety) => {
                 let ident = &ety.name.rust;
@@ -152,6 +155,30 @@ fn expand_struct(strct: &Struct) -> TokenStream {
 
         #derived_traits
     }
+}
+
+fn expand_struct_operators(strct: &Struct) -> TokenStream {
+    let ident = &strct.name.rust;
+    let mut operators = TokenStream::new();
+
+    for derive in &strct.derives {
+        let span = derive.span;
+        match derive.what {
+            Trait::PartialEq => operators.extend({
+                let link_name = mangle::operator(&strct.name, "__operator_eq");
+                quote_spanned! {span=>
+                    #[doc(hidden)]
+                    #[export_name = #link_name]
+                    extern "C" fn __operator_eq(lhs: &#ident, rhs: &#ident) -> bool {
+                        *lhs == *rhs
+                    }
+                }
+            }),
+            _ => {}
+        }
+    }
+
+    operators
 }
 
 fn expand_enum(enm: &Enum) -> TokenStream {
