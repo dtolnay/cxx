@@ -15,7 +15,7 @@ use std::os::raw::c_char;
 
 #[cxx::bridge(namespace = "tests")]
 pub mod ffi {
-    #[derive(Clone)]
+    #[derive(Clone, Debug)]
     struct Shared {
         z: usize,
     }
@@ -24,6 +24,7 @@ pub mod ffi {
         msg: String,
     }
 
+    #[derive(Debug)]
     enum Enum {
         AVal,
         BVal = 2020,

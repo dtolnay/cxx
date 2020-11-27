@@ -227,6 +227,13 @@ fn test_enum_representations() {
     assert_eq!(2021, ffi::Enum::CVal.repr);
 }
 
+#[test]
+fn test_debug() {
+    assert_eq!("Shared { z: 1 }", format!("{:?}", ffi::Shared { z: 1 }));
+    assert_eq!("BVal", format!("{:?}", ffi::Enum::BVal));
+    assert_eq!("Enum(9)", format!("{:?}", ffi::Enum { repr: 9 }));
+}
+
 #[no_mangle]
 extern "C" fn cxx_test_suite_get_box() -> *mut R {
     Box::into_raw(Box::new(R(2020usize)))
