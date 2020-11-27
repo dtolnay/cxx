@@ -4,6 +4,7 @@
     clippy::new_without_default,
     clippy::nonminimal_bool,
     clippy::or_fun_call,
+    clippy::single_match,
     clippy::toplevel_ref_arg,
     clippy::useless_let_if_seq
 )]
