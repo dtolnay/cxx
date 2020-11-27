@@ -1,0 +1,8 @@
+error[E0277]: the trait bound `ffi::Other: Clone` is not satisfied
+ --> $DIR/derive_nonclone.rs:1:1
+  |
+1 | #[cxx::bridge]
+  | ^^^^^^^^^^^^^^ the trait `Clone` is not implemented for `ffi::Other`
+  |
+  = note: required by `clone`
+  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
