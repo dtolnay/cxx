@@ -3,8 +3,8 @@ use crate::syntax::improper::ImproperCtype;
 use crate::syntax::report::Errors;
 use crate::syntax::set::{OrderedSet as Set, UnorderedSet};
 use crate::syntax::{
-    toposort, Api, Enum, ExternFn, ExternType, Impl, Pair, ResolvableName, Struct, Trait, Type,
-    TypeAlias,
+    derive, toposort, Api, Enum, ExternFn, ExternType, Impl, Pair, ResolvableName, Struct, Trait,
+    Type, TypeAlias,
 };
 use proc_macro2::Ident;
 use quote::ToTokens;
@@ -260,12 +260,7 @@ impl<'a> Types<'a> {
     }
 
     pub fn is_pod(&self, strct: &Struct) -> bool {
-        for derive in &strct.derives {
-            if derive.what == Trait::Copy {
-                return true;
-            }
-        }
-        false
+        derive::contains(&strct.derives, Trait::Copy)
     }
 
     // Types that trigger rustc's default #[warn(improper_ctypes)] lint, even if

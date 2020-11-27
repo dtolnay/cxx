@@ -3,7 +3,7 @@
 pub mod atom;
 mod attrs;
 pub mod check;
-mod derive;
+pub mod derive;
 mod discriminant;
 mod doc;
 pub mod error;

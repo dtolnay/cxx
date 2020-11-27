@@ -31,3 +31,7 @@ impl PartialEq<Trait> for Derive {
         self.what == *other
     }
 }
+
+pub fn contains(derives: &[Derive], query: Trait) -> bool {
+    derives.iter().any(|derive| derive.what == query)
+}

@@ -1,4 +1,4 @@
-use crate::syntax::{Enum, Struct, Trait};
+use crate::syntax::{derive, Enum, Struct, Trait};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, quote_spanned, ToTokens};
 
@@ -59,12 +59,7 @@ fn struct_copy(strct: &Struct, span: Span) -> TokenStream {
 fn struct_clone(strct: &Struct, span: Span) -> TokenStream {
     let ident = &strct.name.rust;
 
-    let is_copy = strct
-        .derives
-        .iter()
-        .any(|derive| derive.what == Trait::Copy);
-
-    let body = if is_copy {
+    let body = if derive::contains(&strct.derives, Trait::Copy) {
         quote!(*self)
     } else {
         let fields = strct.fields.iter().map(|field| &field.ident);
