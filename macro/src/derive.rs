@@ -1,5 +1,5 @@
 use crate::syntax::{Enum, Struct, Trait};
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, quote_spanned, ToTokens};
 
 pub fn expand_struct(strct: &Struct) -> TokenStream {
@@ -10,6 +10,7 @@ pub fn expand_struct(strct: &Struct) -> TokenStream {
         match derive.what {
             Trait::Copy => expanded.extend(struct_copy(strct, span)),
             Trait::Clone => expanded.extend(struct_clone(strct, span)),
+            Trait::Debug => expanded.extend(struct_debug(strct, span)),
         }
     }
 
@@ -32,6 +33,7 @@ pub fn expand_enum(enm: &Enum) -> TokenStream {
                 expanded.extend(enum_clone(enm, span));
                 has_clone = true;
             }
+            Trait::Debug => expanded.extend(enum_debug(enm, span)),
         }
     }
 
@@ -86,6 +88,23 @@ fn struct_clone(strct: &Struct, span: Span) -> TokenStream {
     }
 }
 
+fn struct_debug(strct: &Struct, span: Span) -> TokenStream {
+    let ident = &strct.name.rust;
+    let struct_name = ident.to_string();
+    let fields = strct.fields.iter().map(|field| &field.ident);
+    let field_names = fields.clone().map(Ident::to_string);
+
+    quote_spanned! {span=>
+        impl ::std::fmt::Debug for #ident {
+            fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                formatter.debug_struct(#struct_name)
+                    #(.field(#field_names, &self.#fields))*
+                    .finish()
+            }
+        }
+    }
+}
+
 fn enum_copy(enm: &Enum, span: Span) -> TokenStream {
     let ident = &enm.name.rust;
 
@@ -101,6 +120,29 @@ fn enum_clone(enm: &Enum, span: Span) -> TokenStream {
         impl ::std::clone::Clone for #ident {
             fn clone(&self) -> Self {
                 *self
+            }
+        }
+    }
+}
+
+fn enum_debug(enm: &Enum, span: Span) -> TokenStream {
+    let ident = &enm.name.rust;
+    let variants = enm.variants.iter().map(|variant| {
+        let variant = &variant.ident;
+        let name = variant.to_string();
+        quote_spanned! {span=>
+            #ident::#variant => formatter.write_str(#name),
+        }
+    });
+    let fallback = format!("{}({{}})", ident);
+
+    quote_spanned! {span=>
+        impl ::std::fmt::Debug for #ident {
+            fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                match *self {
+                    #(#variants)*
+                    _ => ::std::write!(formatter, #fallback, self.repr),
+                }
             }
         }
     }

@@ -10,6 +10,7 @@ pub struct Derive {
 pub enum Trait {
     Clone,
     Copy,
+    Debug,
 }
 
 impl Derive {
@@ -17,6 +18,7 @@ impl Derive {
         let what = match ident.to_string().as_str() {
             "Clone" => Trait::Clone,
             "Copy" => Trait::Copy,
+            "Debug" => Trait::Debug,
             _ => return None,
         };
         let span = ident.span();
