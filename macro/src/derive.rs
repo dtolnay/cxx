@@ -4,6 +4,7 @@ use quote::{quote, quote_spanned, ToTokens};
 
 pub fn expand_struct(strct: &Struct, actual_derives: &mut Option<TokenStream>) -> TokenStream {
     let mut expanded = TokenStream::new();
+    let mut traits = Vec::new();
 
     for derive in &strct.derives {
         let span = derive.span;
@@ -11,18 +12,27 @@ pub fn expand_struct(strct: &Struct, actual_derives: &mut Option<TokenStream>) -
             Trait::Copy => expanded.extend(struct_copy(strct, span)),
             Trait::Clone => expanded.extend(struct_clone(strct, span)),
             Trait::Debug => expanded.extend(struct_debug(strct, span)),
+            Trait::Eq => traits.push(quote_spanned!(span=> ::std::cmp::Eq)),
+            Trait::PartialEq => traits.push(quote_spanned!(span=> ::std::cmp::PartialEq)),
         }
     }
 
-    *actual_derives = None;
+    if traits.is_empty() {
+        *actual_derives = None;
+    } else {
+        *actual_derives = Some(quote!(#[derive(#(#traits),*)]));
+    }
 
     expanded
 }
 
 pub fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) -> TokenStream {
     let mut expanded = TokenStream::new();
+    let mut traits = Vec::new();
     let mut has_copy = false;
     let mut has_clone = false;
+    let mut has_eq = false;
+    let mut has_partial_eq = false;
 
     for derive in &enm.derives {
         let span = derive.span;
@@ -36,6 +46,14 @@ pub fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) -> Toke
                 has_clone = true;
             }
             Trait::Debug => expanded.extend(enum_debug(enm, span)),
+            Trait::Eq => {
+                traits.push(quote_spanned!(span=> ::std::cmp::Eq));
+                has_eq = true;
+            }
+            Trait::PartialEq => {
+                traits.push(quote_spanned!(span=> ::std::cmp::PartialEq));
+                has_partial_eq = true;
+            }
         }
     }
 
@@ -46,12 +64,16 @@ pub fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) -> Toke
     if !has_clone {
         expanded.extend(enum_clone(enm, span));
     }
-
-    *actual_derives = Some(quote! {
+    if !has_eq {
         // Required to be derived in order for the enum's "variants" to be
         // usable in patterns.
-        #[derive(::std::cmp::PartialEq, ::std::cmp::Eq)]
-    });
+        traits.push(quote!(::std::cmp::Eq));
+    }
+    if !has_partial_eq {
+        traits.push(quote!(::std::cmp::PartialEq));
+    }
+
+    *actual_derives = Some(quote!(#[derive(#(#traits),*)]));
 
     expanded
 }
