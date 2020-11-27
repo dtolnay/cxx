@@ -15,12 +15,3 @@ impl Derive {
         }
     }
 }
-
-impl AsRef<str> for Derive {
-    fn as_ref(&self) -> &str {
-        match self {
-            Derive::Clone => "Clone",
-            Derive::Copy => "Copy",
-        }
-    }
-}

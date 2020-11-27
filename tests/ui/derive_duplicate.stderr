@@ -7,4 +7,4 @@ error[E0119]: conflicting implementations of trait `std::clone::Clone` for type 
   | first implementation here
   | conflicting implementation for `ffi::Struct`
   |
-  = note: this error originates in a derive macro (in Nightly builds, run with -Z macro-backtrace for more info)
+  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)

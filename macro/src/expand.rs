@@ -1,11 +1,10 @@
-use crate::derive::DeriveAttribute;
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::file::Module;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    self, check, mangle, Api, Enum, ExternFn, ExternType, Impl, Pair, ResolvableName, Signature,
-    Struct, Type, TypeAlias, Types,
+    self, check, mangle, Api, Derive, Enum, ExternFn, ExternType, Impl, Pair, ResolvableName,
+    Signature, Struct, Type, TypeAlias, Types,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
@@ -127,7 +126,6 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
 fn expand_struct(strct: &Struct) -> TokenStream {
     let ident = &strct.name.rust;
     let doc = &strct.doc;
-    let derives = DeriveAttribute(&strct.derives);
     let type_id = type_id(&strct.name);
     let fields = strct.fields.iter().map(|field| {
         // This span on the pub makes "private type in public interface" errors
@@ -136,9 +134,8 @@ fn expand_struct(strct: &Struct) -> TokenStream {
         quote!(#vis #field)
     });
 
-    quote! {
+    let mut expanded = quote! {
         #doc
-        #derives
         #[repr(C)]
         pub struct #ident {
             #(#fields,)*
@@ -148,7 +145,37 @@ fn expand_struct(strct: &Struct) -> TokenStream {
             type Id = #type_id;
             type Kind = ::cxx::kind::Trivial;
         }
+    };
+
+    let is_copy = strct.derives.contains(&Derive::Copy);
+    for derive in &strct.derives {
+        match derive {
+            Derive::Copy => {
+                expanded.extend(quote! {
+                    impl ::std::marker::Copy for #ident {}
+                });
+            }
+            Derive::Clone => {
+                let body = if is_copy {
+                    quote!(*self)
+                } else {
+                    let fields = strct.fields.iter().map(|field| &field.ident);
+                    quote!(#ident {
+                        #(#fields: ::std::clone::Clone::clone(&self.#fields),)*
+                    })
+                };
+                expanded.extend(quote! {
+                    impl ::std::clone::Clone for #ident {
+                        fn clone(&self) -> Self {
+                            #body
+                        }
+                    }
+                });
+            }
+        }
     }
+
+    expanded
 }
 
 fn expand_enum(enm: &Enum) -> TokenStream {
@@ -166,7 +193,7 @@ fn expand_enum(enm: &Enum) -> TokenStream {
 
     quote! {
         #doc
-        #[derive(Copy, Clone, PartialEq, Eq)]
+        #[derive(PartialEq, Eq)] // required to be derived in order to be usable in patterns
         #[repr(transparent)]
         pub struct #ident {
             pub repr: #repr,
@@ -180,6 +207,14 @@ fn expand_enum(enm: &Enum) -> TokenStream {
         unsafe impl ::cxx::ExternType for #ident {
             type Id = #type_id;
             type Kind = ::cxx::kind::Trivial;
+        }
+
+        impl ::std::marker::Copy for #ident {}
+
+        impl ::std::clone::Clone for #ident {
+            fn clone(&self) -> Self {
+                *self
+            }
         }
     }
 }
