@@ -2,7 +2,7 @@ use crate::syntax::{derive, Enum, Struct, Trait};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, quote_spanned, ToTokens};
 
-pub fn expand_struct(strct: &Struct) -> TokenStream {
+pub fn expand_struct(strct: &Struct, actual_derives: &mut Option<TokenStream>) -> TokenStream {
     let mut expanded = TokenStream::new();
 
     for derive in &strct.derives {
@@ -13,6 +13,8 @@ pub fn expand_struct(strct: &Struct) -> TokenStream {
             Trait::Debug => expanded.extend(struct_debug(strct, span)),
         }
     }
+
+    *actual_derives = None;
 
     expanded
 }

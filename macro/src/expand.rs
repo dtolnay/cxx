@@ -134,10 +134,12 @@ fn expand_struct(strct: &Struct) -> TokenStream {
         let vis = Token![pub](field.ident.span());
         quote!(#vis #field)
     });
-    let derived_traits = derive::expand_struct(strct);
+    let mut derives = None;
+    let derived_traits = derive::expand_struct(strct, &mut derives);
 
     quote! {
         #doc
+        #derives
         #[repr(C)]
         pub struct #ident {
             #(#fields,)*
