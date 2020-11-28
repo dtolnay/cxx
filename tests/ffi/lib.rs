@@ -15,7 +15,7 @@ use std::os::raw::c_char;
 
 #[cxx::bridge(namespace = "tests")]
 pub mod ffi {
-    #[derive(Clone, Debug)]
+    #[derive(Clone, Debug, PartialEq, Eq)]
     struct Shared {
         z: usize,
     }

@@ -653,6 +653,9 @@ extern "C" const char *cxx_run_test() noexcept {
 
   ASSERT(std::string(rAliasedFunction(2020)) == "2020");
 
+  ASSERT(Shared{1} == Shared{1});
+  ASSERT(Shared{1} != Shared{2});
+
   cxx_test_suite_set_correct();
   return nullptr;
 }
