@@ -40,6 +40,20 @@ impl PartialEq<Trait> for Derive {
     }
 }
 
+impl AsRef<str> for Trait {
+    fn as_ref(&self) -> &str {
+        match self {
+            Trait::Clone => "Clone",
+            Trait::Copy => "Copy",
+            Trait::Debug => "Debug",
+            Trait::Eq => "Eq",
+            Trait::Ord => "Ord",
+            Trait::PartialEq => "PartialEq",
+            Trait::PartialOrd => "PartialOrd",
+        }
+    }
+}
+
 pub fn contains(derives: &[Derive], query: Trait) -> bool {
     derives.iter().any(|derive| derive.what == query)
 }

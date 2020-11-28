@@ -1,7 +1,7 @@
 use crate::syntax::atom::Atom::*;
 use crate::syntax::{
-    Array, Atom, Enum, ExternFn, ExternType, Impl, Receiver, Ref, ResolvableName, Signature,
-    SliceRef, Struct, Ty1, Type, TypeAlias, Var,
+    Array, Atom, Derive, Enum, ExternFn, ExternType, Impl, Receiver, Ref, ResolvableName,
+    Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote_spanned, ToTokens};
@@ -96,6 +96,12 @@ impl ToTokens for Array {
 impl ToTokens for Atom {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         Ident::new(self.as_ref(), Span::call_site()).to_tokens(tokens);
+    }
+}
+
+impl ToTokens for Derive {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        Ident::new(self.what.as_ref(), self.span).to_tokens(tokens);
     }
 }
 
