@@ -360,6 +360,15 @@ fn write_struct_operator_decls<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
             "bool {}(const {1} &, const {1} &) noexcept;",
             link_name, strct.name.cxx,
         );
+
+        if !derive::contains(&strct.derives, Trait::Eq) {
+            let link_name = mangle::operator(&strct.name, "__operator_ne");
+            writeln!(
+                out,
+                "bool {}(const {1} &, const {1} &) noexcept;",
+                link_name, strct.name.cxx,
+            );
+        }
     }
 
     out.end_block(Block::ExternC);
@@ -373,22 +382,28 @@ fn write_struct_operators<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
     out.set_namespace(&strct.name.namespace);
 
     if derive::contains(&strct.derives, Trait::PartialEq) {
-        let link_name = mangle::operator(&strct.name, "__operator_eq");
         out.next_section();
         writeln!(
             out,
             "bool {0}::operator==(const {0} &rhs) const noexcept {{",
             strct.name.cxx,
         );
+        let link_name = mangle::operator(&strct.name, "__operator_eq");
         writeln!(out, "  return {}(*this, rhs);", link_name);
         writeln!(out, "}}");
+
         out.next_section();
         writeln!(
             out,
             "bool {0}::operator!=(const {0} &rhs) const noexcept {{",
             strct.name.cxx,
         );
-        writeln!(out, "  return !(*this == rhs);");
+        if derive::contains(&strct.derives, Trait::Eq) {
+            writeln!(out, "  return !(*this == rhs);");
+        } else {
+            let link_name = mangle::operator(&strct.name, "__operator_ne");
+            writeln!(out, "  return {}(*this, rhs);", link_name);
+        }
         writeln!(out, "}}");
     }
 }
