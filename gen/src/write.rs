@@ -181,6 +181,7 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
 
 fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&ExternFn]) {
     let operator_eq = derive::contains(&strct.derives, Trait::PartialEq);
+    let operator_ord = derive::contains(&strct.derives, Trait::PartialOrd);
 
     out.set_namespace(&strct.name.namespace);
     let guard = format!("CXXBRIDGE1_STRUCT_{}", strct.name.to_symbol());
@@ -190,14 +191,17 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
         writeln!(out, "//{}", line);
     }
     writeln!(out, "struct {} final {{", strct.name.cxx);
+
     for field in &strct.fields {
         write!(out, "  ");
         write_type_space(out, &field.ty);
         writeln!(out, "{};", field.ident);
     }
-    if !methods.is_empty() || operator_eq {
+
+    if !methods.is_empty() || operator_eq || operator_ord {
         writeln!(out);
     }
+
     for method in methods {
         write!(out, "  ");
         let sig = &method.sig;
@@ -205,6 +209,7 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
         write_rust_function_shim_decl(out, &local_name, sig, false);
         writeln!(out, ";");
     }
+
     if operator_eq {
         writeln!(
             out,
@@ -217,6 +222,30 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
             strct.name.cxx,
         );
     }
+
+    if operator_ord {
+        writeln!(
+            out,
+            "  bool operator<(const {} &) const noexcept;",
+            strct.name.cxx,
+        );
+        writeln!(
+            out,
+            "  bool operator<=(const {} &) const noexcept;",
+            strct.name.cxx,
+        );
+        writeln!(
+            out,
+            "  bool operator>(const {} &) const noexcept;",
+            strct.name.cxx,
+        );
+        writeln!(
+            out,
+            "  bool operator>=(const {} &) const noexcept;",
+            strct.name.cxx,
+        );
+    }
+
     writeln!(out, "}};");
     writeln!(out, "#endif // {}", guard);
 }
@@ -371,6 +400,38 @@ fn write_struct_operator_decls<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
         }
     }
 
+    if derive::contains(&strct.derives, Trait::PartialOrd) {
+        let link_name = mangle::operator(&strct.name, "__operator_lt");
+        writeln!(
+            out,
+            "bool {}(const {1} &, const {1} &) noexcept;",
+            link_name, strct.name.cxx,
+        );
+
+        let link_name = mangle::operator(&strct.name, "__operator_le");
+        writeln!(
+            out,
+            "bool {}(const {1} &, const {1} &) noexcept;",
+            link_name, strct.name.cxx,
+        );
+
+        if !derive::contains(&strct.derives, Trait::Ord) {
+            let link_name = mangle::operator(&strct.name, "__operator_gt");
+            writeln!(
+                out,
+                "bool {}(const {1} &, const {1} &) noexcept;",
+                link_name, strct.name.cxx,
+            );
+
+            let link_name = mangle::operator(&strct.name, "__operator_ge");
+            writeln!(
+                out,
+                "bool {}(const {1} &, const {1} &) noexcept;",
+                link_name, strct.name.cxx,
+            );
+        }
+    }
+
     out.end_block(Block::ExternC);
 }
 
@@ -402,6 +463,56 @@ fn write_struct_operators<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
             writeln!(out, "  return !(*this == rhs);");
         } else {
             let link_name = mangle::operator(&strct.name, "__operator_ne");
+            writeln!(out, "  return {}(*this, rhs);", link_name);
+        }
+        writeln!(out, "}}");
+    }
+
+    if derive::contains(&strct.derives, Trait::PartialOrd) {
+        out.next_section();
+        writeln!(
+            out,
+            "bool {0}::operator<(const {0} &rhs) const noexcept {{",
+            strct.name.cxx,
+        );
+        let link_name = mangle::operator(&strct.name, "__operator_lt");
+        writeln!(out, "  return {}(*this, rhs);", link_name);
+        writeln!(out, "}}");
+
+        out.next_section();
+        writeln!(
+            out,
+            "bool {0}::operator<=(const {0} &rhs) const noexcept {{",
+            strct.name.cxx,
+        );
+        let link_name = mangle::operator(&strct.name, "__operator_le");
+        writeln!(out, "  return {}(*this, rhs);", link_name);
+        writeln!(out, "}}");
+
+        out.next_section();
+        writeln!(
+            out,
+            "bool {0}::operator>(const {0} &rhs) const noexcept {{",
+            strct.name.cxx,
+        );
+        if derive::contains(&strct.derives, Trait::Ord) {
+            writeln!(out, "  return !(*this <= rhs);");
+        } else {
+            let link_name = mangle::operator(&strct.name, "__operator_gt");
+            writeln!(out, "  return {}(*this, rhs);", link_name);
+        }
+        writeln!(out, "}}");
+
+        out.next_section();
+        writeln!(
+            out,
+            "bool {0}::operator>=(const {0} &rhs) const noexcept {{",
+            strct.name.cxx,
+        );
+        if derive::contains(&strct.derives, Trait::Ord) {
+            writeln!(out, "  return !(*this < rhs);");
+        } else {
+            let link_name = mangle::operator(&strct.name, "__operator_ge");
             writeln!(out, "  return {}(*this, rhs);", link_name);
         }
         writeln!(out, "}}");

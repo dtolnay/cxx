@@ -187,6 +187,49 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                     });
                 }
             }
+            Trait::PartialOrd => {
+                let link_name = mangle::operator(&strct.name, "__operator_lt");
+                let local_name = format_ident!("__operator_lt_{}", strct.name.rust);
+                operators.extend(quote_spanned! {span=>
+                    #[doc(hidden)]
+                    #[export_name = #link_name]
+                    extern "C" fn #local_name(lhs: &#ident, rhs: &#ident) -> bool {
+                        *lhs < *rhs
+                    }
+                });
+
+                let link_name = mangle::operator(&strct.name, "__operator_le");
+                let local_name = format_ident!("__operator_le_{}", strct.name.rust);
+                operators.extend(quote_spanned! {span=>
+                    #[doc(hidden)]
+                    #[export_name = #link_name]
+                    extern "C" fn #local_name(lhs: &#ident, rhs: &#ident) -> bool {
+                        *lhs <= *rhs
+                    }
+                });
+
+                if !derive::contains(&strct.derives, Trait::Ord) {
+                    let link_name = mangle::operator(&strct.name, "__operator_gt");
+                    let local_name = format_ident!("__operator_gt_{}", strct.name.rust);
+                    operators.extend(quote_spanned! {span=>
+                        #[doc(hidden)]
+                        #[export_name = #link_name]
+                        extern "C" fn #local_name(lhs: &#ident, rhs: &#ident) -> bool {
+                            *lhs > *rhs
+                        }
+                    });
+
+                    let link_name = mangle::operator(&strct.name, "__operator_ge");
+                    let local_name = format_ident!("__operator_ge_{}", strct.name.rust);
+                    operators.extend(quote_spanned! {span=>
+                        #[doc(hidden)]
+                        #[export_name = #link_name]
+                        extern "C" fn #local_name(lhs: &#ident, rhs: &#ident) -> bool {
+                            *lhs >= *rhs
+                        }
+                    });
+                }
+            }
             _ => {}
         }
     }

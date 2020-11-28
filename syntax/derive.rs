@@ -12,7 +12,9 @@ pub enum Trait {
     Copy,
     Debug,
     Eq,
+    Ord,
     PartialEq,
+    PartialOrd,
 }
 
 impl Derive {
@@ -22,7 +24,9 @@ impl Derive {
             "Copy" => Trait::Copy,
             "Debug" => Trait::Debug,
             "Eq" => Trait::Eq,
+            "Ord" => Trait::Ord,
             "PartialEq" => Trait::PartialEq,
+            "PartialOrd" => Trait::PartialOrd,
             _ => return None,
         };
         let span = ident.span();
