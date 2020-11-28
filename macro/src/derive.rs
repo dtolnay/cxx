@@ -14,6 +14,7 @@ pub fn expand_struct(strct: &Struct, actual_derives: &mut Option<TokenStream>) -
             Trait::Copy => expanded.extend(struct_copy(strct, span)),
             Trait::Clone => expanded.extend(struct_clone(strct, span)),
             Trait::Debug => expanded.extend(struct_debug(strct, span)),
+            Trait::Default => expanded.extend(struct_default(strct, span)),
             Trait::Eq => traits.push(quote_spanned!(span=> ::std::cmp::Eq)),
             Trait::Ord => expanded.extend(struct_ord(strct, span)),
             Trait::PartialEq => traits.push(quote_spanned!(span=> ::std::cmp::PartialEq)),
@@ -50,6 +51,7 @@ pub fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) -> Toke
                 has_clone = true;
             }
             Trait::Debug => expanded.extend(enum_debug(enm, span)),
+            Trait::Default => unreachable!(),
             Trait::Eq => {
                 traits.push(quote_spanned!(span=> ::std::cmp::Eq));
                 has_eq = true;
@@ -131,6 +133,23 @@ fn struct_debug(strct: &Struct, span: Span) -> TokenStream {
                 formatter.debug_struct(#struct_name)
                     #(.field(#field_names, &self.#fields))*
                     .finish()
+            }
+        }
+    }
+}
+
+fn struct_default(strct: &Struct, span: Span) -> TokenStream {
+    let ident = &strct.name.rust;
+    let fields = strct.fields.iter().map(|field| &field.ident);
+
+    quote_spanned! {span=>
+        impl ::std::default::Default for #ident {
+            fn default() -> Self {
+                #ident {
+                    #(
+                        #fields: ::std::default::Default::default(),
+                    )*
+                }
             }
         }
     }
