@@ -20,6 +20,7 @@ pub mod ffi {
         z: usize,
     }
 
+    #[derive(PartialEq)]
     struct SharedString {
         msg: String,
     }

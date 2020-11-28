@@ -164,17 +164,29 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
     for derive in &strct.derives {
         let span = derive.span;
         match derive.what {
-            Trait::PartialEq => operators.extend({
+            Trait::PartialEq => {
                 let link_name = mangle::operator(&strct.name, "__operator_eq");
                 let local_name = format_ident!("__operator_eq_{}", strct.name.rust);
-                quote_spanned! {span=>
+                operators.extend(quote_spanned! {span=>
                     #[doc(hidden)]
                     #[export_name = #link_name]
                     extern "C" fn #local_name(lhs: &#ident, rhs: &#ident) -> bool {
                         *lhs == *rhs
                     }
+                });
+
+                if !derive::contains(&strct.derives, Trait::Eq) {
+                    let link_name = mangle::operator(&strct.name, "__operator_ne");
+                    let local_name = format_ident!("__operator_ne_{}", strct.name.rust);
+                    operators.extend(quote_spanned! {span=>
+                        #[doc(hidden)]
+                        #[export_name = #link_name]
+                        extern "C" fn #local_name(lhs: &#ident, rhs: &#ident) -> bool {
+                            *lhs != *rhs
+                        }
+                    });
                 }
-            }),
+            }
             _ => {}
         }
     }
