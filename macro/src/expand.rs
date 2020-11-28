@@ -166,10 +166,11 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
         match derive.what {
             Trait::PartialEq => operators.extend({
                 let link_name = mangle::operator(&strct.name, "__operator_eq");
+                let local_name = format_ident!("__operator_eq_{}", strct.name.rust);
                 quote_spanned! {span=>
                     #[doc(hidden)]
                     #[export_name = #link_name]
-                    extern "C" fn __operator_eq(lhs: &#ident, rhs: &#ident) -> bool {
+                    extern "C" fn #local_name(lhs: &#ident, rhs: &#ident) -> bool {
                         *lhs == *rhs
                     }
                 }
