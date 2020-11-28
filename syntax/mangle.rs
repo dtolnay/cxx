@@ -26,7 +26,13 @@ pub fn extern_fn(efn: &ExternFn, types: &Types) -> Symbol {
 }
 
 pub fn operator(receiver: &Pair, operator: &'static str) -> Symbol {
-    join!(receiver.namespace, CXXBRIDGE, receiver.cxx, "operator", operator)
+    join!(
+        receiver.namespace,
+        CXXBRIDGE,
+        receiver.cxx,
+        "operator",
+        operator,
+    )
 }
 
 // The C half of a function pointer trampoline.

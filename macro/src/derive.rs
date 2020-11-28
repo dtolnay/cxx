@@ -16,6 +16,7 @@ pub fn expand_struct(strct: &Struct, actual_derives: &mut Option<TokenStream>) -
             Trait::Debug => expanded.extend(struct_debug(strct, span)),
             Trait::Default => expanded.extend(struct_default(strct, span)),
             Trait::Eq => traits.push(quote_spanned!(span=> ::std::cmp::Eq)),
+            Trait::Hash => expanded.extend(struct_hash(strct, span)),
             Trait::Ord => expanded.extend(struct_ord(strct, span)),
             Trait::PartialEq => traits.push(quote_spanned!(span=> ::std::cmp::PartialEq)),
             Trait::PartialOrd => expanded.extend(struct_partial_ord(strct, span)),
@@ -56,6 +57,7 @@ pub fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) -> Toke
                 traits.push(quote_spanned!(span=> ::std::cmp::Eq));
                 has_eq = true;
             }
+            Trait::Hash => expanded.extend(enum_hash(enm, span)),
             Trait::Ord => expanded.extend(enum_ord(enm, span)),
             Trait::PartialEq => {
                 traits.push(quote_spanned!(span=> ::std::cmp::PartialEq));
@@ -155,6 +157,21 @@ fn struct_default(strct: &Struct, span: Span) -> TokenStream {
     }
 }
 
+fn struct_hash(strct: &Struct, span: Span) -> TokenStream {
+    let ident = &strct.name.rust;
+    let fields = strct.fields.iter().map(|field| &field.ident);
+
+    quote_spanned! {span=>
+        impl ::std::hash::Hash for #ident {
+            fn hash<H: ::std::hash::Hasher>(&self, state: &mut H) {
+                #(
+                    ::std::hash::Hash::hash(&self.#fields, state);
+                )*
+            }
+        }
+    }
+}
+
 fn struct_ord(strct: &Struct, span: Span) -> TokenStream {
     let ident = &strct.name.rust;
     let fields = strct.fields.iter().map(|field| &field.ident);
@@ -241,6 +258,18 @@ fn enum_debug(enm: &Enum, span: Span) -> TokenStream {
                     #(#variants)*
                     _ => ::std::write!(formatter, #fallback, self.repr),
                 }
+            }
+        }
+    }
+}
+
+fn enum_hash(enm: &Enum, span: Span) -> TokenStream {
+    let ident = &enm.name.rust;
+
+    quote_spanned! {span=>
+        impl ::std::hash::Hash for #ident {
+            fn hash<H: ::std::hash::Hasher>(&self, state: &mut H) {
+                ::std::hash::Hash::hash(&self.repr, state);
             }
         }
     }
