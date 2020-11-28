@@ -1,0 +1,14 @@
+[package]
+name = "scoped-ptr-demo"
+version = "0.0.0"
+edition = "2018"
+links = "scoped-ptr-demo"
+publish = false
+
+[dependencies]
+cxx = "1.0"
+
+[build-dependencies]
+cxx-build = "1.0"
+
+[workspace]
