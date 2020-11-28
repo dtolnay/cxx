@@ -3,8 +3,8 @@ use crate::syntax::file::{Item, ItemForeignMod};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
-    attrs, error, Api, Array, Doc, Enum, ExternFn, ExternType, Impl, Include, IncludeKind, Lang,
-    Namespace, Pair, Receiver, Ref, ResolvableName, Signature, SliceRef, Struct, Ty1, Type,
+    attrs, error, Api, Array, Derive, Doc, Enum, ExternFn, ExternType, Impl, Include, IncludeKind,
+    Lang, Namespace, Pair, Receiver, Ref, ResolvableName, Signature, SliceRef, Struct, Ty1, Type,
     TypeAlias, Var, Variant,
 };
 use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree};
@@ -14,8 +14,8 @@ use syn::punctuated::Punctuated;
 use syn::{
     Abi, Attribute, Error, Expr, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
     GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lit, LitStr,
-    Pat, PathArguments, Result, ReturnType, Token, Type as RustType, TypeArray, TypeBareFn,
-    TypePath, TypeReference,
+    Pat, PathArguments, Result, ReturnType, Token, TraitBound, TraitBoundModifier,
+    Type as RustType, TypeArray, TypeBareFn, TypeParamBound, TypePath, TypeReference,
 };
 
 pub mod kw {
@@ -257,7 +257,7 @@ fn parse_foreign_mod(
                 }
             }
             ForeignItem::Verbatim(tokens) => {
-                match parse_extern_verbatim(cx, tokens, lang, &namespace) {
+                match parse_extern_verbatim(cx, tokens, lang, trusted, &namespace) {
                     Ok(api) => items.push(api),
                     Err(err) => cx.push(err),
                 }
@@ -352,6 +352,8 @@ fn parse_extern_type(
         derives,
         type_token,
         name: Pair::new(namespace, ident),
+        colon_token: None,
+        bounds: Vec::new(),
         semi_token,
         trusted,
     })
@@ -518,10 +520,10 @@ fn parse_extern_verbatim(
     cx: &mut Errors,
     tokens: &TokenStream,
     lang: Lang,
+    trusted: bool,
     namespace: &Namespace,
 ) -> Result<Api> {
-    // type Alias = crate::path::to::Type;
-    let parse = |input: ParseStream| -> Result<TypeAlias> {
+    |input: ParseStream| -> Result<Api> {
         let attrs = input.call(Attribute::parse_outer)?;
         let type_token: Token![type] = match input.parse()? {
             Some(type_token) => type_token,
@@ -531,41 +533,137 @@ fn parse_extern_verbatim(
             }
         };
         let ident: Ident = input.parse()?;
-        let eq_token: Token![=] = input.parse()?;
-        let ty: RustType = input.parse()?;
-        let semi_token: Token![;] = input.parse()?;
-        let mut doc = Doc::new();
-        let mut namespace = namespace.clone();
-        attrs::parse(
-            cx,
-            &attrs,
-            attrs::Parser {
-                doc: Some(&mut doc),
-                namespace: Some(&mut namespace),
-                ..Default::default()
-            },
-        );
-
-        Ok(TypeAlias {
-            doc,
-            type_token,
-            name: Pair::new(namespace, ident),
-            eq_token,
-            ty,
-            semi_token,
-        })
-    };
-
-    let type_alias = parse.parse2(tokens.clone())?;
-    match lang {
-        Lang::Cxx => Ok(Api::TypeAlias(type_alias)),
-        Lang::Rust => {
-            let (type_token, semi_token) = (type_alias.type_token, type_alias.semi_token);
-            let span = quote!(#type_token #semi_token);
-            let msg = "type alias in extern \"Rust\" block is not supported";
-            Err(Error::new_spanned(span, msg))
+        let lookahead = input.lookahead1();
+        if lookahead.peek(Token![=]) {
+            // type Alias = crate::path::to::Type;
+            parse_type_alias(cx, attrs, type_token, ident, input, lang, namespace)
+        } else if lookahead.peek(Token![:]) {
+            // type Opaque: Bound2 + Bound2;
+            parse_extern_type_bounded(
+                cx, attrs, type_token, ident, input, lang, trusted, namespace,
+            )
+        } else {
+            Err(lookahead.error())
         }
     }
+    .parse2(tokens.clone())
+}
+
+fn parse_type_alias(
+    cx: &mut Errors,
+    attrs: Vec<Attribute>,
+    type_token: Token![type],
+    ident: Ident,
+    input: ParseStream,
+    lang: Lang,
+    namespace: &Namespace,
+) -> Result<Api> {
+    let eq_token: Token![=] = input.parse()?;
+    let ty: RustType = input.parse()?;
+    let semi_token: Token![;] = input.parse()?;
+
+    let mut doc = Doc::new();
+    let mut derives = Vec::new();
+    let mut namespace = namespace.clone();
+    attrs::parse(
+        cx,
+        &attrs,
+        attrs::Parser {
+            doc: Some(&mut doc),
+            derives: Some(&mut derives),
+            namespace: Some(&mut namespace),
+            ..Default::default()
+        },
+    );
+
+    if lang == Lang::Rust {
+        let span = quote!(#type_token #semi_token);
+        let msg = "type alias in extern \"Rust\" block is not supported";
+        return Err(Error::new_spanned(span, msg));
+    }
+
+    Ok(Api::TypeAlias(TypeAlias {
+        doc,
+        derives,
+        type_token,
+        name: Pair::new(namespace, ident),
+        eq_token,
+        ty,
+        semi_token,
+    }))
+}
+
+fn parse_extern_type_bounded(
+    cx: &mut Errors,
+    attrs: Vec<Attribute>,
+    type_token: Token![type],
+    ident: Ident,
+    input: ParseStream,
+    lang: Lang,
+    trusted: bool,
+    namespace: &Namespace,
+) -> Result<Api> {
+    let colon_token: Token![:] = input.parse()?;
+    let mut bounds = Vec::new();
+    loop {
+        match input.parse()? {
+            TypeParamBound::Trait(TraitBound {
+                paren_token: None,
+                modifier: TraitBoundModifier::None,
+                lifetimes: None,
+                path,
+            }) if if let Some(derive) = path.get_ident().and_then(Derive::from) {
+                bounds.push(derive);
+                true
+            } else {
+                false
+            } => {}
+            bound @ TypeParamBound::Trait(_) | bound @ TypeParamBound::Lifetime(_) => {
+                cx.error(bound, "unsupported trait");
+            }
+        }
+
+        let lookahead = input.lookahead1();
+        if lookahead.peek(Token![+]) {
+            input.parse::<Token![+]>()?;
+        } else if lookahead.peek(Token![;]) {
+            break;
+        } else {
+            return Err(lookahead.error());
+        }
+    }
+    let semi_token: Token![;] = input.parse()?;
+
+    let mut doc = Doc::new();
+    let mut derives = Vec::new();
+    let mut namespace = namespace.clone();
+    attrs::parse(
+        cx,
+        &attrs,
+        attrs::Parser {
+            doc: Some(&mut doc),
+            derives: Some(&mut derives),
+            namespace: Some(&mut namespace),
+            ..Default::default()
+        },
+    );
+
+    let api_type = match lang {
+        Lang::Cxx => Api::CxxType,
+        Lang::Rust => Api::RustType,
+    };
+
+    Ok(api_type(ExternType {
+        lang,
+        doc,
+        derives,
+        type_token,
+        name: Pair::new(namespace, ident),
+        colon_token: Some(colon_token),
+        bounds,
+        semi_token,
+        trusted,
+    }))
 }
 
 fn parse_impl(imp: ItemImpl) -> Result<Api> {

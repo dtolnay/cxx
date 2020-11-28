@@ -131,6 +131,8 @@ mod tests {
             derives: Vec::new(),
             type_token: Token![type](Span::call_site()),
             name: Pair::new(ns, Ident::new(ident, Span::call_site())),
+            colon_token: None,
+            bounds: Vec::new(),
             semi_token: Token![;](Span::call_site()),
             trusted: false,
         })
