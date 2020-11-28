@@ -3,7 +3,7 @@ use crate::syntax::report::Errors;
 use crate::syntax::types::TrivialReason;
 use crate::syntax::{
     error, ident, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Signature,
-    SliceRef, Struct, Ty1, Type, Types,
+    SliceRef, Struct, Trait, Ty1, Type, Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
@@ -255,6 +255,15 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
             span,
             "explicit #[repr(...)] is required for enum without any variants",
         );
+    }
+
+    for derive in &enm.derives {
+        if derive.what == Trait::Default {
+            cx.error(
+                derive,
+                "derive(Default) on shared enums is not supported yet",
+            );
+        }
     }
 }
 
