@@ -25,7 +25,7 @@ pub mod ffi {
         msg: String,
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, Hash)]
     enum Enum {
         AVal,
         BVal = 2020,
@@ -64,6 +64,7 @@ pub mod ffi {
     }
 
     #[namespace = "second"]
+    #[derive(Hash)]
     struct Second {
         i: i32,
         e: COwnedEnum,
@@ -184,6 +185,7 @@ pub mod ffi {
     }
 
     #[repr(u32)]
+    #[derive(Hash)]
     enum COwnedEnum {
         CVal1,
         CVal2,

@@ -134,6 +134,8 @@ fn write_functions<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
                 _ => {}
             }
         }
+
+        write_std_specializations(out, apis);
     }
 
     for api in apis {
@@ -146,6 +148,36 @@ fn write_functions<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
             _ => {}
         }
     }
+}
+
+fn write_std_specializations(out: &mut OutFile, apis: &[Api]) {
+    out.set_namespace(Default::default());
+    out.begin_block(Block::Namespace("std"));
+
+    for api in apis {
+        if let Api::Struct(strct) = api {
+            if derive::contains(&strct.derives, Trait::Hash) {
+                out.next_section();
+                let qualified = strct.name.to_fully_qualified();
+                writeln!(out, "template <> struct hash<{}> {{", qualified);
+                writeln!(
+                    out,
+                    "  size_t operator()(const {} &self) const noexcept {{",
+                    qualified,
+                );
+                let link_name = mangle::operator(&strct.name, "hash");
+                write!(out, "    return ::");
+                for name in &strct.name.namespace {
+                    write!(out, "{}::", name);
+                }
+                writeln!(out, "{}(self);", link_name);
+                writeln!(out, "  }}");
+                writeln!(out, "}};");
+            }
+        }
+    }
+
+    out.end_block(Block::Namespace("std"));
 }
 
 fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
@@ -430,6 +462,15 @@ fn write_struct_operator_decls<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
                 link_name, strct.name.cxx,
             );
         }
+    }
+
+    if derive::contains(&strct.derives, Trait::Hash) {
+        let link_name = mangle::operator(&strct.name, "hash");
+        writeln!(
+            out,
+            "size_t {}(const {} &) noexcept;",
+            link_name, strct.name.cxx,
+        );
     }
 
     out.end_block(Block::ExternC);
