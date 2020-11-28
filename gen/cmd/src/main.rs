@@ -5,6 +5,7 @@
     clippy::new_without_default,
     clippy::nonminimal_bool,
     clippy::or_fun_call,
+    clippy::too_many_arguments,
     clippy::toplevel_ref_arg
 )]
 
