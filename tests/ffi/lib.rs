@@ -15,12 +15,12 @@ use std::os::raw::c_char;
 
 #[cxx::bridge(namespace = "tests")]
 pub mod ffi {
-    #[derive(Clone, Debug, PartialEq, Eq)]
+    #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
     struct Shared {
         z: usize,
     }
 
-    #[derive(PartialEq)]
+    #[derive(PartialEq, PartialOrd)]
     struct SharedString {
         msg: String,
     }
