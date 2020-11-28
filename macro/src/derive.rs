@@ -16,6 +16,7 @@ pub fn expand_struct(strct: &Struct, actual_derives: &mut Option<TokenStream>) -
             Trait::Debug => expanded.extend(struct_debug(strct, span)),
             Trait::Default => expanded.extend(struct_default(strct, span)),
             Trait::Eq => traits.push(quote_spanned!(span=> ::std::cmp::Eq)),
+            Trait::ExternType => unreachable!(),
             Trait::Hash => traits.push(quote_spanned!(span=> ::std::hash::Hash)),
             Trait::Ord => expanded.extend(struct_ord(strct, span)),
             Trait::PartialEq => traits.push(quote_spanned!(span=> ::std::cmp::PartialEq)),
@@ -57,6 +58,7 @@ pub fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) -> Toke
                 traits.push(quote_spanned!(span=> ::std::cmp::Eq));
                 has_eq = true;
             }
+            Trait::ExternType => unreachable!(),
             Trait::Hash => traits.push(quote_spanned!(span=> ::std::hash::Hash)),
             Trait::Ord => expanded.extend(enum_ord(enm, span)),
             Trait::PartialEq => {

@@ -327,12 +327,14 @@ fn parse_extern_type(
     namespace: &Namespace,
 ) -> Api {
     let mut doc = Doc::new();
+    let mut derives = Vec::new();
     let mut namespace = namespace.clone();
     attrs::parse(
         cx,
         &foreign_type.attrs,
         attrs::Parser {
             doc: Some(&mut doc),
+            derives: Some(&mut derives),
             namespace: Some(&mut namespace),
             ..Default::default()
         },
@@ -345,7 +347,9 @@ fn parse_extern_type(
         Lang::Rust => Api::RustType,
     };
     api_type(ExternType {
+        lang,
         doc,
+        derives,
         type_token,
         name: Pair::new(namespace, ident),
         semi_token,

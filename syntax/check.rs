@@ -232,6 +232,13 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
         }
     }
 
+    for derive in &strct.derives {
+        if derive.what == Trait::ExternType {
+            let msg = format!("derive({}) on shared struct is not supported", derive);
+            cx.error(derive, msg);
+        }
+    }
+
     for field in &strct.fields {
         if let Type::Fn(_) = field.ty {
             cx.error(
@@ -258,17 +265,30 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
     }
 
     for derive in &enm.derives {
-        if derive.what == Trait::Default {
-            cx.error(
-                derive,
-                "derive(Default) on shared enums is not supported yet",
-            );
+        if derive.what == Trait::Default || derive.what == Trait::ExternType {
+            let msg = format!("derive({}) on shared enum is not supported", derive);
+            cx.error(derive, msg);
         }
     }
 }
 
 fn check_api_type(cx: &mut Check, ety: &ExternType) {
     check_reserved_name(cx, &ety.name.rust);
+
+    for derive in &ety.derives {
+        if derive.what == Trait::ExternType && ety.lang == Lang::Rust {
+            continue;
+        }
+        let lang = match ety.lang {
+            Lang::Rust => "Rust",
+            Lang::Cxx => "C++",
+        };
+        let msg = format!(
+            "derive({}) on opaque {} type is not supported yet",
+            derive, lang,
+        );
+        cx.error(derive, msg);
+    }
 
     if let Some(reason) = cx.types.required_trivial.get(&ety.name.rust) {
         let what = match reason {

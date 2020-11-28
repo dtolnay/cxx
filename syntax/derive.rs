@@ -1,4 +1,5 @@
 use proc_macro2::{Ident, Span};
+use std::fmt::{self, Display};
 
 #[derive(Copy, Clone)]
 pub struct Derive {
@@ -13,6 +14,7 @@ pub enum Trait {
     Debug,
     Default,
     Eq,
+    ExternType,
     Hash,
     Ord,
     PartialEq,
@@ -27,6 +29,7 @@ impl Derive {
             "Debug" => Trait::Debug,
             "Default" => Trait::Default,
             "Eq" => Trait::Eq,
+            "ExternType" => Trait::ExternType,
             "Hash" => Trait::Hash,
             "Ord" => Trait::Ord,
             "PartialEq" => Trait::PartialEq,
@@ -52,11 +55,18 @@ impl AsRef<str> for Trait {
             Trait::Debug => "Debug",
             Trait::Default => "Default",
             Trait::Eq => "Eq",
+            Trait::ExternType => "ExternType",
             Trait::Hash => "Hash",
             Trait::Ord => "Ord",
             Trait::PartialEq => "PartialEq",
             Trait::PartialOrd => "PartialOrd",
         }
+    }
+}
+
+impl Display for Derive {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str(self.what.as_ref())
     }
 }
 

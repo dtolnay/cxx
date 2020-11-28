@@ -617,9 +617,24 @@ fn expand_rust_type_impl(ety: &ExternType) -> TokenStream {
     let span = ident.span();
     let unsafe_impl = quote_spanned!(ety.type_token.span=> unsafe impl);
 
-    quote_spanned! {span=>
+    let mut impls = quote_spanned! {span=>
         #unsafe_impl ::cxx::private::RustType for #ident {}
+    };
+
+    for derive in &ety.derives {
+        if derive.what == Trait::ExternType {
+            let type_id = type_id(&ety.name);
+            let span = derive.span;
+            impls.extend(quote_spanned! {span=>
+                unsafe impl ::cxx::ExternType for #ident {
+                    type Id = #type_id;
+                    type Kind = ::cxx::kind::Opaque;
+                }
+            });
+        }
     }
+
+    impls
 }
 
 fn expand_rust_type_assert_sized(ety: &ExternType) -> TokenStream {

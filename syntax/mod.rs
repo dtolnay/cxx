@@ -67,7 +67,9 @@ pub enum IncludeKind {
 }
 
 pub struct ExternType {
+    pub lang: Lang,
     pub doc: Doc,
+    pub derives: Vec<Derive>,
     pub type_token: Token![type],
     pub name: Pair,
     pub semi_token: Token![;],
