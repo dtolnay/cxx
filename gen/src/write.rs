@@ -383,7 +383,7 @@ fn write_struct_operator_decls<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
     out.begin_block(Block::ExternC);
 
     if derive::contains(&strct.derives, Trait::PartialEq) {
-        let link_name = mangle::operator(&strct.name, "__operator_eq");
+        let link_name = mangle::operator(&strct.name, "eq");
         writeln!(
             out,
             "bool {}(const {1} &, const {1} &) noexcept;",
@@ -391,7 +391,7 @@ fn write_struct_operator_decls<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
         );
 
         if !derive::contains(&strct.derives, Trait::Eq) {
-            let link_name = mangle::operator(&strct.name, "__operator_ne");
+            let link_name = mangle::operator(&strct.name, "ne");
             writeln!(
                 out,
                 "bool {}(const {1} &, const {1} &) noexcept;",
@@ -401,14 +401,14 @@ fn write_struct_operator_decls<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
     }
 
     if derive::contains(&strct.derives, Trait::PartialOrd) {
-        let link_name = mangle::operator(&strct.name, "__operator_lt");
+        let link_name = mangle::operator(&strct.name, "lt");
         writeln!(
             out,
             "bool {}(const {1} &, const {1} &) noexcept;",
             link_name, strct.name.cxx,
         );
 
-        let link_name = mangle::operator(&strct.name, "__operator_le");
+        let link_name = mangle::operator(&strct.name, "le");
         writeln!(
             out,
             "bool {}(const {1} &, const {1} &) noexcept;",
@@ -416,14 +416,14 @@ fn write_struct_operator_decls<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
         );
 
         if !derive::contains(&strct.derives, Trait::Ord) {
-            let link_name = mangle::operator(&strct.name, "__operator_gt");
+            let link_name = mangle::operator(&strct.name, "gt");
             writeln!(
                 out,
                 "bool {}(const {1} &, const {1} &) noexcept;",
                 link_name, strct.name.cxx,
             );
 
-            let link_name = mangle::operator(&strct.name, "__operator_ge");
+            let link_name = mangle::operator(&strct.name, "ge");
             writeln!(
                 out,
                 "bool {}(const {1} &, const {1} &) noexcept;",
@@ -449,7 +449,7 @@ fn write_struct_operators<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
             "bool {0}::operator==(const {0} &rhs) const noexcept {{",
             strct.name.cxx,
         );
-        let link_name = mangle::operator(&strct.name, "__operator_eq");
+        let link_name = mangle::operator(&strct.name, "eq");
         writeln!(out, "  return {}(*this, rhs);", link_name);
         writeln!(out, "}}");
 
@@ -462,7 +462,7 @@ fn write_struct_operators<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
         if derive::contains(&strct.derives, Trait::Eq) {
             writeln!(out, "  return !(*this == rhs);");
         } else {
-            let link_name = mangle::operator(&strct.name, "__operator_ne");
+            let link_name = mangle::operator(&strct.name, "ne");
             writeln!(out, "  return {}(*this, rhs);", link_name);
         }
         writeln!(out, "}}");
@@ -475,7 +475,7 @@ fn write_struct_operators<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
             "bool {0}::operator<(const {0} &rhs) const noexcept {{",
             strct.name.cxx,
         );
-        let link_name = mangle::operator(&strct.name, "__operator_lt");
+        let link_name = mangle::operator(&strct.name, "lt");
         writeln!(out, "  return {}(*this, rhs);", link_name);
         writeln!(out, "}}");
 
@@ -485,7 +485,7 @@ fn write_struct_operators<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
             "bool {0}::operator<=(const {0} &rhs) const noexcept {{",
             strct.name.cxx,
         );
-        let link_name = mangle::operator(&strct.name, "__operator_le");
+        let link_name = mangle::operator(&strct.name, "le");
         writeln!(out, "  return {}(*this, rhs);", link_name);
         writeln!(out, "}}");
 
@@ -498,7 +498,7 @@ fn write_struct_operators<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
         if derive::contains(&strct.derives, Trait::Ord) {
             writeln!(out, "  return !(*this <= rhs);");
         } else {
-            let link_name = mangle::operator(&strct.name, "__operator_gt");
+            let link_name = mangle::operator(&strct.name, "gt");
             writeln!(out, "  return {}(*this, rhs);", link_name);
         }
         writeln!(out, "}}");
@@ -512,7 +512,7 @@ fn write_struct_operators<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
         if derive::contains(&strct.derives, Trait::Ord) {
             writeln!(out, "  return !(*this < rhs);");
         } else {
-            let link_name = mangle::operator(&strct.name, "__operator_ge");
+            let link_name = mangle::operator(&strct.name, "ge");
             writeln!(out, "  return {}(*this, rhs);", link_name);
         }
         writeln!(out, "}}");

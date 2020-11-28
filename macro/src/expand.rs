@@ -165,7 +165,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
         let span = derive.span;
         match derive.what {
             Trait::PartialEq => {
-                let link_name = mangle::operator(&strct.name, "__operator_eq");
+                let link_name = mangle::operator(&strct.name, "eq");
                 let local_name = format_ident!("__operator_eq_{}", strct.name.rust);
                 operators.extend(quote_spanned! {span=>
                     #[doc(hidden)]
@@ -176,7 +176,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                 });
 
                 if !derive::contains(&strct.derives, Trait::Eq) {
-                    let link_name = mangle::operator(&strct.name, "__operator_ne");
+                    let link_name = mangle::operator(&strct.name, "ne");
                     let local_name = format_ident!("__operator_ne_{}", strct.name.rust);
                     operators.extend(quote_spanned! {span=>
                         #[doc(hidden)]
@@ -188,7 +188,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                 }
             }
             Trait::PartialOrd => {
-                let link_name = mangle::operator(&strct.name, "__operator_lt");
+                let link_name = mangle::operator(&strct.name, "lt");
                 let local_name = format_ident!("__operator_lt_{}", strct.name.rust);
                 operators.extend(quote_spanned! {span=>
                     #[doc(hidden)]
@@ -198,7 +198,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                     }
                 });
 
-                let link_name = mangle::operator(&strct.name, "__operator_le");
+                let link_name = mangle::operator(&strct.name, "le");
                 let local_name = format_ident!("__operator_le_{}", strct.name.rust);
                 operators.extend(quote_spanned! {span=>
                     #[doc(hidden)]
@@ -209,7 +209,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                 });
 
                 if !derive::contains(&strct.derives, Trait::Ord) {
-                    let link_name = mangle::operator(&strct.name, "__operator_gt");
+                    let link_name = mangle::operator(&strct.name, "gt");
                     let local_name = format_ident!("__operator_gt_{}", strct.name.rust);
                     operators.extend(quote_spanned! {span=>
                         #[doc(hidden)]
@@ -219,7 +219,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                         }
                     });
 
-                    let link_name = mangle::operator(&strct.name, "__operator_ge");
+                    let link_name = mangle::operator(&strct.name, "ge");
                     let local_name = format_ident!("__operator_ge_{}", strct.name.rust);
                     operators.extend(quote_spanned! {span=>
                         #[doc(hidden)]
