@@ -3,7 +3,7 @@ use crate::syntax::report::Errors;
 use crate::syntax::types::TrivialReason;
 use crate::syntax::{
     error, ident, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Signature,
-    SliceRef, Struct, Trait, Ty1, Type, Types,
+    SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
@@ -43,12 +43,13 @@ fn do_typecheck(cx: &mut Check) {
 
     for api in cx.apis {
         match api {
+            Api::Include(_) => {}
             Api::Struct(strct) => check_api_struct(cx, strct),
             Api::Enum(enm) => check_api_enum(cx, enm),
             Api::CxxType(ety) | Api::RustType(ety) => check_api_type(cx, ety),
             Api::CxxFunction(efn) | Api::RustFunction(efn) => check_api_fn(cx, efn),
+            Api::TypeAlias(alias) => check_api_type_alias(cx, alias),
             Api::Impl(imp) => check_api_impl(cx, imp),
-            Api::Include(_) | Api::TypeAlias(_) => {}
         }
     }
 }
@@ -290,6 +291,12 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
         cx.error(derive, msg);
     }
 
+    if !ety.bounds.is_empty() {
+        let bounds = &ety.bounds;
+        let span = quote!(#(#bounds)*);
+        cx.error(span, "extern type bounds are not implemented yet");
+    }
+
     if let Some(reason) = cx.types.required_trivial.get(&ety.name.rust) {
         let what = match reason {
             TrivialReason::StructField(strct) => format!("a field of `{}`", strct.name.rust),
@@ -385,6 +392,13 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
     }
 
     check_multiple_arg_lifetimes(cx, efn);
+}
+
+fn check_api_type_alias(cx: &mut Check, alias: &TypeAlias) {
+    for derive in &alias.derives {
+        let msg = format!("derive({}) on extern type alias is not supported", derive);
+        cx.error(derive, msg);
+    }
 }
 
 fn check_api_impl(cx: &mut Check, imp: &Impl) {

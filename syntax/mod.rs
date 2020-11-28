@@ -72,6 +72,8 @@ pub struct ExternType {
     pub derives: Vec<Derive>,
     pub type_token: Token![type],
     pub name: Pair,
+    pub colon_token: Option<Token![:]>,
+    pub bounds: Vec<Derive>,
     pub semi_token: Token![;],
     pub trusted: bool,
 }
@@ -108,6 +110,7 @@ pub struct ExternFn {
 
 pub struct TypeAlias {
     pub doc: Doc,
+    pub derives: Vec<Derive>,
     pub type_token: Token![type],
     pub name: Pair,
     pub eq_token: Token![=],
