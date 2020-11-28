@@ -624,8 +624,24 @@ extern "C" const char *cxx_run_test() noexcept {
   r_take_unique_ptr(std::unique_ptr<C>(new C{2020}));
   r_take_ref_c(C{2020});
   r_take_str(rust::Str("2020"));
+  r_take_empty_str(rust::Str{""});
+  r_take_empty_str(rust::Str{nullptr, 0});
+#ifdef CXXBRIDGE_HAS_STRING_VIEW
+  r_take_str(std::string_view{"2020"});
+  r_take_empty_str(std::string_view{});
+  r_take_empty_str(std::string_view{""});
+  ASSERT(static_cast<std::string_view>(rust::Str{"2020"}) == "2020");
+#endif
   r_take_slice_char(rust::Slice<const char>(SLICE_DATA, sizeof(SLICE_DATA)));
   r_take_rust_string(rust::String("2020"));
+  r_take_empty_rust_string(rust::String{""});
+  r_take_empty_rust_string(rust::String{nullptr, 0});
+#ifdef CXXBRIDGE_HAS_STRING_VIEW
+  r_take_rust_string(std::string_view{"2020"});
+  r_take_empty_rust_string(std::string_view{});
+  r_take_empty_rust_string(std::string_view{""});
+  ASSERT(static_cast<std::string_view>(rust::String{"2020"}) == "2020");
+#endif
   r_take_unique_ptr_string(
       std::unique_ptr<std::string>(new std::string("2020")));
   r_take_ref_vector(std::vector<uint8_t>{20, 2, 0});
