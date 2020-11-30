@@ -31,9 +31,13 @@ public:
 
   const T &operator[](size_t n) const noexcept;
   const T &at(size_t n) const;
-
   const T &front() const;
   const T &back() const;
+
+  T &operator[](size_t n) noexcept;
+  T &at(size_t n);
+  T &front();
+  T &back();
 
   void reserve(size_t new_cap);
   void push_back(const T &value);

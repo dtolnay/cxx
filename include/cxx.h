@@ -253,9 +253,13 @@ public:
 
   const T &operator[](size_t n) const noexcept;
   const T &at(size_t n) const;
-
   const T &front() const;
   const T &back() const;
+
+  T &operator[](size_t n) noexcept;
+  T &at(size_t n);
+  T &front();
+  T &back();
 
   void reserve(size_t new_cap);
   void push_back(const T &value);
@@ -679,6 +683,30 @@ const T &Vec<T>::front() const {
 
 template <typename T>
 const T &Vec<T>::back() const {
+  return (*this)[this->size() - 1];
+}
+
+template <typename T>
+T &Vec<T>::operator[](size_t n) noexcept {
+  auto data = reinterpret_cast<char *>(this->data());
+  return *reinterpret_cast<T *>(data + n * this->stride());
+}
+
+template <typename T>
+T &Vec<T>::at(size_t n) {
+  if (n >= this->size()) {
+    panic<std::out_of_range>("rust::Vec index out of range");
+  }
+  return (*this)[n];
+}
+
+template <typename T>
+T &Vec<T>::front() {
+  return (*this)[0];
+}
+
+template <typename T>
+T &Vec<T>::back() {
   return (*this)[this->size() - 1];
 }
 
