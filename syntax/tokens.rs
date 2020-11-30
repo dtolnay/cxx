@@ -148,6 +148,7 @@ impl ToTokens for ExternFn {
 impl ToTokens for Impl {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         self.impl_token.to_tokens(tokens);
+        self.negative_token.to_tokens(tokens);
         self.ty.to_tokens(tokens);
         self.brace_token.surround(tokens, |_tokens| {});
     }

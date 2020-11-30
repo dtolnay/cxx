@@ -402,7 +402,15 @@ fn check_api_type_alias(cx: &mut Check, alias: &TypeAlias) {
 }
 
 fn check_api_impl(cx: &mut Check, imp: &Impl) {
-    if let Type::UniquePtr(ty) | Type::CxxVector(ty) = &imp.ty {
+    let ty = &imp.ty;
+
+    if let Some(negative) = imp.negative_token {
+        let span = quote!(#negative #ty);
+        cx.error(span, "negative impl is not supported yet");
+        return;
+    }
+
+    if let Type::UniquePtr(ty) | Type::CxxVector(ty) = ty {
         if let Type::Ident(inner) = &ty.inner {
             if Atom::from(&inner.rust).is_none() {
                 return;

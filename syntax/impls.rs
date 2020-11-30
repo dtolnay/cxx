@@ -342,9 +342,14 @@ impl Hash for Impl {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let Impl {
             impl_token: _,
+            negative,
             ty,
             brace_token: _,
+            negative_token: _,
         } = self;
+        if *negative {
+            negative.hash(state);
+        }
         ty.hash(state);
     }
 }
@@ -355,15 +360,19 @@ impl PartialEq for Impl {
     fn eq(&self, other: &Impl) -> bool {
         let Impl {
             impl_token: _,
+            negative,
             ty,
             brace_token: _,
+            negative_token: _,
         } = self;
         let Impl {
             impl_token: _,
+            negative: negative2,
             ty: ty2,
             brace_token: _,
+            negative_token: _,
         } = other;
-        ty == ty2
+        negative == negative2 && ty == ty2
     }
 }
 

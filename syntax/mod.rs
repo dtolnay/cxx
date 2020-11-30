@@ -120,8 +120,10 @@ pub struct TypeAlias {
 
 pub struct Impl {
     pub impl_token: Token![impl],
+    pub negative: bool,
     pub ty: Type,
     pub brace_token: Brace,
+    pub negative_token: Option<Token![!]>,
 }
 
 pub struct Signature {

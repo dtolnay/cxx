@@ -673,8 +673,8 @@ fn parse_impl(imp: ItemImpl) -> Result<Api> {
         return Err(Error::new_spanned(span, "expected an empty impl block"));
     }
 
-    let self_ty = &imp.self_ty;
     if let Some((bang, path, for_token)) = &imp.trait_ {
+        let self_ty = &imp.self_ty;
         let span = quote!(#bang #path #for_token #self_ty);
         return Err(Error::new_spanned(
             span,
@@ -690,10 +690,27 @@ fn parse_impl(imp: ItemImpl) -> Result<Api> {
         ));
     }
 
+    let mut negative_token = None;
+    let mut self_ty = *imp.self_ty;
+    if let RustType::Verbatim(ty) = &self_ty {
+        let mut iter = ty.clone().into_iter();
+        if let Some(TokenTree::Punct(punct)) = iter.next() {
+            if punct.as_char() == '!' {
+                let ty = iter.collect::<TokenStream>();
+                if !ty.is_empty() {
+                    negative_token = Some(Token![!](punct.span()));
+                    self_ty = syn::parse2(ty)?;
+                }
+            }
+        }
+    }
+
     Ok(Api::Impl(Impl {
         impl_token: imp.impl_token,
+        negative: negative_token.is_some(),
         ty: parse_type(&self_ty)?,
         brace_token: imp.brace_token,
+        negative_token,
     }))
 }
 
