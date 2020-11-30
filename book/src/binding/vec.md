@@ -6,6 +6,7 @@
 ```cpp,hidelines
 // rust/cxx.h
 #
+# #include <initializer_list>
 # #include <iterator>
 # #include <type_traits>
 #
@@ -17,6 +18,7 @@ public:
   using value_type = T;
 
   Vec() noexcept;
+  Vec(std::initializer_list<T>);
   Vec(Vec &&) noexcept;
   ~Vec() noexcept;
 

@@ -1,8 +1,10 @@
 #pragma once
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <exception>
+#include <initializer_list>
 #include <iosfwd>
 #include <iterator>
 #include <new>
@@ -238,6 +240,7 @@ public:
   using value_type = T;
 
   Vec() noexcept;
+  Vec(std::initializer_list<T>);
   Vec(Vec &&) noexcept;
   ~Vec() noexcept;
 
@@ -619,6 +622,12 @@ Box<T>::Box() noexcept = default;
 
 #ifndef CXXBRIDGE1_RUST_VEC
 #define CXXBRIDGE1_RUST_VEC
+template <typename T>
+Vec<T>::Vec(std::initializer_list<T> init) : Vec{} {
+  this->reserve_total(init.size());
+  std::move(init.begin(), init.end(), std::back_inserter(*this));
+}
+
 template <typename T>
 Vec<T>::Vec(Vec &&other) noexcept : repr(other.repr) {
   new (&other) Vec();
