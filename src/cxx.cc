@@ -150,6 +150,8 @@ std::ostream &operator<<(std::ostream &os, const String &s) {
 
 Str::Str() noexcept : ptr(reinterpret_cast<const char *>(1)), len(0) {}
 
+Str::Str(const String &s) noexcept : ptr(s.data()), len(s.length()) {}
+
 static void initStr(const char *ptr, size_t len) {
   if (!cxxbridge1$str$valid(ptr, len)) {
     panic<std::invalid_argument>("data for rust::Str is not utf-8");
