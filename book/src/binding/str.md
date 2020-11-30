@@ -37,6 +37,13 @@ public:
   const_iterator end() const noexcept;
   const_iterator cbegin() const noexcept;
   const_iterator cend() const noexcept;
+
+  bool operator==(const Str &) const noexcept;
+  bool operator!=(const Str &) const noexcept;
+  bool operator<(const Str &) const noexcept;
+  bool operator<=(const Str &) const noexcept;
+  bool operator>(const Str &) const noexcept;
+  bool operator>=(const Str &) const noexcept;
 };
 
 std::ostream &operator<<(std::ostream &, const Str &);
