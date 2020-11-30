@@ -294,22 +294,19 @@ private:
 
 #ifndef CXXBRIDGE1_RUST_FN
 // https://cxx.rs/binding/fn.html
-template <typename Signature, bool Throws = false>
+template <typename Signature>
 class Fn;
 
-template <typename Ret, typename... Args, bool Throws>
-class Fn<Ret(Args...), Throws> final {
+template <typename Ret, typename... Args>
+class Fn<Ret(Args...)> final {
 public:
-  Ret operator()(Args... args) const noexcept(!Throws);
+  Ret operator()(Args... args) const noexcept;
   Fn operator*() const noexcept;
 
 private:
-  Ret (*trampoline)(Args..., void *fn) noexcept(!Throws);
+  Ret (*trampoline)(Args..., void *fn) noexcept;
   void *fn;
 };
-
-template <typename Signature>
-using TryFn = Fn<Signature, true>;
 #endif // CXXBRIDGE1_RUST_FN
 
 #ifndef CXXBRIDGE1_RUST_ERROR
@@ -388,10 +385,8 @@ using box = Box<T>;
 template <typename T>
 using vec = Vec<T>;
 using error = Error;
-template <typename Signature, bool Throws = false>
-using fn = Fn<Signature, Throws>;
 template <typename Signature>
-using try_fn = TryFn<Signature>;
+using fn = Fn<Signature>;
 template <typename T>
 using is_relocatable = IsRelocatable<T>;
 
@@ -408,13 +403,13 @@ void panic [[noreturn]] (const char *msg);
 
 #ifndef CXXBRIDGE1_RUST_FN
 #define CXXBRIDGE1_RUST_FN
-template <typename Ret, typename... Args, bool Throws>
-Ret Fn<Ret(Args...), Throws>::operator()(Args... args) const noexcept(!Throws) {
+template <typename Ret, typename... Args>
+Ret Fn<Ret(Args...)>::operator()(Args... args) const noexcept {
   return (*this->trampoline)(std::move(args)..., this->fn);
 }
 
-template <typename Ret, typename... Args, bool Throws>
-Fn<Ret(Args...), Throws> Fn<Ret(Args...), Throws>::operator*() const noexcept {
+template <typename Ret, typename... Args>
+Fn<Ret(Args...)> Fn<Ret(Args...)>::operator*() const noexcept {
   return *this;
 }
 #endif // CXXBRIDGE1_RUST_FN

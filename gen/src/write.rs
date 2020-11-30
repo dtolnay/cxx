@@ -1128,7 +1128,7 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write!(out, ">");
         }
         Type::Fn(f) => {
-            write!(out, "::rust::{}<", if f.throws { "TryFn" } else { "Fn" });
+            write!(out, "::rust::Fn<");
             match &f.ret {
                 Some(ret) => write_type(out, ret),
                 None => write!(out, "void"),
