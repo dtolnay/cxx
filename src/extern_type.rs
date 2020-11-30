@@ -1,4 +1,6 @@
 use self::kind::{Kind, Opaque, Trivial};
+use crate::CxxString;
+use alloc::string::String;
 
 /// A type for which the layout is determined by its C++ definition.
 ///
@@ -181,3 +183,35 @@ pub fn verify_extern_type<T: ExternType<Id = Id>, Id>() {}
 
 #[doc(hidden)]
 pub fn verify_extern_kind<T: ExternType<Kind = Kind>, Kind: self::Kind>() {}
+
+macro_rules! impl_extern_type {
+    ($([$kind:ident] $($ty:path = $cxxpath:literal)*)*) => {
+        $($(
+            unsafe impl ExternType for $ty {
+                type Id = crate::type_id!($cxxpath);
+                type Kind = $kind;
+            }
+        )*)*
+    };
+}
+
+impl_extern_type! {
+    [Trivial]
+    bool = "bool"
+    u8 = "std::uint8_t"
+    u16 = "std::uint16_t"
+    u32 = "std::uint32_t"
+    u64 = "std::uint64_t"
+    usize = "size_t"
+    i8 = "std::int8_t"
+    i16 = "std::int16_t"
+    i32 = "std::int32_t"
+    i64 = "std::int64_t"
+    isize = "rust::isize"
+    f32 = "float"
+    f64 = "double"
+    String = "rust::String"
+
+    [Opaque]
+    CxxString = "std::string"
+}

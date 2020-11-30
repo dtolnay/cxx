@@ -386,6 +386,7 @@
 extern crate link_cplusplus;
 
 extern crate alloc;
+extern crate self as cxx;
 extern crate std;
 
 #[macro_use]
