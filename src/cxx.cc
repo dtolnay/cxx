@@ -1,4 +1,5 @@
 #include "../include/cxx.h"
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 #include <exception>
@@ -140,6 +141,30 @@ String::const_iterator String::cend() const noexcept {
   return this->data() + this->size();
 }
 
+bool String::operator==(const String &rhs) const noexcept {
+  return rust::Str(*this) == rust::Str(rhs);
+}
+
+bool String::operator!=(const String &rhs) const noexcept {
+  return rust::Str(*this) != rust::Str(rhs);
+}
+
+bool String::operator<(const String &rhs) const noexcept {
+  return rust::Str(*this) < rust::Str(rhs);
+}
+
+bool String::operator<=(const String &rhs) const noexcept {
+  return rust::Str(*this) <= rust::Str(rhs);
+}
+
+bool String::operator>(const String &rhs) const noexcept {
+  return rust::Str(*this) > rust::Str(rhs);
+}
+
+bool String::operator>=(const String &rhs) const noexcept {
+  return rust::Str(*this) >= rust::Str(rhs);
+}
+
 String::String(unsafe_bitcopy_t, const String &bits) noexcept
     : repr(bits.repr) {}
 
@@ -185,6 +210,39 @@ Str::const_iterator Str::end() const noexcept { return this->cend(); }
 Str::const_iterator Str::cbegin() const noexcept { return this->ptr; }
 
 Str::const_iterator Str::cend() const noexcept { return this->ptr + this->len; }
+
+bool Str::operator==(const Str &rhs) const noexcept {
+  return this->len == rhs.len &&
+         std::equal(this->begin(), this->end(), rhs.begin());
+}
+
+bool Str::operator!=(const Str &rhs) const noexcept { return !(*this == rhs); }
+
+bool Str::operator<(const Str &rhs) const noexcept {
+  return std::lexicographical_compare(this->begin(), this->end(), rhs.begin(),
+                                      rhs.end());
+}
+
+bool Str::operator<=(const Str &rhs) const noexcept {
+  // std::mismatch(this->begin(), this->end(), rhs.begin(), rhs.end()), except
+  // without Undefined Behavior on C++11 if rhs is shorter than *this.
+  const_iterator liter = this->begin(), lend = this->end(), riter = rhs.begin(),
+                 rend = rhs.end();
+  while (liter != lend && riter != rend && *liter == *riter) {
+    ++liter, ++riter;
+  }
+  if (liter == lend) {
+    return true; // equal or *this is a prefix of rhs
+  } else if (riter == rend) {
+    return false; // rhs is a prefix of *this
+  } else {
+    return *liter <= *riter;
+  }
+}
+
+bool Str::operator>(const Str &rhs) const noexcept { return rhs < *this; }
+
+bool Str::operator>=(const Str &rhs) const noexcept { return rhs <= *this; }
 
 std::ostream &operator<<(std::ostream &os, const Str &s) {
   os.write(s.data(), s.size());
