@@ -132,7 +132,8 @@ const std::vector<uint8_t> &c_return_ref_vector(const C &c) {
 std::vector<uint8_t> &c_return_mut_vector(C &c) { return c.get_v(); }
 
 rust::Vec<uint8_t> c_return_rust_vec() {
-  throw std::runtime_error("unimplemented");
+  rust::Vec<uint8_t> vec{2, 0, 2, 0};
+  return vec;
 }
 
 const rust::Vec<uint8_t> &c_return_ref_rust_vec(const C &c) {
@@ -146,7 +147,7 @@ rust::Vec<uint8_t> &c_return_mut_rust_vec(C &c) {
 }
 
 rust::Vec<rust::String> c_return_rust_vec_string() {
-  throw std::runtime_error("unimplemented");
+  return {"2", "0", "2", "0"};
 }
 
 size_t c_return_identity(size_t n) { return n; }

@@ -21,11 +21,13 @@ pub struct Include {
 #[derive(Default, PartialEq)]
 pub struct Includes<'a> {
     pub custom: Vec<Include>,
+    pub algorithm: bool,
     pub array: bool,
     pub cstddef: bool,
     pub cstdint: bool,
     pub cstring: bool,
     pub exception: bool,
+    pub initializer_list: bool,
     pub iterator: bool,
     pub memory: bool,
     pub new: bool,
@@ -69,11 +71,13 @@ pub(super) fn write(out: &mut OutFile) {
 
     let Includes {
         custom: _,
+        algorithm,
         array,
         cstddef,
         cstdint,
         cstring,
         exception,
+        initializer_list,
         iterator,
         memory,
         new,
@@ -85,6 +89,9 @@ pub(super) fn write(out: &mut OutFile) {
         content: _,
     } = *include;
 
+    if algorithm {
+        writeln!(out, "#include <algorithm>");
+    }
     if array {
         writeln!(out, "#include <array>");
     }
@@ -99,6 +106,9 @@ pub(super) fn write(out: &mut OutFile) {
     }
     if exception {
         writeln!(out, "#include <exception>");
+    }
+    if initializer_list {
+        writeln!(out, "#include <initializer_list>");
     }
     if iterator {
         writeln!(out, "#include <iterator>");

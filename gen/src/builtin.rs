@@ -71,7 +71,9 @@ pub(super) fn write(out: &mut OutFile) {
     }
 
     if builtin.rust_vec {
+        include.algorithm = true;
         include.array = true;
+        include.initializer_list = true;
         include.iterator = true;
         include.new = true;
         include.type_traits = true;
