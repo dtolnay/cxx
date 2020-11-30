@@ -660,7 +660,8 @@ extern "C" const char *cxx_run_test() noexcept {
   rust::String first = "first", second = "second", sec = "sec";
   bool (rust::String::*cmp)(const rust::String &) const;
   bool first_first, first_second, sec_second, second_sec;
-  for (auto test : (std::tuple<decltype(cmp), bool, bool, bool, bool>[]) {
+  for (auto test : {
+    std::tuple<decltype(cmp), bool, bool, bool, bool>
     {&rust::String::operator==, true, false, false, false},
     {&rust::String::operator!=, false, true, true, true},
     {&rust::String::operator<, false, true, true, false},
