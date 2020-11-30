@@ -27,6 +27,7 @@ class impl;
 
 #ifndef CXXBRIDGE1_RUST_STRING
 #define CXXBRIDGE1_RUST_STRING
+// https://cxx.rs/binding/string.html
 class String final {
 public:
   String() noexcept;
@@ -68,6 +69,7 @@ private:
 #endif // CXXBRIDGE1_RUST_STRING
 
 #ifndef CXXBRIDGE1_RUST_STR
+// https://cxx.rs/binding/str.html
 class Str final {
 public:
   Str() noexcept;
@@ -118,6 +120,7 @@ struct copy_assignable_if<false> {
 };
 } // namespace detail
 
+// https://cxx.rs/binding/slice.html
 template <typename T>
 class Slice final
     : private detail::copy_assignable_if<std::is_const<T>::value> {
@@ -171,6 +174,7 @@ private:
 #endif // CXXBRIDGE1_RUST_SLICE
 
 #ifndef CXXBRIDGE1_RUST_BOX
+// https://cxx.rs/binding/box.html
 template <typename T>
 class Box final {
 public:
@@ -212,6 +216,7 @@ private:
 #endif // CXXBRIDGE1_RUST_BOX
 
 #ifndef CXXBRIDGE1_RUST_VEC
+// https://cxx.rs/binding/vec.html
 template <typename T>
 class Vec final {
 public:
@@ -288,6 +293,7 @@ private:
 #endif // CXXBRIDGE1_RUST_VEC
 
 #ifndef CXXBRIDGE1_RUST_FN
+// https://cxx.rs/binding/fn.html
 template <typename Signature, bool Throws = false>
 class Fn;
 
@@ -308,6 +314,7 @@ using TryFn = Fn<Signature, true>;
 
 #ifndef CXXBRIDGE1_RUST_ERROR
 #define CXXBRIDGE1_RUST_ERROR
+// https://cxx.rs/binding/result.html
 class Error final : public std::exception {
 public:
   Error(const Error &);
