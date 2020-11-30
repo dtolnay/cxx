@@ -15,6 +15,7 @@ class Str final {
 public:
   Str() noexcept;
   Str(const Str &) noexcept;
+  Str(const String &) noexcept;
 
   // Throws std::invalid_argument if not utf-8.
   Str(const std::string &);

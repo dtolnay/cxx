@@ -115,6 +115,11 @@ pub(super) fn write(out: &mut OutFile) {
         out.end_block(Block::AnonymousNamespace);
     }
 
+    if builtin.rust_str && !builtin.rust_string {
+        out.next_section();
+        writeln!(out, "class String;");
+    }
+
     ifndef::write(out, builtin.rust_string, "CXXBRIDGE1_RUST_STRING");
     ifndef::write(out, builtin.rust_str, "CXXBRIDGE1_RUST_STR");
     ifndef::write(out, builtin.rust_slice, "CXXBRIDGE1_RUST_SLICE");

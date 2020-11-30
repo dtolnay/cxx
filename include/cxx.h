@@ -73,6 +73,7 @@ private:
 class Str final {
 public:
   Str() noexcept;
+  Str(const String &) noexcept;
   Str(const std::string &);
   Str(const char *);
   Str(const char *, size_t);
