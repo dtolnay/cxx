@@ -255,7 +255,7 @@ fn enum_ord(enm: &Enum, span: Span) -> TokenStream {
 
     quote_spanned! {span=>
         impl ::std::cmp::Ord for #ident {
-            pub fn cmp(&self, other: &Self) -> ::std::cmp::Ordering {
+            fn cmp(&self, other: &Self) -> ::std::cmp::Ordering {
                 ::std::cmp::Ord::cmp(&self.repr, &other.repr)
             }
         }
@@ -267,8 +267,8 @@ fn enum_partial_ord(enm: &Enum, span: Span) -> TokenStream {
 
     quote_spanned! {span=>
         impl ::std::cmp::PartialOrd for #ident {
-            pub fn cmp(&self, other: &Self) -> ::std::option::Option<::std::cmp::Ordering> {
-                ::std::cmp::PartialOrd::cmp(&self.repr, &other.repr)
+            fn partial_cmp(&self, other: &Self) -> ::std::option::Option<::std::cmp::Ordering> {
+                ::std::cmp::PartialOrd::partial_cmp(&self.repr, &other.repr)
             }
         }
     }
