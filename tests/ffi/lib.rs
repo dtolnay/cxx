@@ -25,7 +25,7 @@ pub mod ffi {
         msg: String,
     }
 
-    #[derive(Debug, Hash)]
+    #[derive(Debug, Hash, PartialOrd, Ord)]
     enum Enum {
         AVal,
         BVal = 2020,
@@ -33,7 +33,7 @@ pub mod ffi {
     }
 
     #[namespace = "A"]
-    #[derive(Clone)]
+    #[derive(Copy, Clone, Default)]
     struct AShared {
         z: usize,
     }
