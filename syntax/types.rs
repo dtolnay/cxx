@@ -45,6 +45,7 @@ impl<'a> Types<'a> {
                 Type::Ident(_) | Type::Str(_) | Type::Void(_) => {}
                 Type::RustBox(ty)
                 | Type::UniquePtr(ty)
+                | Type::SharedPtr(ty)
                 | Type::CxxVector(ty)
                 | Type::RustVec(ty) => visit(all, &ty.inner),
                 Type::Ref(r) => visit(all, &r.inner),
@@ -254,7 +255,7 @@ impl<'a> Types<'a> {
                     Atom::from(&ident.rust) == Some(RustString)
                 }
             }
-            Type::RustVec(_) | Type::Array(_) => true,
+            Type::SharedPtr(_) | Type::RustVec(_) | Type::Array(_) => true,
             _ => false,
         }
     }

@@ -86,6 +86,14 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
                     expanded.extend(expand_unique_ptr(ident, types, explicit_impl));
                 }
             }
+        } else if let Type::SharedPtr(ptr) = ty {
+            if let Type::Ident(ident) = &ptr.inner {
+                if Atom::from(&ident.rust).is_none()
+                    && (explicit_impl.is_some() || !types.aliases.contains_key(&ident.rust))
+                {
+                    expanded.extend(expand_shared_ptr(ident, types, explicit_impl));
+                }
+            }
         } else if let Type::CxxVector(ptr) = ty {
             if let Type::Ident(ident) = &ptr.inner {
                 if Atom::from(&ident.rust).is_none()
@@ -1105,6 +1113,77 @@ fn expand_unique_ptr(
                     fn __drop(this: *mut *mut ::std::ffi::c_void);
                 }
                 __drop(&mut repr);
+            }
+        }
+    }
+}
+
+fn expand_shared_ptr(
+    ident: &ResolvableName,
+    types: &Types,
+    explicit_impl: Option<&Impl>,
+) -> TokenStream {
+    let name = ident.rust.to_string();
+    let prefix = format!("cxxbridge1$shared_ptr${}$", ident.to_symbol(types));
+    let link_null = format!("{}null", prefix);
+    let link_new = format!("{}new", prefix);
+    let link_clone = format!("{}clone", prefix);
+    let link_get = format!("{}get", prefix);
+    let link_drop = format!("{}drop", prefix);
+
+    let can_construct_from_value = types.structs.contains_key(&ident.rust)
+        || types.enums.contains_key(&ident.rust)
+        || types.aliases.contains_key(&ident.rust);
+    let new_method = if can_construct_from_value {
+        Some(quote! {
+            unsafe fn __new(mut value: Self, new: *mut ::std::ffi::c_void) {
+                extern "C" {
+                    #[link_name = #link_new]
+                    fn __new(new: *mut ::std::ffi::c_void, value: *mut #ident);
+                }
+                __new(new, &mut value);
+            }
+        })
+    } else {
+        None
+    };
+
+    let begin_span =
+        explicit_impl.map_or_else(Span::call_site, |explicit| explicit.impl_token.span);
+    let end_span = explicit_impl.map_or_else(Span::call_site, |explicit| explicit.brace_token.span);
+    let unsafe_token = format_ident!("unsafe", span = begin_span);
+
+    quote_spanned! {end_span=>
+        #unsafe_token impl ::cxx::private::SharedPtrTarget for #ident {
+            const __NAME: &'static dyn ::std::fmt::Display = &#name;
+            unsafe fn __null(new: *mut ::std::ffi::c_void) {
+                extern "C" {
+                    #[link_name = #link_null]
+                    fn __null(new: *mut ::std::ffi::c_void);
+                }
+                __null(new);
+            }
+            #new_method
+            unsafe fn __clone(this: *const ::std::ffi::c_void, new: *mut ::std::ffi::c_void) {
+                extern "C" {
+                    #[link_name = #link_clone]
+                    fn __clone(this: *const ::std::ffi::c_void, new: *mut ::std::ffi::c_void);
+                }
+                __clone(this, new);
+            }
+            unsafe fn __get(this: *const ::std::ffi::c_void) -> *const Self {
+                extern "C" {
+                    #[link_name = #link_get]
+                    fn __get(this: *const ::std::ffi::c_void) -> *const #ident;
+                }
+                __get(this)
+            }
+            unsafe fn __drop(this: *mut ::std::ffi::c_void) {
+                extern "C" {
+                    #[link_name = #link_drop]
+                    fn __drop(this: *mut ::std::ffi::c_void);
+                }
+                __drop(this);
             }
         }
     }

@@ -49,8 +49,8 @@ public:
 ### Restrictions:
 
 Box\<T\> does not support T being an opaque C++ type. You should use
-[UniquePtr\<T\>](uniqueptr.md) instead for transferring ownership of opaque C++
-types on the language boundary.
+[UniquePtr\<T\>](uniqueptr.md) or [SharedPtr\<T\>](sharedptr.md) instead for
+transferring ownership of opaque C++ types on the language boundary.
 
 If T is an opaque Rust type, the Rust type is required to be [Sized] i.e. size
 known at compile time. In the future we may introduce support for dynamically

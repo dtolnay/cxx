@@ -57,6 +57,10 @@ std::unique_ptr<C> c_return_unique_ptr() {
   return std::unique_ptr<C>(new C{2020});
 }
 
+std::shared_ptr<C> c_return_shared_ptr() {
+  return std::shared_ptr<C>(new C{2020});
+}
+
 std::unique_ptr<::H::H> c_return_ns_unique_ptr() {
   return std::unique_ptr<::H::H>(new ::H::H{"hello"});
 }
@@ -479,6 +483,11 @@ extern "C" C *cxx_test_suite_get_unique_ptr() noexcept {
   return std::unique_ptr<C>(new C{2020}).release();
 }
 
+extern "C" void
+cxx_test_suite_get_shared_ptr(std::shared_ptr<C> *repr) noexcept {
+  new (repr) std::shared_ptr<C>(new C{2020});
+}
+
 extern "C" std::string *cxx_test_suite_get_unique_ptr_string() noexcept {
   return std::unique_ptr<std::string>(new std::string("2020")).release();
 }
@@ -611,6 +620,7 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(r_return_shared().z == 2020);
   ASSERT(cxx_test_suite_r_is_correct(&*r_return_box()));
   ASSERT(r_return_unique_ptr()->get() == 2020);
+  ASSERT(r_return_shared_ptr()->get() == 2020);
   ASSERT(r_return_ref(Shared{2020}) == 2020);
   ASSERT(std::string(r_return_str(Shared{2020})) == "2020");
   ASSERT(std::string(r_return_rust_string()) == "2020");
@@ -624,6 +634,7 @@ extern "C" const char *cxx_run_test() noexcept {
   r_take_primitive(2020);
   r_take_shared(Shared{2020});
   r_take_unique_ptr(std::unique_ptr<C>(new C{2020}));
+  r_take_shared_ptr(std::shared_ptr<C>(new C{2020}));
   r_take_ref_c(C{2020});
   r_take_str(rust::Str("2020"));
   r_take_slice_char(rust::Slice<const char>(SLICE_DATA, sizeof(SLICE_DATA)));

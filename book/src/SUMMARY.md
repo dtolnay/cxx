@@ -29,6 +29,7 @@
     - [CxxString &mdash; std::string](binding/cxxstring.md)
     - [Box\<T\> &mdash; rust::Box\<T\>](binding/box.md)
     - [UniquePtr\<T\> &mdash; std::unique\_ptr\<T\>](binding/uniqueptr.md)
+    - [SharedPtr\<T\> &mdash; std::shared\_ptr\<T\>](binding/sharedptr.md)
     - [Vec\<T\> &mdash; rust::Vec\<T\>](binding/vec.md)
     - [CxxVector\<T\> &mdash; std::vector\<T\>](binding/cxxvector.md)
     - [Function pointers](binding/fn.md)
