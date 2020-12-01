@@ -363,7 +363,7 @@
 //! </table>
 
 #![no_std]
-#![doc(html_root_url = "https://docs.rs/cxx/1.0.8")]
+#![doc(html_root_url = "https://docs.rs/cxx/1.0.9")]
 #![deny(improper_ctypes)]
 #![allow(non_camel_case_types)]
 #![allow(
