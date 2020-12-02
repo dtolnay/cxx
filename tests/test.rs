@@ -36,6 +36,7 @@ fn test_c_return() {
     assert_eq!(2020, ffi::c_return_shared().z);
     assert_eq!(2020, ffi::c_return_box().0);
     ffi::c_return_unique_ptr();
+    ffi::c_return_shared_ptr();
     ffi2::c_return_ns_unique_ptr();
     assert_eq!(2020, *ffi::c_return_ref(&shared));
     assert_eq!(2020, *ffi::c_return_ns_ref(&ns_shared));

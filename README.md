@@ -327,6 +327,7 @@ returns of functions.
 <tr><td><a href="https://docs.rs/cxx/1.0/cxx/struct.CxxString.html">CxxString</a></td><td>std::string</td><td><sup><i>cannot be passed by value</i></sup></td></tr>
 <tr><td>Box&lt;T&gt;</td><td>rust::Box&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
 <tr><td><a href="https://docs.rs/cxx/1.0/cxx/struct.UniquePtr.html">UniquePtr&lt;T&gt;</a></td><td>std::unique_ptr&lt;T&gt;</td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
+<tr><td><a href="https://docs.rs/cxx/1.0/cxx/struct.SharedPtr.html">SharedPtr&lt;T&gt;</a></td><td>std::shared_ptr&lt;T&gt;</td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
 <tr><td>[T; N]</td><td>std::array&lt;T, N&gt;</td><td><sup><i>cannot hold opaque Rust or C++ type</i></sup></td></tr>
 <tr><td>Vec&lt;T&gt;</td><td>rust::Vec&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
 <tr><td><a href="https://docs.rs/cxx/1.0/cxx/struct.CxxVector.html">CxxVector&lt;T&gt;</a></td><td>std::vector&lt;T&gt;</td><td><sup><i>cannot be passed by value, cannot hold opaque Rust type</i></sup></td></tr>
@@ -350,7 +351,6 @@ matter of designing a nice API for each in its non-native language.
 <tr><td>Option&lt;T&gt;</td><td><sup><i>tbd</i></sup></td></tr>
 <tr><td><sup><i>tbd</i></sup></td><td>std::map&lt;K, V&gt;</td></tr>
 <tr><td><sup><i>tbd</i></sup></td><td>std::unordered_map&lt;K, V&gt;</td></tr>
-<tr><td><sup><i>tbd</i></sup></td><td>std::shared_ptr&lt;T&gt;</td></tr>
 </table>
 
 <br>

@@ -20,9 +20,11 @@ impl ToTokens for Type {
                 }
                 ident.rust.to_tokens(tokens);
             }
-            Type::RustBox(ty) | Type::UniquePtr(ty) | Type::CxxVector(ty) | Type::RustVec(ty) => {
-                ty.to_tokens(tokens)
-            }
+            Type::RustBox(ty)
+            | Type::UniquePtr(ty)
+            | Type::SharedPtr(ty)
+            | Type::CxxVector(ty)
+            | Type::RustVec(ty) => ty.to_tokens(tokens),
             Type::Ref(r) | Type::Str(r) => r.to_tokens(tokens),
             Type::Array(a) => a.to_tokens(tokens),
             Type::Fn(f) => f.to_tokens(tokens),
@@ -44,7 +46,7 @@ impl ToTokens for Ty1 {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let span = self.name.span();
         let name = self.name.to_string();
-        if let "UniquePtr" | "CxxVector" = name.as_str() {
+        if let "UniquePtr" | "SharedPtr" | "CxxVector" = name.as_str() {
             tokens.extend(quote_spanned!(span=> ::cxx::));
         } else if name == "Vec" {
             tokens.extend(quote_spanned!(span=> ::std::vec::));

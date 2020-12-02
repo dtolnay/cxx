@@ -32,6 +32,7 @@ fn do_typecheck(cx: &mut Check) {
             Type::RustBox(ptr) => check_type_box(cx, ptr),
             Type::RustVec(ty) => check_type_rust_vec(cx, ty),
             Type::UniquePtr(ptr) => check_type_unique_ptr(cx, ptr),
+            Type::SharedPtr(ptr) => check_type_shared_ptr(cx, ptr),
             Type::CxxVector(ptr) => check_type_cxx_vector(cx, ptr),
             Type::Ref(ty) => check_type_ref(cx, ty),
             Type::Array(array) => check_type_array(cx, array),
@@ -115,6 +116,7 @@ fn check_type_unique_ptr(cx: &mut Check, ptr: &Ty1) {
     if let Type::Ident(ident) = &ptr.inner {
         if cx.types.rust.contains(&ident.rust) {
             cx.error(ptr, "unique_ptr of a Rust type is not supported yet");
+            return;
         }
 
         match Atom::from(&ident.rust) {
@@ -128,6 +130,29 @@ fn check_type_unique_ptr(cx: &mut Check, ptr: &Ty1) {
     cx.error(ptr, "unsupported unique_ptr target type");
 }
 
+fn check_type_shared_ptr(cx: &mut Check, ptr: &Ty1) {
+    if let Type::Ident(ident) = &ptr.inner {
+        if cx.types.rust.contains(&ident.rust) {
+            cx.error(ptr, "shared_ptr of a Rust type is not supported yet");
+            return;
+        }
+
+        match Atom::from(&ident.rust) {
+            None => return,
+            Some(CxxString) => {
+                cx.error(ptr, "std::shared_ptr<std::string> is not supported yet");
+                return;
+            }
+            _ => {}
+        }
+    } else if let Type::CxxVector(_) = &ptr.inner {
+        cx.error(ptr, "std::shared_ptr<std::vector> is not supported yet");
+        return;
+    }
+
+    cx.error(ptr, "unsupported shared_ptr target type");
+}
+
 fn check_type_cxx_vector(cx: &mut Check, ptr: &Ty1) {
     if let Type::Ident(ident) = &ptr.inner {
         if cx.types.rust.contains(&ident.rust) {
@@ -135,6 +160,7 @@ fn check_type_cxx_vector(cx: &mut Check, ptr: &Ty1) {
                 ptr,
                 "C++ vector containing a Rust type is not supported yet",
             );
+            return;
         }
 
         match Atom::from(&ident.rust) {
@@ -410,7 +436,7 @@ fn check_api_impl(cx: &mut Check, imp: &Impl) {
         return;
     }
 
-    if let Type::UniquePtr(ty) | Type::CxxVector(ty) = ty {
+    if let Type::UniquePtr(ty) | Type::SharedPtr(ty) | Type::CxxVector(ty) = ty {
         if let Type::Ident(inner) = &ty.inner {
             if Atom::from(&inner.rust).is_none() {
                 return;
@@ -473,6 +499,7 @@ fn check_multiple_arg_lifetimes(cx: &mut Check, efn: &ExternFn) {
 fn check_reserved_name(cx: &mut Check, ident: &Ident) {
     if ident == "Box"
         || ident == "UniquePtr"
+        || ident == "SharedPtr"
         || ident == "Vec"
         || ident == "CxxVector"
         || ident == "str"
@@ -493,6 +520,7 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
         Type::RustBox(_)
         | Type::RustVec(_)
         | Type::UniquePtr(_)
+        | Type::SharedPtr(_)
         | Type::Ref(_)
         | Type::Str(_)
         | Type::SliceRef(_) => false,
@@ -564,6 +592,7 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         Type::RustBox(_) => "Box".to_owned(),
         Type::RustVec(_) => "Vec".to_owned(),
         Type::UniquePtr(_) => "unique_ptr".to_owned(),
+        Type::SharedPtr(_) => "shared_ptr".to_owned(),
         Type::Ref(_) => "reference".to_owned(),
         Type::Str(_) => "&str".to_owned(),
         Type::CxxVector(_) => "C++ vector".to_owned(),

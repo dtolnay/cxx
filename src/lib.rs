@@ -336,6 +336,7 @@
 //! <tr><td><a href="struct.CxxString.html">CxxString</a></td><td>std::string</td><td><sup><i>cannot be passed by value</i></sup></td></tr>
 //! <tr><td>Box&lt;T&gt;</td><td>rust::Box&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
 //! <tr><td><a href="struct.UniquePtr.html">UniquePtr&lt;T&gt;</a></td><td>std::unique_ptr&lt;T&gt;</td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
+//! <tr><td><a href="struct.SharedPtr.html">SharedPtr&lt;T&gt;</a></td><td>std::shared_ptr&lt;T&gt;</td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
 //! <tr><td>[T; N]</td><td>std::array&lt;T, N&gt;</td><td><sup><i>cannot hold opaque Rust or C++ type</i></sup></td></tr>
 //! <tr><td>Vec&lt;T&gt;</td><td>rust::Vec&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
 //! <tr><td><a href="struct.CxxVector.html">CxxVector&lt;T&gt;</a></td><td>std::vector&lt;T&gt;</td><td><sup><i>cannot be passed by value, cannot hold opaque Rust type</i></sup></td></tr>
@@ -359,7 +360,6 @@
 //! <tr><td>Option&lt;T&gt;</td><td><sup><i>tbd</i></sup></td></tr>
 //! <tr><td><sup><i>tbd</i></sup></td><td>std::map&lt;K, V&gt;</td></tr>
 //! <tr><td><sup><i>tbd</i></sup></td><td>std::unordered_map&lt;K, V&gt;</td></tr>
-//! <tr><td><sup><i>tbd</i></sup></td><td>std::shared_ptr&lt;T&gt;</td></tr>
 //! </table>
 
 #![no_std]
@@ -404,6 +404,7 @@ mod rust_str;
 mod rust_string;
 mod rust_type;
 mod rust_vec;
+mod shared_ptr;
 mod symbols;
 mod unique_ptr;
 mod unwind;
@@ -412,6 +413,7 @@ pub use crate::cxx_string::CxxString;
 pub use crate::cxx_vector::CxxVector;
 pub use crate::exception::Exception;
 pub use crate::extern_type::{kind, ExternType};
+pub use crate::shared_ptr::SharedPtr;
 pub use crate::unique_ptr::UniquePtr;
 pub use cxxbridge_macro::bridge;
 
@@ -448,6 +450,7 @@ pub mod private {
     pub use crate::rust_string::RustString;
     pub use crate::rust_type::RustType;
     pub use crate::rust_vec::RustVec;
+    pub use crate::shared_ptr::SharedPtrTarget;
     pub use crate::unique_ptr::UniquePtrTarget;
     pub use crate::unwind::catch_unwind;
 }

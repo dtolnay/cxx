@@ -29,7 +29,7 @@ pub static ERRORS: &[Error] = &[
 pub static BOX_CXX_TYPE: Error = Error {
     msg: "Box of a C++ type is not supported yet",
     label: None,
-    note: Some("hint: use UniquePtr<>"),
+    note: Some("hint: use UniquePtr<> or SharedPtr<>"),
 };
 
 pub static CXXBRIDGE_RESERVED: Error = Error {
@@ -47,7 +47,7 @@ pub static CXX_STRING_BY_VALUE: Error = Error {
 pub static CXX_TYPE_BY_VALUE: Error = Error {
     msg: "C++ type by value is not supported",
     label: None,
-    note: Some("hint: wrap it in a UniquePtr<>"),
+    note: Some("hint: wrap it in a UniquePtr<> or SharedPtr<>"),
 };
 
 pub static DISCRIMINANT_OVERFLOW: Error = Error {

@@ -201,6 +201,7 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
             Type::RustBox(_) => out.builtin.rust_box = true,
             Type::RustVec(_) => out.builtin.rust_vec = true,
             Type::UniquePtr(_) => out.include.memory = true,
+            Type::SharedPtr(_) => out.include.memory = true,
             Type::Str(_) => out.builtin.rust_str = true,
             Type::CxxVector(_) => out.include.vector = true,
             Type::Fn(_) => out.builtin.rust_fn = true,
@@ -1104,6 +1105,11 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write_type(out, &ptr.inner);
             write!(out, ">");
         }
+        Type::SharedPtr(ptr) => {
+            write!(out, "::std::shared_ptr<");
+            write_type(out, &ptr.inner);
+            write!(out, ">");
+        }
         Type::CxxVector(ty) => {
             write!(out, "::std::vector<");
             write_type(out, &ty.inner);
@@ -1182,6 +1188,7 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
         Type::Ident(_)
         | Type::RustBox(_)
         | Type::UniquePtr(_)
+        | Type::SharedPtr(_)
         | Type::Str(_)
         | Type::CxxVector(_)
         | Type::RustVec(_)
@@ -1268,6 +1275,16 @@ fn write_generic_instantiations(out: &mut OutFile) {
                 {
                     out.next_section();
                     write_unique_ptr(out, inner);
+                }
+            }
+        } else if let Type::SharedPtr(ptr) = ty {
+            if let Type::Ident(inner) = &ptr.inner {
+                if Atom::from(&inner.rust).is_none()
+                    && !(out.types.aliases.contains_key(&inner.rust)
+                        || out.types.explicit_impls.contains(ty))
+                {
+                    out.next_section();
+                    write_shared_ptr(out, inner);
                 }
             }
         } else if let Type::CxxVector(ptr) = ty {
@@ -1552,6 +1569,87 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
         writeln!(out, "  ptr->~unique_ptr();");
     }
     writeln!(out, "}}");
+}
+
+fn write_shared_ptr(out: &mut OutFile, ident: &ResolvableName) {
+    let resolved = out.types.resolve(ident);
+    let inner = resolved.to_fully_qualified();
+    let instance = ident.to_symbol(out.types);
+
+    writeln!(out, "#ifndef CXXBRIDGE1_SHARED_PTR_{}", instance);
+    writeln!(out, "#define CXXBRIDGE1_SHARED_PTR_{}", instance);
+    out.include.new = true;
+    out.include.utility = true;
+
+    // Some aliases are to opaque types; some are to trivial types. We can't
+    // know at code generation time, so we generate both C++ and Rust side
+    // bindings for a "new" method anyway. But the Rust code can't be called for
+    // Opaque types because the 'new' method is not implemented.
+    let can_construct_from_value = out.types.structs.contains_key(&ident.rust)
+        || out.types.enums.contains_key(&ident.rust)
+        || out.types.aliases.contains_key(&ident.rust);
+
+    if !out.types.structs.contains_key(&ident.rust) && !out.types.enums.contains_key(&ident.rust) {
+        out.builtin.is_complete = true;
+        writeln!(
+            out,
+            "static_assert(::rust::is_complete<{}>::value, \"definition of {} is required\");",
+            inner, resolved.cxx,
+        );
+    }
+    writeln!(
+        out,
+        "static_assert(sizeof(::std::shared_ptr<{}>) == 2 * sizeof(void *), \"\");",
+        inner,
+    );
+    writeln!(
+        out,
+        "static_assert(alignof(::std::shared_ptr<{}>) == alignof(void *), \"\");",
+        inner,
+    );
+    writeln!(
+        out,
+        "void cxxbridge1$shared_ptr${}$null(::std::shared_ptr<{}> *ptr) noexcept {{",
+        instance, inner,
+    );
+    writeln!(out, "  new (ptr) ::std::shared_ptr<{}>();", inner);
+    writeln!(out, "}}");
+    if can_construct_from_value {
+        writeln!(
+            out,
+            "void cxxbridge1$shared_ptr${}$new(::std::shared_ptr<{}> *ptr, {} *value) noexcept {{",
+            instance, inner, inner,
+        );
+        writeln!(
+            out,
+            "  new (ptr) ::std::shared_ptr<{}>(new {}(::std::move(*value)));",
+            inner, inner,
+        );
+        writeln!(out, "}}");
+    }
+    writeln!(
+        out,
+        "void cxxbridge1$shared_ptr${}$clone(const ::std::shared_ptr<{}>& self, ::std::shared_ptr<{}> *ptr) noexcept {{",
+        instance, inner, inner,
+    );
+    writeln!(out, "  new (ptr) ::std::shared_ptr<{}>(self);", inner);
+    writeln!(out, "}}");
+    writeln!(
+        out,
+        "const {} *cxxbridge1$shared_ptr${}$get(const ::std::shared_ptr<{}>& self) noexcept {{",
+        inner, instance, inner,
+    );
+    writeln!(out, "  return self.get();");
+    writeln!(out, "}}");
+    writeln!(
+        out,
+        "void cxxbridge1$shared_ptr${}$drop(::std::shared_ptr<{}> *self) noexcept {{",
+        instance, inner,
+    );
+    writeln!(out, "  self->~shared_ptr();");
+    writeln!(out, "}}");
+
+    writeln!(out, "#endif // CXXBRIDGE1_SHARED_PTR_{}", instance);
 }
 
 fn write_cxx_vector(out: &mut OutFile, element: &ResolvableName) {
