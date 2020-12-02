@@ -1041,7 +1041,7 @@ fn expand_unique_ptr(
     let name = ident.rust.to_string();
     let prefix = format!("cxxbridge1$unique_ptr${}$", ident.to_symbol(types));
     let link_null = format!("{}null", prefix);
-    let link_new = format!("{}new", prefix);
+    let link_uninit = format!("{}uninit", prefix);
     let link_raw = format!("{}raw", prefix);
     let link_get = format!("{}get", prefix);
     let link_release = format!("{}release", prefix);
@@ -1054,11 +1054,11 @@ fn expand_unique_ptr(
         Some(quote! {
             fn __new(mut value: Self) -> *mut ::std::ffi::c_void {
                 extern "C" {
-                    #[link_name = #link_new]
-                    fn __new(this: *mut *mut ::std::ffi::c_void, value: *mut #ident);
+                    #[link_name = #link_uninit]
+                    fn __uninit(this: *mut *mut ::std::ffi::c_void) -> *mut ::std::ffi::c_void;
                 }
                 let mut repr = ::std::ptr::null_mut::<::std::ffi::c_void>();
-                unsafe { __new(&mut repr, &mut value) }
+                unsafe { __uninit(&mut repr).cast::<#ident>().write(value) }
                 repr
             }
         })
@@ -1126,7 +1126,7 @@ fn expand_shared_ptr(
     let name = ident.rust.to_string();
     let prefix = format!("cxxbridge1$shared_ptr${}$", ident.to_symbol(types));
     let link_null = format!("{}null", prefix);
-    let link_new = format!("{}new", prefix);
+    let link_uninit = format!("{}uninit", prefix);
     let link_clone = format!("{}clone", prefix);
     let link_get = format!("{}get", prefix);
     let link_drop = format!("{}drop", prefix);
@@ -1138,10 +1138,10 @@ fn expand_shared_ptr(
         Some(quote! {
             unsafe fn __new(mut value: Self, new: *mut ::std::ffi::c_void) {
                 extern "C" {
-                    #[link_name = #link_new]
-                    fn __new(new: *mut ::std::ffi::c_void, value: *mut ::std::ffi::c_void);
+                    #[link_name = #link_uninit]
+                    fn __uninit(new: *mut ::std::ffi::c_void) -> *mut ::std::ffi::c_void;
                 }
-                __new(new, &mut value as *mut Self as *mut ::std::ffi::c_void);
+                __uninit(new).cast::<#ident>().write(value);
             }
         })
     } else {

@@ -1520,16 +1520,19 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     writeln!(out, "  new (ptr) ::std::unique_ptr<{}>();", inner);
     writeln!(out, "}}");
     if can_construct_from_value {
+        out.builtin.maybe_uninit = true;
         writeln!(
             out,
-            "void cxxbridge1$unique_ptr${}$new(::std::unique_ptr<{}> *ptr, {} *value) noexcept {{",
-            instance, inner, inner,
+            "{} *cxxbridge1$unique_ptr${}$uninit(::std::unique_ptr<{}> *ptr) noexcept {{",
+            inner, instance, inner,
         );
         writeln!(
             out,
-            "  new (ptr) ::std::unique_ptr<{}>(new {}(::std::move(*value)));",
-            inner, inner,
+            "  {} *uninit = reinterpret_cast<{} *>(new ::rust::MaybeUninit<{}>);",
+            inner, inner, inner,
         );
+        writeln!(out, "  new (ptr) ::std::unique_ptr<{}>(uninit);", inner);
+        writeln!(out, "  return uninit;");
         writeln!(out, "}}");
     }
     writeln!(
@@ -1615,16 +1618,19 @@ fn write_shared_ptr(out: &mut OutFile, ident: &ResolvableName) {
     writeln!(out, "  new (ptr) ::std::shared_ptr<{}>();", inner);
     writeln!(out, "}}");
     if can_construct_from_value {
+        out.builtin.maybe_uninit = true;
         writeln!(
             out,
-            "void cxxbridge1$shared_ptr${}$new(::std::shared_ptr<{}> *ptr, {} *value) noexcept {{",
-            instance, inner, inner,
+            "{} *cxxbridge1$shared_ptr${}$uninit(::std::shared_ptr<{}> *ptr) noexcept {{",
+            inner, instance, inner,
         );
         writeln!(
             out,
-            "  new (ptr) ::std::shared_ptr<{}>(new {}(::std::move(*value)));",
-            inner, inner,
+            "  {} *uninit = reinterpret_cast<{} *>(new ::rust::MaybeUninit<{}>);",
+            inner, inner, inner,
         );
+        writeln!(out, "  new (ptr) ::std::shared_ptr<{}>(uninit);", inner);
+        writeln!(out, "  return uninit;");
         writeln!(out, "}}");
     }
     writeln!(
