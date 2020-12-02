@@ -1087,25 +1087,25 @@ fn expand_unique_ptr(
             unsafe fn __raw(raw: *mut Self) -> *mut ::std::ffi::c_void {
                 extern "C" {
                     #[link_name = #link_raw]
-                    fn __raw(this: *mut *mut ::std::ffi::c_void, raw: *mut #ident);
+                    fn __raw(this: *mut *mut ::std::ffi::c_void, raw: *mut ::std::ffi::c_void);
                 }
                 let mut repr = ::std::ptr::null_mut::<::std::ffi::c_void>();
-                __raw(&mut repr, raw);
+                __raw(&mut repr, raw.cast());
                 repr
             }
             unsafe fn __get(repr: *mut ::std::ffi::c_void) -> *const Self {
                 extern "C" {
                     #[link_name = #link_get]
-                    fn __get(this: *const *mut ::std::ffi::c_void) -> *const #ident;
+                    fn __get(this: *const *mut ::std::ffi::c_void) -> *const ::std::ffi::c_void;
                 }
-                __get(&repr)
+                __get(&repr).cast()
             }
             unsafe fn __release(mut repr: *mut ::std::ffi::c_void) -> *mut Self {
                 extern "C" {
                     #[link_name = #link_release]
-                    fn __release(this: *mut *mut ::std::ffi::c_void) -> *mut #ident;
+                    fn __release(this: *mut *mut ::std::ffi::c_void) -> *mut ::std::ffi::c_void;
                 }
-                __release(&mut repr)
+                __release(&mut repr).cast()
             }
             unsafe fn __drop(mut repr: *mut ::std::ffi::c_void) {
                 extern "C" {
@@ -1139,9 +1139,9 @@ fn expand_shared_ptr(
             unsafe fn __new(mut value: Self, new: *mut ::std::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_new]
-                    fn __new(new: *mut ::std::ffi::c_void, value: *mut #ident);
+                    fn __new(new: *mut ::std::ffi::c_void, value: *mut ::std::ffi::c_void);
                 }
-                __new(new, &mut value);
+                __new(new, &mut value as *mut Self as *mut ::std::ffi::c_void);
             }
         })
     } else {
@@ -1174,9 +1174,9 @@ fn expand_shared_ptr(
             unsafe fn __get(this: *const ::std::ffi::c_void) -> *const Self {
                 extern "C" {
                     #[link_name = #link_get]
-                    fn __get(this: *const ::std::ffi::c_void) -> *const #ident;
+                    fn __get(this: *const ::std::ffi::c_void) -> *const ::std::ffi::c_void;
                 }
-                __get(this)
+                __get(this).cast()
             }
             unsafe fn __drop(this: *mut ::std::ffi::c_void) {
                 extern "C" {
