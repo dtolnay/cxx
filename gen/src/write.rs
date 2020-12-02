@@ -1280,7 +1280,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
         } else if let Type::SharedPtr(ptr) = ty {
             if let Type::Ident(inner) = &ptr.inner {
                 if Atom::from(&inner.rust).is_none()
-                    && !(out.types.aliases.contains_key(&inner.rust)
+                    && (!out.types.aliases.contains_key(&inner.rust)
                         || out.types.explicit_impls.contains(ty))
                 {
                     out.next_section();
