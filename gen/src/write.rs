@@ -1592,14 +1592,6 @@ fn write_shared_ptr(out: &mut OutFile, ident: &ResolvableName) {
         || out.types.enums.contains_key(&ident.rust)
         || out.types.aliases.contains_key(&ident.rust);
 
-    if !out.types.structs.contains_key(&ident.rust) && !out.types.enums.contains_key(&ident.rust) {
-        out.builtin.is_complete = true;
-        writeln!(
-            out,
-            "static_assert(::rust::is_complete<{}>::value, \"definition of {} is required\");",
-            inner, resolved.cxx,
-        );
-    }
     writeln!(
         out,
         "static_assert(sizeof(::std::shared_ptr<{}>) == 2 * sizeof(void *), \"\");",
