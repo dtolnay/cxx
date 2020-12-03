@@ -59,31 +59,63 @@ public:
 # template <typename T>
 # class Vec<T>::iterator final {
 # public:
+#   using iterator_category = std::random_access_iterator_tag;
 #   using value_type = T;
 #   using pointer = T *;
 #   using reference = T &;
 #
 #   T &operator*() const noexcept;
 #   T *operator->() const noexcept;
+#   T &operator[](ptrdiff_t) const noexcept;
+#
 #   iterator &operator++() noexcept;
 #   iterator operator++(int) noexcept;
+#   iterator &operator--() noexcept;
+#   iterator operator--(int) noexcept;
+#
+#   iterator &operator+=(ptrdiff_t) noexcept;
+#   iterator &operator-=(ptrdiff_t) noexcept;
+#   iterator operator+(ptrdiff_t) const noexcept;
+#   iterator operator-(ptrdiff_t) const noexcept;
+#   ptrdiff_t operator-(const iterator &) const noexcept;
+#
 #   bool operator==(const iterator &) const noexcept;
 #   bool operator!=(const iterator &) const noexcept;
+#   bool operator<(const iterator &) const noexcept;
+#   bool operator>(const iterator &) const noexcept;
+#   bool operator<=(const iterator &) const noexcept;
+#   bool operator>=(const iterator &) const noexcept;
 # };
 #
 # template <typename T>
 # class Vec<T>::const_iterator final {
 # public:
+#   using iterator_category = std::random_access_iterator_tag;
 #   using value_type = const T;
 #   using pointer = const T *;
 #   using reference = const T &;
 #
 #   const T &operator*() const noexcept;
 #   const T *operator->() const noexcept;
+#   const T &operator[](ptrdiff_t) const noexcept;
+#
 #   const_iterator &operator++() noexcept;
 #   const_iterator operator++(int) noexcept;
+#   const_iterator &operator--() noexcept;
+#   const_iterator operator--(int) noexcept;
+#
+#   const_iterator &operator+=(ptrdiff_t) noexcept;
+#   const_iterator &operator-=(ptrdiff_t) noexcept;
+#   const_iterator operator+(ptrdiff_t) const noexcept;
+#   const_iterator operator-(ptrdiff_t) const noexcept;
+#   ptrdiff_t operator-(const const_iterator &) const noexcept;
+#
 #   bool operator==(const const_iterator &) const noexcept;
 #   bool operator!=(const const_iterator &) const noexcept;
+#   bool operator<(const const_iterator &) const noexcept;
+#   bool operator>(const const_iterator &) const noexcept;
+#   bool operator<=(const const_iterator &) const noexcept;
+#   bool operator>=(const const_iterator &) const noexcept;
 # };
 #
 # } // namespace rust
