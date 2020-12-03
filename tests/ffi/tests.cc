@@ -365,6 +365,16 @@ void c_take_rust_vec_shared_forward_iterator(rust::Vec<Shared> v) {
   }
 }
 
+void c_take_rust_vec_shared_sort(rust::Vec<Shared> v) {
+  // Exercise requirements of RandomAccessIterator.
+  // https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator
+  std::sort(v.begin(), v.end());
+  if (v[0].z == 0 && v[1].z == 2 && v[2].z == 4 && v[3].z == 7)
+  {
+    cxx_test_suite_set_correct();
+  }
+}
+
 void c_take_rust_vec_shared_index(rust::Vec<Shared> v) {
   if (v[0].z == 1010 && v.at(0).z == 1010 && v.front().z == 1010 &&
       v[1].z == 1011 && v.at(1).z == 1011 && v.back().z == 1011) {
