@@ -149,10 +149,13 @@ fn test_c_take() {
     check!(ffi::c_take_rust_vec_shared_forward_iterator(
         shared_test_vec,
     ));
-    let shared_sort_vec = vec![ffi::Shared { z: 2 }, ffi::Shared { z: 0 }, ffi::Shared { z: 7 }, ffi::Shared { z: 4 }];
-    check!(ffi::c_take_rust_vec_shared_sort(
-        shared_sort_vec,
-    ));
+    let shared_sort_vec = vec![
+        ffi::Shared { z: 2 },
+        ffi::Shared { z: 0 },
+        ffi::Shared { z: 7 },
+        ffi::Shared { z: 4 },
+    ];
+    check!(ffi::c_take_rust_vec_shared_sort(shared_sort_vec));
     check!(ffi::c_take_ref_rust_vec(&test_vec));
     check!(ffi::c_take_ref_rust_vec_index(&test_vec));
     check!(ffi::c_take_ref_rust_vec_copy(&test_vec));
@@ -207,7 +210,7 @@ fn test_c_method_calls() {
     assert_eq!(2021, unique_ptr.pin_mut().set(2021));
     assert_eq!(2021, unique_ptr.get());
     assert_eq!(2021, unique_ptr.get2());
-    assert_eq!(2022, unique_ptr.pin_mut().set_succeed(2022).unwrap(),);
+    assert_eq!(2022, unique_ptr.pin_mut().set_succeed(2022).unwrap());
     assert!(unique_ptr.pin_mut().get_fail().is_err());
     assert_eq!(2021, ffi::Shared { z: 0 }.c_method_on_shared());
 

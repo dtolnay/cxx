@@ -369,8 +369,7 @@ void c_take_rust_vec_shared_sort(rust::Vec<Shared> v) {
   // Exercise requirements of RandomAccessIterator.
   // https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator
   std::sort(v.begin(), v.end());
-  if (v[0].z == 0 && v[1].z == 2 && v[2].z == 4 && v[3].z == 7)
-  {
+  if (v[0].z == 0 && v[1].z == 2 && v[2].z == 4 && v[3].z == 7) {
     cxx_test_suite_set_correct();
   }
 }
