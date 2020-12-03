@@ -293,18 +293,33 @@ private:
 template <typename T>
 class Vec<T>::iterator final {
 public:
-  using difference_type = ptrdiff_t;
+  using iterator_category = std::random_access_iterator_tag;
   using value_type = T;
+  using difference_type = ptrdiff_t;
   using pointer = typename std::add_pointer<T>::type;
   using reference = typename std::add_lvalue_reference<T>::type;
-  using iterator_category = std::forward_iterator_tag;
 
-  T &operator*() const noexcept;
-  T *operator->() const noexcept;
+  reference operator*() const noexcept;
+  pointer operator->() const noexcept;
+  reference operator[](difference_type) const noexcept;
+
   iterator &operator++() noexcept;
   iterator operator++(int) noexcept;
+  iterator &operator--() noexcept;
+  iterator operator--(int) noexcept;
+
+  iterator &operator+=(difference_type) noexcept;
+  iterator &operator-=(difference_type) noexcept;
+  iterator operator+(difference_type) const noexcept;
+  iterator operator-(difference_type) const noexcept;
+  difference_type operator-(const iterator &) const noexcept;
+
   bool operator==(const iterator &) const noexcept;
   bool operator!=(const iterator &) const noexcept;
+  bool operator<(const iterator &) const noexcept;
+  bool operator>(const iterator &) const noexcept;
+  bool operator<=(const iterator &) const noexcept;
+  bool operator>=(const iterator &) const noexcept;
 
 private:
   friend class Vec;
@@ -737,13 +752,20 @@ void Vec<T>::emplace_back(Args &&... args) {
 }
 
 template <typename T>
-T &Vec<T>::iterator::operator*() const noexcept {
+typename Vec<T>::iterator::reference Vec<T>::iterator::operator*() const noexcept {
   return *static_cast<T *>(this->pos);
 }
 
 template <typename T>
-T *Vec<T>::iterator::operator->() const noexcept {
+typename Vec<T>::iterator::pointer Vec<T>::iterator::operator->() const noexcept {
   return static_cast<T *>(this->pos);
+}
+
+template <typename T>
+typename Vec<T>::iterator::reference Vec<T>::iterator::operator[](
+    Vec<T>::iterator::difference_type n) const noexcept {
+  auto pos = static_cast<char *>(this->pos) + this->stride * n;
+  return *static_cast<T *>(pos);
 }
 
 template <typename T>
@@ -760,6 +782,57 @@ typename Vec<T>::iterator Vec<T>::iterator::operator++(int) noexcept {
 }
 
 template <typename T>
+typename Vec<T>::iterator &Vec<T>::iterator::operator--() noexcept {
+  this->pos = static_cast<char *>(this->pos) - this->stride;
+  return *this;
+}
+
+template <typename T>
+typename Vec<T>::iterator Vec<T>::iterator::operator--(int) noexcept {
+  auto ret = iterator(*this);
+  this->pos = static_cast<char *>(this->pos) - this->stride;
+  return ret;
+}
+
+template <typename T>
+typename Vec<T>::iterator &
+Vec<T>::iterator::operator+=(Vec<T>::iterator::difference_type n) noexcept {
+  this->pos = static_cast<char *>(this->pos) + this->stride * n;
+  return *this;
+}
+
+template <typename T>
+typename Vec<T>::iterator &
+Vec<T>::iterator::operator-=(Vec<T>::iterator::difference_type n) noexcept {
+  this->pos = static_cast<char *>(this->pos) - this->stride * n;
+  return *this;
+}
+
+template <typename T>
+typename Vec<T>::iterator Vec<T>::iterator::operator+(
+    Vec<T>::iterator::difference_type n) const noexcept {
+  auto temp = iterator(*this);
+  temp.pos = static_cast<char *>(this->pos) + this->stride * n;
+  return temp;
+}
+
+template <typename T>
+typename Vec<T>::iterator Vec<T>::iterator::operator-(
+    Vec<T>::iterator::difference_type n) const noexcept {
+  auto temp = iterator(*this);
+  temp.pos = static_cast<char *>(this->pos) - this->stride * n;
+  return temp;
+}
+
+template <typename T>
+typename Vec<T>::iterator::difference_type
+Vec<T>::iterator::operator-(const iterator &other) const noexcept {
+  auto diff = std::distance(static_cast<char *>(other.pos),
+                            static_cast<char *>(this->pos));
+  return diff / stride;
+}
+
+template <typename T>
 bool Vec<T>::iterator::operator==(const iterator &other) const noexcept {
   return this->pos == other.pos;
 }
@@ -767,6 +840,26 @@ bool Vec<T>::iterator::operator==(const iterator &other) const noexcept {
 template <typename T>
 bool Vec<T>::iterator::operator!=(const iterator &other) const noexcept {
   return this->pos != other.pos;
+}
+
+template <typename T>
+bool Vec<T>::iterator::operator>(const iterator &other) const noexcept {
+  return this->pos > other.pos;
+}
+
+template <typename T>
+bool Vec<T>::iterator::operator<(const iterator &other) const noexcept {
+  return this->pos < other.pos;
+}
+
+template <typename T>
+bool Vec<T>::iterator::operator>=(const iterator &other) const noexcept {
+  return this->pos >= other.pos;
+}
+
+template <typename T>
+bool Vec<T>::iterator::operator<=(const iterator &other) const noexcept {
+  return this->pos <= other.pos;
 }
 
 template <typename T>

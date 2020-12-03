@@ -149,6 +149,10 @@ fn test_c_take() {
     check!(ffi::c_take_rust_vec_shared_forward_iterator(
         shared_test_vec,
     ));
+    let shared_sort_vec = vec![ffi::Shared { z: 2 }, ffi::Shared { z: 0 }, ffi::Shared { z: 7 }, ffi::Shared { z: 4 }];
+    check!(ffi::c_take_rust_vec_shared_sort(
+        shared_sort_vec,
+    ));
     check!(ffi::c_take_ref_rust_vec(&test_vec));
     check!(ffi::c_take_ref_rust_vec_index(&test_vec));
     check!(ffi::c_take_ref_rust_vec_copy(&test_vec));
