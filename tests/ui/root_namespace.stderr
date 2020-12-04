@@ -1,0 +1,5 @@
+error: unexpected token: `]`
+ --> $DIR/root_namespace.rs:9:19
+  |
+9 |     #[namespace = ]
+  |                   ^
