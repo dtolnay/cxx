@@ -2,7 +2,7 @@ use crate::cxx_string::CxxString;
 use crate::extern_type::ExternType;
 use crate::kind::Trivial;
 use core::ffi::c_void;
-use core::fmt::{self, Display};
+use core::fmt::{self, Debug, Display};
 use core::marker::{PhantomData, PhantomPinned};
 use core::mem;
 use core::ptr;
@@ -121,6 +121,15 @@ where
         let next = self.v.get(self.index);
         self.index += 1;
         next
+    }
+}
+
+impl<T> Debug for CxxVector<T>
+where
+    T: VectorElement + Debug,
+{
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.debug_list().entries(self).finish()
     }
 }
 
