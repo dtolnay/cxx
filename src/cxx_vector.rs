@@ -1,4 +1,6 @@
 use crate::cxx_string::CxxString;
+use crate::extern_type::ExternType;
+use crate::kind::Trivial;
 use core::ffi::c_void;
 use core::fmt::{self, Display};
 use core::marker::{PhantomData, PhantomPinned};
@@ -67,7 +69,10 @@ where
     }
 
     /// Returns a slice to the underlying contiguous array of elements.
-    pub fn as_slice(&self) -> &[T] {
+    pub fn as_slice(&self) -> &[T]
+    where
+        T: ExternType<Kind = Trivial>,
+    {
         let len = self.len();
         if len == 0 {
             // The slice::from_raw_parts in the other branch requires a nonnull
