@@ -11,6 +11,8 @@ pub mod ffi {
 
         fn c_take_unique_ptr(c: UniquePtr<C>);
     }
+
+    impl Vec<Job> {}
 }
 
 #[cxx::bridge(namespace = "tests")]

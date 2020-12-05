@@ -68,13 +68,17 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
         let explicit_impl = types.explicit_impls.get(ty);
         if let Type::RustBox(ty) = ty {
             if let Type::Ident(ident) = &ty.inner {
-                if Atom::from(&ident.rust).is_none() {
+                if Atom::from(&ident.rust).is_none()
+                    && (explicit_impl.is_some() || !types.aliases.contains_key(&ident.rust))
+                {
                     hidden.extend(expand_rust_box(ident, types));
                 }
             }
         } else if let Type::RustVec(ty) = ty {
             if let Type::Ident(ident) = &ty.inner {
-                if Atom::from(&ident.rust).is_none() {
+                if Atom::from(&ident.rust).is_none()
+                    && (explicit_impl.is_some() || !types.aliases.contains_key(&ident.rust))
+                {
                     hidden.extend(expand_rust_vec(ident, types));
                 }
             }
