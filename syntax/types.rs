@@ -202,9 +202,16 @@ impl<'a> Types<'a> {
             }
         }
         for ty in &all {
-            if let Type::RustVec(ty) = ty {
-                let reason = TrivialReason::VecElement;
-                insist_alias_types_are_trivial(&ty.inner, reason);
+            match ty {
+                Type::RustBox(ty) => {
+                    let reason = TrivialReason::BoxTarget;
+                    insist_alias_types_are_trivial(&ty.inner, reason);
+                }
+                Type::RustVec(ty) => {
+                    let reason = TrivialReason::VecElement;
+                    insist_alias_types_are_trivial(&ty.inner, reason);
+                }
+                _ => {}
             }
         }
 
@@ -303,6 +310,7 @@ pub enum TrivialReason<'a> {
     StructField(&'a Struct),
     FunctionArgument(&'a ExternFn),
     FunctionReturn(&'a ExternFn),
+    BoxTarget,
     VecElement,
 }
 

@@ -76,6 +76,7 @@ fn check_type_ident(cx: &mut Check, ident: &Ident) {
 fn check_type_box(cx: &mut Check, ptr: &Ty1) {
     if let Type::Ident(ident) = &ptr.inner {
         if cx.types.cxx.contains(&ident.rust)
+            && !cx.types.aliases.contains_key(&ident.rust)
             && !cx.types.structs.contains_key(&ident.rust)
             && !cx.types.enums.contains_key(&ident.rust)
         {
@@ -329,6 +330,7 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
             TrivialReason::StructField(strct) => format!("a field of `{}`", strct.name.rust),
             TrivialReason::FunctionArgument(efn) => format!("an argument of `{}`", efn.name.rust),
             TrivialReason::FunctionReturn(efn) => format!("a return value of `{}`", efn.name.rust),
+            TrivialReason::BoxTarget => format!("Box<{}>", ety.name.rust),
             TrivialReason::VecElement => format!("a vector element in Vec<{}>", ety.name.rust),
         };
         let msg = format!(
