@@ -201,6 +201,12 @@ impl<'a> Types<'a> {
                 _ => {}
             }
         }
+        for ty in &all {
+            if let Type::RustVec(ty) = ty {
+                let reason = TrivialReason::VecElement;
+                insist_alias_types_are_trivial(&ty.inner, reason);
+            }
+        }
 
         let mut types = Types {
             all,
@@ -297,6 +303,7 @@ pub enum TrivialReason<'a> {
     StructField(&'a Struct),
     FunctionArgument(&'a ExternFn),
     FunctionReturn(&'a ExternFn),
+    VecElement,
 }
 
 fn duplicate_name(cx: &mut Errors, sp: impl ToTokens, ident: &Ident) {

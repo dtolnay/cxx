@@ -35,6 +35,7 @@ cc_library(
     hdrs = ["ffi/tests.h"],
     deps = [
         ":bridge/include",
+        ":module/include",
         "//:core",
     ],
 )

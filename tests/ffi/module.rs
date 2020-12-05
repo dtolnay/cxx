@@ -1,5 +1,9 @@
 #[cxx::bridge(namespace = "tests")]
 pub mod ffi {
+    struct Job {
+        raw: u32,
+    }
+
     unsafe extern "C++" {
         include!("tests/ffi/tests.h");
 
