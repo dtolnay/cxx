@@ -440,12 +440,19 @@ fn check_api_impl(cx: &mut Check, imp: &Impl) {
         return;
     }
 
-    if let Type::UniquePtr(ty) | Type::SharedPtr(ty) | Type::CxxVector(ty) = ty {
-        if let Type::Ident(inner) = &ty.inner {
-            if Atom::from(&inner.rust).is_none() {
-                return;
+    match ty {
+        Type::RustBox(ty)
+        | Type::RustVec(ty)
+        | Type::UniquePtr(ty)
+        | Type::SharedPtr(ty)
+        | Type::CxxVector(ty) => {
+            if let Type::Ident(inner) = &ty.inner {
+                if Atom::from(&inner.rust).is_none() {
+                    return;
+                }
             }
         }
+        _ => {}
     }
 
     cx.error(imp, "unsupported Self type of explicit impl");

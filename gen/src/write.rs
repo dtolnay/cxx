@@ -1255,14 +1255,22 @@ fn write_generic_instantiations(out: &mut OutFile) {
     out.set_namespace(Default::default());
     out.begin_block(Block::ExternC);
     for ty in out.types {
-        if let Type::RustBox(ty) = ty {
-            if let Type::Ident(inner) = &ty.inner {
-                out.next_section();
-                write_rust_box_extern(out, &out.types.resolve(&inner));
+        if let Type::RustBox(ptr) = ty {
+            if let Type::Ident(inner) = &ptr.inner {
+                if Atom::from(&inner.rust).is_none()
+                    && (!out.types.aliases.contains_key(&inner.rust)
+                        || out.types.explicit_impls.contains(ty))
+                {
+                    out.next_section();
+                    write_rust_box_extern(out, &out.types.resolve(&inner));
+                }
             }
-        } else if let Type::RustVec(ty) = ty {
-            if let Type::Ident(inner) = &ty.inner {
-                if Atom::from(&inner.rust).is_none() {
+        } else if let Type::RustVec(vec) = ty {
+            if let Type::Ident(inner) = &vec.inner {
+                if Atom::from(&inner.rust).is_none()
+                    && (!out.types.aliases.contains_key(&inner.rust)
+                        || out.types.explicit_impls.contains(ty))
+                {
                     out.next_section();
                     write_rust_vec_extern(out, inner);
                 }
@@ -1287,8 +1295,8 @@ fn write_generic_instantiations(out: &mut OutFile) {
                     write_shared_ptr(out, inner);
                 }
             }
-        } else if let Type::CxxVector(ptr) = ty {
-            if let Type::Ident(inner) = &ptr.inner {
+        } else if let Type::CxxVector(vector) = ty {
+            if let Type::Ident(inner) = &vector.inner {
                 if Atom::from(&inner.rust).is_none()
                     && (!out.types.aliases.contains_key(&inner.rust)
                         || out.types.explicit_impls.contains(ty))
@@ -1304,13 +1312,21 @@ fn write_generic_instantiations(out: &mut OutFile) {
     out.begin_block(Block::Namespace("rust"));
     out.begin_block(Block::InlineNamespace("cxxbridge1"));
     for ty in out.types {
-        if let Type::RustBox(ty) = ty {
-            if let Type::Ident(inner) = &ty.inner {
-                write_rust_box_impl(out, &out.types.resolve(&inner));
+        if let Type::RustBox(ptr) = ty {
+            if let Type::Ident(inner) = &ptr.inner {
+                if Atom::from(&inner.rust).is_none()
+                    && (!out.types.aliases.contains_key(&inner.rust)
+                        || out.types.explicit_impls.contains(ty))
+                {
+                    write_rust_box_impl(out, &out.types.resolve(&inner));
+                }
             }
-        } else if let Type::RustVec(ty) = ty {
-            if let Type::Ident(inner) = &ty.inner {
-                if Atom::from(&inner.rust).is_none() {
+        } else if let Type::RustVec(vec) = ty {
+            if let Type::Ident(inner) = &vec.inner {
+                if Atom::from(&inner.rust).is_none()
+                    && (!out.types.aliases.contains_key(&inner.rust)
+                        || out.types.explicit_impls.contains(ty))
+                {
                     write_rust_vec_impl(out, inner);
                 }
             }
