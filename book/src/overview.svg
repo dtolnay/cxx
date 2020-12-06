@@ -34,43 +34,6 @@
                          font-family: monospace;
                          font-size: 14px;
                         }
-
-                        .end_marked_arrow{
-                            marker-end: url(#arrow);
-                         }
-                        .start_marked_arrow{
-                            marker-start: url(#arrow);
-                         }
-
-                        .end_marked_diamond{
-                            marker-end: url(#diamond);
-                         }
-                        .start_marked_diamond{
-                            marker-start: url(#diamond);
-                         }
-
-                        .end_marked_circle{
-                            marker-end: url(#circle);
-                         }
-                        .start_marked_circle{
-                            marker-start: url(#circle);
-                         }
-
-                        .end_marked_open_circle{
-                            marker-end: url(#open_circle);
-                         }
-                        .start_marked_open_circle{
-                            marker-start: url(#open_circle);
-                         }
-
-                        .end_marked_big_open_circle{
-                            marker-end: url(#big_open_circle);
-                         }
-                        .start_marked_big_open_circle{
-                            marker-start: url(#big_open_circle);
-                         }
-
-                         
                         </style>
     <defs>
         <marker id="arrow" viewBox="-2 -2 8 8" refX="4" refY="2" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -96,17 +59,22 @@
     <text x="426" y="188" >C++ bindings</text>
     <text x="272" y="28" >#[cxx::bridge] mod</text>
     <text x="250" y="44" >description of boundary</text>
-    <line x1="220" y1="120" x2="220" y2="160" class="solid end_marked_arrow"></line>
-    <line x1="476" y1="120" x2="476" y2="160" class="solid end_marked_arrow"></line>
+    <line x1="220" y1="120" x2="220" y2="160" class="solid"></line>
+    <polygon points="216,156 224,156 220,164" class="filled"></polygon>
+    <line x1="476" y1="120" x2="476" y2="160" class="solid"></line>
+    <polygon points="472,156 480,156 476,164" class="filled"></polygon>
     <text x="74" y="140" >Safe</text>
     <text x="34" y="156" >straightforward</text>
     <text x="530" y="156" >Straightforward</text>
     <polygon points="48,180 40,184 48,188" class="filled"></polygon>
-    <line x1="48" y1="184" x2="144" y2="184" class="solid end_marked_arrow"></line>
+    <line x1="48" y1="184" x2="144" y2="184" class="solid"></line>
+    <polygon points="136,180 144,184 136,188" class="filled"></polygon>
     <polygon points="296,180 288,184 296,188" class="filled"></polygon>
-    <line x1="296" y1="184" x2="408" y2="184" class="broken end_marked_arrow"></line>
+    <line x1="296" y1="184" x2="408" y2="184" class="broken"></line>
+    <polygon points="400,180 408,184 400,188" class="filled"></polygon>
     <polygon points="552,180 544,184 552,188" class="filled"></polygon>
-    <line x1="552" y1="184" x2="648" y2="184" class="solid end_marked_arrow"></line>
+    <line x1="552" y1="184" x2="648" y2="184" class="solid"></line>
+    <polygon points="644,180 652,184 644,188" class="filled"></polygon>
     <text x="2" y="188" >Rust</text>
     <text x="2" y="204" >code</text>
     <text x="658" y="204" >code</text>
