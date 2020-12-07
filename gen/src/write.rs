@@ -1687,6 +1687,7 @@ fn write_cxx_vector(out: &mut OutFile, element: &RustName) {
     writeln!(out, "  return &s[pos];");
     writeln!(out, "}}");
 
+    out.include.memory = true;
     write_unique_ptr_common(out, UniquePtr::CxxVector(element));
 
     writeln!(out, "#endif // CXXBRIDGE1_VECTOR_{}", instance);
