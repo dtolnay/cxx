@@ -5,8 +5,8 @@ use crate::gen::{builtin, include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    derive, mangle, Api, Enum, ExternFn, ExternType, Pair, ResolvableName, Signature, Struct,
-    Trait, Type, Types, Var,
+    derive, mangle, Api, Enum, ExternFn, ExternType, Pair, RustName, Signature, Struct, Trait,
+    Type, Types, Var,
 };
 use proc_macro2::Ident;
 use std::collections::{HashMap, HashSet};
@@ -1202,15 +1202,15 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
 
 #[derive(Copy, Clone)]
 enum UniquePtr<'a> {
-    Ident(&'a ResolvableName),
-    CxxVector(&'a ResolvableName),
+    Ident(&'a RustName),
+    CxxVector(&'a RustName),
 }
 
 trait ToTypename {
     fn to_typename(&self, types: &Types) -> String;
 }
 
-impl ToTypename for ResolvableName {
+impl ToTypename for RustName {
     fn to_typename(&self, types: &Types) -> String {
         types.resolve(self).to_fully_qualified()
     }
@@ -1231,7 +1231,7 @@ trait ToMangled {
     fn to_mangled(&self, types: &Types) -> Symbol;
 }
 
-impl ToMangled for ResolvableName {
+impl ToMangled for RustName {
     fn to_mangled(&self, types: &Types) -> Symbol {
         self.to_symbol(types)
     }
@@ -1355,7 +1355,7 @@ fn write_rust_box_extern(out: &mut OutFile, ident: &Pair) {
     writeln!(out, "#endif // CXXBRIDGE1_RUST_BOX_{}", instance);
 }
 
-fn write_rust_vec_extern(out: &mut OutFile, element: &ResolvableName) {
+fn write_rust_vec_extern(out: &mut OutFile, element: &RustName) {
     let inner = element.to_typename(out.types);
     let instance = element.to_mangled(out.types);
 
@@ -1414,7 +1414,7 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Pair) {
     writeln!(out, "}}");
 }
 
-fn write_rust_vec_impl(out: &mut OutFile, element: &ResolvableName) {
+fn write_rust_vec_impl(out: &mut OutFile, element: &RustName) {
     let inner = element.to_typename(out.types);
     let instance = element.to_mangled(out.types);
 
@@ -1466,7 +1466,7 @@ fn write_rust_vec_impl(out: &mut OutFile, element: &ResolvableName) {
     writeln!(out, "}}");
 }
 
-fn write_unique_ptr(out: &mut OutFile, ident: &ResolvableName) {
+fn write_unique_ptr(out: &mut OutFile, ident: &RustName) {
     let ty = UniquePtr::Ident(ident);
     let instance = ty.to_mangled(out.types);
 
@@ -1590,7 +1590,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     writeln!(out, "}}");
 }
 
-fn write_shared_ptr(out: &mut OutFile, ident: &ResolvableName) {
+fn write_shared_ptr(out: &mut OutFile, ident: &RustName) {
     let resolved = out.types.resolve(ident);
     let inner = resolved.to_fully_qualified();
     let instance = ident.to_symbol(out.types);
@@ -1666,7 +1666,7 @@ fn write_shared_ptr(out: &mut OutFile, ident: &ResolvableName) {
     writeln!(out, "#endif // CXXBRIDGE1_SHARED_PTR_{}", instance);
 }
 
-fn write_cxx_vector(out: &mut OutFile, element: &ResolvableName) {
+fn write_cxx_vector(out: &mut OutFile, element: &RustName) {
     let inner = element.to_typename(out.types);
     let instance = element.to_mangled(out.types);
 

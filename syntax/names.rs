@@ -1,4 +1,4 @@
-use crate::syntax::{Namespace, Pair, ResolvableName, Symbol, Types};
+use crate::syntax::{Namespace, Pair, RustName, Symbol, Types};
 use proc_macro2::{Ident, Span};
 use std::iter;
 use syn::Token;
@@ -48,7 +48,7 @@ impl Pair {
     }
 }
 
-impl ResolvableName {
+impl RustName {
     pub fn new(ident: Ident) -> Self {
         Self { rust: ident }
     }

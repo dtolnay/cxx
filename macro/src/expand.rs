@@ -4,8 +4,8 @@ use crate::syntax::file::Module;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    self, check, mangle, Api, Enum, ExternFn, ExternType, Impl, Pair, ResolvableName, Signature,
-    Struct, Trait, Type, TypeAlias, Types,
+    self, check, mangle, Api, Enum, ExternFn, ExternType, Impl, Pair, RustName, Signature, Struct,
+    Trait, Type, TypeAlias, Types,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
@@ -949,7 +949,7 @@ fn type_id(name: &Pair) -> TokenStream {
     }
 }
 
-fn expand_rust_box(ident: &ResolvableName, types: &Types) -> TokenStream {
+fn expand_rust_box(ident: &RustName, types: &Types) -> TokenStream {
     let link_prefix = format!("cxxbridge1$box${}$", types.resolve(ident).to_symbol());
     let link_uninit = format!("{}uninit", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
@@ -978,7 +978,7 @@ fn expand_rust_box(ident: &ResolvableName, types: &Types) -> TokenStream {
     }
 }
 
-fn expand_rust_vec(elem: &ResolvableName, types: &Types) -> TokenStream {
+fn expand_rust_vec(elem: &RustName, types: &Types) -> TokenStream {
     let link_prefix = format!("cxxbridge1$rust_vec${}$", elem.to_symbol(types));
     let link_new = format!("{}new", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
@@ -1037,11 +1037,7 @@ fn expand_rust_vec(elem: &ResolvableName, types: &Types) -> TokenStream {
     }
 }
 
-fn expand_unique_ptr(
-    ident: &ResolvableName,
-    types: &Types,
-    explicit_impl: Option<&Impl>,
-) -> TokenStream {
+fn expand_unique_ptr(ident: &RustName, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
     let name = ident.rust.to_string();
     let prefix = format!("cxxbridge1$unique_ptr${}$", ident.to_symbol(types));
     let link_null = format!("{}null", prefix);
@@ -1122,11 +1118,7 @@ fn expand_unique_ptr(
     }
 }
 
-fn expand_shared_ptr(
-    ident: &ResolvableName,
-    types: &Types,
-    explicit_impl: Option<&Impl>,
-) -> TokenStream {
+fn expand_shared_ptr(ident: &RustName, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
     let name = ident.rust.to_string();
     let prefix = format!("cxxbridge1$shared_ptr${}$", ident.to_symbol(types));
     let link_null = format!("{}null", prefix);
@@ -1193,11 +1185,7 @@ fn expand_shared_ptr(
     }
 }
 
-fn expand_cxx_vector(
-    elem: &ResolvableName,
-    explicit_impl: Option<&Impl>,
-    types: &Types,
-) -> TokenStream {
+fn expand_cxx_vector(elem: &RustName, explicit_impl: Option<&Impl>, types: &Types) -> TokenStream {
     let _ = explicit_impl;
     let name = elem.rust.to_string();
     let prefix = format!("cxxbridge1$std$vector${}$", elem.to_symbol(types));

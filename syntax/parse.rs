@@ -4,7 +4,7 @@ use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
     attrs, error, Api, Array, Derive, Doc, Enum, ExternFn, ExternType, Impl, Include, IncludeKind,
-    Lang, Namespace, Pair, Receiver, Ref, ResolvableName, Signature, SliceRef, Struct, Ty1, Type,
+    Lang, Namespace, Pair, Receiver, Ref, RustName, Signature, SliceRef, Struct, Ty1, Type,
     TypeAlias, Var, Variant,
 };
 use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree};
@@ -186,7 +186,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
     }
 
     let ident = Ident::new(repr.as_ref(), Span::call_site());
-    let repr_type = Type::Ident(ResolvableName::new(ident));
+    let repr_type = Type::Ident(RustName::new(ident));
 
     Ok(Api::Enum(Enum {
         doc,
@@ -289,7 +289,7 @@ fn parse_foreign_mod(
             if let Api::CxxFunction(efn) | Api::RustFunction(efn) = item {
                 if let Some(receiver) = &mut efn.receiver {
                     if receiver.ty.is_self() {
-                        receiver.ty = ResolvableName::new(single_type.rust.clone());
+                        receiver.ty = RustName::new(single_type.rust.clone());
                     }
                 }
             }
@@ -432,7 +432,7 @@ fn parse_extern_fn(
                         lifetime: lifetime.clone(),
                         mutable: arg.mutability.is_some(),
                         var: arg.self_token,
-                        ty: ResolvableName::make_self(arg.self_token.span),
+                        ty: RustName::make_self(arg.self_token.span),
                         shorthand: true,
                         pin_tokens: None,
                         mutability: arg.mutability,
@@ -810,7 +810,7 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
         let segment = &path.segments[0];
         let ident = segment.ident.clone();
         match &segment.arguments {
-            PathArguments::None => return Ok(Type::Ident(ResolvableName::new(ident))),
+            PathArguments::None => return Ok(Type::Ident(RustName::new(ident))),
             PathArguments::AngleBracketed(generic) => {
                 if ident == "UniquePtr" && generic.args.len() == 1 {
                     if let GenericArgument::Type(arg) = &generic.args[0] {

@@ -150,7 +150,7 @@ pub struct Receiver {
     pub lifetime: Option<Lifetime>,
     pub mutable: bool,
     pub var: Token![self],
-    pub ty: ResolvableName,
+    pub ty: RustName,
     pub shorthand: bool,
     pub pin_tokens: Option<(kw::Pin, Token![<], Token![>])>,
     pub mutability: Option<Token![mut]>,
@@ -163,7 +163,7 @@ pub struct Variant {
 }
 
 pub enum Type {
-    Ident(ResolvableName),
+    Ident(RustName),
     RustBox(Box<Ty1>),
     RustVec(Box<Ty1>),
     UniquePtr(Box<Ty1>),
@@ -230,6 +230,6 @@ pub struct Pair {
 // C++.
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 #[repr(transparent)]
-pub struct ResolvableName {
+pub struct RustName {
     pub rust: Ident,
 }
