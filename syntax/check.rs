@@ -189,7 +189,7 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
             cx.error(
                 ty,
                 format!(
-                    "mutable reference to C++ type requires a pin -- use Pin<&mut {}>",
+                    "mutable reference to C++ type requires a pin -- use Pin<&mut {}> or declare the type Trivial in a cxx::ExternType impl",
                     requires_pin,
                 ),
             );
@@ -332,6 +332,10 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
             TrivialReason::FunctionReturn(efn) => format!("a return value of `{}`", efn.name.rust),
             TrivialReason::BoxTarget => format!("Box<{}>", ety.name.rust),
             TrivialReason::VecElement => format!("a vector element in Vec<{}>", ety.name.rust),
+            TrivialReason::UnpinnedMutableReferenceFunctionArgument(efn) => format!(
+                "a non-pinned mutable reference argument of {}",
+                efn.name.rust
+            ),
         };
         let msg = format!(
             "needs a cxx::ExternType impl in order to be used as {}",
@@ -385,7 +389,7 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
             cx.error(
                 span,
                 format!(
-                    "mutable reference to C++ type requires a pin -- use `self: Pin<&mut {}>`",
+                    "mutable reference to opaque C++ type requires a pin -- use `self: Pin<&mut {}>` or declare the type Trivial in a cxx::ExternType impl",
                     receiver.ty.rust,
                 ),
             );

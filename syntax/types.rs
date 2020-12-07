@@ -170,14 +170,13 @@ impl<'a> Types<'a> {
         // the APIs above, in case some function or struct references a type
         // which is declared subsequently.
         let mut required_trivial = Map::new();
-        let mut insist_alias_types_are_trivial = |ty: &'a Type, reason| {
-            if let Type::Ident(ident) = ty {
-                if cxx.contains(&ident.rust)
-                    && !structs.contains_key(&ident.rust)
-                    && !enums.contains_key(&ident.rust)
-                {
-                    required_trivial.entry(&ident.rust).or_insert(reason);
-                }
+
+        let mut insist_extern_types_are_trivial = |ident: &'a RustName, reason| {
+            if cxx.contains(&ident.rust)
+                && !structs.contains_key(&ident.rust)
+                && !enums.contains_key(&ident.rust)
+            {
+                required_trivial.entry(&ident.rust).or_insert(reason);
             }
         };
         for api in apis {
@@ -185,17 +184,23 @@ impl<'a> Types<'a> {
                 Api::Struct(strct) => {
                     let reason = TrivialReason::StructField(strct);
                     for field in &strct.fields {
-                        insist_alias_types_are_trivial(&field.ty, reason);
+                        if let Type::Ident(ident) = &field.ty {
+                            insist_extern_types_are_trivial(&ident, reason);
+                        }
                     }
                 }
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
                     let reason = TrivialReason::FunctionArgument(efn);
                     for arg in &efn.args {
-                        insist_alias_types_are_trivial(&arg.ty, reason);
+                        if let Type::Ident(ident) = &arg.ty {
+                            insist_extern_types_are_trivial(&ident, reason);
+                        }
                     }
                     if let Some(ret) = &efn.ret {
                         let reason = TrivialReason::FunctionReturn(efn);
-                        insist_alias_types_are_trivial(&ret, reason);
+                        if let Type::Ident(ident) = &ret {
+                            insist_extern_types_are_trivial(&ident, reason);
+                        }
                     }
                 }
                 _ => {}
@@ -205,11 +210,37 @@ impl<'a> Types<'a> {
             match ty {
                 Type::RustBox(ty) => {
                     let reason = TrivialReason::BoxTarget;
-                    insist_alias_types_are_trivial(&ty.inner, reason);
+                    if let Type::Ident(ident) = &ty.inner {
+                        insist_extern_types_are_trivial(&ident, reason);
+                    }
                 }
                 Type::RustVec(ty) => {
                     let reason = TrivialReason::VecElement;
-                    insist_alias_types_are_trivial(&ty.inner, reason);
+                    if let Type::Ident(ident) = &ty.inner {
+                        insist_extern_types_are_trivial(&ident, reason);
+                    }
+                }
+                _ => {}
+            }
+        }
+        for api in apis {
+            match api {
+                Api::CxxFunction(efn) | Api::RustFunction(efn) => {
+                    let reason = TrivialReason::UnpinnedMutableReferenceFunctionArgument(efn);
+                    if let Some(receiver) = &efn.receiver {
+                        if receiver.mutable && !receiver.pinned {
+                            insist_extern_types_are_trivial(&receiver.ty, reason);
+                        }
+                    }
+                    for arg in &efn.args {
+                        if let Type::Ref(reff) = &arg.ty {
+                            if reff.mutable && !reff.pinned {
+                                if let Type::Ident(ident) = &reff.inner {
+                                    insist_extern_types_are_trivial(&ident, reason);
+                                }
+                            }
+                        }
+                    }
                 }
                 _ => {}
             }
@@ -310,6 +341,7 @@ pub enum TrivialReason<'a> {
     FunctionReturn(&'a ExternFn),
     BoxTarget,
     VecElement,
+    UnpinnedMutableReferenceFunctionArgument(&'a ExternFn),
 }
 
 fn duplicate_name(cx: &mut Errors, sp: impl ToTokens, ident: &Ident) {

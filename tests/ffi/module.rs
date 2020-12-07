@@ -32,12 +32,16 @@ pub mod ffi2 {
 
         fn c_take_trivial_ptr(d: UniquePtr<D>);
         fn c_take_trivial_ref(d: &D);
+        fn c_take_trivial_ref_method(self: &D);
+        fn c_take_trivial_mut_ref_method(self: &mut D);
         fn c_take_trivial(d: D);
         fn c_take_trivial_ns_ptr(g: UniquePtr<G>);
         fn c_take_trivial_ns_ref(g: &G);
         fn c_take_trivial_ns(g: G);
         fn c_take_opaque_ptr(e: UniquePtr<E>);
         fn c_take_opaque_ref(e: &E);
+        fn c_take_opaque_ref_method(self: &E);
+        fn c_take_opaque_mut_ref_method(self: Pin<&mut E>);
         fn c_take_opaque_ns_ptr(e: UniquePtr<F>);
         fn c_take_opaque_ns_ref(e: &F);
         fn c_return_trivial_ptr() -> UniquePtr<D>;
