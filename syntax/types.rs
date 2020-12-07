@@ -8,7 +8,7 @@ use crate::syntax::{
 };
 use proc_macro2::Ident;
 use quote::ToTokens;
-use std::collections::BTreeMap as Map;
+use std::{collections::BTreeMap as Map, fmt::Display};
 
 pub struct Types<'a> {
     pub all: Set<&'a Type>,
@@ -342,6 +342,35 @@ pub enum TrivialReason<'a> {
     BoxTarget,
     VecElement,
     UnpinnedMutableReferenceFunctionArgument(&'a ExternFn),
+}
+
+impl<'a> TrivialReason<'a> {
+    pub fn describe_in_context(&self, ety: &ExternType) -> String {
+        match self {
+            TrivialReason::BoxTarget => format!("Box<{}>", ety.name.rust),
+            TrivialReason::VecElement => format!("a vector element in Vec<{}>", ety.name.rust),
+            _ => self.to_string(),
+        }
+    }
+}
+
+impl<'a> Display for TrivialReason<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TrivialReason::StructField(strct) => write!(f, "a field of `{}`", strct.name.rust),
+            TrivialReason::FunctionArgument(efn) => write!(f, "an argument of `{}`", efn.name.rust),
+            TrivialReason::FunctionReturn(efn) => {
+                write!(f, "a return value of `{}`", efn.name.rust)
+            }
+            TrivialReason::BoxTarget => write!(f, "in a Box<...>"),
+            TrivialReason::VecElement => write!(f, "a Vec<...> element"),
+            TrivialReason::UnpinnedMutableReferenceFunctionArgument(efn) => write!(
+                f,
+                "a non-pinned mutable reference argument of {}",
+                efn.name.rust
+            ),
+        }
+    }
 }
 
 fn duplicate_name(cx: &mut Errors, sp: impl ToTokens, ident: &Ident) {

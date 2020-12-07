@@ -1,6 +1,5 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
-use crate::syntax::types::TrivialReason;
 use crate::syntax::{
     error, ident, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Signature,
     SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
@@ -326,17 +325,7 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
     }
 
     if let Some(reason) = cx.types.required_trivial.get(&ety.name.rust) {
-        let what = match reason {
-            TrivialReason::StructField(strct) => format!("a field of `{}`", strct.name.rust),
-            TrivialReason::FunctionArgument(efn) => format!("an argument of `{}`", efn.name.rust),
-            TrivialReason::FunctionReturn(efn) => format!("a return value of `{}`", efn.name.rust),
-            TrivialReason::BoxTarget => format!("Box<{}>", ety.name.rust),
-            TrivialReason::VecElement => format!("a vector element in Vec<{}>", ety.name.rust),
-            TrivialReason::UnpinnedMutableReferenceFunctionArgument(efn) => format!(
-                "a non-pinned mutable reference argument of {}",
-                efn.name.rust
-            ),
-        };
+        let what = reason.describe_in_context(&ety);
         let msg = format!(
             "needs a cxx::ExternType impl in order to be used as {}",
             what,
