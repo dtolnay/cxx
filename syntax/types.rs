@@ -20,7 +20,7 @@ pub struct Types<'a> {
     pub untrusted: Map<&'a Ident, &'a ExternType>,
     pub required_trivial: Map<&'a Ident, TrivialReason<'a>>,
     pub explicit_impls: Set<&'a Impl>,
-    pub resolutions: Map<&'a Ident, &'a Pair>,
+    pub resolutions: Map<&'a ResolvableName, &'a Pair>,
     pub struct_improper_ctypes: UnorderedSet<&'a Ident>,
     pub toposorted_structs: Vec<&'a Struct>,
 }
@@ -63,7 +63,7 @@ impl<'a> Types<'a> {
         }
 
         let mut add_resolution = |pair: &'a Pair| {
-            resolutions.insert(&pair.rust, pair);
+            resolutions.insert(ResolvableName::from_ref(&pair.rust), pair);
         };
 
         let mut type_names = UnorderedSet::new();
@@ -291,9 +291,7 @@ impl<'a> Types<'a> {
     }
 
     pub fn resolve(&self, ident: &ResolvableName) -> &Pair {
-        self.resolutions
-            .get(&ident.rust)
-            .expect("Unable to resolve type")
+        self.resolutions.get(ident).expect("Unable to resolve type")
     }
 }
 

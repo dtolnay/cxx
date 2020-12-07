@@ -53,6 +53,10 @@ impl ResolvableName {
         Self { rust: ident }
     }
 
+    pub fn from_ref(ident: &Ident) -> &Self {
+        unsafe { &*(ident as *const Ident as *const Self) }
+    }
+
     pub fn make_self(span: Span) -> Self {
         Self {
             rust: Token![Self](span).into(),
