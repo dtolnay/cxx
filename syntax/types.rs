@@ -18,7 +18,7 @@ pub struct Types<'a> {
     pub rust: Set<&'a Ident>,
     pub aliases: Map<&'a Ident, &'a TypeAlias>,
     pub untrusted: Map<&'a Ident, &'a ExternType>,
-    pub required_trivial: Map<&'a Ident, TrivialReason<'a>>,
+    pub required_trivial: Map<&'a Ident, Vec<TrivialReason<'a>>>,
     pub explicit_impls: Set<&'a Impl>,
     pub resolutions: Map<&'a RustName, &'a Pair>,
     pub struct_improper_ctypes: UnorderedSet<&'a Ident>,
@@ -169,14 +169,17 @@ impl<'a> Types<'a> {
         // we check that this is permissible. We do this _after_ scanning all
         // the APIs above, in case some function or struct references a type
         // which is declared subsequently.
-        let mut required_trivial = Map::new();
+        let mut required_trivial: Map<_, Vec<_>> = Map::new();
 
         let mut insist_extern_types_are_trivial = |ident: &'a RustName, reason| {
             if cxx.contains(&ident.rust)
                 && !structs.contains_key(&ident.rust)
                 && !enums.contains_key(&ident.rust)
             {
-                required_trivial.entry(&ident.rust).or_insert(reason);
+                required_trivial
+                    .entry(&ident.rust)
+                    .or_default()
+                    .push(reason);
             }
         };
         for api in apis {

@@ -324,13 +324,15 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
         cx.error(span, "extern type bounds are not implemented yet");
     }
 
-    if let Some(reason) = cx.types.required_trivial.get(&ety.name.rust) {
-        let what = reason.describe_in_context(&ety);
-        let msg = format!(
-            "needs a cxx::ExternType impl in order to be used as {}",
-            what,
-        );
-        cx.error(ety, msg);
+    if let Some(reasons) = cx.types.required_trivial.get(&ety.name.rust) {
+        for reason in reasons {
+            let what = reason.describe_in_context(&ety);
+            let msg = format!(
+                "needs a cxx::ExternType impl in order to be used as {}",
+                what,
+            );
+            cx.error(ety, msg);
+        }
     }
 }
 

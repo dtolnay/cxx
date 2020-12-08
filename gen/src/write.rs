@@ -117,8 +117,8 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
     out.next_section();
     for api in apis {
         if let Api::TypeAlias(ety) = api {
-            if let Some(reason) = out.types.required_trivial.get(&ety.name.rust) {
-                check_trivial_extern_type(out, &ety.name, reason)
+            if let Some(reasons) = out.types.required_trivial.get(&ety.name.rust) {
+                check_trivial_extern_type(out, &ety.name, reasons)
             }
         }
     }
@@ -366,7 +366,7 @@ fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
     }
 }
 
-fn check_trivial_extern_type(out: &mut OutFile, id: &Pair, reason: &TrivialReason) {
+fn check_trivial_extern_type(out: &mut OutFile, id: &Pair, reasons: &[TrivialReason]) {
     // NOTE: The following static assertion is just nice-to-have and not
     // necessary for soundness. That's because triviality is always declared by
     // the user in the form of an unsafe impl of cxx::ExternType:
@@ -402,14 +402,16 @@ fn check_trivial_extern_type(out: &mut OutFile, id: &Pair, reason: &TrivialReaso
 
     let id = id.to_fully_qualified();
     out.builtin.relocatable = true;
-    writeln!(out, "static_assert(");
-    writeln!(out, "    ::rust::IsRelocatable<{}>::value,", id);
-    writeln!(
-        out,
-        "    \"type {} is not move constructible and trivially destructible in C++ yet is used as a trivial type in Rust ({})\");",
-        id,
-        reason
-    );
+    for reason in reasons {
+        writeln!(out, "static_assert(");
+        writeln!(out, "    ::rust::IsRelocatable<{}>::value,", id);
+        writeln!(
+            out,
+            "    \"type {} is not move constructible and trivially destructible in C++ yet is used as a trivial type in Rust ({})\");",
+            id,
+            reason
+        );
+    }
 }
 
 fn write_struct_operator_decls<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
