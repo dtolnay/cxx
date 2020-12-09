@@ -125,6 +125,14 @@ fn test_c_take() {
         ffi::Shared { z: 2020 },
         ffi::Shared { z: 2021 },
     ]));
+    check!(ffi::c_take_slice_not_usized(&[
+        ffi::Second { i: 1, e: ffi::COwnedEnum::CVal1 },
+        ffi::Second { i: 2, e: ffi::COwnedEnum::CVal2 },
+    ]));
+    check!(ffi::c_take_slice_not_usized_mut(&mut [
+        ffi::Second { i: 1, e: ffi::COwnedEnum::CVal1 },
+        ffi::Second { i: 2, e: ffi::COwnedEnum::CVal2 },
+    ]));
     check!(ffi::c_take_rust_string("2020".to_owned()));
     check!(ffi::c_take_unique_ptr_string(
         ffi::c_return_unique_ptr_string()

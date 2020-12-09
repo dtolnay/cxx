@@ -109,6 +109,12 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
                     expanded.extend(expand_cxx_vector(ident, explicit_impl, types));
                 }
             }
+        } else if let Type::Ident(ident) = ty {
+            let explicit_impl = types.explicit_impls.get(ty);
+            if Atom::from(&ident.rust).is_none()
+                    && (explicit_impl.is_some() || !types.aliases.contains_key(&ident.rust)) {
+                hidden.extend(expand_rust_sizeof(ident, types));
+            }
         }
     }
 
@@ -982,6 +988,20 @@ fn expand_rust_box(ident: &RustName, types: &Types) -> TokenStream {
     }
 }
 
+fn expand_rust_sizeof(elem: &RustName, types: &Types) -> TokenStream {
+    let link_sizeof = format!("cxxbridge1$rust_sizeof${}", elem.to_symbol(types));
+    let local_sizeof = format_ident!("{}__sizeof", elem.rust);
+
+    let span = elem.span();
+    quote_spanned! {span=>
+        #[doc(hidden)]
+        #[export_name = #link_sizeof]
+        unsafe extern "C" fn #local_sizeof() -> usize {
+            ::std::mem::size_of::<#elem>()
+        }
+    }
+}
+
 fn expand_rust_vec(elem: &RustName, types: &Types) -> TokenStream {
     let link_prefix = format!("cxxbridge1$rust_vec${}$", elem.to_symbol(types));
     let link_new = format!("{}new", link_prefix);
@@ -991,7 +1011,6 @@ fn expand_rust_vec(elem: &RustName, types: &Types) -> TokenStream {
     let link_data = format!("{}data", link_prefix);
     let link_reserve_total = format!("{}reserve_total", link_prefix);
     let link_set_len = format!("{}set_len", link_prefix);
-    let link_stride = format!("{}stride", link_prefix);
 
     let local_prefix = format_ident!("{}__vec_", elem.rust);
     let local_new = format_ident!("{}new", local_prefix);
@@ -1001,7 +1020,6 @@ fn expand_rust_vec(elem: &RustName, types: &Types) -> TokenStream {
     let local_data = format_ident!("{}data", local_prefix);
     let local_reserve_total = format_ident!("{}reserve_total", local_prefix);
     let local_set_len = format_ident!("{}set_len", local_prefix);
-    let local_stride = format_ident!("{}stride", local_prefix);
 
     let span = elem.span();
     quote_spanned! {span=>
@@ -1041,11 +1059,6 @@ fn expand_rust_vec(elem: &RustName, types: &Types) -> TokenStream {
         #[export_name = #link_set_len]
         unsafe extern "C" fn #local_set_len(this: *mut ::cxx::private::RustVec<#elem>, len: usize) {
             (*this).set_len(len);
-        }
-        #[doc(hidden)]
-        #[export_name = #link_stride]
-        unsafe extern "C" fn #local_stride() -> usize {
-            ::std::mem::size_of::<#elem>()
         }
     }
 }

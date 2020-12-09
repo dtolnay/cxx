@@ -210,6 +210,7 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
 fn check_type_slice_ref(cx: &mut Check, ty: &SliceRef) {
     let supported = match &ty.inner {
         Type::Str(_) | Type::SliceRef(_) => false,
+        Type::Ident(ident) => !is_opaque_cxx(cx, &ident.rust),
         element => !is_unsized(cx, element),
     };
 
@@ -217,9 +218,7 @@ fn check_type_slice_ref(cx: &mut Check, ty: &SliceRef) {
         let mutable = if ty.mutable { "mut " } else { "" };
         let mut msg = format!("unsupported &{}[T] element type", mutable);
         if let Type::Ident(ident) = &ty.inner {
-            if cx.types.rust.contains(&ident.rust) {
-                msg += ": opaque Rust type is not supported yet";
-            } else if is_opaque_cxx(cx, &ident.rust) {
+            if is_opaque_cxx(cx, &ident.rust) {
                 msg += ": opaque C++ type is not supported yet";
             }
         }

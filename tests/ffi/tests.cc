@@ -274,7 +274,19 @@ void c_take_slice_char(rust::Slice<const char> s) {
 }
 
 void c_take_slice_shared(rust::Slice<const Shared> s) {
-  if (s.size() == 2 && s.data()->z == 2020 && (s.data() + 1)->z == 2021) {
+  if (s.size() == 2 && s[0].z == 2020 && s[1].z == 2021) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_slice_not_usized(rust::Slice<const second::Second> s) {
+  if (s.size() == 2 && s[0].i == 1 && s[0].e == tests::COwnedEnum::CVAL1 && s[1].i == 2 && s[1].e == COwnedEnum::CVAL2) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_slice_not_usized_mut(rust::Slice<second::Second> s) {
+  if (s.size() == 2 && s[0].i == 1 && s[0].e == tests::COwnedEnum::CVAL1 && s[1].i == 2 && s[1].e == COwnedEnum::CVAL2) {
     cxx_test_suite_set_correct();
   }
 }

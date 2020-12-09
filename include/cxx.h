@@ -30,6 +30,14 @@ template <typename T>
 class impl;
 }
 
+#ifndef CXXBRIDGE1_DETAIL_SIZEOF
+#define CXXBRIDGE1_DETAIL_SIZEOF
+namespace detail {
+template <typename T>
+std::size_t rust_sizeof();
+} // namespace detail
+#endif // CXXBRIDGE1_DETAIL_SIZEOF
+
 #ifndef CXXBRIDGE1_RUST_STRING
 #define CXXBRIDGE1_RUST_STRING
 // https://cxx.rs/binding/string.html
@@ -156,6 +164,8 @@ public:
   T *data() const noexcept;
   std::size_t size() const noexcept;
   std::size_t length() const noexcept;
+  T &operator[](std::size_t n) noexcept;
+  T &at(std::size_t n);
 
   // Important in order for System V ABI to pass in registers.
   Slice(const Slice<T> &) noexcept = default;
@@ -167,6 +177,7 @@ public:
 
 private:
   friend impl<Slice>;
+  static std::size_t stride() noexcept;
   // Not necessarily ABI compatible with &[T]. Codegen will translate to
   // cxx::rust_slice::RustSlice which matches this layout.
   T *ptr;
@@ -192,6 +203,7 @@ public:
 private:
   friend class Slice;
   T *pos;
+  std::size_t stride;
 };
 #endif // CXXBRIDGE1_RUST_SLICE
 
@@ -525,15 +537,36 @@ T *Slice<T>::iterator::operator->() const noexcept {
 }
 
 template <typename T>
+T &Slice<T>::operator[](std::size_t n) noexcept {
+  auto data = const_cast<char*>(reinterpret_cast<const char *>(this->data()));
+  return *reinterpret_cast<T *>(data + n * this->stride());
+}
+
+template <typename T>
+T &Slice<T>::at(std::size_t n) {
+  if (n >= this->size()) {
+    panic<std::out_of_range>("rust::Slice index out of range");
+  }
+  return (*this)[n];
+}
+
+template <typename T>
+size_t Slice<T>::stride() noexcept {
+  return detail::rust_sizeof<T>();
+}
+
+template <typename T>
 typename Slice<T>::iterator &Slice<T>::iterator::operator++() noexcept {
-  ++this->pos;
+  auto data = const_cast<char*>(reinterpret_cast<const char *>(this->pos));
+  this->pos = reinterpret_cast<T *>(data + this->stride);
   return *this;
 }
 
 template <typename T>
 typename Slice<T>::iterator Slice<T>::iterator::operator++(int) noexcept {
   auto ret = iterator(*this);
-  ++this->pos;
+  auto data = const_cast<char*>(reinterpret_cast<const char *>(this->pos));
+  this->pos = reinterpret_cast<T *>(data + this->stride);
   return ret;
 }
 
@@ -551,6 +584,7 @@ template <typename T>
 typename Slice<T>::iterator Slice<T>::begin() const noexcept {
   iterator it;
   it.pos = this->ptr;
+  it.stride = this->stride();
   return it;
 }
 
@@ -558,6 +592,7 @@ template <typename T>
 typename Slice<T>::iterator Slice<T>::end() const noexcept {
   iterator it = this->begin();
   it.pos += this->len;
+  it.stride = this->stride();
   return it;
 }
 #endif // CXXBRIDGE1_RUST_SLICE
@@ -750,6 +785,11 @@ const T &Vec<T>::at(std::size_t n) const {
     panic<std::out_of_range>("rust::Vec index out of range");
   }
   return (*this)[n];
+}
+
+template <typename T>
+size_t Vec<T>::stride() noexcept {
+  return detail::rust_sizeof<T>();
 }
 
 template <typename T>

@@ -136,6 +136,7 @@ pub(super) fn write(out: &mut OutFile) {
     ifndef::write(out, builtin.rust_isize, "CXXBRIDGE1_RUST_ISIZE");
     ifndef::write(out, builtin.opaque, "CXXBRIDGE1_RUST_OPAQUE");
     ifndef::write(out, builtin.relocatable, "CXXBRIDGE1_RELOCATABLE");
+    ifndef::write(out, builtin.relocatable, "CXXBRIDGE1_DETAIL_SIZEOF");
 
     out.begin_block(Block::Namespace("detail"));
 

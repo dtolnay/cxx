@@ -53,12 +53,6 @@ macro_rules! rust_vec_shims {
                     (*this).repr.set_len(len);
                 }
             }
-            attr! {
-                #[export_name = concat!("cxxbridge1$rust_vec$", $segment, "$stride")]
-                unsafe extern "C" fn __stride() -> usize {
-                    mem::size_of::<$ty>()
-                }
-            }
         };
     };
 }

@@ -1253,6 +1253,7 @@ impl<'a> ToMangled for UniquePtr<'a> {
 }
 
 fn write_generic_instantiations(out: &mut OutFile) {
+
     if out.header {
         return;
     }
@@ -1311,6 +1312,14 @@ fn write_generic_instantiations(out: &mut OutFile) {
                     write_cxx_vector(out, inner);
                 }
             }
+        } else if let Type::Ident(name) = ty {
+            if Atom::from(&name.rust).is_none()
+                && (!out.types.aliases.contains_key(&name.rust)
+                    || out.types.explicit_impls.contains(ty))
+            {
+                out.next_section();
+                write_rust_sizeof_extern(out, name);
+            }
         }
     }
     out.end_block(Block::ExternC);
@@ -1335,6 +1344,13 @@ fn write_generic_instantiations(out: &mut OutFile) {
                 {
                     write_rust_vec_impl(out, inner);
                 }
+            }
+        } else if let Type::Ident(name) = ty {
+            if Atom::from(&name.rust).is_none()
+                && (!out.types.aliases.contains_key(&name.rust)
+                    || out.types.explicit_impls.contains(ty))
+            {
+                write_rust_sizeof_impl(out, name);
             }
         }
     }
@@ -1364,6 +1380,36 @@ fn write_rust_box_extern(out: &mut OutFile, ident: &Pair) {
         instance, inner,
     );
     writeln!(out, "#endif // CXXBRIDGE1_RUST_BOX_{}", instance);
+}
+
+fn write_rust_sizeof_extern(out: &mut OutFile, element: &RustName) {
+    let instance = element.to_mangled(out.types);
+
+    writeln!(out, "#ifndef CXX_BRIDGE_RUST_SIZEOF_{}", instance);
+    writeln!(out, "#define CXX_BRIDGE_RUST_SIZEOF_{}", instance);
+    writeln!(out, "::std::size_t cxxbridge1$rust_sizeof${}() noexcept;", instance);
+    writeln!(out, "#endif // CXX_BRIDGE_RUST_SIZEOF_{}", instance);
+
+}
+
+fn write_rust_sizeof_impl(out: &mut OutFile, element: &RustName) {
+    let instance = element.to_mangled(out.types);
+    let typename = element.to_typename(out.types);
+
+    writeln!(out, "#ifndef CXX_BRIDGE_RUST_SIZEOF_IMPL_{}", instance);
+    writeln!(out, "#define CXX_BRIDGE_RUST_SIZEOF_IMPL_{}", instance);
+    out.begin_block(Block::Namespace("detail"));
+    writeln!(out, "template<>");
+    writeln!(out, "::std::size_t rust_sizeof<{}>() {{", typename);
+    writeln!( out, "  return cxxbridge1$rust_sizeof${}();", instance);
+    writeln!(out, " }}");
+    writeln!(out, "template<>");
+    writeln!(out, "::std::size_t rust_sizeof<const {}>() {{", typename);
+    writeln!( out, "  return cxxbridge1$rust_sizeof${}();", instance);
+    writeln!(out, " }}");
+    out.end_block(Block::Namespace("detail"));
+    writeln!(out, "#endif // CXX_BRIDGE_RUST_SIZEOF_IMPL_{}", instance);
+
 }
 
 fn write_rust_vec_extern(out: &mut OutFile, element: &RustName) {
@@ -1408,11 +1454,6 @@ fn write_rust_vec_extern(out: &mut OutFile, element: &RustName) {
         out,
         "void cxxbridge1$rust_vec${}$set_len(::rust::Vec<{}> *ptr, ::std::size_t len) noexcept;",
         instance, inner,
-    );
-    writeln!(
-        out,
-        "::std::size_t cxxbridge1$rust_vec${}$stride() noexcept;",
-        instance,
     );
     writeln!(out, "#endif // CXXBRIDGE1_RUST_VEC_{}", instance);
 }
@@ -1512,11 +1553,6 @@ fn write_rust_vec_impl(out: &mut OutFile, element: &RustName) {
         "  return cxxbridge1$rust_vec${}$set_len(this, len);",
         instance,
     );
-    writeln!(out, "}}");
-
-    writeln!(out, "template <>");
-    writeln!(out, "::std::size_t Vec<{}>::stride() noexcept {{", inner);
-    writeln!(out, "  return cxxbridge1$rust_vec${}$stride();", instance);
     writeln!(out, "}}");
 }
 

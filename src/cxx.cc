@@ -436,6 +436,16 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
     ptr->~unique_ptr();                                                        \
   }
 
+#define RUST_SIZEOF_OPS(RUST_TYPE, CXX_TYPE)                                   \
+  template <>                                                                  \
+  size_t rust_sizeof<CXX_TYPE>() {                                             \
+    return sizeof(CXX_TYPE);                                                   \
+  }                                                                            \
+  template <>                                                                  \
+  size_t rust_sizeof<const CXX_TYPE>() {                                       \
+    return sizeof(CXX_TYPE);                                                   \
+  }                                                                            \
+
 #define RUST_VEC_EXTERNS(RUST_TYPE, CXX_TYPE)                                  \
   void cxxbridge1$rust_vec$##RUST_TYPE##$new(                                  \
       rust::Vec<CXX_TYPE> *ptr) noexcept;                                      \
@@ -450,8 +460,7 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
   void cxxbridge1$rust_vec$##RUST_TYPE##$reserve_total(                        \
       rust::Vec<CXX_TYPE> *ptr, std::size_t cap) noexcept;                     \
   void cxxbridge1$rust_vec$##RUST_TYPE##$set_len(rust::Vec<CXX_TYPE> *ptr,     \
-                                                 std::size_t len) noexcept;    \
-  std::size_t cxxbridge1$rust_vec$##RUST_TYPE##$stride() noexcept;
+                                                 std::size_t len) noexcept;
 
 #define RUST_VEC_OPS(RUST_TYPE, CXX_TYPE)                                      \
   template <>                                                                  \
@@ -482,10 +491,6 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
   void Vec<CXX_TYPE>::set_len(std::size_t len) noexcept {                      \
     cxxbridge1$rust_vec$##RUST_TYPE##$set_len(this, len);                      \
   }                                                                            \
-  template <>                                                                  \
-  std::size_t Vec<CXX_TYPE>::stride() noexcept {                               \
-    return cxxbridge1$rust_vec$##RUST_TYPE##$stride();                         \
-  }
 
 #define SHARED_PTR_OPS(RUST_TYPE, CXX_TYPE)                                    \
   static_assert(sizeof(std::shared_ptr<CXX_TYPE>) == 2 * sizeof(void *), "");  \
@@ -534,7 +539,7 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
   MACRO(isize, rust::isize)                                                    \
   MACRO(string, std::string)
 
-#define FOR_EACH_RUST_VEC(MACRO)                                               \
+#define FOR_EACH_RUST_BASE_TYPE(MACRO)                                         \
   FOR_EACH_NUMERIC(MACRO)                                                      \
   MACRO(bool, bool)                                                            \
   MACRO(char, char)                                                            \
@@ -548,12 +553,15 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
 
 extern "C" {
 FOR_EACH_STD_VECTOR(STD_VECTOR_OPS)
-FOR_EACH_RUST_VEC(RUST_VEC_EXTERNS)
 FOR_EACH_SHARED_PTR(SHARED_PTR_OPS)
+FOR_EACH_RUST_BASE_TYPE(RUST_VEC_EXTERNS)
 } // extern "C"
 
 namespace rust {
 inline namespace cxxbridge1 {
-FOR_EACH_RUST_VEC(RUST_VEC_OPS)
+FOR_EACH_RUST_BASE_TYPE(RUST_VEC_OPS)
+namespace detail {
+FOR_EACH_RUST_BASE_TYPE(RUST_SIZEOF_OPS)
+} // namespace detail
 } // namespace cxxbridge1
 } // namespace rust
