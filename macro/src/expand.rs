@@ -961,6 +961,8 @@ fn expand_rust_box(ident: &RustName, types: &Types) -> TokenStream {
     let span = ident.span();
     quote_spanned! {span=>
         #[doc(hidden)]
+        unsafe impl ::cxx::private::ImplBox for #ident {}
+        #[doc(hidden)]
         #[export_name = #link_uninit]
         unsafe extern "C" fn #local_uninit(
             this: *mut ::std::boxed::Box<::std::mem::MaybeUninit<#ident>>,
@@ -999,6 +1001,8 @@ fn expand_rust_vec(elem: &RustName, types: &Types) -> TokenStream {
 
     let span = elem.span();
     quote_spanned! {span=>
+        #[doc(hidden)]
+        unsafe impl ::cxx::private::ImplVec for #elem {}
         #[doc(hidden)]
         #[export_name = #link_new]
         unsafe extern "C" fn #local_new(this: *mut ::cxx::private::RustVec<#elem>) {
