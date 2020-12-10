@@ -27,6 +27,7 @@ pub struct Includes<'a> {
     pub cstdint: bool,
     pub cstring: bool,
     pub exception: bool,
+    pub functional: bool,
     pub initializer_list: bool,
     pub iterator: bool,
     pub memory: bool,
@@ -77,6 +78,7 @@ pub(super) fn write(out: &mut OutFile) {
         cstdint,
         cstring,
         exception,
+        functional,
         initializer_list,
         iterator,
         memory,
@@ -106,6 +108,9 @@ pub(super) fn write(out: &mut OutFile) {
     }
     if exception {
         writeln!(out, "#include <exception>");
+    }
+    if functional {
+        writeln!(out, "#include <functional>");
     }
     if initializer_list {
         writeln!(out, "#include <initializer_list>");

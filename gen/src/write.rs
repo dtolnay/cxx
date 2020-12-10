@@ -158,6 +158,7 @@ fn write_std_specializations(out: &mut OutFile, apis: &[Api]) {
         if let Api::Struct(strct) = api {
             if derive::contains(&strct.derives, Trait::Hash) {
                 out.next_section();
+                out.include.functional = true;
                 let qualified = strct.name.to_fully_qualified();
                 writeln!(out, "template <> struct hash<{}> {{", qualified);
                 writeln!(
