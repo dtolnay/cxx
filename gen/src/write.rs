@@ -233,9 +233,7 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
         writeln!(out, "{};", field.ident);
     }
 
-    if !methods.is_empty() || operator_eq || operator_ord {
-        writeln!(out);
-    }
+    writeln!(out);
 
     for method in methods {
         write!(out, "  ");
@@ -280,6 +278,9 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
             strct.name.cxx,
         );
     }
+
+    out.include.type_traits = true;
+    writeln!(out, "  using IsRelocatable = ::std::true_type;");
 
     writeln!(out, "}};");
     writeln!(out, "#endif // {}", guard);
