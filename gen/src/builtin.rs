@@ -161,6 +161,7 @@ pub(super) fn write(out: &mut OutFile) {
     out.begin_block(Block::AnonymousNamespace);
 
     if builtin.ptr_len {
+        include.cstddef = true;
         out.begin_block(Block::Namespace("repr"));
         writeln!(out, "struct PtrLen final {{");
         writeln!(out, "  void *ptr;");
@@ -241,6 +242,7 @@ pub(super) fn write(out: &mut OutFile) {
     }
 
     if builtin.is_complete {
+        include.cstddef = true;
         include.type_traits = true;
         out.next_section();
         writeln!(out, "template <typename T, typename = size_t>");
@@ -296,6 +298,7 @@ pub(super) fn write(out: &mut OutFile) {
     out.end_block(Block::Namespace("rust"));
 
     if builtin.exception {
+        include.cstddef = true;
         out.begin_block(Block::ExternC);
         writeln!(
             out,
