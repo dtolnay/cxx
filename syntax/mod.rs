@@ -15,6 +15,7 @@ pub mod mangle;
 mod names;
 pub mod namespace;
 mod parse;
+mod pod;
 pub mod qualified;
 pub mod report;
 pub mod set;

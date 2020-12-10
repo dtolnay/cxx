@@ -1,10 +1,8 @@
-use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::improper::ImproperCtype;
 use crate::syntax::report::Errors;
 use crate::syntax::set::{OrderedSet as Set, UnorderedSet};
 use crate::syntax::{
-    derive, toposort, Api, Enum, ExternFn, ExternType, Impl, Pair, RustName, Struct, Trait, Type,
-    TypeAlias,
+    toposort, Api, Enum, ExternFn, ExternType, Impl, Pair, RustName, Struct, Type, TypeAlias,
 };
 use proc_macro2::Ident;
 use quote::ToTokens;
@@ -261,20 +259,10 @@ impl<'a> Types<'a> {
 
     pub fn needs_indirect_abi(&self, ty: &Type) -> bool {
         match ty {
-            Type::Ident(ident) => {
-                if let Some(strct) = self.structs.get(&ident.rust) {
-                    !self.is_pod(strct)
-                } else {
-                    Atom::from(&ident.rust) == Some(RustString)
-                }
-            }
-            Type::SharedPtr(_) | Type::RustVec(_) | Type::Array(_) => true,
-            _ => false,
+            Type::RustBox(_) | Type::UniquePtr(_) => false,
+            Type::Array(_) => true,
+            _ => !self.is_guaranteed_pod(ty),
         }
-    }
-
-    pub fn is_pod(&self, strct: &Struct) -> bool {
-        derive::contains(&strct.derives, Trait::Copy)
     }
 
     // Types that trigger rustc's default #[warn(improper_ctypes)] lint, even if
