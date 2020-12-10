@@ -134,6 +134,34 @@ pub(super) fn write(out: &mut OutFile) {
     ifndef::write(out, builtin.opaque, "CXXBRIDGE1_RUST_OPAQUE");
     ifndef::write(out, builtin.relocatable, "CXXBRIDGE1_RELOCATABLE");
 
+    out.begin_block(Block::Namespace("detail"));
+
+    if builtin.maybe_uninit {
+        include.cstddef = true;
+        include.new = true;
+        out.next_section();
+        writeln!(out, "template <typename T, typename = void *>");
+        writeln!(out, "struct operator_new {{");
+        writeln!(
+            out,
+            "  void *operator()(size_t sz) {{ return ::operator new(sz); }}",
+        );
+        writeln!(out, "}};");
+        out.next_section();
+        writeln!(out, "template <typename T>");
+        writeln!(
+            out,
+            "struct operator_new<T, decltype(T::operator new(sizeof(T)))> {{",
+        );
+        writeln!(
+            out,
+            "  void *operator()(size_t sz) {{ return T::operator new(sz); }}",
+        );
+        writeln!(out, "}};");
+    }
+
+    out.end_block(Block::Namespace("detail"));
+
     if builtin.manually_drop {
         out.next_section();
         include.utility = true;
@@ -149,10 +177,15 @@ pub(super) fn write(out: &mut OutFile) {
     }
 
     if builtin.maybe_uninit {
+        include.cstddef = true;
         out.next_section();
         writeln!(out, "template <typename T>");
         writeln!(out, "union MaybeUninit {{");
         writeln!(out, "  T value;");
+        writeln!(
+            out,
+            "  void *operator new(size_t sz) {{ return detail::operator_new<T>{{}}(sz); }}",
+        );
         writeln!(out, "  MaybeUninit() {{}}");
         writeln!(out, "  ~MaybeUninit() {{}}");
         writeln!(out, "}};");

@@ -1540,7 +1540,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
         "void cxxbridge1$unique_ptr${}$null(::std::unique_ptr<{}> *ptr) noexcept {{",
         instance, inner,
     );
-    writeln!(out, "  new (ptr) ::std::unique_ptr<{}>();", inner);
+    writeln!(out, "  ::new (ptr) ::std::unique_ptr<{}>();", inner);
     writeln!(out, "}}");
     if can_construct_from_value {
         out.builtin.maybe_uninit = true;
@@ -1554,7 +1554,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
             "  {} *uninit = reinterpret_cast<{} *>(new ::rust::MaybeUninit<{}>);",
             inner, inner, inner,
         );
-        writeln!(out, "  new (ptr) ::std::unique_ptr<{}>(uninit);", inner);
+        writeln!(out, "  ::new (ptr) ::std::unique_ptr<{}>(uninit);", inner);
         writeln!(out, "  return uninit;");
         writeln!(out, "}}");
     }
@@ -1563,7 +1563,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
         "void cxxbridge1$unique_ptr${}$raw(::std::unique_ptr<{}> *ptr, {} *raw) noexcept {{",
         instance, inner, inner,
     );
-    writeln!(out, "  new (ptr) ::std::unique_ptr<{}>(raw);", inner);
+    writeln!(out, "  ::new (ptr) ::std::unique_ptr<{}>(raw);", inner);
     writeln!(out, "}}");
     writeln!(
         out,
@@ -1630,7 +1630,7 @@ fn write_shared_ptr(out: &mut OutFile, ident: &RustName) {
         "void cxxbridge1$shared_ptr${}$null(::std::shared_ptr<{}> *ptr) noexcept {{",
         instance, inner,
     );
-    writeln!(out, "  new (ptr) ::std::shared_ptr<{}>();", inner);
+    writeln!(out, "  ::new (ptr) ::std::shared_ptr<{}>();", inner);
     writeln!(out, "}}");
     if can_construct_from_value {
         out.builtin.maybe_uninit = true;
@@ -1644,7 +1644,7 @@ fn write_shared_ptr(out: &mut OutFile, ident: &RustName) {
             "  {} *uninit = reinterpret_cast<{} *>(new ::rust::MaybeUninit<{}>);",
             inner, inner, inner,
         );
-        writeln!(out, "  new (ptr) ::std::shared_ptr<{}>(uninit);", inner);
+        writeln!(out, "  ::new (ptr) ::std::shared_ptr<{}>(uninit);", inner);
         writeln!(out, "  return uninit;");
         writeln!(out, "}}");
     }
@@ -1653,7 +1653,7 @@ fn write_shared_ptr(out: &mut OutFile, ident: &RustName) {
         "void cxxbridge1$shared_ptr${}$clone(const ::std::shared_ptr<{}>& self, ::std::shared_ptr<{}> *ptr) noexcept {{",
         instance, inner, inner,
     );
-    writeln!(out, "  new (ptr) ::std::shared_ptr<{}>(self);", inner);
+    writeln!(out, "  ::new (ptr) ::std::shared_ptr<{}>(self);", inner);
     writeln!(out, "}}");
     writeln!(
         out,
