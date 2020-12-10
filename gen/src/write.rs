@@ -158,6 +158,7 @@ fn write_std_specializations(out: &mut OutFile, apis: &[Api]) {
         if let Api::Struct(strct) = api {
             if derive::contains(&strct.derives, Trait::Hash) {
                 out.next_section();
+                out.include.cstddef = true;
                 out.include.functional = true;
                 let qualified = strct.name.to_fully_qualified();
                 writeln!(out, "template <> struct hash<{}> {{", qualified);
@@ -467,6 +468,7 @@ fn write_struct_operator_decls<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
     }
 
     if derive::contains(&strct.derives, Trait::Hash) {
+        out.include.cstddef = true;
         let link_name = mangle::operator(&strct.name, "hash");
         writeln!(
             out,
@@ -1360,6 +1362,8 @@ fn write_rust_vec_extern(out: &mut OutFile, element: &RustName) {
     let inner = element.to_typename(out.types);
     let instance = element.to_mangled(out.types);
 
+    out.include.cstddef = true;
+
     writeln!(out, "#ifndef CXXBRIDGE1_RUST_VEC_{}", instance);
     writeln!(out, "#define CXXBRIDGE1_RUST_VEC_{}", instance);
     writeln!(
@@ -1418,6 +1422,8 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Pair) {
 fn write_rust_vec_impl(out: &mut OutFile, element: &RustName) {
     let inner = element.to_typename(out.types);
     let instance = element.to_mangled(out.types);
+
+    out.include.cstddef = true;
 
     writeln!(out, "template <>");
     writeln!(out, "Vec<{}>::Vec() noexcept {{", inner);
@@ -1670,6 +1676,8 @@ fn write_shared_ptr(out: &mut OutFile, ident: &RustName) {
 fn write_cxx_vector(out: &mut OutFile, element: &RustName) {
     let inner = element.to_typename(out.types);
     let instance = element.to_mangled(out.types);
+
+    out.include.cstddef = true;
 
     writeln!(out, "#ifndef CXXBRIDGE1_VECTOR_{}", instance);
     writeln!(out, "#define CXXBRIDGE1_VECTOR_{}", instance);
