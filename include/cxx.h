@@ -241,10 +241,12 @@ public:
 
   Vec() noexcept;
   Vec(std::initializer_list<T>);
+  Vec(const Vec &);
   Vec(Vec &&) noexcept;
   ~Vec() noexcept;
 
   Vec &operator=(Vec &&) noexcept;
+  Vec &operator=(const Vec &);
 
   size_t size() const noexcept;
   bool empty() const noexcept;
@@ -649,6 +651,12 @@ Vec<T>::Vec(std::initializer_list<T> init) : Vec{} {
 }
 
 template <typename T>
+Vec<T>::Vec(const Vec &other) : Vec() {
+  this->reserve_total(other.size());
+  std::copy(other.begin(), other.end(), std::back_inserter(*this));
+}
+
+template <typename T>
 Vec<T>::Vec(Vec &&other) noexcept : repr(other.repr) {
   new (&other) Vec();
 }
@@ -664,6 +672,15 @@ Vec<T> &Vec<T>::operator=(Vec &&other) noexcept {
     this->drop();
     this->repr = other.repr;
     new (&other) Vec();
+  }
+  return *this;
+}
+
+template <typename T>
+Vec<T> &Vec<T>::operator=(const Vec &other) {
+  if (this != &other) {
+    this->drop();
+    new (this) Vec(other);
   }
   return *this;
 }

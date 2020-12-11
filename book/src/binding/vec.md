@@ -19,10 +19,12 @@ public:
 
   Vec() noexcept;
   Vec(std::initializer_list<T>);
+  Vec(const Vec &);
   Vec(Vec &&) noexcept;
   ~Vec() noexcept;
 
   Vec &operator=(Vec &&) noexcept;
+  Vec &operator=(const Vec &);
 
   size_t size() const noexcept;
   bool empty() const noexcept;
