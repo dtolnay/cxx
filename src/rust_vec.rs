@@ -41,6 +41,10 @@ impl<T> RustVec<T> {
         self.repr.len()
     }
 
+    pub fn capacity(&self) -> usize {
+        self.repr.capacity()
+    }
+
     pub fn as_ptr(&self) -> *const T {
         self.repr.as_ptr()
     }
