@@ -414,6 +414,8 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
       rust::Vec<CXX_TYPE> *ptr) noexcept;                                      \
   size_t cxxbridge1$rust_vec$##RUST_TYPE##$len(                                \
       const rust::Vec<CXX_TYPE> *ptr) noexcept;                                \
+  size_t cxxbridge1$rust_vec$##RUST_TYPE##$capacity(                           \
+      const rust::Vec<CXX_TYPE> *ptr) noexcept;                                \
   const CXX_TYPE *cxxbridge1$rust_vec$##RUST_TYPE##$data(                      \
       const rust::Vec<CXX_TYPE> *ptr) noexcept;                                \
   void cxxbridge1$rust_vec$##RUST_TYPE##$reserve_total(                        \
@@ -434,6 +436,10 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
   template <>                                                                  \
   size_t Vec<CXX_TYPE>::size() const noexcept {                                \
     return cxxbridge1$rust_vec$##RUST_TYPE##$len(this);                        \
+  }                                                                            \
+  template <>                                                                  \
+  size_t Vec<CXX_TYPE>::capacity() const noexcept {                            \
+    return cxxbridge1$rust_vec$##RUST_TYPE##$capacity(this);                   \
   }                                                                            \
   template <>                                                                  \
   const CXX_TYPE *Vec<CXX_TYPE>::data() const noexcept {                       \

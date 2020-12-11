@@ -985,6 +985,7 @@ fn expand_rust_vec(elem: &RustName, types: &Types) -> TokenStream {
     let link_new = format!("{}new", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
     let link_len = format!("{}len", link_prefix);
+    let link_capacity = format!("{}capacity", link_prefix);
     let link_data = format!("{}data", link_prefix);
     let link_reserve_total = format!("{}reserve_total", link_prefix);
     let link_set_len = format!("{}set_len", link_prefix);
@@ -994,6 +995,7 @@ fn expand_rust_vec(elem: &RustName, types: &Types) -> TokenStream {
     let local_new = format_ident!("{}new", local_prefix);
     let local_drop = format_ident!("{}drop", local_prefix);
     let local_len = format_ident!("{}len", local_prefix);
+    let local_capacity = format_ident!("{}capacity", local_prefix);
     let local_data = format_ident!("{}data", local_prefix);
     let local_reserve_total = format_ident!("{}reserve_total", local_prefix);
     let local_set_len = format_ident!("{}set_len", local_prefix);
@@ -1017,6 +1019,11 @@ fn expand_rust_vec(elem: &RustName, types: &Types) -> TokenStream {
         #[export_name = #link_len]
         unsafe extern "C" fn #local_len(this: *const ::cxx::private::RustVec<#elem>) -> usize {
             (*this).len()
+        }
+        #[doc(hidden)]
+        #[export_name = #link_capacity]
+        unsafe extern "C" fn #local_capacity(this: *const ::cxx::private::RustVec<#elem>) -> usize {
+            (*this).capacity()
         }
         #[doc(hidden)]
         #[export_name = #link_data]
