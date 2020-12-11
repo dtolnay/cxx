@@ -246,6 +246,7 @@ public:
   ~Vec() noexcept;
 
   Vec &operator=(Vec &&) noexcept;
+  Vec &operator=(const Vec &);
 
   size_t size() const noexcept;
   bool empty() const noexcept;
@@ -671,6 +672,15 @@ Vec<T> &Vec<T>::operator=(Vec &&other) noexcept {
     this->drop();
     this->repr = other.repr;
     new (&other) Vec();
+  }
+  return *this;
+}
+
+template <typename T>
+Vec<T> &Vec<T>::operator=(const Vec &other) {
+  if (this != &other) {
+    this->drop();
+    new (this) Vec(other);
   }
   return *this;
 }

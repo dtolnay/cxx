@@ -24,6 +24,7 @@ public:
   ~Vec() noexcept;
 
   Vec &operator=(Vec &&) noexcept;
+  Vec &operator=(const Vec &);
 
   size_t size() const noexcept;
   bool empty() const noexcept;
