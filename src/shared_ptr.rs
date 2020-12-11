@@ -4,8 +4,7 @@ use core::ffi::c_void;
 use core::fmt::{self, Debug, Display};
 use core::marker::PhantomData;
 use core::mem::MaybeUninit;
-use core::ops::{Deref, DerefMut};
-use core::pin::Pin;
+use core::ops::Deref;
 
 /// BInding to C++ `std::shared_ptr<T>`.
 #[repr(C)]
@@ -61,29 +60,6 @@ where
         let this = self as *const Self as *const c_void;
         unsafe { T::__get(this).as_ref() }
     }
-
-    /// Returns a mutable pinned reference to the object owned by this SharedPtr
-    /// if any, otherwise None.
-    pub fn as_mut(&mut self) -> Option<Pin<&mut T>> {
-        let this = self as *mut Self as *mut c_void;
-        unsafe {
-            let mut_reference = (T::__get(this) as *mut T).as_mut()?;
-            Some(Pin::new_unchecked(mut_reference))
-        }
-    }
-
-    /// Returns a mutable pinned reference to the object owned by this
-    /// SharedPtr.
-    ///
-    /// # Panics
-    ///
-    /// Panics if the SharedPtr holds a null pointer.
-    pub fn pin_mut(&mut self) -> Pin<&mut T> {
-        match self.as_mut() {
-            Some(target) => target,
-            None => panic!("called pin_mut on a null SharedPtr<{}>", T::__NAME),
-        }
-    }
 }
 
 unsafe impl<T> Send for SharedPtr<T> where T: Send + Sync + SharedPtrTarget {}
@@ -124,18 +100,6 @@ where
         match self.as_ref() {
             Some(target) => target,
             None => panic!("called deref on a null SharedPtr<{}>", T::__NAME),
-        }
-    }
-}
-
-impl<T> DerefMut for SharedPtr<T>
-where
-    T: SharedPtrTarget + Unpin,
-{
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        match self.as_mut() {
-            Some(target) => Pin::into_inner(target),
-            None => panic!("called deref_mut on a null SharedPtr<{}>", T::__NAME),
         }
     }
 }
