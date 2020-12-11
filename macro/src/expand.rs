@@ -1056,7 +1056,7 @@ fn expand_unique_ptr(ident: &RustName, types: &Types, explicit_impl: Option<&Imp
         || types.aliases.contains_key(&ident.rust);
     let new_method = if can_construct_from_value {
         Some(quote! {
-            fn __new(mut value: Self) -> *mut ::std::ffi::c_void {
+            fn __new(value: Self) -> *mut ::std::ffi::c_void {
                 extern "C" {
                     #[link_name = #link_uninit]
                     fn __uninit(this: *mut *mut ::std::ffi::c_void) -> *mut ::std::ffi::c_void;
@@ -1136,7 +1136,7 @@ fn expand_shared_ptr(ident: &RustName, types: &Types, explicit_impl: Option<&Imp
         || types.aliases.contains_key(&ident.rust);
     let new_method = if can_construct_from_value {
         Some(quote! {
-            unsafe fn __new(mut value: Self, new: *mut ::std::ffi::c_void) {
+            unsafe fn __new(value: Self, new: *mut ::std::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_uninit]
                     fn __uninit(new: *mut ::std::ffi::c_void) -> *mut ::std::ffi::c_void;
