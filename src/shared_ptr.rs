@@ -1,3 +1,4 @@
+use crate::cxx_string::CxxString;
 use crate::kind::Trivial;
 use crate::ExternType;
 use core::ffi::c_void;
@@ -153,3 +154,77 @@ pub unsafe trait SharedPtrTarget {
     #[doc(hidden)]
     unsafe fn __drop(this: *mut c_void);
 }
+
+macro_rules! impl_shared_ptr_target {
+    ($segment:expr, $name:expr, $ty:ty) => {
+        unsafe impl SharedPtrTarget for $ty {
+            const __NAME: &'static dyn Display = &$name;
+            unsafe fn __null(new: *mut c_void) {
+                extern "C" {
+                    attr! {
+                        #[link_name = concat!("cxxbridge1$std$shared_ptr$", $segment, "$null")]
+                        fn __null(new: *mut c_void);
+                    }
+                }
+                __null(new);
+            }
+            unsafe fn __new(value: Self, new: *mut c_void) {
+                extern "C" {
+                    attr! {
+                        #[link_name = concat!("cxxbridge1$std$shared_ptr$", $segment, "$uninit")]
+                        fn __uninit(new: *mut c_void) -> *mut c_void;
+                    }
+                }
+                __uninit(new).cast::<$ty>().write(value);
+            }
+            unsafe fn __clone(this: *const c_void, new: *mut c_void) {
+                extern "C" {
+                    attr! {
+                        #[link_name = concat!("cxxbridge1$std$shared_ptr$", $segment, "$clone")]
+                        fn __clone(this: *const c_void, new: *mut c_void);
+                    }
+                }
+                __clone(this, new);
+            }
+            unsafe fn __get(this: *const c_void) -> *const Self {
+                extern "C" {
+                    attr! {
+                        #[link_name = concat!("cxxbridge1$std$shared_ptr$", $segment, "$get")]
+                        fn __get(this: *const c_void) -> *const c_void;
+                    }
+                }
+                __get(this).cast()
+            }
+            unsafe fn __drop(this: *mut c_void) {
+                extern "C" {
+                    attr! {
+                        #[link_name = concat!("cxxbridge1$std$shared_ptr$", $segment, "$drop")]
+                        fn __drop(this: *mut c_void);
+                    }
+                }
+                __drop(this);
+            }
+        }
+    };
+}
+
+macro_rules! impl_shared_ptr_target_for_primitive {
+    ($ty:ident) => {
+        impl_shared_ptr_target!(stringify!($ty), stringify!($ty), $ty);
+    };
+}
+
+impl_shared_ptr_target_for_primitive!(u8);
+impl_shared_ptr_target_for_primitive!(u16);
+impl_shared_ptr_target_for_primitive!(u32);
+impl_shared_ptr_target_for_primitive!(u64);
+impl_shared_ptr_target_for_primitive!(usize);
+impl_shared_ptr_target_for_primitive!(i8);
+impl_shared_ptr_target_for_primitive!(i16);
+impl_shared_ptr_target_for_primitive!(i32);
+impl_shared_ptr_target_for_primitive!(i64);
+impl_shared_ptr_target_for_primitive!(isize);
+impl_shared_ptr_target_for_primitive!(f32);
+impl_shared_ptr_target_for_primitive!(f64);
+
+impl_shared_ptr_target!("string", "CxxString", CxxString);

@@ -14,5 +14,6 @@ Checks:
   -cppcoreguidelines-pro-type-reinterpret-cast,
   -cppcoreguidelines-special-member-functions,
   -modernize-use-default-member-init,
+  -modernize-use-equals-default,
   -modernize-use-trailing-return-type,
 HeaderFilterRegex: cxx\.h
