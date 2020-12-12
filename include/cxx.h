@@ -621,10 +621,7 @@ T &Box<T>::operator*() noexcept {
 template <typename T>
 template <typename... Fields>
 Box<T> Box<T>::in_place(Fields &&... fields) {
-  Box box = uninit{};
-  box.ptr = alloc();
-  ::new (box.ptr) T{std::forward<Fields>(fields)...};
-  return box;
+  return from_raw(::new (alloc()) T{std::forward<Fields>(fields)...});
 }
 
 template <typename T>
