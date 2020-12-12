@@ -200,6 +200,7 @@ public:
       typename std::add_pointer<typename std::add_const<T>::type>::type;
   using pointer = typename std::add_pointer<T>::type;
 
+  Box() = delete;
   Box(const Box &);
   Box(Box &&) noexcept;
   ~Box() noexcept;
@@ -225,8 +226,9 @@ public:
   T *into_raw() noexcept;
 
 private:
-  Box() noexcept;
-  void uninit() noexcept;
+  class uninit;
+  Box(uninit) noexcept;
+  static T *alloc() noexcept;
   void drop() noexcept;
   T *ptr;
 };
@@ -546,6 +548,9 @@ typename Slice<T>::iterator Slice<T>::end() const noexcept {
 #ifndef CXXBRIDGE1_RUST_BOX
 #define CXXBRIDGE1_RUST_BOX
 template <typename T>
+class Box<T>::uninit {};
+
+template <typename T>
 Box<T>::Box(const Box &other) : Box(*other) {}
 
 template <typename T>
@@ -554,14 +559,12 @@ Box<T>::Box(Box &&other) noexcept : ptr(other.ptr) {
 }
 
 template <typename T>
-Box<T>::Box(const T &val) {
-  this->uninit();
+Box<T>::Box(const T &val) : ptr(alloc()) {
   ::new (this->ptr) T(val);
 }
 
 template <typename T>
-Box<T>::Box(T &&val) {
-  this->uninit();
+Box<T>::Box(T &&val) : ptr(alloc()) {
   ::new (this->ptr) T(std::move(val));
 }
 
@@ -578,7 +581,7 @@ Box<T> &Box<T>::operator=(const Box &other) {
     if (this->ptr) {
       **this = *other;
     } else {
-      this->uninit();
+      this->ptr = alloc();
       ::new (this->ptr) T(*other);
     }
   }
@@ -618,15 +621,15 @@ T &Box<T>::operator*() noexcept {
 template <typename T>
 template <typename... Fields>
 Box<T> Box<T>::in_place(Fields &&... fields) {
-  Box box;
-  box.uninit();
+  Box box = uninit{};
+  box.ptr = alloc();
   ::new (box.ptr) T{std::forward<Fields>(fields)...};
   return box;
 }
 
 template <typename T>
 Box<T> Box<T>::from_raw(T *raw) noexcept {
-  Box box;
+  Box box = uninit{};
   box.ptr = raw;
   return box;
 }
@@ -639,7 +642,7 @@ T *Box<T>::into_raw() noexcept {
 }
 
 template <typename T>
-Box<T>::Box() noexcept = default;
+Box<T>::Box(uninit) noexcept {}
 #endif // CXXBRIDGE1_RUST_BOX
 
 #ifndef CXXBRIDGE1_RUST_VEC

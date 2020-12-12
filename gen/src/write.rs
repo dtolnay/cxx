@@ -1348,8 +1348,8 @@ fn write_rust_box_extern(out: &mut OutFile, ident: &Pair) {
     writeln!(out, "#define CXXBRIDGE1_RUST_BOX_{}", instance);
     writeln!(
         out,
-        "void cxxbridge1$box${}$uninit(::rust::Box<{}> *ptr) noexcept;",
-        instance, inner,
+        "{} *cxxbridge1$box${}$alloc() noexcept;",
+        inner, instance,
     );
     writeln!(
         out,
@@ -1415,8 +1415,8 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Pair) {
     let instance = ident.to_symbol();
 
     writeln!(out, "template <>");
-    writeln!(out, "void Box<{}>::uninit() noexcept {{", inner);
-    writeln!(out, "  cxxbridge1$box${}$uninit(this);", instance);
+    writeln!(out, "{} *Box<{}>::alloc() noexcept {{", inner, inner);
+    writeln!(out, "  return cxxbridge1$box${}$alloc();", instance);
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
