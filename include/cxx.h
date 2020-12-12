@@ -783,7 +783,7 @@ Vec<T>::iterator::operator->() const noexcept {
 
 template <typename T>
 typename Vec<T>::iterator::reference Vec<T>::iterator::operator[](
-    Vec<T>::iterator::difference_type n) const noexcept {
+    typename Vec<T>::iterator::difference_type n) const noexcept {
   auto pos = static_cast<char *>(this->pos) + this->stride * n;
   return *static_cast<T *>(pos);
 }
@@ -815,22 +815,22 @@ typename Vec<T>::iterator Vec<T>::iterator::operator--(int) noexcept {
 }
 
 template <typename T>
-typename Vec<T>::iterator &
-Vec<T>::iterator::operator+=(Vec<T>::iterator::difference_type n) noexcept {
+typename Vec<T>::iterator &Vec<T>::iterator::operator+=(
+    typename Vec<T>::iterator::difference_type n) noexcept {
   this->pos = static_cast<char *>(this->pos) + this->stride * n;
   return *this;
 }
 
 template <typename T>
-typename Vec<T>::iterator &
-Vec<T>::iterator::operator-=(Vec<T>::iterator::difference_type n) noexcept {
+typename Vec<T>::iterator &Vec<T>::iterator::operator-=(
+    typename Vec<T>::iterator::difference_type n) noexcept {
   this->pos = static_cast<char *>(this->pos) - this->stride * n;
   return *this;
 }
 
 template <typename T>
 typename Vec<T>::iterator Vec<T>::iterator::operator+(
-    Vec<T>::iterator::difference_type n) const noexcept {
+    typename Vec<T>::iterator::difference_type n) const noexcept {
   auto ret = iterator(*this);
   ret.pos = static_cast<char *>(this->pos) + this->stride * n;
   return ret;
@@ -838,7 +838,7 @@ typename Vec<T>::iterator Vec<T>::iterator::operator+(
 
 template <typename T>
 typename Vec<T>::iterator Vec<T>::iterator::operator-(
-    Vec<T>::iterator::difference_type n) const noexcept {
+    typename Vec<T>::iterator::difference_type n) const noexcept {
   auto ret = iterator(*this);
   ret.pos = static_cast<char *>(this->pos) - this->stride * n;
   return ret;
