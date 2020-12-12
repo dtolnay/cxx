@@ -229,6 +229,7 @@ private:
   class uninit;
   Box(uninit) noexcept;
   static T *alloc() noexcept;
+  static void dealloc(T *) noexcept;
   void drop() noexcept;
   T *ptr;
 };

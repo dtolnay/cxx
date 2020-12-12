@@ -1353,6 +1353,11 @@ fn write_rust_box_extern(out: &mut OutFile, ident: &Pair) {
     );
     writeln!(
         out,
+        "void cxxbridge1$box${}$dealloc({} *) noexcept;",
+        instance, inner,
+    );
+    writeln!(
+        out,
         "void cxxbridge1$box${}$drop(::rust::Box<{}> *ptr) noexcept;",
         instance, inner,
     );
@@ -1417,6 +1422,15 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Pair) {
     writeln!(out, "template <>");
     writeln!(out, "{} *Box<{}>::alloc() noexcept {{", inner, inner);
     writeln!(out, "  return cxxbridge1$box${}$alloc();", instance);
+    writeln!(out, "}}");
+
+    writeln!(out, "template <>");
+    writeln!(
+        out,
+        "void Box<{}>::dealloc({} *ptr) noexcept {{",
+        inner, inner,
+    );
+    writeln!(out, "  cxxbridge1$box${}$dealloc(ptr);", instance);
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
