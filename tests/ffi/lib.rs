@@ -276,6 +276,8 @@ pub mod ffi {
     struct Dag4 {
         dag0: Dag0,
     }
+
+    impl Box<Shared> {}
 }
 
 mod other {
