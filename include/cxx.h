@@ -227,9 +227,8 @@ public:
 
 private:
   class uninit;
+  class allocation;
   Box(uninit) noexcept;
-  static T *alloc() noexcept;
-  static void dealloc(T *) noexcept;
   void drop() noexcept;
   T *ptr;
 };
@@ -552,6 +551,14 @@ template <typename T>
 class Box<T>::uninit {};
 
 template <typename T>
+class Box<T>::allocation {
+public:
+  static T *alloc() noexcept;
+  static void dealloc(T *) noexcept;
+  T *ptr;
+};
+
+template <typename T>
 Box<T>::Box(const Box &other) : Box(*other) {}
 
 template <typename T>
@@ -560,12 +567,12 @@ Box<T>::Box(Box &&other) noexcept : ptr(other.ptr) {
 }
 
 template <typename T>
-Box<T>::Box(const T &val) : ptr(alloc()) {
+Box<T>::Box(const T &val) : ptr(allocation::alloc()) {
   ::new (this->ptr) T(val);
 }
 
 template <typename T>
-Box<T>::Box(T &&val) : ptr(alloc()) {
+Box<T>::Box(T &&val) : ptr(allocation::alloc()) {
   ::new (this->ptr) T(std::move(val));
 }
 
@@ -582,7 +589,7 @@ Box<T> &Box<T>::operator=(const Box &other) {
     if (this->ptr) {
       **this = *other;
     } else {
-      this->ptr = alloc();
+      this->ptr = allocation::alloc();
       ::new (this->ptr) T(*other);
     }
   }
@@ -622,7 +629,8 @@ T &Box<T>::operator*() noexcept {
 template <typename T>
 template <typename... Fields>
 Box<T> Box<T>::in_place(Fields &&... fields) {
-  return from_raw(::new (alloc()) T{std::forward<Fields>(fields)...});
+  return from_raw(::new (allocation::alloc())
+                      T{std::forward<Fields>(fields)...});
 }
 
 template <typename T>

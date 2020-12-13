@@ -1420,14 +1420,18 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Pair) {
     let instance = ident.to_symbol();
 
     writeln!(out, "template <>");
-    writeln!(out, "{} *Box<{}>::alloc() noexcept {{", inner, inner);
+    writeln!(
+        out,
+        "{} *Box<{}>::allocation::alloc() noexcept {{",
+        inner, inner,
+    );
     writeln!(out, "  return cxxbridge1$box${}$alloc();", instance);
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
     writeln!(
         out,
-        "void Box<{}>::dealloc({} *ptr) noexcept {{",
+        "void Box<{}>::allocation::dealloc({} *ptr) noexcept {{",
         inner, inner,
     );
     writeln!(out, "  cxxbridge1$box${}$dealloc(ptr);", instance);
