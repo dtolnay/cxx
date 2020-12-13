@@ -409,13 +409,14 @@ mod symbols;
 mod unique_ptr;
 mod unwind;
 #[path = "cxx_vector.rs"]
-mod vector;
+pub mod vector;
 
 pub use crate::exception::Exception;
 pub use crate::extern_type::{kind, ExternType};
 pub use crate::shared_ptr::SharedPtr;
 pub use crate::string::CxxString;
 pub use crate::unique_ptr::UniquePtr;
+#[doc(inline)]
 pub use crate::vector::CxxVector;
 pub use cxxbridge_macro::bridge;
 

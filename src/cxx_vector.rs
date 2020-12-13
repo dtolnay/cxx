@@ -1,3 +1,6 @@
+//! Less used details of `CxxVector` are exposed in this module. `CxxVector`
+//! itself is exposed at the crate root.
+
 use crate::extern_type::ExternType;
 use crate::kind::Trivial;
 use crate::string::CxxString;
@@ -7,6 +10,9 @@ use core::marker::{PhantomData, PhantomPinned};
 use core::mem;
 use core::ptr;
 use core::slice;
+
+#[doc(inline)]
+pub use crate::Vector;
 
 /// Binding to C++ `std::vector<T, std::allocator<T>>`.
 ///
@@ -94,6 +100,9 @@ where
     }
 }
 
+/// Iterator over elements of a `CxxVector` by shared reference.
+///
+/// The iterator element type is `&'a T`.
 pub struct Iter<'a, T> {
     v: &'a CxxVector<T>,
     index: usize,
@@ -133,7 +142,7 @@ where
     }
 }
 
-pub struct TypeName<T> {
+pub(crate) struct TypeName<T> {
     element: PhantomData<T>,
 }
 
