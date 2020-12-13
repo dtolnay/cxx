@@ -1,5 +1,5 @@
-use crate::cxx_string::CxxString;
 use crate::kind::Trivial;
+use crate::string::CxxString;
 use crate::ExternType;
 use core::ffi::c_void;
 use core::fmt::{self, Debug, Display};

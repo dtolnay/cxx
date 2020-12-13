@@ -1,6 +1,6 @@
-use crate::cxx_string::CxxString;
-use crate::cxx_vector::{self, CxxVector, VectorElement};
 use crate::kind::Trivial;
+use crate::string::CxxString;
+use crate::vector::{self, CxxVector, VectorElement};
 use crate::ExternType;
 use core::ffi::c_void;
 use core::fmt::{self, Debug, Display};
@@ -237,7 +237,7 @@ unsafe impl<T> UniquePtrTarget for CxxVector<T>
 where
     T: VectorElement + 'static,
 {
-    const __NAME: &'static dyn Display = &cxx_vector::TypeName::<T>::new();
+    const __NAME: &'static dyn Display = &vector::TypeName::<T>::new();
     fn __null() -> *mut c_void {
         T::__unique_ptr_null()
     }
