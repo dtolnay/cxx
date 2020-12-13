@@ -392,8 +392,6 @@ extern crate std;
 #[macro_use]
 mod macros;
 
-mod cxx_string;
-mod cxx_vector;
 mod exception;
 mod extern_type;
 mod function;
@@ -405,16 +403,20 @@ mod rust_string;
 mod rust_type;
 mod rust_vec;
 mod shared_ptr;
+#[path = "cxx_string.rs"]
+mod string;
 mod symbols;
 mod unique_ptr;
 mod unwind;
+#[path = "cxx_vector.rs"]
+mod vector;
 
-pub use crate::cxx_string::CxxString;
-pub use crate::cxx_vector::CxxVector;
 pub use crate::exception::Exception;
 pub use crate::extern_type::{kind, ExternType};
 pub use crate::shared_ptr::SharedPtr;
+pub use crate::string::CxxString;
 pub use crate::unique_ptr::UniquePtr;
+pub use crate::vector::CxxVector;
 pub use cxxbridge_macro::bridge;
 
 /// For use in impls of the `ExternType` trait. See [`ExternType`].
@@ -439,8 +441,6 @@ pub type Vector<T> = CxxVector<T>;
 // Not public API.
 #[doc(hidden)]
 pub mod private {
-    pub use crate::cxx_string::StackString;
-    pub use crate::cxx_vector::VectorElement;
     pub use crate::extern_type::{verify_extern_kind, verify_extern_type};
     pub use crate::function::FatFunction;
     pub use crate::opaque::Opaque;
@@ -451,8 +451,10 @@ pub mod private {
     pub use crate::rust_type::{ImplBox, ImplVec, RustType};
     pub use crate::rust_vec::RustVec;
     pub use crate::shared_ptr::SharedPtrTarget;
+    pub use crate::string::StackString;
     pub use crate::unique_ptr::UniquePtrTarget;
     pub use crate::unwind::catch_unwind;
+    pub use crate::vector::VectorElement;
 }
 
 mod actually_private {

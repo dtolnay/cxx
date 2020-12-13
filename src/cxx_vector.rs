@@ -1,6 +1,6 @@
-use crate::cxx_string::CxxString;
 use crate::extern_type::ExternType;
 use crate::kind::Trivial;
+use crate::string::CxxString;
 use core::ffi::c_void;
 use core::fmt::{self, Debug, Display};
 use core::marker::{PhantomData, PhantomPinned};
