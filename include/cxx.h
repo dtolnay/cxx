@@ -41,7 +41,7 @@ public:
 
   String(const std::string &);
   String(const char *);
-  String(const char *, size_t);
+  String(const char *, std::size_t);
 
   String &operator=(const String &) noexcept;
   String &operator=(String &&) noexcept;
@@ -50,8 +50,8 @@ public:
 
   // Note: no null terminator.
   const char *data() const noexcept;
-  size_t size() const noexcept;
-  size_t length() const noexcept;
+  std::size_t size() const noexcept;
+  std::size_t length() const noexcept;
 
   using iterator = char *;
   iterator begin() noexcept;
@@ -75,7 +75,7 @@ public:
 
 private:
   // Size and alignment statically verified by rust_string.rs.
-  std::array<uintptr_t, 3> repr;
+  std::array<std::uintptr_t, 3> repr;
 };
 #endif // CXXBRIDGE1_RUST_STRING
 
@@ -87,7 +87,7 @@ public:
   Str(const String &) noexcept;
   Str(const std::string &);
   Str(const char *);
-  Str(const char *, size_t);
+  Str(const char *, std::size_t);
 
   Str &operator=(const Str &) noexcept = default;
 
@@ -95,8 +95,8 @@ public:
 
   // Note: no null terminator.
   const char *data() const noexcept;
-  size_t size() const noexcept;
-  size_t length() const noexcept;
+  std::size_t size() const noexcept;
+  std::size_t length() const noexcept;
 
   // Important in order for System V ABI to pass in registers.
   Str(const Str &) noexcept = default;
@@ -121,7 +121,7 @@ private:
   // Not necessarily ABI compatible with &str. Codegen will translate to
   // cxx::rust_str::RustStr which matches this layout.
   const char *ptr;
-  size_t len;
+  std::size_t len;
 };
 #endif // CXXBRIDGE1_RUST_STR
 
@@ -145,14 +145,14 @@ class Slice final
     : private detail::copy_assignable_if<std::is_const<T>::value> {
 public:
   Slice() noexcept;
-  Slice(T *, size_t count) noexcept;
+  Slice(T *, std::size_t count) noexcept;
 
   Slice &operator=(const Slice<T> &) noexcept = default;
   Slice &operator=(Slice<T> &&) noexcept = default;
 
   T *data() const noexcept;
-  size_t size() const noexcept;
-  size_t length() const noexcept;
+  std::size_t size() const noexcept;
+  std::size_t length() const noexcept;
 
   // Important in order for System V ABI to pass in registers.
   Slice(const Slice<T> &) noexcept = default;
@@ -167,13 +167,13 @@ private:
   // Not necessarily ABI compatible with &[T]. Codegen will translate to
   // cxx::rust_slice::RustSlice which matches this layout.
   T *ptr;
-  size_t len;
+  std::size_t len;
 };
 
 template <typename T>
 class Slice<T>::iterator final {
 public:
-  using difference_type = ptrdiff_t;
+  using difference_type = std::ptrdiff_t;
   using value_type = T;
   using pointer = typename std::add_pointer<T>::type;
   using reference = typename std::add_lvalue_reference<T>::type;
@@ -252,23 +252,23 @@ public:
   Vec &operator=(Vec &&) noexcept;
   Vec &operator=(const Vec &);
 
-  size_t size() const noexcept;
+  std::size_t size() const noexcept;
   bool empty() const noexcept;
   const T *data() const noexcept;
   T *data() noexcept;
-  size_t capacity() const noexcept;
+  std::size_t capacity() const noexcept;
 
-  const T &operator[](size_t n) const noexcept;
-  const T &at(size_t n) const;
+  const T &operator[](std::size_t n) const noexcept;
+  const T &at(std::size_t n) const;
   const T &front() const;
   const T &back() const;
 
-  T &operator[](size_t n) noexcept;
-  T &at(size_t n);
+  T &operator[](std::size_t n) noexcept;
+  T &at(std::size_t n);
   T &front();
   T &back();
 
-  void reserve(size_t new_cap);
+  void reserve(std::size_t new_cap);
   void push_back(const T &value);
   void push_back(T &&value);
   template <typename... Args>
@@ -288,13 +288,13 @@ public:
   Vec(unsafe_bitcopy_t, const Vec &) noexcept;
 
 private:
-  static size_t stride() noexcept;
-  void reserve_total(size_t cap) noexcept;
-  void set_len(size_t len) noexcept;
+  static std::size_t stride() noexcept;
+  void reserve_total(std::size_t cap) noexcept;
+  void set_len(std::size_t len) noexcept;
   void drop() noexcept;
 
   // Size and alignment statically verified by rust_vec.rs.
-  std::array<uintptr_t, 3> repr;
+  std::array<std::uintptr_t, 3> repr;
 };
 
 template <typename T>
@@ -302,7 +302,7 @@ class Vec<T>::iterator final {
 public:
   using iterator_category = std::random_access_iterator_tag;
   using value_type = T;
-  using difference_type = ptrdiff_t;
+  using difference_type = std::ptrdiff_t;
   using pointer = typename std::add_pointer<T>::type;
   using reference = typename std::add_lvalue_reference<T>::type;
 
@@ -332,7 +332,7 @@ private:
   friend class Vec;
   friend class Vec<typename std::remove_const<T>::type>;
   void *pos;
-  size_t stride;
+  std::size_t stride;
 };
 #endif // CXXBRIDGE1_RUST_VEC
 
@@ -371,7 +371,7 @@ private:
   Error() noexcept = default;
   friend impl<Error>;
   const char *msg;
-  size_t len;
+  std::size_t len;
 };
 #endif // CXXBRIDGE1_RUST_ERROR
 
@@ -419,15 +419,15 @@ public:
 template <typename T>
 struct IsRelocatable;
 
-using u8 = uint8_t;
-using u16 = uint16_t;
-using u32 = uint32_t;
-using u64 = uint64_t;
-using usize = size_t; // see static asserts in cxx.cc
-using i8 = int8_t;
-using i16 = int16_t;
-using i32 = int32_t;
-using i64 = int64_t;
+using u8 = std::uint8_t;
+using u16 = std::uint16_t;
+using u32 = std::uint32_t;
+using u64 = std::uint64_t;
+using usize = std::size_t; // see static asserts in cxx.cc
+using i8 = std::int8_t;
+using i16 = std::int16_t;
+using i32 = std::int32_t;
+using i64 = std::int64_t;
 using f32 = float;
 using f64 = double;
 
@@ -483,9 +483,9 @@ constexpr unsafe_bitcopy_t unsafe_bitcopy{};
 #define CXXBRIDGE1_RUST_STR
 inline const char *Str::data() const noexcept { return this->ptr; }
 
-inline size_t Str::size() const noexcept { return this->len; }
+inline std::size_t Str::size() const noexcept { return this->len; }
 
-inline size_t Str::length() const noexcept { return this->len; }
+inline std::size_t Str::length() const noexcept { return this->len; }
 #endif // CXXBRIDGE1_RUST_STR
 
 #ifndef CXXBRIDGE1_RUST_SLICE
@@ -494,7 +494,7 @@ template <typename T>
 Slice<T>::Slice() noexcept : ptr(reinterpret_cast<T *>(alignof(T))), len(0) {}
 
 template <typename T>
-Slice<T>::Slice(T *s, size_t count) noexcept : ptr(s), len(count) {}
+Slice<T>::Slice(T *s, std::size_t count) noexcept : ptr(s), len(count) {}
 
 template <typename T>
 T *Slice<T>::data() const noexcept {
@@ -502,12 +502,12 @@ T *Slice<T>::data() const noexcept {
 }
 
 template <typename T>
-size_t Slice<T>::size() const noexcept {
+std::size_t Slice<T>::size() const noexcept {
   return this->len;
 }
 
 template <typename T>
-size_t Slice<T>::length() const noexcept {
+std::size_t Slice<T>::length() const noexcept {
   return this->len;
 }
 
@@ -735,13 +735,13 @@ T *Vec<T>::data() noexcept {
 }
 
 template <typename T>
-const T &Vec<T>::operator[](size_t n) const noexcept {
+const T &Vec<T>::operator[](std::size_t n) const noexcept {
   auto data = reinterpret_cast<const char *>(this->data());
   return *reinterpret_cast<const T *>(data + n * this->stride());
 }
 
 template <typename T>
-const T &Vec<T>::at(size_t n) const {
+const T &Vec<T>::at(std::size_t n) const {
   if (n >= this->size()) {
     panic<std::out_of_range>("rust::Vec index out of range");
   }
@@ -759,13 +759,13 @@ const T &Vec<T>::back() const {
 }
 
 template <typename T>
-T &Vec<T>::operator[](size_t n) noexcept {
+T &Vec<T>::operator[](std::size_t n) noexcept {
   auto data = reinterpret_cast<char *>(this->data());
   return *reinterpret_cast<T *>(data + n * this->stride());
 }
 
 template <typename T>
-T &Vec<T>::at(size_t n) {
+T &Vec<T>::at(std::size_t n) {
   if (n >= this->size()) {
     panic<std::out_of_range>("rust::Vec index out of range");
   }
@@ -783,7 +783,7 @@ T &Vec<T>::back() {
 }
 
 template <typename T>
-void Vec<T>::reserve(size_t new_cap) {
+void Vec<T>::reserve(std::size_t new_cap) {
   this->reserve_total(new_cap);
 }
 

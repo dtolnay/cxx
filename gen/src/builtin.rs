@@ -147,7 +147,7 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "struct operator_new {{");
         writeln!(
             out,
-            "  void *operator()(size_t sz) {{ return ::operator new(sz); }}",
+            "  void *operator()(::std::size_t sz) {{ return ::operator new(sz); }}",
         );
         writeln!(out, "}};");
         out.next_section();
@@ -158,7 +158,7 @@ pub(super) fn write(out: &mut OutFile) {
         );
         writeln!(
             out,
-            "  void *operator()(size_t sz) {{ return T::operator new(sz); }}",
+            "  void *operator()(::std::size_t sz) {{ return T::operator new(sz); }}",
         );
         writeln!(out, "}};");
     }
@@ -187,7 +187,7 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "  T value;");
         writeln!(
             out,
-            "  void *operator new(size_t sz) {{ return detail::operator_new<T>{{}}(sz); }}",
+            "  void *operator new(::std::size_t sz) {{ return detail::operator_new<T>{{}}(sz); }}",
         );
         writeln!(out, "  MaybeUninit() {{}}");
         writeln!(out, "  ~MaybeUninit() {{}}");
@@ -201,7 +201,7 @@ pub(super) fn write(out: &mut OutFile) {
         out.begin_block(Block::Namespace("repr"));
         writeln!(out, "struct PtrLen final {{");
         writeln!(out, "  void *ptr;");
-        writeln!(out, "  size_t len;");
+        writeln!(out, "  ::std::size_t len;");
         writeln!(out, "}};");
         out.end_block(Block::Namespace("repr"));
     }
@@ -281,7 +281,7 @@ pub(super) fn write(out: &mut OutFile) {
         include.cstddef = true;
         include.type_traits = true;
         out.next_section();
-        writeln!(out, "template <typename T, typename = size_t>");
+        writeln!(out, "template <typename T, typename = ::std::size_t>");
         writeln!(out, "struct is_complete : std::false_type {{}};");
         out.next_section();
         writeln!(out, "template <typename T>");
@@ -338,7 +338,7 @@ pub(super) fn write(out: &mut OutFile) {
         out.begin_block(Block::ExternC);
         writeln!(
             out,
-            "const char *cxxbridge1$exception(const char *, size_t);",
+            "const char *cxxbridge1$exception(const char *, ::std::size_t);",
         );
         out.end_block(Block::ExternC);
     }
