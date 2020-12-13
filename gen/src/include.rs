@@ -37,6 +37,7 @@ pub struct Includes<'a> {
     pub utility: bool,
     pub vector: bool,
     pub basetsd: bool,
+    pub sys_types: bool,
     pub content: Content<'a>,
 }
 
@@ -88,6 +89,7 @@ pub(super) fn write(out: &mut OutFile) {
         utility,
         vector,
         basetsd,
+        sys_types,
         content: _,
     } = *include;
 
@@ -139,6 +141,18 @@ pub(super) fn write(out: &mut OutFile) {
     if basetsd {
         writeln!(out, "#if defined(_WIN32)");
         writeln!(out, "#include <basetsd.h>");
+    }
+    if sys_types {
+        if basetsd {
+            writeln!(out, "#else");
+        } else {
+            writeln!(out, "#if not defined(_WIN32)");
+        }
+    }
+    if sys_types {
+        writeln!(out, "#include <sys/types.h>");
+    }
+    if basetsd || sys_types {
         writeln!(out, "#endif");
     }
 }

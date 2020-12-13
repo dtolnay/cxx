@@ -15,6 +15,8 @@
 #include <vector>
 #if defined(_WIN32)
 #include <basetsd.h>
+#else
+#include <sys/types.h>
 #endif
 
 namespace rust {

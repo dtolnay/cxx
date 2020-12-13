@@ -93,6 +93,7 @@ pub(super) fn write(out: &mut OutFile) {
 
     if builtin.rust_isize {
         include.basetsd = true;
+        include.sys_types = true;
     }
 
     if builtin.relocatable {
