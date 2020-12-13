@@ -18,10 +18,9 @@ public:
   Slice(const Slice<T> &) noexcept;
   Slice(T *, size_t count) noexcept;
 
-  // if std::is_const<T> {
-  Slice &operator=(const Slice<T> &) noexcept;
-  // }
   Slice &operator=(Slice<T> &&) noexcept;
+  Slice &operator=(const Slice<T> &) noexcept
+    requires std::is_const_v<T>;
 
   T *data() const noexcept;
   size_t size() const noexcept;
