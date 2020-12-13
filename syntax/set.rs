@@ -102,8 +102,13 @@ pub struct Iter<'s, 'a, T>(slice::Iter<'s, &'a T>);
 
 impl<'s, 'a, T> Iterator for Iter<'s, 'a, T> {
     type Item = &'a T;
+
     fn next(&mut self) -> Option<Self::Item> {
         self.0.next().copied()
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.0.size_hint()
     }
 }
 
