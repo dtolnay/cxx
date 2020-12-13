@@ -249,6 +249,23 @@ std::ostream &operator<<(std::ostream &os, const Str &s) {
   return os;
 }
 
+// Rust specifies that usize is ABI compatible with C's uintptr_t.
+// https://rust-lang.github.io/unsafe-code-guidelines/layout/scalars.html#isize-and-usize
+// However there is no direct Rust equivalent for size_t. C does not guarantee
+// that size_t and uintptr_t are compatible. In practice though, on all
+// platforms supported by Rust, they are identical for ABI purposes. See the
+// libc crate which unconditionally defines libc::size_t = usize. We expect the
+// same here and these assertions are just here to explicitly document that.
+// *Note that no assumption is made about C++ name mangling of signatures
+// containing these types, not here nor anywhere in CXX.*
+static_assert(sizeof(size_t) == sizeof(uintptr_t), "unsupported size_t size");
+static_assert(alignof(size_t) == alignof(uintptr_t),
+              "unsupported size_t alignment");
+static_assert(sizeof(rust::isize) == sizeof(intptr_t),
+              "unsupported ssize_t size");
+static_assert(alignof(rust::isize) == alignof(intptr_t),
+              "unsupported ssize_t alignment");
+
 static_assert(std::is_trivially_copy_constructible<Str>::value,
               "trivial Str(const Str &)");
 static_assert(std::is_trivially_copy_assignable<Str>::value,
