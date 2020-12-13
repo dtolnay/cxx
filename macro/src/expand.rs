@@ -952,10 +952,12 @@ fn type_id(name: &Pair) -> TokenStream {
 fn expand_rust_box(ident: &RustName, types: &Types) -> TokenStream {
     let link_prefix = format!("cxxbridge1$box${}$", types.resolve(ident).to_symbol());
     let link_alloc = format!("{}alloc", link_prefix);
+    let link_dealloc = format!("{}dealloc", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
 
     let local_prefix = format_ident!("{}__box_", &ident.rust);
     let local_alloc = format_ident!("{}alloc", local_prefix);
+    let local_dealloc = format_ident!("{}dealloc", local_prefix);
     let local_drop = format_ident!("{}drop", local_prefix);
 
     let span = ident.span();
@@ -966,6 +968,11 @@ fn expand_rust_box(ident: &RustName, types: &Types) -> TokenStream {
         #[export_name = #link_alloc]
         unsafe extern "C" fn #local_alloc() -> *mut ::std::mem::MaybeUninit<#ident> {
             ::std::boxed::Box::into_raw(::std::boxed::Box::new(::std::mem::MaybeUninit::uninit()))
+        }
+        #[doc(hidden)]
+        #[export_name = #link_dealloc]
+        unsafe extern "C" fn #local_dealloc(ptr: *mut ::std::mem::MaybeUninit<#ident>) {
+            ::std::boxed::Box::from_raw(ptr);
         }
         #[doc(hidden)]
         #[export_name = #link_drop]
