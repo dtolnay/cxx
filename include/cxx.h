@@ -554,6 +554,7 @@ template <typename T>
 class Box<T>::allocation {
   static T *alloc() noexcept;
   static void dealloc(T *) noexcept;
+
 public:
   allocation() noexcept : ptr(alloc()) {}
   ~allocation() noexcept {
