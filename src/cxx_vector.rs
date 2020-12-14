@@ -6,6 +6,7 @@ use crate::kind::Trivial;
 use crate::string::CxxString;
 use core::ffi::c_void;
 use core::fmt::{self, Debug, Display};
+use core::iter::FusedIterator;
 use core::marker::{PhantomData, PhantomPinned};
 use core::mem;
 use core::ptr;
@@ -146,6 +147,8 @@ where
         self.v.len() - self.index
     }
 }
+
+impl<'a, T> FusedIterator for Iter<'a, T> where T: VectorElement {}
 
 impl<T> Debug for CxxVector<T>
 where
