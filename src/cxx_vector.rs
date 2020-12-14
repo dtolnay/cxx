@@ -128,8 +128,22 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         let next = self.v.get(self.index);
-        self.index += 1;
+        self.index += next.is_some() as usize;
         next
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let len = self.len();
+        (len, Some(len))
+    }
+}
+
+impl<'a, T> ExactSizeIterator for Iter<'a, T>
+where
+    T: VectorElement,
+{
+    fn len(&self) -> usize {
+        self.v.len() - self.index
     }
 }
 
