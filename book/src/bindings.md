@@ -11,8 +11,8 @@ returns of extern functions.
 <tr><th>name in Rust</th><th>name in C++</th><th>restrictions</th></tr>
 <tr><td style="padding:3px 6px">String</td><td style="padding:3px 6px"><b><a href="binding/string.md">rust::String</a></b></td><td style="padding:3px 6px"></td></tr>
 <tr><td style="padding:3px 6px">&amp;str</td><td style="padding:3px 6px"><b><a href="binding/str.md">rust::Str</a></b></td><td style="padding:3px 6px"></td></tr>
-<tr><td style="padding:3px 6px">&amp;[u8]</td><td style="padding:3px 6px"><b><a href="binding/slice.md">rust::Slice&lt;const&nbsp;uint8_t&gt;</a></b></td><td style="padding:3px 6px"><sup><i>arbitrary &amp;[T] not implemented yet</i></sup></td></tr>
-<tr><td style="padding:3px 6px">&amp;mut [u8]</td><td style="padding:3px 6px"><b><a href="binding/slice.md">rust::Slice&lt;uint8_t&gt;</a></b></td><td style="padding:3px 6px"><sup><i>arbitrary &amp;mut [T] not implemented yet</i></sup></td></tr>
+<tr><td style="padding:3px 6px">&amp;[T]</td><td style="padding:3px 6px"><b><a href="binding/slice.md">rust::Slice&lt;const&nbsp;T&gt;</a></b></td><td style="padding:3px 6px"><sup><i>cannot hold opaque Rust or C++ type</i></sup></td></tr>
+<tr><td style="padding:3px 6px">&amp;mut [T]</td><td style="padding:3px 6px"><b><a href="binding/slice.md">rust::Slice&lt;T&gt;</a></b></td><td style="padding:3px 6px"><sup><i>cannot hold opaque Rust or C++ type</i></sup></td></tr>
 <tr><td style="padding:3px 6px"><b><a href="binding/cxxstring.md">CxxString</a></b></td><td style="padding:3px 6px">std::string</td><td style="padding:3px 6px"><sup><i>cannot be passed by value</i></sup></td></tr>
 <tr><td style="padding:3px 6px">Box&lt;T&gt;</td><td style="padding:3px 6px"><b><a href="binding/box.md">rust::Box&lt;T&gt;</a></b></td><td style="padding:3px 6px"><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
 <tr><td style="padding:3px 6px"><b><a href="binding/uniqueptr.md">UniquePtr&lt;T&gt;</a></b></td><td style="padding:3px 6px">std::unique_ptr&lt;T&gt;</td><td style="padding:3px 6px"><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
