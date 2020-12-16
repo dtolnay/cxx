@@ -1,5 +1,3 @@
-use std::marker::Unpin;
-
 #[cxx::bridge]
 mod ffi {
     extern "C++" {

@@ -1,10 +1,10 @@
 error[E0277]: `*const u8` cannot be sent between threads safely
-  --> $DIR/opaque_autotraits.rs:15:5
+  --> $DIR/opaque_autotraits.rs:13:5
    |
-10 | fn assert_send<T: Send>() {}
+8  | fn assert_send<T: Send>() {}
    |                   ---- required by this bound in `assert_send`
 ...
-15 |     assert_send::<ffi::Opaque>();
+13 |     assert_send::<ffi::Opaque>();
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ `*const u8` cannot be sent between threads safely
    |
    = help: within `ffi::Opaque`, the trait `Send` is not implemented for `*const u8`
@@ -13,12 +13,12 @@ error[E0277]: `*const u8` cannot be sent between threads safely
    = note: required because it appears within the type `ffi::Opaque`
 
 error[E0277]: `*const u8` cannot be shared between threads safely
-  --> $DIR/opaque_autotraits.rs:16:5
+  --> $DIR/opaque_autotraits.rs:14:5
    |
-11 | fn assert_sync<T: Sync>() {}
+9  | fn assert_sync<T: Sync>() {}
    |                   ---- required by this bound in `assert_sync`
 ...
-16 |     assert_sync::<ffi::Opaque>();
+14 |     assert_sync::<ffi::Opaque>();
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ `*const u8` cannot be shared between threads safely
    |
    = help: within `ffi::Opaque`, the trait `Sync` is not implemented for `*const u8`
@@ -27,12 +27,12 @@ error[E0277]: `*const u8` cannot be shared between threads safely
    = note: required because it appears within the type `ffi::Opaque`
 
 error[E0277]: `PhantomPinned` cannot be unpinned
-  --> $DIR/opaque_autotraits.rs:17:5
+  --> $DIR/opaque_autotraits.rs:15:5
    |
-12 | fn assert_unpin<T: Unpin>() {}
+10 | fn assert_unpin<T: Unpin>() {}
    |                    ----- required by this bound in `assert_unpin`
 ...
-17 |     assert_unpin::<ffi::Opaque>();
+15 |     assert_unpin::<ffi::Opaque>();
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `ffi::Opaque`, the trait `Unpin` is not implemented for `PhantomPinned`
    |
    = note: required because it appears within the type `PhantomData<PhantomPinned>`
