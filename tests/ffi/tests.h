@@ -45,6 +45,8 @@ public:
   size_t get() const;
   size_t set(size_t n);
   size_t get2() const;
+  const size_t &getRef() const;
+  size_t &getMut();
   size_t set_succeed(size_t n);
   size_t get_fail();
   const std::vector<uint8_t> &get_v() const;

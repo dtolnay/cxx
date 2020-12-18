@@ -464,6 +464,12 @@ fn check_mut_return_restriction(cx: &mut Check, efn: &ExternFn) {
         _ => return,
     }
 
+    if let Some(r) = &efn.receiver {
+        if r.mutable {
+            return;
+        }
+    }
+
     for arg in &efn.args {
         if let Type::Ref(ty) = &arg.ty {
             if ty.mutable {
