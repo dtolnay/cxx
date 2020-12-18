@@ -53,6 +53,8 @@ public:
   std::size_t size() const noexcept;
   std::size_t length() const noexcept;
 
+  const char *c_str() noexcept;
+
   using iterator = char *;
   iterator begin() noexcept;
   iterator end() noexcept;
