@@ -22,6 +22,10 @@ size_t C::get() const { return this->n; }
 
 size_t C::get2() const { return this->n; }
 
+const size_t &C::getRef() const { return this->n; }
+
+size_t &C::getMut() { return this->n; }
+
 size_t C::set(size_t n) {
   this->n = n;
   return this->n;
@@ -32,6 +36,12 @@ size_t C::set_succeed(size_t n) { return this->set(n); }
 size_t C::get_fail() { throw std::runtime_error("unimplemented"); }
 
 size_t Shared::c_method_on_shared() const noexcept { return 2021; }
+
+const size_t &Shared::c_method_ref_on_shared() const noexcept {
+  return this->z;
+}
+
+size_t &Shared::c_method_mut_on_shared() noexcept { return this->z; }
 
 void Array::c_set_array(int32_t val) noexcept {
   this->a = {val, val, val, val};

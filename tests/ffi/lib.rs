@@ -165,9 +165,13 @@ pub mod ffi {
         fn get(self: &C) -> usize;
         fn set(self: Pin<&mut C>, n: usize) -> usize;
         fn get2(&self) -> usize;
+        fn getRef(self: &C) -> &usize;
+        fn getMut(self: Pin<&mut C>) -> &mut usize;
         fn set_succeed(self: Pin<&mut C>, n: usize) -> Result<usize>;
         fn get_fail(self: Pin<&mut C>) -> Result<usize>;
         fn c_method_on_shared(self: &Shared) -> usize;
+        fn c_method_ref_on_shared(self: &Shared) -> &usize;
+        fn c_method_mut_on_shared(self: &mut Shared) -> &mut usize;
         fn c_set_array(self: &mut Array, value: i32);
 
         #[rust_name = "i32_overloaded_method"]

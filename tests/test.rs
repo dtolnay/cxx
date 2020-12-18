@@ -210,9 +210,13 @@ fn test_c_method_calls() {
     assert_eq!(2021, unique_ptr.pin_mut().set(2021));
     assert_eq!(2021, unique_ptr.get());
     assert_eq!(2021, unique_ptr.get2());
+    assert_eq!(2021, *unique_ptr.getRef());
+    assert_eq!(2021, *unique_ptr.pin_mut().getMut());
     assert_eq!(2022, unique_ptr.pin_mut().set_succeed(2022).unwrap());
     assert!(unique_ptr.pin_mut().get_fail().is_err());
     assert_eq!(2021, ffi::Shared { z: 0 }.c_method_on_shared());
+    assert_eq!(2022, *ffi::Shared { z: 2022 }.c_method_ref_on_shared());
+    assert_eq!(2023, *ffi::Shared { z: 2023 }.c_method_mut_on_shared());
 
     let val = 42;
     let mut array = ffi::Array { a: [0, 0, 0, 0] };
