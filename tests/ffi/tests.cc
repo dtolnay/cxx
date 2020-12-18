@@ -716,6 +716,12 @@ extern "C" const char *cxx_run_test() noexcept {
     ASSERT((second.*cmp)(sec) == second_sec);
   }
 
+  rust::String cstring = "test";
+  ASSERT(cstring.length() == 4);
+  ASSERT(strncmp(cstring.data(), "test", 4) == 0);
+  ASSERT(strncmp(cstring.c_str(), "test", 5) == 0);
+  ASSERT(cstring.length() == 4);
+
   cxx_test_suite_set_correct();
   return nullptr;
 }
