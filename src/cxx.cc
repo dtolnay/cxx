@@ -42,6 +42,7 @@ bool cxxbridge1$string$from(rust::String *self, const char *ptr,
 void cxxbridge1$string$drop(rust::String *self) noexcept;
 const char *cxxbridge1$string$ptr(const rust::String *self) noexcept;
 std::size_t cxxbridge1$string$len(const rust::String *self) noexcept;
+void cxxbridge1$string$reserve_total(rust::String *self, size_t cap) noexcept;
 
 // rust::Str
 bool cxxbridge1$str$valid(const char *ptr, std::size_t len) noexcept;
@@ -125,6 +126,14 @@ std::size_t String::size() const noexcept {
 
 std::size_t String::length() const noexcept {
   return cxxbridge1$string$len(this);
+}
+
+const char *String::c_str() noexcept {
+  auto len = this->length();
+  cxxbridge1$string$reserve_total(this, len + 1);
+  auto ptr = this->data();
+  const_cast<char *>(ptr)[len] = '\0';
+  return ptr;
 }
 
 String::iterator String::begin() noexcept {

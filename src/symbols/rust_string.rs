@@ -45,3 +45,8 @@ unsafe extern "C" fn string_ptr(this: &String) -> *const u8 {
 unsafe extern "C" fn string_len(this: &String) -> usize {
     this.len()
 }
+
+#[export_name = "cxxbridge1$string$reserve_total"]
+unsafe extern "C" fn string_reserve_total(this: &mut String, cap: usize) {
+    this.reserve(cap);
+}
