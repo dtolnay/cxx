@@ -1,8 +1,8 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::{
-    error, ident, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Signature,
-    SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
+    error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref,
+    Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
@@ -325,14 +325,11 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
     }
 
     if let Some(reasons) = cx.types.required_trivial.get(&ety.name.rust) {
-        for reason in reasons {
-            let what = reason.describe_in_context(&ety);
-            let msg = format!(
-                "needs a cxx::ExternType impl in order to be used as {}",
-                what,
-            );
-            cx.error(ety, msg);
-        }
+        let msg = format!(
+            "needs a cxx::ExternType impl in order to be used as {}",
+            trivial::as_what(&ety.name, reasons),
+        );
+        cx.error(ety, msg);
     }
 }
 

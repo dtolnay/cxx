@@ -50,11 +50,21 @@ mod ordered {
         }
     }
 
+    impl<'a, T> OrderedSet<&'a T> {
+        pub fn is_empty(&self) -> bool {
+            self.vec.is_empty()
+        }
+
+        pub fn iter(&self) -> Iter<'_, 'a, T> {
+            Iter(self.vec.iter())
+        }
+    }
+
     impl<'s, 'a, T> IntoIterator for &'s OrderedSet<&'a T> {
         type Item = &'a T;
         type IntoIter = Iter<'s, 'a, T>;
         fn into_iter(self) -> Self::IntoIter {
-            Iter(self.vec.iter())
+            self.iter()
         }
     }
 }
