@@ -1,13 +1,13 @@
 use crate::syntax::improper::ImproperCtype;
 use crate::syntax::report::Errors;
 use crate::syntax::set::{OrderedSet as Set, UnorderedSet};
+use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::{
-    toposort, Api, Enum, ExternFn, ExternType, Impl, Pair, RustName, Struct, Type, TypeAlias,
+    toposort, Api, Enum, ExternType, Impl, Pair, RustName, Struct, Type, TypeAlias,
 };
 use proc_macro2::Ident;
 use quote::ToTokens;
 use std::collections::BTreeMap as Map;
-use std::fmt::Display;
 
 pub struct Types<'a> {
     pub all: Set<&'a Type>,
@@ -168,80 +168,8 @@ impl<'a> Types<'a> {
         // we check that this is permissible. We do this _after_ scanning all
         // the APIs above, in case some function or struct references a type
         // which is declared subsequently.
-        let mut required_trivial: Map<_, Vec<_>> = Map::new();
-
-        let mut insist_extern_types_are_trivial = |ident: &'a RustName, reason| {
-            if cxx.contains(&ident.rust)
-                && !structs.contains_key(&ident.rust)
-                && !enums.contains_key(&ident.rust)
-            {
-                required_trivial
-                    .entry(&ident.rust)
-                    .or_default()
-                    .push(reason);
-            }
-        };
-        for api in apis {
-            match api {
-                Api::Struct(strct) => {
-                    for field in &strct.fields {
-                        if let Type::Ident(ident) = &field.ty {
-                            let reason = TrivialReason::StructField(strct);
-                            insist_extern_types_are_trivial(ident, reason);
-                        }
-                    }
-                }
-                Api::CxxFunction(efn) | Api::RustFunction(efn) => {
-                    if let Some(receiver) = &efn.receiver {
-                        if receiver.mutable && !receiver.pinned {
-                            let reason = TrivialReason::UnpinnedMutArg(efn);
-                            insist_extern_types_are_trivial(&receiver.ty, reason);
-                        }
-                    }
-                    for arg in &efn.args {
-                        match &arg.ty {
-                            Type::Ident(ident) => {
-                                let reason = TrivialReason::FunctionArgument(efn);
-                                insist_extern_types_are_trivial(ident, reason);
-                            }
-                            Type::Ref(ty) => {
-                                if ty.mutable && !ty.pinned {
-                                    if let Type::Ident(ident) = &ty.inner {
-                                        let reason = TrivialReason::UnpinnedMutArg(efn);
-                                        insist_extern_types_are_trivial(ident, reason);
-                                    }
-                                }
-                            }
-                            _ => {}
-                        }
-                    }
-                    if let Some(ret) = &efn.ret {
-                        if let Type::Ident(ident) = &ret {
-                            let reason = TrivialReason::FunctionReturn(efn);
-                            insist_extern_types_are_trivial(ident, reason);
-                        }
-                    }
-                }
-                _ => {}
-            }
-        }
-        for ty in &all {
-            match ty {
-                Type::RustBox(ty) => {
-                    if let Type::Ident(ident) = &ty.inner {
-                        let reason = TrivialReason::BoxTarget;
-                        insist_extern_types_are_trivial(ident, reason);
-                    }
-                }
-                Type::RustVec(ty) => {
-                    if let Type::Ident(ident) = &ty.inner {
-                        let reason = TrivialReason::VecElement;
-                        insist_extern_types_are_trivial(ident, reason);
-                    }
-                }
-                _ => {}
-            }
-        }
+        let required_trivial =
+            trivial::required_trivial_reasons(apis, &all, &structs, &enums, &cxx);
 
         let mut types = Types {
             all,
@@ -318,45 +246,6 @@ impl<'t, 'a> IntoIterator for &'t Types<'a> {
     type IntoIter = crate::syntax::set::Iter<'t, 'a, Type>;
     fn into_iter(self) -> Self::IntoIter {
         self.all.into_iter()
-    }
-}
-
-#[derive(Copy, Clone)]
-pub enum TrivialReason<'a> {
-    StructField(&'a Struct),
-    FunctionArgument(&'a ExternFn),
-    FunctionReturn(&'a ExternFn),
-    BoxTarget,
-    VecElement,
-    UnpinnedMutArg(&'a ExternFn),
-}
-
-impl<'a> TrivialReason<'a> {
-    pub fn describe_in_context(&self, ety: &ExternType) -> String {
-        match self {
-            TrivialReason::BoxTarget => format!("Box<{}>", ety.name.rust),
-            TrivialReason::VecElement => format!("a vector element in Vec<{}>", ety.name.rust),
-            _ => self.to_string(),
-        }
-    }
-}
-
-impl<'a> Display for TrivialReason<'a> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            TrivialReason::StructField(strct) => write!(f, "a field of `{}`", strct.name.rust),
-            TrivialReason::FunctionArgument(efn) => write!(f, "an argument of `{}`", efn.name.rust),
-            TrivialReason::FunctionReturn(efn) => {
-                write!(f, "a return value of `{}`", efn.name.rust)
-            }
-            TrivialReason::BoxTarget => write!(f, "in a Box<...>"),
-            TrivialReason::VecElement => write!(f, "a Vec<...> element"),
-            TrivialReason::UnpinnedMutArg(efn) => write!(
-                f,
-                "a non-pinned mutable reference argument of {}",
-                efn.name.rust
-            ),
-        }
     }
 }
 

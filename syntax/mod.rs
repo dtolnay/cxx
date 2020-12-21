@@ -22,6 +22,7 @@ pub mod set;
 pub mod symbol;
 mod tokens;
 mod toposort;
+pub mod trivial;
 pub mod types;
 
 use self::discriminant::Discriminant;
