@@ -131,7 +131,11 @@ mod tests {
             doc: Doc::new(),
             derives: Vec::new(),
             type_token: Token![type](Span::call_site()),
-            name: Pair::new(ns, ident.clone(), ident),
+            name: Pair {
+                namespace: ns,
+                cxx: ident.clone(),
+                rust: ident,
+            },
             colon_token: None,
             bounds: Vec::new(),
             semi_token: Token![;](Span::call_site()),

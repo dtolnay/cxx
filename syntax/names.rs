@@ -1,16 +1,8 @@
-use crate::syntax::{Namespace, Pair, RustName, Symbol, Types};
+use crate::syntax::{Pair, RustName, Symbol, Types};
 use proc_macro2::{Ident, Span};
 use std::iter;
 
 impl Pair {
-    pub fn new(namespace: Namespace, cxx: Ident, rust: Ident) -> Self {
-        Pair {
-            namespace,
-            cxx,
-            rust,
-        }
-    }
-
     pub fn to_symbol(&self) -> Symbol {
         Symbol::from_idents(self.iter_all_segments())
     }

@@ -1047,9 +1047,9 @@ fn parse_return_type(
 
 fn pair(namespace: Namespace, default: &Ident, cxx: Option<Ident>, rust: Option<Ident>) -> Pair {
     let default = || default.clone();
-    Pair::new(
+    Pair {
         namespace,
-        cxx.unwrap_or_else(default),
-        rust.unwrap_or_else(default),
-    )
+        cxx: cxx.unwrap_or_else(default),
+        rust: rust.unwrap_or_else(default),
+    }
 }
