@@ -4,7 +4,7 @@ use std::iter;
 
 impl Pair {
     pub fn new(namespace: Namespace, cxx: Ident, rust: Ident) -> Self {
-        Self {
+        Pair {
             namespace,
             cxx,
             rust,
@@ -30,12 +30,12 @@ impl Pair {
 }
 
 impl RustName {
-    pub fn new(ident: Ident) -> Self {
-        Self { rust: ident }
+    pub fn new(rust: Ident) -> Self {
+        RustName { rust }
     }
 
-    pub fn from_ref(ident: &Ident) -> &Self {
-        unsafe { &*(ident as *const Ident as *const Self) }
+    pub fn from_ref(rust: &Ident) -> &Self {
+        unsafe { &*(rust as *const Ident as *const Self) }
     }
 
     pub fn span(&self) -> Span {
