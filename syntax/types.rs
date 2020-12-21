@@ -184,23 +184,23 @@ impl<'a> Types<'a> {
         for api in apis {
             match api {
                 Api::Struct(strct) => {
-                    let reason = TrivialReason::StructField(strct);
                     for field in &strct.fields {
                         if let Type::Ident(ident) = &field.ty {
+                            let reason = TrivialReason::StructField(strct);
                             insist_extern_types_are_trivial(ident, reason);
                         }
                     }
                 }
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
-                    let reason = TrivialReason::FunctionArgument(efn);
                     for arg in &efn.args {
                         if let Type::Ident(ident) = &arg.ty {
+                            let reason = TrivialReason::FunctionArgument(efn);
                             insist_extern_types_are_trivial(ident, reason);
                         }
                     }
                     if let Some(ret) = &efn.ret {
-                        let reason = TrivialReason::FunctionReturn(efn);
                         if let Type::Ident(ident) = &ret {
+                            let reason = TrivialReason::FunctionReturn(efn);
                             insist_extern_types_are_trivial(ident, reason);
                         }
                     }
@@ -211,14 +211,14 @@ impl<'a> Types<'a> {
         for ty in &all {
             match ty {
                 Type::RustBox(ty) => {
-                    let reason = TrivialReason::BoxTarget;
                     if let Type::Ident(ident) = &ty.inner {
+                        let reason = TrivialReason::BoxTarget;
                         insist_extern_types_are_trivial(ident, reason);
                     }
                 }
                 Type::RustVec(ty) => {
-                    let reason = TrivialReason::VecElement;
                     if let Type::Ident(ident) = &ty.inner {
+                        let reason = TrivialReason::VecElement;
                         insist_extern_types_are_trivial(ident, reason);
                     }
                 }
@@ -228,9 +228,9 @@ impl<'a> Types<'a> {
         for api in apis {
             match api {
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
-                    let reason = TrivialReason::UnpinnedMutArg(efn);
                     if let Some(receiver) = &efn.receiver {
                         if receiver.mutable && !receiver.pinned {
+                            let reason = TrivialReason::UnpinnedMutArg(efn);
                             insist_extern_types_are_trivial(&receiver.ty, reason);
                         }
                     }
@@ -238,6 +238,7 @@ impl<'a> Types<'a> {
                         if let Type::Ref(reff) = &arg.ty {
                             if reff.mutable && !reff.pinned {
                                 if let Type::Ident(ident) = &reff.inner {
+                                    let reason = TrivialReason::UnpinnedMutArg(efn);
                                     insist_extern_types_are_trivial(ident, reason);
                                 }
                             }
