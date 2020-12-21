@@ -32,18 +32,16 @@ impl Pair {
     }
 
     pub fn to_fully_qualified(&self) -> String {
-        format!("::{}", self.join("::"))
+        let mut fully_qualified = String::new();
+        for segment in self.iter_all_segments() {
+            fully_qualified += "::";
+            fully_qualified += &segment.to_string();
+        }
+        fully_qualified
     }
 
     fn iter_all_segments(&self) -> impl Iterator<Item = &Ident> {
         self.namespace.iter().chain(iter::once(&self.cxx))
-    }
-
-    fn join(&self, sep: &str) -> String {
-        self.iter_all_segments()
-            .map(|s| s.to_string())
-            .collect::<Vec<_>>()
-            .join(sep)
     }
 }
 
