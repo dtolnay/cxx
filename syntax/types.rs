@@ -192,10 +192,27 @@ impl<'a> Types<'a> {
                     }
                 }
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
+                    if let Some(receiver) = &efn.receiver {
+                        if receiver.mutable && !receiver.pinned {
+                            let reason = TrivialReason::UnpinnedMutArg(efn);
+                            insist_extern_types_are_trivial(&receiver.ty, reason);
+                        }
+                    }
                     for arg in &efn.args {
-                        if let Type::Ident(ident) = &arg.ty {
-                            let reason = TrivialReason::FunctionArgument(efn);
-                            insist_extern_types_are_trivial(ident, reason);
+                        match &arg.ty {
+                            Type::Ident(ident) => {
+                                let reason = TrivialReason::FunctionArgument(efn);
+                                insist_extern_types_are_trivial(ident, reason);
+                            }
+                            Type::Ref(ty) => {
+                                if ty.mutable && !ty.pinned {
+                                    if let Type::Ident(ident) = &ty.inner {
+                                        let reason = TrivialReason::UnpinnedMutArg(efn);
+                                        insist_extern_types_are_trivial(ident, reason);
+                                    }
+                                }
+                            }
+                            _ => {}
                         }
                     }
                     if let Some(ret) = &efn.ret {
@@ -220,29 +237,6 @@ impl<'a> Types<'a> {
                     if let Type::Ident(ident) = &ty.inner {
                         let reason = TrivialReason::VecElement;
                         insist_extern_types_are_trivial(ident, reason);
-                    }
-                }
-                _ => {}
-            }
-        }
-        for api in apis {
-            match api {
-                Api::CxxFunction(efn) | Api::RustFunction(efn) => {
-                    if let Some(receiver) = &efn.receiver {
-                        if receiver.mutable && !receiver.pinned {
-                            let reason = TrivialReason::UnpinnedMutArg(efn);
-                            insist_extern_types_are_trivial(&receiver.ty, reason);
-                        }
-                    }
-                    for arg in &efn.args {
-                        if let Type::Ref(reff) = &arg.ty {
-                            if reff.mutable && !reff.pinned {
-                                if let Type::Ident(ident) = &reff.inner {
-                                    let reason = TrivialReason::UnpinnedMutArg(efn);
-                                    insist_extern_types_are_trivial(ident, reason);
-                                }
-                            }
-                        }
                     }
                 }
                 _ => {}
