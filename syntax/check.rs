@@ -188,7 +188,7 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
             cx.error(
                 ty,
                 format!(
-                    "mutable reference to C++ type requires a pin -- use Pin<&mut {}> or declare the type Trivial in a cxx::ExternType impl",
+                    "mutable reference to C++ type requires a pin -- use Pin<&mut {}>",
                     requires_pin,
                 ),
             );
@@ -380,7 +380,7 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
             cx.error(
                 span,
                 format!(
-                    "mutable reference to opaque C++ type requires a pin -- use `self: Pin<&mut {}>` or declare the type Trivial in a cxx::ExternType impl",
+                    "mutable reference to opaque C++ type requires a pin -- use `self: Pin<&mut {}>`",
                     receiver.ty.rust,
                 ),
             );
