@@ -1,6 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <exception>
@@ -728,7 +729,7 @@ Vec<T> &Vec<T>::operator=(const Vec &other) {
 
 template <typename T>
 bool Vec<T>::empty() const noexcept {
-  return size() == 0;
+  return this->size() == 0;
 }
 
 template <typename T>
@@ -738,6 +739,7 @@ T *Vec<T>::data() noexcept {
 
 template <typename T>
 const T &Vec<T>::operator[](std::size_t n) const noexcept {
+  assert(n < this->size());
   auto data = reinterpret_cast<const char *>(this->data());
   return *reinterpret_cast<const T *>(data + n * this->stride());
 }
@@ -752,16 +754,19 @@ const T &Vec<T>::at(std::size_t n) const {
 
 template <typename T>
 const T &Vec<T>::front() const noexcept {
+  assert(!this->empty());
   return (*this)[0];
 }
 
 template <typename T>
 const T &Vec<T>::back() const noexcept {
+  assert(!this->empty());
   return (*this)[this->size() - 1];
 }
 
 template <typename T>
 T &Vec<T>::operator[](std::size_t n) noexcept {
+  assert(n < this->size());
   auto data = reinterpret_cast<char *>(this->data());
   return *reinterpret_cast<T *>(data + n * this->stride());
 }
@@ -776,11 +781,13 @@ T &Vec<T>::at(std::size_t n) {
 
 template <typename T>
 T &Vec<T>::front() noexcept {
+  assert(!this->empty());
   return (*this)[0];
 }
 
 template <typename T>
 T &Vec<T>::back() noexcept {
+  assert(!this->empty());
   return (*this)[this->size() - 1];
 }
 

@@ -1,5 +1,4 @@
 #include "../include/cxx.h"
-#include <cassert>
 #include <cstring>
 #include <iostream>
 #include <memory>
