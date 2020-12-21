@@ -228,7 +228,7 @@ impl<'a> Types<'a> {
         for api in apis {
             match api {
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
-                    let reason = TrivialReason::UnpinnedMutableReferenceFunctionArgument(efn);
+                    let reason = TrivialReason::UnpinnedMutArg(efn);
                     if let Some(receiver) = &efn.receiver {
                         if receiver.mutable && !receiver.pinned {
                             insist_extern_types_are_trivial(&receiver.ty, reason);
@@ -333,7 +333,7 @@ pub enum TrivialReason<'a> {
     FunctionReturn(&'a ExternFn),
     BoxTarget,
     VecElement,
-    UnpinnedMutableReferenceFunctionArgument(&'a ExternFn),
+    UnpinnedMutArg(&'a ExternFn),
 }
 
 impl<'a> TrivialReason<'a> {
@@ -356,7 +356,7 @@ impl<'a> Display for TrivialReason<'a> {
             }
             TrivialReason::BoxTarget => write!(f, "in a Box<...>"),
             TrivialReason::VecElement => write!(f, "a Vec<...> element"),
-            TrivialReason::UnpinnedMutableReferenceFunctionArgument(efn) => write!(
+            TrivialReason::UnpinnedMutArg(efn) => write!(
                 f,
                 "a non-pinned mutable reference argument of {}",
                 efn.name.rust
