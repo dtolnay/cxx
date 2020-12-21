@@ -63,7 +63,7 @@ rust_library(
 
 rust_library(
     name = "quote",
-    srcs = glob(["vendor/quote-1.0.7/src/**"]),
+    srcs = glob(["vendor/quote-1.0.8/src/**"]),
     crate_features = ["proc-macro"],
     visibility = ["//visibility:public"],
     deps = [":proc-macro2"],
@@ -78,7 +78,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.54/src/**"]),
+    srcs = glob(["vendor/syn-1.0.55/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
