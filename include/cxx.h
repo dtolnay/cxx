@@ -262,13 +262,13 @@ public:
 
   const T &operator[](std::size_t n) const noexcept;
   const T &at(std::size_t n) const;
-  const T &front() const;
-  const T &back() const;
+  const T &front() const noexcept;
+  const T &back() const noexcept;
 
   T &operator[](std::size_t n) noexcept;
   T &at(std::size_t n);
-  T &front();
-  T &back();
+  T &front() noexcept;
+  T &back() noexcept;
 
   void reserve(std::size_t new_cap);
   void push_back(const T &value);
@@ -751,12 +751,12 @@ const T &Vec<T>::at(std::size_t n) const {
 }
 
 template <typename T>
-const T &Vec<T>::front() const {
+const T &Vec<T>::front() const noexcept {
   return (*this)[0];
 }
 
 template <typename T>
-const T &Vec<T>::back() const {
+const T &Vec<T>::back() const noexcept {
   return (*this)[this->size() - 1];
 }
 
@@ -775,12 +775,12 @@ T &Vec<T>::at(std::size_t n) {
 }
 
 template <typename T>
-T &Vec<T>::front() {
+T &Vec<T>::front() noexcept {
   return (*this)[0];
 }
 
 template <typename T>
-T &Vec<T>::back() {
+T &Vec<T>::back() noexcept {
   return (*this)[this->size() - 1];
 }
 
