@@ -22,6 +22,18 @@ error: needs a cxx::ExternType impl in order to be used as a field of `S`
 10 |         type C;
    |         ^^^^^^
 
+error: needs a cxx::ExternType impl in order to be used as an argument of `f`
+  --> $DIR/by_value_not_supported.rs:10:9
+   |
+10 |         type C;
+   |         ^^^^^^
+
+error: needs a cxx::ExternType impl in order to be used as a return value of `f`
+  --> $DIR/by_value_not_supported.rs:10:9
+   |
+10 |         type C;
+   |         ^^^^^^
+
 error: passing opaque C++ type by value is not supported
   --> $DIR/by_value_not_supported.rs:16:14
    |

@@ -1,6 +1,5 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
-use crate::syntax::types::TrivialReason;
 use crate::syntax::{
     error, ident, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref, Signature,
     SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
@@ -189,7 +188,7 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
             cx.error(
                 ty,
                 format!(
-                    "mutable reference to C++ type requires a pin -- use Pin<&mut {}>",
+                    "mutable reference to C++ type requires a pin -- use Pin<&mut {}> or declare the type Trivial in a cxx::ExternType impl",
                     requires_pin,
                 ),
             );
@@ -325,19 +324,15 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
         cx.error(span, "extern type bounds are not implemented yet");
     }
 
-    if let Some(reason) = cx.types.required_trivial.get(&ety.name.rust) {
-        let what = match reason {
-            TrivialReason::StructField(strct) => format!("a field of `{}`", strct.name.rust),
-            TrivialReason::FunctionArgument(efn) => format!("an argument of `{}`", efn.name.rust),
-            TrivialReason::FunctionReturn(efn) => format!("a return value of `{}`", efn.name.rust),
-            TrivialReason::BoxTarget => format!("Box<{}>", ety.name.rust),
-            TrivialReason::VecElement => format!("a vector element in Vec<{}>", ety.name.rust),
-        };
-        let msg = format!(
-            "needs a cxx::ExternType impl in order to be used as {}",
-            what,
-        );
-        cx.error(ety, msg);
+    if let Some(reasons) = cx.types.required_trivial.get(&ety.name.rust) {
+        for reason in reasons {
+            let what = reason.describe_in_context(&ety);
+            let msg = format!(
+                "needs a cxx::ExternType impl in order to be used as {}",
+                what,
+            );
+            cx.error(ety, msg);
+        }
     }
 }
 
@@ -385,7 +380,7 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
             cx.error(
                 span,
                 format!(
-                    "mutable reference to C++ type requires a pin -- use `self: Pin<&mut {}>`",
+                    "mutable reference to opaque C++ type requires a pin -- use `self: Pin<&mut {}>` or declare the type Trivial in a cxx::ExternType impl",
                     receiver.ty.rust,
                 ),
             );

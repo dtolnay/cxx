@@ -548,6 +548,18 @@ void c_take_trivial_ref(const D &d) {
   }
 }
 
+void D::c_take_trivial_ref_method() const {
+  if (d == 30) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void D::c_take_trivial_mut_ref_method() {
+  if (d == 30) {
+    cxx_test_suite_set_correct();
+  }
+}
+
 void c_take_trivial(D d) {
   if (d.d == 30) {
     cxx_test_suite_set_correct();
@@ -586,6 +598,18 @@ void c_take_opaque_ns_ptr(std::unique_ptr<::F::F> f) {
 
 void c_take_opaque_ref(const E &e) {
   if (e.e == 40 && e.e_str == "hello") {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void E::c_take_opaque_ref_method() const {
+  if (e == 40 && e_str == "hello") {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void E::c_take_opaque_mut_ref_method() {
+  if (e == 40 && e_str == "hello") {
     cxx_test_suite_set_correct();
   }
 }

@@ -61,11 +61,15 @@ private:
 
 struct D {
   uint64_t d;
+  void c_take_trivial_ref_method() const;
+  void c_take_trivial_mut_ref_method();
 };
 
 struct E {
   uint64_t e;
   std::string e_str;
+  void c_take_opaque_ref_method() const;
+  void c_take_opaque_mut_ref_method();
 };
 
 enum COwnedEnum {
