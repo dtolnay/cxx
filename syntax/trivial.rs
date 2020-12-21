@@ -11,7 +11,7 @@ pub enum TrivialReason<'a> {
     FunctionReturn(&'a ExternFn),
     BoxTarget,
     VecElement,
-    UnpinnedMutArg(&'a ExternFn),
+    UnpinnedMut(&'a ExternFn),
 }
 
 pub fn required_trivial_reasons<'a>(
@@ -48,7 +48,7 @@ pub fn required_trivial_reasons<'a>(
             Api::CxxFunction(efn) | Api::RustFunction(efn) => {
                 if let Some(receiver) = &efn.receiver {
                     if receiver.mutable && !receiver.pinned {
-                        let reason = TrivialReason::UnpinnedMutArg(efn);
+                        let reason = TrivialReason::UnpinnedMut(efn);
                         insist_extern_types_are_trivial(&receiver.ty, reason);
                     }
                 }
@@ -61,7 +61,7 @@ pub fn required_trivial_reasons<'a>(
                         Type::Ref(ty) => {
                             if ty.mutable && !ty.pinned {
                                 if let Type::Ident(ident) = &ty.inner {
-                                    let reason = TrivialReason::UnpinnedMutArg(efn);
+                                    let reason = TrivialReason::UnpinnedMut(efn);
                                     insist_extern_types_are_trivial(ident, reason);
                                 }
                             }
@@ -70,9 +70,20 @@ pub fn required_trivial_reasons<'a>(
                     }
                 }
                 if let Some(ret) = &efn.ret {
-                    if let Type::Ident(ident) = &ret {
-                        let reason = TrivialReason::FunctionReturn(efn);
-                        insist_extern_types_are_trivial(ident, reason);
+                    match ret {
+                        Type::Ident(ident) => {
+                            let reason = TrivialReason::FunctionReturn(efn);
+                            insist_extern_types_are_trivial(ident, reason);
+                        }
+                        Type::Ref(ty) => {
+                            if ty.mutable && !ty.pinned {
+                                if let Type::Ident(ident) = &ty.inner {
+                                    let reason = TrivialReason::UnpinnedMut(efn);
+                                    insist_extern_types_are_trivial(ident, reason);
+                                }
+                            }
+                        }
+                        _ => {}
                     }
                 }
             }
@@ -132,7 +143,7 @@ pub fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl Display
                     }
                     TrivialReason::BoxTarget => box_target = true,
                     TrivialReason::VecElement => vec_element = true,
-                    TrivialReason::UnpinnedMutArg(efn) => {
+                    TrivialReason::UnpinnedMut(efn) => {
                         unpinned_mut.insert(&efn.name.rust);
                     }
                 }
@@ -177,7 +188,7 @@ pub fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl Display
             if !unpinned_mut.is_empty() {
                 clauses.push(Clause::Set {
                     article: "a",
-                    desc: "non-pinned mutable reference argument of",
+                    desc: "non-pinned mutable reference in signature of",
                     set: &unpinned_mut,
                 });
             }
