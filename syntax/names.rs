@@ -1,7 +1,6 @@
 use crate::syntax::{Namespace, Pair, RustName, Symbol, Types};
 use proc_macro2::{Ident, Span};
 use std::iter;
-use syn::Token;
 
 impl Pair {
     // Use this constructor when the item can't have a different name in Rust
@@ -55,16 +54,6 @@ impl RustName {
 
     pub fn from_ref(ident: &Ident) -> &Self {
         unsafe { &*(ident as *const Ident as *const Self) }
-    }
-
-    pub fn make_self(span: Span) -> Self {
-        Self {
-            rust: Token![Self](span).into(),
-        }
-    }
-
-    pub fn is_self(&self) -> bool {
-        self.rust == "Self"
     }
 
     pub fn span(&self) -> Span {

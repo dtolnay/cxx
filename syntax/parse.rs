@@ -288,8 +288,8 @@ fn parse_foreign_mod(
         for item in &mut items {
             if let Api::CxxFunction(efn) | Api::RustFunction(efn) = item {
                 if let Some(receiver) = &mut efn.receiver {
-                    if receiver.ty.is_self() {
-                        receiver.ty = RustName::new(single_type.rust.clone());
+                    if receiver.ty.rust == "Self" {
+                        receiver.ty.rust = single_type.rust.clone();
                     }
                 }
             }
@@ -432,7 +432,7 @@ fn parse_extern_fn(
                         lifetime: lifetime.clone(),
                         mutable: arg.mutability.is_some(),
                         var: arg.self_token,
-                        ty: RustName::make_self(arg.self_token.span),
+                        ty: RustName::new(Ident::new("Self", arg.self_token.span)),
                         shorthand: true,
                         pin_tokens: None,
                         mutability: arg.mutability,

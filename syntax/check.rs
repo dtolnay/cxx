@@ -356,7 +356,7 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
     if let Some(receiver) = &efn.receiver {
         let ref span = span_for_receiver_error(receiver);
 
-        if receiver.ty.is_self() {
+        if receiver.ty.rust == "Self" {
             let mutability = match receiver.mutable {
                 true => "mut ",
                 false => "",
