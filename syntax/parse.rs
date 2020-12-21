@@ -497,11 +497,7 @@ fn parse_extern_fn(
     let throws = throws_tokens.is_some();
     let unsafety = foreign_fn.sig.unsafety;
     let fn_token = foreign_fn.sig.fn_token;
-    let name = Pair::new(
-        namespace,
-        cxx_name.unwrap_or(foreign_fn.sig.ident.clone()),
-        rust_name.unwrap_or(foreign_fn.sig.ident.clone()),
-    );
+    let name = pair(namespace, &foreign_fn.sig.ident, cxx_name, rust_name);
     let generics = generics.clone();
     let paren_token = foreign_fn.sig.paren_token;
     let semi_token = foreign_fn.semi_token;
@@ -1028,4 +1024,13 @@ fn parse_return_type(
         Type::Void(_) => Ok(None),
         ty => Ok(Some(ty)),
     }
+}
+
+fn pair(namespace: Namespace, default: &Ident, cxx: Option<Ident>, rust: Option<Ident>) -> Pair {
+    let default = || default.clone();
+    Pair::new(
+        namespace,
+        cxx.unwrap_or_else(default),
+        rust.unwrap_or_else(default),
+    )
 }
