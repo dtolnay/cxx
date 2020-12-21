@@ -6,7 +6,8 @@ use crate::syntax::{
 };
 use proc_macro2::Ident;
 use quote::ToTokens;
-use std::{collections::BTreeMap as Map, fmt::Display};
+use std::collections::BTreeMap as Map;
+use std::fmt::Display;
 
 pub struct Types<'a> {
     pub all: Set<&'a Type>,
@@ -186,7 +187,7 @@ impl<'a> Types<'a> {
                     let reason = TrivialReason::StructField(strct);
                     for field in &strct.fields {
                         if let Type::Ident(ident) = &field.ty {
-                            insist_extern_types_are_trivial(&ident, reason);
+                            insist_extern_types_are_trivial(ident, reason);
                         }
                     }
                 }
@@ -194,13 +195,13 @@ impl<'a> Types<'a> {
                     let reason = TrivialReason::FunctionArgument(efn);
                     for arg in &efn.args {
                         if let Type::Ident(ident) = &arg.ty {
-                            insist_extern_types_are_trivial(&ident, reason);
+                            insist_extern_types_are_trivial(ident, reason);
                         }
                     }
                     if let Some(ret) = &efn.ret {
                         let reason = TrivialReason::FunctionReturn(efn);
                         if let Type::Ident(ident) = &ret {
-                            insist_extern_types_are_trivial(&ident, reason);
+                            insist_extern_types_are_trivial(ident, reason);
                         }
                     }
                 }
@@ -212,13 +213,13 @@ impl<'a> Types<'a> {
                 Type::RustBox(ty) => {
                     let reason = TrivialReason::BoxTarget;
                     if let Type::Ident(ident) = &ty.inner {
-                        insist_extern_types_are_trivial(&ident, reason);
+                        insist_extern_types_are_trivial(ident, reason);
                     }
                 }
                 Type::RustVec(ty) => {
                     let reason = TrivialReason::VecElement;
                     if let Type::Ident(ident) = &ty.inner {
-                        insist_extern_types_are_trivial(&ident, reason);
+                        insist_extern_types_are_trivial(ident, reason);
                     }
                 }
                 _ => {}
@@ -237,7 +238,7 @@ impl<'a> Types<'a> {
                         if let Type::Ref(reff) = &arg.ty {
                             if reff.mutable && !reff.pinned {
                                 if let Type::Ident(ident) = &reff.inner {
-                                    insist_extern_types_are_trivial(&ident, reason);
+                                    insist_extern_types_are_trivial(ident, reason);
                                 }
                             }
                         }

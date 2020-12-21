@@ -1,13 +1,14 @@
+use crate::gen::block::Block;
 use crate::gen::nested::NamespaceEntries;
 use crate::gen::out::OutFile;
 use crate::gen::{builtin, include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::symbol::Symbol;
+use crate::syntax::types::TrivialReason;
 use crate::syntax::{
     derive, mangle, Api, Enum, ExternFn, ExternType, Pair, RustName, Signature, Struct, Trait,
     Type, Types, Var,
 };
-use crate::{gen::block::Block, syntax::types::TrivialReason};
 use proc_macro2::Ident;
 use std::collections::{HashMap, HashSet};
 
