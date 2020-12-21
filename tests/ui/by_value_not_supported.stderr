@@ -16,19 +16,7 @@ error: using C++ string by value is not supported
 6 |         s: CxxString,
   |         ^^^^^^^^^^^^
 
-error: needs a cxx::ExternType impl in order to be used as a field of `S`
-  --> $DIR/by_value_not_supported.rs:10:9
-   |
-10 |         type C;
-   |         ^^^^^^
-
-error: needs a cxx::ExternType impl in order to be used as an argument of `f`
-  --> $DIR/by_value_not_supported.rs:10:9
-   |
-10 |         type C;
-   |         ^^^^^^
-
-error: needs a cxx::ExternType impl in order to be used as a return value of `f`
+error: needs a cxx::ExternType impl in order to be used as a field of `S`, argument of `f` or return value of `f`
   --> $DIR/by_value_not_supported.rs:10:9
    |
 10 |         type C;

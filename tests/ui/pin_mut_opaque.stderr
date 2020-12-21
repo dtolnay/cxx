@@ -16,19 +16,7 @@ error: mutable reference to C++ type requires a pin -- use Pin<&mut CxxVector<..
 9 |         fn v(v: &mut CxxVector<u8>);
   |                 ^^^^^^^^^^^^^^^^^^
 
-error: needs a cxx::ExternType impl in order to be used as a non-pinned mutable reference argument of f
- --> $DIR/pin_mut_opaque.rs:4:9
-  |
-4 |         type Opaque;
-  |         ^^^^^^^^^^^
-
-error: needs a cxx::ExternType impl in order to be used as a non-pinned mutable reference argument of g
- --> $DIR/pin_mut_opaque.rs:4:9
-  |
-4 |         type Opaque;
-  |         ^^^^^^^^^^^
-
-error: needs a cxx::ExternType impl in order to be used as a non-pinned mutable reference argument of h
+error: needs a cxx::ExternType impl in order to be used as a non-pinned mutable reference argument of `f`, `g`, `h`
  --> $DIR/pin_mut_opaque.rs:4:9
   |
 4 |         type Opaque;

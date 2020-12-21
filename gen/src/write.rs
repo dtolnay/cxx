@@ -4,10 +4,10 @@ use crate::gen::out::OutFile;
 use crate::gen::{builtin, include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::symbol::Symbol;
-use crate::syntax::trivial::TrivialReason;
+use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::{
     derive, mangle, Api, Enum, ExternFn, ExternType, Pair, RustName, Signature, Struct, Trait,
-    Type, Types, Var,
+    Type, TypeAlias, Types, Var,
 };
 use proc_macro2::Ident;
 use std::collections::{HashMap, HashSet};
@@ -119,7 +119,7 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
     for api in apis {
         if let Api::TypeAlias(ety) = api {
             if let Some(reasons) = out.types.required_trivial.get(&ety.name.rust) {
-                check_trivial_extern_type(out, &ety.name, reasons)
+                check_trivial_extern_type(out, ety, reasons)
             }
         }
     }
@@ -370,7 +370,7 @@ fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
     }
 }
 
-fn check_trivial_extern_type(out: &mut OutFile, id: &Pair, reasons: &[TrivialReason]) {
+fn check_trivial_extern_type(out: &mut OutFile, alias: &TypeAlias, reasons: &[TrivialReason]) {
     // NOTE: The following static assertion is just nice-to-have and not
     // necessary for soundness. That's because triviality is always declared by
     // the user in the form of an unsafe impl of cxx::ExternType:
@@ -404,18 +404,16 @@ fn check_trivial_extern_type(out: &mut OutFile, id: &Pair, reasons: &[TrivialRea
     //    + struct rust::IsRelocatable<MyType> : std::true_type {};
     //
 
-    let id = id.to_fully_qualified();
+    let id = alias.name.to_fully_qualified();
     out.builtin.relocatable = true;
-    for reason in reasons {
-        writeln!(out, "static_assert(");
-        writeln!(out, "    ::rust::IsRelocatable<{}>::value,", id);
-        writeln!(
-            out,
-            "    \"type {} is not move constructible and trivially destructible in C++ yet is used as a trivial type in Rust ({})\");",
-            id.trim_start_matches("::"),
-            reason,
-        );
-    }
+    writeln!(out, "static_assert(");
+    writeln!(out, "    ::rust::IsRelocatable<{}>::value,", id);
+    writeln!(
+        out,
+        "    \"type {} should be trivially move constructible and trivially destructible in C++ to be used as {} in Rust\");",
+        id.trim_start_matches("::"),
+        trivial::as_what(&alias.name, reasons),
+    );
 }
 
 fn write_struct_operator_decls<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
