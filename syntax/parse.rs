@@ -377,17 +377,17 @@ fn parse_extern_fn(
     namespace: &Namespace,
 ) -> Result<Api> {
     let mut doc = Doc::new();
+    let mut namespace = namespace.clone();
     let mut cxx_name = None;
     let mut rust_name = None;
-    let mut namespace = namespace.clone();
     attrs::parse(
         cx,
         &foreign_fn.attrs,
         attrs::Parser {
             doc: Some(&mut doc),
+            namespace: Some(&mut namespace),
             cxx_name: Some(&mut cxx_name),
             rust_name: Some(&mut rust_name),
-            namespace: Some(&mut namespace),
             ..Default::default()
         },
     );
