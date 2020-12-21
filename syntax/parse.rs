@@ -58,6 +58,8 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct, namespace: &Namespace) -> Res
     let mut doc = Doc::new();
     let mut derives = Vec::new();
     let mut namespace = namespace.clone();
+    let mut cxx_name = None;
+    let mut rust_name = None;
     attrs::parse(
         cx,
         &item.attrs,
@@ -65,6 +67,8 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct, namespace: &Namespace) -> Res
             doc: Some(&mut doc),
             derives: Some(&mut derives),
             namespace: Some(&mut namespace),
+            cxx_name: Some(&mut cxx_name),
+            rust_name: Some(&mut rust_name),
             ..Default::default()
         },
     );
@@ -103,7 +107,7 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct, namespace: &Namespace) -> Res
     }
 
     let struct_token = item.struct_token;
-    let name = Pair::new(namespace, item.ident.clone(), item.ident);
+    let name = pair(namespace, &item.ident, cxx_name, rust_name);
     let brace_token = named_fields.brace_token;
 
     Ok(Api::Struct(Struct {
@@ -121,6 +125,8 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
     let mut derives = Vec::new();
     let mut repr = None;
     let mut namespace = namespace.clone();
+    let mut cxx_name = None;
+    let mut rust_name = None;
     attrs::parse(
         cx,
         &item.attrs,
@@ -129,6 +135,8 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
             derives: Some(&mut derives),
             repr: Some(&mut repr),
             namespace: Some(&mut namespace),
+            cxx_name: Some(&mut cxx_name),
+            rust_name: Some(&mut rust_name),
             ..Default::default()
         },
     );
@@ -189,7 +197,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
         }
     }
 
-    let name = Pair::new(namespace, item.ident.clone(), item.ident);
+    let name = pair(namespace, &item.ident, cxx_name, rust_name);
     let repr_ident = Ident::new(repr.as_ref(), Span::call_site());
     let repr_type = Type::Ident(RustName::new(repr_ident));
 
@@ -335,6 +343,8 @@ fn parse_extern_type(
     let mut doc = Doc::new();
     let mut derives = Vec::new();
     let mut namespace = namespace.clone();
+    let mut cxx_name = None;
+    let mut rust_name = None;
     attrs::parse(
         cx,
         &foreign_type.attrs,
@@ -342,13 +352,14 @@ fn parse_extern_type(
             doc: Some(&mut doc),
             derives: Some(&mut derives),
             namespace: Some(&mut namespace),
+            cxx_name: Some(&mut cxx_name),
+            rust_name: Some(&mut rust_name),
             ..Default::default()
         },
     );
 
     let type_token = foreign_type.type_token;
-    let ident = foreign_type.ident.clone();
-    let name = Pair::new(namespace, ident.clone(), ident);
+    let name = pair(namespace, &foreign_type.ident, cxx_name, rust_name);
     let colon_token = None;
     let bounds = Vec::new();
     let semi_token = foreign_type.semi_token;
@@ -574,6 +585,8 @@ fn parse_type_alias(
     let mut doc = Doc::new();
     let mut derives = Vec::new();
     let mut namespace = namespace.clone();
+    let mut cxx_name = None;
+    let mut rust_name = None;
     attrs::parse(
         cx,
         &attrs,
@@ -581,6 +594,8 @@ fn parse_type_alias(
             doc: Some(&mut doc),
             derives: Some(&mut derives),
             namespace: Some(&mut namespace),
+            cxx_name: Some(&mut cxx_name),
+            rust_name: Some(&mut rust_name),
             ..Default::default()
         },
     );
@@ -591,7 +606,7 @@ fn parse_type_alias(
         return Err(Error::new_spanned(span, msg));
     }
 
-    let name = Pair::new(namespace, ident.clone(), ident);
+    let name = pair(namespace, &ident, cxx_name, rust_name);
 
     Ok(Api::TypeAlias(TypeAlias {
         doc,
@@ -648,6 +663,8 @@ fn parse_extern_type_bounded(
     let mut doc = Doc::new();
     let mut derives = Vec::new();
     let mut namespace = namespace.clone();
+    let mut cxx_name = None;
+    let mut rust_name = None;
     attrs::parse(
         cx,
         &attrs,
@@ -655,11 +672,13 @@ fn parse_extern_type_bounded(
             doc: Some(&mut doc),
             derives: Some(&mut derives),
             namespace: Some(&mut namespace),
+            cxx_name: Some(&mut cxx_name),
+            rust_name: Some(&mut rust_name),
             ..Default::default()
         },
     );
 
-    let name = Pair::new(namespace, ident.clone(), ident);
+    let name = pair(namespace, &ident, cxx_name, rust_name);
     let colon_token = Some(colon_token);
 
     Ok(match lang {
