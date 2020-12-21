@@ -3,27 +3,11 @@ use proc_macro2::{Ident, Span};
 use std::iter;
 
 impl Pair {
-    // Use this constructor when the item can't have a different name in Rust
-    // and C++.
-    pub fn new(namespace: Namespace, ident: Ident) -> Self {
+    pub fn new(namespace: Namespace, cxx: Ident, rust: Ident) -> Self {
         Self {
             namespace,
-            cxx: ident.clone(),
-            rust: ident,
-        }
-    }
-
-    // Use this constructor when attributes such as #[rust_name] can be used to
-    // potentially give a different name in Rust vs C++.
-    pub fn new_from_differing_names(
-        namespace: Namespace,
-        cxx_ident: Ident,
-        rust_ident: Ident,
-    ) -> Self {
-        Self {
-            namespace,
-            cxx: cxx_ident,
-            rust: rust_ident,
+            cxx,
+            rust,
         }
     }
 

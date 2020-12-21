@@ -106,7 +106,7 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct, namespace: &Namespace) -> Res
         doc,
         derives,
         struct_token: item.struct_token,
-        name: Pair::new(namespace, item.ident),
+        name: Pair::new(namespace, item.ident.clone(), item.ident),
         brace_token: named_fields.brace_token,
         fields,
     }))
@@ -192,7 +192,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
         doc,
         derives,
         enum_token,
-        name: Pair::new(namespace, item.ident),
+        name: Pair::new(namespace, item.ident.clone(), item.ident),
         brace_token,
         variants,
         repr,
@@ -351,7 +351,7 @@ fn parse_extern_type(
         doc,
         derives,
         type_token,
-        name: Pair::new(namespace, ident),
+        name: Pair::new(namespace, ident.clone(), ident),
         colon_token: None,
         bounds: Vec::new(),
         semi_token,
@@ -483,7 +483,7 @@ fn parse_extern_fn(
     let throws = throws_tokens.is_some();
     let unsafety = foreign_fn.sig.unsafety;
     let fn_token = foreign_fn.sig.fn_token;
-    let name = Pair::new_from_differing_names(
+    let name = Pair::new(
         namespace,
         cxx_name.unwrap_or(foreign_fn.sig.ident.clone()),
         rust_name.unwrap_or(foreign_fn.sig.ident.clone()),
@@ -586,7 +586,7 @@ fn parse_type_alias(
         doc,
         derives,
         type_token,
-        name: Pair::new(namespace, ident),
+        name: Pair::new(namespace, ident.clone(), ident),
         eq_token,
         ty,
         semi_token,
@@ -658,7 +658,7 @@ fn parse_extern_type_bounded(
         doc,
         derives,
         type_token,
-        name: Pair::new(namespace, ident),
+        name: Pair::new(namespace, ident.clone(), ident),
         colon_token: Some(colon_token),
         bounds,
         semi_token,
