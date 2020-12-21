@@ -412,8 +412,8 @@ fn check_trivial_extern_type(out: &mut OutFile, id: &Pair, reasons: &[TrivialRea
         writeln!(
             out,
             "    \"type {} is not move constructible and trivially destructible in C++ yet is used as a trivial type in Rust ({})\");",
-            id,
-            reason
+            id.trim_start_matches("::"),
+            reason,
         );
     }
 }
