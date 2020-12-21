@@ -55,18 +55,6 @@ pub fn parse_items(
 }
 
 fn parse_struct(cx: &mut Errors, item: ItemStruct, namespace: &Namespace) -> Result<Api> {
-    let generics = &item.generics;
-    if !generics.params.is_empty() || generics.where_clause.is_some() {
-        let struct_token = item.struct_token;
-        let ident = &item.ident;
-        let where_clause = &generics.where_clause;
-        let span = quote!(#struct_token #ident #generics #where_clause);
-        return Err(Error::new_spanned(
-            span,
-            "struct with generic parameters is not supported yet",
-        ));
-    }
-
     let mut doc = Doc::new();
     let mut derives = Vec::new();
     let mut namespace = namespace.clone();
@@ -80,6 +68,18 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct, namespace: &Namespace) -> Res
             ..Default::default()
         },
     );
+
+    let generics = &item.generics;
+    if !generics.params.is_empty() || generics.where_clause.is_some() {
+        let struct_token = item.struct_token;
+        let ident = &item.ident;
+        let where_clause = &generics.where_clause;
+        let span = quote!(#struct_token #ident #generics #where_clause);
+        return Err(Error::new_spanned(
+            span,
+            "struct with generic parameters is not supported yet",
+        ));
+    }
 
     let named_fields = match item.fields {
         Fields::Named(fields) => fields,
@@ -113,18 +113,6 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct, namespace: &Namespace) -> Res
 }
 
 fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<Api> {
-    let generics = &item.generics;
-    if !generics.params.is_empty() || generics.where_clause.is_some() {
-        let enum_token = item.enum_token;
-        let ident = &item.ident;
-        let where_clause = &generics.where_clause;
-        let span = quote!(#enum_token #ident #generics #where_clause);
-        return Err(Error::new_spanned(
-            span,
-            "enums with generic parameters are not allowed",
-        ));
-    }
-
     let mut doc = Doc::new();
     let mut derives = Vec::new();
     let mut repr = None;
@@ -140,6 +128,18 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
             ..Default::default()
         },
     );
+
+    let generics = &item.generics;
+    if !generics.params.is_empty() || generics.where_clause.is_some() {
+        let enum_token = item.enum_token;
+        let ident = &item.ident;
+        let where_clause = &generics.where_clause;
+        let span = quote!(#enum_token #ident #generics #where_clause);
+        return Err(Error::new_spanned(
+            span,
+            "enums with generic parameters are not allowed",
+        ));
+    }
 
     let mut variants = Vec::new();
     let mut discriminants = DiscriminantSet::new(repr);
@@ -366,6 +366,22 @@ fn parse_extern_fn(
     trusted: bool,
     namespace: &Namespace,
 ) -> Result<Api> {
+    let mut doc = Doc::new();
+    let mut cxx_name = None;
+    let mut rust_name = None;
+    let mut namespace = namespace.clone();
+    attrs::parse(
+        cx,
+        &foreign_fn.attrs,
+        attrs::Parser {
+            doc: Some(&mut doc),
+            cxx_name: Some(&mut cxx_name),
+            rust_name: Some(&mut rust_name),
+            namespace: Some(&mut namespace),
+            ..Default::default()
+        },
+    );
+
     let generics = &foreign_fn.sig.generics;
     if generics.where_clause.is_some()
         || generics.params.iter().any(|param| match param {
@@ -402,22 +418,6 @@ fn parse_extern_fn(
             "explicit ABI on extern function is not supported",
         ));
     }
-
-    let mut doc = Doc::new();
-    let mut cxx_name = None;
-    let mut rust_name = None;
-    let mut namespace = namespace.clone();
-    attrs::parse(
-        cx,
-        &foreign_fn.attrs,
-        attrs::Parser {
-            doc: Some(&mut doc),
-            cxx_name: Some(&mut cxx_name),
-            rust_name: Some(&mut rust_name),
-            namespace: Some(&mut namespace),
-            ..Default::default()
-        },
-    );
 
     let mut receiver = None;
     let mut args = Punctuated::new();
