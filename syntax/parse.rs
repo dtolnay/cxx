@@ -16,6 +16,7 @@ use syn::{
     GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lit, LitStr,
     Pat, PathArguments, Result, ReturnType, Token, TraitBound, TraitBoundModifier,
     Type as RustType, TypeArray, TypeBareFn, TypeParamBound, TypePath, TypeReference,
+    Variant as RustVariant,
 };
 
 pub mod kw {
@@ -156,31 +157,10 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
     let mut variants = Vec::new();
     let mut discriminants = DiscriminantSet::new(repr);
     for variant in item.variants {
-        match variant.fields {
-            Fields::Unit => {}
-            _ => {
-                cx.error(variant, "enums with data are not supported yet");
-                break;
-            }
+        match parse_variant(variant, &mut discriminants) {
+            Ok(variant) => variants.push(variant),
+            Err(err) => cx.push(err),
         }
-        let expr = variant.discriminant.as_ref().map(|(_, expr)| expr);
-        let try_discriminant = match &expr {
-            Some(lit) => discriminants.insert(lit),
-            None => discriminants.insert_next(),
-        };
-        let discriminant = match try_discriminant {
-            Ok(discriminant) => discriminant,
-            Err(err) => {
-                cx.error(variant, err);
-                break;
-            }
-        };
-        let expr = variant.discriminant.map(|(_, expr)| expr);
-        variants.push(Variant {
-            ident: variant.ident,
-            discriminant,
-            expr,
-        });
     }
 
     let enum_token = item.enum_token;
@@ -212,6 +192,33 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
         repr_type,
         explicit_repr,
     }))
+}
+
+fn parse_variant(variant: RustVariant, discriminants: &mut DiscriminantSet) -> Result<Variant> {
+    match variant.fields {
+        Fields::Unit => {}
+        _ => {
+            let msg = "enums with data are not supported yet";
+            return Err(Error::new_spanned(variant, msg));
+        }
+    }
+
+    let expr = variant.discriminant.as_ref().map(|(_, expr)| expr);
+    let try_discriminant = match &expr {
+        Some(lit) => discriminants.insert(lit),
+        None => discriminants.insert_next(),
+    };
+    let discriminant = match try_discriminant {
+        Ok(discriminant) => discriminant,
+        Err(err) => return Err(Error::new_spanned(variant, err)),
+    };
+    let expr = variant.discriminant.map(|(_, expr)| expr);
+
+    Ok(Variant {
+        ident: variant.ident,
+        discriminant,
+        expr,
+    })
 }
 
 fn parse_foreign_mod(
