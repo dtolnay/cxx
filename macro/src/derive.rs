@@ -230,7 +230,7 @@ fn enum_clone(enm: &Enum, span: Span) -> TokenStream {
 fn enum_debug(enm: &Enum, span: Span) -> TokenStream {
     let ident = &enm.name.rust;
     let variants = enm.variants.iter().map(|variant| {
-        let variant = &variant.ident;
+        let variant = &variant.name.rust;
         let name = variant.to_string();
         quote_spanned! {span=>
             #ident::#variant => formatter.write_str(#name),

@@ -212,10 +212,12 @@ fn parse_variant(variant: RustVariant, discriminants: &mut DiscriminantSet) -> R
         Ok(discriminant) => discriminant,
         Err(err) => return Err(Error::new_spanned(variant, err)),
     };
+
+    let name = pair(Namespace::ROOT, &variant.ident, None, None);
     let expr = variant.discriminant.map(|(_, expr)| expr);
 
     Ok(Variant {
-        ident: variant.ident,
+        name,
         discriminant,
         expr,
     })
