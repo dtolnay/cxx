@@ -9,6 +9,7 @@ use core::fmt::{self, Debug, Display};
 use core::iter::FusedIterator;
 use core::marker::{PhantomData, PhantomPinned};
 use core::mem;
+use core::pin::Pin;
 use core::ptr;
 use core::slice;
 
@@ -61,7 +62,34 @@ where
         }
     }
 
+    /// Returns a pinned mutable reference to an element at the given position,
+    /// or `None` if out of bounds.
+    pub fn get_mut(&mut self, pos: usize) -> Option<Pin<&mut T>> {
+        if pos < self.len() {
+            Some(unsafe { self.get_unchecked_mut(pos) })
+        } else {
+            None
+        }
+    }
+
     /// Returns a reference to an element without doing bounds checking.
+    ///
+    /// This is generally not recommended, use with caution! Calling this method
+    /// with an out-of-bounds index is undefined behavior even if the resulting
+    /// reference is not used.
+    ///
+    /// Matches the behavior of C++
+    /// [std::vector\<T\>::operator\[\] const][operator_at].
+    ///
+    /// [operator_at]: https://en.cppreference.com/w/cpp/container/vector/operator_at
+    pub unsafe fn get_unchecked(&self, pos: usize) -> &T {
+        let this = self as *const CxxVector<T> as *mut CxxVector<T>;
+        let ptr = T::__get_unchecked(this, pos) as *const T;
+        &*ptr
+    }
+
+    /// Returns a pinned mutable reference to an element without doing bounds
+    /// checking.
     ///
     /// This is generally not recommended, use with caution! Calling this method
     /// with an out-of-bounds index is undefined behavior even if the resulting
@@ -71,8 +99,9 @@ where
     /// [std::vector\<T\>::operator\[\]][operator_at].
     ///
     /// [operator_at]: https://en.cppreference.com/w/cpp/container/vector/operator_at
-    pub unsafe fn get_unchecked(&self, pos: usize) -> &T {
-        &*T::__get_unchecked(self, pos)
+    pub unsafe fn get_unchecked_mut(&mut self, pos: usize) -> Pin<&mut T> {
+        let ptr = T::__get_unchecked(self, pos);
+        Pin::new_unchecked(&mut *ptr)
     }
 
     /// Returns a slice to the underlying contiguous array of elements.
@@ -90,7 +119,8 @@ where
             // which upholds the invariants.
             &[]
         } else {
-            let ptr = unsafe { T::__get_unchecked(self, 0) };
+            let this = self as *const CxxVector<T> as *mut CxxVector<T>;
+            let ptr = unsafe { T::__get_unchecked(this, 0) };
             unsafe { slice::from_raw_parts(ptr, len) }
         }
     }
@@ -186,7 +216,7 @@ where
 pub unsafe trait VectorElement: Sized {
     const __NAME: &'static dyn Display;
     fn __vector_size(v: &CxxVector<Self>) -> usize;
-    unsafe fn __get_unchecked(v: &CxxVector<Self>, pos: usize) -> *const Self;
+    unsafe fn __get_unchecked(v: *mut CxxVector<Self>, pos: usize) -> *mut Self;
     fn __unique_ptr_null() -> *mut c_void;
     unsafe fn __unique_ptr_raw(raw: *mut CxxVector<Self>) -> *mut c_void;
     unsafe fn __unique_ptr_get(repr: *mut c_void) -> *const CxxVector<Self>;
@@ -209,11 +239,11 @@ macro_rules! impl_vector_element {
                 }
                 unsafe { __vector_size(v) }
             }
-            unsafe fn __get_unchecked(v: &CxxVector<$ty>, pos: usize) -> *const $ty {
+            unsafe fn __get_unchecked(v: *mut CxxVector<$ty>, pos: usize) -> *mut $ty {
                 extern "C" {
                     attr! {
                         #[link_name = concat!("cxxbridge1$std$vector$", $segment, "$get_unchecked")]
-                        fn __get_unchecked(_: &CxxVector<$ty>, _: usize) -> *const $ty;
+                        fn __get_unchecked(_: *mut CxxVector<$ty>, _: usize) -> *mut $ty;
                     }
                 }
                 __get_unchecked(v, pos)

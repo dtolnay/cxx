@@ -1737,10 +1737,10 @@ fn write_cxx_vector(out: &mut OutFile, element: &RustName) {
     writeln!(out, "}}");
     writeln!(
         out,
-        "const {} *cxxbridge1$std$vector${}$get_unchecked(const ::std::vector<{}> &s, ::std::size_t pos) noexcept {{",
+        "{} *cxxbridge1$std$vector${}$get_unchecked(::std::vector<{}> *s, ::std::size_t pos) noexcept {{",
         inner, instance, inner,
     );
-    writeln!(out, "  return &s[pos];");
+    writeln!(out, "  return &(*s)[pos];");
     writeln!(out, "}}");
 
     out.include.memory = true;

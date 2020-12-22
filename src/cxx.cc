@@ -408,9 +408,9 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
       const std::vector<CXX_TYPE> &s) noexcept {                               \
     return s.size();                                                           \
   }                                                                            \
-  const CXX_TYPE *cxxbridge1$std$vector$##RUST_TYPE##$get_unchecked(           \
-      const std::vector<CXX_TYPE> &s, std::size_t pos) noexcept {              \
-    return &s[pos];                                                            \
+  CXX_TYPE *cxxbridge1$std$vector$##RUST_TYPE##$get_unchecked(                 \
+      std::vector<CXX_TYPE> *s, std::size_t pos) noexcept {                    \
+    return &(*s)[pos];                                                         \
   }                                                                            \
   void cxxbridge1$unique_ptr$std$vector$##RUST_TYPE##$null(                    \
       std::unique_ptr<std::vector<CXX_TYPE>> *ptr) noexcept {                  \
