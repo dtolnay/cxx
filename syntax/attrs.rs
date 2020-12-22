@@ -14,6 +14,11 @@ pub struct Parser<'a> {
     pub namespace: Option<&'a mut Namespace>,
     pub cxx_name: Option<&'a mut Option<Ident>>,
     pub rust_name: Option<&'a mut Option<Ident>>,
+
+    // Suppress clippy needless_update lint ("struct update has no effect, all
+    // the fields in the struct have already been specified") when preemptively
+    // writing `..Default::default()`.
+    pub(crate) _more: (),
 }
 
 pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
