@@ -158,9 +158,9 @@ where
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let next = self.v.get(self.index);
-        self.index += next.is_some() as usize;
-        next
+        let next = self.v.get(self.index)?;
+        self.index += 1;
+        Some(next)
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
