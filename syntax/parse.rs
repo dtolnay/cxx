@@ -157,7 +157,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
     let mut variants = Vec::new();
     let mut discriminants = DiscriminantSet::new(repr);
     for variant in item.variants {
-        match parse_variant(variant, &mut discriminants) {
+        match parse_variant(cx, variant, &mut discriminants) {
             Ok(variant) => variants.push(variant),
             Err(err) => cx.push(err),
         }
@@ -194,7 +194,23 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
     }))
 }
 
-fn parse_variant(variant: RustVariant, discriminants: &mut DiscriminantSet) -> Result<Variant> {
+fn parse_variant(
+    cx: &mut Errors,
+    variant: RustVariant,
+    discriminants: &mut DiscriminantSet,
+) -> Result<Variant> {
+    let mut cxx_name = None;
+    let mut rust_name = None;
+    attrs::parse(
+        cx,
+        &variant.attrs,
+        attrs::Parser {
+            cxx_name: Some(&mut cxx_name),
+            rust_name: Some(&mut rust_name),
+            ..Default::default()
+        },
+    );
+
     match variant.fields {
         Fields::Unit => {}
         _ => {
@@ -212,10 +228,12 @@ fn parse_variant(variant: RustVariant, discriminants: &mut DiscriminantSet) -> R
         Ok(discriminant) => discriminant,
         Err(err) => return Err(Error::new_spanned(variant, err)),
     };
+
+    let name = pair(Namespace::ROOT, &variant.ident, cxx_name, rust_name);
     let expr = variant.discriminant.map(|(_, expr)| expr);
 
     Ok(Variant {
-        ident: variant.ident,
+        name,
         discriminant,
         expr,
     })

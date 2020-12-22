@@ -73,8 +73,8 @@ struct E {
 };
 
 enum COwnedEnum {
-  CVal1,
-  CVal2,
+  CVAL1,
+  CVAL2,
 };
 
 size_t c_return_primitive();

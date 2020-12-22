@@ -76,7 +76,7 @@ fn test_c_return() {
         _ => assert!(false),
     }
     match ffi::c_return_enum(2021) {
-        enm @ ffi::Enum::CVal => assert_eq!(2021, enm.repr),
+        enm @ ffi::Enum::LastVal => assert_eq!(2021, enm.repr),
         _ => assert!(false),
     }
     match ffi::c_return_ns_enum(0) {
@@ -236,7 +236,7 @@ fn test_c_ns_method_calls() {
 fn test_enum_representations() {
     assert_eq!(0, ffi::Enum::AVal.repr);
     assert_eq!(2020, ffi::Enum::BVal.repr);
-    assert_eq!(2021, ffi::Enum::CVal.repr);
+    assert_eq!(2021, ffi::Enum::LastVal.repr);
 }
 
 #[test]

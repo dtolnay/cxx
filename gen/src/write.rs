@@ -342,7 +342,7 @@ fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
     write_atom(out, enm.repr);
     writeln!(out, " {{");
     for variant in &enm.variants {
-        writeln!(out, "  {} = {},", variant.ident, variant.discriminant);
+        writeln!(out, "  {} = {},", variant.name.cxx, variant.discriminant);
     }
     writeln!(out, "}};");
     writeln!(out, "#endif // {}", guard);
@@ -365,7 +365,7 @@ fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
         writeln!(
             out,
             ">({}::{}) == {}, \"disagrees with the value in #[cxx::bridge]\");",
-            enm.name.cxx, variant.ident, variant.discriminant,
+            enm.name.cxx, variant.name.cxx, variant.discriminant,
         );
     }
 }

@@ -32,7 +32,7 @@ pub(crate) fn check_all(cx: &mut Check, apis: &[Api]) {
             Api::Enum(enm) => {
                 check_ident(cx, &enm.name);
                 for variant in &enm.variants {
-                    check(cx, &variant.ident);
+                    check(cx, &variant.name.rust);
                 }
             }
             Api::CxxType(ety) | Api::RustType(ety) => {
