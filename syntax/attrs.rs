@@ -6,6 +6,24 @@ use proc_macro2::Ident;
 use syn::parse::{ParseStream, Parser as _};
 use syn::{Attribute, Error, LitStr, Path, Result, Token};
 
+// Intended usage:
+//
+//     let mut doc = Doc::new();
+//     let mut cxx_name = None;
+//     let mut rust_name = None;
+//     /* ... */
+//     attrs::parse(
+//         cx,
+//         &item.attrs,
+//         attrs::Parser {
+//             doc: Some(&mut doc),
+//             cxx_name: Some(&mut cxx_name),
+//             rust_name: Some(&mut rust_name),
+//             /* ... */
+//             ..Default::default()
+//         },
+//     );
+//
 #[derive(Default)]
 pub struct Parser<'a> {
     pub doc: Option<&'a mut Doc>,
