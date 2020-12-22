@@ -1229,10 +1229,10 @@ fn expand_cxx_vector(elem: &RustName, explicit_impl: Option<&Impl>, types: &Type
                 }
                 unsafe { __vector_size(v) }
             }
-            unsafe fn __get_unchecked(v: &::cxx::CxxVector<Self>, pos: usize) -> *const Self {
+            unsafe fn __get_unchecked(v: *mut ::cxx::CxxVector<Self>, pos: usize) -> *mut Self {
                 extern "C" {
                     #[link_name = #link_get_unchecked]
-                    fn __get_unchecked(_: &::cxx::CxxVector<#elem>, _: usize) -> *const #elem;
+                    fn __get_unchecked(_: *mut ::cxx::CxxVector<#elem>, _: usize) -> *mut #elem;
                 }
                 __get_unchecked(v, pos)
             }
