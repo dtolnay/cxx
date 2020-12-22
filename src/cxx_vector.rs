@@ -129,6 +129,11 @@ where
     pub fn iter(&self) -> Iter<T> {
         Iter { v: self, index: 0 }
     }
+
+    /// Returns an iterator over elements of type `Pin<&mut T>`.
+    pub fn iter_mut(&mut self) -> IterMut<T> {
+        IterMut { v: self, index: 0 }
+    }
 }
 
 /// Iterator over elements of a `CxxVector` by shared reference.
@@ -179,6 +184,60 @@ where
 }
 
 impl<'a, T> FusedIterator for Iter<'a, T> where T: VectorElement {}
+
+/// Iterator over elements of a `CxxVector` by pinned mutable reference.
+///
+/// The iterator element type is `Pin<&'a mut T>`.
+pub struct IterMut<'a, T> {
+    v: &'a mut CxxVector<T>,
+    index: usize,
+}
+
+impl<'a, T> IntoIterator for &'a mut CxxVector<T>
+where
+    T: VectorElement,
+{
+    type Item = Pin<&'a mut T>;
+    type IntoIter = IterMut<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter_mut()
+    }
+}
+
+impl<'a, T> Iterator for IterMut<'a, T>
+where
+    T: VectorElement,
+{
+    type Item = Pin<&'a mut T>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let next = self.v.get_mut(self.index)?;
+        self.index += 1;
+        // Extend lifetime to allow simultaneous holding of nonoverlapping
+        // elements, analogous to slice::split_first_mut.
+        unsafe {
+            let ptr = Pin::into_inner_unchecked(next) as *mut T;
+            Some(Pin::new_unchecked(&mut *ptr))
+        }
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        let len = self.len();
+        (len, Some(len))
+    }
+}
+
+impl<'a, T> ExactSizeIterator for IterMut<'a, T>
+where
+    T: VectorElement,
+{
+    fn len(&self) -> usize {
+        self.v.len() - self.index
+    }
+}
+
+impl<'a, T> FusedIterator for IterMut<'a, T> where T: VectorElement {}
 
 impl<T> Debug for CxxVector<T>
 where
