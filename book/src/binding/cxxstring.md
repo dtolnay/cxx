@@ -36,24 +36,26 @@ mod ffi {
     unsafe extern "C++" {
         include!("example/include/json.h");
 
-        type json;
-        type object;
+        #[cxx_name = "json"]
+        type Json;
+        #[cxx_name = "object"]
+        type Object;
 
-        fn isNull(self: &json) -> bool;
-        fn isNumber(self: &json) -> bool;
-        fn isString(self: &json) -> bool;
-        fn isArray(self: &json) -> bool;
-        fn isObject(self: &json) -> bool;
+        fn isNull(self: &Json) -> bool;
+        fn isNumber(self: &Json) -> bool;
+        fn isString(self: &Json) -> bool;
+        fn isArray(self: &Json) -> bool;
+        fn isObject(self: &Json) -> bool;
 
-        fn getNumber(self: &json) -> f64;
-        fn getString(self: &json) -> &CxxString;
-        fn getArray(self: &json) -> &CxxVector<json>;
-        fn getObject(self: &json) -> &object;
+        fn getNumber(self: &Json) -> f64;
+        fn getString(self: &Json) -> &CxxString;
+        fn getArray(self: &Json) -> &CxxVector<Json>;
+        fn getObject(self: &Json) -> &Object;
 
-        #[cxx_name = "at"]  // https://en.cppreference.com/w/cpp/container/map/at
-        fn get<'a>(self: &'a object, key: &CxxString) -> &'a json;
+        #[cxx_name = "at"]
+        fn get<'a>(self: &'a Object, key: &CxxString) -> &'a Json;
 
-        fn load_config() -> UniquePtr<json>;
+        fn load_config() -> UniquePtr<Json>;
     }
 }
 
