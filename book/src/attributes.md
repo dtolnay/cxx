@@ -48,9 +48,9 @@ The above would result in functions `::second_priority::f`,
 
 ## rust\_name, cxx\_name
 
-Sometimes you want the Rust name of a function to differ from its C++ name.
-Importantly, this enables binding multiple overloads of the same C++ function
-name using distinct Rust names.
+Sometimes you want the Rust name of a function or type to differ from its C++
+name. Importantly, this enables binding multiple overloads of the same C++
+function name using distinct Rust names.
 
 ```rust,noplayground
 #[cxx::bridge]
@@ -71,4 +71,5 @@ name that C++ should use.
 Either of the two attributes may be used on extern "Rust" as well as extern
 "C++" functions, according to which one you find clearer in context.
 
-Support for renaming type names and enum variants is not implemented yet.
+The same attribute works for renaming functions, opaque types, shared
+structs and enums, and enum variants.
