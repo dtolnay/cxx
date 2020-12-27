@@ -668,6 +668,11 @@ extern "C" const char *cxx_run_test() noexcept {
     }                                                                          \
   } while (false)
 
+  ASSERT(rust::size_of<R>() == sizeof(size_t));
+  ASSERT(rust::align_of<R>() == alignof(size_t));
+  ASSERT(rust::size_of<size_t>() == sizeof(size_t));
+  ASSERT(rust::align_of<size_t>() == alignof(size_t));
+
   ASSERT(r_return_primitive() == 2020);
   ASSERT(r_return_shared().z == 2020);
   ASSERT(cxx_test_suite_r_is_correct(&*r_return_box()));
