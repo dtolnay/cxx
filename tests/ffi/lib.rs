@@ -121,6 +121,7 @@ pub mod ffi {
         fn c_take_slice_char(s: &[c_char]);
         fn c_take_slice_shared(s: &[Shared]);
         fn c_take_slice_shared_sort(s: &mut [Shared]);
+        fn c_take_slice_r(s: &[R]);
         fn c_take_rust_string(s: String);
         fn c_take_unique_ptr_string(s: UniquePtr<CxxString>);
         fn c_take_unique_ptr_vector_u8(v: UniquePtr<CxxVector<u8>>);

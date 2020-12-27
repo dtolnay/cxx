@@ -289,6 +289,12 @@ void c_take_slice_shared_sort(rust::Slice<Shared> s) {
   }
 }
 
+void c_take_slice_r(rust::Slice<const R> s) {
+  if (s.size() == 2 && s[0].get() == 2020 && s[1].get() == 2021) {
+    cxx_test_suite_set_correct();
+  }
+}
+
 void c_take_rust_string(rust::String s) {
   if (std::string(s) == "2020") {
     cxx_test_suite_set_correct();

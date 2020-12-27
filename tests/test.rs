@@ -132,6 +132,7 @@ fn test_c_take() {
         ffi::Shared { z: 4 },
     ];
     check!(ffi::c_take_slice_shared_sort(shared_sort_slice));
+    check!(ffi::c_take_slice_r(&[R(2020), R(2021)]));
     assert_eq!(shared_sort_slice[0].z, 0);
     assert_eq!(shared_sort_slice[1].z, 2);
     assert_eq!(shared_sort_slice[2].z, 4);
