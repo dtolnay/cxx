@@ -279,12 +279,7 @@ pub(super) fn write(out: &mut OutFile) {
                 out,
                 "  static repr::PtrLen repr(Slice<T> slice) noexcept {{",
             );
-            writeln!(out, "    return repr::PtrLen{{");
-            writeln!(
-                out,
-                "        const_cast<typename ::std::remove_const<T>::type *>(slice.ptr),",
-            );
-            writeln!(out, "        slice.len}};");
+            writeln!(out, "    return repr::PtrLen{{slice.ptr, slice.len}};");
             writeln!(out, "  }}");
         }
         writeln!(out, "}};");

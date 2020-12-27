@@ -175,7 +175,7 @@ private:
   friend impl<Slice>;
   // Not necessarily ABI compatible with &[T]. Codegen will translate to
   // cxx::rust_slice::RustSlice which matches this layout.
-  T *ptr;
+  void *ptr;
   std::size_t len;
 };
 
@@ -522,14 +522,15 @@ inline std::size_t Str::length() const noexcept { return this->len; }
 #define CXXBRIDGE1_RUST_SLICE
 template <typename T>
 Slice<T>::Slice() noexcept
-    : ptr(reinterpret_cast<T *>(align_of<T>())), len(0) {}
+    : ptr(reinterpret_cast<void *>(align_of<T>())), len(0) {}
 
 template <typename T>
-Slice<T>::Slice(T *s, std::size_t count) noexcept : ptr(s), len(count) {}
+Slice<T>::Slice(T *s, std::size_t count) noexcept
+    : ptr(const_cast<typename std::remove_const<T>::type *>(s)), len(count) {}
 
 template <typename T>
 T *Slice<T>::data() const noexcept {
-  return this->ptr;
+  return reinterpret_cast<T *>(this->ptr);
 }
 
 template <typename T>
@@ -550,7 +551,8 @@ bool Slice<T>::empty() const noexcept {
 template <typename T>
 T &Slice<T>::operator[](std::size_t n) const noexcept {
   assert(n < this->size());
-  return this->ptr[n];
+  auto pos = static_cast<char *>(this->ptr) + size_of<T>() * n;
+  return *reinterpret_cast<T *>(pos);
 }
 
 template <typename T>
@@ -564,13 +566,13 @@ T &Slice<T>::at(std::size_t n) const {
 template <typename T>
 T &Slice<T>::front() const noexcept {
   assert(!this->empty());
-  return this->ptr[0];
+  return (*this)[0];
 }
 
 template <typename T>
 T &Slice<T>::back() const noexcept {
   assert(!this->empty());
-  return this->ptr[this->len - 1];
+  return (*this)[this->len - 1];
 }
 
 template <typename T>
@@ -689,7 +691,7 @@ bool Slice<T>::iterator::operator>=(const iterator &other) const noexcept {
 template <typename T>
 typename Slice<T>::iterator Slice<T>::begin() const noexcept {
   iterator it;
-  it.pos = const_cast<typename std::remove_const<T>::type *>(this->ptr);
+  it.pos = this->ptr;
   it.stride = size_of<T>();
   return it;
 }
