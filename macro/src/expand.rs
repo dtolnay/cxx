@@ -55,7 +55,10 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
             Api::CxxFunction(efn) => {
                 expanded.extend(expand_cxx_function_shim(efn, types));
             }
-            Api::RustType(ety) => expanded.extend(expand_rust_type_impl(ety)),
+            Api::RustType(ety) => {
+                expanded.extend(expand_rust_type_impl(ety));
+                hidden.extend(expand_rust_type_layout(ety));
+            }
             Api::RustFunction(efn) => hidden.extend(expand_rust_function_shim(efn, types)),
             Api::TypeAlias(alias) => {
                 expanded.extend(expand_type_alias(alias));
@@ -678,6 +681,30 @@ fn expand_rust_type_assert_sized(ety: &ExternType) -> TokenStream {
             fn __AssertUnpin<T: #unpin>() {}
             (__AssertSized::<#ident>, __AssertUnpin::<#ident>)
         };
+    }
+}
+
+fn expand_rust_type_layout(ety: &ExternType) -> TokenStream {
+    let ident = &ety.name.rust;
+    let span = ident.span();
+
+    let link_sizeof = mangle::operator(&ety.name, "sizeof");
+    let link_alignof = mangle::operator(&ety.name, "alignof");
+
+    let local_sizeof = format_ident!("__sizeof_{}", ety.name.rust);
+    let local_alignof = format_ident!("__alignof_{}", ety.name.rust);
+
+    quote_spanned! {span=>
+        #[doc(hidden)]
+        #[export_name = #link_sizeof]
+        extern "C" fn #local_sizeof() -> usize {
+            ::std::mem::size_of::<#ident>()
+        }
+        #[doc(hidden)]
+        #[export_name = #link_alignof]
+        extern "C" fn #local_alignof() -> usize {
+            ::std::mem::align_of::<#ident>()
+        }
     }
 }
 
