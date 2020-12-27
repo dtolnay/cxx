@@ -146,6 +146,8 @@ pub(super) fn write(out: &mut OutFile) {
         out.next_section();
         writeln!(out, "template <typename T>");
         writeln!(out, "::std::size_t size_of();");
+        writeln!(out, "template <typename T>");
+        writeln!(out, "::std::size_t align_of();");
     }
 
     ifndef::write(out, builtin.rust_string, "CXXBRIDGE1_RUST_STRING");
