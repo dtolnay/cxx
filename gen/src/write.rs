@@ -333,8 +333,10 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
         writeln!(out);
     }
 
+    out.builtin.layout = true;
     out.include.cstddef = true;
     writeln!(out, "private:");
+    writeln!(out, "  friend ::rust::layout;");
     writeln!(out, "  struct layout {{");
     writeln!(out, "    static ::std::size_t size() noexcept;");
     writeln!(out, "    static ::std::size_t align() noexcept;");
