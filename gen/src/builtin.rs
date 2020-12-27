@@ -64,6 +64,7 @@ pub(super) fn write(out: &mut OutFile) {
         include.iterator = true;
         include.type_traits = true;
         builtin.friend_impl = true;
+        builtin.layout = true;
         builtin.panic = true;
     }
 
@@ -139,6 +140,12 @@ pub(super) fn write(out: &mut OutFile) {
     }
     if builtin.layout && !builtin.opaque {
         writeln!(out, "class Opaque;");
+    }
+
+    if builtin.rust_slice {
+        out.next_section();
+        writeln!(out, "template <typename T>");
+        writeln!(out, "::std::size_t size_of();");
     }
 
     ifndef::write(out, builtin.rust_string, "CXXBRIDGE1_RUST_STRING");
