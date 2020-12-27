@@ -9,12 +9,3 @@ error[E0277]: the size for values of type `str` cannot be known at compilation t
   |
   = help: within `TypeR`, the trait `Sized` is not implemented for `str`
   = note: required because it appears within the type `TypeR`
-
-error[E0277]: the size for values of type `str` cannot be known at compilation time
-   --> $DIR/opaque_not_sized.rs:4:14
-    |
-4   |         type TypeR;
-    |              ^^^^^ doesn't have a size known at compile-time
-    |
-    = help: within `TypeR`, the trait `Sized` is not implemented for `str`
-    = note: required because it appears within the type `TypeR`

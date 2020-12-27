@@ -669,47 +669,46 @@ fn expand_rust_type_assert_sized(ety: &ExternType) -> TokenStream {
 
     let ident = &ety.name.rust;
     let begin_span = Token![::](ety.type_token.span);
-    let sized = quote_spanned! {ety.semi_token.span=>
-        #begin_span std::marker::Sized
-    };
     let unpin = quote_spanned! {ety.semi_token.span=>
         #begin_span std::marker::Unpin
     };
     quote_spanned! {ident.span()=>
         let _ = {
-            fn __AssertSized<T: ?#sized + #sized>() {}
-            fn __AssertUnpin<T: #unpin>() {}
-            (__AssertSized::<#ident>, __AssertUnpin::<#ident>)
+            fn __AssertUnpin<T: ?::std::marker::Sized + #unpin>() {}
+            __AssertUnpin::<#ident>
         };
     }
 }
 
 fn expand_rust_type_layout(ety: &ExternType) -> TokenStream {
     let ident = &ety.name.rust;
-    let span = ident.span();
+    let begin_span = Token![::](ety.type_token.span);
+    let sized = quote_spanned! {ety.semi_token.span=>
+        #begin_span std::marker::Sized
+    };
 
     let link_sizeof = mangle::operator(&ety.name, "sizeof");
     let link_alignof = mangle::operator(&ety.name, "alignof");
 
-    let local_layout = format_ident!("__layout_{}", ety.name.rust);
     let local_sizeof = format_ident!("__sizeof_{}", ety.name.rust);
     let local_alignof = format_ident!("__alignof_{}", ety.name.rust);
 
-    quote_spanned! {span=>
-        #[doc(hidden)]
-        #[inline]
-        fn #local_layout() -> ::std::alloc::Layout {
-            ::std::alloc::Layout::new::<#ident>()
-        }
-        #[doc(hidden)]
-        #[export_name = #link_sizeof]
-        extern "C" fn #local_sizeof() -> usize {
-            #local_layout().size()
-        }
-        #[doc(hidden)]
-        #[export_name = #link_alignof]
-        extern "C" fn #local_alignof() -> usize {
-            #local_layout().align()
+    quote_spanned! {ident.span()=>
+        {
+            #[doc(hidden)]
+            fn __AssertSized<T: ?#sized + #sized>() -> ::std::alloc::Layout {
+                ::std::alloc::Layout::new::<T>()
+            }
+            #[doc(hidden)]
+            #[export_name = #link_sizeof]
+            extern "C" fn #local_sizeof() -> usize {
+                __AssertSized::<#ident>().size()
+            }
+            #[doc(hidden)]
+            #[export_name = #link_alignof]
+            extern "C" fn #local_alignof() -> usize {
+                __AssertSized::<#ident>().align()
+            }
         }
     }
 }
