@@ -25,6 +25,12 @@ public:
   T *data() const noexcept;
   size_t size() const noexcept;
   size_t length() const noexcept;
+  bool empty() const noexcept;
+
+  T &operator[](size_t n) const noexcept;
+  T &at(size_t n) const;
+  T &front() const noexcept;
+  T &back() const noexcept;
 
   class iterator;
   iterator begin() const noexcept;

@@ -274,7 +274,8 @@ void c_take_slice_char(rust::Slice<const char> s) {
 }
 
 void c_take_slice_shared(rust::Slice<const Shared> s) {
-  if (s.size() == 2 && s.data()->z == 2020 && (s.data() + 1)->z == 2021) {
+  if (s.size() == 2 && s.data()->z == 2020 && s[1].z == 2021 &&
+      s.at(1).z == 2021 && s.front().z == 2020 && s.back().z == 2021) {
     cxx_test_suite_set_correct();
   }
 }
