@@ -299,11 +299,11 @@ public:
   template <typename... Args>
   void emplace_back(Args &&... args);
 
-  class iterator;
+  using iterator = typename Slice<T>::iterator;
   iterator begin() noexcept;
   iterator end() noexcept;
 
-  using const_iterator = typename Vec<const T>::iterator;
+  using const_iterator = typename Slice<const T>::iterator;
   const_iterator begin() const noexcept;
   const_iterator end() const noexcept;
   const_iterator cbegin() const noexcept;
@@ -319,44 +319,6 @@ private:
 
   // Size and alignment statically verified by rust_vec.rs.
   std::array<std::uintptr_t, 3> repr;
-};
-
-template <typename T>
-class Vec<T>::iterator final {
-public:
-  using iterator_category = std::random_access_iterator_tag;
-  using value_type = T;
-  using difference_type = std::ptrdiff_t;
-  using pointer = typename std::add_pointer<T>::type;
-  using reference = typename std::add_lvalue_reference<T>::type;
-
-  reference operator*() const noexcept;
-  pointer operator->() const noexcept;
-  reference operator[](difference_type) const noexcept;
-
-  iterator &operator++() noexcept;
-  iterator operator++(int) noexcept;
-  iterator &operator--() noexcept;
-  iterator operator--(int) noexcept;
-
-  iterator &operator+=(difference_type) noexcept;
-  iterator &operator-=(difference_type) noexcept;
-  iterator operator+(difference_type) const noexcept;
-  iterator operator-(difference_type) const noexcept;
-  difference_type operator-(const iterator &) const noexcept;
-
-  bool operator==(const iterator &) const noexcept;
-  bool operator!=(const iterator &) const noexcept;
-  bool operator<(const iterator &) const noexcept;
-  bool operator<=(const iterator &) const noexcept;
-  bool operator>(const iterator &) const noexcept;
-  bool operator>=(const iterator &) const noexcept;
-
-private:
-  friend class Vec;
-  friend class Vec<typename std::remove_const<T>::type>;
-  void *pos;
-  std::size_t stride;
 };
 #endif // CXXBRIDGE1_RUST_VEC
 
@@ -959,131 +921,13 @@ void Vec<T>::emplace_back(Args &&... args) {
 }
 
 template <typename T>
-typename Vec<T>::iterator::reference
-Vec<T>::iterator::operator*() const noexcept {
-  return *static_cast<T *>(this->pos);
-}
-
-template <typename T>
-typename Vec<T>::iterator::pointer
-Vec<T>::iterator::operator->() const noexcept {
-  return static_cast<T *>(this->pos);
-}
-
-template <typename T>
-typename Vec<T>::iterator::reference Vec<T>::iterator::operator[](
-    typename Vec<T>::iterator::difference_type n) const noexcept {
-  auto pos = static_cast<char *>(this->pos) + this->stride * n;
-  return *static_cast<T *>(pos);
-}
-
-template <typename T>
-typename Vec<T>::iterator &Vec<T>::iterator::operator++() noexcept {
-  this->pos = static_cast<char *>(this->pos) + this->stride;
-  return *this;
-}
-
-template <typename T>
-typename Vec<T>::iterator Vec<T>::iterator::operator++(int) noexcept {
-  auto ret = iterator(*this);
-  this->pos = static_cast<char *>(this->pos) + this->stride;
-  return ret;
-}
-
-template <typename T>
-typename Vec<T>::iterator &Vec<T>::iterator::operator--() noexcept {
-  this->pos = static_cast<char *>(this->pos) - this->stride;
-  return *this;
-}
-
-template <typename T>
-typename Vec<T>::iterator Vec<T>::iterator::operator--(int) noexcept {
-  auto ret = iterator(*this);
-  this->pos = static_cast<char *>(this->pos) - this->stride;
-  return ret;
-}
-
-template <typename T>
-typename Vec<T>::iterator &Vec<T>::iterator::operator+=(
-    typename Vec<T>::iterator::difference_type n) noexcept {
-  this->pos = static_cast<char *>(this->pos) + this->stride * n;
-  return *this;
-}
-
-template <typename T>
-typename Vec<T>::iterator &Vec<T>::iterator::operator-=(
-    typename Vec<T>::iterator::difference_type n) noexcept {
-  this->pos = static_cast<char *>(this->pos) - this->stride * n;
-  return *this;
-}
-
-template <typename T>
-typename Vec<T>::iterator Vec<T>::iterator::operator+(
-    typename Vec<T>::iterator::difference_type n) const noexcept {
-  auto ret = iterator(*this);
-  ret.pos = static_cast<char *>(this->pos) + this->stride * n;
-  return ret;
-}
-
-template <typename T>
-typename Vec<T>::iterator Vec<T>::iterator::operator-(
-    typename Vec<T>::iterator::difference_type n) const noexcept {
-  auto ret = iterator(*this);
-  ret.pos = static_cast<char *>(this->pos) - this->stride * n;
-  return ret;
-}
-
-template <typename T>
-typename Vec<T>::iterator::difference_type
-Vec<T>::iterator::operator-(const iterator &other) const noexcept {
-  auto diff = std::distance(static_cast<char *>(other.pos),
-                            static_cast<char *>(this->pos));
-  return diff / this->stride;
-}
-
-template <typename T>
-bool Vec<T>::iterator::operator==(const iterator &other) const noexcept {
-  return this->pos == other.pos;
-}
-
-template <typename T>
-bool Vec<T>::iterator::operator!=(const iterator &other) const noexcept {
-  return this->pos != other.pos;
-}
-
-template <typename T>
-bool Vec<T>::iterator::operator<(const iterator &other) const noexcept {
-  return this->pos < other.pos;
-}
-
-template <typename T>
-bool Vec<T>::iterator::operator<=(const iterator &other) const noexcept {
-  return this->pos <= other.pos;
-}
-
-template <typename T>
-bool Vec<T>::iterator::operator>(const iterator &other) const noexcept {
-  return this->pos > other.pos;
-}
-
-template <typename T>
-bool Vec<T>::iterator::operator>=(const iterator &other) const noexcept {
-  return this->pos >= other.pos;
-}
-
-template <typename T>
 typename Vec<T>::iterator Vec<T>::begin() noexcept {
-  iterator it;
-  it.pos = const_cast<typename std::remove_const<T>::type *>(this->data());
-  it.stride = size_of<T>();
-  return it;
+  return Slice<T>(this->data(), this->size()).begin();
 }
 
 template <typename T>
 typename Vec<T>::iterator Vec<T>::end() noexcept {
-  iterator it = this->begin();
-  it.pos = static_cast<char *>(it.pos) + it.stride * this->size();
-  return it;
+  return Slice<T>(this->data(), this->size()).end();
 }
 
 template <typename T>
@@ -1098,17 +942,12 @@ typename Vec<T>::const_iterator Vec<T>::end() const noexcept {
 
 template <typename T>
 typename Vec<T>::const_iterator Vec<T>::cbegin() const noexcept {
-  const_iterator it;
-  it.pos = const_cast<typename std::remove_const<T>::type *>(this->data());
-  it.stride = size_of<T>();
-  return it;
+  return Slice<const T>(this->data(), this->size()).begin();
 }
 
 template <typename T>
 typename Vec<T>::const_iterator Vec<T>::cend() const noexcept {
-  const_iterator it = this->cbegin();
-  it.pos = static_cast<char *>(it.pos) + it.stride * this->size();
-  return it;
+  return Slice<const T>(this->data(), this->size()).end();
 }
 
 // Internal API only intended for the cxxbridge code generator.
