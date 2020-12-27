@@ -59,6 +59,20 @@ pub(super) fn write(out: &mut OutFile) {
         builtin.friend_impl = true;
     }
 
+    if builtin.rust_vec {
+        include.algorithm = true;
+        include.array = true;
+        include.cstddef = true;
+        include.initializer_list = true;
+        include.iterator = true;
+        include.new = true;
+        include.type_traits = true;
+        include.utility = true;
+        builtin.panic = true;
+        builtin.rust_slice = true;
+        builtin.unsafe_bitcopy = true;
+    }
+
     if builtin.rust_slice {
         include.cstddef = true;
         include.iterator = true;
@@ -72,19 +86,6 @@ pub(super) fn write(out: &mut OutFile) {
         include.new = true;
         include.type_traits = true;
         include.utility = true;
-    }
-
-    if builtin.rust_vec {
-        include.algorithm = true;
-        include.array = true;
-        include.cstddef = true;
-        include.initializer_list = true;
-        include.iterator = true;
-        include.new = true;
-        include.type_traits = true;
-        include.utility = true;
-        builtin.panic = true;
-        builtin.unsafe_bitcopy = true;
     }
 
     if builtin.rust_fn {
