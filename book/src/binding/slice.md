@@ -40,16 +40,32 @@ public:
 # template <typename T>
 # class Slice<T>::iterator final {
 # public:
+#   using iterator_category = std::random_access_iterator_tag;
 #   using value_type = T;
 #   using pointer = T *;
 #   using reference = T &;
 #
 #   T &operator*() const noexcept;
 #   T *operator->() const noexcept;
+#   T &operator[](ptrdiff_t) const noexcept;
+#
 #   iterator &operator++() noexcept;
 #   iterator operator++(int) noexcept;
+#   iterator &operator--() noexcept;
+#   iterator operator--(int) noexcept;
+#
+#   iterator &operator+=(ptrdiff_t) noexcept;
+#   iterator &operator-=(ptrdiff_t) noexcept;
+#   iterator operator+(ptrdiff_t) const noexcept;
+#   iterator operator-(ptrdiff_t) const noexcept;
+#   ptrdiff_t operator-(const iterator &) const noexcept;
+#
 #   bool operator==(const iterator &) const noexcept;
 #   bool operator!=(const iterator &) const noexcept;
+#   bool operator<(const iterator &) const noexcept;
+#   bool operator>(const iterator &) const noexcept;
+#   bool operator<=(const iterator &) const noexcept;
+#   bool operator>=(const iterator &) const noexcept;
 # };
 #
 # } // namespace rust
