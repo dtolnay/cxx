@@ -132,6 +132,7 @@ fn write_functions<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
         for api in apis {
             match api {
                 Api::Struct(strct) => write_struct_operator_decls(out, strct),
+                Api::RustType(ety) => write_opaque_type_layout_decls(out, ety),
                 Api::CxxFunction(efn) => write_cxx_function_shim(out, efn),
                 Api::RustFunction(efn) => write_rust_function_decl(out, efn),
                 _ => {}
@@ -144,6 +145,7 @@ fn write_functions<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
     for api in apis {
         match api {
             Api::Struct(strct) => write_struct_operators(out, strct),
+            Api::RustType(ety) => write_opaque_type_layout(out, ety),
             Api::RustFunction(efn) => {
                 out.next_section();
                 write_rust_function_shim(out, efn);
@@ -576,6 +578,47 @@ fn write_struct_operators<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
         }
         writeln!(out, "}}");
     }
+}
+
+fn write_opaque_type_layout_decls<'a>(out: &mut OutFile<'a>, ety: &'a ExternType) {
+    out.set_namespace(&ety.name.namespace);
+    out.begin_block(Block::ExternC);
+
+    let link_name = mangle::operator(&ety.name, "sizeof");
+    writeln!(out, "::std::size_t {}() noexcept;", link_name);
+
+    let link_name = mangle::operator(&ety.name, "alignof");
+    writeln!(out, "::std::size_t {}() noexcept;", link_name);
+
+    out.end_block(Block::ExternC);
+}
+
+fn write_opaque_type_layout<'a>(out: &mut OutFile<'a>, ety: &'a ExternType) {
+    if out.header {
+        return;
+    }
+
+    out.set_namespace(&ety.name.namespace);
+
+    out.next_section();
+    let link_name = mangle::operator(&ety.name, "sizeof");
+    writeln!(
+        out,
+        "::std::size_t {}::layout::size() noexcept {{",
+        ety.name.cxx,
+    );
+    writeln!(out, "  return {}();", link_name);
+    writeln!(out, "}}");
+
+    out.next_section();
+    let link_name = mangle::operator(&ety.name, "alignof");
+    writeln!(
+        out,
+        "::std::size_t {}::layout::align() noexcept {{",
+        ety.name.cxx,
+    );
+    writeln!(out, "  return {}();", link_name);
+    writeln!(out, "}}");
 }
 
 fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
