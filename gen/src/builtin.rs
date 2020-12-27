@@ -13,6 +13,7 @@ pub struct Builtins<'a> {
     pub rust_fn: bool,
     pub rust_isize: bool,
     pub opaque: bool,
+    pub layout: bool,
     pub unsafe_bitcopy: bool,
     pub rust_error: bool,
     pub manually_drop: bool,
@@ -102,6 +103,12 @@ pub(super) fn write(out: &mut OutFile) {
         include.type_traits = true;
     }
 
+    if builtin.layout {
+        include.type_traits = true;
+        include.cstddef = true;
+        builtin.is_complete = true;
+    }
+
     if builtin.is_complete {
         include.cstddef = true;
         include.type_traits = true;
@@ -125,9 +132,12 @@ pub(super) fn write(out: &mut OutFile) {
         out.end_block(Block::AnonymousNamespace);
     }
 
+    out.next_section();
     if builtin.rust_str && !builtin.rust_string {
-        out.next_section();
         writeln!(out, "class String;");
+    }
+    if builtin.layout && !builtin.opaque {
+        writeln!(out, "class Opaque;");
     }
 
     ifndef::write(out, builtin.rust_string, "CXXBRIDGE1_RUST_STRING");
@@ -140,8 +150,9 @@ pub(super) fn write(out: &mut OutFile) {
     ifndef::write(out, builtin.rust_error, "CXXBRIDGE1_RUST_ERROR");
     ifndef::write(out, builtin.rust_isize, "CXXBRIDGE1_RUST_ISIZE");
     ifndef::write(out, builtin.opaque, "CXXBRIDGE1_RUST_OPAQUE");
-    ifndef::write(out, builtin.relocatable, "CXXBRIDGE1_RELOCATABLE");
     ifndef::write(out, builtin.is_complete, "CXXBRIDGE1_IS_COMPLETE");
+    ifndef::write(out, builtin.layout, "CXXBRIDGE1_LAYOUT");
+    ifndef::write(out, builtin.relocatable, "CXXBRIDGE1_RELOCATABLE");
 
     out.begin_block(Block::Namespace("detail"));
 
