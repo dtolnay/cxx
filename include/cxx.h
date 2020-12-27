@@ -156,6 +156,12 @@ public:
   T *data() const noexcept;
   std::size_t size() const noexcept;
   std::size_t length() const noexcept;
+  bool empty() const noexcept;
+
+  T &operator[](std::size_t n) const noexcept;
+  T &at(std::size_t n) const;
+  T &front() const noexcept;
+  T &back() const noexcept;
 
   // Important in order for System V ABI to pass in registers.
   Slice(const Slice<T> &) noexcept = default;
@@ -517,6 +523,37 @@ std::size_t Slice<T>::size() const noexcept {
 template <typename T>
 std::size_t Slice<T>::length() const noexcept {
   return this->len;
+}
+
+template <typename T>
+bool Slice<T>::empty() const noexcept {
+  return this->len == 0;
+}
+
+template <typename T>
+T &Slice<T>::operator[](std::size_t n) const noexcept {
+  assert(n < this->size());
+  return this->ptr[n];
+}
+
+template <typename T>
+T &Slice<T>::at(std::size_t n) const {
+  if (n >= this->size()) {
+    panic<std::out_of_range>("rust::Slice index out of range");
+  }
+  return (*this)[n];
+}
+
+template <typename T>
+T &Slice<T>::front() const noexcept {
+  assert(!this->empty());
+  return this->ptr[0];
+}
+
+template <typename T>
+T &Slice<T>::back() const noexcept {
+  assert(!this->empty());
+  return this->ptr[this->len - 1];
 }
 
 template <typename T>

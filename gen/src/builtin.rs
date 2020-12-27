@@ -64,6 +64,7 @@ pub(super) fn write(out: &mut OutFile) {
         include.iterator = true;
         include.type_traits = true;
         builtin.friend_impl = true;
+        builtin.panic = true;
     }
 
     if builtin.rust_box {
