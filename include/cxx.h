@@ -521,7 +521,8 @@ inline std::size_t Str::length() const noexcept { return this->len; }
 #ifndef CXXBRIDGE1_RUST_SLICE
 #define CXXBRIDGE1_RUST_SLICE
 template <typename T>
-Slice<T>::Slice() noexcept : ptr(reinterpret_cast<T *>(alignof(T))), len(0) {}
+Slice<T>::Slice() noexcept
+    : ptr(reinterpret_cast<T *>(align_of<T>())), len(0) {}
 
 template <typename T>
 Slice<T>::Slice(T *s, std::size_t count) noexcept : ptr(s), len(count) {}
