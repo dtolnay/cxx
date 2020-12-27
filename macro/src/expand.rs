@@ -329,12 +329,18 @@ fn expand_cxx_type_assert_pinned(ety: &ExternType) -> TokenStream {
                 fn infer() {}
             }
 
-            impl<T: ?Sized> __AmbiguousIfImpl<()> for T {}
+            impl<T> __AmbiguousIfImpl<()> for T
+            where
+                T: ?::std::marker::Sized
+            {}
 
             #[allow(dead_code)]
             struct __Invalid;
 
-            impl<T: ?Sized + Unpin> __AmbiguousIfImpl<__Invalid> for T {}
+            impl<T> __AmbiguousIfImpl<__Invalid> for T
+            where
+                T: ?::std::marker::Sized + ::std::marker::Unpin,
+            {}
 
             // If there is only one specialized trait impl, type inference with
             // `_` can be resolved and this can compile. Fails to compile if
