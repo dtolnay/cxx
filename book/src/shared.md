@@ -179,3 +179,47 @@ correctly match the existing C++ enum definition.
 Extern enums support all the same features as ordinary shared enums (explicit
 discriminants, repr). Again, CXX will static assert that all of those things you
 wrote are correct.
+
+## Derives
+
+The following standard traits are supported in `derive(...)` within the CXX
+bridge module.
+
+- `Clone`
+- `Copy`
+- `Debug`
+- `Default`
+- `Eq`
+- `Hash`
+- `Ord`
+- `PartialEq`
+- `PartialOrd`
+
+Note that shared enums automatically always come with impls of `Copy`, `Clone`,
+`Eq`, and `PartialEq`, so you're free to omit those derives on an enum.
+
+```rust,noplayground
+#[cxx::bridge]
+mod ffi {
+    #[derive(Clone, Debug, Hash)]
+    struct ExampleStruct {
+        x: u32,
+        s: String,
+    }
+
+    #[derive(Hash, Ord, PartialOrd)]
+    enum ExampleEnum {
+        Yes,
+        No,
+    }
+}
+```
+
+The derives naturally apply to *both* the Rust data type *and* the corresponding
+C++ data type:
+
+- `Hash` gives you a specialization of [`template <> struct std::hash<T>`][hash] in C++
+- `PartialEq` produces `operator==` and `operator!=`
+- `PartialOrd` produces `operator<`, `operator<=`, `operator>`, `operator>=`
+
+[hash]: https://en.cppreference.com/w/cpp/utility/hash
