@@ -106,10 +106,12 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
                 }
             }
             Api::RustType(ety) => {
-                if let Some(methods) = methods_for_type.get(&ety.name.rust) {
-                    out.next_section();
-                    write_struct_with_methods(out, ety, methods);
-                }
+                out.next_section();
+                let methods = methods_for_type
+                    .get(&ety.name.rust)
+                    .map(Vec::as_slice)
+                    .unwrap_or_default();
+                write_opaque_type(out, ety, methods);
             }
             _ => {}
         }
@@ -301,11 +303,7 @@ fn write_struct_using(out: &mut OutFile, ident: &Pair) {
     writeln!(out, "using {} = {};", ident.cxx, ident.to_fully_qualified());
 }
 
-fn write_struct_with_methods<'a>(
-    out: &mut OutFile<'a>,
-    ety: &'a ExternType,
-    methods: &[&ExternFn],
-) {
+fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[&ExternFn]) {
     out.set_namespace(&ety.name.namespace);
     let guard = format!("CXXBRIDGE1_STRUCT_{}", ety.name.to_symbol());
     writeln!(out, "#ifndef {}", guard);
@@ -314,17 +312,20 @@ fn write_struct_with_methods<'a>(
         writeln!(out, "//{}", line);
     }
     out.builtin.opaque = true;
-    writeln!(
+    write!(
         out,
         "struct {} final : public ::rust::Opaque {{",
         ety.name.cxx,
     );
     for method in methods {
-        write!(out, "  ");
+        write!(out, "\n  ");
         let sig = &method.sig;
         let local_name = method.name.cxx.to_string();
         write_rust_function_shim_decl(out, &local_name, sig, false);
-        writeln!(out, ";");
+        write!(out, ";");
+    }
+    if !methods.is_empty() {
+        writeln!(out);
     }
     writeln!(out, "}};");
     writeln!(out, "#endif // {}", guard);
