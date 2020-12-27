@@ -188,8 +188,8 @@ public:
   using reference = typename std::add_lvalue_reference<T>::type;
   using iterator_category = std::forward_iterator_tag;
 
-  T &operator*() const noexcept;
-  T *operator->() const noexcept;
+  reference operator*() const noexcept;
+  pointer operator->() const noexcept;
   iterator &operator++() noexcept;
   iterator operator++(int) noexcept;
   bool operator==(const iterator &) const noexcept;
@@ -557,12 +557,14 @@ T &Slice<T>::back() const noexcept {
 }
 
 template <typename T>
-T &Slice<T>::iterator::operator*() const noexcept {
+typename Slice<T>::iterator::reference
+Slice<T>::iterator::operator*() const noexcept {
   return *this->pos;
 }
 
 template <typename T>
-T *Slice<T>::iterator::operator->() const noexcept {
+typename Slice<T>::iterator::pointer
+Slice<T>::iterator::operator->() const noexcept {
   return this->pos;
 }
 
