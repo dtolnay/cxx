@@ -327,8 +327,8 @@ public:
   bool operator==(const iterator &) const noexcept;
   bool operator!=(const iterator &) const noexcept;
   bool operator<(const iterator &) const noexcept;
-  bool operator>(const iterator &) const noexcept;
   bool operator<=(const iterator &) const noexcept;
+  bool operator>(const iterator &) const noexcept;
   bool operator>=(const iterator &) const noexcept;
 
 private:
@@ -911,23 +911,23 @@ bool Vec<T>::iterator::operator!=(const iterator &other) const noexcept {
 }
 
 template <typename T>
-bool Vec<T>::iterator::operator>(const iterator &other) const noexcept {
-  return this->pos > other.pos;
-}
-
-template <typename T>
 bool Vec<T>::iterator::operator<(const iterator &other) const noexcept {
   return this->pos < other.pos;
 }
 
 template <typename T>
-bool Vec<T>::iterator::operator>=(const iterator &other) const noexcept {
-  return this->pos >= other.pos;
+bool Vec<T>::iterator::operator<=(const iterator &other) const noexcept {
+  return this->pos <= other.pos;
 }
 
 template <typename T>
-bool Vec<T>::iterator::operator<=(const iterator &other) const noexcept {
-  return this->pos <= other.pos;
+bool Vec<T>::iterator::operator>(const iterator &other) const noexcept {
+  return this->pos > other.pos;
+}
+
+template <typename T>
+bool Vec<T>::iterator::operator>=(const iterator &other) const noexcept {
+  return this->pos >= other.pos;
 }
 
 template <typename T>

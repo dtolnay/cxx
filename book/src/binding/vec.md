@@ -85,8 +85,8 @@ public:
 #   bool operator==(const iterator &) const noexcept;
 #   bool operator!=(const iterator &) const noexcept;
 #   bool operator<(const iterator &) const noexcept;
-#   bool operator>(const iterator &) const noexcept;
 #   bool operator<=(const iterator &) const noexcept;
+#   bool operator>(const iterator &) const noexcept;
 #   bool operator>=(const iterator &) const noexcept;
 # };
 #
@@ -116,8 +116,8 @@ public:
 #   bool operator==(const const_iterator &) const noexcept;
 #   bool operator!=(const const_iterator &) const noexcept;
 #   bool operator<(const const_iterator &) const noexcept;
-#   bool operator>(const const_iterator &) const noexcept;
 #   bool operator<=(const const_iterator &) const noexcept;
+#   bool operator>(const const_iterator &) const noexcept;
 #   bool operator>=(const const_iterator &) const noexcept;
 # };
 #
