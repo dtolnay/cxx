@@ -9,6 +9,9 @@
 ```cpp,hidelines
 // rust/cxx.h
 #
+# #include <iterator>
+# #include <type_traits>
+#
 # namespace rust {
 
 template <typename T>
