@@ -689,7 +689,7 @@ template <typename T>
 typename Slice<T>::iterator Slice<T>::begin() const noexcept {
   iterator it;
   it.pos = const_cast<typename std::remove_const<T>::type *>(this->ptr);
-  it.stride = sizeof(T);
+  it.stride = size_of<T>();
   return it;
 }
 
