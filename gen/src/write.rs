@@ -311,22 +311,32 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
     for line in ety.doc.to_string().lines() {
         writeln!(out, "//{}", line);
     }
+
     out.builtin.opaque = true;
-    write!(
+    writeln!(
         out,
         "struct {} final : public ::rust::Opaque {{",
         ety.name.cxx,
     );
+
     for method in methods {
-        write!(out, "\n  ");
+        write!(out, "  ");
         let sig = &method.sig;
         let local_name = method.name.cxx.to_string();
         write_rust_function_shim_decl(out, &local_name, sig, false);
-        write!(out, ";");
+        writeln!(out, ";");
     }
+
     if !methods.is_empty() {
         writeln!(out);
     }
+
+    out.include.cstddef = true;
+    writeln!(out, "private:");
+    writeln!(out, "  struct layout {{");
+    writeln!(out, "    static ::std::size_t size() noexcept;");
+    writeln!(out, "    static ::std::size_t align() noexcept;");
+    writeln!(out, "  }};");
     writeln!(out, "}};");
     writeln!(out, "#endif // {}", guard);
 }
