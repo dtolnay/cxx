@@ -123,6 +123,7 @@ void c_take_ref_ns_c(const ::H::H &h);
 void c_take_str(rust::Str s);
 void c_take_slice_char(rust::Slice<const char> s);
 void c_take_slice_shared(rust::Slice<const Shared> s);
+void c_take_slice_shared_sort(rust::Slice<Shared> s);
 void c_take_rust_string(rust::String s);
 void c_take_unique_ptr_string(std::unique_ptr<std::string> s);
 void c_take_unique_ptr_vector_u8(std::unique_ptr<std::vector<uint8_t>> v);
