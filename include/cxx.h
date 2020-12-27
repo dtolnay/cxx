@@ -212,7 +212,8 @@ public:
 
 private:
   friend class Slice;
-  T *pos;
+  void *pos;
+  std::size_t stride;
 };
 #endif // CXXBRIDGE1_RUST_SLICE
 
@@ -574,77 +575,84 @@ T &Slice<T>::back() const noexcept {
 template <typename T>
 typename Slice<T>::iterator::reference
 Slice<T>::iterator::operator*() const noexcept {
-  return *this->pos;
+  return *static_cast<T *>(this->pos);
 }
 
 template <typename T>
 typename Slice<T>::iterator::pointer
 Slice<T>::iterator::operator->() const noexcept {
-  return this->pos;
+  return static_cast<T *>(this->pos);
 }
 
 template <typename T>
 typename Slice<T>::iterator::reference Slice<T>::iterator::operator[](
     typename Slice<T>::iterator::difference_type n) const noexcept {
-  return this->pos[n];
+  auto pos = static_cast<char *>(this->pos) + this->stride * n;
+  return *static_cast<T *>(pos);
 }
 
 template <typename T>
 typename Slice<T>::iterator &Slice<T>::iterator::operator++() noexcept {
-  ++this->pos;
+  this->pos = static_cast<char *>(this->pos) + this->stride;
   return *this;
 }
 
 template <typename T>
 typename Slice<T>::iterator Slice<T>::iterator::operator++(int) noexcept {
   auto ret = iterator(*this);
-  ++this->pos;
+  this->pos = static_cast<char *>(this->pos) + this->stride;
   return ret;
 }
 
 template <typename T>
 typename Slice<T>::iterator &Slice<T>::iterator::operator--() noexcept {
-  --this->pos;
+  this->pos = static_cast<char *>(this->pos) - this->stride;
   return *this;
 }
 
 template <typename T>
 typename Slice<T>::iterator Slice<T>::iterator::operator--(int) noexcept {
   auto ret = iterator(*this);
-  --this->pos;
+  this->pos = static_cast<char *>(this->pos) - this->stride;
   return ret;
 }
 
 template <typename T>
 typename Slice<T>::iterator &Slice<T>::iterator::operator+=(
     typename Slice<T>::iterator::difference_type n) noexcept {
-  this->pos += n;
+  this->pos = static_cast<char *>(this->pos) + this->stride * n;
   return *this;
 }
 
 template <typename T>
 typename Slice<T>::iterator &Slice<T>::iterator::operator-=(
     typename Slice<T>::iterator::difference_type n) noexcept {
-  this->pos -= n;
+  this->pos = static_cast<char *>(this->pos) - this->stride * n;
   return *this;
 }
 
 template <typename T>
 typename Slice<T>::iterator Slice<T>::iterator::operator+(
     typename Slice<T>::iterator::difference_type n) const noexcept {
-  return iterator(*this) += n;
+  auto ret = iterator(*this);
+  ret.pos = static_cast<char *>(this->pos) + this->stride * n;
+  return ret;
 }
 
 template <typename T>
 typename Slice<T>::iterator Slice<T>::iterator::operator-(
     typename Slice<T>::iterator::difference_type n) const noexcept {
-  return iterator(*this) -= n;
+  auto ret = iterator(*this);
+  ret.pos = static_cast<char *>(this->pos) - this->stride * n;
+  return ret;
 }
 
 template <typename T>
 typename Slice<T>::iterator::difference_type
 Slice<T>::iterator::operator-(const iterator &other) const noexcept {
-  return std::distance(other.pos, this->pos);
+  auto diff = std::distance(static_cast<char *>(other.pos),
+                            static_cast<char *>(this->pos));
+  return diff / this->stride;
 }
 
 template <typename T>
@@ -680,14 +688,15 @@ bool Slice<T>::iterator::operator>=(const iterator &other) const noexcept {
 template <typename T>
 typename Slice<T>::iterator Slice<T>::begin() const noexcept {
   iterator it;
-  it.pos = this->ptr;
+  it.pos = const_cast<typename std::remove_const<T>::type *>(this->ptr);
+  it.stride = sizeof(T);
   return it;
 }
 
 template <typename T>
 typename Slice<T>::iterator Slice<T>::end() const noexcept {
   iterator it = this->begin();
-  it.pos += this->len;
+  it.pos = static_cast<char *>(it.pos) + it.stride * this->len;
   return it;
 }
 #endif // CXXBRIDGE1_RUST_SLICE
