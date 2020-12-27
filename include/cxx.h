@@ -313,7 +313,6 @@ public:
   Vec(unsafe_bitcopy_t, const Vec &) noexcept;
 
 private:
-  static std::size_t stride() noexcept;
   void reserve_total(std::size_t cap) noexcept;
   void set_len(std::size_t len) noexcept;
   void drop() noexcept;
@@ -883,7 +882,7 @@ template <typename T>
 const T &Vec<T>::operator[](std::size_t n) const noexcept {
   assert(n < this->size());
   auto data = reinterpret_cast<const char *>(this->data());
-  return *reinterpret_cast<const T *>(data + n * this->stride());
+  return *reinterpret_cast<const T *>(data + n * size_of<T>());
 }
 
 template <typename T>
@@ -910,7 +909,7 @@ template <typename T>
 T &Vec<T>::operator[](std::size_t n) noexcept {
   assert(n < this->size());
   auto data = reinterpret_cast<char *>(this->data());
-  return *reinterpret_cast<T *>(data + n * this->stride());
+  return *reinterpret_cast<T *>(data + n * size_of<T>());
 }
 
 template <typename T>
@@ -954,7 +953,7 @@ void Vec<T>::emplace_back(Args &&... args) {
   auto size = this->size();
   this->reserve_total(size + 1);
   ::new (reinterpret_cast<T *>(reinterpret_cast<char *>(this->data()) +
-                               size * this->stride()))
+                               size * size_of<T>()))
       T(std::forward<Args>(args)...);
   this->set_len(size + 1);
 }
@@ -1076,7 +1075,7 @@ template <typename T>
 typename Vec<T>::iterator Vec<T>::begin() noexcept {
   iterator it;
   it.pos = const_cast<typename std::remove_const<T>::type *>(this->data());
-  it.stride = this->stride();
+  it.stride = size_of<T>();
   return it;
 }
 
@@ -1101,7 +1100,7 @@ template <typename T>
 typename Vec<T>::const_iterator Vec<T>::cbegin() const noexcept {
   const_iterator it;
   it.pos = const_cast<typename std::remove_const<T>::type *>(this->data());
-  it.stride = this->stride();
+  it.stride = size_of<T>();
   return it;
 }
 
