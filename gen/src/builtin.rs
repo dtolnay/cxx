@@ -102,6 +102,11 @@ pub(super) fn write(out: &mut OutFile) {
         include.type_traits = true;
     }
 
+    if builtin.is_complete {
+        include.cstddef = true;
+        include.type_traits = true;
+    }
+
     out.begin_block(Block::Namespace("rust"));
     out.begin_block(Block::InlineNamespace("cxxbridge1"));
     writeln!(out, "// #include \"rust/cxx.h\"");
@@ -136,6 +141,7 @@ pub(super) fn write(out: &mut OutFile) {
     ifndef::write(out, builtin.rust_isize, "CXXBRIDGE1_RUST_ISIZE");
     ifndef::write(out, builtin.opaque, "CXXBRIDGE1_RUST_OPAQUE");
     ifndef::write(out, builtin.relocatable, "CXXBRIDGE1_RELOCATABLE");
+    ifndef::write(out, builtin.is_complete, "CXXBRIDGE1_IS_COMPLETE");
 
     out.begin_block(Block::Namespace("detail"));
 
@@ -275,20 +281,6 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "    return error;");
         writeln!(out, "  }}");
         writeln!(out, "}};");
-    }
-
-    if builtin.is_complete {
-        include.cstddef = true;
-        include.type_traits = true;
-        out.next_section();
-        writeln!(out, "template <typename T, typename = ::std::size_t>");
-        writeln!(out, "struct is_complete : std::false_type {{}};");
-        out.next_section();
-        writeln!(out, "template <typename T>");
-        writeln!(
-            out,
-            "struct is_complete<T, decltype(sizeof(T))> : std::true_type {{}};",
-        );
     }
 
     if builtin.deleter_if {

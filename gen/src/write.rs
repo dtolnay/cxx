@@ -1622,7 +1622,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
         };
         writeln!(
             out,
-            "static_assert(::rust::is_complete<{}>::value, \"definition of {} is required\");",
+            "static_assert(::rust::detail::is_complete<{}>::value, \"definition of {} is required\");",
             inner, definition,
         );
     }
@@ -1689,7 +1689,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
         out.builtin.deleter_if = true;
         writeln!(
             out,
-            "  ::rust::deleter_if<::rust::is_complete<{}>::value>{{}}(ptr);",
+            "  ::rust::deleter_if<::rust::detail::is_complete<{}>::value>{{}}(ptr);",
             inner,
         );
     } else {
