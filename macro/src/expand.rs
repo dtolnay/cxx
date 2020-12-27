@@ -691,19 +691,25 @@ fn expand_rust_type_layout(ety: &ExternType) -> TokenStream {
     let link_sizeof = mangle::operator(&ety.name, "sizeof");
     let link_alignof = mangle::operator(&ety.name, "alignof");
 
+    let local_layout = format_ident!("__layout_{}", ety.name.rust);
     let local_sizeof = format_ident!("__sizeof_{}", ety.name.rust);
     let local_alignof = format_ident!("__alignof_{}", ety.name.rust);
 
     quote_spanned! {span=>
         #[doc(hidden)]
+        #[inline]
+        fn #local_layout() -> ::std::alloc::Layout {
+            ::std::alloc::Layout::new::<#ident>()
+        }
+        #[doc(hidden)]
         #[export_name = #link_sizeof]
         extern "C" fn #local_sizeof() -> usize {
-            ::std::mem::size_of::<#ident>()
+            #local_layout().size()
         }
         #[doc(hidden)]
         #[export_name = #link_alignof]
         extern "C" fn #local_alignof() -> usize {
-            ::std::mem::align_of::<#ident>()
+            #local_layout().align()
         }
     }
 }
