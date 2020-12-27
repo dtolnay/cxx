@@ -280,6 +280,15 @@ void c_take_slice_shared(rust::Slice<const Shared> s) {
   }
 }
 
+void c_take_slice_shared_sort(rust::Slice<Shared> s) {
+  // Exercise requirements of RandomAccessIterator.
+  // https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator
+  std::sort(s.begin(), s.end());
+  if (s[0].z == 0 && s[1].z == 2 && s[2].z == 4 && s[3].z == 7) {
+    cxx_test_suite_set_correct();
+  }
+}
+
 void c_take_rust_string(rust::String s) {
   if (std::string(s) == "2020") {
     cxx_test_suite_set_correct();

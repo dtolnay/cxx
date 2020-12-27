@@ -182,18 +182,33 @@ private:
 template <typename T>
 class Slice<T>::iterator final {
 public:
-  using difference_type = std::ptrdiff_t;
+  using iterator_category = std::random_access_iterator_tag;
   using value_type = T;
+  using difference_type = std::ptrdiff_t;
   using pointer = typename std::add_pointer<T>::type;
   using reference = typename std::add_lvalue_reference<T>::type;
-  using iterator_category = std::forward_iterator_tag;
 
-  T &operator*() const noexcept;
-  T *operator->() const noexcept;
+  reference operator*() const noexcept;
+  pointer operator->() const noexcept;
+  reference operator[](difference_type) const noexcept;
+
   iterator &operator++() noexcept;
   iterator operator++(int) noexcept;
+  iterator &operator--() noexcept;
+  iterator operator--(int) noexcept;
+
+  iterator &operator+=(difference_type) noexcept;
+  iterator &operator-=(difference_type) noexcept;
+  iterator operator+(difference_type) const noexcept;
+  iterator operator-(difference_type) const noexcept;
+  difference_type operator-(const iterator &) const noexcept;
+
   bool operator==(const iterator &) const noexcept;
   bool operator!=(const iterator &) const noexcept;
+  bool operator<(const iterator &) const noexcept;
+  bool operator<=(const iterator &) const noexcept;
+  bool operator>(const iterator &) const noexcept;
+  bool operator>=(const iterator &) const noexcept;
 
 private:
   friend class Slice;
@@ -557,13 +572,21 @@ T &Slice<T>::back() const noexcept {
 }
 
 template <typename T>
-T &Slice<T>::iterator::operator*() const noexcept {
+typename Slice<T>::iterator::reference
+Slice<T>::iterator::operator*() const noexcept {
   return *this->pos;
 }
 
 template <typename T>
-T *Slice<T>::iterator::operator->() const noexcept {
+typename Slice<T>::iterator::pointer
+Slice<T>::iterator::operator->() const noexcept {
   return this->pos;
+}
+
+template <typename T>
+typename Slice<T>::iterator::reference Slice<T>::iterator::operator[](
+    typename Slice<T>::iterator::difference_type n) const noexcept {
+  return this->pos[n];
 }
 
 template <typename T>
@@ -580,6 +603,51 @@ typename Slice<T>::iterator Slice<T>::iterator::operator++(int) noexcept {
 }
 
 template <typename T>
+typename Slice<T>::iterator &Slice<T>::iterator::operator--() noexcept {
+  --this->pos;
+  return *this;
+}
+
+template <typename T>
+typename Slice<T>::iterator Slice<T>::iterator::operator--(int) noexcept {
+  auto ret = iterator(*this);
+  --this->pos;
+  return ret;
+}
+
+template <typename T>
+typename Slice<T>::iterator &Slice<T>::iterator::operator+=(
+    typename Slice<T>::iterator::difference_type n) noexcept {
+  this->pos += n;
+  return *this;
+}
+
+template <typename T>
+typename Slice<T>::iterator &Slice<T>::iterator::operator-=(
+    typename Slice<T>::iterator::difference_type n) noexcept {
+  this->pos -= n;
+  return *this;
+}
+
+template <typename T>
+typename Slice<T>::iterator Slice<T>::iterator::operator+(
+    typename Slice<T>::iterator::difference_type n) const noexcept {
+  return iterator(*this) += n;
+}
+
+template <typename T>
+typename Slice<T>::iterator Slice<T>::iterator::operator-(
+    typename Slice<T>::iterator::difference_type n) const noexcept {
+  return iterator(*this) -= n;
+}
+
+template <typename T>
+typename Slice<T>::iterator::difference_type
+Slice<T>::iterator::operator-(const iterator &other) const noexcept {
+  return std::distance(other.pos, this->pos);
+}
+
+template <typename T>
 bool Slice<T>::iterator::operator==(const iterator &other) const noexcept {
   return this->pos == other.pos;
 }
@@ -587,6 +655,26 @@ bool Slice<T>::iterator::operator==(const iterator &other) const noexcept {
 template <typename T>
 bool Slice<T>::iterator::operator!=(const iterator &other) const noexcept {
   return this->pos != other.pos;
+}
+
+template <typename T>
+bool Slice<T>::iterator::operator<(const iterator &other) const noexcept {
+  return this->pos < other.pos;
+}
+
+template <typename T>
+bool Slice<T>::iterator::operator<=(const iterator &other) const noexcept {
+  return this->pos <= other.pos;
+}
+
+template <typename T>
+bool Slice<T>::iterator::operator>(const iterator &other) const noexcept {
+  return this->pos > other.pos;
+}
+
+template <typename T>
+bool Slice<T>::iterator::operator>=(const iterator &other) const noexcept {
+  return this->pos >= other.pos;
 }
 
 template <typename T>
