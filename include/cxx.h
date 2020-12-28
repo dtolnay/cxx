@@ -254,8 +254,7 @@ public:
 
   T *into_raw() noexcept;
 
-  // Deprecated.
-  using value_type = element_type;
+  /* Deprecated */ using value_type = element_type;
 
 private:
   class uninit;
