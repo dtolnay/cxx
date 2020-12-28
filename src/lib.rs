@@ -360,6 +360,7 @@
 //! <tr><td>Option&lt;T&gt;</td><td><sup><i>tbd</i></sup></td></tr>
 //! <tr><td><sup><i>tbd</i></sup></td><td>std::map&lt;K, V&gt;</td></tr>
 //! <tr><td><sup><i>tbd</i></sup></td><td>std::unordered_map&lt;K, V&gt;</td></tr>
+//! <tr><td><sup><i>tbd</i></sup></td><td>std::weak_ptr&lt;T&gt;</td></tr>
 //! </table>
 
 #![no_std]
