@@ -1,5 +1,6 @@
 #include "tests/ffi/tests.h"
 #include "tests/ffi/lib.rs.h"
+#include <cstdlib>
 #include <cstring>
 #include <iterator>
 #include <memory>
@@ -290,7 +291,21 @@ void c_take_slice_shared_sort(rust::Slice<Shared> s) {
 }
 
 void c_take_slice_r(rust::Slice<const R> s) {
-  if (s.size() == 2 && s[0].get() == 2020 && s[1].get() == 2021) {
+  if (s.size() == 3 && s[0].get() == 2020 && s[1].get() == 2050) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+bool operator<(const R &a, const R &b) noexcept { return a.get() < b.get(); }
+
+void c_take_slice_r_sort(rust::Slice<R> s) {
+  std::qsort(s.data(), s.size(), rust::size_of<decltype(s)::value_type>(),
+             [](const void *fst, const void *snd) {
+               auto &a = *static_cast<const R *>(fst);
+               auto &b = *static_cast<const R *>(snd);
+               return a < b ? -1 : b < a ? 1 : 0;
+             });
+  if (s[0].get() == 2020 && s[1].get() == 2021 && s[2].get() == 2050) {
     cxx_test_suite_set_correct();
   }
 }

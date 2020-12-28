@@ -132,11 +132,16 @@ fn test_c_take() {
         ffi::Shared { z: 4 },
     ];
     check!(ffi::c_take_slice_shared_sort(shared_sort_slice));
-    check!(ffi::c_take_slice_r(&[R(2020), R(2021)]));
     assert_eq!(shared_sort_slice[0].z, 0);
     assert_eq!(shared_sort_slice[1].z, 2);
     assert_eq!(shared_sort_slice[2].z, 4);
     assert_eq!(shared_sort_slice[3].z, 7);
+    let r_sort_slice = &mut [R(2020), R(2050), R(2021)];
+    check!(ffi::c_take_slice_r(r_sort_slice));
+    check!(ffi::c_take_slice_r_sort(r_sort_slice));
+    assert_eq!(r_sort_slice[0].0, 2020);
+    assert_eq!(r_sort_slice[1].0, 2021);
+    assert_eq!(r_sort_slice[2].0, 2050);
     check!(ffi::c_take_rust_string("2020".to_owned()));
     check!(ffi::c_take_unique_ptr_string(
         ffi::c_return_unique_ptr_string()
