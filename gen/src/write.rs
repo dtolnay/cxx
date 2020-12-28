@@ -1402,8 +1402,6 @@ fn write_rust_box_extern(out: &mut OutFile, ident: &Pair) {
     let inner = ident.to_fully_qualified();
     let instance = ident.to_symbol();
 
-    writeln!(out, "#ifndef CXXBRIDGE1_RUST_BOX_{}", instance);
-    writeln!(out, "#define CXXBRIDGE1_RUST_BOX_{}", instance);
     writeln!(
         out,
         "{} *cxxbridge1$box${}$alloc() noexcept;",
@@ -1419,7 +1417,6 @@ fn write_rust_box_extern(out: &mut OutFile, ident: &Pair) {
         "void cxxbridge1$box${}$drop(::rust::Box<{}> *ptr) noexcept;",
         instance, inner,
     );
-    writeln!(out, "#endif // CXXBRIDGE1_RUST_BOX_{}", instance);
 }
 
 fn write_rust_vec_extern(out: &mut OutFile, element: &RustName) {
@@ -1428,8 +1425,6 @@ fn write_rust_vec_extern(out: &mut OutFile, element: &RustName) {
 
     out.include.cstddef = true;
 
-    writeln!(out, "#ifndef CXXBRIDGE1_RUST_VEC_{}", instance);
-    writeln!(out, "#define CXXBRIDGE1_RUST_VEC_{}", instance);
     writeln!(
         out,
         "void cxxbridge1$rust_vec${}$new(const ::rust::Vec<{}> *ptr) noexcept;",
@@ -1465,7 +1460,6 @@ fn write_rust_vec_extern(out: &mut OutFile, element: &RustName) {
         "void cxxbridge1$rust_vec${}$set_len(::rust::Vec<{}> *ptr, ::std::size_t len) noexcept;",
         instance, inner,
     );
-    writeln!(out, "#endif // CXXBRIDGE1_RUST_VEC_{}", instance);
 }
 
 fn write_rust_box_impl(out: &mut OutFile, ident: &Pair) {
