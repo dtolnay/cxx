@@ -13,7 +13,7 @@
 template <typename T>
 class Box final {
 public:
-  using value_type = T;
+  using element_type = T;
   using const_pointer =
       typename std::add_pointer<typename std::add_const<T>::type>::type;
   using pointer = typename std::add_pointer<T>::type;
