@@ -1562,14 +1562,7 @@ fn write_rust_vec_impl(out: &mut OutFile, element: &RustName) {
 
 fn write_unique_ptr(out: &mut OutFile, ident: &RustName) {
     let ty = UniquePtr::Ident(ident);
-    let instance = ty.to_mangled(out.types);
-
-    writeln!(out, "#ifndef CXXBRIDGE1_UNIQUE_PTR_{}", instance);
-    writeln!(out, "#define CXXBRIDGE1_UNIQUE_PTR_{}", instance);
-
     write_unique_ptr_common(out, ty);
-
-    writeln!(out, "#endif // CXXBRIDGE1_UNIQUE_PTR_{}", instance);
 }
 
 // Shared by UniquePtr<T> and UniquePtr<CxxVector<T>>.
@@ -1689,8 +1682,6 @@ fn write_shared_ptr(out: &mut OutFile, ident: &RustName) {
     let inner = resolved.to_fully_qualified();
     let instance = ident.to_symbol(out.types);
 
-    writeln!(out, "#ifndef CXXBRIDGE1_SHARED_PTR_{}", instance);
-    writeln!(out, "#define CXXBRIDGE1_SHARED_PTR_{}", instance);
     out.include.new = true;
     out.include.utility = true;
 
@@ -1756,8 +1747,6 @@ fn write_shared_ptr(out: &mut OutFile, ident: &RustName) {
     );
     writeln!(out, "  self->~shared_ptr();");
     writeln!(out, "}}");
-
-    writeln!(out, "#endif // CXXBRIDGE1_SHARED_PTR_{}", instance);
 }
 
 fn write_cxx_vector(out: &mut OutFile, element: &RustName) {
@@ -1766,8 +1755,6 @@ fn write_cxx_vector(out: &mut OutFile, element: &RustName) {
 
     out.include.cstddef = true;
 
-    writeln!(out, "#ifndef CXXBRIDGE1_VECTOR_{}", instance);
-    writeln!(out, "#define CXXBRIDGE1_VECTOR_{}", instance);
     writeln!(
         out,
         "::std::size_t cxxbridge1$std$vector${}$size(const ::std::vector<{}> &s) noexcept {{",
@@ -1785,6 +1772,4 @@ fn write_cxx_vector(out: &mut OutFile, element: &RustName) {
 
     out.include.memory = true;
     write_unique_ptr_common(out, UniquePtr::CxxVector(element));
-
-    writeln!(out, "#endif // CXXBRIDGE1_VECTOR_{}", instance);
 }
