@@ -7,7 +7,7 @@ use core::marker::PhantomData;
 use core::mem::MaybeUninit;
 use core::ops::Deref;
 
-/// BInding to C++ `std::shared_ptr<T>`.
+/// Binding to C++ `std::shared_ptr<T>`.
 #[repr(C)]
 pub struct SharedPtr<T>
 where
