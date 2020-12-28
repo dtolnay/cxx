@@ -73,7 +73,9 @@ macro_rules! let_cxx_string {
     ($var:ident = $value:expr $(,)?) => {
         let mut $var = $crate::private::StackString::new();
         #[allow(unused_mut, unused_unsafe)]
-        let mut $var = unsafe { $var.init($value) };
+        let mut $var = match $value {
+            let_cxx_string => unsafe { $var.init(let_cxx_string) },
+        };
     };
 }
 
