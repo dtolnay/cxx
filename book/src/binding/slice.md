@@ -17,6 +17,8 @@
 template <typename T>
 class Slice final {
 public:
+  using value_type = T;
+
   Slice() noexcept;
   Slice(const Slice<T> &) noexcept;
   Slice(T *, size_t count) noexcept;

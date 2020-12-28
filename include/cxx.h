@@ -147,6 +147,8 @@ template <typename T>
 class Slice final
     : private detail::copy_assignable_if<std::is_const<T>::value> {
 public:
+  using value_type = T;
+
   Slice() noexcept;
   Slice(T *, std::size_t count) noexcept;
 
