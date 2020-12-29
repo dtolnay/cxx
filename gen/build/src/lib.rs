@@ -425,8 +425,9 @@ fn best_effort_copy_headers(src: &Path, dst: &Path, max_depth: usize) {
             }
             Ok(file_type) if file_type.is_file() => {
                 let src = entry.path();
-                if src.extension() != Some(OsStr::new("h")) {
-                    continue;
+                match src.extension().map(|x| x.to_str()).flatten() {
+                    Some("h") | Some("hh") | Some("hpp") => {},
+                    _ => continue
                 }
                 if !dst_created && fs::create_dir_all(dst).is_err() {
                     return;
