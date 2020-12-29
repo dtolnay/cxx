@@ -1242,6 +1242,7 @@ fn expand_weak_ptr(ident: &RustName, types: &Types, explicit_impl: Option<&Impl>
     let prefix = format!("cxxbridge1$weak_ptr${}$", ident.to_symbol(types));
     let link_null = format!("{}null", prefix);
     let link_clone = format!("{}clone", prefix);
+    let link_downgrade = format!("{}downgrade", prefix);
     let link_drop = format!("{}drop", prefix);
 
     let begin_span =
@@ -1265,6 +1266,13 @@ fn expand_weak_ptr(ident: &RustName, types: &Types, explicit_impl: Option<&Impl>
                     fn __clone(this: *const ::std::ffi::c_void, new: *mut ::std::ffi::c_void);
                 }
                 __clone(this, new);
+            }
+            unsafe fn __downgrade(shared: *const ::std::ffi::c_void, weak: *mut ::std::ffi::c_void) {
+                extern "C" {
+                    #[link_name = #link_downgrade]
+                    fn __downgrade(shared: *const ::std::ffi::c_void, weak: *mut ::std::ffi::c_void);
+                }
+                __downgrade(shared, weak);
             }
             unsafe fn __drop(this: *mut ::std::ffi::c_void) {
                 extern "C" {

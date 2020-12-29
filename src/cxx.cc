@@ -520,6 +520,11 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
       std::weak_ptr<CXX_TYPE> *ptr) noexcept {                                 \
     new (ptr) std::weak_ptr<CXX_TYPE>(self);                                   \
   }                                                                            \
+  void cxxbridge1$std$weak_ptr$##RUST_TYPE##$downgrade(                        \
+      const std::shared_ptr<CXX_TYPE> &shared,                                 \
+      std::weak_ptr<CXX_TYPE> *weak) noexcept {                                \
+    new (weak) std::weak_ptr<CXX_TYPE>(shared);                                \
+  }                                                                            \
   void cxxbridge1$std$weak_ptr$##RUST_TYPE##$drop(                             \
       const std::weak_ptr<CXX_TYPE> *self) noexcept {                          \
     self->~weak_ptr();                                                         \

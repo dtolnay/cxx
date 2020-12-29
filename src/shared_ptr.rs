@@ -1,5 +1,6 @@
 use crate::kind::Trivial;
 use crate::string::CxxString;
+use crate::weak_ptr::{WeakPtr, WeakPtrTarget};
 use crate::ExternType;
 use core::ffi::c_void;
 use core::fmt::{self, Debug, Display};
@@ -60,6 +61,24 @@ where
     pub fn as_ref(&self) -> Option<&T> {
         let this = self as *const Self as *const c_void;
         unsafe { T::__get(this).as_ref() }
+    }
+
+    /// Constructs new WeakPtr as a non-owning reference to the object managed
+    /// by `self`. If `self` manages no object, the WeakPtr manages no object
+    /// too.
+    ///
+    /// Matches the behavior of [std::weak_ptr\<T\>::weak_ptr(const std::shared_ptr\<T\> \&)](https://en.cppreference.com/w/cpp/memory/weak_ptr/weak_ptr).
+    pub fn downgrade(self: &SharedPtr<T>) -> WeakPtr<T>
+    where
+        T: WeakPtrTarget,
+    {
+        let this = self as *const Self as *const c_void;
+        let mut weak_ptr = MaybeUninit::<WeakPtr<T>>::uninit();
+        let new = weak_ptr.as_mut_ptr().cast();
+        unsafe {
+            T::__downgrade(this, new);
+            weak_ptr.assume_init()
+        }
     }
 }
 

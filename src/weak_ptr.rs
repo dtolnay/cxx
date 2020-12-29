@@ -5,6 +5,11 @@ use core::marker::PhantomData;
 use core::mem::MaybeUninit;
 
 /// Binding to C++ `std::weak_ptr<T>`.
+///
+/// The typical way to construct a WeakPtr from Rust is by [downgrading] from a
+/// SharedPtr.
+///
+/// [downgrading]: crate::SharedPtr::downgrade
 #[repr(C)]
 pub struct WeakPtr<T>
 where
@@ -69,6 +74,8 @@ pub unsafe trait WeakPtrTarget {
     #[doc(hidden)]
     unsafe fn __clone(this: *const c_void, new: *mut c_void);
     #[doc(hidden)]
+    unsafe fn __downgrade(shared: *const c_void, new: *mut c_void);
+    #[doc(hidden)]
     unsafe fn __drop(this: *mut c_void);
 }
 
@@ -93,6 +100,15 @@ macro_rules! impl_weak_ptr_target {
                     }
                 }
                 __clone(this, new);
+            }
+            unsafe fn __downgrade(shared: *const c_void, weak: *mut c_void) {
+                extern "C" {
+                    attr! {
+                        #[link_name = concat!("cxxbridge1$std$weak_ptr$", $segment, "$downgrade")]
+                        fn __downgrade(shared: *const c_void, weak: *mut c_void);
+                    }
+                }
+                __downgrade(shared, weak);
             }
             unsafe fn __drop(this: *mut c_void) {
                 extern "C" {
