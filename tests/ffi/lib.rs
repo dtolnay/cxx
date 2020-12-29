@@ -1,6 +1,5 @@
 #![allow(
     clippy::boxed_local,
-    clippy::cast_possible_truncation,
     clippy::just_underscores_and_digits,
     clippy::let_underscore_drop,
     clippy::must_use_candidate,

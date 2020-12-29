@@ -259,6 +259,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                 operators.extend(quote_spanned! {span=>
                     #[doc(hidden)]
                     #[export_name = #link_name]
+                    #[allow(clippy::cast_possible_truncation)]
                     extern "C" fn #local_name(this: &#ident) -> usize {
                         let mut hasher = ::std::collections::hash_map::DefaultHasher::new();
                         ::std::hash::Hash::hash(this, &mut hasher);
