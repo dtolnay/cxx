@@ -4,8 +4,8 @@ use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
     attrs, error, Api, Array, Derive, Doc, Enum, ExternFn, ExternType, Impl, Include, IncludeKind,
-    Lang, Namespace, Pair, Receiver, Ref, RustName, Signature, SliceRef, Struct, Ty1, Type,
-    TypeAlias, Var, Variant,
+    Lang, Lifetimes, Namespace, Pair, Receiver, Ref, RustName, Signature, SliceRef, Struct, Ty1,
+    Type, TypeAlias, Var, Variant,
 };
 use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
@@ -13,8 +13,8 @@ use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::{
     Abi, Attribute, Error, Expr, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
-    GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lifetime, Lit,
-    LitStr, Pat, PathArguments, Result, ReturnType, Token, TraitBound, TraitBoundModifier,
+    GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lit, LitStr,
+    Pat, PathArguments, Result, ReturnType, Token, TraitBound, TraitBoundModifier,
     Type as RustType, TypeArray, TypeBareFn, TypeParamBound, TypePath, TypeReference,
     Variant as RustVariant,
 };
@@ -385,7 +385,11 @@ fn parse_extern_type(
 
     let type_token = foreign_type.type_token;
     let name = pair(namespace, &foreign_type.ident, cxx_name, rust_name);
-    let lifetimes = Vec::new();
+    let generics = Lifetimes {
+        lt_token: None,
+        lifetimes: Punctuated::new(),
+        gt_token: None,
+    };
     let colon_token = None;
     let bounds = Vec::new();
     let semi_token = foreign_type.semi_token;
@@ -399,7 +403,7 @@ fn parse_extern_type(
         derives,
         type_token,
         name,
-        lifetimes,
+        generics,
         colon_token,
         bounds,
         semi_token,
@@ -581,9 +585,10 @@ fn parse_extern_verbatim(
         };
         let ident: Ident = input.parse()?;
         let generics: Generics = input.parse()?;
-        let mut lifetimes = Vec::new();
+        let mut lifetimes = Punctuated::new();
         let mut has_unsupported_generic_param = false;
-        for param in generics.params {
+        for pair in generics.params.into_pairs() {
+            let (param, punct) = pair.into_tuple();
             match param {
                 GenericParam::Lifetime(param) => {
                     if !param.bounds.is_empty() && !has_unsupported_generic_param {
@@ -591,7 +596,10 @@ fn parse_extern_verbatim(
                         cx.error(&param, msg);
                         has_unsupported_generic_param = true;
                     }
-                    lifetimes.push(param.lifetime);
+                    lifetimes.push_value(param.lifetime);
+                    if let Some(punct) = punct {
+                        lifetimes.push_punct(punct);
+                    }
                 }
                 GenericParam::Type(param) => {
                     if !has_unsupported_generic_param {
@@ -609,6 +617,11 @@ fn parse_extern_verbatim(
                 }
             }
         }
+        let lifetimes = Lifetimes {
+            lt_token: generics.lt_token,
+            lifetimes,
+            gt_token: generics.gt_token,
+        };
         let lookahead = input.lookahead1();
         if lookahead.peek(Token![=]) {
             // type Alias = crate::path::to::Type;
@@ -632,7 +645,7 @@ fn parse_type_alias(
     attrs: Vec<Attribute>,
     type_token: Token![type],
     ident: Ident,
-    lifetimes: Vec<Lifetime>,
+    generics: Lifetimes,
     input: ParseStream,
     lang: Lang,
     namespace: &Namespace,
@@ -672,7 +685,7 @@ fn parse_type_alias(
         derives,
         type_token,
         name,
-        lifetimes,
+        generics,
         eq_token,
         ty,
         semi_token,
@@ -684,7 +697,7 @@ fn parse_extern_type_bounded(
     attrs: Vec<Attribute>,
     type_token: Token![type],
     ident: Ident,
-    lifetimes: Vec<Lifetime>,
+    generics: Lifetimes,
     input: ParseStream,
     lang: Lang,
     trusted: bool,
@@ -752,7 +765,7 @@ fn parse_extern_type_bounded(
         derives,
         type_token,
         name,
-        lifetimes,
+        generics,
         colon_token,
         bounds,
         semi_token,
