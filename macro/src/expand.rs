@@ -1243,6 +1243,7 @@ fn expand_weak_ptr(ident: &RustName, types: &Types, explicit_impl: Option<&Impl>
     let link_null = format!("{}null", prefix);
     let link_clone = format!("{}clone", prefix);
     let link_downgrade = format!("{}downgrade", prefix);
+    let link_upgrade = format!("{}upgrade", prefix);
     let link_drop = format!("{}drop", prefix);
 
     let begin_span =
@@ -1273,6 +1274,13 @@ fn expand_weak_ptr(ident: &RustName, types: &Types, explicit_impl: Option<&Impl>
                     fn __downgrade(shared: *const ::std::ffi::c_void, weak: *mut ::std::ffi::c_void);
                 }
                 __downgrade(shared, weak);
+            }
+            unsafe fn __upgrade(weak: *const ::std::ffi::c_void, shared: *mut ::std::ffi::c_void) {
+                extern "C" {
+                    #[link_name = #link_upgrade]
+                    fn __upgrade(weak: *const ::std::ffi::c_void, shared: *mut ::std::ffi::c_void);
+                }
+                __upgrade(weak, shared);
             }
             unsafe fn __drop(this: *mut ::std::ffi::c_void) {
                 extern "C" {

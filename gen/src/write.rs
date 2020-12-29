@@ -1806,6 +1806,17 @@ fn write_weak_ptr(out: &mut OutFile, ident: &RustName) {
     writeln!(out, "}}");
     writeln!(
         out,
+        "void cxxbridge1$weak_ptr${}$upgrade(const ::std::weak_ptr<{}>& weak, ::std::shared_ptr<{}> *shared) noexcept {{",
+        instance, inner, inner,
+    );
+    writeln!(
+        out,
+        "  ::new (shared) ::std::shared_ptr<{}>(weak.lock());",
+        inner,
+    );
+    writeln!(out, "}}");
+    writeln!(
+        out,
         "void cxxbridge1$weak_ptr${}$drop(::std::weak_ptr<{}> *self) noexcept {{",
         instance, inner,
     );
