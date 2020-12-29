@@ -385,6 +385,7 @@ fn parse_extern_type(
 
     let type_token = foreign_type.type_token;
     let name = pair(namespace, &foreign_type.ident, cxx_name, rust_name);
+    let lifetimes = Vec::new();
     let colon_token = None;
     let bounds = Vec::new();
     let semi_token = foreign_type.semi_token;
@@ -398,6 +399,7 @@ fn parse_extern_type(
         derives,
         type_token,
         name,
+        lifetimes,
         colon_token,
         bounds,
         semi_token,
@@ -632,12 +634,14 @@ fn parse_type_alias(
     }
 
     let name = pair(namespace, &ident, cxx_name, rust_name);
+    let lifetimes = Vec::new();
 
     Ok(Api::TypeAlias(TypeAlias {
         doc,
         derives,
         type_token,
         name,
+        lifetimes,
         eq_token,
         ty,
         semi_token,
@@ -704,6 +708,7 @@ fn parse_extern_type_bounded(
     );
 
     let name = pair(namespace, &ident, cxx_name, rust_name);
+    let lifetimes = Vec::new();
     let colon_token = Some(colon_token);
 
     Ok(match lang {
@@ -715,6 +720,7 @@ fn parse_extern_type_bounded(
         derives,
         type_token,
         name,
+        lifetimes,
         colon_token,
         bounds,
         semi_token,
