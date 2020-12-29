@@ -13,8 +13,8 @@ use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::{
     Abi, Attribute, Error, Expr, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
-    GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lit, LitStr,
-    Pat, PathArguments, Result, ReturnType, Token, TraitBound, TraitBoundModifier,
+    GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lifetime, Lit,
+    LitStr, Pat, PathArguments, Result, ReturnType, Token, TraitBound, TraitBoundModifier,
     Type as RustType, TypeArray, TypeBareFn, TypeParamBound, TypePath, TypeReference,
     Variant as RustVariant,
 };
@@ -580,14 +580,45 @@ fn parse_extern_verbatim(
             }
         };
         let ident: Ident = input.parse()?;
+        let generics: Generics = input.parse()?;
+        let mut lifetimes = Vec::new();
+        let mut has_unsupported_generic_param = false;
+        for param in generics.params {
+            match param {
+                GenericParam::Lifetime(param) => {
+                    if !param.bounds.is_empty() && !has_unsupported_generic_param {
+                        let msg = "lifetime parameter with bounds is not supported yet";
+                        cx.error(&param, msg);
+                        has_unsupported_generic_param = true;
+                    }
+                    lifetimes.push(param.lifetime);
+                }
+                GenericParam::Type(param) => {
+                    if !has_unsupported_generic_param {
+                        let msg = "extern type with generic type parameter is not supported yet";
+                        cx.error(&param, msg);
+                        has_unsupported_generic_param = true;
+                    }
+                }
+                GenericParam::Const(param) => {
+                    if !has_unsupported_generic_param {
+                        let msg = "extern type with const generic parameter is not supported yet";
+                        cx.error(&param, msg);
+                        has_unsupported_generic_param = true;
+                    }
+                }
+            }
+        }
         let lookahead = input.lookahead1();
         if lookahead.peek(Token![=]) {
             // type Alias = crate::path::to::Type;
-            parse_type_alias(cx, attrs, type_token, ident, input, lang, namespace)
+            parse_type_alias(
+                cx, attrs, type_token, ident, lifetimes, input, lang, namespace,
+            )
         } else if lookahead.peek(Token![:]) {
             // type Opaque: Bound2 + Bound2;
             parse_extern_type_bounded(
-                cx, attrs, type_token, ident, input, lang, trusted, namespace,
+                cx, attrs, type_token, ident, lifetimes, input, lang, trusted, namespace,
             )
         } else {
             Err(lookahead.error())
@@ -601,6 +632,7 @@ fn parse_type_alias(
     attrs: Vec<Attribute>,
     type_token: Token![type],
     ident: Ident,
+    lifetimes: Vec<Lifetime>,
     input: ParseStream,
     lang: Lang,
     namespace: &Namespace,
@@ -634,7 +666,6 @@ fn parse_type_alias(
     }
 
     let name = pair(namespace, &ident, cxx_name, rust_name);
-    let lifetimes = Vec::new();
 
     Ok(Api::TypeAlias(TypeAlias {
         doc,
@@ -653,6 +684,7 @@ fn parse_extern_type_bounded(
     attrs: Vec<Attribute>,
     type_token: Token![type],
     ident: Ident,
+    lifetimes: Vec<Lifetime>,
     input: ParseStream,
     lang: Lang,
     trusted: bool,
@@ -708,7 +740,6 @@ fn parse_extern_type_bounded(
     );
 
     let name = pair(namespace, &ident, cxx_name, rust_name);
-    let lifetimes = Vec::new();
     let colon_token = Some(colon_token);
 
     Ok(match lang {
