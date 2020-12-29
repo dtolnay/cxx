@@ -1,4 +1,13 @@
-#![allow(clippy::assertions_on_constants, clippy::float_cmp, clippy::unit_cmp)]
+#![allow(
+    clippy::assertions_on_constants,
+    clippy::cast_possible_truncation,
+    clippy::cast_possible_wrap,
+    clippy::float_cmp,
+    clippy::needless_pass_by_value,
+    clippy::redundant_closure_for_method_calls,
+    clippy::unit_cmp,
+    clippy::unseparated_literal_suffix
+)]
 
 use cxx::SharedPtr;
 use cxx_test_suite::module::ffi2;

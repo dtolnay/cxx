@@ -9,11 +9,28 @@
 
 #![allow(dead_code)]
 #![allow(
+    clippy::cast_sign_loss,
+    clippy::default_trait_access,
+    clippy::enum_glob_use,
     clippy::inherent_to_string,
+    clippy::items_after_statements,
+    clippy::match_bool,
+    clippy::match_on_vec_items,
+    clippy::match_same_arms,
+    clippy::missing_errors_doc,
+    clippy::module_name_repetitions,
+    clippy::needless_pass_by_value,
     clippy::new_without_default,
     clippy::nonminimal_bool,
+    clippy::option_if_let_else,
     clippy::or_fun_call,
+    clippy::redundant_else,
+    clippy::shadow_unrelated,
+    clippy::similar_names,
+    clippy::single_match_else,
+    clippy::struct_excessive_bools,
     clippy::too_many_arguments,
+    clippy::too_many_lines,
     clippy::toplevel_ref_arg
 )]
 
