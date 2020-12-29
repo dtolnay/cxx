@@ -178,6 +178,8 @@ pub mod ffi {
         fn c_method_mut_on_shared(self: &mut Shared) -> &mut usize;
         fn c_set_array(self: &mut Array, value: i32);
 
+        fn c_get_use_count(weak: &WeakPtr<C>) -> usize;
+
         #[rust_name = "i32_overloaded_method"]
         fn cOverloadedMethod(&self, x: i32) -> String;
         #[rust_name = "str_overloaded_method"]

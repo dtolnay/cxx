@@ -208,7 +208,7 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
             Type::RustBox(_) => out.builtin.rust_box = true,
             Type::RustVec(_) => out.builtin.rust_vec = true,
             Type::UniquePtr(_) => out.include.memory = true,
-            Type::SharedPtr(_) => out.include.memory = true,
+            Type::SharedPtr(_) | Type::WeakPtr(_) => out.include.memory = true,
             Type::Str(_) => out.builtin.rust_str = true,
             Type::CxxVector(_) => out.include.vector = true,
             Type::Fn(_) => out.builtin.rust_fn = true,
@@ -1172,6 +1172,11 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write_type(out, &ptr.inner);
             write!(out, ">");
         }
+        Type::WeakPtr(ptr) => {
+            write!(out, "::std::weak_ptr<");
+            write_type(out, &ptr.inner);
+            write!(out, ">");
+        }
         Type::CxxVector(ty) => {
             write!(out, "::std::vector<");
             write_type(out, &ty.inner);
@@ -1251,6 +1256,7 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
         | Type::RustBox(_)
         | Type::UniquePtr(_)
         | Type::SharedPtr(_)
+        | Type::WeakPtr(_)
         | Type::Str(_)
         | Type::CxxVector(_)
         | Type::RustVec(_)
@@ -1355,6 +1361,16 @@ fn write_generic_instantiations(out: &mut OutFile) {
                 {
                     out.next_section();
                     write_shared_ptr(out, inner);
+                }
+            }
+        } else if let Type::WeakPtr(ptr) = ty {
+            if let Type::Ident(inner) = &ptr.inner {
+                if Atom::from(&inner.rust).is_none()
+                    && (!out.types.aliases.contains_key(&inner.rust)
+                        || out.types.explicit_impls.contains(ty))
+                {
+                    out.next_section();
+                    write_weak_ptr(out, inner);
                 }
             }
         } else if let Type::CxxVector(vector) = ty {
@@ -1746,6 +1762,65 @@ fn write_shared_ptr(out: &mut OutFile, ident: &RustName) {
         instance, inner,
     );
     writeln!(out, "  self->~shared_ptr();");
+    writeln!(out, "}}");
+}
+
+fn write_weak_ptr(out: &mut OutFile, ident: &RustName) {
+    let resolved = out.types.resolve(ident);
+    let inner = resolved.to_fully_qualified();
+    let instance = ident.to_symbol(out.types);
+
+    out.include.new = true;
+    out.include.utility = true;
+
+    writeln!(
+        out,
+        "static_assert(sizeof(::std::weak_ptr<{}>) == 2 * sizeof(void *), \"\");",
+        inner,
+    );
+    writeln!(
+        out,
+        "static_assert(alignof(::std::weak_ptr<{}>) == alignof(void *), \"\");",
+        inner,
+    );
+    writeln!(
+        out,
+        "void cxxbridge1$weak_ptr${}$null(::std::weak_ptr<{}> *ptr) noexcept {{",
+        instance, inner,
+    );
+    writeln!(out, "  ::new (ptr) ::std::weak_ptr<{}>();", inner);
+    writeln!(out, "}}");
+    writeln!(
+        out,
+        "void cxxbridge1$weak_ptr${}$clone(const ::std::weak_ptr<{}>& self, ::std::weak_ptr<{}> *ptr) noexcept {{",
+        instance, inner, inner,
+    );
+    writeln!(out, "  ::new (ptr) ::std::weak_ptr<{}>(self);", inner);
+    writeln!(out, "}}");
+    writeln!(
+        out,
+        "void cxxbridge1$weak_ptr${}$downgrade(const ::std::shared_ptr<{}>& shared, ::std::weak_ptr<{}> *weak) noexcept {{",
+        instance, inner, inner,
+    );
+    writeln!(out, "  ::new (weak) ::std::weak_ptr<{}>(shared);", inner);
+    writeln!(out, "}}");
+    writeln!(
+        out,
+        "void cxxbridge1$weak_ptr${}$upgrade(const ::std::weak_ptr<{}>& weak, ::std::shared_ptr<{}> *shared) noexcept {{",
+        instance, inner, inner,
+    );
+    writeln!(
+        out,
+        "  ::new (shared) ::std::shared_ptr<{}>(weak.lock());",
+        inner,
+    );
+    writeln!(out, "}}");
+    writeln!(
+        out,
+        "void cxxbridge1$weak_ptr${}$drop(::std::weak_ptr<{}> *self) noexcept {{",
+        instance, inner,
+    );
+    writeln!(out, "  self->~weak_ptr();");
     writeln!(out, "}}");
 }
 

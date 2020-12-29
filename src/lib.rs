@@ -360,7 +360,6 @@
 //! <tr><td>Option&lt;T&gt;</td><td><sup><i>tbd</i></sup></td></tr>
 //! <tr><td><sup><i>tbd</i></sup></td><td>std::map&lt;K, V&gt;</td></tr>
 //! <tr><td><sup><i>tbd</i></sup></td><td>std::unordered_map&lt;K, V&gt;</td></tr>
-//! <tr><td><sup><i>tbd</i></sup></td><td>std::weak_ptr&lt;T&gt;</td></tr>
 //! </table>
 
 #![no_std]
@@ -411,6 +410,7 @@ mod unique_ptr;
 mod unwind;
 #[path = "cxx_vector.rs"]
 pub mod vector;
+mod weak_ptr;
 
 pub use crate::exception::Exception;
 pub use crate::extern_type::{kind, ExternType};
@@ -419,6 +419,7 @@ pub use crate::string::CxxString;
 pub use crate::unique_ptr::UniquePtr;
 #[doc(inline)]
 pub use crate::vector::CxxVector;
+pub use crate::weak_ptr::WeakPtr;
 pub use cxxbridge_macro::bridge;
 
 /// For use in impls of the `ExternType` trait. See [`ExternType`].
@@ -457,6 +458,7 @@ pub mod private {
     pub use crate::unique_ptr::UniquePtrTarget;
     pub use crate::unwind::catch_unwind;
     pub use crate::vector::VectorElement;
+    pub use crate::weak_ptr::WeakPtrTarget;
 }
 
 mod actually_private {

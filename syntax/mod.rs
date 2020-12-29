@@ -170,6 +170,7 @@ pub enum Type {
     RustVec(Box<Ty1>),
     UniquePtr(Box<Ty1>),
     SharedPtr(Box<Ty1>),
+    WeakPtr(Box<Ty1>),
     Ref(Box<Ref>),
     Str(Box<Ref>),
     CxxVector(Box<Ty1>),

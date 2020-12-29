@@ -45,6 +45,7 @@ impl<'a> Types<'a> {
                 Type::RustBox(ty)
                 | Type::UniquePtr(ty)
                 | Type::SharedPtr(ty)
+                | Type::WeakPtr(ty)
                 | Type::CxxVector(ty)
                 | Type::RustVec(ty) => visit(all, &ty.inner),
                 Type::Ref(r) => visit(all, &r.inner),
