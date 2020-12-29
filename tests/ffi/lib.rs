@@ -7,8 +7,7 @@
     clippy::ptr_arg,
     clippy::trivially_copy_pass_by_ref,
     clippy::unnecessary_wraps,
-    clippy::unused_self,
-    clippy::used_underscore_binding
+    clippy::unused_self
 )]
 
 pub mod cast;

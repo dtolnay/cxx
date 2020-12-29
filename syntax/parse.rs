@@ -501,7 +501,7 @@ fn parse_extern_fn(
                 let ident = match arg.pat.as_ref() {
                     Pat::Ident(pat) => pat.ident.clone(),
                     Pat::Wild(pat) => {
-                        Ident::new(&format!("_{}", args.len()), pat.underscore_token.span)
+                        Ident::new(&format!("arg{}", args.len()), pat.underscore_token.span)
                     }
                     _ => return Err(Error::new_spanned(arg, "unsupported signature")),
                 };
@@ -1070,7 +1070,7 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
             let ty = parse_type(&arg.ty)?;
             let ident = match &arg.name {
                 Some(ident) => ident.0.clone(),
-                None => format_ident!("_{}", i),
+                None => format_ident!("arg{}", i),
             };
             Ok(Var { ident, ty })
         })
