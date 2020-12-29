@@ -313,16 +313,23 @@ fn expand_enum(enm: &Enum) -> TokenStream {
 fn expand_cxx_type(ety: &ExternType) -> TokenStream {
     let ident = &ety.name.rust;
     let doc = &ety.doc;
+    let generics = &ety.generics;
     let type_id = type_id(&ety.name);
+
+    let lifetime_fields = ety.generics.lifetimes.iter().map(|lifetime| {
+        let field = format_ident!("_lifetime_{}", lifetime.ident);
+        quote!(#field: ::std::marker::PhantomData<&#lifetime ()>)
+    });
 
     quote! {
         #doc
         #[repr(C)]
-        pub struct #ident {
+        pub struct #ident #generics {
             _private: ::cxx::private::Opaque,
+            #(#lifetime_fields,)*
         }
 
-        unsafe impl ::cxx::ExternType for #ident {
+        unsafe impl #generics ::cxx::ExternType for #ident #generics {
             type Id = #type_id;
             type Kind = ::cxx::kind::Opaque;
         }
@@ -959,10 +966,11 @@ fn expand_rust_function_shim_super(
 fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
     let doc = &alias.doc;
     let ident = &alias.name.rust;
+    let generics = &alias.generics;
     let ty = &alias.ty;
     quote! {
         #doc
-        pub type #ident = #ty;
+        pub type #ident #generics = #ty;
     }
 }
 

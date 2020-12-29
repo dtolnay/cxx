@@ -74,7 +74,7 @@ pub struct ExternType {
     pub derives: Vec<Derive>,
     pub type_token: Token![type],
     pub name: Pair,
-    pub lifetimes: Vec<Lifetime>,
+    pub generics: Lifetimes,
     pub colon_token: Option<Token![:]>,
     pub bounds: Vec<Derive>,
     pub semi_token: Token![;],
@@ -116,7 +116,7 @@ pub struct TypeAlias {
     pub derives: Vec<Derive>,
     pub type_token: Token![type],
     pub name: Pair,
-    pub lifetimes: Vec<Lifetime>,
+    pub generics: Lifetimes,
     pub eq_token: Token![=],
     pub ty: RustType,
     pub semi_token: Token![;],
@@ -128,6 +128,12 @@ pub struct Impl {
     pub ty: Type,
     pub brace_token: Brace,
     pub negative_token: Option<Token![!]>,
+}
+
+pub struct Lifetimes {
+    pub lt_token: Option<Token![<]>,
+    pub lifetimes: Punctuated<Lifetime, Token![,]>,
+    pub gt_token: Option<Token![>]>,
 }
 
 pub struct Signature {

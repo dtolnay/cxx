@@ -1,7 +1,7 @@
 use crate::syntax::atom::Atom::*;
 use crate::syntax::{
-    Array, Atom, Derive, Enum, ExternFn, ExternType, Impl, Receiver, Ref, RustName, Signature,
-    SliceRef, Struct, Ty1, Type, TypeAlias, Var,
+    Array, Atom, Derive, Enum, ExternFn, ExternType, Impl, Lifetimes, Receiver, Ref, RustName,
+    Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote_spanned, ToTokens};
@@ -154,6 +154,14 @@ impl ToTokens for Impl {
         self.negative_token.to_tokens(tokens);
         self.ty.to_tokens(tokens);
         self.brace_token.surround(tokens, |_tokens| {});
+    }
+}
+
+impl ToTokens for Lifetimes {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        self.lt_token.to_tokens(tokens);
+        self.lifetimes.to_tokens(tokens);
+        self.gt_token.to_tokens(tokens);
     }
 }
 

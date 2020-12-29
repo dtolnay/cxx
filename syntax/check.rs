@@ -337,7 +337,7 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
         cx.error(derive, msg);
     }
 
-    if let Some(lifetime) = ety.lifetimes.first() {
+    if let Some(lifetime) = ety.generics.lifetimes.first() {
         cx.error(lifetime, "extern type with lifetimes is not supported yet");
     }
 
@@ -445,7 +445,7 @@ fn check_api_type_alias(cx: &mut Check, alias: &TypeAlias) {
         cx.error(derive, msg);
     }
 
-    if let Some(lifetime) = alias.lifetimes.first() {
+    if let Some(lifetime) = alias.generics.lifetimes.first() {
         cx.error(lifetime, "extern type with lifetimes is not supported yet");
     }
 }
