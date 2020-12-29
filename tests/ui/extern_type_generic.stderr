@@ -1,0 +1,11 @@
+error: extern type with generic type parameter is not supported yet
+ --> $DIR/extern_type_generic.rs:4:22
+  |
+4 |         type Generic<T>;
+  |                      ^
+
+error: expected `=` or `:`
+ --> $DIR/extern_type_generic.rs:4:24
+  |
+4 |         type Generic<T>;
+  |                        ^
