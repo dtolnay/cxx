@@ -139,12 +139,10 @@ fn check_type_shared_ptr(cx: &mut Check, ptr: &Ty1) {
         }
 
         match Atom::from(&ident.rust) {
-            None => return,
-            Some(CxxString) => {
-                cx.error(ptr, "std::shared_ptr<std::string> is not supported yet");
-                return;
-            }
-            _ => {}
+            None | Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize) | Some(I8)
+            | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32) | Some(F64)
+            | Some(CxxString) => return,
+            Some(Bool) | Some(Char) | Some(RustString) => {}
         }
     } else if let Type::CxxVector(_) = &ptr.inner {
         cx.error(ptr, "std::shared_ptr<std::vector> is not supported yet");
