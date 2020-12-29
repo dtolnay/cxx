@@ -64,7 +64,6 @@
     clippy::nonminimal_bool,
     clippy::option_if_let_else,
     clippy::or_fun_call,
-    clippy::redundant_closure_for_method_calls,
     clippy::redundant_else,
     clippy::shadow_unrelated,
     clippy::similar_names,
@@ -444,7 +443,7 @@ fn best_effort_copy_headers(src: &Path, dst: &Path, max_depth: usize) {
             }
             Ok(file_type) if file_type.is_file() => {
                 let src = entry.path();
-                match src.extension().and_then(|x| x.to_str()) {
+                match src.extension().and_then(OsStr::to_str) {
                     Some("h") | Some("hh") | Some("hpp") => {}
                     _ => continue,
                 }

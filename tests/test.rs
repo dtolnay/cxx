@@ -4,7 +4,6 @@
     clippy::cast_possible_wrap,
     clippy::float_cmp,
     clippy::needless_pass_by_value,
-    clippy::redundant_closure_for_method_calls,
     clippy::unit_cmp,
     clippy::unseparated_literal_suffix
 )]
@@ -29,7 +28,7 @@ macro_rules! check {
         CORRECT.with(|correct| correct.set(false));
         $run;
         assert!(
-            CORRECT.with(|correct| correct.get()),
+            CORRECT.with(Cell::get),
             "{}",
             stringify!($run),
         );
