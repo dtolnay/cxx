@@ -168,6 +168,8 @@ rust::Vec<uint8_t> c_try_return_rust_vec();
 rust::Vec<rust::String> c_try_return_rust_vec_string();
 const rust::Vec<uint8_t> &c_try_return_ref_rust_vec(const C &c);
 
+size_t c_get_use_count(const std::weak_ptr<C> &weak) noexcept;
+
 void c_take_trivial_ptr(std::unique_ptr<D> d);
 void c_take_trivial_ref(const D &d);
 void c_take_trivial(D d);

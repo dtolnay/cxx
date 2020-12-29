@@ -1,5 +1,6 @@
 #![allow(clippy::assertions_on_constants, clippy::float_cmp, clippy::unit_cmp)]
 
+use cxx::SharedPtr;
 use cxx_test_suite::module::ffi2;
 use cxx_test_suite::{cast, ffi, R};
 use std::cell::Cell;
@@ -36,7 +37,6 @@ fn test_c_return() {
     assert_eq!(2020, ffi::c_return_shared().z);
     assert_eq!(2020, ffi::c_return_box().0);
     ffi::c_return_unique_ptr();
-    ffi::c_return_shared_ptr();
     ffi2::c_return_ns_unique_ptr();
     assert_eq!(2020, *ffi::c_return_ref(&shared));
     assert_eq!(2020, *ffi::c_return_ns_ref(&ns_shared));
@@ -239,6 +239,20 @@ fn test_c_method_calls() {
     let mut array = ffi::Array { a: [0, 0, 0, 0] };
     array.c_set_array(val);
     assert_eq!(array.a.len() as i32 * val, array.r_get_array_sum());
+}
+
+#[test]
+fn test_shared_ptr_weak_ptr() {
+    let shared_ptr = ffi::c_return_shared_ptr();
+    let weak_ptr = SharedPtr::downgrade(&shared_ptr);
+    assert_eq!(1, ffi::c_get_use_count(&weak_ptr));
+
+    assert!(!weak_ptr.upgrade().is_null());
+    assert_eq!(1, ffi::c_get_use_count(&weak_ptr));
+
+    drop(shared_ptr);
+    assert_eq!(0, ffi::c_get_use_count(&weak_ptr));
+    assert!(weak_ptr.upgrade().is_null());
 }
 
 #[test]

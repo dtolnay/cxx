@@ -538,6 +538,10 @@ const rust::Vec<uint8_t> &c_try_return_ref_rust_vec(const C &c) {
   throw std::runtime_error("unimplemented");
 }
 
+size_t c_get_use_count(const std::weak_ptr<C> &weak) noexcept {
+  return weak.use_count();
+}
+
 extern "C" C *cxx_test_suite_get_unique_ptr() noexcept {
   return std::unique_ptr<C>(new C{2020}).release();
 }
