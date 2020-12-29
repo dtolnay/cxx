@@ -214,6 +214,7 @@ macro_rules! impl_shared_ptr_target_for_primitive {
     };
 }
 
+impl_shared_ptr_target_for_primitive!(bool);
 impl_shared_ptr_target_for_primitive!(u8);
 impl_shared_ptr_target_for_primitive!(u16);
 impl_shared_ptr_target_for_primitive!(u32);
