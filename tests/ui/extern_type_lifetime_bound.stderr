@@ -3,9 +3,3 @@ error: lifetime parameter with bounds is not supported yet
   |
 4 |         type Complex<'a, 'b: 'a>;
   |                          ^^^^^^
-
-error: expected `=` or `:`
- --> $DIR/extern_type_lifetime_bound.rs:4:33
-  |
-4 |         type Complex<'a, 'b: 'a>;
-  |                                 ^

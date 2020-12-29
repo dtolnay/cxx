@@ -615,7 +615,7 @@ fn parse_extern_verbatim(
             parse_type_alias(
                 cx, attrs, type_token, ident, lifetimes, input, lang, namespace,
             )
-        } else if lookahead.peek(Token![:]) {
+        } else if lookahead.peek(Token![:]) || lookahead.peek(Token![;]) {
             // type Opaque: Bound2 + Bound2;
             parse_extern_type_bounded(
                 cx, attrs, type_token, ident, lifetimes, input, lang, trusted, namespace,
@@ -690,33 +690,35 @@ fn parse_extern_type_bounded(
     trusted: bool,
     namespace: &Namespace,
 ) -> Result<Api> {
-    let colon_token: Token![:] = input.parse()?;
     let mut bounds = Vec::new();
-    loop {
-        match input.parse()? {
-            TypeParamBound::Trait(TraitBound {
-                paren_token: None,
-                modifier: TraitBoundModifier::None,
-                lifetimes: None,
-                path,
-            }) if if let Some(derive) = path.get_ident().and_then(Derive::from) {
-                bounds.push(derive);
-                true
-            } else {
-                false
-            } => {}
-            bound @ TypeParamBound::Trait(_) | bound @ TypeParamBound::Lifetime(_) => {
-                cx.error(bound, "unsupported trait");
+    let colon_token: Option<Token![:]> = input.parse()?;
+    if colon_token.is_some() {
+        loop {
+            match input.parse()? {
+                TypeParamBound::Trait(TraitBound {
+                    paren_token: None,
+                    modifier: TraitBoundModifier::None,
+                    lifetimes: None,
+                    path,
+                }) if if let Some(derive) = path.get_ident().and_then(Derive::from) {
+                    bounds.push(derive);
+                    true
+                } else {
+                    false
+                } => {}
+                bound @ TypeParamBound::Trait(_) | bound @ TypeParamBound::Lifetime(_) => {
+                    cx.error(bound, "unsupported trait");
+                }
             }
-        }
 
-        let lookahead = input.lookahead1();
-        if lookahead.peek(Token![+]) {
-            input.parse::<Token![+]>()?;
-        } else if lookahead.peek(Token![;]) {
-            break;
-        } else {
-            return Err(lookahead.error());
+            let lookahead = input.lookahead1();
+            if lookahead.peek(Token![+]) {
+                input.parse::<Token![+]>()?;
+            } else if lookahead.peek(Token![;]) {
+                break;
+            } else {
+                return Err(lookahead.error());
+            }
         }
     }
     let semi_token: Token![;] = input.parse()?;
@@ -740,7 +742,6 @@ fn parse_extern_type_bounded(
     );
 
     let name = pair(namespace, &ident, cxx_name, rust_name);
-    let colon_token = Some(colon_token);
 
     Ok(match lang {
         Lang::Cxx => Api::CxxType,
