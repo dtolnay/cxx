@@ -101,6 +101,14 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
                     expanded.extend(expand_shared_ptr(ident, types, explicit_impl));
                 }
             }
+        } else if let Type::WeakPtr(ptr) = ty {
+            if let Type::Ident(ident) = &ptr.inner {
+                if Atom::from(&ident.rust).is_none()
+                    && (explicit_impl.is_some() || !types.aliases.contains_key(&ident.rust))
+                {
+                    expanded.extend(expand_weak_ptr(ident, types, explicit_impl));
+                }
+            }
         } else if let Type::CxxVector(ptr) = ty {
             if let Type::Ident(ident) = &ptr.inner {
                 if Atom::from(&ident.rust).is_none()
@@ -1217,6 +1225,46 @@ fn expand_shared_ptr(ident: &RustName, types: &Types, explicit_impl: Option<&Imp
                     fn __get(this: *const ::std::ffi::c_void) -> *const ::std::ffi::c_void;
                 }
                 __get(this).cast()
+            }
+            unsafe fn __drop(this: *mut ::std::ffi::c_void) {
+                extern "C" {
+                    #[link_name = #link_drop]
+                    fn __drop(this: *mut ::std::ffi::c_void);
+                }
+                __drop(this);
+            }
+        }
+    }
+}
+
+fn expand_weak_ptr(ident: &RustName, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
+    let name = ident.rust.to_string();
+    let prefix = format!("cxxbridge1$weak_ptr${}$", ident.to_symbol(types));
+    let link_null = format!("{}null", prefix);
+    let link_clone = format!("{}clone", prefix);
+    let link_drop = format!("{}drop", prefix);
+
+    let begin_span =
+        explicit_impl.map_or_else(Span::call_site, |explicit| explicit.impl_token.span);
+    let end_span = explicit_impl.map_or_else(Span::call_site, |explicit| explicit.brace_token.span);
+    let unsafe_token = format_ident!("unsafe", span = begin_span);
+
+    quote_spanned! {end_span=>
+        #unsafe_token impl ::cxx::private::WeakPtrTarget for #ident {
+            const __NAME: &'static dyn ::std::fmt::Display = &#name;
+            unsafe fn __null(new: *mut ::std::ffi::c_void) {
+                extern "C" {
+                    #[link_name = #link_null]
+                    fn __null(new: *mut ::std::ffi::c_void);
+                }
+                __null(new);
+            }
+            unsafe fn __clone(this: *const ::std::ffi::c_void, new: *mut ::std::ffi::c_void) {
+                extern "C" {
+                    #[link_name = #link_clone]
+                    fn __clone(this: *const ::std::ffi::c_void, new: *mut ::std::ffi::c_void);
+                }
+                __clone(this, new);
             }
             unsafe fn __drop(this: *mut ::std::ffi::c_void) {
                 extern "C" {

@@ -26,6 +26,7 @@ impl<'a> Types<'a> {
             | Type::RustVec(_)
             | Type::UniquePtr(_)
             | Type::SharedPtr(_)
+            | Type::WeakPtr(_)
             | Type::CxxVector(_)
             | Type::Void(_) => false,
             Type::Ref(_) | Type::Str(_) | Type::Fn(_) | Type::SliceRef(_) => true,

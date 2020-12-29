@@ -508,6 +508,21 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
   void cxxbridge1$std$shared_ptr$##RUST_TYPE##$drop(                           \
       const std::shared_ptr<CXX_TYPE> *self) noexcept {                        \
     self->~shared_ptr();                                                       \
+  }                                                                            \
+  static_assert(sizeof(std::weak_ptr<CXX_TYPE>) == 2 * sizeof(void *), "");    \
+  static_assert(alignof(std::weak_ptr<CXX_TYPE>) == alignof(void *), "");      \
+  void cxxbridge1$std$weak_ptr$##RUST_TYPE##$null(                             \
+      std::weak_ptr<CXX_TYPE> *ptr) noexcept {                                 \
+    new (ptr) std::weak_ptr<CXX_TYPE>();                                       \
+  }                                                                            \
+  void cxxbridge1$std$weak_ptr$##RUST_TYPE##$clone(                            \
+      const std::weak_ptr<CXX_TYPE> &self,                                     \
+      std::weak_ptr<CXX_TYPE> *ptr) noexcept {                                 \
+    new (ptr) std::weak_ptr<CXX_TYPE>(self);                                   \
+  }                                                                            \
+  void cxxbridge1$std$weak_ptr$##RUST_TYPE##$drop(                             \
+      const std::weak_ptr<CXX_TYPE> *self) noexcept {                          \
+    self->~weak_ptr();                                                         \
   }
 
 // Usize and isize are the same type as one of the below.
