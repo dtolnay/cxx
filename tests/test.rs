@@ -27,11 +27,7 @@ macro_rules! check {
     ($run:expr) => {{
         CORRECT.with(|correct| correct.set(false));
         $run;
-        assert!(
-            CORRECT.with(Cell::get),
-            "{}",
-            stringify!($run),
-        );
+        assert!(CORRECT.with(Cell::get), "{}", stringify!($run));
     }};
 }
 
