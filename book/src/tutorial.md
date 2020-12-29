@@ -320,7 +320,7 @@ pub struct MultiBuf {
 pub fn next_chunk(buf: &mut MultiBuf) -> &[u8] {
     let next = buf.chunks.get(buf.pos);
     buf.pos += 1;
-    next.map(Vec::as_slice).unwrap_or(&[])
+    next.map_or(&[], Vec::as_slice)
 }
 #
 # fn main() {
@@ -411,7 +411,7 @@ This is now ready to use. :)
 # pub fn next_chunk(buf: &mut MultiBuf) -> &[u8] {
 #     let next = buf.chunks.get(buf.pos);
 #     buf.pos += 1;
-#     next.map(Vec::as_slice).unwrap_or(&[])
+#     next.map_or(&[], Vec::as_slice)
 # }
 
 fn main() {
@@ -537,7 +537,7 @@ mod ffi {
 # pub fn next_chunk(buf: &mut MultiBuf) -> &[u8] {
 #     let next = buf.chunks.get(buf.pos);
 #     buf.pos += 1;
-#     next.map(Vec::as_slice).unwrap_or(&[])
+#     next.map_or(&[], Vec::as_slice)
 # }
 
 fn main() {
