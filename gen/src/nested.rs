@@ -136,6 +136,7 @@ mod tests {
                 cxx: ident.clone(),
                 rust: ident,
             },
+            lifetimes: Vec::new(),
             colon_token: None,
             bounds: Vec::new(),
             semi_token: Token![;](Span::call_site()),
