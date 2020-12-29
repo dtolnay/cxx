@@ -1,7 +1,7 @@
 use crate::shared_ptr::{SharedPtr, SharedPtrTarget};
 use crate::string::CxxString;
 use core::ffi::c_void;
-use core::fmt::Display;
+use core::fmt::{self, Debug, Display};
 use core::marker::PhantomData;
 use core::mem::MaybeUninit;
 
@@ -79,6 +79,15 @@ where
     fn drop(&mut self) {
         let this = self as *mut Self as *mut c_void;
         unsafe { T::__drop(this) }
+    }
+}
+
+impl<T> Debug for WeakPtr<T>
+where
+    T: Debug + WeakPtrTarget + SharedPtrTarget,
+{
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        Debug::fmt(&self.upgrade(), formatter)
     }
 }
 
