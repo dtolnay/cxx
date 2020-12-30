@@ -16,12 +16,6 @@ error: missing documentation for a struct field
 12 |         pub undocumented_field: u8,
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-error: missing documentation for a struct field
-  --> $DIR/deny_missing_docs.rs:18:9
-   |
-18 |         pub documented_field: u8,
-   |         ^^^^^^^^^^^^^^^^^^^^^^^^
-
 error: missing documentation for a struct
  --> $DIR/deny_missing_docs.rs:9:1
   |

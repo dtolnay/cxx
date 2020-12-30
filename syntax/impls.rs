@@ -297,11 +297,13 @@ impl Eq for Var {}
 impl PartialEq for Var {
     fn eq(&self, other: &Var) -> bool {
         let Var {
+            doc: _,
             visibility: _,
             ident,
             ty,
         } = self;
         let Var {
+            doc: _,
             visibility: _,
             ident: ident2,
             ty: ty2,
@@ -313,6 +315,7 @@ impl PartialEq for Var {
 impl Hash for Var {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let Var {
+            doc: _,
             visibility: _,
             ident,
             ty,

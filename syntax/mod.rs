@@ -150,6 +150,7 @@ pub struct Signature {
 }
 
 pub struct Var {
+    pub doc: Doc,
     pub visibility: Token![pub],
     pub ident: Ident,
     pub ty: Type,

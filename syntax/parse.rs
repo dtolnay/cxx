@@ -97,6 +97,15 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct, namespace: &Namespace) -> Res
     let mut fields = Vec::new();
     for field in named_fields.named {
         let ident = field.ident.unwrap();
+        let mut doc = Doc::new();
+        attrs::parse(
+            cx,
+            &field.attrs,
+            attrs::Parser {
+                doc: Some(&mut doc),
+                ..Default::default()
+            },
+        );
         let ty = match parse_type(&field.ty) {
             Ok(ty) => ty,
             Err(err) => {
@@ -111,6 +120,7 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct, namespace: &Namespace) -> Res
             Visibility::Inherited => ident.span(),
         });
         fields.push(Var {
+            doc,
             visibility,
             ident,
             ty,
@@ -527,8 +537,10 @@ fn parse_extern_fn(
                 };
                 let ty = parse_type(&arg.ty)?;
                 if ident != "self" {
+                    let doc = Doc::new();
                     let visibility = Token![pub](ident.span());
                     args.push_value(Var {
+                        doc,
                         visibility,
                         ident,
                         ty,
@@ -1098,8 +1110,10 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
                 Some(ident) => ident.0.clone(),
                 None => format_ident!("arg{}", i),
             };
+            let doc = Doc::new();
             let visibility = Token![pub](ident.span());
             Ok(Var {
+                doc,
                 visibility,
                 ident,
                 ty,
