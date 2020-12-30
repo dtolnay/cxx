@@ -69,7 +69,11 @@ fn try_main() -> Result<()> {
     for output in opt.outputs {
         let kind = if opt.input.is_none() {
             Kind::Header
-        } else if opt.header || output.ends_with(".h") {
+        } else if opt.header
+            || output.ends_with(".h")
+            || output.ends_with(".hh")
+            || output.ends_with(".hpp")
+        {
             gen_header = true;
             Kind::GeneratedHeader
         } else {
