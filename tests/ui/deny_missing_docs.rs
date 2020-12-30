@@ -56,6 +56,11 @@ pub mod ffi {
         /// ...
         pub fn documented_foreign_fn() -> u8;
     }
+
+    #[allow(missing_docs)]
+    pub struct SuppressUndocumentedStruct {
+        pub undocumented_field: u8,
+    }
 }
 
 struct UndocumentedRustType;
