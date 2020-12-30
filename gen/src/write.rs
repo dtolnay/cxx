@@ -623,13 +623,17 @@ fn write_opaque_type_layout<'a>(out: &mut OutFile<'a>, ety: &'a ExternType) {
     writeln!(out, "}}");
 }
 
+fn begin_function_definition(out: &mut OutFile) {
+    if let Some(annotation) = &out.opt.cxx_impl_annotations {
+        write!(out, "{} ", annotation);
+    }
+}
+
 fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     out.next_section();
     out.set_namespace(&efn.name.namespace);
     out.begin_block(Block::ExternC);
-    if let Some(annotation) = &out.opt.cxx_impl_annotations {
-        write!(out, "{} ", annotation);
-    }
+    begin_function_definition(out);
     if efn.throws {
         out.builtin.ptr_len = true;
         write!(out, "::rust::repr::PtrLen ");
