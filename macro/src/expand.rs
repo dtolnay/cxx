@@ -157,7 +157,7 @@ fn expand_struct(strct: &Struct) -> TokenStream {
     let fields = strct.fields.iter().map(|field| {
         // This span on the pub makes "private type in public interface" errors
         // appear in the right place.
-        let vis = Token![pub](field.ident.span());
+        let vis = field.visibility;
         quote!(#vis #field)
     });
     let mut derives = None;

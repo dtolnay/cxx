@@ -1,5 +1,5 @@
 use crate::syntax::{
-    Array, ExternFn, Impl, Include, Receiver, Ref, Signature, SliceRef, Ty1, Type,
+    Array, ExternFn, Impl, Include, Receiver, Ref, Signature, SliceRef, Ty1, Type, Var,
 };
 use std::borrow::Borrow;
 use std::hash::{Hash, Hasher};
@@ -289,6 +289,36 @@ impl Hash for Signature {
         }
         ret.hash(state);
         throws.hash(state);
+    }
+}
+
+impl Eq for Var {}
+
+impl PartialEq for Var {
+    fn eq(&self, other: &Var) -> bool {
+        let Var {
+            visibility: _,
+            ident,
+            ty,
+        } = self;
+        let Var {
+            visibility: _,
+            ident: ident2,
+            ty: ty2,
+        } = other;
+        ident == ident2 && ty == ty2
+    }
+}
+
+impl Hash for Var {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let Var {
+            visibility: _,
+            ident,
+            ty,
+        } = self;
+        ident.hash(state);
+        ty.hash(state);
     }
 }
 

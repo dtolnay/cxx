@@ -148,8 +148,8 @@ pub struct Signature {
     pub throws_tokens: Option<(kw::Result, Token![<], Token![>])>,
 }
 
-#[derive(Eq, PartialEq, Hash)]
 pub struct Var {
+    pub visibility: Token![pub],
     pub ident: Ident,
     pub ty: Type,
 }

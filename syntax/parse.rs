@@ -104,7 +104,17 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct, namespace: &Namespace) -> Res
                 continue;
             }
         };
-        fields.push(Var { ident, ty });
+        let visibility = Token![pub](match field.vis {
+            Visibility::Public(vis) => vis.pub_token.span,
+            Visibility::Crate(vis) => vis.crate_token.span,
+            Visibility::Restricted(vis) => vis.pub_token.span,
+            Visibility::Inherited => ident.span(),
+        });
+        fields.push(Var {
+            visibility,
+            ident,
+            ty,
+        });
     }
 
     let struct_token = item.struct_token;
@@ -510,7 +520,12 @@ fn parse_extern_fn(
                 };
                 let ty = parse_type(&arg.ty)?;
                 if ident != "self" {
-                    args.push_value(Var { ident, ty });
+                    let visibility = Token![pub](ident.span());
+                    args.push_value(Var {
+                        visibility,
+                        ident,
+                        ty,
+                    });
                     if let Some(comma) = comma {
                         args.push_punct(*comma);
                     }
@@ -1076,7 +1091,12 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
                 Some(ident) => ident.0.clone(),
                 None => format_ident!("arg{}", i),
             };
-            Ok(Var { ident, ty })
+            let visibility = Token![pub](ident.span());
+            Ok(Var {
+                visibility,
+                ident,
+                ty,
+            })
         })
         .collect::<Result<_>>()?;
 
