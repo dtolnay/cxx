@@ -296,6 +296,7 @@ fn expand_enum(enm: &Enum) -> TokenStream {
         #derives
         #[repr(transparent)]
         pub struct #ident {
+            #[allow(missing_docs)]
             pub repr: #repr,
         }
 

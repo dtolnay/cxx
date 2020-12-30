@@ -31,14 +31,6 @@ error: missing documentation for a struct
   |
   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: missing documentation for a struct field
- --> $DIR/deny_missing_docs.rs:9:1
-  |
-9 | #[cxx::bridge]
-  | ^^^^^^^^^^^^^^
-  |
-  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
-
 error: missing documentation for an associated constant
  --> $DIR/deny_missing_docs.rs:9:1
   |
