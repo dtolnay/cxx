@@ -16,7 +16,7 @@ use syn::{
     GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lit, LitStr,
     Pat, PathArguments, Result, ReturnType, Token, TraitBound, TraitBoundModifier,
     Type as RustType, TypeArray, TypeBareFn, TypeParamBound, TypePath, TypeReference,
-    Variant as RustVariant,
+    Variant as RustVariant, Visibility,
 };
 
 pub mod kw {
@@ -576,6 +576,7 @@ fn parse_extern_verbatim(
 ) -> Result<Api> {
     |input: ParseStream| -> Result<Api> {
         let attrs = input.call(Attribute::parse_outer)?;
+        input.parse::<Visibility>()?;
         let type_token: Token![type] = match input.parse()? {
             Some(type_token) => type_token,
             None => {
