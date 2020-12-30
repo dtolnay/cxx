@@ -199,12 +199,14 @@ fn parse_variant(
     variant: RustVariant,
     discriminants: &mut DiscriminantSet,
 ) -> Result<Variant> {
+    let mut doc = Doc::new();
     let mut cxx_name = None;
     let mut rust_name = None;
     attrs::parse(
         cx,
         &variant.attrs,
         attrs::Parser {
+            doc: Some(&mut doc),
             cxx_name: Some(&mut cxx_name),
             rust_name: Some(&mut rust_name),
             ..Default::default()
@@ -233,6 +235,7 @@ fn parse_variant(
     let expr = variant.discriminant.map(|(_, expr)| expr);
 
     Ok(Variant {
+        doc,
         name,
         discriminant,
         expr,

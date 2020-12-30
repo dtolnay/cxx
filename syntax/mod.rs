@@ -167,6 +167,7 @@ pub struct Receiver {
 }
 
 pub struct Variant {
+    pub doc: Doc,
     pub name: Pair,
     pub discriminant: Discriminant,
     pub expr: Option<Expr>,
