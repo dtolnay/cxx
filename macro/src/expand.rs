@@ -155,10 +155,11 @@ fn expand_struct(strct: &Struct) -> TokenStream {
     let doc = &strct.doc;
     let type_id = type_id(&strct.name);
     let fields = strct.fields.iter().map(|field| {
+        let doc = &field.doc;
         // This span on the pub makes "private type in public interface" errors
         // appear in the right place.
         let vis = field.visibility;
-        quote!(#vis #field)
+        quote!(#doc #vis #field)
     });
     let mut derives = None;
     let derived_traits = derive::expand_struct(strct, &mut derives);
