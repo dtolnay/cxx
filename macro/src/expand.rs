@@ -280,9 +280,11 @@ fn expand_enum(enm: &Enum) -> TokenStream {
     let repr = enm.repr;
     let type_id = type_id(&enm.name);
     let variants = enm.variants.iter().map(|variant| {
+        let doc = &variant.doc;
         let variant_ident = &variant.name.rust;
         let discriminant = &variant.discriminant;
         Some(quote! {
+            #doc
             pub const #variant_ident: Self = #ident { repr: #discriminant };
         })
     });

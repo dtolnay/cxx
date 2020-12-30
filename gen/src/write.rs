@@ -357,6 +357,9 @@ fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
     write_atom(out, enm.repr);
     writeln!(out, " {{");
     for variant in &enm.variants {
+        for line in variant.doc.to_string().lines() {
+            writeln!(out, "  //{}", line);
+        }
         writeln!(out, "  {} = {},", variant.name.cxx, variant.discriminant);
     }
     writeln!(out, "}};");
