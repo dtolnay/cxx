@@ -950,6 +950,9 @@ fn write_rust_function_shim_impl(
         // We've already defined this inside the struct.
         return;
     }
+    if !out.header {
+        begin_function_definition(out);
+    }
     write_rust_function_shim_decl(out, local_name, sig, indirect_call);
     if out.header {
         writeln!(out, ";");
@@ -1487,6 +1490,7 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Pair) {
     let instance = ident.to_symbol();
 
     writeln!(out, "template <>");
+    begin_function_definition(out);
     writeln!(
         out,
         "{} *Box<{}>::allocation::alloc() noexcept {{",
@@ -1496,6 +1500,7 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Pair) {
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
+    begin_function_definition(out);
     writeln!(
         out,
         "void Box<{}>::allocation::dealloc({} *ptr) noexcept {{",
@@ -1505,6 +1510,7 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Pair) {
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
+    begin_function_definition(out);
     writeln!(out, "void Box<{}>::drop() noexcept {{", inner);
     writeln!(out, "  cxxbridge1$box${}$drop(this);", instance);
     writeln!(out, "}}");
@@ -1517,16 +1523,19 @@ fn write_rust_vec_impl(out: &mut OutFile, element: &RustName) {
     out.include.cstddef = true;
 
     writeln!(out, "template <>");
+    begin_function_definition(out);
     writeln!(out, "Vec<{}>::Vec() noexcept {{", inner);
     writeln!(out, "  cxxbridge1$rust_vec${}$new(this);", instance);
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
+    begin_function_definition(out);
     writeln!(out, "void Vec<{}>::drop() noexcept {{", inner);
     writeln!(out, "  return cxxbridge1$rust_vec${}$drop(this);", instance);
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
+    begin_function_definition(out);
     writeln!(
         out,
         "::std::size_t Vec<{}>::size() const noexcept {{",
@@ -1536,6 +1545,7 @@ fn write_rust_vec_impl(out: &mut OutFile, element: &RustName) {
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
+    begin_function_definition(out);
     writeln!(
         out,
         "::std::size_t Vec<{}>::capacity() const noexcept {{",
@@ -1549,11 +1559,13 @@ fn write_rust_vec_impl(out: &mut OutFile, element: &RustName) {
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
+    begin_function_definition(out);
     writeln!(out, "const {} *Vec<{0}>::data() const noexcept {{", inner);
     writeln!(out, "  return cxxbridge1$rust_vec${}$data(this);", instance);
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
+    begin_function_definition(out);
     writeln!(
         out,
         "void Vec<{}>::reserve_total(::std::size_t cap) noexcept {{",
@@ -1567,6 +1579,7 @@ fn write_rust_vec_impl(out: &mut OutFile, element: &RustName) {
     writeln!(out, "}}");
 
     writeln!(out, "template <>");
+    begin_function_definition(out);
     writeln!(
         out,
         "void Vec<{}>::set_len(::std::size_t len) noexcept {{",
