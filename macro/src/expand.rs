@@ -163,13 +163,20 @@ fn expand_struct(strct: &Struct) -> TokenStream {
     let mut derives = None;
     let derived_traits = derive::expand_struct(strct, &mut derives);
 
+    let span = ident.span();
+    let visibility = strct.visibility;
+    let struct_token = strct.struct_token;
+    let struct_def = quote_spanned! {span=>
+        #visibility #struct_token #ident {
+            #(#fields,)*
+        }
+    };
+
     quote! {
         #doc
         #derives
         #[repr(C)]
-        pub struct #ident {
-            #(#fields,)*
-        }
+        #struct_def
 
         unsafe impl ::cxx::ExternType for #ident {
             type Id = #type_id;

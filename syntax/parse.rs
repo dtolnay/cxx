@@ -117,6 +117,12 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct, namespace: &Namespace) -> Res
         });
     }
 
+    let visibility = Token![pub](match item.vis {
+        Visibility::Public(vis) => vis.pub_token.span,
+        Visibility::Crate(vis) => vis.crate_token.span,
+        Visibility::Restricted(vis) => vis.pub_token.span,
+        Visibility::Inherited => item.ident.span(),
+    });
     let struct_token = item.struct_token;
     let name = pair(namespace, &item.ident, cxx_name, rust_name);
     let brace_token = named_fields.brace_token;
@@ -124,6 +130,7 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct, namespace: &Namespace) -> Res
     Ok(Api::Struct(Struct {
         doc,
         derives,
+        visibility,
         struct_token,
         name,
         brace_token,
