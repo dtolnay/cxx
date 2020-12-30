@@ -84,6 +84,7 @@ pub struct ExternType {
 pub struct Struct {
     pub doc: Doc,
     pub derives: Vec<Derive>,
+    pub visibility: Token![pub],
     pub struct_token: Token![struct],
     pub name: Pair,
     pub brace_token: Brace,
