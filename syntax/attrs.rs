@@ -101,6 +101,13 @@ pub(super) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) 
                 }
                 Err(err) => return cx.push(err),
             }
+        } else if attr.path.is_ident("allow")
+            || attr.path.is_ident("warn")
+            || attr.path.is_ident("deny")
+            || attr.path.is_ident("forbid")
+        {
+            // https://doc.rust-lang.org/reference/attributes/diagnostics.html#lint-check-attributes
+            continue;
         }
         return cx.error(attr, "unsupported attribute");
     }
