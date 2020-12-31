@@ -125,6 +125,21 @@ where
         }
     }
 
+    /// Returns a slice to the underlying contiguous array of elements by
+    /// mutable reference.
+    pub fn as_mut_slice(self: Pin<&mut Self>) -> &mut [T]
+    where
+        T: ExternType<Kind = Trivial>,
+    {
+        let len = self.len();
+        if len == 0 {
+            &mut []
+        } else {
+            let ptr = unsafe { T::__get_unchecked(self.get_unchecked_mut(), 0) };
+            unsafe { slice::from_raw_parts_mut(ptr, len) }
+        }
+    }
+
     /// Returns an iterator over elements of type `&T`.
     pub fn iter(&self) -> Iter<T> {
         Iter { v: self, index: 0 }
