@@ -115,12 +115,7 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
                 continue;
             }
         };
-        let visibility = Token![pub](match field.vis {
-            Visibility::Public(vis) => vis.pub_token.span,
-            Visibility::Crate(vis) => vis.crate_token.span,
-            Visibility::Restricted(vis) => vis.pub_token.span,
-            Visibility::Inherited => ident.span(),
-        });
+        let visibility = visibility_pub(&field.vis, &ident);
         fields.push(Var {
             doc,
             attrs,
@@ -130,12 +125,7 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
         });
     }
 
-    let visibility = Token![pub](match item.vis {
-        Visibility::Public(vis) => vis.pub_token.span,
-        Visibility::Crate(vis) => vis.crate_token.span,
-        Visibility::Restricted(vis) => vis.pub_token.span,
-        Visibility::Inherited => item.ident.span(),
-    });
+    let visibility = visibility_pub(&item.vis, &item.ident);
     let struct_token = item.struct_token;
     let name = pair(namespace, &item.ident, cxx_name, rust_name);
     let brace_token = named_fields.brace_token;
@@ -194,12 +184,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
         }
     }
 
-    let visibility = Token![pub](match item.vis {
-        Visibility::Public(vis) => vis.pub_token.span,
-        Visibility::Crate(vis) => vis.crate_token.span,
-        Visibility::Restricted(vis) => vis.pub_token.span,
-        Visibility::Inherited => item.ident.span(),
-    });
+    let visibility = visibility_pub(&item.vis, &item.ident);
     let enum_token = item.enum_token;
     let brace_token = item.brace_token;
 
@@ -426,12 +411,7 @@ fn parse_extern_type(
         },
     );
 
-    let visibility = Token![pub](match foreign_type.vis {
-        Visibility::Public(vis) => vis.pub_token.span,
-        Visibility::Crate(vis) => vis.crate_token.span,
-        Visibility::Restricted(vis) => vis.pub_token.span,
-        Visibility::Inherited => foreign_type.ident.span(),
-    });
+    let visibility = visibility_pub(&foreign_type.vis, &foreign_type.ident);
     let type_token = foreign_type.type_token;
     let name = pair(namespace, &foreign_type.ident, cxx_name, rust_name);
     let generics = Lifetimes {
@@ -597,12 +577,7 @@ fn parse_extern_fn(
     let mut throws_tokens = None;
     let ret = parse_return_type(&foreign_fn.sig.output, &mut throws_tokens)?;
     let throws = throws_tokens.is_some();
-    let visibility = Token![pub](match foreign_fn.vis {
-        Visibility::Public(vis) => vis.pub_token.span,
-        Visibility::Crate(vis) => vis.crate_token.span,
-        Visibility::Restricted(vis) => vis.pub_token.span,
-        Visibility::Inherited => foreign_fn.sig.ident.span(),
-    });
+    let visibility = visibility_pub(&foreign_fn.vis, &foreign_fn.sig.ident);
     let unsafety = foreign_fn.sig.unsafety;
     let fn_token = foreign_fn.sig.fn_token;
     let name = pair(namespace, &foreign_fn.sig.ident, cxx_name, rust_name);
@@ -749,12 +724,7 @@ fn parse_type_alias(
         return Err(Error::new_spanned(span, msg));
     }
 
-    let visibility = Token![pub](match visibility {
-        Visibility::Public(vis) => vis.pub_token.span,
-        Visibility::Crate(vis) => vis.crate_token.span,
-        Visibility::Restricted(vis) => vis.pub_token.span,
-        Visibility::Inherited => ident.span(),
-    });
+    let visibility = visibility_pub(&visibility, &ident);
     let name = pair(namespace, &ident, cxx_name, rust_name);
 
     Ok(Api::TypeAlias(TypeAlias {
@@ -834,12 +804,7 @@ fn parse_extern_type_bounded(
         },
     );
 
-    let visibility = Token![pub](match visibility {
-        Visibility::Public(vis) => vis.pub_token.span,
-        Visibility::Crate(vis) => vis.crate_token.span,
-        Visibility::Restricted(vis) => vis.pub_token.span,
-        Visibility::Inherited => ident.span(),
-    });
+    let visibility = visibility_pub(&visibility, &ident);
     let name = pair(namespace, &ident, cxx_name, rust_name);
 
     Ok(match lang {
@@ -1226,6 +1191,15 @@ fn parse_return_type(
         Type::Void(_) => Ok(None),
         ty => Ok(Some(ty)),
     }
+}
+
+fn visibility_pub(vis: &Visibility, inherited: &Ident) -> Token![pub] {
+    Token![pub](match vis {
+        Visibility::Public(vis) => vis.pub_token.span,
+        Visibility::Crate(vis) => vis.crate_token.span,
+        Visibility::Restricted(vis) => vis.pub_token.span,
+        Visibility::Inherited => inherited.span(),
+    })
 }
 
 fn pair(namespace: Namespace, default: &Ident, cxx: Option<Ident>, rust: Option<Ident>) -> Pair {
