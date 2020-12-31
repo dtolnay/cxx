@@ -47,15 +47,3 @@ error: missing documentation for a function
   | ^^^^^^^^^^^^^^
   |
   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
-
-error: missing documentation for a struct
-  --> $DIR/deny_missing_docs.rs:61:5
-   |
-61 |     pub struct SuppressUndocumentedStruct {
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-error: missing documentation for a struct field
-  --> $DIR/deny_missing_docs.rs:62:9
-   |
-62 |         pub undocumented_field: u8,
-   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^
