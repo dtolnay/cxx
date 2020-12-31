@@ -1056,6 +1056,31 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
                             return Ok(Type::Ref(inner));
                         }
                     }
+                } else {
+                    let mut lifetimes = Punctuated::new();
+                    let mut only_lifetimes = true;
+                    for pair in generic.args.pairs() {
+                        let (param, punct) = pair.into_tuple();
+                        if let GenericArgument::Lifetime(param) = param {
+                            lifetimes.push_value(param.clone());
+                            if let Some(punct) = punct {
+                                lifetimes.push_punct(*punct);
+                            }
+                        } else {
+                            only_lifetimes = false;
+                            break;
+                        }
+                    }
+                    if only_lifetimes {
+                        return Ok(Type::Ident(RustName {
+                            rust: ident,
+                            generics: Lifetimes {
+                                lt_token: Some(generic.lt_token),
+                                lifetimes,
+                                gt_token: Some(generic.gt_token),
+                            },
+                        }));
+                    }
                 }
             }
             PathArguments::Parenthesized(_) => {}

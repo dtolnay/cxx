@@ -2,7 +2,7 @@ use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::{
     error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref,
-    Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
+    RustName, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
@@ -27,7 +27,7 @@ fn do_typecheck(cx: &mut Check) {
 
     for ty in cx.types {
         match ty {
-            Type::Ident(ident) => check_type_ident(cx, &ident.rust),
+            Type::Ident(ident) => check_type_ident(cx, ident),
             Type::RustBox(ptr) => check_type_box(cx, ptr),
             Type::RustVec(ty) => check_type_rust_vec(cx, ty),
             Type::UniquePtr(ptr) => check_type_unique_ptr(cx, ptr),
@@ -61,7 +61,8 @@ impl Check<'_> {
     }
 }
 
-fn check_type_ident(cx: &mut Check, ident: &Ident) {
+fn check_type_ident(cx: &mut Check, name: &RustName) {
+    let ident = &name.rust;
     if Atom::from(ident).is_none()
         && !cx.types.structs.contains_key(ident)
         && !cx.types.enums.contains_key(ident)
@@ -70,6 +71,11 @@ fn check_type_ident(cx: &mut Check, ident: &Ident) {
     {
         let msg = format!("unsupported type: {}", ident);
         cx.error(ident, &msg);
+        return;
+    }
+
+    if !name.generics.lifetimes.is_empty() {
+        cx.error(name, "type with lifetime parameter is not supported yet");
     }
 }
 
