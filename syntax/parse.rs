@@ -57,15 +57,14 @@ pub fn parse_items(
 }
 
 fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) -> Result<Api> {
-    let attrs = mem::take(&mut item.attrs);
     let mut doc = Doc::new();
     let mut derives = Vec::new();
     let mut namespace = namespace.clone();
     let mut cxx_name = None;
     let mut rust_name = None;
-    attrs::parse(
+    let attrs = attrs::parse(
         cx,
-        attrs,
+        mem::take(&mut item.attrs),
         attrs::Parser {
             doc: Some(&mut doc),
             derives: Some(&mut derives),
@@ -100,7 +99,7 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
     for field in named_fields.named {
         let ident = field.ident.unwrap();
         let mut doc = Doc::new();
-        attrs::parse(
+        let attrs = attrs::parse(
             cx,
             field.attrs,
             attrs::Parser {
@@ -123,6 +122,7 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
         });
         fields.push(Var {
             doc,
+            attrs,
             visibility,
             ident,
             ty,
@@ -142,6 +142,7 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
     Ok(Api::Struct(Struct {
         doc,
         derives,
+        attrs,
         visibility,
         struct_token,
         name,
@@ -157,7 +158,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
     let mut namespace = namespace.clone();
     let mut cxx_name = None;
     let mut rust_name = None;
-    attrs::parse(
+    let attrs = attrs::parse(
         cx,
         item.attrs,
         attrs::Parser {
@@ -213,6 +214,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
     Ok(Api::Enum(Enum {
         doc,
         derives,
+        attrs,
         enum_token,
         name,
         brace_token,
@@ -228,13 +230,12 @@ fn parse_variant(
     mut variant: RustVariant,
     discriminants: &mut DiscriminantSet,
 ) -> Result<Variant> {
-    let attrs = mem::take(&mut variant.attrs);
     let mut doc = Doc::new();
     let mut cxx_name = None;
     let mut rust_name = None;
-    attrs::parse(
+    let attrs = attrs::parse(
         cx,
-        attrs,
+        mem::take(&mut variant.attrs),
         attrs::Parser {
             doc: Some(&mut doc),
             cxx_name: Some(&mut cxx_name),
@@ -266,6 +267,7 @@ fn parse_variant(
 
     Ok(Variant {
         doc,
+        attrs,
         name,
         discriminant,
         expr,
@@ -403,7 +405,7 @@ fn parse_extern_type(
     let mut namespace = namespace.clone();
     let mut cxx_name = None;
     let mut rust_name = None;
-    attrs::parse(
+    let attrs = attrs::parse(
         cx,
         foreign_type.attrs,
         attrs::Parser {
@@ -434,6 +436,7 @@ fn parse_extern_type(
         lang,
         doc,
         derives,
+        attrs,
         type_token,
         name,
         generics,
@@ -451,14 +454,13 @@ fn parse_extern_fn(
     trusted: bool,
     namespace: &Namespace,
 ) -> Result<Api> {
-    let attrs = mem::take(&mut foreign_fn.attrs);
     let mut doc = Doc::new();
     let mut namespace = namespace.clone();
     let mut cxx_name = None;
     let mut rust_name = None;
-    attrs::parse(
+    let attrs = attrs::parse(
         cx,
-        attrs,
+        mem::take(&mut foreign_fn.attrs),
         attrs::Parser {
             doc: Some(&mut doc),
             namespace: Some(&mut namespace),
@@ -542,9 +544,11 @@ fn parse_extern_fn(
                 let ty = parse_type(&arg.ty)?;
                 if ident != "self" {
                     let doc = Doc::new();
+                    let attrs = Vec::new();
                     let visibility = Token![pub](ident.span());
                     args.push_value(Var {
                         doc,
+                        attrs,
                         visibility,
                         ident,
                         ty,
@@ -591,6 +595,7 @@ fn parse_extern_fn(
     }(ExternFn {
         lang,
         doc,
+        attrs,
         name,
         sig: Signature {
             unsafety,
@@ -701,7 +706,7 @@ fn parse_type_alias(
     let mut namespace = namespace.clone();
     let mut cxx_name = None;
     let mut rust_name = None;
-    attrs::parse(
+    let attrs = attrs::parse(
         cx,
         attrs,
         attrs::Parser {
@@ -725,6 +730,7 @@ fn parse_type_alias(
     Ok(Api::TypeAlias(TypeAlias {
         doc,
         derives,
+        attrs,
         type_token,
         name,
         generics,
@@ -783,7 +789,7 @@ fn parse_extern_type_bounded(
     let mut namespace = namespace.clone();
     let mut cxx_name = None;
     let mut rust_name = None;
-    attrs::parse(
+    let attrs = attrs::parse(
         cx,
         attrs,
         attrs::Parser {
@@ -805,6 +811,7 @@ fn parse_extern_type_bounded(
         lang,
         doc,
         derives,
+        attrs,
         type_token,
         name,
         generics,
@@ -1115,9 +1122,11 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
                 None => format_ident!("arg{}", i),
             };
             let doc = Doc::new();
+            let attrs = Vec::new();
             let visibility = Token![pub](ident.span());
             Ok(Var {
                 doc,
+                attrs,
                 visibility,
                 ident,
                 ty,

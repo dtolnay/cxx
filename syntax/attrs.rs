@@ -39,7 +39,8 @@ pub struct Parser<'a> {
     pub(crate) _more: (),
 }
 
-pub(super) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) {
+pub(super) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> Vec<Attribute> {
+    let mut passthrough_attrs = Vec::new();
     for attr in attrs {
         if attr.path.is_ident("doc") {
             match parse_doc_attribute.parse2(attr.tokens.clone()) {
@@ -49,7 +50,10 @@ pub(super) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) 
                         continue;
                     }
                 }
-                Err(err) => return cx.push(err),
+                Err(err) => {
+                    cx.push(err);
+                    break;
+                }
             }
         } else if attr.path.is_ident("derive") {
             match attr.parse_args_with(|attr: ParseStream| parse_derive_attribute(cx, attr)) {
@@ -59,7 +63,10 @@ pub(super) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) 
                         continue;
                     }
                 }
-                Err(err) => return cx.push(err),
+                Err(err) => {
+                    cx.push(err);
+                    break;
+                }
             }
         } else if attr.path.is_ident("repr") {
             match attr.parse_args_with(parse_repr_attribute) {
@@ -69,7 +76,10 @@ pub(super) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) 
                         continue;
                     }
                 }
-                Err(err) => return cx.push(err),
+                Err(err) => {
+                    cx.push(err);
+                    break;
+                }
             }
         } else if attr.path.is_ident("namespace") {
             match parse_namespace_attribute.parse2(attr.tokens.clone()) {
@@ -79,7 +89,10 @@ pub(super) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) 
                         continue;
                     }
                 }
-                Err(err) => return cx.push(err),
+                Err(err) => {
+                    cx.push(err);
+                    break;
+                }
             }
         } else if attr.path.is_ident("cxx_name") {
             match parse_function_alias_attribute.parse2(attr.tokens.clone()) {
@@ -89,7 +102,10 @@ pub(super) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) 
                         continue;
                     }
                 }
-                Err(err) => return cx.push(err),
+                Err(err) => {
+                    cx.push(err);
+                    break;
+                }
             }
         } else if attr.path.is_ident("rust_name") {
             match parse_function_alias_attribute.parse2(attr.tokens.clone()) {
@@ -99,7 +115,10 @@ pub(super) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) 
                         continue;
                     }
                 }
-                Err(err) => return cx.push(err),
+                Err(err) => {
+                    cx.push(err);
+                    break;
+                }
             }
         } else if attr.path.is_ident("allow")
             || attr.path.is_ident("warn")
@@ -107,10 +126,13 @@ pub(super) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) 
             || attr.path.is_ident("forbid")
         {
             // https://doc.rust-lang.org/reference/attributes/diagnostics.html#lint-check-attributes
+            passthrough_attrs.push(attr);
             continue;
         }
-        return cx.error(attr, "unsupported attribute");
+        cx.error(attr, "unsupported attribute");
+        break;
     }
+    passthrough_attrs
 }
 
 fn parse_doc_attribute(input: ParseStream) -> Result<LitStr> {
