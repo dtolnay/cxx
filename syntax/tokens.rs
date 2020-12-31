@@ -37,39 +37,64 @@ impl ToTokens for Type {
 
 impl ToTokens for Var {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        self.ident.to_tokens(tokens);
-        Token![:](self.ident.span()).to_tokens(tokens);
-        self.ty.to_tokens(tokens);
+        let Var {
+            doc: _,
+            attrs: _,
+            visibility: _,
+            ident,
+            ty,
+        } = self;
+        ident.to_tokens(tokens);
+        Token![:](ident.span()).to_tokens(tokens);
+        ty.to_tokens(tokens);
     }
 }
 
 impl ToTokens for Ty1 {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let span = self.name.span();
-        let name = self.name.to_string();
-        if let "UniquePtr" | "SharedPtr" | "WeakPtr" | "CxxVector" = name.as_str() {
-            tokens.extend(quote_spanned!(span=> ::cxx::));
-        } else if name == "Vec" {
-            tokens.extend(quote_spanned!(span=> ::std::vec::));
+        let Ty1 {
+            name,
+            langle,
+            inner,
+            rangle,
+        } = self;
+        let span = name.span();
+        match name.to_string().as_str() {
+            "UniquePtr" | "SharedPtr" | "WeakPtr" | "CxxVector" => {
+                tokens.extend(quote_spanned!(span=> ::cxx::));
+            }
+            "Vec" => {
+                tokens.extend(quote_spanned!(span=> ::std::vec::));
+            }
+            _ => {}
         }
-        self.name.to_tokens(tokens);
-        self.langle.to_tokens(tokens);
-        self.inner.to_tokens(tokens);
-        self.rangle.to_tokens(tokens);
+        name.to_tokens(tokens);
+        langle.to_tokens(tokens);
+        inner.to_tokens(tokens);
+        rangle.to_tokens(tokens);
     }
 }
 
 impl ToTokens for Ref {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        if let Some((pin, langle, _rangle)) = self.pin_tokens {
+        let Ref {
+            pinned: _,
+            ampersand,
+            lifetime,
+            mutable: _,
+            inner,
+            pin_tokens,
+            mutability,
+        } = self;
+        if let Some((pin, langle, _rangle)) = pin_tokens {
             tokens.extend(quote_spanned!(pin.span=> ::std::pin::Pin));
             langle.to_tokens(tokens);
         }
-        self.ampersand.to_tokens(tokens);
-        self.lifetime.to_tokens(tokens);
-        self.mutability.to_tokens(tokens);
-        self.inner.to_tokens(tokens);
-        if let Some((_pin, _langle, rangle)) = self.pin_tokens {
+        ampersand.to_tokens(tokens);
+        lifetime.to_tokens(tokens);
+        mutability.to_tokens(tokens);
+        inner.to_tokens(tokens);
+        if let Some((_pin, _langle, rangle)) = pin_tokens {
             rangle.to_tokens(tokens);
         }
     }
@@ -77,21 +102,36 @@ impl ToTokens for Ref {
 
 impl ToTokens for SliceRef {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        self.ampersand.to_tokens(tokens);
-        self.lifetime.to_tokens(tokens);
-        self.mutability.to_tokens(tokens);
-        self.bracket.surround(tokens, |tokens| {
-            self.inner.to_tokens(tokens);
+        let SliceRef {
+            ampersand,
+            lifetime,
+            mutable: _,
+            bracket,
+            inner,
+            mutability,
+        } = self;
+        ampersand.to_tokens(tokens);
+        lifetime.to_tokens(tokens);
+        mutability.to_tokens(tokens);
+        bracket.surround(tokens, |tokens| {
+            inner.to_tokens(tokens);
         });
     }
 }
 
 impl ToTokens for Array {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        self.bracket.surround(tokens, |tokens| {
-            self.inner.to_tokens(tokens);
-            self.semi_token.to_tokens(tokens);
-            self.len_token.to_tokens(tokens);
+        let Array {
+            bracket,
+            inner,
+            semi_token,
+            len: _,
+            len_token,
+        } = self;
+        bracket.surround(tokens, |tokens| {
+            inner.to_tokens(tokens);
+            semi_token.to_tokens(tokens);
+            len_token.to_tokens(tokens);
         });
     }
 }
@@ -150,30 +190,53 @@ impl ToTokens for ExternFn {
 
 impl ToTokens for Impl {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        self.impl_token.to_tokens(tokens);
-        self.negative_token.to_tokens(tokens);
-        self.ty.to_tokens(tokens);
-        self.brace_token.surround(tokens, |_tokens| {});
+        let Impl {
+            impl_token,
+            negative: _,
+            ty,
+            brace_token,
+            negative_token,
+        } = self;
+        impl_token.to_tokens(tokens);
+        negative_token.to_tokens(tokens);
+        ty.to_tokens(tokens);
+        brace_token.surround(tokens, |_tokens| {});
     }
 }
 
 impl ToTokens for Lifetimes {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        self.lt_token.to_tokens(tokens);
-        self.lifetimes.to_tokens(tokens);
-        self.gt_token.to_tokens(tokens);
+        let Lifetimes {
+            lt_token,
+            lifetimes,
+            gt_token,
+        } = self;
+        lt_token.to_tokens(tokens);
+        lifetimes.to_tokens(tokens);
+        gt_token.to_tokens(tokens);
     }
 }
 
 impl ToTokens for Signature {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        self.fn_token.to_tokens(tokens);
-        self.paren_token.surround(tokens, |tokens| {
-            self.args.to_tokens(tokens);
+        let Signature {
+            unsafety: _,
+            fn_token,
+            generics: _,
+            receiver: _,
+            args,
+            ret,
+            throws: _,
+            paren_token,
+            throws_tokens,
+        } = self;
+        fn_token.to_tokens(tokens);
+        paren_token.surround(tokens, |tokens| {
+            args.to_tokens(tokens);
         });
-        if let Some(ret) = &self.ret {
-            Token![->](self.paren_token.span).to_tokens(tokens);
-            if let Some((result, langle, rangle)) = self.throws_tokens {
+        if let Some(ret) = ret {
+            Token![->](paren_token.span).to_tokens(tokens);
+            if let Some((result, langle, rangle)) = throws_tokens {
                 result.to_tokens(tokens);
                 langle.to_tokens(tokens);
                 ret.to_tokens(tokens);
@@ -181,8 +244,8 @@ impl ToTokens for Signature {
             } else {
                 ret.to_tokens(tokens);
             }
-        } else if let Some((result, langle, rangle)) = self.throws_tokens {
-            Token![->](self.paren_token.span).to_tokens(tokens);
+        } else if let Some((result, langle, rangle)) = throws_tokens {
+            Token![->](paren_token.span).to_tokens(tokens);
             result.to_tokens(tokens);
             langle.to_tokens(tokens);
             token::Paren(langle.span).surround(tokens, |_| ());
@@ -193,7 +256,8 @@ impl ToTokens for Signature {
 
 impl ToTokens for RustName {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        self.rust.to_tokens(tokens);
+        let RustName { rust } = self;
+        rust.to_tokens(tokens);
     }
 }
 
@@ -208,15 +272,26 @@ impl Receiver {
 
 impl ToTokens for ReceiverType<'_> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        if let Some((pin, langle, _rangle)) = self.0.pin_tokens {
+        let Receiver {
+            pinned: _,
+            ampersand,
+            lifetime,
+            mutable: _,
+            var: _,
+            ty,
+            shorthand: _,
+            pin_tokens,
+            mutability,
+        } = &self.0;
+        if let Some((pin, langle, _rangle)) = pin_tokens {
             tokens.extend(quote_spanned!(pin.span=> ::std::pin::Pin));
             langle.to_tokens(tokens);
         }
-        self.0.ampersand.to_tokens(tokens);
-        self.0.lifetime.to_tokens(tokens);
-        self.0.mutability.to_tokens(tokens);
-        self.0.ty.to_tokens(tokens);
-        if let Some((_pin, _langle, rangle)) = self.0.pin_tokens {
+        ampersand.to_tokens(tokens);
+        lifetime.to_tokens(tokens);
+        mutability.to_tokens(tokens);
+        ty.to_tokens(tokens);
+        if let Some((_pin, _langle, rangle)) = pin_tokens {
             rangle.to_tokens(tokens);
         }
     }
