@@ -2,7 +2,8 @@ use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::{self, *};
 use crate::syntax::{Derive, Doc};
-use proc_macro2::Ident;
+use proc_macro2::{Ident, TokenStream};
+use quote::ToTokens;
 use syn::parse::{ParseStream, Parser as _};
 use syn::{Attribute, Error, LitStr, Path, Result, Token};
 
@@ -39,7 +40,7 @@ pub struct Parser<'a> {
     pub(crate) _more: (),
 }
 
-pub(super) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> Vec<Attribute> {
+pub(super) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> OtherAttrs {
     let mut passthrough_attrs = Vec::new();
     for attr in attrs {
         if attr.path.is_ident("doc") {
@@ -132,7 +133,7 @@ pub(super) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) 
         cx.error(attr, "unsupported attribute");
         break;
     }
-    passthrough_attrs
+    OtherAttrs(passthrough_attrs)
 }
 
 fn parse_doc_attribute(input: ParseStream) -> Result<LitStr> {
@@ -187,5 +188,21 @@ fn parse_function_alias_attribute(input: ParseStream) -> Result<Ident> {
         lit.parse()
     } else {
         input.parse()
+    }
+}
+
+pub struct OtherAttrs(Vec<Attribute>);
+
+impl OtherAttrs {
+    pub fn none() -> Self {
+        OtherAttrs(Vec::new())
+    }
+}
+
+impl ToTokens for OtherAttrs {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        for attr in &self.0 {
+            attr.to_tokens(tokens);
+        }
     }
 }

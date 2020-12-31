@@ -1,3 +1,4 @@
+use crate::syntax::attrs::OtherAttrs;
 use crate::syntax::discriminant::DiscriminantSet;
 use crate::syntax::file::{Item, ItemForeignMod};
 use crate::syntax::report::Errors;
@@ -544,7 +545,7 @@ fn parse_extern_fn(
                 let ty = parse_type(&arg.ty)?;
                 if ident != "self" {
                     let doc = Doc::new();
-                    let attrs = Vec::new();
+                    let attrs = OtherAttrs::none();
                     let visibility = Token![pub](ident.span());
                     args.push_value(Var {
                         doc,
@@ -1122,7 +1123,7 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
                 None => format_ident!("arg{}", i),
             };
             let doc = Doc::new();
-            let attrs = Vec::new();
+            let attrs = OtherAttrs::none();
             let visibility = Token![pub](ident.span());
             Ok(Var {
                 doc,
