@@ -35,12 +35,10 @@ error: missing documentation for a struct
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: missing documentation for a type alias
- --> $DIR/deny_missing_docs.rs:9:1
-  |
-9 | #[cxx::bridge]
-  | ^^^^^^^^^^^^^^
-  |
-  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+  --> $DIR/deny_missing_docs.rs:49:9
+   |
+49 |         pub type UndocumentedTypeAlias = crate::bindgen::UndocumentedTypeAlias;
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: missing documentation for a function
  --> $DIR/deny_missing_docs.rs:9:1

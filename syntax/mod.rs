@@ -123,6 +123,7 @@ pub struct TypeAlias {
     pub doc: Doc,
     pub derives: Vec<Derive>,
     pub attrs: OtherAttrs,
+    pub visibility: Token![pub],
     pub type_token: Token![type],
     pub name: Pair,
     pub generics: Lifetimes,

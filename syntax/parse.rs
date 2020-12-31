@@ -688,7 +688,7 @@ fn parse_extern_verbatim(
         if lookahead.peek(Token![=]) {
             // type Alias = crate::path::to::Type;
             parse_type_alias(
-                cx, attrs, type_token, ident, lifetimes, input, lang, namespace,
+                cx, attrs, visibility, type_token, ident, lifetimes, input, lang, namespace,
             )
         } else if lookahead.peek(Token![:]) || lookahead.peek(Token![;]) {
             // type Opaque: Bound2 + Bound2;
@@ -706,6 +706,7 @@ fn parse_extern_verbatim(
 fn parse_type_alias(
     cx: &mut Errors,
     attrs: Vec<Attribute>,
+    visibility: Visibility,
     type_token: Token![type],
     ident: Ident,
     generics: Lifetimes,
@@ -741,12 +742,19 @@ fn parse_type_alias(
         return Err(Error::new_spanned(span, msg));
     }
 
+    let visibility = Token![pub](match visibility {
+        Visibility::Public(vis) => vis.pub_token.span,
+        Visibility::Crate(vis) => vis.crate_token.span,
+        Visibility::Restricted(vis) => vis.pub_token.span,
+        Visibility::Inherited => ident.span(),
+    });
     let name = pair(namespace, &ident, cxx_name, rust_name);
 
     Ok(Api::TypeAlias(TypeAlias {
         doc,
         derives,
         attrs,
+        visibility,
         type_token,
         name,
         generics,

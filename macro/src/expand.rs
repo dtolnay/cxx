@@ -1019,13 +1019,18 @@ fn expand_rust_function_shim_super(
 fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
     let doc = &alias.doc;
     let attrs = &alias.attrs;
+    let visibility = alias.visibility;
+    let type_token = alias.type_token;
     let ident = &alias.name.rust;
     let generics = &alias.generics;
+    let eq_token = alias.eq_token;
     let ty = &alias.ty;
+    let semi_token = alias.semi_token;
+
     quote! {
         #doc
         #attrs
-        pub type #ident #generics = #ty;
+        #visibility #type_token #ident #generics #eq_token #ty #semi_token
     }
 }
 
