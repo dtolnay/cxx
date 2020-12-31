@@ -360,15 +360,25 @@ fn expand_cxx_type(ety: &ExternType) -> TokenStream {
         let field = format_ident!("_lifetime_{}", lifetime.ident);
         quote!(#field: ::std::marker::PhantomData<&#lifetime ()>)
     });
+    let repr_fields = quote! {
+        _private: ::cxx::private::Opaque,
+        #(#lifetime_fields,)*
+    };
+
+    let span = ident.span();
+    let visibility = &ety.visibility;
+    let struct_token = Token![struct](ety.type_token.span);
+    let extern_type_def = quote_spanned! {span=>
+        #visibility #struct_token #ident #generics {
+            #repr_fields
+        }
+    };
 
     quote! {
         #doc
         #attrs
         #[repr(C)]
-        pub struct #ident #generics {
-            _private: ::cxx::private::Opaque,
-            #(#lifetime_fields,)*
-        }
+        #extern_type_def
 
         unsafe impl #generics ::cxx::ExternType for #ident #generics {
             type Id = #type_id;

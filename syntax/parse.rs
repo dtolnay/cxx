@@ -426,6 +426,12 @@ fn parse_extern_type(
         },
     );
 
+    let visibility = Token![pub](match foreign_type.vis {
+        Visibility::Public(vis) => vis.pub_token.span,
+        Visibility::Crate(vis) => vis.crate_token.span,
+        Visibility::Restricted(vis) => vis.pub_token.span,
+        Visibility::Inherited => foreign_type.ident.span(),
+    });
     let type_token = foreign_type.type_token;
     let name = pair(namespace, &foreign_type.ident, cxx_name, rust_name);
     let generics = Lifetimes {
@@ -445,6 +451,7 @@ fn parse_extern_type(
         doc,
         derives,
         attrs,
+        visibility,
         type_token,
         name,
         generics,
@@ -630,7 +637,7 @@ fn parse_extern_verbatim(
 ) -> Result<Api> {
     |input: ParseStream| -> Result<Api> {
         let attrs = input.call(Attribute::parse_outer)?;
-        input.parse::<Visibility>()?;
+        let visibility: Visibility = input.parse()?;
         let type_token: Token![type] = match input.parse()? {
             Some(type_token) => type_token,
             None => {
@@ -686,7 +693,8 @@ fn parse_extern_verbatim(
         } else if lookahead.peek(Token![:]) || lookahead.peek(Token![;]) {
             // type Opaque: Bound2 + Bound2;
             parse_extern_type_bounded(
-                cx, attrs, type_token, ident, lifetimes, input, lang, trusted, namespace,
+                cx, attrs, visibility, type_token, ident, lifetimes, input, lang, trusted,
+                namespace,
             )
         } else {
             Err(lookahead.error())
@@ -751,6 +759,7 @@ fn parse_type_alias(
 fn parse_extern_type_bounded(
     cx: &mut Errors,
     attrs: Vec<Attribute>,
+    visibility: Visibility,
     type_token: Token![type],
     ident: Ident,
     generics: Lifetimes,
@@ -810,6 +819,12 @@ fn parse_extern_type_bounded(
         },
     );
 
+    let visibility = Token![pub](match visibility {
+        Visibility::Public(vis) => vis.pub_token.span,
+        Visibility::Crate(vis) => vis.crate_token.span,
+        Visibility::Restricted(vis) => vis.pub_token.span,
+        Visibility::Inherited => ident.span(),
+    });
     let name = pair(namespace, &ident, cxx_name, rust_name);
 
     Ok(match lang {
@@ -820,6 +835,7 @@ fn parse_extern_type_bounded(
         doc,
         derives,
         attrs,
+        visibility,
         type_token,
         name,
         generics,
