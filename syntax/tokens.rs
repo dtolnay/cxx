@@ -18,7 +18,7 @@ impl ToTokens for Type {
                     let span = ident.rust.span();
                     tokens.extend(quote_spanned!(span=> ::cxx::));
                 }
-                ident.rust.to_tokens(tokens);
+                ident.to_tokens(tokens);
             }
             Type::RustBox(ty)
             | Type::UniquePtr(ty)
