@@ -125,8 +125,10 @@ pub(super) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) 
             || attr.path.is_ident("warn")
             || attr.path.is_ident("deny")
             || attr.path.is_ident("forbid")
+            || attr.path.is_ident("deprecated")
+            || attr.path.is_ident("must_use")
         {
-            // https://doc.rust-lang.org/reference/attributes/diagnostics.html#lint-check-attributes
+            // https://doc.rust-lang.org/reference/attributes/diagnostics.html
             passthrough_attrs.push(attr);
             continue;
         }
