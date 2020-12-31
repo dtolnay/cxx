@@ -136,6 +136,7 @@ pub struct TypeAlias {
 
 pub struct Impl {
     pub impl_token: Token![impl],
+    pub generics: Lifetimes,
     pub negative: bool,
     pub ty: Type,
     pub brace_token: Brace,

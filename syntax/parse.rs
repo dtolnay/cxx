@@ -827,6 +827,8 @@ fn parse_extern_type_bounded(
 }
 
 fn parse_impl(imp: ItemImpl) -> Result<Api> {
+    let impl_token = imp.impl_token;
+
     if !imp.items.is_empty() {
         let mut span = Group::new(Delimiter::Brace, TokenStream::new());
         span.set_span(imp.brace_token.span);
@@ -842,12 +844,34 @@ fn parse_impl(imp: ItemImpl) -> Result<Api> {
         ));
     }
 
-    let generics = &imp.generics;
-    if !generics.params.is_empty() || generics.where_clause.is_some() {
+    if let Some(where_clause) = imp.generics.where_clause {
         return Err(Error::new_spanned(
-            imp,
-            "generic parameters on an impl is not supported",
+            where_clause,
+            "where-clause on an impl is not supported yet",
         ));
+    }
+    let mut generics = Lifetimes {
+        lt_token: imp.generics.lt_token,
+        lifetimes: Punctuated::new(),
+        gt_token: imp.generics.gt_token,
+    };
+    for pair in imp.generics.params.into_pairs() {
+        let (param, punct) = pair.into_tuple();
+        match param {
+            GenericParam::Lifetime(def) if def.bounds.is_empty() => {
+                generics.lifetimes.push_value(def.lifetime);
+                if let Some(punct) = punct {
+                    generics.lifetimes.push_punct(punct);
+                }
+            }
+            _ => {
+                let span = quote!(#impl_token #generics);
+                return Err(Error::new_spanned(
+                    span,
+                    "generic parameter on an impl is not supported yet",
+                ));
+            }
+        }
     }
 
     let mut negative_token = None;
@@ -865,13 +889,13 @@ fn parse_impl(imp: ItemImpl) -> Result<Api> {
         }
     }
 
-    let impl_token = imp.impl_token;
     let negative = negative_token.is_some();
     let ty = parse_type(&self_ty)?;
     let brace_token = imp.brace_token;
 
     Ok(Api::Impl(Impl {
         impl_token,
+        generics,
         negative,
         ty,
         brace_token,
