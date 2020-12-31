@@ -23,12 +23,10 @@ error: missing documentation for a struct
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: missing documentation for an associated constant
- --> $DIR/deny_missing_docs.rs:9:1
-  |
-9 | #[cxx::bridge]
-  | ^^^^^^^^^^^^^^
-  |
-  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+  --> $DIR/deny_missing_docs.rs:22:9
+   |
+22 |         UndocumentedVariant = 0,
+   |         ^^^^^^^^^^^^^^^^^^^
 
 error: missing documentation for a struct
  --> $DIR/deny_missing_docs.rs:9:1

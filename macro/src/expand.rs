@@ -305,7 +305,8 @@ fn expand_enum(enm: &Enum) -> TokenStream {
         let attrs = &variant.attrs;
         let variant_ident = &variant.name.rust;
         let discriminant = &variant.discriminant;
-        Some(quote! {
+        let span = variant_ident.span();
+        Some(quote_spanned! {span=>
             #doc
             #attrs
             pub const #variant_ident: Self = #ident { repr: #discriminant };
