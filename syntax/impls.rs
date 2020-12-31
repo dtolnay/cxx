@@ -1,5 +1,5 @@
 use crate::syntax::{
-    Array, ExternFn, Impl, Include, Receiver, Ref, Signature, SliceRef, Ty1, Type, Var,
+    Array, ExternFn, Impl, Include, Lifetimes, Receiver, Ref, Signature, SliceRef, Ty1, Type, Var,
 };
 use std::borrow::Borrow;
 use std::hash::{Hash, Hasher};
@@ -77,6 +77,38 @@ impl PartialEq for Type {
             (Type::SliceRef(lhs), Type::SliceRef(rhs)) => lhs == rhs,
             (Type::Void(_), Type::Void(_)) => true,
             (_, _) => false,
+        }
+    }
+}
+
+impl Eq for Lifetimes {}
+
+impl PartialEq for Lifetimes {
+    fn eq(&self, other: &Lifetimes) -> bool {
+        let Lifetimes {
+            lt_token: _,
+            lifetimes,
+            gt_token: _,
+        } = self;
+        let Lifetimes {
+            lt_token: _,
+            lifetimes: lifetimes2,
+            gt_token: _,
+        } = other;
+        lifetimes.iter().eq(lifetimes2)
+    }
+}
+
+impl Hash for Lifetimes {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let Lifetimes {
+            lt_token: _,
+            lifetimes,
+            gt_token: _,
+        } = self;
+        lifetimes.len().hash(state);
+        for lifetime in lifetimes {
+            lifetime.hash(state);
         }
     }
 }
