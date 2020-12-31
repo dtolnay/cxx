@@ -1,4 +1,5 @@
 use crate::syntax::improper::ImproperCtype;
+use crate::syntax::instantiate::ImplKey;
 use crate::syntax::report::Errors;
 use crate::syntax::set::{OrderedSet as Set, UnorderedSet};
 use crate::syntax::trivial::{self, TrivialReason};
@@ -18,7 +19,7 @@ pub struct Types<'a> {
     pub aliases: Map<&'a Ident, &'a TypeAlias>,
     pub untrusted: Map<&'a Ident, &'a ExternType>,
     pub required_trivial: Map<&'a Ident, Vec<TrivialReason<'a>>>,
-    pub explicit_impls: Set<&'a Impl>,
+    pub explicit_impls: Map<ImplKey<'a>, &'a Impl>,
     pub resolutions: Map<&'a Ident, &'a Pair>,
     pub struct_improper_ctypes: UnorderedSet<&'a Ident>,
     pub toposorted_structs: Vec<&'a Struct>,
@@ -33,7 +34,7 @@ impl<'a> Types<'a> {
         let mut rust = Set::new();
         let mut aliases = Map::new();
         let mut untrusted = Map::new();
-        let mut explicit_impls = Set::new();
+        let mut explicit_impls = Map::new();
         let mut resolutions = Map::new();
         let struct_improper_ctypes = UnorderedSet::new();
         let toposorted_structs = Vec::new();
@@ -160,7 +161,9 @@ impl<'a> Types<'a> {
                 }
                 Api::Impl(imp) => {
                     visit(&mut all, &imp.ty);
-                    explicit_impls.insert(imp);
+                    if let Some(key) = imp.ty.impl_key() {
+                        explicit_impls.insert(key, imp);
+                    }
                 }
             }
         }

@@ -11,6 +11,7 @@ pub mod file;
 pub mod ident;
 mod impls;
 mod improper;
+pub mod instantiate;
 pub mod mangle;
 mod names;
 pub mod namespace;
