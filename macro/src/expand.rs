@@ -632,22 +632,26 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         }
     };
     let mut dispatch = quote!(#setup #expr);
+    let visibility = efn.visibility;
     let unsafety = &efn.sig.unsafety;
     if unsafety.is_none() {
         dispatch = quote!(unsafe { #dispatch });
     }
+    let fn_token = efn.sig.fn_token;
     let ident = &efn.name.rust;
     let generics = &efn.generics;
+    let arg_list = quote_spanned!(efn.sig.paren_token.span=> (#(#all_args,)*));
+    let fn_body = quote_spanned!(efn.semi_token.span=> {
+        extern "C" {
+            #decl
+        }
+        #trampolines
+        #dispatch
+    });
     let function_shim = quote! {
         #doc
         #attrs
-        pub #unsafety fn #ident #generics(#(#all_args,)*) #ret {
-            extern "C" {
-                #decl
-            }
-            #trampolines
-            #dispatch
-        }
+        #visibility #unsafety #fn_token #ident #generics #arg_list #ret #fn_body
     };
     match &efn.receiver {
         None => function_shim,

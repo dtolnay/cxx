@@ -113,6 +113,7 @@ pub struct ExternFn {
     pub lang: Lang,
     pub doc: Doc,
     pub attrs: OtherAttrs,
+    pub visibility: Token![pub],
     pub name: Pair,
     pub sig: Signature,
     pub semi_token: Token![;],

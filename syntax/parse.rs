@@ -597,6 +597,12 @@ fn parse_extern_fn(
     let mut throws_tokens = None;
     let ret = parse_return_type(&foreign_fn.sig.output, &mut throws_tokens)?;
     let throws = throws_tokens.is_some();
+    let visibility = Token![pub](match foreign_fn.vis {
+        Visibility::Public(vis) => vis.pub_token.span,
+        Visibility::Crate(vis) => vis.crate_token.span,
+        Visibility::Restricted(vis) => vis.pub_token.span,
+        Visibility::Inherited => foreign_fn.sig.ident.span(),
+    });
     let unsafety = foreign_fn.sig.unsafety;
     let fn_token = foreign_fn.sig.fn_token;
     let name = pair(namespace, &foreign_fn.sig.ident, cxx_name, rust_name);
@@ -611,6 +617,7 @@ fn parse_extern_fn(
         lang,
         doc,
         attrs,
+        visibility,
         name,
         sig: Signature {
             unsafety,
