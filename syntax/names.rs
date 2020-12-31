@@ -1,6 +1,7 @@
-use crate::syntax::{Pair, RustName, Symbol, Types};
+use crate::syntax::{Lifetimes, Pair, RustName, Symbol, Types};
 use proc_macro2::{Ident, Span};
 use std::iter;
+use syn::punctuated::Punctuated;
 
 impl Pair {
     pub fn to_symbol(&self) -> Symbol {
@@ -23,11 +24,12 @@ impl Pair {
 
 impl RustName {
     pub fn new(rust: Ident) -> Self {
-        RustName { rust }
-    }
-
-    pub fn from_ref(rust: &Ident) -> &Self {
-        unsafe { &*(rust as *const Ident as *const Self) }
+        let generics = Lifetimes {
+            lt_token: None,
+            lifetimes: Punctuated::new(),
+            gt_token: None,
+        };
+        RustName { rust, generics }
     }
 
     pub fn span(&self) -> Span {

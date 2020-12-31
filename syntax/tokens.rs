@@ -256,7 +256,7 @@ impl ToTokens for Signature {
 
 impl ToTokens for RustName {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let RustName { rust } = self;
+        let RustName { rust, generics: _ } = self;
         rust.to_tokens(tokens);
     }
 }
