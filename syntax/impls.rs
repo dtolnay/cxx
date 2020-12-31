@@ -1,7 +1,6 @@
 use crate::syntax::{
     Array, ExternFn, Impl, Include, Lifetimes, Receiver, Ref, Signature, SliceRef, Ty1, Type, Var,
 };
-use std::borrow::Borrow;
 use std::hash::{Hash, Hasher};
 use std::mem;
 use std::ops::{Deref, DerefMut};
@@ -445,11 +444,5 @@ impl PartialEq for Impl {
             negative_token: _,
         } = other;
         negative == negative2 && ty == ty2
-    }
-}
-
-impl Borrow<Type> for &Impl {
-    fn borrow(&self) -> &Type {
-        &self.ty
     }
 }

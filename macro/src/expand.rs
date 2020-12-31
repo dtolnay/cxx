@@ -80,7 +80,11 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
     }
 
     for ty in types {
-        let explicit_impl = types.explicit_impls.get(ty);
+        let impl_key = match ty.impl_key() {
+            Some(impl_key) => impl_key,
+            None => continue,
+        };
+        let explicit_impl = types.explicit_impls.get(&impl_key).copied();
         if let Type::RustBox(ty) = ty {
             if let Type::Ident(ident) = &ty.inner {
                 if Atom::from(&ident.rust).is_none()
@@ -1366,7 +1370,6 @@ fn expand_weak_ptr(ident: &RustName, types: &Types, explicit_impl: Option<&Impl>
 }
 
 fn expand_cxx_vector(elem: &RustName, explicit_impl: Option<&Impl>, types: &Types) -> TokenStream {
-    let _ = explicit_impl;
     let name = elem.rust.to_string();
     let prefix = format!("cxxbridge1$std$vector${}$", elem.to_symbol(types));
     let link_size = format!("{}size", prefix);

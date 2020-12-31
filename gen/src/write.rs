@@ -1336,11 +1336,15 @@ fn write_generic_instantiations(out: &mut OutFile) {
     out.set_namespace(Default::default());
     out.begin_block(Block::ExternC);
     for ty in out.types {
+        let impl_key = match ty.impl_key() {
+            Some(impl_key) => impl_key,
+            None => continue,
+        };
         if let Type::RustBox(ptr) = ty {
             if let Type::Ident(inner) = &ptr.inner {
                 if Atom::from(&inner.rust).is_none()
                     && (!out.types.aliases.contains_key(&inner.rust)
-                        || out.types.explicit_impls.contains(ty))
+                        || out.types.explicit_impls.contains_key(&impl_key))
                 {
                     out.next_section();
                     write_rust_box_extern(out, &out.types.resolve(&inner));
@@ -1350,7 +1354,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
             if let Type::Ident(inner) = &vec.inner {
                 if Atom::from(&inner.rust).is_none()
                     && (!out.types.aliases.contains_key(&inner.rust)
-                        || out.types.explicit_impls.contains(ty))
+                        || out.types.explicit_impls.contains_key(&impl_key))
                 {
                     out.next_section();
                     write_rust_vec_extern(out, inner);
@@ -1360,7 +1364,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
             if let Type::Ident(inner) = &ptr.inner {
                 if Atom::from(&inner.rust).is_none()
                     && (!out.types.aliases.contains_key(&inner.rust)
-                        || out.types.explicit_impls.contains(ty))
+                        || out.types.explicit_impls.contains_key(&impl_key))
                 {
                     out.next_section();
                     write_unique_ptr(out, inner);
@@ -1370,7 +1374,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
             if let Type::Ident(inner) = &ptr.inner {
                 if Atom::from(&inner.rust).is_none()
                     && (!out.types.aliases.contains_key(&inner.rust)
-                        || out.types.explicit_impls.contains(ty))
+                        || out.types.explicit_impls.contains_key(&impl_key))
                 {
                     out.next_section();
                     write_shared_ptr(out, inner);
@@ -1380,7 +1384,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
             if let Type::Ident(inner) = &ptr.inner {
                 if Atom::from(&inner.rust).is_none()
                     && (!out.types.aliases.contains_key(&inner.rust)
-                        || out.types.explicit_impls.contains(ty))
+                        || out.types.explicit_impls.contains_key(&impl_key))
                 {
                     out.next_section();
                     write_weak_ptr(out, inner);
@@ -1390,7 +1394,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
             if let Type::Ident(inner) = &vector.inner {
                 if Atom::from(&inner.rust).is_none()
                     && (!out.types.aliases.contains_key(&inner.rust)
-                        || out.types.explicit_impls.contains(ty))
+                        || out.types.explicit_impls.contains_key(&impl_key))
                 {
                     out.next_section();
                     write_cxx_vector(out, inner);
@@ -1403,11 +1407,15 @@ fn write_generic_instantiations(out: &mut OutFile) {
     out.begin_block(Block::Namespace("rust"));
     out.begin_block(Block::InlineNamespace("cxxbridge1"));
     for ty in out.types {
+        let impl_key = match ty.impl_key() {
+            Some(impl_key) => impl_key,
+            None => continue,
+        };
         if let Type::RustBox(ptr) = ty {
             if let Type::Ident(inner) = &ptr.inner {
                 if Atom::from(&inner.rust).is_none()
                     && (!out.types.aliases.contains_key(&inner.rust)
-                        || out.types.explicit_impls.contains(ty))
+                        || out.types.explicit_impls.contains_key(&impl_key))
                 {
                     write_rust_box_impl(out, &out.types.resolve(&inner));
                 }
@@ -1416,7 +1424,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
             if let Type::Ident(inner) = &vec.inner {
                 if Atom::from(&inner.rust).is_none()
                     && (!out.types.aliases.contains_key(&inner.rust)
-                        || out.types.explicit_impls.contains(ty))
+                        || out.types.explicit_impls.contains_key(&impl_key))
                 {
                     write_rust_vec_impl(out, inner);
                 }
