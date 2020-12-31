@@ -131,6 +131,15 @@ pub(super) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) 
             // https://doc.rust-lang.org/reference/attributes/diagnostics.html
             passthrough_attrs.push(attr);
             continue;
+        } else if attr.path.segments.len() > 1 {
+            let tool = &attr.path.segments.first().unwrap().ident;
+            if tool == "rustfmt" {
+                // Skip, rustfmt only needs to find it in the pre-expansion source file.
+                continue;
+            } else if tool == "clippy" {
+                passthrough_attrs.push(attr);
+                continue;
+            }
         }
         cx.error(attr, "unsupported attribute");
         break;
