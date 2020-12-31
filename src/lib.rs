@@ -385,7 +385,8 @@
     clippy::or_fun_call,
     clippy::ptr_arg,
     clippy::toplevel_ref_arg,
-    clippy::useless_let_if_seq
+    clippy::useless_let_if_seq,
+    clippy::wrong_self_convention
 )]
 
 #[cfg(built_with_cargo)]
