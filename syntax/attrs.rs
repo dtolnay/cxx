@@ -40,7 +40,7 @@ pub struct Parser<'a> {
     pub(crate) _more: (),
 }
 
-pub(super) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> OtherAttrs {
+pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> OtherAttrs {
     let mut passthrough_attrs = Vec::new();
     for attr in attrs {
         if attr.path.is_ident("doc") {

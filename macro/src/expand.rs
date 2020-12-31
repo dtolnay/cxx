@@ -1,11 +1,12 @@
 use crate::derive;
 use crate::syntax::atom::Atom::{self, *};
+use crate::syntax::attrs::{self, OtherAttrs};
 use crate::syntax::file::Module;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    self, check, mangle, Api, Enum, ExternFn, ExternType, Impl, Pair, RustName, Signature, Struct,
-    Trait, Type, TypeAlias, Types,
+    self, check, mangle, Api, Doc, Enum, ExternFn, ExternType, Impl, Pair, RustName, Signature,
+    Struct, Trait, Type, TypeAlias, Types,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
@@ -14,6 +15,17 @@ use syn::{parse_quote, Result, Token};
 
 pub fn bridge(mut ffi: Module) -> Result<TokenStream> {
     let ref mut errors = Errors::new();
+
+    let mut doc = Doc::new();
+    let attrs = attrs::parse(
+        errors,
+        mem::take(&mut ffi.attrs),
+        attrs::Parser {
+            doc: Some(&mut doc),
+            ..Default::default()
+        },
+    );
+
     let content = mem::take(&mut ffi.content);
     let trusted = ffi.unsafety.is_some();
     let namespace = &ffi.namespace;
@@ -23,10 +35,10 @@ pub fn bridge(mut ffi: Module) -> Result<TokenStream> {
     check::typecheck(errors, apis, types);
     errors.propagate()?;
 
-    Ok(expand(ffi, apis, types))
+    Ok(expand(ffi, doc, attrs, apis, types))
 }
 
-fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
+fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types) -> TokenStream {
     let mut expanded = TokenStream::new();
     let mut hidden = TokenStream::new();
 
@@ -133,15 +145,12 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
         });
     }
 
-    let attrs = ffi
-        .attrs
-        .into_iter()
-        .filter(|attr| attr.path.is_ident("doc"));
     let vis = &ffi.vis;
     let ident = &ffi.ident;
 
     quote! {
-        #(#attrs)*
+        #doc
+        #attrs
         #[deny(improper_ctypes)]
         #[allow(non_snake_case)]
         #vis mod #ident {
