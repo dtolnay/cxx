@@ -115,12 +115,7 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
                 continue;
             }
         };
-        let visibility = Token![pub](match field.vis {
-            Visibility::Public(vis) => vis.pub_token.span,
-            Visibility::Crate(vis) => vis.crate_token.span,
-            Visibility::Restricted(vis) => vis.pub_token.span,
-            Visibility::Inherited => ident.span(),
-        });
+        let visibility = visibility_pub(&field.vis, &ident);
         fields.push(Var {
             doc,
             attrs,
@@ -130,12 +125,7 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
         });
     }
 
-    let visibility = Token![pub](match item.vis {
-        Visibility::Public(vis) => vis.pub_token.span,
-        Visibility::Crate(vis) => vis.crate_token.span,
-        Visibility::Restricted(vis) => vis.pub_token.span,
-        Visibility::Inherited => item.ident.span(),
-    });
+    let visibility = visibility_pub(&item.vis, &item.ident);
     let struct_token = item.struct_token;
     let name = pair(namespace, &item.ident, cxx_name, rust_name);
     let brace_token = named_fields.brace_token;
@@ -194,6 +184,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
         }
     }
 
+    let visibility = visibility_pub(&item.vis, &item.ident);
     let enum_token = item.enum_token;
     let brace_token = item.brace_token;
 
@@ -216,6 +207,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
         doc,
         derives,
         attrs,
+        visibility,
         enum_token,
         name,
         brace_token,
@@ -419,6 +411,7 @@ fn parse_extern_type(
         },
     );
 
+    let visibility = visibility_pub(&foreign_type.vis, &foreign_type.ident);
     let type_token = foreign_type.type_token;
     let name = pair(namespace, &foreign_type.ident, cxx_name, rust_name);
     let generics = Lifetimes {
@@ -438,6 +431,7 @@ fn parse_extern_type(
         doc,
         derives,
         attrs,
+        visibility,
         type_token,
         name,
         generics,
@@ -583,6 +577,7 @@ fn parse_extern_fn(
     let mut throws_tokens = None;
     let ret = parse_return_type(&foreign_fn.sig.output, &mut throws_tokens)?;
     let throws = throws_tokens.is_some();
+    let visibility = visibility_pub(&foreign_fn.vis, &foreign_fn.sig.ident);
     let unsafety = foreign_fn.sig.unsafety;
     let fn_token = foreign_fn.sig.fn_token;
     let name = pair(namespace, &foreign_fn.sig.ident, cxx_name, rust_name);
@@ -597,6 +592,7 @@ fn parse_extern_fn(
         lang,
         doc,
         attrs,
+        visibility,
         name,
         sig: Signature {
             unsafety,
@@ -623,7 +619,7 @@ fn parse_extern_verbatim(
 ) -> Result<Api> {
     |input: ParseStream| -> Result<Api> {
         let attrs = input.call(Attribute::parse_outer)?;
-        input.parse::<Visibility>()?;
+        let visibility: Visibility = input.parse()?;
         let type_token: Token![type] = match input.parse()? {
             Some(type_token) => type_token,
             None => {
@@ -674,12 +670,13 @@ fn parse_extern_verbatim(
         if lookahead.peek(Token![=]) {
             // type Alias = crate::path::to::Type;
             parse_type_alias(
-                cx, attrs, type_token, ident, lifetimes, input, lang, namespace,
+                cx, attrs, visibility, type_token, ident, lifetimes, input, lang, namespace,
             )
         } else if lookahead.peek(Token![:]) || lookahead.peek(Token![;]) {
             // type Opaque: Bound2 + Bound2;
             parse_extern_type_bounded(
-                cx, attrs, type_token, ident, lifetimes, input, lang, trusted, namespace,
+                cx, attrs, visibility, type_token, ident, lifetimes, input, lang, trusted,
+                namespace,
             )
         } else {
             Err(lookahead.error())
@@ -691,6 +688,7 @@ fn parse_extern_verbatim(
 fn parse_type_alias(
     cx: &mut Errors,
     attrs: Vec<Attribute>,
+    visibility: Visibility,
     type_token: Token![type],
     ident: Ident,
     generics: Lifetimes,
@@ -726,12 +724,14 @@ fn parse_type_alias(
         return Err(Error::new_spanned(span, msg));
     }
 
+    let visibility = visibility_pub(&visibility, &ident);
     let name = pair(namespace, &ident, cxx_name, rust_name);
 
     Ok(Api::TypeAlias(TypeAlias {
         doc,
         derives,
         attrs,
+        visibility,
         type_token,
         name,
         generics,
@@ -744,6 +744,7 @@ fn parse_type_alias(
 fn parse_extern_type_bounded(
     cx: &mut Errors,
     attrs: Vec<Attribute>,
+    visibility: Visibility,
     type_token: Token![type],
     ident: Ident,
     generics: Lifetimes,
@@ -803,6 +804,7 @@ fn parse_extern_type_bounded(
         },
     );
 
+    let visibility = visibility_pub(&visibility, &ident);
     let name = pair(namespace, &ident, cxx_name, rust_name);
 
     Ok(match lang {
@@ -813,6 +815,7 @@ fn parse_extern_type_bounded(
         doc,
         derives,
         attrs,
+        visibility,
         type_token,
         name,
         generics,
@@ -1188,6 +1191,15 @@ fn parse_return_type(
         Type::Void(_) => Ok(None),
         ty => Ok(Some(ty)),
     }
+}
+
+fn visibility_pub(vis: &Visibility, inherited: &Ident) -> Token![pub] {
+    Token![pub](match vis {
+        Visibility::Public(vis) => vis.pub_token.span,
+        Visibility::Crate(vis) => vis.crate_token.span,
+        Visibility::Restricted(vis) => vis.pub_token.span,
+        Visibility::Inherited => inherited.span(),
+    })
 }
 
 fn pair(namespace: Namespace, default: &Ident, cxx: Option<Ident>, rust: Option<Ident>) -> Pair {

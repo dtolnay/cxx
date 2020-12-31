@@ -17,33 +17,31 @@ error: missing documentation for a struct field
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: missing documentation for a struct
- --> $DIR/deny_missing_docs.rs:9:1
-  |
-9 | #[cxx::bridge]
-  | ^^^^^^^^^^^^^^
-  |
-  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+  --> $DIR/deny_missing_docs.rs:21:5
+   |
+21 |     pub enum UndocumentedEnum {
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: missing documentation for an associated constant
- --> $DIR/deny_missing_docs.rs:9:1
-  |
-9 | #[cxx::bridge]
-  | ^^^^^^^^^^^^^^
-  |
-  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+  --> $DIR/deny_missing_docs.rs:22:9
+   |
+22 |         UndocumentedVariant = 0,
+   |         ^^^^^^^^^^^^^^^^^^^
+
+error: missing documentation for a struct
+  --> $DIR/deny_missing_docs.rs:44:9
+   |
+44 |         pub type UndocumentedForeignType;
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: missing documentation for a type alias
- --> $DIR/deny_missing_docs.rs:9:1
-  |
-9 | #[cxx::bridge]
-  | ^^^^^^^^^^^^^^
-  |
-  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+  --> $DIR/deny_missing_docs.rs:49:9
+   |
+49 |         pub type UndocumentedTypeAlias = crate::bindgen::UndocumentedTypeAlias;
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: missing documentation for a function
- --> $DIR/deny_missing_docs.rs:9:1
-  |
-9 | #[cxx::bridge]
-  | ^^^^^^^^^^^^^^
-  |
-  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
+  --> $DIR/deny_missing_docs.rs:54:9
+   |
+54 |         pub fn undocumented_foreign_fn() -> u8;
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

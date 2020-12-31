@@ -305,7 +305,8 @@ fn expand_enum(enm: &Enum) -> TokenStream {
         let attrs = &variant.attrs;
         let variant_ident = &variant.name.rust;
         let discriminant = &variant.discriminant;
-        Some(quote! {
+        let span = variant_ident.span();
+        Some(quote_spanned! {span=>
             #doc
             #attrs
             pub const #variant_ident: Self = #ident { repr: #discriminant };
@@ -314,15 +315,25 @@ fn expand_enum(enm: &Enum) -> TokenStream {
     let mut derives = None;
     let derived_traits = derive::expand_enum(enm, &mut derives);
 
+    let span = ident.span();
+    let visibility = enm.visibility;
+    let struct_token = Token![struct](enm.enum_token.span);
+    let enum_repr = quote! {
+        #[allow(missing_docs)]
+        pub repr: #repr,
+    };
+    let enum_def = quote_spanned! {span=>
+        #visibility #struct_token #ident {
+            #enum_repr
+        }
+    };
+
     quote! {
         #doc
         #attrs
         #derives
         #[repr(transparent)]
-        pub struct #ident {
-            #[allow(missing_docs)]
-            pub repr: #repr,
-        }
+        #enum_def
 
         #[allow(non_upper_case_globals)]
         impl #ident {
@@ -349,15 +360,25 @@ fn expand_cxx_type(ety: &ExternType) -> TokenStream {
         let field = format_ident!("_lifetime_{}", lifetime.ident);
         quote!(#field: ::std::marker::PhantomData<&#lifetime ()>)
     });
+    let repr_fields = quote! {
+        _private: ::cxx::private::Opaque,
+        #(#lifetime_fields,)*
+    };
+
+    let span = ident.span();
+    let visibility = &ety.visibility;
+    let struct_token = Token![struct](ety.type_token.span);
+    let extern_type_def = quote_spanned! {span=>
+        #visibility #struct_token #ident #generics {
+            #repr_fields
+        }
+    };
 
     quote! {
         #doc
         #attrs
         #[repr(C)]
-        pub struct #ident #generics {
-            _private: ::cxx::private::Opaque,
-            #(#lifetime_fields,)*
-        }
+        #extern_type_def
 
         unsafe impl #generics ::cxx::ExternType for #ident #generics {
             type Id = #type_id;
@@ -611,22 +632,26 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         }
     };
     let mut dispatch = quote!(#setup #expr);
+    let visibility = efn.visibility;
     let unsafety = &efn.sig.unsafety;
     if unsafety.is_none() {
         dispatch = quote!(unsafe { #dispatch });
     }
+    let fn_token = efn.sig.fn_token;
     let ident = &efn.name.rust;
     let generics = &efn.generics;
+    let arg_list = quote_spanned!(efn.sig.paren_token.span=> (#(#all_args,)*));
+    let fn_body = quote_spanned!(efn.semi_token.span=> {
+        extern "C" {
+            #decl
+        }
+        #trampolines
+        #dispatch
+    });
     let function_shim = quote! {
         #doc
         #attrs
-        pub #unsafety fn #ident #generics(#(#all_args,)*) #ret {
-            extern "C" {
-                #decl
-            }
-            #trampolines
-            #dispatch
-        }
+        #visibility #unsafety #fn_token #ident #generics #arg_list #ret #fn_body
     };
     match &efn.receiver {
         None => function_shim,
@@ -998,13 +1023,18 @@ fn expand_rust_function_shim_super(
 fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
     let doc = &alias.doc;
     let attrs = &alias.attrs;
+    let visibility = alias.visibility;
+    let type_token = alias.type_token;
     let ident = &alias.name.rust;
     let generics = &alias.generics;
+    let eq_token = alias.eq_token;
     let ty = &alias.ty;
+    let semi_token = alias.semi_token;
+
     quote! {
         #doc
         #attrs
-        pub type #ident #generics = #ty;
+        #visibility #type_token #ident #generics #eq_token #ty #semi_token
     }
 }
 
