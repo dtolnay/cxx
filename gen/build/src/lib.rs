@@ -206,7 +206,6 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
     let ref prj = Project::init()?;
     validate_cfg(prj)?;
     let this_crate = make_this_crate(prj)?;
-    this_crate.print_to_cargo();
 
     let mut build = Build::new();
     build.cpp(true);
@@ -216,6 +215,7 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
         generate_bridge(prj, &mut build, path.as_ref())?;
     }
 
+    this_crate.print_to_cargo();
     eprintln!("\nCXX include path:");
     for header_dir in this_crate.header_dirs {
         build.include(&header_dir.path);
