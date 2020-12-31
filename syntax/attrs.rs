@@ -2,7 +2,8 @@ use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::{self, *};
 use crate::syntax::{Derive, Doc};
-use proc_macro2::Ident;
+use proc_macro2::{Ident, TokenStream};
+use quote::ToTokens;
 use syn::parse::{ParseStream, Parser as _};
 use syn::{Attribute, Error, LitStr, Path, Result, Token};
 
@@ -12,9 +13,9 @@ use syn::{Attribute, Error, LitStr, Path, Result, Token};
 //     let mut cxx_name = None;
 //     let mut rust_name = None;
 //     /* ... */
-//     attrs::parse(
+//     let attrs = attrs::parse(
 //         cx,
-//         &item.attrs,
+//         item.attrs,
 //         attrs::Parser {
 //             doc: Some(&mut doc),
 //             cxx_name: Some(&mut cxx_name),
@@ -39,7 +40,8 @@ pub struct Parser<'a> {
     pub(crate) _more: (),
 }
 
-pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
+pub(super) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> OtherAttrs {
+    let mut passthrough_attrs = Vec::new();
     for attr in attrs {
         if attr.path.is_ident("doc") {
             match parse_doc_attribute.parse2(attr.tokens.clone()) {
@@ -49,7 +51,10 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
                         continue;
                     }
                 }
-                Err(err) => return cx.push(err),
+                Err(err) => {
+                    cx.push(err);
+                    break;
+                }
             }
         } else if attr.path.is_ident("derive") {
             match attr.parse_args_with(|attr: ParseStream| parse_derive_attribute(cx, attr)) {
@@ -59,7 +64,10 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
                         continue;
                     }
                 }
-                Err(err) => return cx.push(err),
+                Err(err) => {
+                    cx.push(err);
+                    break;
+                }
             }
         } else if attr.path.is_ident("repr") {
             match attr.parse_args_with(parse_repr_attribute) {
@@ -69,7 +77,10 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
                         continue;
                     }
                 }
-                Err(err) => return cx.push(err),
+                Err(err) => {
+                    cx.push(err);
+                    break;
+                }
             }
         } else if attr.path.is_ident("namespace") {
             match parse_namespace_attribute.parse2(attr.tokens.clone()) {
@@ -79,7 +90,10 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
                         continue;
                     }
                 }
-                Err(err) => return cx.push(err),
+                Err(err) => {
+                    cx.push(err);
+                    break;
+                }
             }
         } else if attr.path.is_ident("cxx_name") {
             match parse_function_alias_attribute.parse2(attr.tokens.clone()) {
@@ -89,7 +103,10 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
                         continue;
                     }
                 }
-                Err(err) => return cx.push(err),
+                Err(err) => {
+                    cx.push(err);
+                    break;
+                }
             }
         } else if attr.path.is_ident("rust_name") {
             match parse_function_alias_attribute.parse2(attr.tokens.clone()) {
@@ -99,11 +116,24 @@ pub(super) fn parse(cx: &mut Errors, attrs: &[Attribute], mut parser: Parser) {
                         continue;
                     }
                 }
-                Err(err) => return cx.push(err),
+                Err(err) => {
+                    cx.push(err);
+                    break;
+                }
             }
+        } else if attr.path.is_ident("allow")
+            || attr.path.is_ident("warn")
+            || attr.path.is_ident("deny")
+            || attr.path.is_ident("forbid")
+        {
+            // https://doc.rust-lang.org/reference/attributes/diagnostics.html#lint-check-attributes
+            passthrough_attrs.push(attr);
+            continue;
         }
-        return cx.error(attr, "unsupported attribute");
+        cx.error(attr, "unsupported attribute");
+        break;
     }
+    OtherAttrs(passthrough_attrs)
 }
 
 fn parse_doc_attribute(input: ParseStream) -> Result<LitStr> {
@@ -158,5 +188,21 @@ fn parse_function_alias_attribute(input: ParseStream) -> Result<Ident> {
         lit.parse()
     } else {
         input.parse()
+    }
+}
+
+pub struct OtherAttrs(Vec<Attribute>);
+
+impl OtherAttrs {
+    pub fn none() -> Self {
+        OtherAttrs(Vec::new())
+    }
+}
+
+impl ToTokens for OtherAttrs {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        for attr in &self.0 {
+            attr.to_tokens(tokens);
+        }
     }
 }

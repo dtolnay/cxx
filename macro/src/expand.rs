@@ -153,13 +153,15 @@ fn expand(ffi: Module, apis: &[Api], types: &Types) -> TokenStream {
 fn expand_struct(strct: &Struct) -> TokenStream {
     let ident = &strct.name.rust;
     let doc = &strct.doc;
+    let attrs = &strct.attrs;
     let type_id = type_id(&strct.name);
     let fields = strct.fields.iter().map(|field| {
         let doc = &field.doc;
+        let attrs = &field.attrs;
         // This span on the pub makes "private type in public interface" errors
         // appear in the right place.
         let vis = field.visibility;
-        quote!(#doc #vis #field)
+        quote!(#doc #attrs #vis #field)
     });
     let mut derives = None;
     let derived_traits = derive::expand_struct(strct, &mut derives);
@@ -175,6 +177,7 @@ fn expand_struct(strct: &Struct) -> TokenStream {
 
     quote! {
         #doc
+        #attrs
         #derives
         #[repr(C)]
         #struct_def
@@ -285,14 +288,17 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
 fn expand_enum(enm: &Enum) -> TokenStream {
     let ident = &enm.name.rust;
     let doc = &enm.doc;
+    let attrs = &enm.attrs;
     let repr = enm.repr;
     let type_id = type_id(&enm.name);
     let variants = enm.variants.iter().map(|variant| {
         let doc = &variant.doc;
+        let attrs = &variant.attrs;
         let variant_ident = &variant.name.rust;
         let discriminant = &variant.discriminant;
         Some(quote! {
             #doc
+            #attrs
             pub const #variant_ident: Self = #ident { repr: #discriminant };
         })
     });
@@ -301,6 +307,7 @@ fn expand_enum(enm: &Enum) -> TokenStream {
 
     quote! {
         #doc
+        #attrs
         #derives
         #[repr(transparent)]
         pub struct #ident {
@@ -325,6 +332,7 @@ fn expand_enum(enm: &Enum) -> TokenStream {
 fn expand_cxx_type(ety: &ExternType) -> TokenStream {
     let ident = &ety.name.rust;
     let doc = &ety.doc;
+    let attrs = &ety.attrs;
     let generics = &ety.generics;
     let type_id = type_id(&ety.name);
 
@@ -335,6 +343,7 @@ fn expand_cxx_type(ety: &ExternType) -> TokenStream {
 
     quote! {
         #doc
+        #attrs
         #[repr(C)]
         pub struct #ident #generics {
             _private: ::cxx::private::Opaque,
@@ -423,6 +432,7 @@ fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
 
 fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let doc = &efn.doc;
+    let attrs = &efn.attrs;
     let decl = expand_cxx_function_decl(efn, types);
     let receiver = efn.receiver.iter().map(|receiver| {
         let var = receiver.var;
@@ -600,6 +610,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let generics = &efn.generics;
     let function_shim = quote! {
         #doc
+        #attrs
         pub #unsafety fn #ident #generics(#(#all_args,)*) #ret {
             extern "C" {
                 #decl
@@ -977,11 +988,13 @@ fn expand_rust_function_shim_super(
 
 fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
     let doc = &alias.doc;
+    let attrs = &alias.attrs;
     let ident = &alias.name.rust;
     let generics = &alias.generics;
     let ty = &alias.ty;
     quote! {
         #doc
+        #attrs
         pub type #ident #generics = #ty;
     }
 }

@@ -51,6 +51,7 @@ fn sort_by_inner_namespace(apis: Vec<&Api>, depth: usize) -> NamespaceEntries {
 #[cfg(test)]
 mod tests {
     use super::NamespaceEntries;
+    use crate::syntax::attrs::OtherAttrs;
     use crate::syntax::namespace::Namespace;
     use crate::syntax::{Api, Doc, ExternType, Lang, Lifetimes, Pair};
     use proc_macro2::{Ident, Span};
@@ -131,6 +132,7 @@ mod tests {
             lang: Lang::Rust,
             doc: Doc::new(),
             derives: Vec::new(),
+            attrs: OtherAttrs::none(),
             type_token: Token![type](Span::call_site()),
             name: Pair {
                 namespace: ns,

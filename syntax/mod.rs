@@ -1,7 +1,7 @@
 // Functionality that is shared between the cxxbridge macro and the cmd.
 
 pub mod atom;
-mod attrs;
+pub mod attrs;
 pub mod check;
 pub mod derive;
 mod discriminant;
@@ -25,6 +25,7 @@ mod toposort;
 pub mod trivial;
 pub mod types;
 
+use self::attrs::OtherAttrs;
 use self::discriminant::Discriminant;
 use self::namespace::Namespace;
 use self::parse::kw;
@@ -72,6 +73,7 @@ pub struct ExternType {
     pub lang: Lang,
     pub doc: Doc,
     pub derives: Vec<Derive>,
+    pub attrs: OtherAttrs,
     pub type_token: Token![type],
     pub name: Pair,
     pub generics: Lifetimes,
@@ -84,6 +86,7 @@ pub struct ExternType {
 pub struct Struct {
     pub doc: Doc,
     pub derives: Vec<Derive>,
+    pub attrs: OtherAttrs,
     pub visibility: Token![pub],
     pub struct_token: Token![struct],
     pub name: Pair,
@@ -94,6 +97,7 @@ pub struct Struct {
 pub struct Enum {
     pub doc: Doc,
     pub derives: Vec<Derive>,
+    pub attrs: OtherAttrs,
     pub enum_token: Token![enum],
     pub name: Pair,
     pub brace_token: Brace,
@@ -106,6 +110,7 @@ pub struct Enum {
 pub struct ExternFn {
     pub lang: Lang,
     pub doc: Doc,
+    pub attrs: OtherAttrs,
     pub name: Pair,
     pub sig: Signature,
     pub semi_token: Token![;],
@@ -115,6 +120,7 @@ pub struct ExternFn {
 pub struct TypeAlias {
     pub doc: Doc,
     pub derives: Vec<Derive>,
+    pub attrs: OtherAttrs,
     pub type_token: Token![type],
     pub name: Pair,
     pub generics: Lifetimes,
@@ -151,6 +157,7 @@ pub struct Signature {
 
 pub struct Var {
     pub doc: Doc,
+    pub attrs: OtherAttrs,
     pub visibility: Token![pub],
     pub ident: Ident,
     pub ty: Type,
@@ -170,6 +177,7 @@ pub struct Receiver {
 
 pub struct Variant {
     pub doc: Doc,
+    pub attrs: OtherAttrs,
     pub name: Pair,
     pub discriminant: Discriminant,
     pub expr: Option<Expr>,
