@@ -64,9 +64,9 @@ where
 
     /// Returns a pinned mutable reference to an element at the given position,
     /// or `None` if out of bounds.
-    pub fn get_mut(self: Pin<&mut Self>, pos: usize) -> Option<Pin<&mut T>> {
+    pub fn index_mut(self: Pin<&mut Self>, pos: usize) -> Option<Pin<&mut T>> {
         if pos < self.len() {
-            Some(unsafe { CxxVector::get_unchecked_mut(self, pos) })
+            Some(unsafe { self.index_unchecked_mut(pos) })
         } else {
             None
         }
@@ -99,8 +99,8 @@ where
     /// [std::vector\<T\>::operator\[\]][operator_at].
     ///
     /// [operator_at]: https://en.cppreference.com/w/cpp/container/vector/operator_at
-    pub unsafe fn get_unchecked_mut(self: Pin<&mut Self>, pos: usize) -> Pin<&mut T> {
-        let ptr = T::__get_unchecked(Pin::get_unchecked_mut(self), pos);
+    pub unsafe fn index_unchecked_mut(self: Pin<&mut Self>, pos: usize) -> Pin<&mut T> {
+        let ptr = T::__get_unchecked(self.get_unchecked_mut(), pos);
         Pin::new_unchecked(&mut *ptr)
     }
 
@@ -212,7 +212,7 @@ where
     type Item = Pin<&'a mut T>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let next = CxxVector::get_mut(self.v.as_mut(), self.index)?;
+        let next = self.v.as_mut().index_mut(self.index)?;
         self.index += 1;
         // Extend lifetime to allow simultaneous holding of nonoverlapping
         // elements, analogous to slice::split_first_mut.
