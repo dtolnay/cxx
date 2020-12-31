@@ -9,6 +9,7 @@ use crate::syntax::{
 };
 use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
+use std::mem;
 use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::{
@@ -55,7 +56,8 @@ pub fn parse_items(
     apis
 }
 
-fn parse_struct(cx: &mut Errors, item: ItemStruct, namespace: &Namespace) -> Result<Api> {
+fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) -> Result<Api> {
+    let attrs = mem::take(&mut item.attrs);
     let mut doc = Doc::new();
     let mut derives = Vec::new();
     let mut namespace = namespace.clone();
@@ -63,7 +65,7 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct, namespace: &Namespace) -> Res
     let mut rust_name = None;
     attrs::parse(
         cx,
-        &item.attrs,
+        attrs,
         attrs::Parser {
             doc: Some(&mut doc),
             derives: Some(&mut derives),
@@ -100,7 +102,7 @@ fn parse_struct(cx: &mut Errors, item: ItemStruct, namespace: &Namespace) -> Res
         let mut doc = Doc::new();
         attrs::parse(
             cx,
-            &field.attrs,
+            field.attrs,
             attrs::Parser {
                 doc: Some(&mut doc),
                 ..Default::default()
@@ -157,7 +159,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
     let mut rust_name = None;
     attrs::parse(
         cx,
-        &item.attrs,
+        item.attrs,
         attrs::Parser {
             doc: Some(&mut doc),
             derives: Some(&mut derives),
@@ -223,15 +225,16 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
 
 fn parse_variant(
     cx: &mut Errors,
-    variant: RustVariant,
+    mut variant: RustVariant,
     discriminants: &mut DiscriminantSet,
 ) -> Result<Variant> {
+    let attrs = mem::take(&mut variant.attrs);
     let mut doc = Doc::new();
     let mut cxx_name = None;
     let mut rust_name = None;
     attrs::parse(
         cx,
-        &variant.attrs,
+        attrs,
         attrs::Parser {
             doc: Some(&mut doc),
             cxx_name: Some(&mut cxx_name),
@@ -298,7 +301,7 @@ fn parse_foreign_mod(
     let mut namespace = namespace.clone();
     attrs::parse(
         cx,
-        &foreign_mod.attrs,
+        foreign_mod.attrs,
         attrs::Parser {
             namespace: Some(&mut namespace),
             ..Default::default()
@@ -306,7 +309,7 @@ fn parse_foreign_mod(
     );
 
     let mut items = Vec::new();
-    for foreign in &foreign_mod.items {
+    for foreign in foreign_mod.items {
         match foreign {
             ForeignItem::Type(foreign) => {
                 let ety = parse_extern_type(cx, foreign, lang, trusted, &namespace);
@@ -390,7 +393,7 @@ fn parse_lang(abi: &Abi) -> Result<Lang> {
 
 fn parse_extern_type(
     cx: &mut Errors,
-    foreign_type: &ForeignItemType,
+    foreign_type: ForeignItemType,
     lang: Lang,
     trusted: bool,
     namespace: &Namespace,
@@ -402,7 +405,7 @@ fn parse_extern_type(
     let mut rust_name = None;
     attrs::parse(
         cx,
-        &foreign_type.attrs,
+        foreign_type.attrs,
         attrs::Parser {
             doc: Some(&mut doc),
             derives: Some(&mut derives),
@@ -443,18 +446,19 @@ fn parse_extern_type(
 
 fn parse_extern_fn(
     cx: &mut Errors,
-    foreign_fn: &ForeignItemFn,
+    mut foreign_fn: ForeignItemFn,
     lang: Lang,
     trusted: bool,
     namespace: &Namespace,
 ) -> Result<Api> {
+    let attrs = mem::take(&mut foreign_fn.attrs);
     let mut doc = Doc::new();
     let mut namespace = namespace.clone();
     let mut cxx_name = None;
     let mut rust_name = None;
     attrs::parse(
         cx,
-        &foreign_fn.attrs,
+        attrs,
         attrs::Parser {
             doc: Some(&mut doc),
             namespace: Some(&mut namespace),
@@ -606,7 +610,7 @@ fn parse_extern_fn(
 
 fn parse_extern_verbatim(
     cx: &mut Errors,
-    tokens: &TokenStream,
+    tokens: TokenStream,
     lang: Lang,
     trusted: bool,
     namespace: &Namespace,
@@ -675,7 +679,7 @@ fn parse_extern_verbatim(
             Err(lookahead.error())
         }
     }
-    .parse2(tokens.clone())
+    .parse2(tokens)
 }
 
 fn parse_type_alias(
@@ -699,7 +703,7 @@ fn parse_type_alias(
     let mut rust_name = None;
     attrs::parse(
         cx,
-        &attrs,
+        attrs,
         attrs::Parser {
             doc: Some(&mut doc),
             derives: Some(&mut derives),
@@ -781,7 +785,7 @@ fn parse_extern_type_bounded(
     let mut rust_name = None;
     attrs::parse(
         cx,
-        &attrs,
+        attrs,
         attrs::Parser {
             doc: Some(&mut doc),
             derives: Some(&mut derives),
