@@ -255,7 +255,6 @@ pub struct Pair {
 // Wrapper for a type which needs to be resolved before it can be printed in
 // C++.
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-#[repr(transparent)]
 pub struct RustName {
     pub rust: Ident,
 }

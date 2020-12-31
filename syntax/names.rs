@@ -26,10 +26,6 @@ impl RustName {
         RustName { rust }
     }
 
-    pub fn from_ref(rust: &Ident) -> &Self {
-        unsafe { &*(rust as *const Ident as *const Self) }
-    }
-
     pub fn span(&self) -> Span {
         self.rust.span()
     }
