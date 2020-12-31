@@ -314,15 +314,25 @@ fn expand_enum(enm: &Enum) -> TokenStream {
     let mut derives = None;
     let derived_traits = derive::expand_enum(enm, &mut derives);
 
+    let span = ident.span();
+    let visibility = enm.visibility;
+    let struct_token = Token![struct](enm.enum_token.span);
+    let enum_repr = quote! {
+        #[allow(missing_docs)]
+        pub repr: #repr,
+    };
+    let enum_def = quote_spanned! {span=>
+        #visibility #struct_token #ident {
+            #enum_repr
+        }
+    };
+
     quote! {
         #doc
         #attrs
         #derives
         #[repr(transparent)]
-        pub struct #ident {
-            #[allow(missing_docs)]
-            pub repr: #repr,
-        }
+        #enum_def
 
         #[allow(non_upper_case_globals)]
         impl #ident {

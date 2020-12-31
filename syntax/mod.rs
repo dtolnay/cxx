@@ -98,6 +98,7 @@ pub struct Enum {
     pub doc: Doc,
     pub derives: Vec<Derive>,
     pub attrs: OtherAttrs,
+    pub visibility: Token![pub],
     pub enum_token: Token![enum],
     pub name: Pair,
     pub brace_token: Brace,

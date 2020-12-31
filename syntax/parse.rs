@@ -194,6 +194,12 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
         }
     }
 
+    let visibility = Token![pub](match item.vis {
+        Visibility::Public(vis) => vis.pub_token.span,
+        Visibility::Crate(vis) => vis.crate_token.span,
+        Visibility::Restricted(vis) => vis.pub_token.span,
+        Visibility::Inherited => item.ident.span(),
+    });
     let enum_token = item.enum_token;
     let brace_token = item.brace_token;
 
@@ -216,6 +222,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
         doc,
         derives,
         attrs,
+        visibility,
         enum_token,
         name,
         brace_token,
