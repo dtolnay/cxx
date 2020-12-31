@@ -233,6 +233,9 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
     writeln!(out, "struct {} final {{", strct.name.cxx);
 
     for field in &strct.fields {
+        for line in field.doc.to_string().lines() {
+            writeln!(out, "  //{}", line);
+        }
         write!(out, "  ");
         write_type_space(out, &field.ty);
         writeln!(out, "{};", field.ident);
