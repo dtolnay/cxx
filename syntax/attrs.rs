@@ -13,9 +13,9 @@ use syn::{Attribute, Error, LitStr, Path, Result, Token};
 //     let mut cxx_name = None;
 //     let mut rust_name = None;
 //     /* ... */
-//     attrs::parse(
+//     let attrs = attrs::parse(
 //         cx,
-//         &item.attrs,
+//         item.attrs,
 //         attrs::Parser {
 //             doc: Some(&mut doc),
 //             cxx_name: Some(&mut cxx_name),
