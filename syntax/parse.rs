@@ -116,11 +116,12 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
             }
         };
         let visibility = visibility_pub(&field.vis, &ident);
+        let name = pair(Namespace::default(), &ident, None, None);
         fields.push(Var {
             doc,
             attrs,
             visibility,
-            ident,
+            name,
             ty,
         });
     }
@@ -541,11 +542,12 @@ fn parse_extern_fn(
                     let doc = Doc::new();
                     let attrs = OtherAttrs::none();
                     let visibility = Token![pub](ident.span());
+                    let name = pair(Namespace::default(), &ident, None, None);
                     args.push_value(Var {
                         doc,
                         attrs,
                         visibility,
-                        ident,
+                        name,
                         ty,
                     });
                     if let Some(comma) = comma {
@@ -1177,11 +1179,12 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
             let doc = Doc::new();
             let attrs = OtherAttrs::none();
             let visibility = Token![pub](ident.span());
+            let name = pair(Namespace::default(), &ident, None, None);
             Ok(Var {
                 doc,
                 attrs,
                 visibility,
-                ident,
+                name,
                 ty,
             })
         })

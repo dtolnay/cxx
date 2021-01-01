@@ -26,7 +26,7 @@ pub(crate) fn check_all(cx: &mut Check, apis: &[Api]) {
             Api::Struct(strct) => {
                 check_ident(cx, &strct.name);
                 for field in &strct.fields {
-                    check(cx, &field.ident);
+                    check_ident(cx, &field.name);
                 }
             }
             Api::Enum(enm) => {
@@ -41,7 +41,7 @@ pub(crate) fn check_all(cx: &mut Check, apis: &[Api]) {
             Api::CxxFunction(efn) | Api::RustFunction(efn) => {
                 check(cx, &efn.name.rust);
                 for arg in &efn.args {
-                    check(cx, &arg.ident);
+                    check_ident(cx, &arg.name);
                 }
             }
             Api::TypeAlias(alias) => {

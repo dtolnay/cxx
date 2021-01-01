@@ -167,7 +167,7 @@ pub struct Var {
     pub doc: Doc,
     pub attrs: OtherAttrs,
     pub visibility: Token![pub],
-    pub ident: Ident,
+    pub name: Pair,
     pub ty: Type,
 }
 

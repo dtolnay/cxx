@@ -104,9 +104,9 @@ fn struct_clone(strct: &Struct, span: Span) -> TokenStream {
     let body = if derive::contains(&strct.derives, Trait::Copy) {
         quote!(*self)
     } else {
-        let fields = strct.fields.iter().map(|field| &field.ident);
+        let fields = strct.fields.iter().map(|field| &field.name.rust);
         let values = strct.fields.iter().map(|field| {
-            let ident = &field.ident;
+            let ident = &field.name.rust;
             let ty = field.ty.to_token_stream();
             let span = ty.into_iter().last().unwrap().span();
             quote_spanned!(span=> &self.#ident)
@@ -128,7 +128,7 @@ fn struct_clone(strct: &Struct, span: Span) -> TokenStream {
 fn struct_debug(strct: &Struct, span: Span) -> TokenStream {
     let ident = &strct.name.rust;
     let struct_name = ident.to_string();
-    let fields = strct.fields.iter().map(|field| &field.ident);
+    let fields = strct.fields.iter().map(|field| &field.name.rust);
     let field_names = fields.clone().map(Ident::to_string);
 
     quote_spanned! {span=>
@@ -144,7 +144,7 @@ fn struct_debug(strct: &Struct, span: Span) -> TokenStream {
 
 fn struct_default(strct: &Struct, span: Span) -> TokenStream {
     let ident = &strct.name.rust;
-    let fields = strct.fields.iter().map(|field| &field.ident);
+    let fields = strct.fields.iter().map(|field| &field.name.rust);
 
     quote_spanned! {span=>
         impl ::std::default::Default for #ident {
@@ -161,7 +161,7 @@ fn struct_default(strct: &Struct, span: Span) -> TokenStream {
 
 fn struct_ord(strct: &Struct, span: Span) -> TokenStream {
     let ident = &strct.name.rust;
-    let fields = strct.fields.iter().map(|field| &field.ident);
+    let fields = strct.fields.iter().map(|field| &field.name.rust);
 
     quote_spanned! {span=>
         impl ::std::cmp::Ord for #ident {
@@ -186,7 +186,7 @@ fn struct_partial_ord(strct: &Struct, span: Span) -> TokenStream {
             ::std::option::Option::Some(::std::cmp::Ord::cmp(self, other))
         }
     } else {
-        let fields = strct.fields.iter().map(|field| &field.ident);
+        let fields = strct.fields.iter().map(|field| &field.name.rust);
         quote! {
             #(
                 match ::std::cmp::PartialOrd::partial_cmp(&self.#fields, &other.#fields) {

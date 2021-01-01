@@ -41,11 +41,11 @@ impl ToTokens for Var {
             doc: _,
             attrs: _,
             visibility: _,
-            ident,
+            name,
             ty,
         } = self;
-        ident.to_tokens(tokens);
-        Token![:](ident.span()).to_tokens(tokens);
+        name.rust.to_tokens(tokens);
+        Token![:](name.rust.span()).to_tokens(tokens);
         ty.to_tokens(tokens);
     }
 }
