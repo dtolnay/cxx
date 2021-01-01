@@ -1,4 +1,4 @@
-use crate::syntax::{Lifetimes, Pair, RustName, Symbol, Types};
+use crate::syntax::{Lifetimes, Pair, RustName, Symbol};
 use proc_macro2::{Ident, Span};
 use std::iter;
 use syn::punctuated::Punctuated;
@@ -34,9 +34,5 @@ impl RustName {
 
     pub fn span(&self) -> Span {
         self.rust.span()
-    }
-
-    pub fn to_symbol(&self, types: &Types) -> Symbol {
-        types.resolve(self).to_symbol()
     }
 }

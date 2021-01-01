@@ -1315,7 +1315,7 @@ trait ToMangled {
 
 impl ToMangled for RustName {
     fn to_mangled(&self, types: &Types) -> Symbol {
-        self.to_symbol(types)
+        types.resolve(self).to_symbol()
     }
 }
 
@@ -1726,9 +1726,9 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
 }
 
 fn write_shared_ptr(out: &mut OutFile, ident: &RustName) {
-    let resolved = out.types.resolve(ident);
-    let inner = resolved.to_fully_qualified();
-    let instance = ident.to_symbol(out.types);
+    let resolve = out.types.resolve(ident);
+    let inner = resolve.to_fully_qualified();
+    let instance = resolve.to_symbol();
 
     out.include.new = true;
     out.include.utility = true;
@@ -1798,9 +1798,9 @@ fn write_shared_ptr(out: &mut OutFile, ident: &RustName) {
 }
 
 fn write_weak_ptr(out: &mut OutFile, ident: &RustName) {
-    let resolved = out.types.resolve(ident);
-    let inner = resolved.to_fully_qualified();
-    let instance = ident.to_symbol(out.types);
+    let resolve = out.types.resolve(ident);
+    let inner = resolve.to_fully_qualified();
+    let instance = resolve.to_symbol();
 
     out.include.new = true;
     out.include.utility = true;
