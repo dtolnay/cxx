@@ -3,13 +3,14 @@ use crate::gen::nested::NamespaceEntries;
 use crate::gen::out::OutFile;
 use crate::gen::{builtin, include, Opt};
 use crate::syntax::atom::Atom::{self, *};
+use crate::syntax::instantiate::ImplKey;
 use crate::syntax::map::UnorderedMap as Map;
 use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::{
-    derive, mangle, Api, Enum, ExternFn, ExternType, NamedType, Pair, Signature, Struct, Trait,
-    Type, TypeAlias, Types, Var,
+    derive, mangle, Api, Enum, ExternFn, ExternType, Pair, Signature, Struct, Trait, Type,
+    TypeAlias, Types, Var,
 };
 use proc_macro2::Ident;
 
@@ -1284,15 +1285,15 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
 
 #[derive(Copy, Clone)]
 enum UniquePtr<'a> {
-    Ident(&'a NamedType),
-    CxxVector(&'a NamedType),
+    Ident(&'a Ident),
+    CxxVector(&'a Ident),
 }
 
 trait ToTypename {
     fn to_typename(&self, types: &Types) -> String;
 }
 
-impl ToTypename for NamedType {
+impl ToTypename for Ident {
     fn to_typename(&self, types: &Types) -> String {
         types.resolve(self).to_fully_qualified()
     }
@@ -1313,7 +1314,7 @@ trait ToMangled {
     fn to_mangled(&self, types: &Types) -> Symbol;
 }
 
-impl ToMangled for NamedType {
+impl ToMangled for Ident {
     fn to_mangled(&self, types: &Types) -> Symbol {
         types.resolve(self).to_symbol()
     }
@@ -1336,109 +1337,36 @@ fn write_generic_instantiations(out: &mut OutFile) {
     out.next_section();
     out.set_namespace(Default::default());
     out.begin_block(Block::ExternC);
-    for ty in out.types {
-        let impl_key = match ty.impl_key() {
-            Some(impl_key) => impl_key,
-            None => continue,
-        };
-        if let Type::RustBox(ptr) = ty {
-            if let Type::Ident(inner) = &ptr.inner {
-                if Atom::from(&inner.rust).is_none()
-                    && (!out.types.aliases.contains_key(&inner.rust)
-                        || out.types.explicit_impls.contains_key(&impl_key))
-                {
-                    out.next_section();
-                    write_rust_box_extern(out, &out.types.resolve(&inner));
-                }
-            }
-        } else if let Type::RustVec(vec) = ty {
-            if let Type::Ident(inner) = &vec.inner {
-                if Atom::from(&inner.rust).is_none()
-                    && (!out.types.aliases.contains_key(&inner.rust)
-                        || out.types.explicit_impls.contains_key(&impl_key))
-                {
-                    out.next_section();
-                    write_rust_vec_extern(out, inner);
-                }
-            }
-        } else if let Type::UniquePtr(ptr) = ty {
-            if let Type::Ident(inner) = &ptr.inner {
-                if Atom::from(&inner.rust).is_none()
-                    && (!out.types.aliases.contains_key(&inner.rust)
-                        || out.types.explicit_impls.contains_key(&impl_key))
-                {
-                    out.next_section();
-                    write_unique_ptr(out, inner);
-                }
-            }
-        } else if let Type::SharedPtr(ptr) = ty {
-            if let Type::Ident(inner) = &ptr.inner {
-                if Atom::from(&inner.rust).is_none()
-                    && (!out.types.aliases.contains_key(&inner.rust)
-                        || out.types.explicit_impls.contains_key(&impl_key))
-                {
-                    out.next_section();
-                    write_shared_ptr(out, inner);
-                }
-            }
-        } else if let Type::WeakPtr(ptr) = ty {
-            if let Type::Ident(inner) = &ptr.inner {
-                if Atom::from(&inner.rust).is_none()
-                    && (!out.types.aliases.contains_key(&inner.rust)
-                        || out.types.explicit_impls.contains_key(&impl_key))
-                {
-                    out.next_section();
-                    write_weak_ptr(out, inner);
-                }
-            }
-        } else if let Type::CxxVector(vector) = ty {
-            if let Type::Ident(inner) = &vector.inner {
-                if Atom::from(&inner.rust).is_none()
-                    && (!out.types.aliases.contains_key(&inner.rust)
-                        || out.types.explicit_impls.contains_key(&impl_key))
-                {
-                    out.next_section();
-                    write_cxx_vector(out, inner);
-                }
-            }
+    for impl_key in out.types.impls.keys() {
+        out.next_section();
+        match impl_key {
+            ImplKey::RustBox(ident) => write_rust_box_extern(out, ident),
+            ImplKey::RustVec(ident) => write_rust_vec_extern(out, ident),
+            ImplKey::UniquePtr(ident) => write_unique_ptr(out, ident),
+            ImplKey::SharedPtr(ident) => write_shared_ptr(out, ident),
+            ImplKey::WeakPtr(ident) => write_weak_ptr(out, ident),
+            ImplKey::CxxVector(ident) => write_cxx_vector(out, ident),
         }
     }
     out.end_block(Block::ExternC);
 
     out.begin_block(Block::Namespace("rust"));
     out.begin_block(Block::InlineNamespace("cxxbridge1"));
-    for ty in out.types {
-        let impl_key = match ty.impl_key() {
-            Some(impl_key) => impl_key,
-            None => continue,
-        };
-        if let Type::RustBox(ptr) = ty {
-            if let Type::Ident(inner) = &ptr.inner {
-                if Atom::from(&inner.rust).is_none()
-                    && (!out.types.aliases.contains_key(&inner.rust)
-                        || out.types.explicit_impls.contains_key(&impl_key))
-                {
-                    write_rust_box_impl(out, &out.types.resolve(&inner));
-                }
-            }
-        } else if let Type::RustVec(vec) = ty {
-            if let Type::Ident(inner) = &vec.inner {
-                if Atom::from(&inner.rust).is_none()
-                    && (!out.types.aliases.contains_key(&inner.rust)
-                        || out.types.explicit_impls.contains_key(&impl_key))
-                {
-                    write_rust_vec_impl(out, inner);
-                }
-            }
+    for impl_key in out.types.impls.keys() {
+        match impl_key {
+            ImplKey::RustBox(ident) => write_rust_box_impl(out, ident),
+            ImplKey::RustVec(ident) => write_rust_vec_impl(out, ident),
+            _ => {}
         }
     }
     out.end_block(Block::InlineNamespace("cxxbridge1"));
     out.end_block(Block::Namespace("rust"));
 }
 
-fn write_rust_box_extern(out: &mut OutFile, ident: &Pair) {
-    let inner = ident.to_fully_qualified();
-    let instance = ident.to_symbol();
+fn write_rust_box_extern(out: &mut OutFile, ident: &Ident) {
+    let resolve = out.types.resolve(ident);
+    let inner = resolve.to_fully_qualified();
+    let instance = resolve.to_symbol();
 
     writeln!(
         out,
@@ -1457,7 +1385,7 @@ fn write_rust_box_extern(out: &mut OutFile, ident: &Pair) {
     );
 }
 
-fn write_rust_vec_extern(out: &mut OutFile, element: &NamedType) {
+fn write_rust_vec_extern(out: &mut OutFile, element: &Ident) {
     let inner = element.to_typename(out.types);
     let instance = element.to_mangled(out.types);
 
@@ -1500,9 +1428,10 @@ fn write_rust_vec_extern(out: &mut OutFile, element: &NamedType) {
     );
 }
 
-fn write_rust_box_impl(out: &mut OutFile, ident: &Pair) {
-    let inner = ident.to_fully_qualified();
-    let instance = ident.to_symbol();
+fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
+    let resolve = out.types.resolve(ident);
+    let inner = resolve.to_fully_qualified();
+    let instance = resolve.to_symbol();
 
     writeln!(out, "template <>");
     begin_function_definition(out);
@@ -1531,7 +1460,7 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Pair) {
     writeln!(out, "}}");
 }
 
-fn write_rust_vec_impl(out: &mut OutFile, element: &NamedType) {
+fn write_rust_vec_impl(out: &mut OutFile, element: &Ident) {
     let inner = element.to_typename(out.types);
     let instance = element.to_mangled(out.types);
 
@@ -1608,7 +1537,7 @@ fn write_rust_vec_impl(out: &mut OutFile, element: &NamedType) {
     writeln!(out, "}}");
 }
 
-fn write_unique_ptr(out: &mut OutFile, ident: &NamedType) {
+fn write_unique_ptr(out: &mut OutFile, ident: &Ident) {
     let ty = UniquePtr::Ident(ident);
     write_unique_ptr_common(out, ty);
 }
@@ -1626,17 +1555,16 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
         // bindings for a "new" method anyway. But the Rust code can't be called
         // for Opaque types because the 'new' method is not implemented.
         UniquePtr::Ident(ident) => {
-            out.types.structs.contains_key(&ident.rust)
-                || out.types.enums.contains_key(&ident.rust)
-                || out.types.aliases.contains_key(&ident.rust)
+            out.types.structs.contains_key(ident)
+                || out.types.enums.contains_key(ident)
+                || out.types.aliases.contains_key(ident)
         }
         UniquePtr::CxxVector(_) => false,
     };
 
     let conditional_delete = match ty {
         UniquePtr::Ident(ident) => {
-            !out.types.structs.contains_key(&ident.rust)
-                && !out.types.enums.contains_key(&ident.rust)
+            !out.types.structs.contains_key(ident) && !out.types.enums.contains_key(ident)
         }
         UniquePtr::CxxVector(_) => false,
     };
@@ -1725,7 +1653,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     writeln!(out, "}}");
 }
 
-fn write_shared_ptr(out: &mut OutFile, ident: &NamedType) {
+fn write_shared_ptr(out: &mut OutFile, ident: &Ident) {
     let resolve = out.types.resolve(ident);
     let inner = resolve.to_fully_qualified();
     let instance = resolve.to_symbol();
@@ -1737,9 +1665,9 @@ fn write_shared_ptr(out: &mut OutFile, ident: &NamedType) {
     // know at code generation time, so we generate both C++ and Rust side
     // bindings for a "new" method anyway. But the Rust code can't be called for
     // Opaque types because the 'new' method is not implemented.
-    let can_construct_from_value = out.types.structs.contains_key(&ident.rust)
-        || out.types.enums.contains_key(&ident.rust)
-        || out.types.aliases.contains_key(&ident.rust);
+    let can_construct_from_value = out.types.structs.contains_key(ident)
+        || out.types.enums.contains_key(ident)
+        || out.types.aliases.contains_key(ident);
 
     writeln!(
         out,
@@ -1797,7 +1725,7 @@ fn write_shared_ptr(out: &mut OutFile, ident: &NamedType) {
     writeln!(out, "}}");
 }
 
-fn write_weak_ptr(out: &mut OutFile, ident: &NamedType) {
+fn write_weak_ptr(out: &mut OutFile, ident: &Ident) {
     let resolve = out.types.resolve(ident);
     let inner = resolve.to_fully_qualified();
     let instance = resolve.to_symbol();
@@ -1856,7 +1784,7 @@ fn write_weak_ptr(out: &mut OutFile, ident: &NamedType) {
     writeln!(out, "}}");
 }
 
-fn write_cxx_vector(out: &mut OutFile, element: &NamedType) {
+fn write_cxx_vector(out: &mut OutFile, element: &Ident) {
     let inner = element.to_typename(out.types);
     let instance = element.to_mangled(out.types);
 
