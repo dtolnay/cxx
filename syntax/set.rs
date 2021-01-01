@@ -70,8 +70,8 @@ mod ordered {
 }
 
 mod unordered {
+    use fnv::FnvHashSet as HashSet;
     use std::borrow::Borrow;
-    use std::collections::HashSet;
     use std::hash::Hash;
 
     // Wrapper prohibits accidentally introducing iteration over the set, which
@@ -83,7 +83,7 @@ mod unordered {
         T: Hash + Eq,
     {
         pub fn new() -> Self {
-            UnorderedSet(HashSet::new())
+            UnorderedSet(HashSet::default())
         }
 
         pub fn insert(&mut self, value: T) -> bool {

@@ -15,6 +15,7 @@ categories = ["development-tools::ffi"]
 proc-macro = true
 
 [dependencies]
+fnv = "1.0"
 proc-macro2 = "1.0"
 quote = "1.0.4"
 syn = { version = "1.0.53", features = ["full"] }

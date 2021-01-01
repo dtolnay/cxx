@@ -40,6 +40,13 @@ rust_library(
 )
 
 rust_library(
+    name = "fnv",
+    srcs = ["vendor/fnv-1.0.7/lib.rs"],
+    visibility = ["//visibility:public"],
+    crate_features = ["std"],
+)
+
+rust_library(
     name = "lazy_static",
     srcs = glob(["vendor/lazy_static-1.4.0/src/**"]),
     visibility = ["//visibility:public"],

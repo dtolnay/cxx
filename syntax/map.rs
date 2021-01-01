@@ -7,8 +7,9 @@ pub use std::collections::hash_map::Entry;
 
 mod unordered {
     use crate::syntax::set::UnorderedSet;
+    use fnv::FnvHashMap as HashMap;
     use std::borrow::Borrow;
-    use std::collections::hash_map::{Entry, HashMap};
+    use std::collections::hash_map::Entry;
     use std::hash::Hash;
 
     // Wrapper prohibits accidentally introducing iteration over the map, which
@@ -17,7 +18,7 @@ mod unordered {
 
     impl<K, V> UnorderedMap<K, V> {
         pub fn new() -> Self {
-            UnorderedMap(HashMap::new())
+            UnorderedMap(HashMap::default())
         }
     }
 

@@ -19,6 +19,7 @@ rust_binary(
     deps = [
         "//third-party:clap",
         "//third-party:codespan-reporting",
+        "//third-party:fnv",
         "//third-party:proc-macro2",
         "//third-party:quote",
         "//third-party:syn",
@@ -44,6 +45,7 @@ rust_library(
     srcs = glob(["macro/src/**"]),
     crate_type = "proc-macro",
     deps = [
+        "//third-party:fnv",
         "//third-party:proc-macro2",
         "//third-party:quote",
         "//third-party:syn",
@@ -58,6 +60,7 @@ rust_library(
     deps = [
         "//third-party:cc",
         "//third-party:codespan-reporting",
+        "//third-party:fnv",
         "//third-party:lazy_static",
         "//third-party:proc-macro2",
         "//third-party:quote",
@@ -74,6 +77,7 @@ rust_library(
     deps = [
         "//third-party:cc",
         "//third-party:codespan-reporting",
+        "//third-party:fnv",
         "//third-party:proc-macro2",
         "//third-party:quote",
         "//third-party:syn",
