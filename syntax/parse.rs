@@ -100,11 +100,15 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
     for field in named_fields.named {
         let ident = field.ident.unwrap();
         let mut doc = Doc::new();
+        let mut cxx_name = None;
+        let mut rust_name = None;
         let attrs = attrs::parse(
             cx,
             field.attrs,
             attrs::Parser {
                 doc: Some(&mut doc),
+                cxx_name: Some(&mut cxx_name),
+                rust_name: Some(&mut rust_name),
                 ..Default::default()
             },
         );
@@ -116,7 +120,7 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
             }
         };
         let visibility = visibility_pub(&field.vis, &ident);
-        let name = pair(Namespace::default(), &ident, None, None);
+        let name = pair(Namespace::default(), &ident, cxx_name, rust_name);
         fields.push(Var {
             doc,
             attrs,
