@@ -1,7 +1,7 @@
 use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::{self, *};
-use crate::syntax::{Derive, Doc};
+use crate::syntax::{Derive, Doc, ForeignName};
 use proc_macro2::{Ident, TokenStream};
 use quote::ToTokens;
 use syn::parse::{ParseStream, Parser as _};
@@ -31,7 +31,7 @@ pub struct Parser<'a> {
     pub derives: Option<&'a mut Vec<Derive>>,
     pub repr: Option<&'a mut Option<Atom>>,
     pub namespace: Option<&'a mut Namespace>,
-    pub cxx_name: Option<&'a mut Option<Ident>>,
+    pub cxx_name: Option<&'a mut Option<ForeignName>>,
     pub rust_name: Option<&'a mut Option<Ident>>,
 
     // Suppress clippy needless_update lint ("struct update has no effect, all
@@ -96,7 +96,7 @@ pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> Othe
                 }
             }
         } else if attr.path.is_ident("cxx_name") {
-            match parse_function_alias_attribute.parse2(attr.tokens.clone()) {
+            match parse_cxx_name_attribute.parse2(attr.tokens.clone()) {
                 Ok(attr) => {
                     if let Some(cxx_name) = &mut parser.cxx_name {
                         **cxx_name = Some(attr);
@@ -109,7 +109,7 @@ pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> Othe
                 }
             }
         } else if attr.path.is_ident("rust_name") {
-            match parse_function_alias_attribute.parse2(attr.tokens.clone()) {
+            match parse_rust_name_attribute.parse2(attr.tokens.clone()) {
                 Ok(attr) => {
                     if let Some(rust_name) = &mut parser.rust_name {
                         **rust_name = Some(attr);
@@ -192,7 +192,18 @@ fn parse_namespace_attribute(input: ParseStream) -> Result<Namespace> {
     Ok(namespace)
 }
 
-fn parse_function_alias_attribute(input: ParseStream) -> Result<Ident> {
+fn parse_cxx_name_attribute(input: ParseStream) -> Result<ForeignName> {
+    input.parse::<Token![=]>()?;
+    if input.peek(LitStr) {
+        let lit: LitStr = input.parse()?;
+        ForeignName::parse(&lit.value(), lit.span())
+    } else {
+        let ident: Ident = input.parse()?;
+        ForeignName::parse(&ident.to_string(), ident.span())
+    }
+}
+
+fn parse_rust_name_attribute(input: ParseStream) -> Result<Ident> {
     input.parse::<Token![=]>()?;
     if input.peek(LitStr) {
         let lit: LitStr = input.parse()?;

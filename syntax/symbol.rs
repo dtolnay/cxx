@@ -1,5 +1,5 @@
 use crate::syntax::namespace::Namespace;
-use crate::syntax::Pair;
+use crate::syntax::{ForeignName, Pair};
 use proc_macro2::{Ident, TokenStream};
 use quote::ToTokens;
 use std::fmt::{self, Display, Write};
@@ -30,7 +30,7 @@ impl Symbol {
         assert!(self.0.len() > len_before);
     }
 
-    pub fn from_idents<'a, T: Iterator<Item = &'a Ident>>(it: T) -> Self {
+    pub fn from_idents<'a>(it: impl Iterator<Item = &'a dyn Segment>) -> Self {
         let mut symbol = Symbol(String::new());
         for segment in it {
             segment.write(&mut symbol);
@@ -55,16 +55,19 @@ impl Segment for str {
         symbol.push(&self);
     }
 }
+
 impl Segment for usize {
     fn write(&self, symbol: &mut Symbol) {
         symbol.push(&self);
     }
 }
+
 impl Segment for Ident {
     fn write(&self, symbol: &mut Symbol) {
         symbol.push(&self);
     }
 }
+
 impl Segment for Symbol {
     fn write(&self, symbol: &mut Symbol) {
         symbol.push(&self);
@@ -83,6 +86,14 @@ impl Segment for Pair {
     fn write(&self, symbol: &mut Symbol) {
         self.namespace.write(symbol);
         self.cxx.write(symbol);
+    }
+}
+
+impl Segment for ForeignName {
+    fn write(&self, symbol: &mut Symbol) {
+        // TODO: support C++ names containing whitespace (`unsigned int`) or
+        // non-alphanumeric characters (`operator++`).
+        self.to_string().write(symbol);
     }
 }
 

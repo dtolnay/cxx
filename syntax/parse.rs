@@ -4,9 +4,9 @@ use crate::syntax::file::{Item, ItemForeignMod};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
-    attrs, error, Api, Array, Derive, Doc, Enum, ExternFn, ExternType, Impl, Include, IncludeKind,
-    Lang, Lifetimes, NamedType, Namespace, Pair, Receiver, Ref, Signature, SliceRef, Struct, Ty1,
-    Type, TypeAlias, Var, Variant,
+    attrs, error, Api, Array, Derive, Doc, Enum, ExternFn, ExternType, ForeignName, Impl, Include,
+    IncludeKind, Lang, Lifetimes, NamedType, Namespace, Pair, Receiver, Ref, Signature, SliceRef,
+    Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
 use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
@@ -1258,11 +1258,16 @@ fn visibility_pub(vis: &Visibility, inherited: &Ident) -> Token![pub] {
     })
 }
 
-fn pair(namespace: Namespace, default: &Ident, cxx: Option<Ident>, rust: Option<Ident>) -> Pair {
-    let default = || default.clone();
+fn pair(
+    namespace: Namespace,
+    default: &Ident,
+    cxx: Option<ForeignName>,
+    rust: Option<Ident>,
+) -> Pair {
     Pair {
         namespace,
-        cxx: cxx.unwrap_or_else(default),
-        rust: rust.unwrap_or_else(default),
+        cxx: cxx
+            .unwrap_or_else(|| ForeignName::parse(&default.to_string(), default.span()).unwrap()),
+        rust: rust.unwrap_or_else(|| default.clone()),
     }
 }
