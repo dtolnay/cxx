@@ -1,6 +1,5 @@
 use crate::syntax::symbol::{self, Symbol};
 use crate::syntax::{ExternFn, Pair, Types};
-use proc_macro2::Ident;
 
 const CXXBRIDGE: &str = "cxxbridge1";
 
@@ -36,11 +35,11 @@ pub fn operator(receiver: &Pair, operator: &'static str) -> Symbol {
 }
 
 // The C half of a function pointer trampoline.
-pub fn c_trampoline(efn: &ExternFn, var: &Ident, types: &Types) -> Symbol {
-    join!(extern_fn(efn, types), var, 0)
+pub fn c_trampoline(efn: &ExternFn, var: &Pair, types: &Types) -> Symbol {
+    join!(extern_fn(efn, types), var.rust, 0)
 }
 
 // The Rust half of a function pointer trampoline.
-pub fn r_trampoline(efn: &ExternFn, var: &Ident, types: &Types) -> Symbol {
-    join!(extern_fn(efn, types), var, 1)
+pub fn r_trampoline(efn: &ExternFn, var: &Pair, types: &Types) -> Symbol {
+    join!(extern_fn(efn, types), var.rust, 1)
 }

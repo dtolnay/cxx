@@ -240,7 +240,7 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
         }
         write!(out, "  ");
         write_type_space(out, &field.ty);
-        writeln!(out, "{};", field.ident);
+        writeln!(out, "{};", field.name.cxx);
     }
 
     writeln!(out);
@@ -755,28 +755,28 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         }
         if let Type::RustBox(_) = &arg.ty {
             write_type(out, &arg.ty);
-            write!(out, "::from_raw({})", arg.ident);
+            write!(out, "::from_raw({})", arg.name.cxx);
         } else if let Type::UniquePtr(_) = &arg.ty {
             write_type(out, &arg.ty);
-            write!(out, "({})", arg.ident);
+            write!(out, "({})", arg.name.cxx);
         } else if let Type::Str(_) = arg.ty {
             out.builtin.rust_str_new_unchecked = true;
             write!(
                 out,
                 "::rust::impl<::rust::Str>::new_unchecked({})",
-                arg.ident,
+                arg.name.cxx,
             );
         } else if arg.ty == RustString {
             out.builtin.unsafe_bitcopy = true;
             write!(
                 out,
                 "::rust::String(::rust::unsafe_bitcopy, *{})",
-                arg.ident,
+                arg.name.cxx,
             );
         } else if let Type::RustVec(_) = arg.ty {
             out.builtin.unsafe_bitcopy = true;
             write_type(out, &arg.ty);
-            write!(out, "(::rust::unsafe_bitcopy, *{})", arg.ident);
+            write!(out, "(::rust::unsafe_bitcopy, *{})", arg.name.cxx);
         } else if let Type::SliceRef(slice) = &arg.ty {
             write_type(out, &arg.ty);
             write!(out, "(static_cast<");
@@ -784,12 +784,12 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
                 write!(out, "const ");
             }
             write_type_space(out, &slice.inner);
-            write!(out, "*>({0}.ptr), {0}.len)", arg.ident);
+            write!(out, "*>({0}.ptr), {0}.len)", arg.name.cxx);
         } else if out.types.needs_indirect_abi(&arg.ty) {
             out.include.utility = true;
-            write!(out, "::std::move(*{})", arg.ident);
+            write!(out, "::std::move(*{})", arg.name.cxx);
         } else {
-            write!(out, "{}", arg.ident);
+            write!(out, "{}", arg.name.cxx);
         }
     }
     write!(out, ")");
@@ -820,19 +820,14 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     writeln!(out, "}}");
     for arg in &efn.args {
         if let Type::Fn(f) = &arg.ty {
-            let var = &arg.ident;
+            let var = &arg.name;
             write_function_pointer_trampoline(out, efn, var, f);
         }
     }
     out.end_block(Block::ExternC);
 }
 
-fn write_function_pointer_trampoline(
-    out: &mut OutFile,
-    efn: &ExternFn,
-    var: &Ident,
-    f: &Signature,
-) {
+fn write_function_pointer_trampoline(out: &mut OutFile, efn: &ExternFn, var: &Pair, f: &Signature) {
     let r_trampoline = mangle::r_trampoline(efn, var, out.types);
     let indirect_call = true;
     write_rust_function_decl_impl(out, &r_trampoline, f, indirect_call);
@@ -928,7 +923,7 @@ fn write_rust_function_shim_decl(
             write!(out, ", ");
         }
         write_type_space(out, &arg.ty);
-        write!(out, "{}", arg.ident);
+        write!(out, "{}", arg.name.cxx);
     }
     if indirect_call {
         if !sig.args.is_empty() {
@@ -973,7 +968,7 @@ fn write_rust_function_shim_impl(
             out.builtin.manually_drop = true;
             write!(out, "  ::rust::ManuallyDrop<");
             write_type(out, &arg.ty);
-            writeln!(out, "> {}$(::std::move({0}));", arg.ident);
+            writeln!(out, "> {}$(::std::move({0}));", arg.name.cxx);
         }
     }
     write!(out, "  ");
@@ -1037,7 +1032,7 @@ fn write_rust_function_shim_impl(
             ty if out.types.needs_indirect_abi(ty) => write!(out, "&"),
             _ => {}
         }
-        write!(out, "{}", arg.ident);
+        write!(out, "{}", arg.name.cxx);
         match &arg.ty {
             Type::RustBox(_) => write!(out, ".into_raw()"),
             Type::UniquePtr(_) => write!(out, ".release()"),
@@ -1158,7 +1153,7 @@ fn write_extern_arg(out: &mut OutFile, arg: &Var) {
     if out.types.needs_indirect_abi(&arg.ty) {
         write!(out, "*");
     }
-    write!(out, "{}", arg.ident);
+    write!(out, "{}", arg.name.cxx);
 }
 
 fn write_type(out: &mut OutFile, ty: &Type) {

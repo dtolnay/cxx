@@ -395,7 +395,7 @@ fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
         quote!(_: #receiver_type)
     });
     let args = efn.args.iter().map(|arg| {
-        let ident = &arg.ident;
+        let ident = &arg.name.rust;
         let ty = expand_extern_type(&arg.ty, types, true);
         if arg.ty == RustString {
             quote!(#ident: *const #ty)
@@ -461,7 +461,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         .iter()
         .map(|receiver| receiver.var.to_token_stream());
     let arg_vars = efn.args.iter().map(|arg| {
-        let var = &arg.ident;
+        let var = &arg.name.rust;
         match &arg.ty {
             Type::Ident(ident) if ident.rust == RustString => {
                 quote!(#var.as_mut_ptr() as *const ::cxx::private::RustString)
@@ -503,7 +503,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         .iter()
         .filter_map(|arg| {
             if let Type::Fn(f) = &arg.ty {
-                let var = &arg.ident;
+                let var = &arg.name;
                 Some(expand_function_pointer_trampoline(efn, var, f, types))
             } else {
                 None
@@ -515,7 +515,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         .iter()
         .filter(|arg| types.needs_indirect_abi(&arg.ty))
         .map(|arg| {
-            let var = &arg.ident;
+            let var = &arg.name.rust;
             // These are arguments for which C++ has taken ownership of the data
             // behind the mut reference it received.
             quote! {
@@ -632,14 +632,14 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
 
 fn expand_function_pointer_trampoline(
     efn: &ExternFn,
-    var: &Ident,
+    var: &Pair,
     sig: &Signature,
     types: &Types,
 ) -> TokenStream {
     let c_trampoline = mangle::c_trampoline(efn, var, types);
     let r_trampoline = mangle::r_trampoline(efn, var, types);
     let local_name = parse_quote!(__);
-    let catch_unwind_label = format!("::{}::{}", efn.name.rust, var);
+    let catch_unwind_label = format!("::{}::{}", efn.name.rust, var.rust);
     let shim = expand_rust_function_shim_impl(
         sig,
         types,
@@ -648,6 +648,7 @@ fn expand_function_pointer_trampoline(
         catch_unwind_label,
         None,
     );
+    let var = &var.rust;
 
     quote! {
         let #var = ::cxx::private::FatFunction {
@@ -792,7 +793,7 @@ fn expand_rust_function_shim_impl(
         quote!(#receiver_var: #receiver_type)
     });
     let args = sig.args.iter().map(|arg| {
-        let ident = &arg.ident;
+        let ident = &arg.name.rust;
         let ty = expand_extern_type(&arg.ty, types, false);
         if types.needs_indirect_abi(&arg.ty) {
             quote!(#ident: *mut #ty)
@@ -803,7 +804,7 @@ fn expand_rust_function_shim_impl(
     let all_args = receiver.into_iter().chain(args);
 
     let arg_vars = sig.args.iter().map(|arg| {
-        let ident = &arg.ident;
+        let ident = &arg.name.rust;
         match &arg.ty {
             Type::Ident(i) if i.rust == RustString => {
                 quote!(::std::mem::take((*#ident).as_mut_string()))
@@ -969,7 +970,7 @@ fn expand_rust_function_shim_super(
         expand_return_type(&sig.ret)
     };
 
-    let arg_vars = sig.args.iter().map(|arg| &arg.ident);
+    let arg_vars = sig.args.iter().map(|arg| &arg.name.rust);
     let vars = receiver_var.iter().chain(arg_vars);
 
     let span = invoke.span();
