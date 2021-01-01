@@ -1,4 +1,4 @@
-use crate::syntax::set::OrderedSet as Set;
+use crate::syntax::set::{OrderedSet as Set, UnorderedSet};
 use crate::syntax::{Api, Enum, ExternFn, Pair, RustName, Struct, Type};
 use proc_macro2::Ident;
 use std::collections::BTreeMap as Map;
@@ -19,7 +19,7 @@ pub fn required_trivial_reasons<'a>(
     all: &Set<&'a Type>,
     structs: &Map<&'a Ident, &'a Struct>,
     enums: &Map<&'a Ident, &'a Enum>,
-    cxx: &Set<&'a Ident>,
+    cxx: &UnorderedSet<&'a Ident>,
 ) -> Map<&'a Ident, Vec<TrivialReason<'a>>> {
     let mut required_trivial = Map::new();
 

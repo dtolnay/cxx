@@ -14,8 +14,8 @@ pub struct Types<'a> {
     pub all: Set<&'a Type>,
     pub structs: Map<&'a Ident, &'a Struct>,
     pub enums: Map<&'a Ident, &'a Enum>,
-    pub cxx: Set<&'a Ident>,
-    pub rust: Set<&'a Ident>,
+    pub cxx: UnorderedSet<&'a Ident>,
+    pub rust: UnorderedSet<&'a Ident>,
     pub aliases: Map<&'a Ident, &'a TypeAlias>,
     pub untrusted: Map<&'a Ident, &'a ExternType>,
     pub required_trivial: Map<&'a Ident, Vec<TrivialReason<'a>>>,
@@ -30,8 +30,8 @@ impl<'a> Types<'a> {
         let mut all = Set::new();
         let mut structs = Map::new();
         let mut enums = Map::new();
-        let mut cxx = Set::new();
-        let mut rust = Set::new();
+        let mut cxx = UnorderedSet::new();
+        let mut rust = UnorderedSet::new();
         let mut aliases = Map::new();
         let mut untrusted = Map::new();
         let mut explicit_impls = Map::new();
