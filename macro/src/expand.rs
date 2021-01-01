@@ -1,12 +1,13 @@
 use crate::derive;
-use crate::syntax::atom::Atom::{self, *};
+use crate::syntax::atom::Atom::*;
 use crate::syntax::attrs::{self, OtherAttrs};
 use crate::syntax::file::Module;
+use crate::syntax::instantiate::ImplKey;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    self, check, mangle, Api, Doc, Enum, ExternFn, ExternType, Impl, NamedType, Pair, Signature,
-    Struct, Trait, Type, TypeAlias, Types,
+    self, check, mangle, Api, Doc, Enum, ExternFn, ExternType, Impl, Pair, Signature, Struct,
+    Trait, Type, TypeAlias, Types,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
@@ -79,62 +80,25 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
         }
     }
 
-    for ty in types {
-        let impl_key = match ty.impl_key() {
-            Some(impl_key) => impl_key,
-            None => continue,
-        };
-        let explicit_impl = types.explicit_impls.get(&impl_key).copied();
-        if let Type::RustBox(ty) = ty {
-            if let Type::Ident(ident) = &ty.inner {
-                if Atom::from(&ident.rust).is_none()
-                    && (explicit_impl.is_some() || !types.aliases.contains_key(&ident.rust))
-                {
-                    hidden.extend(expand_rust_box(ident, types, explicit_impl));
-                }
+    for (impl_key, &explicit_impl) in &types.impls {
+        match impl_key {
+            ImplKey::RustBox(ident) => {
+                hidden.extend(expand_rust_box(ident, types, explicit_impl));
             }
-        } else if let Type::RustVec(ty) = ty {
-            if let Type::Ident(ident) = &ty.inner {
-                if Atom::from(&ident.rust).is_none()
-                    && (explicit_impl.is_some() || !types.aliases.contains_key(&ident.rust))
-                {
-                    hidden.extend(expand_rust_vec(ident, types, explicit_impl));
-                }
+            ImplKey::RustVec(ident) => {
+                hidden.extend(expand_rust_vec(ident, types, explicit_impl));
             }
-        } else if let Type::UniquePtr(ptr) = ty {
-            if let Type::Ident(ident) = &ptr.inner {
-                if Atom::from(&ident.rust).is_none()
-                    && (explicit_impl.is_some() || !types.aliases.contains_key(&ident.rust))
-                {
-                    expanded.extend(expand_unique_ptr(ident, types, explicit_impl));
-                }
+            ImplKey::UniquePtr(ident) => {
+                expanded.extend(expand_unique_ptr(ident, types, explicit_impl));
             }
-        } else if let Type::SharedPtr(ptr) = ty {
-            if let Type::Ident(ident) = &ptr.inner {
-                if Atom::from(&ident.rust).is_none()
-                    && (explicit_impl.is_some() || !types.aliases.contains_key(&ident.rust))
-                {
-                    expanded.extend(expand_shared_ptr(ident, types, explicit_impl));
-                }
+            ImplKey::SharedPtr(ident) => {
+                expanded.extend(expand_shared_ptr(ident, types, explicit_impl));
             }
-        } else if let Type::WeakPtr(ptr) = ty {
-            if let Type::Ident(ident) = &ptr.inner {
-                if Atom::from(&ident.rust).is_none()
-                    && (explicit_impl.is_some() || !types.aliases.contains_key(&ident.rust))
-                {
-                    expanded.extend(expand_weak_ptr(ident, types, explicit_impl));
-                }
+            ImplKey::WeakPtr(ident) => {
+                expanded.extend(expand_weak_ptr(ident, types, explicit_impl));
             }
-        } else if let Type::CxxVector(ptr) = ty {
-            if let Type::Ident(ident) = &ptr.inner {
-                if Atom::from(&ident.rust).is_none()
-                    && (explicit_impl.is_some() || !types.aliases.contains_key(&ident.rust))
-                {
-                    // Generate impl for CxxVector<T> if T is a struct or opaque
-                    // C++ type. Impl for primitives is already provided by cxx
-                    // crate.
-                    expanded.extend(expand_cxx_vector(ident, explicit_impl, types));
-                }
+            ImplKey::CxxVector(ident) => {
+                expanded.extend(expand_cxx_vector(ident, explicit_impl, types));
             }
         }
     }
@@ -1071,14 +1035,14 @@ fn type_id(name: &Pair) -> TokenStream {
     }
 }
 
-fn expand_rust_box(ident: &NamedType, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
+fn expand_rust_box(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
     let resolve = types.resolve(ident);
     let link_prefix = format!("cxxbridge1$box${}$", resolve.to_symbol());
     let link_alloc = format!("{}alloc", link_prefix);
     let link_dealloc = format!("{}dealloc", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
 
-    let local_prefix = format_ident!("{}__box_", &ident.rust);
+    let local_prefix = format_ident!("{}__box_", ident);
     let local_alloc = format_ident!("{}alloc", local_prefix);
     let local_dealloc = format_ident!("{}dealloc", local_prefix);
     let local_drop = format_ident!("{}drop", local_prefix);
@@ -1109,7 +1073,7 @@ fn expand_rust_box(ident: &NamedType, types: &Types, explicit_impl: Option<&Impl
     }
 }
 
-fn expand_rust_vec(elem: &NamedType, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
+fn expand_rust_vec(elem: &Ident, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
     let resolve = types.resolve(elem);
     let link_prefix = format!("cxxbridge1$rust_vec${}$", resolve.to_symbol());
     let link_new = format!("{}new", link_prefix);
@@ -1120,7 +1084,7 @@ fn expand_rust_vec(elem: &NamedType, types: &Types, explicit_impl: Option<&Impl>
     let link_reserve_total = format!("{}reserve_total", link_prefix);
     let link_set_len = format!("{}set_len", link_prefix);
 
-    let local_prefix = format_ident!("{}__vec_", elem.rust);
+    let local_prefix = format_ident!("{}__vec_", elem);
     let local_new = format_ident!("{}new", local_prefix);
     let local_drop = format_ident!("{}drop", local_prefix);
     let local_len = format_ident!("{}len", local_prefix);
@@ -1175,12 +1139,8 @@ fn expand_rust_vec(elem: &NamedType, types: &Types, explicit_impl: Option<&Impl>
     }
 }
 
-fn expand_unique_ptr(
-    ident: &NamedType,
-    types: &Types,
-    explicit_impl: Option<&Impl>,
-) -> TokenStream {
-    let name = ident.rust.to_string();
+fn expand_unique_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
+    let name = ident.to_string();
     let resolve = types.resolve(ident);
     let prefix = format!("cxxbridge1$unique_ptr${}$", resolve.to_symbol());
     let link_null = format!("{}null", prefix);
@@ -1190,9 +1150,9 @@ fn expand_unique_ptr(
     let link_release = format!("{}release", prefix);
     let link_drop = format!("{}drop", prefix);
 
-    let can_construct_from_value = types.structs.contains_key(&ident.rust)
-        || types.enums.contains_key(&ident.rust)
-        || types.aliases.contains_key(&ident.rust);
+    let can_construct_from_value = types.structs.contains_key(ident)
+        || types.enums.contains_key(ident)
+        || types.aliases.contains_key(ident);
     let new_method = if can_construct_from_value {
         Some(quote! {
             fn __new(value: Self) -> *mut ::std::ffi::c_void {
@@ -1261,12 +1221,8 @@ fn expand_unique_ptr(
     }
 }
 
-fn expand_shared_ptr(
-    ident: &NamedType,
-    types: &Types,
-    explicit_impl: Option<&Impl>,
-) -> TokenStream {
-    let name = ident.rust.to_string();
+fn expand_shared_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
+    let name = ident.to_string();
     let resolve = types.resolve(ident);
     let prefix = format!("cxxbridge1$shared_ptr${}$", resolve.to_symbol());
     let link_null = format!("{}null", prefix);
@@ -1275,9 +1231,9 @@ fn expand_shared_ptr(
     let link_get = format!("{}get", prefix);
     let link_drop = format!("{}drop", prefix);
 
-    let can_construct_from_value = types.structs.contains_key(&ident.rust)
-        || types.enums.contains_key(&ident.rust)
-        || types.aliases.contains_key(&ident.rust);
+    let can_construct_from_value = types.structs.contains_key(ident)
+        || types.enums.contains_key(ident)
+        || types.aliases.contains_key(ident);
     let new_method = if can_construct_from_value {
         Some(quote! {
             unsafe fn __new(value: Self, new: *mut ::std::ffi::c_void) {
@@ -1333,8 +1289,8 @@ fn expand_shared_ptr(
     }
 }
 
-fn expand_weak_ptr(ident: &NamedType, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
-    let name = ident.rust.to_string();
+fn expand_weak_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
+    let name = ident.to_string();
     let resolve = types.resolve(ident);
     let prefix = format!("cxxbridge1$weak_ptr${}$", resolve.to_symbol());
     let link_null = format!("{}null", prefix);
@@ -1390,8 +1346,8 @@ fn expand_weak_ptr(ident: &NamedType, types: &Types, explicit_impl: Option<&Impl
     }
 }
 
-fn expand_cxx_vector(elem: &NamedType, explicit_impl: Option<&Impl>, types: &Types) -> TokenStream {
-    let name = elem.rust.to_string();
+fn expand_cxx_vector(elem: &Ident, explicit_impl: Option<&Impl>, types: &Types) -> TokenStream {
+    let name = elem.to_string();
     let resolve = types.resolve(elem);
     let prefix = format!("cxxbridge1$std$vector${}$", resolve.to_symbol());
     let link_size = format!("{}size", prefix);

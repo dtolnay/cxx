@@ -29,6 +29,10 @@ mod ordered {
         pub fn iter(&self) -> Iter<K, V> {
             Iter(self.vec.iter())
         }
+
+        pub fn keys(&self) -> impl Iterator<Item = &K> {
+            self.vec.iter().map(|(k, _v)| k)
+        }
     }
 
     impl<K, V> OrderedMap<K, V>
