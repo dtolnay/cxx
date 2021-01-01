@@ -5,7 +5,7 @@ use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
     attrs, error, Api, Array, Derive, Doc, Enum, ExternFn, ExternType, Impl, Include, IncludeKind,
-    Lang, Lifetimes, Namespace, Pair, Receiver, Ref, RustName, Signature, SliceRef, Struct, Ty1,
+    Lang, Lifetimes, NamedType, Namespace, Pair, Receiver, Ref, Signature, SliceRef, Struct, Ty1,
     Type, TypeAlias, Var, Variant,
 };
 use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree};
@@ -201,7 +201,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
 
     let name = pair(namespace, &item.ident, cxx_name, rust_name);
     let repr_ident = Ident::new(repr.as_ref(), Span::call_site());
-    let repr_type = Type::Ident(RustName::new(repr_ident));
+    let repr_type = Type::Ident(NamedType::new(repr_ident));
 
     Ok(Api::Enum(Enum {
         doc,
@@ -519,7 +519,7 @@ fn parse_extern_fn(
                         lifetime: lifetime.clone(),
                         mutable: arg.mutability.is_some(),
                         var: arg.self_token,
-                        ty: RustName::new(Ident::new("Self", arg.self_token.span)),
+                        ty: NamedType::new(Ident::new("Self", arg.self_token.span)),
                         shorthand: true,
                         pin_tokens: None,
                         mutability: arg.mutability,
@@ -1007,7 +1007,7 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
         let segment = &path.segments[0];
         let ident = segment.ident.clone();
         match &segment.arguments {
-            PathArguments::None => return Ok(Type::Ident(RustName::new(ident))),
+            PathArguments::None => return Ok(Type::Ident(NamedType::new(ident))),
             PathArguments::AngleBracketed(generic) => {
                 if ident == "UniquePtr" && generic.args.len() == 1 {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
@@ -1096,7 +1096,7 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
                         }
                     }
                     if only_lifetimes {
-                        return Ok(Type::Ident(RustName {
+                        return Ok(Type::Ident(NamedType {
                             rust: ident,
                             generics: Lifetimes {
                                 lt_token: Some(generic.lt_token),

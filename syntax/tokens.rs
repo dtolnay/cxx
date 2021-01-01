@@ -1,6 +1,6 @@
 use crate::syntax::atom::Atom::*;
 use crate::syntax::{
-    Array, Atom, Derive, Enum, ExternFn, ExternType, Impl, Lifetimes, Receiver, Ref, RustName,
+    Array, Atom, Derive, Enum, ExternFn, ExternType, Impl, Lifetimes, NamedType, Receiver, Ref,
     Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var,
 };
 use proc_macro2::{Ident, Span, TokenStream};
@@ -256,9 +256,9 @@ impl ToTokens for Signature {
     }
 }
 
-impl ToTokens for RustName {
+impl ToTokens for NamedType {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        let RustName { rust, generics } = self;
+        let NamedType { rust, generics } = self;
         rust.to_tokens(tokens);
         generics.to_tokens(tokens);
     }

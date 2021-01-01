@@ -1,6 +1,6 @@
 use crate::syntax::map::UnorderedMap;
 use crate::syntax::set::{OrderedSet as Set, UnorderedSet};
-use crate::syntax::{Api, Enum, ExternFn, Pair, RustName, Struct, Type};
+use crate::syntax::{Api, Enum, ExternFn, NamedType, Pair, Struct, Type};
 use proc_macro2::Ident;
 use std::fmt::{self, Display};
 
@@ -23,7 +23,7 @@ pub fn required_trivial_reasons<'a>(
 ) -> UnorderedMap<&'a Ident, Vec<TrivialReason<'a>>> {
     let mut required_trivial = UnorderedMap::new();
 
-    let mut insist_extern_types_are_trivial = |ident: &'a RustName, reason| {
+    let mut insist_extern_types_are_trivial = |ident: &'a NamedType, reason| {
         if cxx.contains(&ident.rust)
             && !structs.contains_key(&ident.rust)
             && !enums.contains_key(&ident.rust)

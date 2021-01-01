@@ -1,4 +1,4 @@
-use crate::syntax::{Lifetimes, Pair, RustName, Symbol};
+use crate::syntax::{Lifetimes, NamedType, Pair, Symbol};
 use proc_macro2::{Ident, Span};
 use std::iter;
 use syn::punctuated::Punctuated;
@@ -22,14 +22,14 @@ impl Pair {
     }
 }
 
-impl RustName {
+impl NamedType {
     pub fn new(rust: Ident) -> Self {
         let generics = Lifetimes {
             lt_token: None,
             lifetimes: Punctuated::new(),
             gt_token: None,
         };
-        RustName { rust, generics }
+        NamedType { rust, generics }
     }
 
     pub fn span(&self) -> Span {

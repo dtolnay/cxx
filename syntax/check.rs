@@ -1,8 +1,8 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::{
-    error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Receiver, Ref,
-    RustName, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
+    error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, NamedType, Receiver,
+    Ref, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
@@ -61,7 +61,7 @@ impl Check<'_> {
     }
 }
 
-fn check_type_ident(cx: &mut Check, name: &RustName) {
+fn check_type_ident(cx: &mut Check, name: &NamedType) {
     let ident = &name.rust;
     if Atom::from(ident).is_none()
         && !cx.types.structs.contains_key(ident)

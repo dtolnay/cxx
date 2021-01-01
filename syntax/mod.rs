@@ -176,7 +176,7 @@ pub struct Receiver {
     pub lifetime: Option<Lifetime>,
     pub mutable: bool,
     pub var: Token![self],
-    pub ty: RustName,
+    pub ty: NamedType,
     pub shorthand: bool,
     pub pin_tokens: Option<(kw::Pin, Token![<], Token![>])>,
     pub mutability: Option<Token![mut]>,
@@ -191,7 +191,7 @@ pub struct Variant {
 }
 
 pub enum Type {
-    Ident(RustName),
+    Ident(NamedType),
     RustBox(Box<Ty1>),
     RustVec(Box<Ty1>),
     UniquePtr(Box<Ty1>),
@@ -258,7 +258,7 @@ pub struct Pair {
 // Wrapper for a type which needs to be resolved before it can be printed in
 // C++.
 #[derive(PartialEq, Eq, Hash)]
-pub struct RustName {
+pub struct NamedType {
     pub rust: Ident,
     pub generics: Lifetimes,
 }

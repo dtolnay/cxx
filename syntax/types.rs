@@ -5,7 +5,7 @@ use crate::syntax::report::Errors;
 use crate::syntax::set::{OrderedSet as Set, UnorderedSet};
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::{
-    toposort, Api, Enum, ExternType, Impl, Pair, RustName, Struct, Type, TypeAlias,
+    toposort, Api, Enum, ExternType, Impl, NamedType, Pair, Struct, Type, TypeAlias,
 };
 use proc_macro2::Ident;
 use quote::ToTokens;
@@ -240,7 +240,7 @@ impl<'a> Types<'a> {
         }
     }
 
-    pub fn resolve(&self, ident: &RustName) -> &Pair {
+    pub fn resolve(&self, ident: &NamedType) -> &Pair {
         self.resolutions
             .get(&ident.rust)
             .expect("Unable to resolve type")
