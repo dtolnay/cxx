@@ -1,6 +1,6 @@
+use crate::syntax::map::UnorderedMap as Map;
 use crate::syntax::Api;
 use proc_macro2::Ident;
-use std::collections::HashMap as Map;
 
 pub struct NamespaceEntries<'a> {
     direct: Vec<&'a Api>,

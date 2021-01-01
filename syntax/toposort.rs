@@ -1,6 +1,6 @@
+use crate::syntax::map::{Entry, UnorderedMap as Map};
 use crate::syntax::report::Errors;
 use crate::syntax::{Api, Struct, Type, Types};
-use std::collections::btree_map::{BTreeMap as Map, Entry};
 
 enum Mark {
     Visiting,

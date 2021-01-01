@@ -105,6 +105,10 @@ mod unordered {
         {
             self.0.get(value)
         }
+
+        pub fn retain(&mut self, f: impl FnMut(&T) -> bool) {
+            self.0.retain(f);
+        }
     }
 }
 

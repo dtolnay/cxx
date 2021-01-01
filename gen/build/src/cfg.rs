@@ -266,10 +266,10 @@ pub use self::r#impl::Cfg::CFG;
 #[cfg(not(doc))]
 mod r#impl {
     use crate::intern::{intern, InternedString};
+    use crate::syntax::map::UnorderedMap as Map;
     use crate::vec::{self, InternedVec as _};
     use lazy_static::lazy_static;
     use std::cell::RefCell;
-    use std::collections::HashMap;
     use std::fmt::{self, Debug};
     use std::marker::PhantomData;
     use std::ops::{Deref, DerefMut};
@@ -316,7 +316,7 @@ mod r#impl {
         //         cfg: AtomicPtr<super::Cfg>,
         //     }
         //
-        static CONST_DEREFS: RefCell<HashMap<Handle, Box<super::Cfg<'static>>>> = RefCell::default();
+        static CONST_DEREFS: RefCell<Map<Handle, Box<super::Cfg<'static>>>> = RefCell::default();
     }
 
     #[derive(Eq, PartialEq, Hash)]

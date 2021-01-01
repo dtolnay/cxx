@@ -1,5 +1,6 @@
 use crate::syntax::improper::ImproperCtype;
 use crate::syntax::instantiate::ImplKey;
+use crate::syntax::map::UnorderedMap;
 use crate::syntax::report::Errors;
 use crate::syntax::set::{OrderedSet as Set, UnorderedSet};
 use crate::syntax::trivial::{self, TrivialReason};
@@ -8,19 +9,18 @@ use crate::syntax::{
 };
 use proc_macro2::Ident;
 use quote::ToTokens;
-use std::collections::BTreeMap as Map;
 
 pub struct Types<'a> {
     pub all: Set<&'a Type>,
-    pub structs: Map<&'a Ident, &'a Struct>,
-    pub enums: Map<&'a Ident, &'a Enum>,
+    pub structs: UnorderedMap<&'a Ident, &'a Struct>,
+    pub enums: UnorderedMap<&'a Ident, &'a Enum>,
     pub cxx: UnorderedSet<&'a Ident>,
     pub rust: UnorderedSet<&'a Ident>,
-    pub aliases: Map<&'a Ident, &'a TypeAlias>,
-    pub untrusted: Map<&'a Ident, &'a ExternType>,
-    pub required_trivial: Map<&'a Ident, Vec<TrivialReason<'a>>>,
-    pub explicit_impls: Map<ImplKey<'a>, &'a Impl>,
-    pub resolutions: Map<&'a Ident, &'a Pair>,
+    pub aliases: UnorderedMap<&'a Ident, &'a TypeAlias>,
+    pub untrusted: UnorderedMap<&'a Ident, &'a ExternType>,
+    pub required_trivial: UnorderedMap<&'a Ident, Vec<TrivialReason<'a>>>,
+    pub explicit_impls: UnorderedMap<ImplKey<'a>, &'a Impl>,
+    pub resolutions: UnorderedMap<&'a Ident, &'a Pair>,
     pub struct_improper_ctypes: UnorderedSet<&'a Ident>,
     pub toposorted_structs: Vec<&'a Struct>,
 }
@@ -28,14 +28,14 @@ pub struct Types<'a> {
 impl<'a> Types<'a> {
     pub fn collect(cx: &mut Errors, apis: &'a [Api]) -> Self {
         let mut all = Set::new();
-        let mut structs = Map::new();
-        let mut enums = Map::new();
+        let mut structs = UnorderedMap::new();
+        let mut enums = UnorderedMap::new();
         let mut cxx = UnorderedSet::new();
         let mut rust = UnorderedSet::new();
-        let mut aliases = Map::new();
-        let mut untrusted = Map::new();
-        let mut explicit_impls = Map::new();
-        let mut resolutions = Map::new();
+        let mut aliases = UnorderedMap::new();
+        let mut untrusted = UnorderedMap::new();
+        let mut explicit_impls = UnorderedMap::new();
+        let mut resolutions = UnorderedMap::new();
         let struct_improper_ctypes = UnorderedSet::new();
         let toposorted_structs = Vec::new();
 
@@ -192,7 +192,7 @@ impl<'a> Types<'a> {
 
         types.toposorted_structs = toposort::sort(cx, apis, &types);
 
-        let mut unresolved_structs: Vec<&Ident> = types.structs.keys().copied().collect();
+        let mut unresolved_structs = types.structs.keys();
         let mut new_information = true;
         while new_information {
             new_information = false;

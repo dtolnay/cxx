@@ -3,6 +3,8 @@ use crate::gen::nested::NamespaceEntries;
 use crate::gen::out::OutFile;
 use crate::gen::{builtin, include, Opt};
 use crate::syntax::atom::Atom::{self, *};
+use crate::syntax::map::UnorderedMap as Map;
+use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::{
@@ -10,7 +12,6 @@ use crate::syntax::{
     Type, TypeAlias, Types, Var,
 };
 use proc_macro2::Ident;
-use std::collections::{HashMap, HashSet};
 
 pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u8> {
     let mut out_file = OutFile::new(header, opt, types);
@@ -65,7 +66,7 @@ fn write_forward_declarations(out: &mut OutFile, apis: &[Api]) {
 }
 
 fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
-    let mut methods_for_type = HashMap::new();
+    let mut methods_for_type = Map::new();
     for api in apis {
         if let Api::CxxFunction(efn) | Api::RustFunction(efn) = api {
             if let Some(receiver) = &efn.sig.receiver {
@@ -77,7 +78,7 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
         }
     }
 
-    let mut structs_written = HashSet::new();
+    let mut structs_written = UnorderedSet::new();
     let mut toposorted_structs = out.types.toposorted_structs.iter();
     for api in apis {
         match api {

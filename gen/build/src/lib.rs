@@ -90,10 +90,10 @@ use crate::error::{Error, Result};
 use crate::gen::error::report;
 use crate::gen::Opt;
 use crate::paths::PathExt;
+use crate::syntax::map::{Entry, UnorderedMap};
 use crate::target::TargetDir;
 use cc::Build;
-use std::collections::btree_map::Entry;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::BTreeSet;
 use std::env;
 use std::ffi::{OsStr, OsString};
 use std::io::{self, Write};
@@ -288,7 +288,7 @@ fn make_this_crate(prj: &Project) -> Result<Crate> {
         });
     }
 
-    let mut header_dirs_index = BTreeMap::new();
+    let mut header_dirs_index = UnorderedMap::new();
     let mut used_header_links = BTreeSet::new();
     let mut used_header_prefixes = BTreeSet::new();
     for krate in deps::direct_dependencies() {

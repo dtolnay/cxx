@@ -13,6 +13,7 @@ mod impls;
 mod improper;
 pub mod instantiate;
 pub mod mangle;
+pub mod map;
 mod names;
 pub mod namespace;
 mod parse;

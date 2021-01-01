@@ -1,7 +1,7 @@
 use crate::syntax::Type;
 use proc_macro2::Ident;
 
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub enum ImplKey<'a> {
     RustBox(&'a Ident),
     RustVec(&'a Ident),
