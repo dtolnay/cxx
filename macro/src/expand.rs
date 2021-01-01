@@ -90,7 +90,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
                 if Atom::from(&ident.rust).is_none()
                     && (explicit_impl.is_some() || !types.aliases.contains_key(&ident.rust))
                 {
-                    hidden.extend(expand_rust_box(ident, types));
+                    hidden.extend(expand_rust_box(ident, types, explicit_impl));
                 }
             }
         } else if let Type::RustVec(ty) = ty {
@@ -98,7 +98,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
                 if Atom::from(&ident.rust).is_none()
                     && (explicit_impl.is_some() || !types.aliases.contains_key(&ident.rust))
                 {
-                    hidden.extend(expand_rust_vec(ident, types));
+                    hidden.extend(expand_rust_vec(ident, types, explicit_impl));
                 }
             }
         } else if let Type::UniquePtr(ptr) = ty {
@@ -1071,7 +1071,7 @@ fn type_id(name: &Pair) -> TokenStream {
     }
 }
 
-fn expand_rust_box(ident: &NamedType, types: &Types) -> TokenStream {
+fn expand_rust_box(ident: &NamedType, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
     let resolve = types.resolve(ident);
     let link_prefix = format!("cxxbridge1$box${}$", resolve.to_symbol());
     let link_alloc = format!("{}alloc", link_prefix);
@@ -1083,10 +1083,14 @@ fn expand_rust_box(ident: &NamedType, types: &Types) -> TokenStream {
     let local_dealloc = format_ident!("{}dealloc", local_prefix);
     let local_drop = format_ident!("{}drop", local_prefix);
 
-    let span = ident.span();
-    quote_spanned! {span=>
+    let begin_span =
+        explicit_impl.map_or_else(Span::call_site, |explicit| explicit.impl_token.span);
+    let end_span = explicit_impl.map_or_else(Span::call_site, |explicit| explicit.brace_token.span);
+    let unsafe_token = format_ident!("unsafe", span = begin_span);
+
+    quote_spanned! {end_span=>
         #[doc(hidden)]
-        unsafe impl ::cxx::private::ImplBox for #ident {}
+        #unsafe_token impl ::cxx::private::ImplBox for #ident {}
         #[doc(hidden)]
         #[export_name = #link_alloc]
         unsafe extern "C" fn #local_alloc() -> *mut ::std::mem::MaybeUninit<#ident> {
@@ -1105,7 +1109,7 @@ fn expand_rust_box(ident: &NamedType, types: &Types) -> TokenStream {
     }
 }
 
-fn expand_rust_vec(elem: &NamedType, types: &Types) -> TokenStream {
+fn expand_rust_vec(elem: &NamedType, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
     let resolve = types.resolve(elem);
     let link_prefix = format!("cxxbridge1$rust_vec${}$", resolve.to_symbol());
     let link_new = format!("{}new", link_prefix);
@@ -1125,10 +1129,14 @@ fn expand_rust_vec(elem: &NamedType, types: &Types) -> TokenStream {
     let local_reserve_total = format_ident!("{}reserve_total", local_prefix);
     let local_set_len = format_ident!("{}set_len", local_prefix);
 
-    let span = elem.span();
-    quote_spanned! {span=>
+    let begin_span =
+        explicit_impl.map_or_else(Span::call_site, |explicit| explicit.impl_token.span);
+    let end_span = explicit_impl.map_or_else(Span::call_site, |explicit| explicit.brace_token.span);
+    let unsafe_token = format_ident!("unsafe", span = begin_span);
+
+    quote_spanned! {end_span=>
         #[doc(hidden)]
-        unsafe impl ::cxx::private::ImplVec for #elem {}
+        #unsafe_token impl ::cxx::private::ImplVec for #elem {}
         #[doc(hidden)]
         #[export_name = #link_new]
         unsafe extern "C" fn #local_new(this: *mut ::cxx::private::RustVec<#elem>) {
