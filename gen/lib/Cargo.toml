@@ -15,7 +15,7 @@ cc = "1.0.49"
 codespan-reporting = "0.9"
 proc-macro2 = { version = "1.0.17", default-features = false, features = ["span-locations"] }
 quote = { version = "1.0", default-features = false }
-syn = { version = "1.0.53", default-features = false, features = ["parsing", "printing", "clone-impls", "full"] }
+syn = { version = "1.0.57", default-features = false, features = ["parsing", "printing", "clone-impls", "full"] }
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
