@@ -1,9 +1,80 @@
 use std::borrow::Borrow;
 use std::hash::Hash;
 use std::ops::Index;
+use std::slice;
 
+pub use self::ordered::OrderedMap;
 pub use self::unordered::UnorderedMap;
 pub use std::collections::hash_map::Entry;
+
+mod ordered {
+    use super::{Entry, Iter, UnorderedMap};
+    use std::borrow::Borrow;
+    use std::hash::Hash;
+    use std::mem;
+
+    pub struct OrderedMap<K, V> {
+        map: UnorderedMap<K, usize>,
+        vec: Vec<(K, V)>,
+    }
+
+    impl<K, V> OrderedMap<K, V> {
+        pub fn new() -> Self {
+            OrderedMap {
+                map: UnorderedMap::new(),
+                vec: Vec::new(),
+            }
+        }
+
+        pub fn iter(&self) -> Iter<K, V> {
+            Iter(self.vec.iter())
+        }
+    }
+
+    impl<K, V> OrderedMap<K, V>
+    where
+        K: Copy + Hash + Eq,
+    {
+        pub fn insert(&mut self, key: K, value: V) -> Option<V> {
+            match self.map.entry(key) {
+                Entry::Occupied(entry) => {
+                    let i = &mut self.vec[*entry.get()];
+                    Some(mem::replace(&mut i.1, value))
+                }
+                Entry::Vacant(entry) => {
+                    entry.insert(self.vec.len());
+                    self.vec.push((key, value));
+                    None
+                }
+            }
+        }
+
+        pub fn contains_key<Q>(&self, key: &Q) -> bool
+        where
+            K: Borrow<Q>,
+            Q: ?Sized + Hash + Eq,
+        {
+            self.map.contains_key(key)
+        }
+
+        pub fn get<Q>(&self, key: &Q) -> Option<&V>
+        where
+            K: Borrow<Q>,
+            Q: ?Sized + Hash + Eq,
+        {
+            let i = *self.map.get(key)?;
+            Some(&self.vec[i].1)
+        }
+    }
+
+    impl<'a, K, V> IntoIterator for &'a OrderedMap<K, V> {
+        type Item = (&'a K, &'a V);
+        type IntoIter = Iter<'a, K, V>;
+        fn into_iter(self) -> Self::IntoIter {
+            self.iter()
+        }
+    }
+}
 
 mod unordered {
     use crate::syntax::set::UnorderedSet;
@@ -67,6 +138,21 @@ mod unordered {
             }
             set
         }
+    }
+}
+
+pub struct Iter<'a, K, V>(slice::Iter<'a, (K, V)>);
+
+impl<'a, K, V> Iterator for Iter<'a, K, V> {
+    type Item = (&'a K, &'a V);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let (k, v) = self.0.next()?;
+        Some((k, v))
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        self.0.size_hint()
     }
 }
 
