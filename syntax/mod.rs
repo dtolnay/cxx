@@ -95,6 +95,7 @@ pub struct Struct {
     pub visibility: Token![pub],
     pub struct_token: Token![struct],
     pub name: Pair,
+    pub generics: Lifetimes,
     pub brace_token: Brace,
     pub fields: Vec<Var>,
 }
@@ -106,6 +107,7 @@ pub struct Enum {
     pub visibility: Token![pub],
     pub enum_token: Token![enum],
     pub name: Pair,
+    pub generics: Lifetimes,
     pub brace_token: Brace,
     pub variants: Vec<Variant>,
     pub repr: Atom,

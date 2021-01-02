@@ -133,6 +133,11 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
     let visibility = visibility_pub(&item.vis, &item.ident);
     let struct_token = item.struct_token;
     let name = pair(namespace, &item.ident, cxx_name, rust_name);
+    let generics = Lifetimes {
+        lt_token: None,
+        lifetimes: Punctuated::new(),
+        gt_token: None,
+    };
     let brace_token = named_fields.brace_token;
 
     Ok(Api::Struct(Struct {
@@ -142,6 +147,7 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
         visibility,
         struct_token,
         name,
+        generics,
         brace_token,
         fields,
     }))
@@ -207,6 +213,11 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
     let name = pair(namespace, &item.ident, cxx_name, rust_name);
     let repr_ident = Ident::new(repr.as_ref(), Span::call_site());
     let repr_type = Type::Ident(NamedType::new(repr_ident));
+    let generics = Lifetimes {
+        lt_token: None,
+        lifetimes: Punctuated::new(),
+        gt_token: None,
+    };
 
     Ok(Api::Enum(Enum {
         doc,
@@ -215,6 +226,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
         visibility,
         enum_token,
         name,
+        generics,
         brace_token,
         variants,
         repr,
