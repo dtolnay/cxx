@@ -174,16 +174,15 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
         },
     );
 
-    let generics = &item.generics;
-    if !generics.params.is_empty() || generics.where_clause.is_some() {
+    if !item.generics.params.is_empty() {
+        let vis = &item.vis;
         let enum_token = item.enum_token;
         let ident = &item.ident;
-        let where_clause = &generics.where_clause;
-        let span = quote!(#enum_token #ident #generics #where_clause);
-        return Err(Error::new_spanned(
-            span,
-            "enums with generic parameters are not allowed",
-        ));
+        let generics = &item.generics;
+        let span = quote!(#vis #enum_token #ident #generics);
+        cx.error(span, "enum with generic parameters is not supported");
+    } else if let Some(where_clause) = &item.generics.where_clause {
+        cx.error(where_clause, "enum with where-clause is not supported");
     }
 
     let mut variants = Vec::new();
