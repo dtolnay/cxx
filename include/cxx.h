@@ -180,6 +180,10 @@ public:
   void swap(Slice &) noexcept;
 
 private:
+  friend void sliceInit(void *, const void *, std::size_t) noexcept;
+  friend void *slicePtr(const void *) noexcept;
+  friend std::size_t sliceLen(const void *) noexcept;
+
   std::array<std::uintptr_t, 2> repr;
 };
 
@@ -485,10 +489,6 @@ constexpr unsafe_bitcopy_t unsafe_bitcopy{};
 
 #ifndef CXXBRIDGE1_RUST_SLICE
 #define CXXBRIDGE1_RUST_SLICE
-void sliceInit(void *, const void *, std::size_t) noexcept;
-void *slicePtr(const void *) noexcept;
-std::size_t sliceLen(const void *) noexcept;
-
 template <typename T>
 Slice<T>::Slice() noexcept {
   sliceInit(this, reinterpret_cast<void *>(align_of<T>()), 0);
