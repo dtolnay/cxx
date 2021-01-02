@@ -1048,6 +1048,12 @@ fn expand_rust_box(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -
     let local_dealloc = format_ident!("{}dealloc", local_prefix);
     let local_drop = format_ident!("{}drop", local_prefix);
 
+    let (impl_generics, ty_generics) = if let Some(imp) = explicit_impl {
+        (&imp.impl_generics, &imp.ty_generics)
+    } else {
+        (resolve.generics, resolve.generics)
+    };
+
     let begin_span =
         explicit_impl.map_or_else(Span::call_site, |explicit| explicit.impl_token.span);
     let end_span = explicit_impl.map_or_else(Span::call_site, |explicit| explicit.brace_token.span);
@@ -1055,20 +1061,20 @@ fn expand_rust_box(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -
 
     quote_spanned! {end_span=>
         #[doc(hidden)]
-        #unsafe_token impl ::cxx::private::ImplBox for #ident {}
+        #unsafe_token impl #impl_generics ::cxx::private::ImplBox for #ident #ty_generics {}
         #[doc(hidden)]
         #[export_name = #link_alloc]
-        unsafe extern "C" fn #local_alloc() -> *mut ::std::mem::MaybeUninit<#ident> {
+        unsafe extern "C" fn #local_alloc #impl_generics() -> *mut ::std::mem::MaybeUninit<#ident #ty_generics> {
             ::std::boxed::Box::into_raw(::std::boxed::Box::new(::std::mem::MaybeUninit::uninit()))
         }
         #[doc(hidden)]
         #[export_name = #link_dealloc]
-        unsafe extern "C" fn #local_dealloc(ptr: *mut ::std::mem::MaybeUninit<#ident>) {
+        unsafe extern "C" fn #local_dealloc #impl_generics(ptr: *mut ::std::mem::MaybeUninit<#ident #ty_generics>) {
             ::std::boxed::Box::from_raw(ptr);
         }
         #[doc(hidden)]
         #[export_name = #link_drop]
-        unsafe extern "C" fn #local_drop(this: *mut ::std::boxed::Box<#ident>) {
+        unsafe extern "C" fn #local_drop #impl_generics(this: *mut ::std::boxed::Box<#ident #ty_generics>) {
             ::std::ptr::drop_in_place(this);
         }
     }
@@ -1094,6 +1100,12 @@ fn expand_rust_vec(elem: &Ident, types: &Types, explicit_impl: Option<&Impl>) ->
     let local_reserve_total = format_ident!("{}reserve_total", local_prefix);
     let local_set_len = format_ident!("{}set_len", local_prefix);
 
+    let (impl_generics, ty_generics) = if let Some(imp) = explicit_impl {
+        (&imp.impl_generics, &imp.ty_generics)
+    } else {
+        (resolve.generics, resolve.generics)
+    };
+
     let begin_span =
         explicit_impl.map_or_else(Span::call_site, |explicit| explicit.impl_token.span);
     let end_span = explicit_impl.map_or_else(Span::call_site, |explicit| explicit.brace_token.span);
@@ -1101,40 +1113,40 @@ fn expand_rust_vec(elem: &Ident, types: &Types, explicit_impl: Option<&Impl>) ->
 
     quote_spanned! {end_span=>
         #[doc(hidden)]
-        #unsafe_token impl ::cxx::private::ImplVec for #elem {}
+        #unsafe_token impl #impl_generics ::cxx::private::ImplVec for #elem #ty_generics {}
         #[doc(hidden)]
         #[export_name = #link_new]
-        unsafe extern "C" fn #local_new(this: *mut ::cxx::private::RustVec<#elem>) {
+        unsafe extern "C" fn #local_new #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>) {
             ::std::ptr::write(this, ::cxx::private::RustVec::new());
         }
         #[doc(hidden)]
         #[export_name = #link_drop]
-        unsafe extern "C" fn #local_drop(this: *mut ::cxx::private::RustVec<#elem>) {
+        unsafe extern "C" fn #local_drop #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>) {
             ::std::ptr::drop_in_place(this);
         }
         #[doc(hidden)]
         #[export_name = #link_len]
-        unsafe extern "C" fn #local_len(this: *const ::cxx::private::RustVec<#elem>) -> usize {
+        unsafe extern "C" fn #local_len #impl_generics(this: *const ::cxx::private::RustVec<#elem #ty_generics>) -> usize {
             (*this).len()
         }
         #[doc(hidden)]
         #[export_name = #link_capacity]
-        unsafe extern "C" fn #local_capacity(this: *const ::cxx::private::RustVec<#elem>) -> usize {
+        unsafe extern "C" fn #local_capacity #impl_generics(this: *const ::cxx::private::RustVec<#elem #ty_generics>) -> usize {
             (*this).capacity()
         }
         #[doc(hidden)]
         #[export_name = #link_data]
-        unsafe extern "C" fn #local_data(this: *const ::cxx::private::RustVec<#elem>) -> *const #elem {
+        unsafe extern "C" fn #local_data #impl_generics(this: *const ::cxx::private::RustVec<#elem #ty_generics>) -> *const #elem #ty_generics {
             (*this).as_ptr()
         }
         #[doc(hidden)]
         #[export_name = #link_reserve_total]
-        unsafe extern "C" fn #local_reserve_total(this: *mut ::cxx::private::RustVec<#elem>, cap: usize) {
+        unsafe extern "C" fn #local_reserve_total #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>, cap: usize) {
             (*this).reserve_total(cap);
         }
         #[doc(hidden)]
         #[export_name = #link_set_len]
-        unsafe extern "C" fn #local_set_len(this: *mut ::cxx::private::RustVec<#elem>, len: usize) {
+        unsafe extern "C" fn #local_set_len #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>, len: usize) {
             (*this).set_len(len);
         }
     }
@@ -1151,6 +1163,12 @@ fn expand_unique_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
     let link_release = format!("{}release", prefix);
     let link_drop = format!("{}drop", prefix);
 
+    let (impl_generics, ty_generics) = if let Some(imp) = explicit_impl {
+        (&imp.impl_generics, &imp.ty_generics)
+    } else {
+        (resolve.generics, resolve.generics)
+    };
+
     let can_construct_from_value = types.structs.contains_key(ident)
         || types.enums.contains_key(ident)
         || types.aliases.contains_key(ident);
@@ -1162,7 +1180,7 @@ fn expand_unique_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
                     fn __uninit(this: *mut *mut ::std::ffi::c_void) -> *mut ::std::ffi::c_void;
                 }
                 let mut repr = ::std::ptr::null_mut::<::std::ffi::c_void>();
-                unsafe { __uninit(&mut repr).cast::<#ident>().write(value) }
+                unsafe { __uninit(&mut repr).cast::<#ident #ty_generics>().write(value) }
                 repr
             }
         })
@@ -1176,7 +1194,7 @@ fn expand_unique_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
     let unsafe_token = format_ident!("unsafe", span = begin_span);
 
     quote_spanned! {end_span=>
-        #unsafe_token impl ::cxx::private::UniquePtrTarget for #ident {
+        #unsafe_token impl #impl_generics ::cxx::private::UniquePtrTarget for #ident #ty_generics {
             const __NAME: &'static dyn ::std::fmt::Display = &#name;
             fn __null() -> *mut ::std::ffi::c_void {
                 extern "C" {
@@ -1232,6 +1250,12 @@ fn expand_shared_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
     let link_get = format!("{}get", prefix);
     let link_drop = format!("{}drop", prefix);
 
+    let (impl_generics, ty_generics) = if let Some(imp) = explicit_impl {
+        (&imp.impl_generics, &imp.ty_generics)
+    } else {
+        (resolve.generics, resolve.generics)
+    };
+
     let can_construct_from_value = types.structs.contains_key(ident)
         || types.enums.contains_key(ident)
         || types.aliases.contains_key(ident);
@@ -1242,7 +1266,7 @@ fn expand_shared_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
                     #[link_name = #link_uninit]
                     fn __uninit(new: *mut ::std::ffi::c_void) -> *mut ::std::ffi::c_void;
                 }
-                __uninit(new).cast::<#ident>().write(value);
+                __uninit(new).cast::<#ident #ty_generics>().write(value);
             }
         })
     } else {
@@ -1255,7 +1279,7 @@ fn expand_shared_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
     let unsafe_token = format_ident!("unsafe", span = begin_span);
 
     quote_spanned! {end_span=>
-        #unsafe_token impl ::cxx::private::SharedPtrTarget for #ident {
+        #unsafe_token impl #impl_generics ::cxx::private::SharedPtrTarget for #ident #ty_generics {
             const __NAME: &'static dyn ::std::fmt::Display = &#name;
             unsafe fn __null(new: *mut ::std::ffi::c_void) {
                 extern "C" {
@@ -1300,13 +1324,19 @@ fn expand_weak_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -
     let link_upgrade = format!("{}upgrade", prefix);
     let link_drop = format!("{}drop", prefix);
 
+    let (impl_generics, ty_generics) = if let Some(imp) = explicit_impl {
+        (&imp.impl_generics, &imp.ty_generics)
+    } else {
+        (resolve.generics, resolve.generics)
+    };
+
     let begin_span =
         explicit_impl.map_or_else(Span::call_site, |explicit| explicit.impl_token.span);
     let end_span = explicit_impl.map_or_else(Span::call_site, |explicit| explicit.brace_token.span);
     let unsafe_token = format_ident!("unsafe", span = begin_span);
 
     quote_spanned! {end_span=>
-        #unsafe_token impl ::cxx::private::WeakPtrTarget for #ident {
+        #unsafe_token impl #impl_generics ::cxx::private::WeakPtrTarget for #ident #ty_generics {
             const __NAME: &'static dyn ::std::fmt::Display = &#name;
             unsafe fn __null(new: *mut ::std::ffi::c_void) {
                 extern "C" {
@@ -1363,25 +1393,31 @@ fn expand_cxx_vector(elem: &Ident, explicit_impl: Option<&Impl>, types: &Types) 
     let link_unique_ptr_release = format!("{}release", unique_ptr_prefix);
     let link_unique_ptr_drop = format!("{}drop", unique_ptr_prefix);
 
+    let (impl_generics, ty_generics) = if let Some(imp) = explicit_impl {
+        (&imp.impl_generics, &imp.ty_generics)
+    } else {
+        (resolve.generics, resolve.generics)
+    };
+
     let begin_span =
         explicit_impl.map_or_else(Span::call_site, |explicit| explicit.impl_token.span);
     let end_span = explicit_impl.map_or_else(Span::call_site, |explicit| explicit.brace_token.span);
     let unsafe_token = format_ident!("unsafe", span = begin_span);
 
     quote_spanned! {end_span=>
-        #unsafe_token impl ::cxx::private::VectorElement for #elem {
+        #unsafe_token impl #impl_generics ::cxx::private::VectorElement for #elem #ty_generics {
             const __NAME: &'static dyn ::std::fmt::Display = &#name;
             fn __vector_size(v: &::cxx::CxxVector<Self>) -> usize {
                 extern "C" {
                     #[link_name = #link_size]
-                    fn __vector_size(_: &::cxx::CxxVector<#elem>) -> usize;
+                    fn __vector_size #impl_generics(_: &::cxx::CxxVector<#elem #ty_generics>) -> usize;
                 }
                 unsafe { __vector_size(v) }
             }
             unsafe fn __get_unchecked(v: *mut ::cxx::CxxVector<Self>, pos: usize) -> *mut Self {
                 extern "C" {
                     #[link_name = #link_get_unchecked]
-                    fn __get_unchecked(_: *mut ::cxx::CxxVector<#elem>, _: usize) -> *mut #elem;
+                    fn __get_unchecked #impl_generics(_: *mut ::cxx::CxxVector<#elem #ty_generics>, _: usize) -> *mut #elem #ty_generics;
                 }
                 __get_unchecked(v, pos)
             }
@@ -1397,7 +1433,7 @@ fn expand_cxx_vector(elem: &Ident, explicit_impl: Option<&Impl>, types: &Types) 
             unsafe fn __unique_ptr_raw(raw: *mut ::cxx::CxxVector<Self>) -> *mut ::std::ffi::c_void {
                 extern "C" {
                     #[link_name = #link_unique_ptr_raw]
-                    fn __unique_ptr_raw(this: *mut *mut ::std::ffi::c_void, raw: *mut ::cxx::CxxVector<#elem>);
+                    fn __unique_ptr_raw #impl_generics(this: *mut *mut ::std::ffi::c_void, raw: *mut ::cxx::CxxVector<#elem #ty_generics>);
                 }
                 let mut repr = ::std::ptr::null_mut::<::std::ffi::c_void>();
                 __unique_ptr_raw(&mut repr, raw);
@@ -1406,14 +1442,14 @@ fn expand_cxx_vector(elem: &Ident, explicit_impl: Option<&Impl>, types: &Types) 
             unsafe fn __unique_ptr_get(repr: *mut ::std::ffi::c_void) -> *const ::cxx::CxxVector<Self> {
                 extern "C" {
                     #[link_name = #link_unique_ptr_get]
-                    fn __unique_ptr_get(this: *const *mut ::std::ffi::c_void) -> *const ::cxx::CxxVector<#elem>;
+                    fn __unique_ptr_get #impl_generics(this: *const *mut ::std::ffi::c_void) -> *const ::cxx::CxxVector<#elem #ty_generics>;
                 }
                 __unique_ptr_get(&repr)
             }
             unsafe fn __unique_ptr_release(mut repr: *mut ::std::ffi::c_void) -> *mut ::cxx::CxxVector<Self> {
                 extern "C" {
                     #[link_name = #link_unique_ptr_release]
-                    fn __unique_ptr_release(this: *mut *mut ::std::ffi::c_void) -> *mut ::cxx::CxxVector<#elem>;
+                    fn __unique_ptr_release #impl_generics(this: *mut *mut ::std::ffi::c_void) -> *mut ::cxx::CxxVector<#elem #ty_generics>;
                 }
                 __unique_ptr_release(&mut repr)
             }
