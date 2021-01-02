@@ -141,13 +141,15 @@ pub struct TypeAlias {
 
 pub struct Impl {
     pub impl_token: Token![impl],
-    pub generics: Lifetimes,
+    pub impl_generics: Lifetimes,
     pub negative: bool,
     pub ty: Type,
+    pub ty_generics: Lifetimes,
     pub brace_token: Brace,
     pub negative_token: Option<Token![!]>,
 }
 
+#[derive(Clone, Default)]
 pub struct Lifetimes {
     pub lt_token: Option<Token![<]>,
     pub lifetimes: Punctuated<Lifetime, Token![,]>,
