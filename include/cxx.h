@@ -120,7 +120,6 @@ public:
   bool operator>=(const Str &) const noexcept;
 
 private:
-  friend impl<Str>;
   // Not necessarily ABI compatible with &str. Codegen will translate to
   // cxx::rust_str::RustStr which matches this layout.
   const char *ptr;
@@ -174,7 +173,6 @@ public:
   iterator end() const noexcept;
 
 private:
-  friend impl<Slice>;
   // Not necessarily ABI compatible with &[T]. Codegen will translate to
   // cxx::rust_slice::RustSlice which matches this layout.
   void *ptr;

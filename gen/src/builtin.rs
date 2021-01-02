@@ -20,8 +20,6 @@ pub struct Builtins<'a> {
     pub maybe_uninit: bool,
     pub trycatch: bool,
     pub ptr_len: bool,
-    pub rust_slice_new: bool,
-    pub rust_slice_repr: bool,
     pub exception: bool,
     pub relocatable: bool,
     pub friend_impl: bool,
@@ -230,31 +228,6 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "  ::std::size_t len;");
         writeln!(out, "}};");
         out.end_block(Block::Namespace("repr"));
-    }
-
-    if builtin.rust_slice_new || builtin.rust_slice_repr {
-        out.next_section();
-        writeln!(out, "template <typename T>");
-        writeln!(out, "class impl<Slice<T>> final {{");
-        writeln!(out, "public:");
-        if builtin.rust_slice_new {
-            writeln!(
-                out,
-                "  static Slice<T> slice(repr::PtrLen repr) noexcept {{",
-            );
-            writeln!(out, "    return {{static_cast<T *>(repr.ptr), repr.len}};");
-            writeln!(out, "  }}");
-        }
-        if builtin.rust_slice_repr {
-            include.type_traits = true;
-            writeln!(
-                out,
-                "  static repr::PtrLen repr(Slice<T> slice) noexcept {{",
-            );
-            writeln!(out, "    return repr::PtrLen{{slice.ptr, slice.len}};");
-            writeln!(out, "  }}");
-        }
-        writeln!(out, "}};");
     }
 
     if builtin.rust_error {
