@@ -751,8 +751,12 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(r->get() == 2020);
   ASSERT(r->set(2021) == 2021);
   ASSERT(r->get() == 2021);
-  ASSERT(r->set(2020) == 2020);
+  auto r2 = r_return_box();
+  swap(r, r2);
   ASSERT(r->get() == 2020);
+  ASSERT(r2->get() == 2021);
+
+
   ASSERT(std::string(Shared{0}.r_method_on_shared()) == "2020");
 
   ASSERT(std::string(rAliasedFunction(2020)) == "2020");
@@ -784,6 +788,23 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(strncmp(cstring.data(), "test", 4) == 0);
   ASSERT(strncmp(cstring.c_str(), "test", 5) == 0);
   ASSERT(cstring.length() == 4);
+
+  rust::String other_cstring = "foo";
+  swap(cstring, other_cstring);
+  ASSERT(cstring == "foo");
+  ASSERT(other_cstring == "test");
+
+  rust::Str cstr = "test";
+  rust::Str other_cstr = "foo";
+  swap(cstr, other_cstr);
+  ASSERT(cstr == "foo");
+  ASSERT(other_cstr == "test");
+
+  rust::Vec<int> vec1{1, 2};
+  rust::Vec<int> vec2{3, 4};
+  swap(vec1, vec2);
+  ASSERT(vec1[0] == 3 && vec1[1] == 4);
+  ASSERT(vec2[0] == 1 && vec2[1] == 2);
 
   cxx_test_suite_set_correct();
   return nullptr;
