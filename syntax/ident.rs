@@ -1,27 +1,24 @@
 use crate::syntax::check::Check;
 use crate::syntax::{error, Api, Pair};
-use proc_macro2::Ident;
 
 fn check(cx: &mut Check, name: &Pair) {
     for segment in &name.namespace {
-        check_cxx_ident(cx, segment);
+        check_cxx_ident(cx, &segment.to_string());
     }
-    check_cxx_ident(cx, &name.cxx);
-    check_rust_ident(cx, &name.rust);
+    check_cxx_ident(cx, &name.cxx.to_string());
+    check_rust_ident(cx, &name.rust.to_string());
 
-    fn check_cxx_ident(cx: &mut Check, ident: &Ident) {
-        let s = ident.to_string();
-        if s.starts_with("cxxbridge") {
+    fn check_cxx_ident(cx: &mut Check, ident: &str) {
+        if ident.starts_with("cxxbridge") {
             cx.error(ident, error::CXXBRIDGE_RESERVED.msg);
         }
-        if s.contains("__") {
+        if ident.contains("__") {
             cx.error(ident, error::DOUBLE_UNDERSCORE.msg);
         }
     }
 
-    fn check_rust_ident(cx: &mut Check, ident: &Ident) {
-        let s = ident.to_string();
-        if s.starts_with("cxxbridge") {
+    fn check_rust_ident(cx: &mut Check, ident: &str) {
+        if ident.starts_with("cxxbridge") {
             cx.error(ident, error::CXXBRIDGE_RESERVED.msg);
         }
     }

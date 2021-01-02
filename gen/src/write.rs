@@ -50,10 +50,10 @@ fn write_forward_declarations(out: &mut OutFile, apis: &[Api]) {
         for api in apis {
             write!(out, "{:1$}", "", indent);
             match api {
-                Api::Struct(strct) => write_struct_decl(out, &strct.name.cxx),
+                Api::Struct(strct) => write_struct_decl(out, &strct.name),
                 Api::Enum(enm) => write_enum_decl(out, enm),
                 Api::CxxType(ety) => write_struct_using(out, &ety.name),
-                Api::RustType(ety) => write_struct_decl(out, &ety.name.cxx),
+                Api::RustType(ety) => write_struct_decl(out, &ety.name),
                 _ => unreachable!(),
             }
         }
@@ -296,8 +296,8 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
     writeln!(out, "#endif // {}", guard);
 }
 
-fn write_struct_decl(out: &mut OutFile, ident: &Ident) {
-    writeln!(out, "struct {};", ident);
+fn write_struct_decl(out: &mut OutFile, ident: &Pair) {
+    writeln!(out, "struct {};", ident.cxx);
 }
 
 fn write_enum_decl(out: &mut OutFile, enm: &Enum) {

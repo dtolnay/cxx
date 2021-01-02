@@ -41,6 +41,7 @@ use syn::{Expr, Generics, Lifetime, LitInt, Token, Type as RustType};
 pub use self::atom::Atom;
 pub use self::derive::{Derive, Trait};
 pub use self::doc::Doc;
+pub use self::names::ForeignName;
 pub use self::parse::parse_items;
 pub use self::types::Types;
 
@@ -252,7 +253,7 @@ pub enum Lang {
 #[derive(Clone)]
 pub struct Pair {
     pub namespace: Namespace,
-    pub cxx: Ident,
+    pub cxx: ForeignName,
     pub rust: Ident,
 }
 
