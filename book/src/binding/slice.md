@@ -32,7 +32,7 @@ public:
   size_t length() const noexcept;
   bool empty() const noexcept;
 
-  void swap(Slice & rhs) noexcept;
+  void swap(Slice &) noexcept;
 
   T &operator[](size_t n) const noexcept;
   T &at(size_t n) const;

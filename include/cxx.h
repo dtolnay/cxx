@@ -56,7 +56,7 @@ public:
 
   const char *c_str() noexcept;
 
-  void swap(String &rhs) noexcept;
+  void swap(String &) noexcept;
 
   using iterator = char *;
   iterator begin() noexcept;
@@ -106,7 +106,7 @@ public:
   std::size_t size() const noexcept;
   std::size_t length() const noexcept;
 
-  void swap(Str &rhs) noexcept;
+  void swap(Str &) noexcept;
 
   // Important in order for System V ABI to pass in registers.
   Str(const Str &) noexcept = default;
@@ -168,7 +168,7 @@ public:
   std::size_t length() const noexcept;
   bool empty() const noexcept;
 
-  void swap(Slice &rhs) noexcept;
+  void swap(Slice &) noexcept;
 
   T &operator[](std::size_t n) const noexcept;
   T &at(std::size_t n) const;
@@ -247,7 +247,7 @@ public:
   explicit Box(const T &);
   explicit Box(T &&);
 
-  void swap(Box &rhs) noexcept;
+  void swap(Box &) noexcept;
 
   Box &operator=(Box &&) noexcept;
 
@@ -301,7 +301,7 @@ public:
   T *data() noexcept;
   std::size_t capacity() const noexcept;
 
-  void swap(Vec &rhs) noexcept;
+  void swap(Vec &) noexcept;
 
   const T &operator[](std::size_t n) const noexcept;
   const T &at(std::size_t n) const;

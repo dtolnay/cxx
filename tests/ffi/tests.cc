@@ -756,7 +756,6 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(r->get() == 2020);
   ASSERT(r2->get() == 2021);
 
-
   ASSERT(std::string(Shared{0}.r_method_on_shared()) == "2020");
 
   ASSERT(std::string(rAliasedFunction(2020)) == "2020");
