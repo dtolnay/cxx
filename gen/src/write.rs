@@ -135,7 +135,7 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
         }
     }
     for ty in &slice_in_return_position {
-        write!(out, "template struct ");
+        write!(out, "template class ");
         write_type(out, ty);
         writeln!(out, ";");
     }
