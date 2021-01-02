@@ -35,6 +35,8 @@ public:
 
   const char *c_str() noexcept;
 
+  void swap(String & rhs) noexcept;
+
   using iterator = char *;
   iterator begin() noexcept;
   iterator end() noexcept;

@@ -130,6 +130,11 @@ const char *String::c_str() noexcept {
   return ptr;
 }
 
+void String::swap(String& rhs) noexcept {
+  using std::swap;
+  swap(this->repr, rhs.repr);
+}
+
 String::iterator String::begin() noexcept {
   return const_cast<char *>(this->data());
 }
@@ -208,6 +213,12 @@ Str::Str(const char *s, std::size_t len)
 
 Str::operator std::string() const {
   return std::string(this->data(), this->size());
+}
+
+void Str::swap(Str& rhs) noexcept {
+  using std::swap;
+  swap(this->ptr, rhs.ptr);
+  swap(this->len, rhs.len);
 }
 
 Str::const_iterator Str::begin() const noexcept { return this->cbegin(); }
