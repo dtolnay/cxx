@@ -40,6 +40,8 @@ public:
   class iterator;
   iterator begin() const noexcept;
   iterator end() const noexcept;
+
+  void swap(Slice &) noexcept;
 };
 #
 # template <typename T>

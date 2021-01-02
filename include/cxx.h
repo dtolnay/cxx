@@ -125,6 +125,8 @@ public:
   bool operator>(const Str &) const noexcept;
   bool operator>=(const Str &) const noexcept;
 
+  void swap(Str &) noexcept;
+
 private:
   std::array<std::uintptr_t, 2> repr;
 };
@@ -174,6 +176,8 @@ public:
   class iterator;
   iterator begin() const noexcept;
   iterator end() const noexcept;
+
+  void swap(Slice &) noexcept;
 
 private:
   // Not necessarily ABI compatible with &[T]. Codegen will translate to
@@ -665,6 +669,11 @@ typename Slice<T>::iterator Slice<T>::end() const noexcept {
   iterator it = this->begin();
   it.pos = static_cast<char *>(it.pos) + it.stride * this->len;
   return it;
+}
+
+template <typename T>
+void Slice<T>::swap(Slice &rhs) noexcept {
+  std::swap(*this, rhs);
 }
 #endif // CXXBRIDGE1_RUST_SLICE
 
