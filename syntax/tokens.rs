@@ -192,14 +192,15 @@ impl ToTokens for Impl {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let Impl {
             impl_token,
-            generics,
+            impl_generics,
             negative: _,
             ty,
+            ty_generics: _,
             brace_token,
             negative_token,
         } = self;
         impl_token.to_tokens(tokens);
-        generics.to_tokens(tokens);
+        impl_generics.to_tokens(tokens);
         negative_token.to_tokens(tokens);
         ty.to_tokens(tokens);
         brace_token.surround(tokens, |_tokens| {});
