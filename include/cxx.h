@@ -56,7 +56,7 @@ public:
 
   const char *c_str() noexcept;
 
-  void swap(String & rhs) noexcept;
+  void swap(String &rhs) noexcept;
 
   using iterator = char *;
   iterator begin() noexcept;
@@ -79,9 +79,7 @@ public:
   String(unsafe_bitcopy_t, const String &) noexcept;
 
 private:
-  friend void swap(String& lhs, String& rhs) noexcept {
-    lhs.swap(rhs);
-  }
+  friend void swap(String &lhs, String &rhs) noexcept { lhs.swap(rhs); }
 
   // Size and alignment statically verified by rust_string.rs.
   std::array<std::uintptr_t, 3> repr;
@@ -108,7 +106,7 @@ public:
   std::size_t size() const noexcept;
   std::size_t length() const noexcept;
 
-  void swap(Str & rhs) noexcept;
+  void swap(Str &rhs) noexcept;
 
   // Important in order for System V ABI to pass in registers.
   Str(const Str &) noexcept = default;
@@ -129,9 +127,7 @@ public:
   bool operator>=(const Str &) const noexcept;
 
 private:
-  friend void swap(Str & lhs, Str & rhs) noexcept {
-    lhs.swap(rhs);
-  }
+  friend void swap(Str &lhs, Str &rhs) noexcept { lhs.swap(rhs); }
 
   // Not necessarily ABI compatible with &str. Codegen will translate to
   // cxx::rust_str::RustStr which matches this layout.
@@ -172,7 +168,7 @@ public:
   std::size_t length() const noexcept;
   bool empty() const noexcept;
 
-  void swap(Slice & rhs) noexcept;
+  void swap(Slice &rhs) noexcept;
 
   T &operator[](std::size_t n) const noexcept;
   T &at(std::size_t n) const;
@@ -188,9 +184,7 @@ public:
   iterator end() const noexcept;
 
 private:
-  friend void swap(Slice<T> & lhs, Slice<T> & rhs) noexcept {
-    lhs.swap(rhs);
-  }
+  friend void swap(Slice<T> &lhs, Slice<T> &rhs) noexcept { lhs.swap(rhs); }
 
   // Not necessarily ABI compatible with &[T]. Codegen will translate to
   // cxx::rust_slice::RustSlice which matches this layout.
@@ -253,7 +247,7 @@ public:
   explicit Box(const T &);
   explicit Box(T &&);
 
-  void swap(Box & rhs) noexcept;
+  void swap(Box &rhs) noexcept;
 
   Box &operator=(Box &&) noexcept;
 
@@ -279,9 +273,7 @@ private:
   Box(uninit) noexcept;
   void drop() noexcept;
 
-  friend void swap(Box & lhs, Box & rhs) noexcept {
-    lhs.swap(rhs);
-  }
+  friend void swap(Box &lhs, Box &rhs) noexcept { lhs.swap(rhs); }
 
   T *ptr;
 };
@@ -309,7 +301,7 @@ public:
   T *data() noexcept;
   std::size_t capacity() const noexcept;
 
-  void swap(Vec & rhs) noexcept;
+  void swap(Vec &rhs) noexcept;
 
   const T &operator[](std::size_t n) const noexcept;
   const T &at(std::size_t n) const;
@@ -345,9 +337,7 @@ private:
   void set_len(std::size_t len) noexcept;
   void drop() noexcept;
 
-  friend void swap(Vec<T> & lhs, Vec<T> & rhs) noexcept {
-    lhs.swap(rhs);
-  }
+  friend void swap(Vec<T> &lhs, Vec<T> &rhs) noexcept { lhs.swap(rhs); }
 
   // Size and alignment statically verified by rust_vec.rs.
   std::array<std::uintptr_t, 3> repr;
@@ -537,7 +527,7 @@ std::size_t Slice<T>::length() const noexcept {
 }
 
 template <typename T>
-void Slice<T>::swap(Slice<T> & rhs) noexcept {
+void Slice<T>::swap(Slice<T> &rhs) noexcept {
   using std::swap;
   swap(this->ptr, rhs.ptr);
   swap(this->len, rhs.len);
@@ -746,7 +736,7 @@ Box<T>::Box(T &&val) {
 }
 
 template <typename T>
-void Box<T>::swap(Box<T> & rhs) noexcept {
+void Box<T>::swap(Box<T> &rhs) noexcept {
   using std::swap;
   swap(this->ptr, rhs.ptr);
 }
@@ -870,7 +860,7 @@ T *Vec<T>::data() noexcept {
 }
 
 template <typename T>
-void Vec<T>::swap(Vec<T> & rhs) noexcept {
+void Vec<T>::swap(Vec<T> &rhs) noexcept {
   using std::swap;
   swap(this->repr, rhs.repr);
 }
