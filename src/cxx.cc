@@ -215,12 +215,6 @@ Str::operator std::string() const {
   return std::string(this->data(), this->size());
 }
 
-void Str::swap(Str &rhs) noexcept {
-  using std::swap;
-  swap(this->ptr, rhs.ptr);
-  swap(this->len, rhs.len);
-}
-
 Str::const_iterator Str::begin() const noexcept { return this->cbegin(); }
 
 Str::const_iterator Str::end() const noexcept { return this->cend(); }

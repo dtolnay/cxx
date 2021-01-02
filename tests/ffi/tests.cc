@@ -751,6 +751,8 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(r->get() == 2020);
   ASSERT(r->set(2021) == 2021);
   ASSERT(r->get() == 2021);
+
+  using std::swap;
   auto r2 = r_return_box();
   swap(r, r2);
   ASSERT(r->get() == 2020);
