@@ -57,6 +57,8 @@ public:
   const_iterator end() const noexcept;
   const_iterator cbegin() const noexcept;
   const_iterator cend() const noexcept;
+
+  void swap(Vec &) noexcept;
 };
 #
 # template <typename T>

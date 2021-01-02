@@ -34,6 +34,8 @@ public:
   template <typename... Fields>
   static Box in_place(Fields &&...);
 
+  void swap(Box &) noexcept;
+
   // Important: requires that `raw` came from an into_raw call. Do not
   // pass a pointer from `new` or any other source.
   static Box from_raw(T *) noexcept;
