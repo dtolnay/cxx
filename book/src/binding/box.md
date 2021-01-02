@@ -24,8 +24,6 @@ public:
   explicit Box(const T &);
   explicit Box(T &&);
 
-  void swap(Box &) noexcept;
-
   Box &operator=(Box &&) noexcept;
 
   const T *operator->() const noexcept;

@@ -32,8 +32,6 @@ public:
   T *data() noexcept;
   size_t capacity() const noexcept;
   
-  void swap(Vec &) noexcept;
-
   const T &operator[](size_t n) const noexcept;
   const T &at(size_t n) const;
   const T &front() const;

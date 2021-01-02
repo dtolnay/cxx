@@ -31,8 +31,6 @@ public:
   size_t size() const noexcept;
   size_t length() const noexcept;
 
-  void swap(Str &) noexcept;
-
   using iterator = const char *;
   using const_iterator = const char *;
   const_iterator begin() const noexcept;
