@@ -910,6 +910,7 @@ fn write_rust_function_shim_decl(
     sig: &Signature,
     indirect_call: bool,
 ) {
+    begin_function_definition(out);
     write_return_type(out, &sig.ret);
     write!(out, "{}(", local_name);
     for (i, arg) in sig.args.iter().enumerate() {
@@ -946,9 +947,6 @@ fn write_rust_function_shim_impl(
     if out.header && sig.receiver.is_some() {
         // We've already defined this inside the struct.
         return;
-    }
-    if !out.header {
-        begin_function_definition(out);
     }
     write_rust_function_shim_decl(out, local_name, sig, indirect_call);
     if out.header {
