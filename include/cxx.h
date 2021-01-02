@@ -556,7 +556,7 @@ template <typename T>
 typename Slice<T>::iterator::reference Slice<T>::iterator::operator[](
     typename Slice<T>::iterator::difference_type n) const noexcept {
   auto pos = static_cast<char *>(this->pos) + this->stride * n;
-  return *static_cast<T *>(pos);
+  return *reinterpret_cast<T *>(pos);
 }
 
 template <typename T>
