@@ -20,8 +20,6 @@ pub struct Builtins<'a> {
     pub maybe_uninit: bool,
     pub trycatch: bool,
     pub ptr_len: bool,
-    pub rust_str_new_unchecked: bool,
-    pub rust_str_repr: bool,
     pub rust_slice_new: bool,
     pub rust_slice_repr: bool,
     pub exception: bool,
@@ -232,33 +230,6 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "  ::std::size_t len;");
         writeln!(out, "}};");
         out.end_block(Block::Namespace("repr"));
-    }
-
-    if builtin.rust_str_new_unchecked || builtin.rust_str_repr {
-        out.next_section();
-        writeln!(out, "template <>");
-        writeln!(out, "class impl<Str> final {{");
-        writeln!(out, "public:");
-        if builtin.rust_str_new_unchecked {
-            writeln!(
-                out,
-                "  static Str new_unchecked(repr::PtrLen repr) noexcept {{",
-            );
-            writeln!(out, "    Str str;");
-            writeln!(out, "    str.ptr = static_cast<const char *>(repr.ptr);");
-            writeln!(out, "    str.len = repr.len;");
-            writeln!(out, "    return str;");
-            writeln!(out, "  }}");
-        }
-        if builtin.rust_str_repr {
-            writeln!(out, "  static repr::PtrLen repr(Str str) noexcept {{");
-            writeln!(
-                out,
-                "    return repr::PtrLen{{const_cast<char *>(str.ptr), str.len}};",
-            );
-            writeln!(out, "  }}");
-        }
-        writeln!(out, "}};");
     }
 
     if builtin.rust_slice_new || builtin.rust_slice_repr {
