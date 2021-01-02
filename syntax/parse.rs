@@ -39,10 +39,7 @@ pub fn parse_items(
                 Ok(strct) => apis.push(strct),
                 Err(err) => cx.push(err),
             },
-            Item::Enum(item) => match parse_enum(cx, item, namespace) {
-                Ok(enm) => apis.push(enm),
-                Err(err) => cx.push(err),
-            },
+            Item::Enum(item) => apis.push(parse_enum(cx, item, namespace)),
             Item::ForeignMod(foreign_mod) => {
                 parse_foreign_mod(cx, foreign_mod, &mut apis, trusted, namespace)
             }
@@ -153,7 +150,7 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
     }))
 }
 
-fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<Api> {
+fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
     let mut doc = Doc::new();
     let mut derives = Vec::new();
     let mut repr = None;
@@ -218,7 +215,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
         gt_token: None,
     };
 
-    Ok(Api::Enum(Enum {
+    Api::Enum(Enum {
         doc,
         derives,
         attrs,
@@ -231,7 +228,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Result<
         repr,
         repr_type,
         explicit_repr,
-    }))
+    })
 }
 
 fn parse_variant(
