@@ -329,7 +329,7 @@ private:
   void set_len(std::size_t len) noexcept;
   void drop() noexcept;
 
-  friend void swap(Vec<T> &lhs, Vec<T> &rhs) noexcept { lhs.swap(rhs); }
+  friend void swap(Vec &lhs, Vec &rhs) noexcept { lhs.swap(rhs); }
 
   // Size and alignment statically verified by rust_vec.rs.
   std::array<std::uintptr_t, 3> repr;
@@ -768,7 +768,7 @@ Box<T> Box<T>::in_place(Fields &&... fields) {
 }
 
 template <typename T>
-void Box<T>::swap(Box<T> &rhs) noexcept {
+void Box<T>::swap(Box &rhs) noexcept {
   using std::swap;
   swap(this->ptr, rhs.ptr);
 }
@@ -955,7 +955,7 @@ typename Vec<T>::const_iterator Vec<T>::cend() const noexcept {
 }
 
 template <typename T>
-void Vec<T>::swap(Vec<T> &rhs) noexcept {
+void Vec<T>::swap(Vec &rhs) noexcept {
   using std::swap;
   swap(this->repr, rhs.repr);
 }
