@@ -68,7 +68,7 @@
                             marker-start: url(#big_open_circle);
                          }
 
-                         
+
                         </style>
     <defs>
         <marker id="arrow" viewBox="-2 -2 8 8" refX="4" refY="2" markerWidth="7" markerHeight="7" orient="auto-start-reverse">

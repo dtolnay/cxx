@@ -31,7 +31,7 @@ public:
   const T *data() const noexcept;
   T *data() noexcept;
   size_t capacity() const noexcept;
-  
+
   const T &operator[](size_t n) const noexcept;
   const T &at(size_t n) const;
   const T &front() const;

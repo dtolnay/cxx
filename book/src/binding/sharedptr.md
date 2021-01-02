@@ -37,7 +37,7 @@ fn main() {
     {
         // Create a second shared_ptr holding shared ownership of the same
         // object. There is still only one Object but two SharedPtr<Object>.
-        // Both pointers point to the same object on the heap. 
+        // Both pointers point to the same object on the heap.
         let ptr2 = ptr1.clone();
         assert!(ptr::eq(ptr1.deref(), ptr2.deref()));
 
