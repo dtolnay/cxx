@@ -64,9 +64,8 @@ rust::Box<R> c_return_box() {
   Shared shared{0};
   rust::Box<Shared> box{shared}; // explicit constructor from const T&
   rust::Box<Shared> other{std::move(shared)}; // explicit constructor from T&&
-  box = other;                                // copy assignment
   box = std::move(other);                     // move assignment
-  rust::Box<Shared> box2(box);                // copy constructor
+  rust::Box<Shared> box2(*box);               // copy from another Box
   rust::Box<Shared> other2(std::move(other)); // move constructor
   rust::Box<Shared>::in_place(shared.z);      // placement static factory
   rust::Box<Shared>::in_place<size_t>(0);

@@ -228,14 +228,12 @@ public:
   using pointer = typename std::add_pointer<T>::type;
 
   Box() = delete;
-  Box(const Box &);
   Box(Box &&) noexcept;
   ~Box() noexcept;
 
   explicit Box(const T &);
   explicit Box(T &&);
 
-  Box &operator=(const Box &);
   Box &operator=(Box &&) noexcept;
 
   const T *operator->() const noexcept;
@@ -688,9 +686,6 @@ public:
 };
 
 template <typename T>
-Box<T>::Box(const Box &other) : Box(*other) {}
-
-template <typename T>
 Box<T>::Box(Box &&other) noexcept : ptr(other.ptr) {
   other.ptr = nullptr;
 }
@@ -716,19 +711,6 @@ Box<T>::~Box() noexcept {
   if (this->ptr) {
     this->drop();
   }
-}
-
-template <typename T>
-Box<T> &Box<T>::operator=(const Box &other) {
-  if (this->ptr) {
-    **this = *other;
-  } else {
-    allocation alloc;
-    ::new (alloc.ptr) T(*other);
-    this->ptr = alloc.ptr;
-    alloc.ptr = nullptr;
-  }
-  return *this;
 }
 
 template <typename T>
