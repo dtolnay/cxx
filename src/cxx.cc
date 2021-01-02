@@ -39,7 +39,12 @@ std::size_t cxxbridge1$string$len(const rust::String *self) noexcept;
 void cxxbridge1$string$reserve_total(rust::String *self, size_t cap) noexcept;
 
 // rust::Str
-bool cxxbridge1$str$valid(const char *ptr, std::size_t len) noexcept;
+void cxxbridge1$str$new(rust::Str *self) noexcept;
+void cxxbridge1$str$ref(rust::Str *self, const rust::String *string) noexcept;
+bool cxxbridge1$str$from(rust::Str *self, const char *ptr,
+                         std::size_t len) noexcept;
+const char *cxxbridge1$str$ptr(const rust::Str *self) noexcept;
+std::size_t cxxbridge1$str$len(const rust::Str *self) noexcept;
 } // extern "C"
 
 namespace rust {
@@ -185,46 +190,52 @@ std::ostream &operator<<(std::ostream &os, const String &s) {
   return os;
 }
 
-Str::Str() noexcept : ptr(reinterpret_cast<const char *>(1)), len(0) {}
+Str::Str() noexcept { cxxbridge1$str$new(this); }
 
-Str::Str(const String &s) noexcept : ptr(s.data()), len(s.length()) {}
+Str::Str(const String &s) noexcept { cxxbridge1$str$ref(this, &s); }
 
-static void initStr(const char *ptr, std::size_t len) {
-  if (!cxxbridge1$str$valid(ptr, len)) {
+static void initStr(Str *self, const char *ptr, std::size_t len) {
+  if (!cxxbridge1$str$from(self, ptr, len)) {
     panic<std::invalid_argument>("data for rust::Str is not utf-8");
   }
 }
 
-Str::Str(const std::string &s) : ptr(s.data()), len(s.length()) {
-  initStr(this->ptr, this->len);
-}
+Str::Str(const std::string &s) { initStr(this, s.data(), s.length()); }
 
-Str::Str(const char *s) : ptr(s), len(std::strlen(s)) {
+Str::Str(const char *s) {
   assert(s != nullptr);
-  initStr(this->ptr, this->len);
+  initStr(this, s, std::strlen(s));
 }
 
-Str::Str(const char *s, std::size_t len)
-    : ptr(s == nullptr && len == 0 ? reinterpret_cast<const char *>(1) : s),
-      len(len) {
+Str::Str(const char *s, std::size_t len) {
   assert(s != nullptr || len == 0);
-  initStr(this->ptr, this->len);
+  initStr(this,
+          s == nullptr && len == 0 ? reinterpret_cast<const char *>(1) : s,
+          len);
 }
 
 Str::operator std::string() const {
   return std::string(this->data(), this->size());
 }
 
+const char *Str::data() const noexcept { return cxxbridge1$str$ptr(this); }
+
+std::size_t Str::size() const noexcept { return cxxbridge1$str$len(this); }
+
+std::size_t Str::length() const noexcept { return this->size(); }
+
 Str::const_iterator Str::begin() const noexcept { return this->cbegin(); }
 
 Str::const_iterator Str::end() const noexcept { return this->cend(); }
 
-Str::const_iterator Str::cbegin() const noexcept { return this->ptr; }
+Str::const_iterator Str::cbegin() const noexcept { return this->data(); }
 
-Str::const_iterator Str::cend() const noexcept { return this->ptr + this->len; }
+Str::const_iterator Str::cend() const noexcept {
+  return this->data() + this->size();
+}
 
 bool Str::operator==(const Str &rhs) const noexcept {
-  return this->len == rhs.len &&
+  return this->size() == rhs.size() &&
          std::equal(this->begin(), this->end(), rhs.begin());
 }
 
