@@ -12,6 +12,18 @@
                     "kind": "bin"
                 }
             }
-        }
+        },
+        {
+            "name": "Debug cargo tests",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": ["test", "--no-run"],
+                "filter": {
+                    "name": "test",
+                    "kind": "test"
+                }
+            }
+        },
     ]
 }
