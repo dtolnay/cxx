@@ -130,11 +130,6 @@ const char *String::c_str() noexcept {
   return ptr;
 }
 
-void String::swap(String &rhs) noexcept {
-  using std::swap;
-  swap(this->repr, rhs.repr);
-}
-
 String::iterator String::begin() noexcept {
   return const_cast<char *>(this->data());
 }
@@ -175,6 +170,11 @@ bool String::operator>(const String &rhs) const noexcept {
 
 bool String::operator>=(const String &rhs) const noexcept {
   return rust::Str(*this) >= rust::Str(rhs);
+}
+
+void String::swap(String &rhs) noexcept {
+  using std::swap;
+  swap(this->repr, rhs.repr);
 }
 
 String::String(unsafe_bitcopy_t, const String &bits) noexcept

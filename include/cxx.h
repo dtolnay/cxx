@@ -56,8 +56,6 @@ public:
 
   const char *c_str() noexcept;
 
-  void swap(String &) noexcept;
-
   using iterator = char *;
   iterator begin() noexcept;
   iterator end() noexcept;
@@ -74,6 +72,8 @@ public:
   bool operator<=(const String &) const noexcept;
   bool operator>(const String &) const noexcept;
   bool operator>=(const String &) const noexcept;
+
+  void swap(String &) noexcept;
 
   // Internal API only intended for the cxxbridge code generator.
   String(unsafe_bitcopy_t, const String &) noexcept;
@@ -239,8 +239,6 @@ public:
   explicit Box(const T &);
   explicit Box(T &&);
 
-  void swap(Box &) noexcept;
-
   Box &operator=(Box &&) noexcept;
 
   const T *operator->() const noexcept;
@@ -250,6 +248,8 @@ public:
 
   template <typename... Fields>
   static Box in_place(Fields &&...);
+
+  void swap(Box &) noexcept;
 
   // Important: requires that `raw` came from an into_raw call. Do not pass a
   // pointer from `new` or any other source.
@@ -293,8 +293,6 @@ public:
   T *data() noexcept;
   std::size_t capacity() const noexcept;
 
-  void swap(Vec &) noexcept;
-
   const T &operator[](std::size_t n) const noexcept;
   const T &at(std::size_t n) const;
   const T &front() const noexcept;
@@ -320,6 +318,8 @@ public:
   const_iterator end() const noexcept;
   const_iterator cbegin() const noexcept;
   const_iterator cend() const noexcept;
+
+  void swap(Vec &) noexcept;
 
   // Internal API only intended for the cxxbridge code generator.
   Vec(unsafe_bitcopy_t, const Vec &) noexcept;
@@ -721,12 +721,6 @@ Box<T>::Box(T &&val) {
 }
 
 template <typename T>
-void Box<T>::swap(Box<T> &rhs) noexcept {
-  using std::swap;
-  swap(this->ptr, rhs.ptr);
-}
-
-template <typename T>
 Box<T>::~Box() noexcept {
   if (this->ptr) {
     this->drop();
@@ -771,6 +765,12 @@ Box<T> Box<T>::in_place(Fields &&... fields) {
   ::new (ptr) T{std::forward<Fields>(fields)...};
   alloc.ptr = nullptr;
   return from_raw(ptr);
+}
+
+template <typename T>
+void Box<T>::swap(Box<T> &rhs) noexcept {
+  using std::swap;
+  swap(this->ptr, rhs.ptr);
 }
 
 template <typename T>
@@ -842,12 +842,6 @@ bool Vec<T>::empty() const noexcept {
 template <typename T>
 T *Vec<T>::data() noexcept {
   return const_cast<T *>(const_cast<const Vec<T> *>(this)->data());
-}
-
-template <typename T>
-void Vec<T>::swap(Vec<T> &rhs) noexcept {
-  using std::swap;
-  swap(this->repr, rhs.repr);
 }
 
 template <typename T>
@@ -958,6 +952,12 @@ typename Vec<T>::const_iterator Vec<T>::cbegin() const noexcept {
 template <typename T>
 typename Vec<T>::const_iterator Vec<T>::cend() const noexcept {
   return Slice<const T>(this->data(), this->size()).end();
+}
+
+template <typename T>
+void Vec<T>::swap(Vec<T> &rhs) noexcept {
+  using std::swap;
+  swap(this->repr, rhs.repr);
 }
 
 // Internal API only intended for the cxxbridge code generator.
