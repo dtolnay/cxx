@@ -3,7 +3,7 @@ use crate::syntax::{Lifetimes, NamedType, Pair, Symbol};
 use proc_macro2::{Ident, Span};
 use std::fmt::{self, Display};
 use std::iter;
-use syn::parse::Result;
+use syn::parse::{Error, Result};
 use syn::punctuated::Punctuated;
 
 #[derive(Clone)]
@@ -53,9 +53,13 @@ impl ForeignName {
     pub fn parse(text: &str, span: Span) -> Result<Self> {
         // TODO: support C++ names containing whitespace (`unsigned int`) or
         // non-alphanumeric characters (`operator++`).
-        let ident: Ident = syn::parse_str(text)?;
-        let text = ident.to_string();
-        Ok(ForeignName { text, span })
+        match syn::parse_str::<Ident>(text) {
+            Ok(ident) => {
+                let text = ident.to_string();
+                Ok(ForeignName { text, span })
+            }
+            Err(err) => Err(Error::new(span, err)),
+        }
     }
 }
 
