@@ -1,5 +1,5 @@
 use crate::syntax::{
-    Array, ExternFn, Impl, Include, Lifetimes, Receiver, Ref, Signature, SliceRef, Ty1, Type, Var,
+    Array, ExternFn, Include, Lifetimes, Receiver, Ref, Signature, SliceRef, Ty1, Type, Var,
 };
 use std::hash::{Hash, Hasher};
 use std::mem;
@@ -393,47 +393,5 @@ impl Hash for Receiver {
         lifetime.hash(state);
         mutable.hash(state);
         ty.hash(state);
-    }
-}
-
-impl Hash for Impl {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        let Impl {
-            impl_token: _,
-            generics,
-            negative,
-            ty,
-            brace_token: _,
-            negative_token: _,
-        } = self;
-        generics.hash(state);
-        if *negative {
-            negative.hash(state);
-        }
-        ty.hash(state);
-    }
-}
-
-impl Eq for Impl {}
-
-impl PartialEq for Impl {
-    fn eq(&self, other: &Impl) -> bool {
-        let Impl {
-            impl_token: _,
-            generics,
-            negative,
-            ty,
-            brace_token: _,
-            negative_token: _,
-        } = self;
-        let Impl {
-            impl_token: _,
-            generics: generics2,
-            negative: negative2,
-            ty: ty2,
-            brace_token: _,
-            negative_token: _,
-        } = other;
-        generics == generics2 && negative == negative2 && ty == ty2
     }
 }
