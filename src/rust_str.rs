@@ -1,27 +1,20 @@
 use core::mem;
 use core::ptr::NonNull;
-use core::slice;
 use core::str;
 
-// Not necessarily ABI compatible with &str. Codegen performs the translation.
 #[repr(C)]
-#[derive(Copy, Clone)]
 pub struct RustStr {
-    pub(crate) ptr: NonNull<u8>,
-    pub(crate) len: usize,
+    repr: NonNull<str>,
 }
 
 impl RustStr {
-    pub fn from(s: &str) -> Self {
-        RustStr {
-            ptr: NonNull::from(s).cast::<u8>(),
-            len: s.len(),
-        }
+    pub fn from(repr: &str) -> Self {
+        let repr = NonNull::from(repr);
+        RustStr { repr }
     }
 
     pub unsafe fn as_str<'a>(self) -> &'a str {
-        let slice = slice::from_raw_parts(self.ptr.as_ptr(), self.len);
-        str::from_utf8_unchecked(slice)
+        &*self.repr.as_ptr()
     }
 }
 

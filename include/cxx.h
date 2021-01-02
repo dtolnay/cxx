@@ -88,6 +88,7 @@ private:
 #endif // CXXBRIDGE1_RUST_STRING
 
 #ifndef CXXBRIDGE1_RUST_STR
+#define CXXBRIDGE1_RUST_STR
 // https://cxx.rs/binding/str.html
 class Str final {
 public:
@@ -125,10 +126,7 @@ public:
   bool operator>=(const Str &) const noexcept;
 
 private:
-  // Not necessarily ABI compatible with &str. Codegen will translate to
-  // cxx::rust_str::RustStr which matches this layout.
-  const char *ptr;
-  std::size_t len;
+  std::array<std::uintptr_t, 2> repr;
 };
 #endif // CXXBRIDGE1_RUST_STR
 
@@ -483,15 +481,6 @@ struct unsafe_bitcopy_t final {
 
 constexpr unsafe_bitcopy_t unsafe_bitcopy{};
 #endif // CXXBRIDGE1_RUST_BITCOPY
-
-#ifndef CXXBRIDGE1_RUST_STR
-#define CXXBRIDGE1_RUST_STR
-inline const char *Str::data() const noexcept { return this->ptr; }
-
-inline std::size_t Str::size() const noexcept { return this->len; }
-
-inline std::size_t Str::length() const noexcept { return this->len; }
-#endif // CXXBRIDGE1_RUST_STR
 
 #ifndef CXXBRIDGE1_RUST_SLICE
 #define CXXBRIDGE1_RUST_SLICE
