@@ -44,6 +44,8 @@ public:
   bool operator<=(const Str &) const noexcept;
   bool operator>(const Str &) const noexcept;
   bool operator>=(const Str &) const noexcept;
+
+  void swap(Str &) noexcept;
 };
 
 std::ostream &operator<<(std::ostream &, const Str &);
