@@ -5,7 +5,7 @@ use crate::gen::{builtin, include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::instantiate::ImplKey;
 use crate::syntax::map::UnorderedMap as Map;
-use crate::syntax::set::UnorderedSet;
+use crate::syntax::set::{OrderedSet, UnorderedSet};
 use crate::syntax::symbol::Symbol;
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::{
@@ -121,18 +121,23 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
 
     out.set_namespace(Default::default());
 
+    // MSVC workaround for "C linkage function cannot return C++ class" error.
+    // Apparently the compiler fails to perform implicit instantiations as part
+    // of an extern declaration. Instead we instantiate explicitly.
+    // See https://stackoverflow.com/a/57429504/6086311.
     out.next_section();
-    for ty in out.types {
-        // MSVC workaround for "C linkage function cannot return C++ class"
-        // error. Apparently the compiler fails to perform implicit
-        // instantiations as part of an extern declaration. Instead we
-        // instantiate explicitly.
-        // See https://stackoverflow.com/a/57429504/6086311.
-        if let Type::SliceRef(_) = ty {
-            write!(out, "template struct ");
-            write_type(out, ty);
-            writeln!(out, ";");
+    let mut slice_in_return_position = OrderedSet::new();
+    for api in apis {
+        if let Api::CxxFunction(efn) | Api::RustFunction(efn) = api {
+            if let Some(ty @ Type::SliceRef(_)) = &efn.ret {
+                slice_in_return_position.insert(ty);
+            }
         }
+    }
+    for ty in &slice_in_return_position {
+        write!(out, "template struct ");
+        write_type(out, ty);
+        writeln!(out, ";");
     }
 
     out.next_section();
