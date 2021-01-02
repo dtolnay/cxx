@@ -45,6 +45,12 @@ bool cxxbridge1$str$from(rust::Str *self, const char *ptr,
                          std::size_t len) noexcept;
 const char *cxxbridge1$str$ptr(const rust::Str *self) noexcept;
 std::size_t cxxbridge1$str$len(const rust::Str *self) noexcept;
+
+// rust::Slice
+void cxxbridge1$slice$new(void *self, const void *ptr,
+                          std::size_t len) noexcept;
+void *cxxbridge1$slice$ptr(const void *self) noexcept;
+std::size_t cxxbridge1$slice$len(const void *self) noexcept;
 } // extern "C"
 
 namespace rust {
@@ -272,6 +278,16 @@ void Str::swap(Str &rhs) noexcept { std::swap(*this, rhs); }
 std::ostream &operator<<(std::ostream &os, const Str &s) {
   os.write(s.data(), s.size());
   return os;
+}
+
+void sliceInit(void *self, const void *ptr, std::size_t len) noexcept {
+  cxxbridge1$slice$new(self, ptr, len);
+}
+
+void *slicePtr(const void *self) noexcept { return cxxbridge1$slice$ptr(self); }
+
+std::size_t sliceLen(const void *self) noexcept {
+  return cxxbridge1$slice$len(self);
 }
 
 // Rust specifies that usize is ABI compatible with C's uintptr_t.
