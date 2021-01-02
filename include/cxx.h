@@ -180,8 +180,6 @@ public:
   void swap(Slice &) noexcept;
 
 private:
-  void *ptr() const noexcept;
-
   std::array<std::uintptr_t, 2> repr;
 };
 
@@ -487,26 +485,27 @@ constexpr unsafe_bitcopy_t unsafe_bitcopy{};
 
 #ifndef CXXBRIDGE1_RUST_SLICE
 #define CXXBRIDGE1_RUST_SLICE
+void sliceInit(void *, const void *, std::size_t) noexcept;
+void *slicePtr(const void *) noexcept;
+std::size_t sliceLen(const void *) noexcept;
+
 template <typename T>
 Slice<T>::Slice() noexcept {
-  void sliceInit(void *, const void *, std::size_t) noexcept;
   sliceInit(this, reinterpret_cast<void *>(align_of<T>()), 0);
 }
 
 template <typename T>
 Slice<T>::Slice(T *s, std::size_t count) noexcept {
-  void sliceInit(void *, const void *, std::size_t) noexcept;
   sliceInit(this, const_cast<typename std::remove_const<T>::type *>(s), count);
 }
 
 template <typename T>
 T *Slice<T>::data() const noexcept {
-  return reinterpret_cast<T *>(this->ptr());
+  return reinterpret_cast<T *>(slicePtr(this));
 }
 
 template <typename T>
 std::size_t Slice<T>::size() const noexcept {
-  std::size_t sliceLen(const void *) noexcept;
   return sliceLen(this);
 }
 
@@ -523,7 +522,7 @@ bool Slice<T>::empty() const noexcept {
 template <typename T>
 T &Slice<T>::operator[](std::size_t n) const noexcept {
   assert(n < this->size());
-  auto pos = static_cast<char *>(this->ptr()) + size_of<T>() * n;
+  auto pos = static_cast<char *>(slicePtr(this)) + size_of<T>() * n;
   return *reinterpret_cast<T *>(pos);
 }
 
@@ -663,7 +662,7 @@ bool Slice<T>::iterator::operator>=(const iterator &other) const noexcept {
 template <typename T>
 typename Slice<T>::iterator Slice<T>::begin() const noexcept {
   iterator it;
-  it.pos = this->ptr();
+  it.pos = slicePtr(this);
   it.stride = size_of<T>();
   return it;
 }
@@ -678,12 +677,6 @@ typename Slice<T>::iterator Slice<T>::end() const noexcept {
 template <typename T>
 void Slice<T>::swap(Slice &rhs) noexcept {
   std::swap(*this, rhs);
-}
-
-template <typename T>
-void *Slice<T>::ptr() const noexcept {
-  void *slicePtr(const void *) noexcept;
-  return slicePtr(this);
 }
 #endif // CXXBRIDGE1_RUST_SLICE
 
