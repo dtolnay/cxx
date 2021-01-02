@@ -657,7 +657,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         write!(
             out,
             "{} &self",
-            out.types.resolve(&receiver.ty).to_fully_qualified(),
+            out.types.resolve(&receiver.ty).name.to_fully_qualified(),
         );
     }
     for (i, arg) in efn.args.iter().enumerate() {
@@ -687,7 +687,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         Some(receiver) => write!(
             out,
             "({}::*{}$)(",
-            out.types.resolve(&receiver.ty).to_fully_qualified(),
+            out.types.resolve(&receiver.ty).name.to_fully_qualified(),
             efn.name.rust,
         ),
     }
@@ -709,7 +709,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         Some(receiver) => write!(
             out,
             "&{}::{}",
-            out.types.resolve(&receiver.ty).to_fully_qualified(),
+            out.types.resolve(&receiver.ty).name.to_fully_qualified(),
             efn.name.cxx,
         ),
     }
@@ -868,7 +868,7 @@ fn write_rust_function_decl_impl(
         write!(
             out,
             "{} &self",
-            out.types.resolve(&receiver.ty).to_fully_qualified(),
+            out.types.resolve(&receiver.ty).name.to_fully_qualified(),
         );
         needs_comma = true;
     }
@@ -903,7 +903,11 @@ fn write_rust_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     }
     let local_name = match &efn.sig.receiver {
         None => efn.name.cxx.to_string(),
-        Some(receiver) => format!("{}::{}", out.types.resolve(&receiver.ty).cxx, efn.name.cxx),
+        Some(receiver) => format!(
+            "{}::{}",
+            out.types.resolve(&receiver.ty).name.cxx,
+            efn.name.cxx,
+        ),
     };
     let invoke = mangle::extern_fn(efn, out.types);
     let indirect_call = false;
@@ -1160,7 +1164,11 @@ fn write_type(out: &mut OutFile, ty: &Type) {
     match ty {
         Type::Ident(ident) => match Atom::from(&ident.rust) {
             Some(atom) => write_atom(out, atom),
-            None => write!(out, "{}", out.types.resolve(ident).to_fully_qualified()),
+            None => write!(
+                out,
+                "{}",
+                out.types.resolve(ident).name.to_fully_qualified(),
+            ),
         },
         Type::RustBox(ty) => {
             write!(out, "::rust::Box<");
@@ -1290,7 +1298,7 @@ trait ToTypename {
 
 impl ToTypename for Ident {
     fn to_typename(&self, types: &Types) -> String {
-        types.resolve(self).to_fully_qualified()
+        types.resolve(self).name.to_fully_qualified()
     }
 }
 
@@ -1311,7 +1319,7 @@ trait ToMangled {
 
 impl ToMangled for Ident {
     fn to_mangled(&self, types: &Types) -> Symbol {
-        types.resolve(self).to_symbol()
+        types.resolve(self).name.to_symbol()
     }
 }
 
@@ -1360,8 +1368,8 @@ fn write_generic_instantiations(out: &mut OutFile) {
 
 fn write_rust_box_extern(out: &mut OutFile, ident: &Ident) {
     let resolve = out.types.resolve(ident);
-    let inner = resolve.to_fully_qualified();
-    let instance = resolve.to_symbol();
+    let inner = resolve.name.to_fully_qualified();
+    let instance = resolve.name.to_symbol();
 
     writeln!(
         out,
@@ -1425,8 +1433,8 @@ fn write_rust_vec_extern(out: &mut OutFile, element: &Ident) {
 
 fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
     let resolve = out.types.resolve(ident);
-    let inner = resolve.to_fully_qualified();
-    let instance = resolve.to_symbol();
+    let inner = resolve.name.to_fully_qualified();
+    let instance = resolve.name.to_symbol();
 
     writeln!(out, "template <>");
     begin_function_definition(out);
@@ -1567,7 +1575,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     if conditional_delete {
         out.builtin.is_complete = true;
         let definition = match ty {
-            UniquePtr::Ident(ty) => &out.types.resolve(ty).cxx,
+            UniquePtr::Ident(ty) => &out.types.resolve(ty).name.cxx,
             UniquePtr::CxxVector(_) => unreachable!(),
         };
         writeln!(
@@ -1650,8 +1658,8 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
 
 fn write_shared_ptr(out: &mut OutFile, ident: &Ident) {
     let resolve = out.types.resolve(ident);
-    let inner = resolve.to_fully_qualified();
-    let instance = resolve.to_symbol();
+    let inner = resolve.name.to_fully_qualified();
+    let instance = resolve.name.to_symbol();
 
     out.include.new = true;
     out.include.utility = true;
@@ -1722,8 +1730,8 @@ fn write_shared_ptr(out: &mut OutFile, ident: &Ident) {
 
 fn write_weak_ptr(out: &mut OutFile, ident: &Ident) {
     let resolve = out.types.resolve(ident);
-    let inner = resolve.to_fully_qualified();
-    let instance = resolve.to_symbol();
+    let inner = resolve.name.to_fully_qualified();
+    let instance = resolve.name.to_symbol();
 
     out.include.new = true;
     out.include.utility = true;

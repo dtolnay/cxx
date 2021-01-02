@@ -1,9 +1,16 @@
-use crate::syntax::{NamedType, Pair, Types};
+use crate::syntax::{Lifetimes, NamedType, Pair, Types};
 use proc_macro2::Ident;
 
+#[derive(Copy, Clone)]
+pub struct Resolution<'a> {
+    pub name: &'a Pair,
+    pub generics: &'a Lifetimes,
+}
+
 impl<'a> Types<'a> {
-    pub fn resolve(&self, ident: &impl UnresolvedName) -> &Pair {
-        self.resolutions
+    pub fn resolve(&self, ident: &impl UnresolvedName) -> Resolution<'a> {
+        *self
+            .resolutions
             .get(ident.ident())
             .expect("Unable to resolve type")
     }

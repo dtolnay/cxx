@@ -16,7 +16,7 @@ pub fn extern_fn(efn: &ExternFn, types: &Types) -> Symbol {
             join!(
                 efn.name.namespace,
                 CXXBRIDGE,
-                receiver_ident.cxx,
+                receiver_ident.name.cxx,
                 efn.name.rust,
             )
         }
