@@ -3,8 +3,6 @@
 #include <iostream>
 #include <memory>
 
-int warning() {}
-
 extern "C" {
 void cxxbridge1$cxx_string$init(std::string *s, const std::uint8_t *ptr,
                                 std::size_t len) noexcept {
