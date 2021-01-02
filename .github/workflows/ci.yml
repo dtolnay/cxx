@@ -29,6 +29,7 @@ jobs:
             flags: /EHsc
     env:
       CXXFLAGS: ${{matrix.flags}}
+      RUSTFLAGS: --cfg deny_warnings
     steps:
       - name: Enable symlinks (windows)
         if: matrix.os == 'windows'
@@ -45,7 +46,7 @@ jobs:
         # still ensure the test is kept passing on the basis of the scheduled
         # builds.
         if: matrix.os && github.event_name != 'schedule'
-        run: echo 'RUSTFLAGS=--cfg skip_ui_tests' >> $GITHUB_ENV
+        run: echo "RUSTFLAGS=--cfg skip_ui_tests $RUSTFLAGS" >> $GITHUB_ENV
         shell: bash
       - run: cargo run --manifest-path demo/Cargo.toml
       - run: cargo test --workspace --exclude cxx-test-suite
