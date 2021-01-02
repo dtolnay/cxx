@@ -106,8 +106,6 @@ public:
   std::size_t size() const noexcept;
   std::size_t length() const noexcept;
 
-  void swap(Str &) noexcept;
-
   // Important in order for System V ABI to pass in registers.
   Str(const Str &) noexcept = default;
   ~Str() noexcept = default;
@@ -127,8 +125,6 @@ public:
   bool operator>=(const Str &) const noexcept;
 
 private:
-  friend void swap(Str &lhs, Str &rhs) noexcept { lhs.swap(rhs); }
-
   // Not necessarily ABI compatible with &str. Codegen will translate to
   // cxx::rust_str::RustStr which matches this layout.
   const char *ptr;
@@ -168,8 +164,6 @@ public:
   std::size_t length() const noexcept;
   bool empty() const noexcept;
 
-  void swap(Slice &) noexcept;
-
   T &operator[](std::size_t n) const noexcept;
   T &at(std::size_t n) const;
   T &front() const noexcept;
@@ -184,8 +178,6 @@ public:
   iterator end() const noexcept;
 
 private:
-  friend void swap(Slice<T> &lhs, Slice<T> &rhs) noexcept { lhs.swap(rhs); }
-
   // Not necessarily ABI compatible with &[T]. Codegen will translate to
   // cxx::rust_slice::RustSlice which matches this layout.
   void *ptr;
@@ -524,13 +516,6 @@ std::size_t Slice<T>::size() const noexcept {
 template <typename T>
 std::size_t Slice<T>::length() const noexcept {
   return this->len;
-}
-
-template <typename T>
-void Slice<T>::swap(Slice<T> &rhs) noexcept {
-  using std::swap;
-  swap(this->ptr, rhs.ptr);
-  swap(this->len, rhs.len);
 }
 
 template <typename T>
