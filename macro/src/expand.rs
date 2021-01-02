@@ -1038,7 +1038,7 @@ fn type_id(name: &Pair) -> TokenStream {
 
 fn expand_rust_box(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
     let resolve = types.resolve(ident);
-    let link_prefix = format!("cxxbridge1$box${}$", resolve.to_symbol());
+    let link_prefix = format!("cxxbridge1$box${}$", resolve.name.to_symbol());
     let link_alloc = format!("{}alloc", link_prefix);
     let link_dealloc = format!("{}dealloc", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
@@ -1076,7 +1076,7 @@ fn expand_rust_box(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -
 
 fn expand_rust_vec(elem: &Ident, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
     let resolve = types.resolve(elem);
-    let link_prefix = format!("cxxbridge1$rust_vec${}$", resolve.to_symbol());
+    let link_prefix = format!("cxxbridge1$rust_vec${}$", resolve.name.to_symbol());
     let link_new = format!("{}new", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
     let link_len = format!("{}len", link_prefix);
@@ -1143,7 +1143,7 @@ fn expand_rust_vec(elem: &Ident, types: &Types, explicit_impl: Option<&Impl>) ->
 fn expand_unique_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
     let name = ident.to_string();
     let resolve = types.resolve(ident);
-    let prefix = format!("cxxbridge1$unique_ptr${}$", resolve.to_symbol());
+    let prefix = format!("cxxbridge1$unique_ptr${}$", resolve.name.to_symbol());
     let link_null = format!("{}null", prefix);
     let link_uninit = format!("{}uninit", prefix);
     let link_raw = format!("{}raw", prefix);
@@ -1225,7 +1225,7 @@ fn expand_unique_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
 fn expand_shared_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
     let name = ident.to_string();
     let resolve = types.resolve(ident);
-    let prefix = format!("cxxbridge1$shared_ptr${}$", resolve.to_symbol());
+    let prefix = format!("cxxbridge1$shared_ptr${}$", resolve.name.to_symbol());
     let link_null = format!("{}null", prefix);
     let link_uninit = format!("{}uninit", prefix);
     let link_clone = format!("{}clone", prefix);
@@ -1293,7 +1293,7 @@ fn expand_shared_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
 fn expand_weak_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
     let name = ident.to_string();
     let resolve = types.resolve(ident);
-    let prefix = format!("cxxbridge1$weak_ptr${}$", resolve.to_symbol());
+    let prefix = format!("cxxbridge1$weak_ptr${}$", resolve.name.to_symbol());
     let link_null = format!("{}null", prefix);
     let link_clone = format!("{}clone", prefix);
     let link_downgrade = format!("{}downgrade", prefix);
@@ -1350,10 +1350,13 @@ fn expand_weak_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -
 fn expand_cxx_vector(elem: &Ident, explicit_impl: Option<&Impl>, types: &Types) -> TokenStream {
     let name = elem.to_string();
     let resolve = types.resolve(elem);
-    let prefix = format!("cxxbridge1$std$vector${}$", resolve.to_symbol());
+    let prefix = format!("cxxbridge1$std$vector${}$", resolve.name.to_symbol());
     let link_size = format!("{}size", prefix);
     let link_get_unchecked = format!("{}get_unchecked", prefix);
-    let unique_ptr_prefix = format!("cxxbridge1$unique_ptr$std$vector${}$", resolve.to_symbol());
+    let unique_ptr_prefix = format!(
+        "cxxbridge1$unique_ptr$std$vector${}$",
+        resolve.name.to_symbol(),
+    );
     let link_unique_ptr_null = format!("{}null", unique_ptr_prefix);
     let link_unique_ptr_raw = format!("{}raw", unique_ptr_prefix);
     let link_unique_ptr_get = format!("{}get", unique_ptr_prefix);
