@@ -747,15 +747,8 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     } else if efn.ret.is_some() {
         write!(out, "return ");
     }
-    match &efn.ret {
-        Some(Type::Ref(_)) => write!(out, "&"),
-        Some(ty @ Type::SliceRef(_)) if !indirect_return => {
-            out.builtin.rust_slice_repr = true;
-            write!(out, "::rust::impl<");
-            write_type(out, ty);
-            write!(out, ">::repr(");
-        }
-        _ => {}
+    if let Some(Type::Ref(_)) = efn.ret {
+        write!(out, "&");
     }
     match &efn.receiver {
         None => write!(out, "{}$(", efn.name.rust),
@@ -782,14 +775,6 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
             out.builtin.unsafe_bitcopy = true;
             write_type(out, &arg.ty);
             write!(out, "(::rust::unsafe_bitcopy, *{})", arg.name.cxx);
-        } else if let Type::SliceRef(slice) = &arg.ty {
-            write_type(out, &arg.ty);
-            write!(out, "(static_cast<");
-            if slice.mutability.is_none() {
-                write!(out, "const ");
-            }
-            write_type_space(out, &slice.inner);
-            write!(out, "*>({0}.ptr), {0}.len)", arg.name.cxx);
         } else if out.types.needs_indirect_abi(&arg.ty) {
             out.include.utility = true;
             write!(out, "::std::move(*{})", arg.name.cxx);
@@ -801,7 +786,6 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     match &efn.ret {
         Some(Type::RustBox(_)) => write!(out, ".into_raw()"),
         Some(Type::UniquePtr(_)) => write!(out, ".release()"),
-        Some(Type::SliceRef(_)) if !indirect_return => write!(out, ")"),
         _ => {}
     }
     if indirect_return {
@@ -1000,12 +984,6 @@ fn write_rust_function_shim_impl(
                 write!(out, "(");
             }
             Type::Ref(_) => write!(out, "*"),
-            Type::SliceRef(_) => {
-                out.builtin.rust_slice_new = true;
-                write!(out, "::rust::impl<");
-                write_type(out, ret);
-                write!(out, ">::slice(");
-            }
             _ => {}
         }
     }
@@ -1023,21 +1001,13 @@ fn write_rust_function_shim_impl(
         if needs_comma {
             write!(out, ", ");
         }
-        match &arg.ty {
-            Type::SliceRef(_) => {
-                out.builtin.rust_slice_repr = true;
-                write!(out, "::rust::impl<");
-                write_type(out, &arg.ty);
-                write!(out, ">::repr(");
-            }
-            ty if out.types.needs_indirect_abi(ty) => write!(out, "&"),
-            _ => {}
+        if out.types.needs_indirect_abi(&arg.ty) {
+            write!(out, "&");
         }
         write!(out, "{}", arg.name.cxx);
         match &arg.ty {
             Type::RustBox(_) => write!(out, ".into_raw()"),
             Type::UniquePtr(_) => write!(out, ".release()"),
-            Type::SliceRef(_) => write!(out, ")"),
             ty if ty != RustString && out.types.needs_indirect_abi(ty) => write!(out, "$.value"),
             _ => {}
         }
@@ -1059,7 +1029,7 @@ fn write_rust_function_shim_impl(
     write!(out, ")");
     if !indirect_return {
         if let Some(ret) = &sig.ret {
-            if let Type::RustBox(_) | Type::UniquePtr(_) | Type::SliceRef(_) = ret {
+            if let Type::RustBox(_) | Type::UniquePtr(_) = ret {
                 write!(out, ")");
             }
         }
@@ -1130,10 +1100,6 @@ fn write_extern_return_type_space(out: &mut OutFile, ty: &Option<Type>) {
             write_type(out, &ty.inner);
             write!(out, " *");
         }
-        Some(Type::SliceRef(_)) => {
-            out.builtin.ptr_len = true;
-            write!(out, "::rust::repr::PtrLen ");
-        }
         Some(ty) if out.types.needs_indirect_abi(ty) => write!(out, "void "),
         _ => write_return_type(out, ty),
     }
@@ -1144,10 +1110,6 @@ fn write_extern_arg(out: &mut OutFile, arg: &Var) {
         Type::RustBox(ty) | Type::UniquePtr(ty) | Type::CxxVector(ty) => {
             write_type_space(out, &ty.inner);
             write!(out, "*");
-        }
-        Type::SliceRef(_) => {
-            out.builtin.ptr_len = true;
-            write!(out, "::rust::repr::PtrLen ");
         }
         _ => write_type_space(out, &arg.ty),
     }
