@@ -3,6 +3,7 @@
     clippy::just_underscores_and_digits,
     clippy::let_underscore_drop,
     clippy::must_use_candidate,
+    clippy::needless_lifetimes,
     clippy::needless_pass_by_value,
     clippy::ptr_arg,
     clippy::trivially_copy_pass_by_ref,
