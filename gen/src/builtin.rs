@@ -20,6 +20,7 @@ pub struct Builtins<'a> {
     pub maybe_uninit: bool,
     pub trycatch: bool,
     pub ptr_len: bool,
+    pub repr_fat: bool,
     pub exception: bool,
     pub relocatable: bool,
     pub friend_impl: bool,
@@ -226,6 +227,17 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "struct PtrLen final {{");
         writeln!(out, "  void *ptr;");
         writeln!(out, "  ::std::size_t len;");
+        writeln!(out, "}};");
+        out.end_block(Block::Namespace("repr"));
+    }
+
+    if builtin.repr_fat {
+        include.array = true;
+        include.cstdint = true;
+        out.begin_block(Block::Namespace("repr"));
+        writeln!(out, "template <typename T>");
+        writeln!(out, "struct Fat final {{");
+        writeln!(out, "  T repr;");
         writeln!(out, "}};");
         out.end_block(Block::Namespace("repr"));
     }

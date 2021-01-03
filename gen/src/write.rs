@@ -133,15 +133,15 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
     let mut slice_in_return_position = OrderedSet::new();
     for api in apis {
         if let Api::CxxFunction(efn) | Api::RustFunction(efn) = api {
-            if let Some(ty @ Type::SliceRef(_)) = &efn.ret {
+            if let Some(ty @ Type::Str(_)) | Some(ty @ Type::SliceRef(_)) = &efn.ret {
                 slice_in_return_position.insert(ty);
             }
         }
     }
     for ty in &slice_in_return_position {
-        write!(out, "template class ");
+        write!(out, "template class ::rust::repr::Fat<");
         write_type(out, ty);
-        writeln!(out, ";");
+        writeln!(out, ">;");
     }
 
     out.next_section();
@@ -756,8 +756,10 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     } else if efn.ret.is_some() {
         write!(out, "return ");
     }
-    if let Some(Type::Ref(_)) = efn.ret {
-        write!(out, "&");
+    match &efn.ret {
+        Some(Type::Ref(_)) => write!(out, "&"),
+        Some(Type::Str(_)) | Some(Type::SliceRef(_)) if !indirect_return => write!(out, "{{"),
+        _ => {}
     }
     match &efn.receiver {
         None => write!(out, "{}$(", efn.name.rust),
@@ -795,6 +797,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     match &efn.ret {
         Some(Type::RustBox(_)) => write!(out, ".into_raw()"),
         Some(Type::UniquePtr(_)) => write!(out, ".release()"),
+        Some(Type::Str(_)) | Some(Type::SliceRef(_)) if !indirect_return => write!(out, "}}"),
         _ => {}
     }
     if indirect_return {
@@ -1038,8 +1041,10 @@ fn write_rust_function_shim_impl(
     write!(out, ")");
     if !indirect_return {
         if let Some(ret) = &sig.ret {
-            if let Type::RustBox(_) | Type::UniquePtr(_) = ret {
-                write!(out, ")");
+            match ret {
+                Type::RustBox(_) | Type::UniquePtr(_) => write!(out, ")"),
+                Type::Str(_) | Type::SliceRef(_) => write!(out, ".repr"),
+                _ => {}
             }
         }
     }
@@ -1108,6 +1113,12 @@ fn write_extern_return_type_space(out: &mut OutFile, ty: &Option<Type>) {
             }
             write_type(out, &ty.inner);
             write!(out, " *");
+        }
+        Some(ty @ Type::Str(_)) | Some(ty @ Type::SliceRef(_)) => {
+            out.builtin.repr_fat = true;
+            write!(out, "::rust::repr::Fat<");
+            write_type(out, ty);
+            write!(out, "> ");
         }
         Some(ty) if out.types.needs_indirect_abi(ty) => write!(out, "void "),
         _ => write_return_type(out, ty),
