@@ -355,9 +355,8 @@ static_assert(!std::is_same<Vec<std::uint8_t>::const_iterator,
 
 extern "C" {
 const char *cxxbridge1$error(const char *ptr, std::size_t len) noexcept {
-  char *copy = new char[len];
-  std::strncpy(copy, ptr, len);
-  return copy;
+  return ptr ? static_cast<char *>(std::memcpy(new char[len], ptr, len))
+             : nullptr;
 }
 } // extern "C"
 
