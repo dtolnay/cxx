@@ -210,6 +210,15 @@ pub mod ffi {
         type Job = crate::module::ffi::Job;
     }
 
+    unsafe extern "C++" {
+        type Borrow<'a>;
+
+        fn c_return_borrow<'a>(s: &'a CxxString) -> UniquePtr<Borrow<'a>>;
+
+        #[rust_name = "c_return_borrow_elided"]
+        fn c_return_borrow(s: &CxxString) -> UniquePtr<Borrow>;
+    }
+
     #[repr(u32)]
     #[derive(Hash)]
     enum COwnedEnum {

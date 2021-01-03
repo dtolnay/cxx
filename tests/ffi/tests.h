@@ -77,6 +77,11 @@ enum COwnedEnum {
   CVAL2,
 };
 
+struct Borrow {
+  Borrow(const std::string &s);
+  const std::string &s;
+};
+
 size_t c_return_primitive();
 Shared c_return_shared();
 ::A::AShared c_return_ns_shared();
@@ -110,6 +115,7 @@ size_t c_return_sum(size_t n1, size_t n2);
 Enum c_return_enum(uint16_t n);
 ::A::AEnum c_return_ns_enum(uint16_t n);
 ::A::B::ABEnum c_return_nested_ns_enum(uint16_t n);
+std::unique_ptr<Borrow> c_return_borrow(const std::string &s);
 
 void c_take_primitive(size_t n);
 void c_take_shared(Shared shared);

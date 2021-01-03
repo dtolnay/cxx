@@ -1,5 +1,0 @@
-error: extern type with lifetimes is not supported yet
- --> $DIR/extern_type_lifetime.rs:4:22
-  |
-4 |         type Complex<'a, 'b>;
-  |                      ^^

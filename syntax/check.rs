@@ -71,11 +71,6 @@ fn check_type_ident(cx: &mut Check, name: &NamedType) {
     {
         let msg = format!("unsupported type: {}", ident);
         cx.error(ident, &msg);
-        return;
-    }
-
-    if !name.generics.lifetimes.is_empty() {
-        cx.error(name, "type with lifetime parameter is not supported yet");
     }
 }
 
@@ -341,7 +336,10 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
     }
 
     if let Some(lifetime) = ety.generics.lifetimes.first() {
-        cx.error(lifetime, "extern type with lifetimes is not supported yet");
+        if ety.lang == Lang::Rust {
+            let msg = "extern Rust type with lifetimes is not supported yet";
+            cx.error(lifetime, msg);
+        }
     }
 
     if !ety.bounds.is_empty() {
@@ -446,10 +444,6 @@ fn check_api_type_alias(cx: &mut Check, alias: &TypeAlias) {
     for derive in &alias.derives {
         let msg = format!("derive({}) on extern type alias is not supported", derive);
         cx.error(derive, msg);
-    }
-
-    if let Some(lifetime) = alias.generics.lifetimes.first() {
-        cx.error(lifetime, "extern type with lifetimes is not supported yet");
     }
 }
 
