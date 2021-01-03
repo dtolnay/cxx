@@ -80,6 +80,11 @@ pub mod ffi {
         a: [i32; 4],
     }
 
+    #[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
+    pub struct StructWithLifetime<'a> {
+        s: &'a str,
+    }
+
     unsafe extern "C++" {
         include!("tests/ffi/tests.h");
 
