@@ -26,6 +26,9 @@ jobs:
           - name: Windows (msvc)
             rust: nightly-x86_64-pc-windows-msvc
             os: windows
+            flags: /EHsc
+    env:
+      CXXFLAGS: ${{matrix.flags}}
     steps:
       - name: Enable symlinks (windows)
         if: matrix.os == 'windows'
