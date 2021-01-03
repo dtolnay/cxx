@@ -153,6 +153,7 @@ impl ToTokens for ExternType {
         // Notional token range for error reporting purposes.
         self.type_token.to_tokens(tokens);
         self.name.rust.to_tokens(tokens);
+        self.generics.to_tokens(tokens);
     }
 }
 
@@ -161,6 +162,7 @@ impl ToTokens for TypeAlias {
         // Notional token range for error reporting purposes.
         self.type_token.to_tokens(tokens);
         self.name.rust.to_tokens(tokens);
+        self.generics.to_tokens(tokens);
     }
 }
 
@@ -169,6 +171,7 @@ impl ToTokens for Struct {
         // Notional token range for error reporting purposes.
         self.struct_token.to_tokens(tokens);
         self.name.rust.to_tokens(tokens);
+        self.generics.to_tokens(tokens);
     }
 }
 
@@ -177,6 +180,7 @@ impl ToTokens for Enum {
         // Notional token range for error reporting purposes.
         self.enum_token.to_tokens(tokens);
         self.name.rust.to_tokens(tokens);
+        self.generics.to_tokens(tokens);
     }
 }
 
