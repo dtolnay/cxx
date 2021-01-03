@@ -131,6 +131,7 @@ fn expand_struct(strct: &Struct) -> TokenStream {
     let ident = &strct.name.rust;
     let doc = &strct.doc;
     let attrs = &strct.attrs;
+    let generics = &strct.generics;
     let type_id = type_id(&strct.name);
     let fields = strct.fields.iter().map(|field| {
         let doc = &field.doc;
@@ -147,7 +148,7 @@ fn expand_struct(strct: &Struct) -> TokenStream {
     let visibility = strct.visibility;
     let struct_token = strct.struct_token;
     let struct_def = quote_spanned! {span=>
-        #visibility #struct_token #ident {
+        #visibility #struct_token #ident #generics {
             #(#fields,)*
         }
     };
@@ -159,7 +160,7 @@ fn expand_struct(strct: &Struct) -> TokenStream {
         #[repr(C)]
         #struct_def
 
-        unsafe impl ::cxx::ExternType for #ident {
+        unsafe impl #generics ::cxx::ExternType for #ident #generics {
             type Id = #type_id;
             type Kind = ::cxx::kind::Trivial;
         }
