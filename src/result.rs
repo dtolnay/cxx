@@ -41,14 +41,11 @@ unsafe fn to_c_error(msg: String) -> Result {
 
     extern "C" {
         #[link_name = "cxxbridge1$error"]
-        fn error(ptr: *const u8, len: usize) -> *const u8;
+        fn error(ptr: *const u8, len: usize) -> NonNull<u8>;
     }
 
     let copy = error(ptr, len);
-    let err = PtrLen {
-        ptr: NonNull::new_unchecked(copy as *mut u8),
-        len,
-    };
+    let err = PtrLen { ptr: copy, len };
     Result { err }
 }
 
