@@ -351,7 +351,7 @@ static_assert(!std::is_same<Vec<std::uint8_t>::const_iterator,
               "Vec<T>::const_iterator != Vec<T>::iterator");
 
 extern "C" {
-const char *cxxbridge1$error(const char *ptr, std::size_t len) {
+const char *cxxbridge1$error(const char *ptr, std::size_t len) noexcept {
   char *copy = new char[len];
   std::strncpy(copy, ptr, len);
   return copy;
