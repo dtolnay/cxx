@@ -210,6 +210,11 @@ pub mod ffi {
         type Job = crate::module::ffi::Job;
     }
 
+    extern "Rust" {
+        #[derive(ExternType)]
+        type Reference<'a>;
+    }
+
     unsafe extern "C++" {
         type Borrow<'a>;
 
@@ -376,6 +381,8 @@ impl R {
         n
     }
 }
+
+pub struct Reference<'a>(&'a String);
 
 impl ffi::Shared {
     fn r_method_on_shared(&self) -> String {

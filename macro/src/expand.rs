@@ -677,11 +677,12 @@ fn expand_rust_type_import(ety: &ExternType) -> TokenStream {
 
 fn expand_rust_type_impl(ety: &ExternType) -> TokenStream {
     let ident = &ety.name.rust;
+    let generics = &ety.generics;
     let span = ident.span();
     let unsafe_impl = quote_spanned!(ety.type_token.span=> unsafe impl);
 
     let mut impls = quote_spanned! {span=>
-        #unsafe_impl ::cxx::private::RustType for #ident {}
+        #unsafe_impl #generics ::cxx::private::RustType for #ident #generics {}
     };
 
     for derive in &ety.derives {
@@ -689,7 +690,7 @@ fn expand_rust_type_impl(ety: &ExternType) -> TokenStream {
             let type_id = type_id(&ety.name);
             let span = derive.span;
             impls.extend(quote_spanned! {span=>
-                unsafe impl ::cxx::ExternType for #ident {
+                unsafe impl #generics ::cxx::ExternType for #ident #generics {
                     type Id = #type_id;
                     type Kind = ::cxx::kind::Opaque;
                 }
