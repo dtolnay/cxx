@@ -234,11 +234,11 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
 }
 
 fn check_type_slice_ref(cx: &mut Check, ty: &SliceRef) {
-    let supported = match &ty.inner {
-        Type::Str(_) | Type::SliceRef(_) => false,
-        Type::Ident(ident) => !is_unsized(cx, &ty.inner) || cx.types.rust.contains(&ident.rust),
-        element => !is_unsized(cx, element),
-    };
+    let supported = !is_unsized(cx, &ty.inner)
+        || match &ty.inner {
+            Type::Ident(ident) => cx.types.rust.contains(&ident.rust),
+            _ => false,
+        };
 
     if !supported {
         let mutable = if ty.mutable { "mut " } else { "" };
@@ -253,10 +253,7 @@ fn check_type_slice_ref(cx: &mut Check, ty: &SliceRef) {
 }
 
 fn check_type_array(cx: &mut Check, ty: &Array) {
-    let supported = match &ty.inner {
-        Type::Str(_) | Type::SliceRef(_) => false,
-        element => !is_unsized(cx, element),
-    };
+    let supported = !is_unsized(cx, &ty.inner);
 
     if !supported {
         cx.error(ty, "unsupported array element type");
