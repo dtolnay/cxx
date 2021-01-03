@@ -84,7 +84,6 @@ private:
   // Size and alignment statically verified by rust_string.rs.
   std::array<std::uintptr_t, 3> repr;
 };
-
 #endif // CXXBRIDGE1_RUST_STRING
 
 #ifndef CXXBRIDGE1_RUST_STR
