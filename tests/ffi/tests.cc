@@ -848,6 +848,7 @@ std::unique_ptr<I> ns_c_return_unique_ptr_ns() {
 // > serves as an explicit instantiation of the same kind (declaration or
 // > definition) of each of its non-inherited non-template members that has not
 // > been previously explicitly specialized in the translation unit.
+#if defined(CXX_TEST_INSTANTIATIONS)
 template class rust::Box<tests::Shared>;
 template class rust::Slice<const char>;
 template class rust::Slice<const uint8_t>;
@@ -860,3 +861,4 @@ template class rust::Vec<uint8_t>;
 template class rust::Vec<rust::String>;
 template class rust::Vec<tests::Shared>;
 template class rust::Fn<size_t(rust::String)>;
+#endif
