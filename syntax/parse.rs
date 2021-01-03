@@ -73,18 +73,6 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
         },
     );
 
-    let generics = &item.generics;
-    if !generics.params.is_empty() || generics.where_clause.is_some() {
-        let struct_token = item.struct_token;
-        let ident = &item.ident;
-        let where_clause = &generics.where_clause;
-        let span = quote!(#struct_token #ident #generics #where_clause);
-        return Err(Error::new_spanned(
-            span,
-            "struct with generic parameters is not supported yet",
-        ));
-    }
-
     let named_fields = match item.fields {
         Fields::Named(fields) => fields,
         Fields::Unit => return Err(Error::new_spanned(item, "unit structs are not supported")),
@@ -92,6 +80,46 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
             return Err(Error::new_spanned(item, "tuple structs are not supported"));
         }
     };
+
+    let mut lifetimes = Punctuated::new();
+    let mut has_unsupported_generic_param = false;
+    for pair in item.generics.params.into_pairs() {
+        let (param, punct) = pair.into_tuple();
+        match param {
+            GenericParam::Lifetime(param) => {
+                if !param.bounds.is_empty() && !has_unsupported_generic_param {
+                    let msg = "lifetime parameter with bounds is not supported yet";
+                    cx.error(&param, msg);
+                    has_unsupported_generic_param = true;
+                }
+                lifetimes.push_value(param.lifetime);
+                if let Some(punct) = punct {
+                    lifetimes.push_punct(punct);
+                }
+            }
+            GenericParam::Type(param) => {
+                if !has_unsupported_generic_param {
+                    let msg = "struct with generic type parameter is not supported yet";
+                    cx.error(&param, msg);
+                    has_unsupported_generic_param = true;
+                }
+            }
+            GenericParam::Const(param) => {
+                if !has_unsupported_generic_param {
+                    let msg = "struct with const generic parameter is not supported yet";
+                    cx.error(&param, msg);
+                    has_unsupported_generic_param = true;
+                }
+            }
+        }
+    }
+
+    if let Some(where_clause) = &item.generics.where_clause {
+        cx.error(
+            where_clause,
+            "struct with where-clause is not supported yet",
+        );
+    }
 
     let mut fields = Vec::new();
     for field in named_fields.named {
@@ -131,9 +159,9 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
     let struct_token = item.struct_token;
     let name = pair(namespace, &item.ident, cxx_name, rust_name);
     let generics = Lifetimes {
-        lt_token: None,
-        lifetimes: Punctuated::new(),
-        gt_token: None,
+        lt_token: item.generics.lt_token,
+        lifetimes,
+        gt_token: item.generics.gt_token,
     };
     let brace_token = named_fields.brace_token;
 
