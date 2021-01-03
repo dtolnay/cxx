@@ -236,7 +236,7 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
 fn check_type_slice_ref(cx: &mut Check, ty: &SliceRef) {
     let supported = match &ty.inner {
         Type::Str(_) | Type::SliceRef(_) => false,
-        Type::Ident(ident) => !is_opaque_cxx(cx, &ident.rust),
+        Type::Ident(ident) => !is_unsized(cx, &ty.inner) || cx.types.rust.contains(&ident.rust),
         element => !is_unsized(cx, element),
     };
 
