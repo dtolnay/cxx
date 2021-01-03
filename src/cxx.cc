@@ -353,15 +353,21 @@ static_assert(!std::is_same<Vec<std::uint8_t>::const_iterator,
                             Vec<std::uint8_t>::iterator>::value,
               "Vec<T>::const_iterator != Vec<T>::iterator");
 
+static const char *errorCopy(const char *ptr, std::size_t len) {
+  char *copy = new char[len];
+  std::memcpy(copy, ptr, len);
+  return copy;
+}
+
 extern "C" {
 const char *cxxbridge1$error(const char *ptr, std::size_t len) noexcept {
-  return ptr ? static_cast<char *>(std::memcpy(new char[len], ptr, len))
-             : nullptr;
+  return errorCopy(ptr, len);
 }
 } // extern "C"
 
 Error::Error(const Error &other)
-    : std::exception(other), msg(cxxbridge1$error(other.msg, other.len)),
+    : std::exception(other),
+      msg(other.msg ? errorCopy(other.msg, other.len) : nullptr),
       len(other.len) {}
 
 Error::Error(Error &&other) noexcept
@@ -377,8 +383,10 @@ Error &Error::operator=(const Error &other) {
     std::exception::operator=(other);
     delete[] this->msg;
     this->msg = nullptr;
-    this->msg = cxxbridge1$error(other.msg, other.len);
-    this->len = other.len;
+    if (other.msg) {
+      this->msg = errorCopy(other.msg, other.len);
+      this->len = other.len;
+    }
   }
   return *this;
 }
