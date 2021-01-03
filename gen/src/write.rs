@@ -359,9 +359,8 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
         writeln!(out, ";");
     }
 
-    if !methods.is_empty() {
-        writeln!(out);
-    }
+    writeln!(out, "  ~{}() = delete;", ety.name.cxx);
+    writeln!(out);
 
     out.builtin.layout = true;
     out.include.cstddef = true;
