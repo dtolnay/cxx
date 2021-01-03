@@ -127,6 +127,10 @@ public:
   void swap(Str &) noexcept;
 
 private:
+  class uninit;
+  Str(uninit) noexcept;
+  friend impl<Str>;
+
   std::array<std::uintptr_t, 2> repr;
 };
 #endif // CXXBRIDGE1_RUST_STR
@@ -179,6 +183,9 @@ public:
   void swap(Slice &) noexcept;
 
 private:
+  class uninit;
+  Slice(uninit) noexcept;
+  friend impl<Slice>;
   friend void sliceInit(void *, const void *, std::size_t) noexcept;
   friend void *slicePtr(const void *) noexcept;
   friend std::size_t sliceLen(const void *) noexcept;

@@ -5,7 +5,7 @@ use crate::gen::{builtin, include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::instantiate::ImplKey;
 use crate::syntax::map::UnorderedMap as Map;
-use crate::syntax::set::{OrderedSet, UnorderedSet};
+use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::{
@@ -124,25 +124,6 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
     }
 
     out.set_namespace(Default::default());
-
-    // MSVC workaround for "C linkage function cannot return C++ class" error.
-    // Apparently the compiler fails to perform implicit instantiations as part
-    // of an extern declaration return type. Instead we instantiate explicitly.
-    // See https://stackoverflow.com/a/57429504/6086311.
-    out.next_section();
-    let mut slice_in_return_position = OrderedSet::new();
-    for api in apis {
-        if let Api::CxxFunction(efn) | Api::RustFunction(efn) = api {
-            if let Some(ty @ Type::Str(_)) | Some(ty @ Type::SliceRef(_)) = &efn.ret {
-                slice_in_return_position.insert(ty);
-            }
-        }
-    }
-    for ty in &slice_in_return_position {
-        write!(out, "template class ::rust::repr::Fat<");
-        write_type(out, ty);
-        writeln!(out, ">;");
-    }
 
     out.next_section();
     for api in apis {
@@ -757,7 +738,16 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     }
     match &efn.ret {
         Some(Type::Ref(_)) => write!(out, "&"),
-        Some(Type::Str(_)) | Some(Type::SliceRef(_)) if !indirect_return => write!(out, "{{"),
+        Some(Type::Str(_)) if !indirect_return => {
+            out.builtin.rust_str_repr = true;
+            write!(out, "::rust::impl<::rust::Str>::repr(");
+        }
+        Some(ty @ Type::SliceRef(_)) if !indirect_return => {
+            out.builtin.rust_slice_repr = true;
+            write!(out, "::rust::impl<");
+            write_type(out, ty);
+            write!(out, ">::repr(");
+        }
         _ => {}
     }
     match &efn.receiver {
@@ -796,7 +786,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     match &efn.ret {
         Some(Type::RustBox(_)) => write!(out, ".into_raw()"),
         Some(Type::UniquePtr(_)) => write!(out, ".release()"),
-        Some(Type::Str(_)) | Some(Type::SliceRef(_)) if !indirect_return => write!(out, "}}"),
+        Some(Type::Str(_)) | Some(Type::SliceRef(_)) if !indirect_return => write!(out, ")"),
         _ => {}
     }
     if indirect_return {
@@ -995,6 +985,16 @@ fn write_rust_function_shim_impl(
                 write!(out, "(");
             }
             Type::Ref(_) => write!(out, "*"),
+            Type::Str(_) => {
+                out.builtin.rust_str_new_unchecked = true;
+                write!(out, "::rust::impl<::rust::Str>::new_unchecked(");
+            }
+            Type::SliceRef(_) => {
+                out.builtin.rust_slice_new = true;
+                write!(out, "::rust::impl<");
+                write_type(out, ret);
+                write!(out, ">::slice(");
+            }
             _ => {}
         }
     }
@@ -1040,10 +1040,8 @@ fn write_rust_function_shim_impl(
     write!(out, ")");
     if !indirect_return {
         if let Some(ret) = &sig.ret {
-            match ret {
-                Type::RustBox(_) | Type::UniquePtr(_) => write!(out, ")"),
-                Type::Str(_) | Type::SliceRef(_) => write!(out, ".repr"),
-                _ => {}
+            if let Type::RustBox(_) | Type::UniquePtr(_) | Type::Str(_) | Type::SliceRef(_) = ret {
+                write!(out, ")");
             }
         }
     }
@@ -1113,11 +1111,9 @@ fn write_extern_return_type_space(out: &mut OutFile, ty: &Option<Type>) {
             write_type(out, &ty.inner);
             write!(out, " *");
         }
-        Some(ty @ Type::Str(_)) | Some(ty @ Type::SliceRef(_)) => {
+        Some(Type::Str(_)) | Some(Type::SliceRef(_)) => {
             out.builtin.repr_fat = true;
-            write!(out, "::rust::repr::Fat<");
-            write_type(out, ty);
-            write!(out, "> ");
+            write!(out, "::rust::repr::Fat ");
         }
         Some(ty) if out.types.needs_indirect_abi(ty) => write!(out, "void "),
         _ => write_return_type(out, ty),
