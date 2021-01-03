@@ -335,13 +335,6 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
         cx.error(derive, msg);
     }
 
-    if let Some(lifetime) = ety.generics.lifetimes.first() {
-        if ety.lang == Lang::Rust {
-            let msg = "extern Rust type with lifetimes is not supported yet";
-            cx.error(lifetime, msg);
-        }
-    }
-
     if !ety.bounds.is_empty() {
         let bounds = &ety.bounds;
         let span = quote!(#(#bounds)*);
