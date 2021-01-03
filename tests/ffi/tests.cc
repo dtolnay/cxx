@@ -207,6 +207,12 @@ Enum c_return_enum(uint16_t n) {
   }
 }
 
+Borrow::Borrow(const std::string &s) : s(s) {}
+
+std::unique_ptr<Borrow> c_return_borrow(const std::string &s) {
+  return std::unique_ptr<Borrow>(new Borrow(s));
+}
+
 void c_take_primitive(size_t n) {
   if (n == 2020) {
     cxx_test_suite_set_correct();
