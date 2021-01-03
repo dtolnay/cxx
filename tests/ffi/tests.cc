@@ -849,6 +849,9 @@ std::unique_ptr<I> ns_c_return_unique_ptr_ns() {
 // > definition) of each of its non-inherited non-template members that has not
 // > been previously explicitly specialized in the translation unit.
 template class rust::Box<tests::Shared>;
+template class rust::Slice<const char>;
+template class rust::Slice<const uint8_t>;
+template class rust::Slice<uint8_t>;
 template class rust::Slice<const tests::Shared>;
 template class rust::Slice<tests::Shared>;
 template class rust::Slice<const tests::R>;

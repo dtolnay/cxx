@@ -121,23 +121,25 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
 
     out.set_namespace(Default::default());
 
-    // MSVC workaround for "C linkage function cannot return C++ class" error.
-    // Apparently the compiler fails to perform implicit instantiations as part
-    // of an extern declaration. Instead we instantiate explicitly.
-    // See https://stackoverflow.com/a/57429504/6086311.
-    out.next_section();
-    let mut slice_in_return_position = OrderedSet::new();
-    for api in apis {
-        if let Api::CxxFunction(efn) | Api::RustFunction(efn) = api {
-            if let Some(ty @ Type::SliceRef(_)) = &efn.ret {
-                slice_in_return_position.insert(ty);
+    if !out.header {
+        // MSVC workaround for "C linkage function cannot return C++ class" error.
+        // Apparently the compiler fails to perform implicit instantiations as part
+        // of an extern declaration return type. Instead we instantiate explicitly.
+        // See https://stackoverflow.com/a/57429504/6086311.
+        out.next_section();
+        let mut slice_in_return_position = OrderedSet::new();
+        for api in apis {
+            if let Api::CxxFunction(efn) | Api::RustFunction(efn) = api {
+                if let Some(ty @ Type::SliceRef(_)) = &efn.ret {
+                    slice_in_return_position.insert(ty);
+                }
             }
         }
-    }
-    for ty in &slice_in_return_position {
-        write!(out, "template class ");
-        write_type(out, ty);
-        writeln!(out, ";");
+        for ty in &slice_in_return_position {
+            write!(out, "template class ");
+            write_type(out, ty);
+            writeln!(out, ";");
+        }
     }
 
     out.next_section();
