@@ -1,8 +1,8 @@
-error: struct with generic parameters is not supported yet
+error: unit structs are not supported
  --> $DIR/multiple_parse_error.rs:3:5
   |
 3 |     struct Monad<T>;
-  |     ^^^^^^^^^^^^^^^
+  |     ^^^^^^^^^^^^^^^^
 
 error: unrecognized ABI, requires either "C++" or "Rust"
  --> $DIR/multiple_parse_error.rs:5:5

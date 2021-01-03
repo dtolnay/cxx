@@ -92,14 +92,16 @@ pub fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) -> Toke
 
 fn struct_copy(strct: &Struct, span: Span) -> TokenStream {
     let ident = &strct.name.rust;
+    let generics = &strct.generics;
 
     quote_spanned! {span=>
-        impl ::std::marker::Copy for #ident {}
+        impl #generics ::std::marker::Copy for #ident #generics {}
     }
 }
 
 fn struct_clone(strct: &Struct, span: Span) -> TokenStream {
     let ident = &strct.name.rust;
+    let generics = &strct.generics;
 
     let body = if derive::contains(&strct.derives, Trait::Copy) {
         quote!(*self)
@@ -117,7 +119,7 @@ fn struct_clone(strct: &Struct, span: Span) -> TokenStream {
     };
 
     quote_spanned! {span=>
-        impl ::std::clone::Clone for #ident {
+        impl #generics ::std::clone::Clone for #ident #generics {
             fn clone(&self) -> Self {
                 #body
             }
@@ -127,12 +129,13 @@ fn struct_clone(strct: &Struct, span: Span) -> TokenStream {
 
 fn struct_debug(strct: &Struct, span: Span) -> TokenStream {
     let ident = &strct.name.rust;
+    let generics = &strct.generics;
     let struct_name = ident.to_string();
     let fields = strct.fields.iter().map(|field| &field.name.rust);
     let field_names = fields.clone().map(Ident::to_string);
 
     quote_spanned! {span=>
-        impl ::std::fmt::Debug for #ident {
+        impl #generics ::std::fmt::Debug for #ident #generics {
             fn fmt(&self, formatter: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
                 formatter.debug_struct(#struct_name)
                     #(.field(#field_names, &self.#fields))*
@@ -144,10 +147,11 @@ fn struct_debug(strct: &Struct, span: Span) -> TokenStream {
 
 fn struct_default(strct: &Struct, span: Span) -> TokenStream {
     let ident = &strct.name.rust;
+    let generics = &strct.generics;
     let fields = strct.fields.iter().map(|field| &field.name.rust);
 
     quote_spanned! {span=>
-        impl ::std::default::Default for #ident {
+        impl #generics ::std::default::Default for #ident #generics {
             fn default() -> Self {
                 #ident {
                     #(
@@ -161,10 +165,11 @@ fn struct_default(strct: &Struct, span: Span) -> TokenStream {
 
 fn struct_ord(strct: &Struct, span: Span) -> TokenStream {
     let ident = &strct.name.rust;
+    let generics = &strct.generics;
     let fields = strct.fields.iter().map(|field| &field.name.rust);
 
     quote_spanned! {span=>
-        impl ::std::cmp::Ord for #ident {
+        impl #generics ::std::cmp::Ord for #ident #generics {
             fn cmp(&self, other: &Self) -> ::std::cmp::Ordering {
                 #(
                     match ::std::cmp::Ord::cmp(&self.#fields, &other.#fields) {
@@ -180,6 +185,7 @@ fn struct_ord(strct: &Struct, span: Span) -> TokenStream {
 
 fn struct_partial_ord(strct: &Struct, span: Span) -> TokenStream {
     let ident = &strct.name.rust;
+    let generics = &strct.generics;
 
     let body = if derive::contains(&strct.derives, Trait::Ord) {
         quote! {
@@ -199,7 +205,7 @@ fn struct_partial_ord(strct: &Struct, span: Span) -> TokenStream {
     };
 
     quote_spanned! {span=>
-        impl ::std::cmp::PartialOrd for #ident {
+        impl #generics ::std::cmp::PartialOrd for #ident #generics {
             fn partial_cmp(&self, other: &Self) -> ::std::option::Option<::std::cmp::Ordering> {
                 #body
             }
