@@ -273,7 +273,10 @@ bool Str::operator>(const Str &rhs) const noexcept { return rhs < *this; }
 
 bool Str::operator>=(const Str &rhs) const noexcept { return rhs <= *this; }
 
-void Str::swap(Str &rhs) noexcept { std::swap(*this, rhs); }
+void Str::swap(Str &rhs) noexcept {
+  using std::swap;
+  swap(this->repr, rhs.repr);
+}
 
 std::ostream &operator<<(std::ostream &os, const Str &s) {
   os.write(s.data(), s.size());
