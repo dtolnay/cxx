@@ -45,11 +45,9 @@ unsafe fn to_c_error(msg: String) -> Result {
     }
 
     let copy = error(ptr, len);
-    let slice = slice::from_raw_parts(copy, len);
-    let string = str::from_utf8_unchecked(slice);
     let err = PtrLen {
-        ptr: NonNull::from(string).cast::<u8>(),
-        len: string.len(),
+        ptr: NonNull::new_unchecked(copy as *mut u8),
+        len,
     };
     Result { err }
 }
