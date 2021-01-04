@@ -80,6 +80,7 @@ enum COwnedEnum {
 struct Borrow {
   Borrow(const std::string &s);
   void const_member() const;
+  void nonconst_member();
   const std::string &s;
 };
 

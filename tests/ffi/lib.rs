@@ -224,6 +224,7 @@ pub mod ffi {
         fn c_return_borrow(s: &CxxString) -> UniquePtr<Borrow>;
 
         fn const_member(self: &Borrow);
+        fn nonconst_member(self: Pin<&mut Borrow>);
     }
 
     #[repr(u32)]

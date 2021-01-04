@@ -436,7 +436,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let receiver = efn.receiver.iter().map(|receiver| {
         let var = receiver.var;
         if receiver.pinned {
-            let ty = receiver.ty();
+            let ty = receiver.ty_self();
             quote!(#var: #ty)
         } else {
             let ampersand = receiver.ampersand;
