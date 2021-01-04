@@ -209,6 +209,8 @@ Enum c_return_enum(uint16_t n) {
 
 Borrow::Borrow(const std::string &s) : s(s) {}
 
+void Borrow::const_member() const {}
+
 std::unique_ptr<Borrow> c_return_borrow(const std::string &s) {
   return std::unique_ptr<Borrow>(new Borrow(s));
 }
