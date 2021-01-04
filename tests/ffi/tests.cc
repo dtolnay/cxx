@@ -211,6 +211,8 @@ Borrow::Borrow(const std::string &s) : s(s) {}
 
 void Borrow::const_member() const {}
 
+void Borrow::nonconst_member() {}
+
 std::unique_ptr<Borrow> c_return_borrow(const std::string &s) {
   return std::unique_ptr<Borrow>(new Borrow(s));
 }
