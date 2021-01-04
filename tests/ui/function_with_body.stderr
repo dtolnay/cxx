@@ -1,5 +1,5 @@
-error: unsupported foreign item
- --> $DIR/function_with_body.rs:4:9
+error: expected `;`
+ --> $DIR/function_with_body.rs:4:16
   |
 4 |         fn f() {}
-  |         ^^^^^^^^^
+  |                ^

@@ -16,9 +16,9 @@ use syn::punctuated::Punctuated;
 use syn::{
     Abi, Attribute, Error, Expr, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
     GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lit, LitStr,
-    Pat, PathArguments, Result, ReturnType, Token, TraitBound, TraitBoundModifier,
-    Type as RustType, TypeArray, TypeBareFn, TypeParamBound, TypePath, TypeReference,
-    Variant as RustVariant, Visibility,
+    Pat, PathArguments, Result, ReturnType, Signature as RustSignature, Token, TraitBound,
+    TraitBoundModifier, Type as RustType, TypeArray, TypeBareFn, TypeParamBound, TypePath,
+    TypeReference, Variant as RustVariant, Visibility,
 };
 
 pub mod kw {
@@ -664,9 +664,14 @@ fn parse_extern_verbatim(
         let visibility: Visibility = input.parse()?;
         if input.peek(Token![type]) {
             parse_extern_verbatim_type(cx, attrs, visibility, input, lang, trusted, namespace)
+        } else if input.peek(Token![fn]) {
+            parse_extern_verbatim_fn(input)
         } else {
             let span = input.cursor().token_stream();
-            Err(Error::new_spanned(span, "unsupported foreign item"))
+            Err(Error::new_spanned(
+                span,
+                "unsupported foreign item, expected `type` or `fn`",
+            ))
         }
     }
     .parse2(tokens)
@@ -735,6 +740,12 @@ fn parse_extern_verbatim_type(
     } else {
         Err(lookahead.error())
     }
+}
+
+fn parse_extern_verbatim_fn(input: ParseStream) -> Result<Api> {
+    input.parse::<RustSignature>()?;
+    input.parse::<Token![;]>()?;
+    unreachable!()
 }
 
 fn parse_type_alias(
