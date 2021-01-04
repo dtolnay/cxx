@@ -114,16 +114,17 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
     }
 
     let vis = &ffi.vis;
+    let mod_token = &ffi.mod_token;
     let ident = &ffi.ident;
+    let span = ffi.brace_token.span;
+    let expanded = quote_spanned!(span=> {#expanded});
 
     quote! {
         #doc
         #attrs
         #[deny(improper_ctypes)]
         #[allow(non_snake_case)]
-        #vis mod #ident {
-            #expanded
-        }
+        #vis #mod_token #ident #expanded
     }
 }
 
