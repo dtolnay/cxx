@@ -55,6 +55,7 @@ pub(super) fn write(out: &mut OutFile) {
     }
 
     if builtin.rust_str {
+        include.array = true;
         include.cstdint = true;
         include.string = true;
         builtin.friend_impl = true;
@@ -64,6 +65,7 @@ pub(super) fn write(out: &mut OutFile) {
         include.algorithm = true;
         include.array = true;
         include.cstddef = true;
+        include.cstdint = true;
         include.initializer_list = true;
         include.iterator = true;
         include.new = true;
@@ -75,7 +77,9 @@ pub(super) fn write(out: &mut OutFile) {
     }
 
     if builtin.rust_slice {
+        include.array = true;
         include.cstddef = true;
+        include.cstdint = true;
         include.iterator = true;
         include.type_traits = true;
         builtin.friend_impl = true;
