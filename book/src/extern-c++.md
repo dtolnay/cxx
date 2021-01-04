@@ -112,6 +112,43 @@ mod ffi {
 }
 ```
 
+## Lifetimes
+
+C++ types holding borrowed data may be described naturally in Rust by an extern
+type with a generic lifetime parameter. For example in the case of the following
+pair of types:
+
+```cpp
+// header.h
+
+class Resource;
+
+class TypeContainingBorrow {
+  TypeContainingBorrow(const Resource &res) : res(res) {}
+  const Resource &res;
+};
+
+std::shared_ptr<TypeContainingBorrow> create(const Resource &res);
+```
+
+we'd want to expose this to Rust as:
+
+```rust,noplayground
+#[cxx::bridge]
+mod ffi {
+    unsafe extern "C++" {
+        # include!("path/to/header.h");
+        #
+        type Resource;
+        type TypeContainingBorrow<'a>;
+
+        fn create<'a>(res: &'a Resource) -> SharedPtr<TypeContainingBorrow<'a>>;
+
+        // or with lifetime elision:
+        fn create(res: &Resource) -> SharedPtr<TypeContainingBorrow>;
+    }
+}
+```
 
 ## Reusing existing binding types
 

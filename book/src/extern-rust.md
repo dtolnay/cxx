@@ -31,7 +31,7 @@ indirection.
     extern "Rust" {
         type MyType;
         type MyOtherType;
-        type OneMoreType;
+        type OneMoreType<'a>;
     }
 # }
 ```

@@ -100,6 +100,27 @@ fn main() {
 }
 ```
 
+If a shared struct has generic lifetime parameters, the lifetimes are simply not
+represented on the C++ side. C++ code will need care when working with borrowed
+data (as usual in C++).
+
+```rust,noplayground
+#[cxx::bridge]
+mod ffi {
+    struct Borrowed<'a> {
+        flags: &'a [&'a str],
+    }
+}
+```
+
+```cpp
+// generated header
+
+struct Borrowed final {
+  rust::Slice<const rust::Str> flags;
+};
+```
+
 ## Enum discriminants
 
 You may provide explicit discriminants for some or all of the enum variants, in
