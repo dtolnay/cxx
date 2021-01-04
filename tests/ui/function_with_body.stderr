@@ -1,0 +1,5 @@
+error: unsupported foreign item
+ --> $DIR/function_with_body.rs:4:9
+  |
+4 |         fn f() {}
+  |         ^^^^^^^^^
