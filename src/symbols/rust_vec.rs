@@ -77,3 +77,4 @@ rust_vec_shims_for_primitive!(f64);
 
 rust_vec_shims!("char", c_char);
 rust_vec_shims!("string", RustString);
+rust_vec_shims!("str", &str);

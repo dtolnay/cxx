@@ -602,7 +602,8 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
   FOR_EACH_NUMERIC(MACRO)                                                      \
   MACRO(bool, bool)                                                            \
   MACRO(char, char)                                                            \
-  MACRO(string, rust::String)
+  MACRO(string, rust::String)                                                  \
+  MACRO(str, rust::Str)
 
 #define FOR_EACH_SHARED_PTR(MACRO)                                             \
   FOR_EACH_NUMERIC(MACRO)                                                      \

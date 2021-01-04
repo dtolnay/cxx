@@ -93,23 +93,27 @@ fn check_type_box(cx: &mut Check, ptr: &Ty1) {
 }
 
 fn check_type_rust_vec(cx: &mut Check, ty: &Ty1) {
-    if let Type::Ident(ident) = &ty.inner {
-        if cx.types.cxx.contains(&ident.rust)
-            && !cx.types.aliases.contains_key(&ident.rust)
-            && !cx.types.structs.contains_key(&ident.rust)
-            && !cx.types.enums.contains_key(&ident.rust)
-        {
-            cx.error(ty, "Rust Vec containing C++ type is not supported yet");
-            return;
-        }
+    match &ty.inner {
+        Type::Ident(ident) => {
+            if cx.types.cxx.contains(&ident.rust)
+                && !cx.types.aliases.contains_key(&ident.rust)
+                && !cx.types.structs.contains_key(&ident.rust)
+                && !cx.types.enums.contains_key(&ident.rust)
+            {
+                cx.error(ty, "Rust Vec containing C++ type is not supported yet");
+                return;
+            }
 
-        match Atom::from(&ident.rust) {
-            None | Some(Char) | Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize)
-            | Some(I8) | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32)
-            | Some(F64) | Some(RustString) => return,
-            Some(Bool) => { /* todo */ }
-            Some(CxxString) => {}
+            match Atom::from(&ident.rust) {
+                None | Some(Char) | Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize)
+                | Some(I8) | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32)
+                | Some(F64) | Some(RustString) => return,
+                Some(Bool) => { /* todo */ }
+                Some(CxxString) => {}
+            }
         }
+        Type::Str(_) => return,
+        _ => {}
     }
 
     cx.error(ty, "unsupported element type of Vec");
