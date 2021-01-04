@@ -16,9 +16,9 @@ use syn::punctuated::Punctuated;
 use syn::{
     Abi, Attribute, Error, Expr, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
     GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lit, LitStr,
-    Pat, PathArguments, Result, ReturnType, Token, TraitBound, TraitBoundModifier,
-    Type as RustType, TypeArray, TypeBareFn, TypeParamBound, TypePath, TypeReference,
-    Variant as RustVariant, Visibility,
+    Pat, PathArguments, Result, ReturnType, Signature as RustSignature, Token, TraitBound,
+    TraitBoundModifier, Type as RustType, TypeArray, TypeBareFn, TypeParamBound, TypePath,
+    TypeReference, Variant as RustVariant, Visibility,
 };
 
 pub mod kw {
@@ -662,69 +662,90 @@ fn parse_extern_verbatim(
     |input: ParseStream| -> Result<Api> {
         let attrs = input.call(Attribute::parse_outer)?;
         let visibility: Visibility = input.parse()?;
-        let type_token: Token![type] = match input.parse()? {
-            Some(type_token) => type_token,
-            None => {
-                let span = input.cursor().token_stream();
-                return Err(Error::new_spanned(span, "unsupported foreign item"));
-            }
-        };
-        let ident: Ident = input.parse()?;
-        let generics: Generics = input.parse()?;
-        let mut lifetimes = Punctuated::new();
-        let mut has_unsupported_generic_param = false;
-        for pair in generics.params.into_pairs() {
-            let (param, punct) = pair.into_tuple();
-            match param {
-                GenericParam::Lifetime(param) => {
-                    if !param.bounds.is_empty() && !has_unsupported_generic_param {
-                        let msg = "lifetime parameter with bounds is not supported yet";
-                        cx.error(&param, msg);
-                        has_unsupported_generic_param = true;
-                    }
-                    lifetimes.push_value(param.lifetime);
-                    if let Some(punct) = punct {
-                        lifetimes.push_punct(punct);
-                    }
-                }
-                GenericParam::Type(param) => {
-                    if !has_unsupported_generic_param {
-                        let msg = "extern type with generic type parameter is not supported yet";
-                        cx.error(&param, msg);
-                        has_unsupported_generic_param = true;
-                    }
-                }
-                GenericParam::Const(param) => {
-                    if !has_unsupported_generic_param {
-                        let msg = "extern type with const generic parameter is not supported yet";
-                        cx.error(&param, msg);
-                        has_unsupported_generic_param = true;
-                    }
-                }
-            }
-        }
-        let lifetimes = Lifetimes {
-            lt_token: generics.lt_token,
-            lifetimes,
-            gt_token: generics.gt_token,
-        };
-        let lookahead = input.lookahead1();
-        if lookahead.peek(Token![=]) {
-            // type Alias = crate::path::to::Type;
-            parse_type_alias(
-                cx, attrs, visibility, type_token, ident, lifetimes, input, lang, namespace,
-            )
-        } else if lookahead.peek(Token![:]) || lookahead.peek(Token![;]) {
-            // type Opaque: Bound2 + Bound2;
-            parse_extern_type_bounded(
-                cx, attrs, visibility, type_token, ident, lifetimes, input, lang, trusted,
-                namespace,
-            )
+        if input.peek(Token![type]) {
+            parse_extern_verbatim_type(cx, attrs, visibility, input, lang, trusted, namespace)
+        } else if input.peek(Token![fn]) {
+            parse_extern_verbatim_fn(input)
         } else {
-            Err(lookahead.error())
+            let span = input.cursor().token_stream();
+            Err(Error::new_spanned(
+                span,
+                "unsupported foreign item, expected `type` or `fn`",
+            ))
         }
     }
     .parse2(tokens)
+}
+
+fn parse_extern_verbatim_type(
+    cx: &mut Errors,
+    attrs: Vec<Attribute>,
+    visibility: Visibility,
+    input: ParseStream,
+    lang: Lang,
+    trusted: bool,
+    namespace: &Namespace,
+) -> Result<Api> {
+    let type_token: Token![type] = input.parse()?;
+    let ident: Ident = input.parse()?;
+    let generics: Generics = input.parse()?;
+    let mut lifetimes = Punctuated::new();
+    let mut has_unsupported_generic_param = false;
+    for pair in generics.params.into_pairs() {
+        let (param, punct) = pair.into_tuple();
+        match param {
+            GenericParam::Lifetime(param) => {
+                if !param.bounds.is_empty() && !has_unsupported_generic_param {
+                    let msg = "lifetime parameter with bounds is not supported yet";
+                    cx.error(&param, msg);
+                    has_unsupported_generic_param = true;
+                }
+                lifetimes.push_value(param.lifetime);
+                if let Some(punct) = punct {
+                    lifetimes.push_punct(punct);
+                }
+            }
+            GenericParam::Type(param) => {
+                if !has_unsupported_generic_param {
+                    let msg = "extern type with generic type parameter is not supported yet";
+                    cx.error(&param, msg);
+                    has_unsupported_generic_param = true;
+                }
+            }
+            GenericParam::Const(param) => {
+                if !has_unsupported_generic_param {
+                    let msg = "extern type with const generic parameter is not supported yet";
+                    cx.error(&param, msg);
+                    has_unsupported_generic_param = true;
+                }
+            }
+        }
+    }
+    let lifetimes = Lifetimes {
+        lt_token: generics.lt_token,
+        lifetimes,
+        gt_token: generics.gt_token,
+    };
+    let lookahead = input.lookahead1();
+    if lookahead.peek(Token![=]) {
+        // type Alias = crate::path::to::Type;
+        parse_type_alias(
+            cx, attrs, visibility, type_token, ident, lifetimes, input, lang, namespace,
+        )
+    } else if lookahead.peek(Token![:]) || lookahead.peek(Token![;]) {
+        // type Opaque: Bound2 + Bound2;
+        parse_extern_type_bounded(
+            cx, attrs, visibility, type_token, ident, lifetimes, input, lang, trusted, namespace,
+        )
+    } else {
+        Err(lookahead.error())
+    }
+}
+
+fn parse_extern_verbatim_fn(input: ParseStream) -> Result<Api> {
+    input.parse::<RustSignature>()?;
+    input.parse::<Token![;]>()?;
+    unreachable!()
 }
 
 fn parse_type_alias(
