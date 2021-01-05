@@ -6,6 +6,7 @@ on:
       - master
     paths:
       - book/**
+      - .github/workflows/site.yml
 
 jobs:
   deploy:
