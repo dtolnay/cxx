@@ -1008,7 +1008,7 @@ fn expand_rust_function_shim_super(
     let call = match &sig.receiver {
         None => quote_spanned!(span=> super::#invoke),
         Some(receiver) => {
-            let receiver_type = &receiver.ty;
+            let receiver_type = &receiver.ty.rust;
             quote_spanned!(span=> #receiver_type::#invoke)
         }
     };
