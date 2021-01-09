@@ -247,6 +247,13 @@ void c_take_box(rust::Box<R> r) {
   }
 }
 
+void c_clone_box(rust::Box<R> r) {
+  auto cloned = r.clone();
+  if (cxx_test_suite_r_is_correct(&*cloned)) {
+    cxx_test_suite_set_correct();
+  }
+}
+
 void c_take_unique_ptr(std::unique_ptr<C> c) {
   if (c->get() == 2020) {
     cxx_test_suite_set_correct();

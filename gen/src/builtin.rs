@@ -26,7 +26,7 @@ pub struct Builtins<'a> {
     pub rust_slice_new: bool,
     pub rust_slice_repr: bool,
     pub exception: bool,
-    pub relocatable: bool,
+    pub traits: bool,
     pub friend_impl: bool,
     pub is_complete: bool,
     pub deleter_if: bool,
@@ -107,7 +107,7 @@ pub(super) fn write(out: &mut OutFile) {
         include.sys_types = true;
     }
 
-    if builtin.relocatable {
+    if builtin.traits {
         include.type_traits = true;
     }
 
@@ -168,7 +168,7 @@ pub(super) fn write(out: &mut OutFile) {
     ifndef::write(out, builtin.opaque, "CXXBRIDGE1_RUST_OPAQUE");
     ifndef::write(out, builtin.is_complete, "CXXBRIDGE1_IS_COMPLETE");
     ifndef::write(out, builtin.layout, "CXXBRIDGE1_LAYOUT");
-    ifndef::write(out, builtin.relocatable, "CXXBRIDGE1_RELOCATABLE");
+    ifndef::write(out, builtin.traits, "CXXBRIDGE1_TRAITS");
 
     if builtin.rust_str_new_unchecked {
         out.next_section();

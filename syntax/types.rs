@@ -6,7 +6,7 @@ use crate::syntax::resolve::Resolution;
 use crate::syntax::set::{OrderedSet, UnorderedSet};
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::{
-    toposort, Api, Atom, Enum, ExternType, Impl, Lifetimes, Pair, Struct, Type, TypeAlias,
+    toposort, Api, Atom, Derive, Enum, ExternType, Impl, Lifetimes, Pair, Struct, Type, TypeAlias,
 };
 use proc_macro2::Ident;
 use quote::ToTokens;
@@ -64,9 +64,21 @@ impl<'a> Types<'a> {
             }
         }
 
-        let mut add_resolution = |name: &'a Pair, generics: &'a Lifetimes| {
-            resolutions.insert(&name.rust, Resolution { name, generics });
-        };
+        let mut add_resolution =
+            |name: &'a Pair,
+             generics: &'a Lifetimes,
+             derives: Option<&'a Vec<Derive>>,
+             bounds: Option<&'a Vec<Derive>>| {
+                resolutions.insert(
+                    &name.rust,
+                    Resolution {
+                        name,
+                        generics,
+                        derives,
+                        bounds,
+                    },
+                );
+            };
 
         let mut type_names = UnorderedSet::new();
         let mut function_names = UnorderedSet::new();
@@ -95,7 +107,7 @@ impl<'a> Types<'a> {
                     for field in &strct.fields {
                         visit(&mut all, &field.ty);
                     }
-                    add_resolution(&strct.name, &strct.generics);
+                    add_resolution(&strct.name, &strct.generics, Some(&strct.derives), None);
                 }
                 Api::Enum(enm) => {
                     all.insert(&enm.repr_type);
@@ -111,7 +123,7 @@ impl<'a> Types<'a> {
                         duplicate_name(cx, enm, ident);
                     }
                     enums.insert(ident, enm);
-                    add_resolution(&enm.name, &enm.generics);
+                    add_resolution(&enm.name, &enm.generics, Some(&enm.derives), None);
                 }
                 Api::CxxType(ety) => {
                     let ident = &ety.name.rust;
@@ -128,7 +140,12 @@ impl<'a> Types<'a> {
                     if !ety.trusted {
                         untrusted.insert(ident, ety);
                     }
-                    add_resolution(&ety.name, &ety.generics);
+                    add_resolution(
+                        &ety.name,
+                        &ety.generics,
+                        Some(&ety.derives),
+                        Some(&ety.bounds),
+                    );
                 }
                 Api::RustType(ety) => {
                     let ident = &ety.name.rust;
@@ -136,7 +153,12 @@ impl<'a> Types<'a> {
                         duplicate_name(cx, ety, ident);
                     }
                     rust.insert(ident);
-                    add_resolution(&ety.name, &ety.generics);
+                    add_resolution(
+                        &ety.name,
+                        &ety.generics,
+                        Some(&ety.derives),
+                        Some(&ety.bounds),
+                    );
                 }
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
                     // Note: duplication of the C++ name is fine because C++ has
@@ -158,7 +180,7 @@ impl<'a> Types<'a> {
                     }
                     cxx.insert(ident);
                     aliases.insert(ident, alias);
-                    add_resolution(&alias.name, &alias.generics);
+                    add_resolution(&alias.name, &alias.generics, Some(&alias.derives), None);
                 }
                 Api::Impl(imp) => {
                     visit(&mut all, &imp.ty);

@@ -340,9 +340,27 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
     }
 
     if !ety.bounds.is_empty() {
-        let bounds = &ety.bounds;
-        let span = quote!(#(#bounds)*);
-        cx.error(span, "extern type bounds are not implemented yet");
+        if ety.lang == Lang::Cxx {
+            let bounds = &ety.bounds;
+            let span = quote!(#(#bounds)*);
+            cx.error(
+                span,
+                "extern type bounds on opaque C++ types are not implemented yet",
+            );
+        } else {
+            for derive in &ety.bounds {
+                match derive.what {
+                    Trait::Clone => {}
+                    _ => {
+                        let msg = format!(
+                            "Trait bound {} on opaque Rust type is not supported yet",
+                            derive
+                        );
+                        cx.error(derive, msg);
+                    }
+                }
+            }
+        }
     }
 
     if let Some(reasons) = cx.types.required_trivial.get(&ety.name.rust) {

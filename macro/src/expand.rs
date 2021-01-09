@@ -1072,17 +1072,38 @@ fn expand_rust_box(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -
     let link_prefix = format!("cxxbridge1$box${}$", resolve.name.to_symbol());
     let link_alloc = format!("{}alloc", link_prefix);
     let link_dealloc = format!("{}dealloc", link_prefix);
+    let link_clone = format!("{}clone", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
 
     let local_prefix = format_ident!("{}__box_", ident);
     let local_alloc = format_ident!("{}alloc", local_prefix);
     let local_dealloc = format_ident!("{}dealloc", local_prefix);
+    let local_clone = format_ident!("{}clone", local_prefix);
     let local_drop = format_ident!("{}drop", local_prefix);
 
     let (impl_generics, ty_generics) = if let Some(imp) = explicit_impl {
         (&imp.impl_generics, &imp.ty_generics)
     } else {
         (resolve.generics, resolve.generics)
+    };
+
+    let cloneable = resolve.derives.map_or(false, |derives| {
+        derives.iter().any(|derive| derive.what == Trait::Clone)
+    }) || resolve.bounds.map_or(false, |bounds| {
+        bounds.iter().any(|bound| bound.what == Trait::Clone)
+    });
+    let clone_method = if cloneable {
+        Some(quote! {
+            #[doc(hidden)]
+            #[export_name = #link_clone]
+            unsafe extern "C" fn #local_clone #impl_generics(
+                this: *const ::std::boxed::Box<#ident #ty_generics>,
+            ) -> *mut #ident #ty_generics {
+                ::std::boxed::Box::into_raw((&*this).clone())
+            }
+        })
+    } else {
+        None
     };
 
     let begin_span =
@@ -1103,6 +1124,7 @@ fn expand_rust_box(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -
         unsafe extern "C" fn #local_dealloc #impl_generics(ptr: *mut ::std::mem::MaybeUninit<#ident #ty_generics>) {
             ::std::boxed::Box::from_raw(ptr);
         }
+        #clone_method
         #[doc(hidden)]
         #[export_name = #link_drop]
         unsafe extern "C" fn #local_drop #impl_generics(this: *mut ::std::boxed::Box<#ident #ty_generics>) {

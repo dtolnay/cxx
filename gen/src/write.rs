@@ -228,6 +228,7 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
 }
 
 fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&ExternFn]) {
+    let clone_method = derive::contains(&strct.derives, Trait::Clone);
     let operator_eq = derive::contains(&strct.derives, Trait::PartialEq);
     let operator_ord = derive::contains(&strct.derives, Trait::PartialOrd);
 
@@ -297,6 +298,9 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
 
     out.include.type_traits = true;
     writeln!(out, "  using IsRelocatable = ::std::true_type;");
+    if clone_method {
+        writeln!(out, "  using IsCloneable = ::std::true_type;");
+    }
 
     writeln!(out, "}};");
     writeln!(out, "#endif // {}", guard);
@@ -331,6 +335,11 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
         "struct {} final : public ::rust::Opaque {{",
         ety.name.cxx,
     );
+
+    if derive::contains(&ety.derives, Trait::Clone) || derive::contains(&ety.bounds, Trait::Clone) {
+        out.builtin.traits = true;
+        writeln!(out, "  using IsCloneable = ::std::true_type;");
+    }
 
     for method in methods {
         write!(out, "  ");
@@ -433,7 +442,7 @@ fn check_trivial_extern_type(out: &mut OutFile, alias: &TypeAlias, reasons: &[Tr
     //
 
     let id = alias.name.to_fully_qualified();
-    out.builtin.relocatable = true;
+    out.builtin.traits = true;
     writeln!(out, "static_assert(");
     writeln!(out, "    ::rust::IsRelocatable<{}>::value,", id);
     writeln!(
@@ -1343,6 +1352,13 @@ fn write_rust_box_extern(out: &mut OutFile, ident: &Ident) {
     let inner = resolve.name.to_fully_qualified();
     let instance = resolve.name.to_symbol();
 
+    let cloneable = resolve
+        .derives
+        .map_or(false, |d| derive::contains(d, Trait::Clone))
+        || resolve
+            .bounds
+            .map_or(false, |b| derive::contains(b, Trait::Clone));
+
     writeln!(
         out,
         "{} *cxxbridge1$box${}$alloc() noexcept;",
@@ -1353,6 +1369,13 @@ fn write_rust_box_extern(out: &mut OutFile, ident: &Ident) {
         "void cxxbridge1$box${}$dealloc({} *) noexcept;",
         instance, inner,
     );
+    if cloneable {
+        writeln!(
+            out,
+            "{} *cxxbridge1$box${}$clone(const ::rust::Box<{}> *ptr) noexcept;",
+            inner, instance, inner
+        );
+    }
     writeln!(
         out,
         "void cxxbridge1$box${}$drop(::rust::Box<{}> *ptr) noexcept;",
@@ -1408,6 +1431,13 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
     let inner = resolve.name.to_fully_qualified();
     let instance = resolve.name.to_symbol();
 
+    let cloneable = resolve
+        .derives
+        .map_or(false, |d| derive::contains(d, Trait::Clone))
+        || resolve
+            .bounds
+            .map_or(false, |b| derive::contains(b, Trait::Clone));
+
     writeln!(out, "template <>");
     begin_function_definition(out);
     writeln!(
@@ -1427,6 +1457,23 @@ fn write_rust_box_impl(out: &mut OutFile, ident: &Ident) {
     );
     writeln!(out, "  cxxbridge1$box${}$dealloc(ptr);", instance);
     writeln!(out, "}}");
+
+    if cloneable {
+        writeln!(out, "template <>");
+        writeln!(out, "template <>");
+        begin_function_definition(out);
+        writeln!(
+            out,
+            "Box<{}> Box<{}>::clone() const noexcept {{",
+            inner, inner
+        );
+        writeln!(
+            out,
+            "  return from_raw(cxxbridge1$box${}$clone(this));",
+            instance
+        );
+        writeln!(out, "}}");
+    }
 
     writeln!(out, "template <>");
     begin_function_definition(out);

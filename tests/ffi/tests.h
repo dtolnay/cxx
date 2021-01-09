@@ -124,6 +124,7 @@ void c_take_shared(Shared shared);
 void c_take_ns_shared(::A::AShared shared);
 void c_take_nested_ns_shared(::A::B::ABShared shared);
 void c_take_box(rust::Box<R> r);
+void c_clone_box(rust::Box<R> r);
 void c_take_unique_ptr(std::unique_ptr<C> c);
 void c_take_ref_r(const R &r);
 void c_take_ref_c(const C &c);

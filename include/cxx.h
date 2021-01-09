@@ -30,6 +30,54 @@ template <typename T>
 class impl;
 }
 
+#ifndef CXXBRIDGE1_TRAITS
+#define CXXBRIDGE1_TRAITS
+namespace detail {
+template <typename... Ts>
+struct make_void {
+  using type = void;
+};
+
+template <typename... Ts>
+using void_t = typename make_void<Ts...>::type;
+
+template <typename Void, template <typename...> class, typename...>
+struct detect : std::false_type {};
+template <template <typename...> class T, typename... A>
+struct detect<void_t<T<A...>>, T, A...> : std::true_type {};
+
+template <template <typename...> class T, typename... A>
+using is_detected = detect<void, T, A...>;
+
+template <typename T>
+using detect_IsRelocatable = typename T::IsRelocatable;
+template <typename T>
+struct get_IsRelocatable
+    : std::is_same<typename T::IsRelocatable, std::true_type> {};
+
+template <typename T>
+using detect_IsCloneable = typename T::IsCloneable;
+template <typename T>
+struct get_IsCloneable : std::is_same<typename T::IsCloneable, std::true_type> {
+};
+} // namespace detail
+
+template <typename T>
+struct IsRelocatable
+    : std::conditional<
+          detail::is_detected<detail::detect_IsRelocatable, T>::value,
+          detail::get_IsRelocatable<T>,
+          std::integral_constant<
+              bool, std::is_trivially_move_constructible<T>::value &&
+                        std::is_trivially_destructible<T>::value>>::type {};
+
+template <typename T>
+struct IsCloneable
+    : std::conditional<
+          detail::is_detected<detail::detect_IsCloneable, T>::value,
+          detail::get_IsCloneable<T>, std::false_type>::type {};
+#endif // CXXBRIDGE1_TRAITS
+
 #ifndef CXXBRIDGE1_RUST_STRING
 #define CXXBRIDGE1_RUST_STRING
 // https://cxx.rs/binding/string.html
@@ -257,6 +305,10 @@ public:
 
   template <typename... Fields>
   static Box in_place(Fields &&...);
+
+  template <typename U = T,
+            typename std::enable_if<IsCloneable<U>::value, bool>::type = true>
+  Box clone() const noexcept;
 
   void swap(Box &) noexcept;
 
@@ -1039,43 +1091,6 @@ std::size_t align_of() {
   return layout::align_of<T>();
 }
 #endif // CXXBRIDGE1_LAYOUT
-
-#ifndef CXXBRIDGE1_RELOCATABLE
-#define CXXBRIDGE1_RELOCATABLE
-namespace detail {
-template <typename... Ts>
-struct make_void {
-  using type = void;
-};
-
-template <typename... Ts>
-using void_t = typename make_void<Ts...>::type;
-
-template <typename Void, template <typename...> class, typename...>
-struct detect : std::false_type {};
-template <template <typename...> class T, typename... A>
-struct detect<void_t<T<A...>>, T, A...> : std::true_type {};
-
-template <template <typename...> class T, typename... A>
-using is_detected = detect<void, T, A...>;
-
-template <typename T>
-using detect_IsRelocatable = typename T::IsRelocatable;
-
-template <typename T>
-struct get_IsRelocatable
-    : std::is_same<typename T::IsRelocatable, std::true_type> {};
-} // namespace detail
-
-template <typename T>
-struct IsRelocatable
-    : std::conditional<
-          detail::is_detected<detail::detect_IsRelocatable, T>::value,
-          detail::get_IsRelocatable<T>,
-          std::integral_constant<
-              bool, std::is_trivially_move_constructible<T>::value &&
-                        std::is_trivially_destructible<T>::value>>::type {};
-#endif // CXXBRIDGE1_RELOCATABLE
 
 } // namespace cxxbridge1
 } // namespace rust
