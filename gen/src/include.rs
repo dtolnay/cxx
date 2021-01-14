@@ -23,6 +23,7 @@ pub struct Includes<'a> {
     pub custom: Vec<Include>,
     pub algorithm: bool,
     pub array: bool,
+    pub cassert: bool,
     pub cstddef: bool,
     pub cstdint: bool,
     pub cstring: bool,
@@ -75,6 +76,7 @@ pub(super) fn write(out: &mut OutFile) {
         custom: _,
         algorithm,
         array,
+        cassert,
         cstddef,
         cstdint,
         cstring,
@@ -98,6 +100,9 @@ pub(super) fn write(out: &mut OutFile) {
     }
     if array {
         writeln!(out, "#include <array>");
+    }
+    if cassert {
+        writeln!(out, "#include <cassert>");
     }
     if cstddef {
         writeln!(out, "#include <cstddef>");

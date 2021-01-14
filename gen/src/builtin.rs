@@ -64,6 +64,7 @@ pub(super) fn write(out: &mut OutFile) {
     if builtin.rust_vec {
         include.algorithm = true;
         include.array = true;
+        include.cassert = true;
         include.cstddef = true;
         include.cstdint = true;
         include.initializer_list = true;
@@ -78,6 +79,7 @@ pub(super) fn write(out: &mut OutFile) {
 
     if builtin.rust_slice {
         include.array = true;
+        include.cassert = true;
         include.cstddef = true;
         include.cstdint = true;
         include.iterator = true;
