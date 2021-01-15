@@ -1,0 +1,11 @@
+error: cannot taking self by-value, consider using `&self` or `&mut self` instead
+ --> $DIR/self_suggestion.rs:4:22
+  |
+4 |         fn self_rust(self);
+  |                      ^^^^
+
+error: cannot taking self by-value, consider using `self: Pin<&mut Self>`, `self: Box<T>` or `self: UniquePtr<T>` instead
+ --> $DIR/self_suggestion.rs:8:19
+  |
+8 |         fn self_c(self);
+  |                   ^^^^

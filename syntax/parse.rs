@@ -567,7 +567,21 @@ fn parse_extern_fn(
                     });
                     continue;
                 }
-                return Err(Error::new_spanned(arg, "unsupported signature"));
+
+                match lang {
+                    Lang::Rust => {
+                        return Err(Error::new_spanned(
+                            arg,
+                            "cannot taking self by-value, consider using `&self` or `&mut self` instead"
+                        ));
+                    }
+                    Lang::Cxx => {
+                        return Err(Error::new_spanned(
+                            arg,
+                            "cannot taking self by-value, consider using `self: Pin<&mut Self>`, `self: Box<T>` or `self: UniquePtr<T>` instead"
+                        ));
+                    }
+                }
             }
             FnArg::Typed(arg) => {
                 let ident = match arg.pat.as_ref() {
