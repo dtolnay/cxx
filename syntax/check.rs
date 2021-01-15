@@ -222,9 +222,15 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
 
     match ty.inner {
         Type::Fn(_) | Type::Void(_) => {}
-        Type::Ref(_) => {
-            cx.error(ty, "C++ does not allow references to references");
-            return;
+        Type::Ref(ref ty) => {
+            if let Type::Ref(_) = ty.inner {
+                // When the inner of the inner is still a reference (e.g. `&&&Type`).
+                cx.error(ty, "C++ does not allow references to references");
+                return;
+            } else {
+                // However this is fine since we treat `&&` as rvalue annotation.
+                return;
+            }
         }
         _ => return,
     }
