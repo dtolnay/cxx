@@ -47,7 +47,7 @@ where
         }
     }
 
-    /// Chacks whether the SharedPtr does not own an object.
+    /// Checks whether the SharedPtr does not own an object.
     ///
     /// This is the opposite of [std::shared_ptr\<T\>::operator bool](https://en.cppreference.com/w/cpp/memory/shared_ptr/operator_bool).
     pub fn is_null(&self) -> bool {
