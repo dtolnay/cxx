@@ -778,6 +778,12 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         } else if out.types.needs_indirect_abi(&arg.ty) {
             out.include.utility = true;
             write!(out, "::std::move(*{})", arg.name.cxx);
+        } else if let Type::Ref(ref inner) = arg.ty {
+            if let Type::Ref(_) = inner.inner {
+                write!(out, "::std::move({})", arg.name.cxx);
+            } else {
+                write!(out, "{}", arg.name.cxx);
+            }
         } else {
             write!(out, "{}", arg.name.cxx);
         }
@@ -1173,11 +1179,16 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write!(out, ">");
         }
         Type::Ref(r) => {
-            if !r.mutable {
-                write!(out, "const ");
+            if let Type::Ref(inner) = &r.inner {
+                write_type(out, &inner.inner);
+                write!(out, " &&");
+            } else {
+                if !r.mutable {
+                    write!(out, "const ");
+                }
+                write_type(out, &r.inner);
+                write!(out, " &");
             }
-            write_type(out, &r.inner);
-            write!(out, " &");
         }
         Type::Str(_) => {
             write!(out, "::rust::Str");

@@ -139,7 +139,7 @@ pub mod ffi {
         fn c_take_unique_ptr_vector_f64(v: UniquePtr<CxxVector<f64>>);
         fn c_take_unique_ptr_vector_string(v: UniquePtr<CxxVector<CxxString>>);
         fn c_take_unique_ptr_vector_shared(v: UniquePtr<CxxVector<Shared>>);
-        // fn c_take_rvalue_unique_ptr(s: &&UniquePtr<CxxString>);
+        fn c_take_rvalue_unique_ptr(s: &&UniquePtr<CxxString>);
         fn c_take_ref_vector(v: &CxxVector<u8>);
         fn c_take_rust_vec(v: Vec<u8>);
         fn c_take_rust_vec_shared(v: Vec<Shared>);

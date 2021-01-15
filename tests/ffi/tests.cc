@@ -355,7 +355,7 @@ void c_take_unique_ptr_vector_shared(std::unique_ptr<std::vector<Shared>> v) {
   }
 }
 
-void c_take_unique_ptr_string(std::unique_ptr<std::string> &&s) {
+void c_take_rvalue_unique_ptr(std::unique_ptr<std::string> &&s) {
   if (*s == "2020") {
     cxx_test_suite_set_correct();
   }

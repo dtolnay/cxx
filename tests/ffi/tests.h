@@ -141,6 +141,7 @@ void c_take_unique_ptr_vector_f64(std::unique_ptr<std::vector<double>> v);
 void c_take_unique_ptr_vector_string(
     std::unique_ptr<std::vector<std::string>> v);
 void c_take_unique_ptr_vector_shared(std::unique_ptr<std::vector<Shared>> v);
+void c_take_rvalue_unique_ptr(std::unique_ptr<std::string> &&s);
 void c_take_ref_vector(const std::vector<uint8_t> &v);
 void c_take_rust_vec(rust::Vec<uint8_t> v);
 void c_take_rust_vec_index(rust::Vec<uint8_t> v);
