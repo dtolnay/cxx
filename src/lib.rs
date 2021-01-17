@@ -423,7 +423,7 @@ pub use crate::exception::Exception;
 pub use crate::extern_type::{kind, ExternType};
 pub use crate::shared_ptr::SharedPtr;
 pub use crate::string::CxxString;
-pub use crate::unique_ptr::UniquePtr;
+pub use crate::unique_ptr::{UniquePtr,UniquePtrTarget};
 #[doc(inline)]
 pub use crate::vector::CxxVector;
 pub use crate::weak_ptr::WeakPtr;
