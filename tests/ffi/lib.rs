@@ -121,6 +121,8 @@ pub mod ffi {
         fn c_return_nested_ns_ref(shared: &ABShared) -> &usize;
         fn c_return_ns_enum(n: u16) -> AEnum;
         fn c_return_nested_ns_enum(n: u16) -> ABEnum;
+        fn c_return_opaque_raw_ptr(n: usize) -> *const C;
+        fn c_return_opaque_mut_raw_ptr(n: usize) -> *mut C;
 
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);
@@ -161,6 +163,12 @@ pub mod ffi {
         fn c_take_nested_ns_shared(shared: ABShared);
         fn c_take_rust_vec_ns_shared(v: Vec<AShared>);
         fn c_take_rust_vec_nested_ns_shared(v: Vec<ABShared>);
+        /// # Unsafety
+        /// To keep clippy happy.
+        unsafe fn c_take_opaque_mut_raw_ptr(c: *mut C) -> usize;
+        /// # Unsafety
+        /// To keep clippy happy.
+        unsafe fn c_take_opaque_raw_ptr(c: *const C) -> usize;
 
         fn c_try_return_void() -> Result<()>;
         fn c_try_return_primitive() -> Result<usize>;

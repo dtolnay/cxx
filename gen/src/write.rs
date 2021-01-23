@@ -222,7 +222,7 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
             Type::Fn(_) => out.builtin.rust_fn = true,
             Type::SliceRef(_) => out.builtin.rust_slice = true,
             Type::Array(_) => out.include.array = true,
-            Type::Ref(_) | Type::Void(_) => {}
+            Type::Ref(_) | Type::Void(_) | Type::Ptr(_) => {}
         }
     }
 }
@@ -1179,6 +1179,13 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write_type(out, &r.inner);
             write!(out, " &");
         }
+        Type::Ptr(p) => {
+            if !p.mutable {
+                write!(out, "const ");
+            }
+            write_type(out, &p.inner);
+            write!(out, " *");
+        }
         Type::Str(_) => {
             write!(out, "::rust::Str");
         }
@@ -1253,7 +1260,7 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
         | Type::SliceRef(_)
         | Type::Fn(_)
         | Type::Array(_) => write!(out, " "),
-        Type::Ref(_) => {}
+        Type::Ref(_) | Type::Ptr(_) => {}
         Type::Void(_) => unreachable!(),
     }
 }

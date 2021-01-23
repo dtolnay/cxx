@@ -335,3 +335,19 @@ fn test_extern_opaque() {
     check!(ffi2::c_take_opaque_ns_ref(f.as_ref().unwrap()));
     check!(ffi2::c_take_opaque_ns_ptr(f));
 }
+
+#[test]
+fn test_raw_ptr() {
+    let c = ffi::c_return_opaque_mut_raw_ptr(2023);
+    let mut c_unique = unsafe { cxx::UniquePtr::from_raw(c) };
+    assert_eq!(2023, c_unique.pin_mut().set_succeed(2023).unwrap());
+    // c will be dropped as it's now in a UniquePtr
+
+    let c2 = ffi::c_return_opaque_mut_raw_ptr(2024);
+    assert_eq!(2024, unsafe { ffi::c_take_opaque_raw_ptr(c2) });
+    assert_eq!(2024, unsafe { ffi::c_take_opaque_mut_raw_ptr(c2) }); // deletes c2
+
+    let c3 = ffi::c_return_opaque_raw_ptr(2025);
+    assert_eq!(2025, unsafe { ffi::c_take_opaque_raw_ptr(c3) });
+    assert_eq!(2025, unsafe { ffi::c_take_opaque_mut_raw_ptr(c3 as *mut ffi::C) }); // deletes c3
+}

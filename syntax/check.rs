@@ -8,6 +8,8 @@ use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
 use std::fmt::Display;
 
+use super::Ptr;
+
 pub(crate) struct Check<'a> {
     apis: &'a [Api],
     types: &'a Types<'a>,
@@ -35,6 +37,7 @@ fn do_typecheck(cx: &mut Check) {
             Type::WeakPtr(ptr) => check_type_weak_ptr(cx, ptr),
             Type::CxxVector(ptr) => check_type_cxx_vector(cx, ptr),
             Type::Ref(ty) => check_type_ref(cx, ty),
+            Type::Ptr(ty) => check_type_ptr(cx, ty),
             Type::Array(array) => check_type_array(cx, array),
             Type::Fn(ty) => check_type_fn(cx, ty),
             Type::SliceRef(ty) => check_type_slice_ref(cx, ty),
@@ -221,7 +224,7 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
     }
 
     match ty.inner {
-        Type::Fn(_) | Type::Void(_) => {}
+        Type::Fn(_) | Type::Void(_) | Type::Ptr(_) => {}
         Type::Ref(_) => {
             cx.error(ty, "C++ does not allow references to references");
             return;
@@ -230,6 +233,12 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
     }
 
     cx.error(ty, "unsupported reference type");
+}
+
+fn check_type_ptr(cx: &mut Check, ty: &Ptr) {
+    if let Type::Ident(_) = ty.inner { return }
+
+    cx.error(ty, "unsupported pointer type");
 }
 
 fn check_type_slice_ref(cx: &mut Check, ty: &SliceRef) {
@@ -555,6 +564,7 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
         | Type::SharedPtr(_)
         | Type::WeakPtr(_)
         | Type::Ref(_)
+        | Type::Ptr(_)
         | Type::Str(_)
         | Type::SliceRef(_) => false,
     }
@@ -628,6 +638,7 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         Type::SharedPtr(_) => "shared_ptr".to_owned(),
         Type::WeakPtr(_) => "weak_ptr".to_owned(),
         Type::Ref(_) => "reference".to_owned(),
+        Type::Ptr(_) => "raw pointer".to_owned(),
         Type::Str(_) => "&str".to_owned(),
         Type::CxxVector(_) => "C++ vector".to_owned(),
         Type::SliceRef(_) => "slice".to_owned(),

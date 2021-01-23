@@ -11,7 +11,7 @@ use crate::syntax::{
 use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
 use std::mem;
-use syn::parse::{ParseStream, Parser};
+use syn::{TypePtr, parse::{ParseStream, Parser}};
 use syn::punctuated::Punctuated;
 use syn::{
     Abi, Attribute, Error, Expr, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
@@ -20,6 +20,8 @@ use syn::{
     TraitBoundModifier, Type as RustType, TypeArray, TypeBareFn, TypeParamBound, TypePath,
     TypeReference, Variant as RustVariant, Visibility,
 };
+
+use super::Ptr;
 
 pub mod kw {
     syn::custom_keyword!(Pin);
@@ -547,6 +549,7 @@ fn parse_extern_fn(
         ));
     }
 
+    let unsafety = foreign_fn.sig.unsafety;
     let mut receiver = None;
     let mut args = Punctuated::new();
     for arg in foreign_fn.sig.inputs.pairs() {
@@ -583,6 +586,11 @@ fn parse_extern_fn(
                     let attrs = OtherAttrs::none();
                     let visibility = Token![pub](ident.span());
                     let name = pair(Namespace::default(), &ident, None, None);
+                    if let Type::Ptr(_) = &ty {
+                        if unsafety.is_none() {
+                            return Err(Error::new_spanned(arg, "pointer argument requires that the function be marked unsafe"));
+                        }
+                    }
                     args.push_value(Var {
                         doc,
                         attrs,
@@ -620,7 +628,6 @@ fn parse_extern_fn(
     let ret = parse_return_type(&foreign_fn.sig.output, &mut throws_tokens)?;
     let throws = throws_tokens.is_some();
     let visibility = visibility_pub(&foreign_fn.vis, &foreign_fn.sig.ident);
-    let unsafety = foreign_fn.sig.unsafety;
     let fn_token = foreign_fn.sig.fn_token;
     let name = pair(namespace, &foreign_fn.sig.ident, cxx_name, rust_name);
     let generics = generics.clone();
@@ -965,6 +972,7 @@ fn parse_impl(imp: ItemImpl) -> Result<Api> {
         },
         Type::Ident(_)
         | Type::Ref(_)
+        | Type::Ptr(_)
         | Type::Str(_)
         | Type::Fn(_)
         | Type::Void(_)
@@ -1033,6 +1041,7 @@ fn parse_include(input: ParseStream) -> Result<Include> {
 fn parse_type(ty: &RustType) -> Result<Type> {
     match ty {
         RustType::Reference(ty) => parse_type_reference(ty),
+        RustType::Ptr(ty) => parse_type_ptr(ty),
         RustType::Path(ty) => parse_type_path(ty),
         RustType::Array(ty) => parse_type_array(ty),
         RustType::BareFn(ty) => parse_type_fn(ty),
@@ -1081,6 +1090,26 @@ fn parse_type_reference(ty: &TypeReference) -> Result<Type> {
         inner,
         pin_tokens,
         mutability,
+    })))
+}
+
+fn parse_type_ptr(ty: &TypePtr) -> Result<Type> {
+    let star = ty.star_token;
+    let mutable = ty.mutability.is_some();
+    let constness = ty.const_token;
+    let mutability = ty.mutability;
+    if !constness.is_some() && !mutable {
+        return Err(Error::new_spanned(ty, "pointer is neither const nor mut"));
+    }
+
+    let inner = parse_type(&ty.elem)?;
+    
+    Ok(Type::Ptr(Box::new(Ptr {
+        star,
+        mutable,
+        inner,
+        mutability,
+        constness,
     })))
 }
 

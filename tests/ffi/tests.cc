@@ -207,6 +207,24 @@ Enum c_return_enum(uint16_t n) {
   }
 }
 
+const C* c_return_opaque_raw_ptr(size_t c) {
+  return new C(c);
+}
+
+C* c_return_opaque_mut_raw_ptr(size_t c) {
+  return new C(c);
+}
+
+size_t c_take_opaque_raw_ptr(const C* c) {
+  return c->get();
+}
+
+size_t c_take_opaque_mut_raw_ptr(C* c) {
+  size_t result = c->get();
+  delete c;
+  return result;
+}
+
 Borrow::Borrow(const std::string &s) : s(s) {}
 
 void Borrow::const_member() const {}
