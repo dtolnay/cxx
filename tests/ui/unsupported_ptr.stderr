@@ -35,3 +35,15 @@ error: unsupported reference type
    |
 26 |         fn get_reference_ptr() -> & *mut C;
    |                                   ^^^^^^^^
+
+error: unsupported vector target type
+  --> $DIR/unsupported_ptr.rs:35:42
+   |
+35 |         fn get_ptr_vector() -> UniquePtr<CxxVector<*mut C>>;
+   |                                          ^^^^^^^^^^^^^^^^^^
+
+error: unsupported unique_ptr target type
+  --> $DIR/unsupported_ptr.rs:36:32
+   |
+36 |         fn get_ptr_unique() -> UniquePtr<*mut C>;
+   |                                ^^^^^^^^^^^^^^^^^

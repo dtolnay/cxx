@@ -27,4 +27,14 @@ mod ffi3 {
     }
 }
 
+#[cxx::bridge]
+mod ffi4 {
+    unsafe extern "C++" {
+        type C;
+
+        fn get_ptr_vector() -> UniquePtr<CxxVector<*mut C>>;
+        fn get_ptr_unique() -> UniquePtr<*mut C>;
+    }
+}
+
 fn main() {}
