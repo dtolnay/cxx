@@ -1,10 +1,8 @@
 load(
     "//tools/bazel:rust.bzl",
     glob = "third_party_glob",
-    rust_binary = "third_party_rust_binary",
     rust_library = "third_party_rust_library",
 )
-load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 
 rust_library(
     name = "bitflags",
