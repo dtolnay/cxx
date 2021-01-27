@@ -17,7 +17,7 @@ path = "src/main.rs"
 
 [dependencies]
 clap = "2.33"
-codespan-reporting = "0.9"
+codespan-reporting = "0.11"
 proc-macro2 = { version = "1.0.17", default-features = false, features = ["span-locations"] }
 quote = { version = "1.0", default-features = false }
 syn = { version = "1.0.57", default-features = false, features = ["parsing", "printing", "clone-impls", "full"] }
