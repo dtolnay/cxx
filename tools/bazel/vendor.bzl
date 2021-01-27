@@ -52,7 +52,7 @@ def _log_cargo_vendor(repository_ctx, result):
         repository_ctx.execute(print, quiet = False)
 
 vendor = repository_rule(
-    doc = "A rule used to vender the dependencies of a crate in the current workspace",
+    doc = "A rule used to vendor the dependencies of a crate in the current workspace",
     attrs = {
         "lockfile": attr.label(
             doc = "A lockfile providing the set of crates to vendor",
