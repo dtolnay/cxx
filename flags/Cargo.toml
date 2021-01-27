@@ -1,6 +1,6 @@
 [package]
 name = "cxxbridge-flags"
-version = "1.0.28"
+version = "1.0.29"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
