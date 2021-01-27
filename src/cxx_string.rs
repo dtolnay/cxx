@@ -188,7 +188,7 @@ impl PartialEq<str> for CxxString {
 pub struct StackString {
     // Static assertions in cxx.cc validate that this is large enough and
     // aligned enough.
-    space: MaybeUninit<[*const (); 8]>,
+    space: MaybeUninit<[usize; 8]>,
 }
 
 impl StackString {
