@@ -60,7 +60,7 @@ pub async fn do_thing(arg: Arg) -> Ret {
 
     ffi::shim_doThing(
         arg,
-        |tx, ret| { let _ = tx.0.send(ret); },
+        |context, ret| { let _ = context.0.send(ret); },
         context,
     );
 
