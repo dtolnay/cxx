@@ -8,7 +8,8 @@
     clippy::ptr_arg,
     clippy::trivially_copy_pass_by_ref,
     clippy::unnecessary_wraps,
-    clippy::unused_self
+    clippy::unused_self,
+    clippy::upper_case_acronyms
 )]
 
 pub mod cast;
