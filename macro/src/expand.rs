@@ -123,7 +123,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
         #doc
         #attrs
         #[deny(improper_ctypes)]
-        #[allow(non_snake_case)]
+        #[allow(non_camel_case_types, non_snake_case)]
         #vis #mod_token #ident #expanded
     }
 }
