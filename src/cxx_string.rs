@@ -71,10 +71,10 @@ pub struct CxxString {
 #[macro_export]
 macro_rules! let_cxx_string {
     ($var:ident = $value:expr $(,)?) => {
-        let mut $var = $crate::private::StackString::new();
+        let mut cxx_stack_string = $crate::private::StackString::new();
         #[allow(unused_mut, unused_unsafe)]
         let mut $var = match $value {
-            let_cxx_string => unsafe { $var.init(let_cxx_string) },
+            let_cxx_string => unsafe { cxx_stack_string.init(let_cxx_string) },
         };
     };
 }
