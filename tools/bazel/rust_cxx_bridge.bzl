@@ -1,7 +1,15 @@
+# buildifier: disable=module-docstring
 load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
 def rust_cxx_bridge(name, src, deps = []):
+    """A macro defining a cxx bridge library
+
+    Args:
+        name (string): The name of the new target
+        src (string): The rust source file to generate a bridge for
+        deps (list, optional): A list of dependencies for the underlying cc_library. Defaults to [].
+    """
     native.alias(
         name = "%s/header" % name,
         actual = src + ".h",
@@ -26,7 +34,7 @@ def rust_cxx_bridge(name, src, deps = []):
             "-o",
             "$(location %s.cc)" % src,
         ],
-        tool = "//:codegen",
+        tool = "@cxx.rs//:codegen",
     )
 
     cc_library(

@@ -1,10 +1,8 @@
 load(
     "//tools/bazel:rust.bzl",
     glob = "third_party_glob",
-    rust_binary = "third_party_rust_binary",
     rust_library = "third_party_rust_library",
 )
-load("@bazel_tools//tools/build_defs/pkg:pkg.bzl", "pkg_tar")
 
 rust_library(
     name = "bitflags",
@@ -31,7 +29,7 @@ rust_library(
 
 rust_library(
     name = "codespan-reporting",
-    srcs = glob(["vendor/codespan-reporting-0.9.5/src/**"]),
+    srcs = glob(["vendor/codespan-reporting-0.11.0/src/**"]),
     visibility = ["//visibility:public"],
     deps = [
         ":termcolor",
@@ -78,7 +76,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.58/src/**"]),
+    srcs = glob(["vendor/syn-1.0.60/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",

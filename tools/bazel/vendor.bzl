@@ -1,3 +1,7 @@
+"""A module defining a repository rule for vendoring the dependencies
+of a crate in the current workspace.
+"""
+
 def _impl(repository_ctx):
     # Link cxx repository into @third-party.
     lockfile = repository_ctx.path(repository_ctx.attr.lockfile)
@@ -48,7 +52,12 @@ def _log_cargo_vendor(repository_ctx, result):
         repository_ctx.execute(print, quiet = False)
 
 vendor = repository_rule(
-    attrs = {"lockfile": attr.label()},
+    doc = "A rule used to vendor the dependencies of a crate in the current workspace",
+    attrs = {
+        "lockfile": attr.label(
+            doc = "A lockfile providing the set of crates to vendor",
+        ),
+    },
     local = True,
     implementation = _impl,
 )

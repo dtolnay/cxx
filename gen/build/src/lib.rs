@@ -71,7 +71,8 @@
     clippy::struct_excessive_bools,
     clippy::too_many_arguments,
     clippy::too_many_lines,
-    clippy::toplevel_ref_arg
+    clippy::toplevel_ref_arg,
+    clippy::upper_case_acronyms
 )]
 
 mod cfg;

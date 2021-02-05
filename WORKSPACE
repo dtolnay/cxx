@@ -1,38 +1,22 @@
+workspace(name = "cxx.rs")
+
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("//tools/bazel:vendor.bzl", "vendor")
 
 http_archive(
-    name = "io_bazel_rules_rust",
-    sha256 = "5ed804fcd10a506a5b8e9e59bc6b3b7f43bc30c87ce4670e6f78df43604894fd",
-    strip_prefix = "rules_rust-fdf9655ba95616e0314b4e0ebab40bb0c5fe005c",
-    # Master branch as of 2020-07-30
-    url = "https://github.com/bazelbuild/rules_rust/archive/fdf9655ba95616e0314b4e0ebab40bb0c5fe005c.tar.gz",
-)
-
-http_archive(
-    name = "bazel_skylib",
-    sha256 = "97e70364e9249702246c0e9444bccdc4b847bed1eb03c5a3ece4f83dfe6abc44",
+    name = "rules_rust",
+    sha256 = "e6d835ee673f388aa5b62dc23d82db8fc76497e93fa47d8a4afe97abaf09b10d",
+    strip_prefix = "rules_rust-f37b9d6a552e9412285e627f30cb124e709f4f7a",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.0.2/bazel-skylib-1.0.2.tar.gz",
-        "https://github.com/bazelbuild/bazel-skylib/releases/download/1.0.2/bazel-skylib-1.0.2.tar.gz",
+        # Master branch as of 2021-01-27
+        "https://github.com/bazelbuild/rules_rust/archive/f37b9d6a552e9412285e627f30cb124e709f4f7a.tar.gz",
     ],
 )
 
-load("@io_bazel_rules_rust//:workspace.bzl", "bazel_version")
+load("@rules_rust//rust:repositories.bzl", "rust_repositories")
 
-bazel_version(name = "bazel_version")
-
-load("@io_bazel_rules_rust//rust:repositories.bzl", "rust_repository_set")
-
-rust_repository_set(
-    name = "rust_1_48_linux",
-    exec_triple = "x86_64-unknown-linux-gnu",
-    version = "1.48.0",
-)
-
-rust_repository_set(
-    name = "rust_1_48_darwin",
-    exec_triple = "x86_64-apple-darwin",
+rust_repositories(
+    edition = "2018",
     version = "1.48.0",
 )
 
