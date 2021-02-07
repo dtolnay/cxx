@@ -383,9 +383,7 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
                 false => "",
             };
             let msg = format!(
-                "unnamed receiver type is only allowed if the surrounding \
-                 extern block contains exactly one extern type; \
-                 use `self: &{mutability}TheType`",
+                "unnamed receiver type is only allowed if the surrounding extern block contains exactly one extern type; use `self: &{mutability}TheType`",
                 mutability = mutability,
             );
             cx.error(span, msg);
