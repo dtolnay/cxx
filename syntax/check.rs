@@ -390,7 +390,10 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
             );
             cx.error(span, msg);
         } else if cx.types.enums.contains_key(&receiver.ty.rust) {
-            cx.error(span, "C++ does not allow member functions on enums");
+            cx.error(
+                span,
+                "unsupported receiver type; C++ does not allow member functions on enums",
+            );
         } else if !cx.types.structs.contains_key(&receiver.ty.rust)
             && !cx.types.cxx.contains(&receiver.ty.rust)
             && !cx.types.rust.contains(&receiver.ty.rust)

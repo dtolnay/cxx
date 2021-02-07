@@ -1,4 +1,4 @@
-error: C++ does not allow member functions on enums
+error: unsupported receiver type; C++ does not allow member functions on enums
  --> $DIR/enum_receiver.rs:7:20
   |
 7 |         fn f(self: &Enum);
