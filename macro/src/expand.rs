@@ -3,6 +3,7 @@ use crate::syntax::atom::Atom::*;
 use crate::syntax::attrs::{self, OtherAttrs};
 use crate::syntax::file::Module;
 use crate::syntax::instantiate::ImplKey;
+use crate::syntax::qualified::QualifiedName;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
@@ -1061,10 +1062,12 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
 }
 
 fn type_id(name: &Pair) -> TokenStream {
-    let path = name.to_fully_qualified();
-    quote! {
-        ::cxx::type_id!(#path)
-    }
+    let namespace_segments = name.namespace.iter();
+    let mut segments = Vec::with_capacity(namespace_segments.len() + 1);
+    segments.extend(namespace_segments.cloned());
+    segments.push(Ident::new(&name.cxx.to_string(), Span::call_site()));
+    let qualified = QualifiedName { segments };
+    crate::type_id::expand(qualified)
 }
 
 fn expand_rust_box(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
