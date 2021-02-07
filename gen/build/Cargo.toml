@@ -11,6 +11,9 @@ exclude = ["build.rs"]
 keywords = ["ffi"]
 categories = ["development-tools::ffi"]
 
+[features]
+parallel = ["cc/parallel"]
+
 [dependencies]
 cc = "1.0.49"
 codespan-reporting = "0.11"
