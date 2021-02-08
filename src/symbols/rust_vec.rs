@@ -72,6 +72,8 @@ rust_vec_shims_for_primitive!(i8);
 rust_vec_shims_for_primitive!(i16);
 rust_vec_shims_for_primitive!(i32);
 rust_vec_shims_for_primitive!(i64);
+rust_vec_shims_for_primitive!(usize);
+rust_vec_shims_for_primitive!(isize);
 rust_vec_shims_for_primitive!(f32);
 rust_vec_shims_for_primitive!(f64);
 

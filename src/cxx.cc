@@ -600,6 +600,8 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
 
 #define FOR_EACH_RUST_VEC(MACRO)                                               \
   FOR_EACH_NUMERIC(MACRO)                                                      \
+  MACRO(usize, std::size_t)                                                    \
+  MACRO(isize, rust::isize)                                                    \
   MACRO(bool, bool)                                                            \
   MACRO(char, char)                                                            \
   MACRO(string, rust::String)                                                  \
