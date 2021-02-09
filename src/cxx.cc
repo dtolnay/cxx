@@ -413,6 +413,21 @@ union MaybeUninit {
 };
 } // namespace
 
+namespace detail {
+// On some platforms size_t is the same C++ type as one of the sized integer
+// types; on others it is a distinct type. Only in the latter case do we need to
+// define a specialized impl of rust::Vec<size_t>, because in the former case it
+// would collide with one of the other specializations.
+using usize_if_unique =
+    typename std::conditional<std::is_same<size_t, uint64_t>::value ||
+                                  std::is_same<size_t, uint32_t>::value,
+                              struct usize_ignore, size_t>::type;
+using isize_if_unique =
+    typename std::conditional<std::is_same<rust::isize, int64_t>::value ||
+                                  std::is_same<rust::isize, int32_t>::value,
+                              struct isize_ignore, rust::isize>::type;
+} // namespace detail
+
 } // namespace cxxbridge1
 } // namespace rust
 
@@ -602,6 +617,8 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
   FOR_EACH_NUMERIC(MACRO)                                                      \
   MACRO(bool, bool)                                                            \
   MACRO(char, char)                                                            \
+  MACRO(usize, rust::detail::usize_if_unique)                                  \
+  MACRO(isize, rust::detail::isize_if_unique)                                  \
   MACRO(string, rust::String)                                                  \
   MACRO(str, rust::Str)
 

@@ -817,6 +817,14 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(vec1[0] == 3 && vec1[1] == 4);
   ASSERT(vec2[0] == 1 && vec2[1] == 2);
 
+  // Test Vec<usize> and Vec<isize>. These are weird because on Linux and
+  // Windows size_t is exactly the same C++ type as one of the sized integer
+  // types (typically uint64_t, both of which are defined as unsigned long),
+  // while on macOS it is a distinct type.
+  // https://github.com/dtolnay/cxx/issues/705
+  (void)rust::Vec<size_t>();
+  (void)rust::Vec<rust::isize>();
+
   cxx_test_suite_set_correct();
   return nullptr;
 }
