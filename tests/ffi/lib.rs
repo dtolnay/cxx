@@ -12,6 +12,7 @@
 )]
 
 pub mod cast;
+pub mod drop;
 pub mod module;
 
 use cxx::{CxxString, CxxVector, SharedPtr, UniquePtr};

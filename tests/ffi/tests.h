@@ -196,6 +196,11 @@ std::unique_ptr<::G::G> c_return_trivial_ns_ptr();
 std::unique_ptr<E> c_return_opaque_ptr();
 std::unique_ptr<::F::F> c_return_ns_opaque_ptr();
 
+struct DropShared;
+
+void c_take_drop_shared(DropShared shared);
+DropShared c_return_drop_shared();
+
 rust::String cOverloadedFunction(int32_t x);
 rust::String cOverloadedFunction(rust::Str x);
 

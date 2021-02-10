@@ -10,7 +10,7 @@
 
 use cxx::SharedPtr;
 use cxx_test_suite::module::ffi2;
-use cxx_test_suite::{cast, ffi, R};
+use cxx_test_suite::{cast, drop, ffi, R};
 use std::cell::Cell;
 use std::ffi::CStr;
 
@@ -334,4 +334,20 @@ fn test_extern_opaque() {
     let f = ffi2::c_return_ns_opaque_ptr();
     check!(ffi2::c_take_opaque_ns_ref(f.as_ref().unwrap()));
     check!(ffi2::c_take_opaque_ns_ptr(f));
+}
+
+macro_rules! check_dropped {
+    ($run:stmt) => {{
+        drop::DROPPED.with(|dropped| dropped.set(false));
+        $run
+        assert!(drop::DROPPED.with(Cell::get), "{}", stringify!($run));
+    }};
+}
+
+#[test]
+fn test_drop() {
+    check_dropped!(let _ = drop::ffi::c_return_drop_shared());
+    check_dropped!(drop::ffi::c_take_drop_shared(drop::ffi::DropShared {
+        foo: 1
+    }));
 }

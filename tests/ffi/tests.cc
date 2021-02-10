@@ -1,4 +1,5 @@
 #include "tests/ffi/tests.h"
+#include "tests/ffi/drop.rs.h"
 #include "tests/ffi/lib.rs.h"
 #include <cstdlib>
 #include <cstring>
@@ -702,6 +703,10 @@ std::unique_ptr<::F::F> c_return_ns_opaque_ptr() {
   return f;
 }
 
+void c_take_drop_shared(DropShared shared) { (void)shared; }
+
+DropShared c_return_drop_shared() { return DropShared{1}; }
+
 extern "C" const char *cxx_run_test() noexcept {
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
@@ -779,14 +784,14 @@ extern "C" const char *cxx_run_test() noexcept {
   bool (rust::String::*cmp)(const rust::String &) const;
   bool first_first, first_second, sec_second, second_sec;
   for (auto test : {
-    std::tuple<decltype(cmp), bool, bool, bool, bool>
-    {&rust::String::operator==, true, false, false, false},
-    {&rust::String::operator!=, false, true, true, true},
-    {&rust::String::operator<, false, true, true, false},
-    {&rust::String::operator<=, true, true, true, false},
-    {&rust::String::operator>, false, false, false, true},
-    {&rust::String::operator>=, true, false, false, true},
-  }) {
+           std::tuple<decltype(cmp), bool, bool, bool, bool>{
+               &rust::String::operator==, true, false, false, false},
+           {&rust::String::operator!=, false, true, true, true},
+           {&rust::String::operator<, false, true, true, false},
+           {&rust::String::operator<=, true, true, true, false},
+           {&rust::String::operator>, false, false, false, true},
+           {&rust::String::operator>=, true, false, false, true},
+       }) {
     std::tie(cmp, first_first, first_second, sec_second, second_sec) = test;
     ASSERT((first.*cmp)(first) == first_first);
     ASSERT((first.*cmp)(second) == first_second);
