@@ -1,0 +1,10 @@
+error[E0119]: conflicting implementations of trait `ffi::_::forbid::Drop` for type `ffi::Shared`:
+ --> $DIR/drop_shared.rs:1:1
+  |
+1 | #[cxx::bridge]
+  | ^^^^^^^^^^^^^^
+  | |
+  | first implementation here
+  | conflicting implementation for `ffi::Shared`
+  |
+  = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
