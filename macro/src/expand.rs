@@ -43,6 +43,7 @@ pub fn bridge(mut ffi: Module) -> Result<TokenStream> {
 fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types) -> TokenStream {
     let mut expanded = TokenStream::new();
     let mut hidden = TokenStream::new();
+    let mut forbid = TokenStream::new();
 
     for api in apis {
         if let Api::RustType(ety) = api {
@@ -57,6 +58,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
             Api::Struct(strct) => {
                 expanded.extend(expand_struct(strct));
                 hidden.extend(expand_struct_operators(strct));
+                forbid.extend(expand_struct_forbid_drop(strct));
             }
             Api::Enum(enm) => expanded.extend(expand_enum(enm)),
             Api::CxxType(ety) => {
@@ -102,6 +104,10 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
                 expanded.extend(expand_cxx_vector(ident, explicit_impl, types));
             }
         }
+    }
+
+    if !forbid.is_empty() {
+        hidden.extend(expand_forbid(forbid));
     }
 
     // Work around https://github.com/rust-lang/rust/issues/67851.
@@ -263,6 +269,17 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
     }
 
     operators
+}
+
+fn expand_struct_forbid_drop(strct: &Struct) -> TokenStream {
+    let ident = &strct.name.rust;
+    let generics = &strct.generics;
+    let span = ident.span();
+    let impl_token = Token![impl](strct.visibility.span);
+
+    quote_spanned! {span=>
+        #impl_token #generics self::Drop for super::#ident #generics {}
+    }
 }
 
 fn expand_enum(enm: &Enum) -> TokenStream {
@@ -782,6 +799,17 @@ fn expand_rust_type_layout(ety: &ExternType) -> TokenStream {
             extern "C" fn #local_alignof() -> usize {
                 __AssertSized::<#ident>().align()
             }
+        }
+    }
+}
+
+fn expand_forbid(impls: TokenStream) -> TokenStream {
+    quote! {
+        mod forbid {
+            pub trait Drop {}
+            #[allow(drop_bounds)]
+            impl<T: ?::std::marker::Sized + ::std::ops::Drop> self::Drop for T {}
+            #impls
         }
     }
 }
