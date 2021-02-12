@@ -824,11 +824,9 @@ Vec<T>::~Vec() noexcept {
 
 template <typename T>
 Vec<T> &Vec<T>::operator=(Vec &&other) noexcept {
-  if (this != &other) {
-    this->drop();
-    this->repr = other.repr;
-    new (&other) Vec();
-  }
+  this->drop();
+  this->repr = other.repr;
+  new (&other) Vec();
   return *this;
 }
 
