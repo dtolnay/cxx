@@ -90,5 +90,5 @@ pub fn type_id(input: TokenStream) -> TokenStream {
     }
 
     let arg = parse_macro_input!(input as TypeId);
-    type_id::expand(arg.path).into()
+    type_id::expand(arg.krate, arg.path).into()
 }
