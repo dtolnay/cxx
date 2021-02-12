@@ -109,11 +109,9 @@ String &String::operator=(const String &other) noexcept {
 }
 
 String &String::operator=(String &&other) noexcept {
-  if (this != &other) {
-    cxxbridge1$string$drop(this);
-    this->repr = other.repr;
-    cxxbridge1$string$new(&other);
-  }
+  cxxbridge1$string$drop(this);
+  this->repr = other.repr;
+  cxxbridge1$string$new(&other);
   return *this;
 }
 
@@ -392,13 +390,11 @@ Error &Error::operator=(const Error &other) {
 }
 
 Error &Error::operator=(Error &&other) noexcept {
-  if (this != &other) {
-    std::exception::operator=(std::move(other));
-    this->msg = other.msg;
-    this->len = other.len;
-    other.msg = nullptr;
-    other.len = 0;
-  }
+  std::exception::operator=(std::move(other));
+  this->msg = other.msg;
+  this->len = other.len;
+  other.msg = nullptr;
+  other.len = 0;
   return *this;
 }
 
