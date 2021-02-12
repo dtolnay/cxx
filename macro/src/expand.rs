@@ -274,9 +274,11 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
 fn expand_struct_forbid_drop(strct: &Struct) -> TokenStream {
     let ident = &strct.name.rust;
     let generics = &strct.generics;
+    let span = ident.span();
+    let impl_token = Token![impl](strct.visibility.span);
 
-    quote! {
-        impl #generics self::Drop for super::#ident #generics {}
+    quote_spanned! {span=>
+        #impl_token #generics self::Drop for super::#ident #generics {}
     }
 }
 
