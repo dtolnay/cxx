@@ -1,6 +1,11 @@
 use crate::syntax::qualified::QualifiedName;
-use proc_macro2::TokenStream;
+use proc_macro2::{TokenStream, TokenTree};
 use quote::{format_ident, quote};
+
+pub enum Crate {
+    Cxx,
+    DollarCrate(TokenTree),
+}
 
 // "folly::File" => `(f, o, l, l, y, (), F, i, l, e)`
 pub fn expand(arg: QualifiedName) -> TokenStream {

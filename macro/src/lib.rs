@@ -36,8 +36,8 @@ mod type_id;
 use crate::syntax::file::Module;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::qualified::QualifiedName;
+use crate::type_id::Crate;
 use proc_macro::TokenStream;
-use proc_macro2::TokenTree;
 use syn::parse::{Parse, ParseStream, Parser, Result};
 use syn::parse_macro_input;
 
@@ -77,13 +77,13 @@ pub fn bridge(args: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn type_id(input: TokenStream) -> TokenStream {
     struct TypeId {
-        krate: TokenTree,
+        krate: Crate,
         path: QualifiedName,
     }
 
     impl Parse for TypeId {
         fn parse(input: ParseStream) -> Result<Self> {
-            let krate: TokenTree = input.parse()?;
+            let krate = input.parse().map(Crate::DollarCrate)?;
             let path = QualifiedName::parse_quoted_or_unquoted(input)?;
             Ok(TypeId { krate, path })
         }
