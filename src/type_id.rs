@@ -4,6 +4,6 @@
 #[macro_export]
 macro_rules! type_id {
     ($($path:tt)*) => {
-        $crate::private::type_id! { $($path)* }
+        $crate::private::type_id! { $crate $($path)* }
     };
 }
