@@ -74,6 +74,7 @@ pub fn bridge(args: TokenStream, input: TokenStream) -> TokenStream {
         .into()
 }
 
+#[doc(hidden)]
 #[proc_macro]
 pub fn type_id(input: TokenStream) -> TokenStream {
     struct TypeId {
