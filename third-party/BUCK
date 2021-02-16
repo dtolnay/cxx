@@ -57,7 +57,7 @@ rust_library(
 
 rust_library(
     name = "quote",
-    srcs = glob(["vendor/quote-1.0.8/src/**"]),
+    srcs = glob(["vendor/quote-1.0.9/src/**"]),
     visibility = ["PUBLIC"],
     features = ["proc-macro"],
     deps = [":proc-macro2"],
