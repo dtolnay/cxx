@@ -170,6 +170,7 @@ fn expand_struct(strct: &Struct) -> TokenStream {
         #struct_def
 
         unsafe impl #generics ::cxx::ExternType for #ident #generics {
+            #[doc(hidden)]
             type Id = #type_id;
             type Kind = ::cxx::kind::Trivial;
         }
@@ -330,6 +331,7 @@ fn expand_enum(enm: &Enum) -> TokenStream {
         }
 
         unsafe impl ::cxx::ExternType for #ident {
+            #[doc(hidden)]
             type Id = #type_id;
             type Kind = ::cxx::kind::Trivial;
         }
@@ -370,6 +372,7 @@ fn expand_cxx_type(ety: &ExternType) -> TokenStream {
         #extern_type_def
 
         unsafe impl #generics ::cxx::ExternType for #ident #generics {
+            #[doc(hidden)]
             type Id = #type_id;
             type Kind = ::cxx::kind::Opaque;
         }
@@ -739,6 +742,7 @@ fn expand_rust_type_impl(ety: &ExternType) -> TokenStream {
             let span = derive.span;
             impls.extend(quote_spanned! {span=>
                 unsafe impl #generics ::cxx::ExternType for #ident #generics {
+                    #[doc(hidden)]
                     type Id = #type_id;
                     type Kind = ::cxx::kind::Opaque;
                 }
