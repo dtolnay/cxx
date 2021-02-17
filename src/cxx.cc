@@ -100,7 +100,7 @@ String::String(const char *s, std::size_t len) {
              len);
 }
 
-String &String::operator=(const String &other) noexcept {
+String &String::operator=(const String &other) & noexcept {
   if (this != &other) {
     cxxbridge1$string$drop(this);
     cxxbridge1$string$clone(this, other);
@@ -108,12 +108,10 @@ String &String::operator=(const String &other) noexcept {
   return *this;
 }
 
-String &String::operator=(String &&other) noexcept {
-  if (this != &other) {
-    cxxbridge1$string$drop(this);
-    this->repr = other.repr;
-    cxxbridge1$string$new(&other);
-  }
+String &String::operator=(String &&other) & noexcept {
+  cxxbridge1$string$drop(this);
+  this->repr = other.repr;
+  cxxbridge1$string$new(&other);
   return *this;
 }
 
@@ -378,7 +376,7 @@ Error::Error(Error &&other) noexcept
 
 Error::~Error() noexcept { delete[] this->msg; }
 
-Error &Error::operator=(const Error &other) {
+Error &Error::operator=(const Error &other) & {
   if (this != &other) {
     std::exception::operator=(other);
     delete[] this->msg;
@@ -391,14 +389,12 @@ Error &Error::operator=(const Error &other) {
   return *this;
 }
 
-Error &Error::operator=(Error &&other) noexcept {
-  if (this != &other) {
-    std::exception::operator=(std::move(other));
-    this->msg = other.msg;
-    this->len = other.len;
-    other.msg = nullptr;
-    other.len = 0;
-  }
+Error &Error::operator=(Error &&other) & noexcept {
+  std::exception::operator=(std::move(other));
+  this->msg = other.msg;
+  this->len = other.len;
+  other.msg = nullptr;
+  other.len = 0;
   return *this;
 }
 
@@ -412,6 +408,21 @@ union MaybeUninit {
   ~MaybeUninit() {}
 };
 } // namespace
+
+namespace detail {
+// On some platforms size_t is the same C++ type as one of the sized integer
+// types; on others it is a distinct type. Only in the latter case do we need to
+// define a specialized impl of rust::Vec<size_t>, because in the former case it
+// would collide with one of the other specializations.
+using usize_if_unique =
+    typename std::conditional<std::is_same<size_t, uint64_t>::value ||
+                                  std::is_same<size_t, uint32_t>::value,
+                              struct usize_ignore, size_t>::type;
+using isize_if_unique =
+    typename std::conditional<std::is_same<rust::isize, int64_t>::value ||
+                                  std::is_same<rust::isize, int32_t>::value,
+                              struct isize_ignore, rust::isize>::type;
+} // namespace detail
 
 } // namespace cxxbridge1
 } // namespace rust
@@ -602,6 +613,8 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
   FOR_EACH_NUMERIC(MACRO)                                                      \
   MACRO(bool, bool)                                                            \
   MACRO(char, char)                                                            \
+  MACRO(usize, rust::detail::usize_if_unique)                                  \
+  MACRO(isize, rust::detail::isize_if_unique)                                  \
   MACRO(string, rust::String)                                                  \
   MACRO(str, rust::Str)
 

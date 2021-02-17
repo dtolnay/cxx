@@ -3,12 +3,14 @@ use crate::syntax::atom::Atom::*;
 use crate::syntax::attrs::{self, OtherAttrs};
 use crate::syntax::file::Module;
 use crate::syntax::instantiate::ImplKey;
+use crate::syntax::qualified::QualifiedName;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
     self, check, mangle, Api, Doc, Enum, ExternFn, ExternType, Impl, Lifetimes, Pair, Signature,
     Struct, Trait, Type, TypeAlias, Types,
 };
+use crate::type_id::Crate;
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
 use std::mem;
@@ -42,6 +44,7 @@ pub fn bridge(mut ffi: Module) -> Result<TokenStream> {
 fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types) -> TokenStream {
     let mut expanded = TokenStream::new();
     let mut hidden = TokenStream::new();
+    let mut forbid = TokenStream::new();
 
     for api in apis {
         if let Api::RustType(ety) = api {
@@ -56,6 +59,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
             Api::Struct(strct) => {
                 expanded.extend(expand_struct(strct));
                 hidden.extend(expand_struct_operators(strct));
+                forbid.extend(expand_struct_forbid_drop(strct));
             }
             Api::Enum(enm) => expanded.extend(expand_enum(enm)),
             Api::CxxType(ety) => {
@@ -101,6 +105,10 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
                 expanded.extend(expand_cxx_vector(ident, explicit_impl, types));
             }
         }
+    }
+
+    if !forbid.is_empty() {
+        hidden.extend(expand_forbid(forbid));
     }
 
     // Work around https://github.com/rust-lang/rust/issues/67851.
@@ -162,6 +170,7 @@ fn expand_struct(strct: &Struct) -> TokenStream {
         #struct_def
 
         unsafe impl #generics ::cxx::ExternType for #ident #generics {
+            #[doc(hidden)]
             type Id = #type_id;
             type Kind = ::cxx::kind::Trivial;
         }
@@ -264,6 +273,17 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
     operators
 }
 
+fn expand_struct_forbid_drop(strct: &Struct) -> TokenStream {
+    let ident = &strct.name.rust;
+    let generics = &strct.generics;
+    let span = ident.span();
+    let impl_token = Token![impl](strct.visibility.span);
+
+    quote_spanned! {span=>
+        #impl_token #generics self::Drop for super::#ident #generics {}
+    }
+}
+
 fn expand_enum(enm: &Enum) -> TokenStream {
     let ident = &enm.name.rust;
     let doc = &enm.doc;
@@ -311,6 +331,7 @@ fn expand_enum(enm: &Enum) -> TokenStream {
         }
 
         unsafe impl ::cxx::ExternType for #ident {
+            #[doc(hidden)]
             type Id = #type_id;
             type Kind = ::cxx::kind::Trivial;
         }
@@ -351,6 +372,7 @@ fn expand_cxx_type(ety: &ExternType) -> TokenStream {
         #extern_type_def
 
         unsafe impl #generics ::cxx::ExternType for #ident #generics {
+            #[doc(hidden)]
             type Id = #type_id;
             type Kind = ::cxx::kind::Opaque;
         }
@@ -720,6 +742,7 @@ fn expand_rust_type_impl(ety: &ExternType) -> TokenStream {
             let span = derive.span;
             impls.extend(quote_spanned! {span=>
                 unsafe impl #generics ::cxx::ExternType for #ident #generics {
+                    #[doc(hidden)]
                     type Id = #type_id;
                     type Kind = ::cxx::kind::Opaque;
                 }
@@ -781,6 +804,17 @@ fn expand_rust_type_layout(ety: &ExternType) -> TokenStream {
             extern "C" fn #local_alignof() -> usize {
                 __AssertSized::<#ident>().align()
             }
+        }
+    }
+}
+
+fn expand_forbid(impls: TokenStream) -> TokenStream {
+    quote! {
+        mod forbid {
+            pub trait Drop {}
+            #[allow(drop_bounds)]
+            impl<T: ?::std::marker::Sized + ::std::ops::Drop> self::Drop for T {}
+            #impls
         }
     }
 }
@@ -1061,10 +1095,12 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
 }
 
 fn type_id(name: &Pair) -> TokenStream {
-    let path = name.to_fully_qualified();
-    quote! {
-        ::cxx::type_id!(#path)
-    }
+    let namespace_segments = name.namespace.iter();
+    let mut segments = Vec::with_capacity(namespace_segments.len() + 1);
+    segments.extend(namespace_segments.cloned());
+    segments.push(Ident::new(&name.cxx.to_string(), Span::call_site()));
+    let qualified = QualifiedName { segments };
+    crate::type_id::expand(Crate::Cxx, qualified)
 }
 
 fn expand_rust_box(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {

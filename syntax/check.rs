@@ -392,12 +392,15 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
                 false => "",
             };
             let msg = format!(
-                "unnamed receiver type is only allowed if the surrounding \
-                 extern block contains exactly one extern type; \
-                 use `self: &{mutability}TheType`",
+                "unnamed receiver type is only allowed if the surrounding extern block contains exactly one extern type; use `self: &{mutability}TheType`",
                 mutability = mutability,
             );
             cx.error(span, msg);
+        } else if cx.types.enums.contains_key(&receiver.ty.rust) {
+            cx.error(
+                span,
+                "unsupported receiver type; C++ does not allow member functions on enums",
+            );
         } else if !cx.types.structs.contains_key(&receiver.ty.rust)
             && !cx.types.cxx.contains(&receiver.ty.rust)
             && !cx.types.rust.contains(&receiver.ty.rust)
