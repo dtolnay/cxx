@@ -55,6 +55,23 @@
 //             - org$rust$cxxbridge1$Struct$invoke$f$0
 //          defining characteristics:
 //             - last symbol is `0` (C half) or `1` (Rust half) which are not legal identifiers on their own
+//
+//
+// Mangled preprocessor variable arrangements:
+//
+//   (A) One-off internal variable.
+//          pattern:  {CXXBRIDGE} _ {NAME}
+//          examples:
+//             - CXXBRIDGE1_PANIC
+//             - CXXBRIDGE1_RUST_STRING
+//          defining characteristics:
+//             - NAME does not begin with STRUCT or ENUM
+//
+//   (B) Guard around user-defined type.
+//          pattern:  {CXXBRIDGE} _ {STRUCT or ENUM} _ {NAMESPACE...} $ {TYPE}
+//          examples:
+//             - CXXBRIDGE1_STRUCT_org$rust$Struct
+//             - CXXBRIDGE1_ENUM_Enabled
 
 use crate::syntax::symbol::{self, Symbol};
 use crate::syntax::{ExternFn, Pair, Types};
