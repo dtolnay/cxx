@@ -718,6 +718,7 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(rust::align_of<size_t>() == alignof(size_t));
 
   ASSERT(r_return_primitive() == 2020);
+  ASSERT(r_return_char() == U'🙃');
   ASSERT(r_return_shared().z == 2020);
   ASSERT(cxx_test_suite_r_is_correct(&*r_return_box()));
   ASSERT(r_return_unique_ptr()->get() == 2020);
@@ -733,6 +734,7 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(r_return_enum(2021) == Enum::CVal);
 
   r_take_primitive(2020);
+  r_take_char(U'🙃');
   r_take_shared(Shared{2020});
   r_take_unique_ptr(std::unique_ptr<C>(new C{2020}));
   r_take_shared_ptr(std::shared_ptr<C>(new C{2020}));

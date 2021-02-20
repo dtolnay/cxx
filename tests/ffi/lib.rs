@@ -14,7 +14,8 @@
 pub mod cast;
 pub mod module;
 
-use cxx::{CxxString, CxxVector, SharedPtr, UniquePtr};
+use cxx::{CxxChar, CxxString, CxxVector, SharedPtr, UniquePtr};
+use std::convert::TryInto;
 use std::fmt::{self, Display};
 use std::mem::MaybeUninit;
 use std::os::raw::c_char;
@@ -240,6 +241,7 @@ pub mod ffi {
         type R;
 
         fn r_return_primitive() -> usize;
+        fn r_return_char() -> CxxChar;
         fn r_return_shared() -> Shared;
         fn r_return_box() -> Box<R>;
         fn r_return_unique_ptr() -> UniquePtr<C>;
@@ -261,6 +263,7 @@ pub mod ffi {
         fn r_return_enum(n: u32) -> Enum;
 
         fn r_take_primitive(n: usize);
+        fn r_take_char(c: CxxChar);
         fn r_take_shared(shared: Shared);
         fn r_take_box(r: Box<R>);
         fn r_take_unique_ptr(c: UniquePtr<C>);
@@ -414,6 +417,10 @@ fn r_return_primitive() -> usize {
     2020
 }
 
+fn r_return_char() -> CxxChar {
+    '🙃'.into()
+}
+
 fn r_return_shared() -> ffi::Shared {
     ffi::Shared { z: 2020 }
 }
@@ -516,6 +523,10 @@ fn r_return_enum(n: u32) -> ffi::Enum {
 
 fn r_take_primitive(n: usize) {
     assert_eq!(n, 2020);
+}
+
+fn r_take_char(c: CxxChar) {
+    assert_eq!(Some('🙃'), c.try_into().ok());
 }
 
 fn r_take_shared(shared: ffi::Shared) {

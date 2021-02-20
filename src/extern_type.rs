@@ -1,5 +1,5 @@
 use self::kind::{Kind, Opaque, Trivial};
-use crate::CxxString;
+use crate::{CxxChar, CxxString};
 use alloc::string::String;
 
 /// A type for which the layout is determined by its C++ definition.
@@ -213,6 +213,7 @@ impl_extern_type! {
     f64 = "double"
     String = "rust::String"
 
+    CxxChar = "char32_t"
     [Opaque]
     CxxString = "std::string"
 }

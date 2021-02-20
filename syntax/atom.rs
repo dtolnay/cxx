@@ -18,6 +18,7 @@ pub enum Atom {
     Isize,
     F32,
     F64,
+    CxxChar,
     CxxString,
     RustString,
 }
@@ -44,6 +45,7 @@ impl Atom {
             "isize" => Some(Isize),
             "f32" => Some(F32),
             "f64" => Some(F64),
+            "CxxChar" => Some(CxxChar),
             "CxxString" => Some(CxxString),
             "String" => Some(RustString),
             _ => None,
@@ -75,6 +77,7 @@ impl AsRef<str> for Atom {
             Isize => "isize",
             F32 => "f32",
             F64 => "f64",
+            CxxChar => "CxxChar",
             CxxString => "CxxString",
             RustString => "String",
         }
