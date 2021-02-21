@@ -85,6 +85,7 @@ struct Borrow {
 };
 
 size_t c_return_primitive();
+char32_t c_return_char();
 Shared c_return_shared();
 ::A::AShared c_return_ns_shared();
 ::A::B::ABShared c_return_nested_ns_shared();
@@ -120,6 +121,7 @@ Enum c_return_enum(uint16_t n);
 std::unique_ptr<Borrow> c_return_borrow(const std::string &s);
 
 void c_take_primitive(size_t n);
+void c_take_char(char32_t c);
 void c_take_shared(Shared shared);
 void c_take_ns_shared(::A::AShared shared);
 void c_take_nested_ns_shared(::A::B::ABShared shared);

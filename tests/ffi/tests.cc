@@ -54,6 +54,8 @@ std::vector<uint8_t> &C::get_v() { return this->v; }
 
 size_t c_return_primitive() { return 2020; }
 
+char32_t c_return_char() { return U'\U0001f643'; }
+
 Shared c_return_shared() { return Shared{2020}; }
 
 ::A::AShared c_return_ns_shared() { return ::A::AShared{2020}; }
@@ -219,6 +221,12 @@ std::unique_ptr<Borrow> c_return_borrow(const std::string &s) {
 
 void c_take_primitive(size_t n) {
   if (n == 2020) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_char(char32_t c) {
+  if (c == U'\U0001f643') {
     cxx_test_suite_set_correct();
   }
 }

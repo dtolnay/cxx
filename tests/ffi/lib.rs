@@ -93,6 +93,7 @@ pub mod ffi {
         type C;
 
         fn c_return_primitive() -> usize;
+        fn c_return_char() -> CxxChar;
         fn c_return_shared() -> Shared;
         fn c_return_box() -> Box<R>;
         fn c_return_unique_ptr() -> UniquePtr<C>;
@@ -124,6 +125,7 @@ pub mod ffi {
         fn c_return_nested_ns_enum(n: u16) -> ABEnum;
 
         fn c_take_primitive(n: usize);
+        fn c_take_char(c: CxxChar);
         fn c_take_shared(shared: Shared);
         fn c_take_box(r: Box<R>);
         fn c_take_ref_r(r: &R);
