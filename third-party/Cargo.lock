@@ -70,6 +70,7 @@ dependencies = [
  "cxx-build",
  "cxx-gen",
  "cxx-test-suite",
+ "cxx-trait",
  "cxxbridge-flags",
  "cxxbridge-macro",
  "link-cplusplus",
@@ -110,6 +111,14 @@ dependencies = [
  "cxx",
  "cxx-build",
  "cxxbridge-flags",
+]
+
+[[package]]
+name = "cxx-trait"
+version = "1.0.32"
+dependencies = [
+ "cxx",
+ "cxxbridge-macro",
 ]
 
 [[package]]

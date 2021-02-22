@@ -1,9 +1,9 @@
 //! Less used details of `CxxVector` are exposed in this module. `CxxVector`
 //! itself is exposed at the crate root.
 
-use crate::extern_type::ExternType;
 use crate::kind::Trivial;
 use crate::string::CxxString;
+use crate::ExternType;
 use core::ffi::c_void;
 use core::fmt::{self, Debug, Display};
 use core::iter::FusedIterator;

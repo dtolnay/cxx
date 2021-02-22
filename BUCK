@@ -5,6 +5,7 @@ rust_library(
     deps = [
         ":core",
         ":macro",
+        ":trait",
     ],
 )
 
@@ -42,6 +43,15 @@ rust_library(
         "//third-party:proc-macro2",
         "//third-party:quote",
         "//third-party:syn",
+    ],
+)
+
+rust_library(
+    name = "trait",
+    srcs = glob(["trait/src/**"]),
+    crate = "cxx_trait",
+    deps = [
+        ":macro",
     ],
 )
 

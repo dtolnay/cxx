@@ -1,0 +1,21 @@
+[package]
+name = "cxx-trait"
+version = "1.0.32"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+edition = "2018"
+license = "MIT OR Apache-2.0"
+description = "Traits for the `cxx` crate."
+repository = "https://github.com/dtolnay/cxx"
+homepage = "https://cxx.rs"
+exclude = ["build.rs", "README.md"]
+keywords = ["ffi"]
+categories = ["development-tools::ffi"]
+
+[dependencies]
+cxxbridge-macro = { version = "=1.0.32", path = "../macro" }
+
+[dev-dependencies]
+cxx = { version = "1.0", path = ".." }
+
+[package.metadata.docs.rs]
+targets = ["x86_64-unknown-linux-gnu"]
