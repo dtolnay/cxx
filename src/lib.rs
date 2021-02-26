@@ -413,7 +413,6 @@ mod shared_ptr;
 #[path = "cxx_string.rs"]
 mod string;
 mod symbols;
-mod type_id;
 mod unique_ptr;
 mod unwind;
 #[path = "cxx_vector.rs"]
@@ -421,13 +420,13 @@ pub mod vector;
 mod weak_ptr;
 
 pub use crate::exception::Exception;
-pub use crate::extern_type::{kind, ExternType};
 pub use crate::shared_ptr::SharedPtr;
 pub use crate::string::CxxString;
 pub use crate::unique_ptr::UniquePtr;
 #[doc(inline)]
 pub use crate::vector::CxxVector;
 pub use crate::weak_ptr::WeakPtr;
+pub use cxx_trait::{chars::*, kind, type_id, ExternType};
 pub use cxxbridge_macro::bridge;
 
 /// Synonym for `CxxString`.
@@ -467,20 +466,4 @@ pub mod private {
 
 mod actually_private {
     pub trait Private {}
-}
-
-macro_rules! chars {
-    ($($ch:ident)*) => {
-        $(
-            #[doc(hidden)]
-            pub enum $ch {}
-        )*
-    };
-}
-
-chars! {
-    _0 _1 _2 _3 _4 _5 _6 _7 _8 _9
-    A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
-    a b c d e f g h i j k l m n o p q r s t u v w x y z
-    __ // underscore
 }

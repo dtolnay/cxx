@@ -8,7 +8,10 @@ rust_library(
         ":cxxbridge-macro",
     ],
     visibility = ["//visibility:public"],
-    deps = [":core-lib"],
+    deps = [
+        ":core-lib",
+        ":cxx-trait",
+    ],
 )
 
 rust_binary(
@@ -47,6 +50,14 @@ rust_library(
         "//third-party:proc-macro2",
         "//third-party:quote",
         "//third-party:syn",
+    ],
+)
+
+rust_library(
+    name = "cxx-trait",
+    srcs = glob(["trait/src/**"]),
+    proc_macro_deps = [
+        ":cxxbridge-macro",
     ],
 )
 

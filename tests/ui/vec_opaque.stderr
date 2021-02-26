@@ -11,12 +11,12 @@ error: needs a cxx::ExternType impl in order to be used as a vector element in V
    |         ^^^^^^^^
 
 error[E0271]: type mismatch resolving `<handle::Job as ExternType>::Kind == Trivial`
-   --> $DIR/vec_opaque.rs:22:9
-    |
-22  |         type Job = crate::handle::Job;
-    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected enum `Trivial`, found enum `cxx::kind::Opaque`
-    |
-   ::: $WORKSPACE/src/extern_type.rs
-    |
-    | pub fn verify_extern_kind<T: ExternType<Kind = Kind>, Kind: self::Kind>() {}
-    |                                         ----------- required by this bound in `verify_extern_kind`
+  --> $DIR/vec_opaque.rs:22:9
+   |
+22 |         type Job = crate::handle::Job;
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected enum `Trivial`, found enum `cxx::kind::Opaque`
+   |
+  ::: $WORKSPACE/src/extern_type.rs
+   |
+   | pub fn verify_extern_kind<T: ExternType<Kind = Kind>, Kind: self::Kind>() {}
+   |                                         ----------- required by this bound in `verify_extern_kind`
