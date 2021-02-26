@@ -94,8 +94,8 @@ pub(super) fn from_args() -> Opt {
 
     Opt {
         input,
-        cxx_impl_annotations,
         header,
+        cxx_impl_annotations,
         include,
         outputs,
     }
