@@ -43,6 +43,7 @@ pub struct Parser<'a> {
 pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> OtherAttrs {
     let mut passthrough_attrs = Vec::new();
     for attr in attrs {
+        #[allow(clippy::if_same_then_else)]
         if attr.path.is_ident("doc") {
             match parse_doc_attribute.parse2(attr.tokens.clone()) {
                 Ok(lit) => {
@@ -129,6 +130,10 @@ pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> Othe
             || attr.path.is_ident("must_use")
         {
             // https://doc.rust-lang.org/reference/attributes/diagnostics.html
+            passthrough_attrs.push(attr);
+            continue;
+        } else if attr.path.is_ident("cfg")
+        {
             passthrough_attrs.push(attr);
             continue;
         } else if attr.path.segments.len() > 1 {
