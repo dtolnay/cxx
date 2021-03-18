@@ -1,7 +1,9 @@
 use crate::actually_private::Private;
 use alloc::borrow::Cow;
 use alloc::string::String;
+use core::cmp::Ordering;
 use core::fmt::{self, Debug, Display};
+use core::hash::{Hash, Hasher};
 use core::marker::{PhantomData, PhantomPinned};
 use core::mem::MaybeUninit;
 use core::pin::Pin;
@@ -186,32 +188,32 @@ impl PartialEq<str> for CxxString {
 impl Eq for CxxString {}
 
 impl PartialOrd for CxxString {
-    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
         self.as_bytes().partial_cmp(other.as_bytes())
     }
 }
 
 impl PartialOrd<str> for CxxString {
-    fn partial_cmp(&self, other: &str) -> Option<core::cmp::Ordering> {
+    fn partial_cmp(&self, other: &str) -> Option<Ordering> {
         self.as_bytes().partial_cmp(other.as_bytes())
     }
 }
 
 impl PartialOrd<CxxString> for str {
-    fn partial_cmp(&self, other: &CxxString) -> Option<core::cmp::Ordering> {
+    fn partial_cmp(&self, other: &CxxString) -> Option<Ordering> {
         self.as_bytes().partial_cmp(other.as_bytes())
     }
 }
 
 impl Ord for CxxString {
-    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
+    fn cmp(&self, other: &Self) -> Ordering {
         self.as_bytes().cmp(other.as_bytes())
     }
 }
 
-impl core::hash::Hash for CxxString {
-    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
-        self.as_bytes().hash(state)
+impl Hash for CxxString {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.as_bytes().hash(state);
     }
 }
 
