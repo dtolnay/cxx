@@ -193,18 +193,6 @@ impl PartialOrd for CxxString {
     }
 }
 
-impl PartialOrd<str> for CxxString {
-    fn partial_cmp(&self, other: &str) -> Option<Ordering> {
-        self.as_bytes().partial_cmp(other.as_bytes())
-    }
-}
-
-impl PartialOrd<CxxString> for str {
-    fn partial_cmp(&self, other: &CxxString) -> Option<Ordering> {
-        self.as_bytes().partial_cmp(other.as_bytes())
-    }
-}
-
 impl Ord for CxxString {
     fn cmp(&self, other: &Self) -> Ordering {
         self.as_bytes().cmp(other.as_bytes())
