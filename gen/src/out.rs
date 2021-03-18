@@ -102,7 +102,7 @@ impl<'a> Write for Content<'a> {
 }
 
 impl<'a> PartialEq for Content<'a> {
-    fn eq(&self, _other: &Content) -> bool {
+    fn eq(&self, _other: &Self) -> bool {
         true
     }
 }

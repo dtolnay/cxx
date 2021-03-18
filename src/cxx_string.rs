@@ -168,7 +168,7 @@ impl Debug for CxxString {
 }
 
 impl PartialEq for CxxString {
-    fn eq(&self, other: &CxxString) -> bool {
+    fn eq(&self, other: &Self) -> bool {
         self.as_bytes() == other.as_bytes()
     }
 }
