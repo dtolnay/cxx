@@ -183,6 +183,38 @@ impl PartialEq<str> for CxxString {
     }
 }
 
+impl Eq for CxxString {}
+
+impl PartialOrd for CxxString {
+    fn partial_cmp(&self, other: &Self) -> Option<core::cmp::Ordering> {
+        self.as_bytes().partial_cmp(other.as_bytes())
+    }
+}
+
+impl PartialOrd<str> for CxxString {
+    fn partial_cmp(&self, other: &str) -> Option<core::cmp::Ordering> {
+        self.as_bytes().partial_cmp(other.as_bytes())
+    }
+}
+
+impl PartialOrd<CxxString> for str {
+    fn partial_cmp(&self, other: &CxxString) -> Option<core::cmp::Ordering> {
+        self.as_bytes().partial_cmp(other.as_bytes())
+    }
+}
+
+impl Ord for CxxString {
+    fn cmp(&self, other: &Self) -> core::cmp::Ordering {
+        self.as_bytes().cmp(other.as_bytes())
+    }
+}
+
+impl core::hash::Hash for CxxString {
+    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
+        self.as_bytes().hash(state)
+    }
+}
+
 #[doc(hidden)]
 #[repr(C)]
 pub struct StackString {
