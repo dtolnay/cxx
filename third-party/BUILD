@@ -11,7 +11,7 @@ rust_library(
 
 rust_library(
     name = "cc",
-    srcs = glob(["vendor/cc-1.0.66/src/**"]),
+    srcs = glob(["vendor/cc-1.0.67/src/**"]),
     visibility = ["//visibility:public"],
 )
 
@@ -29,7 +29,7 @@ rust_library(
 
 rust_library(
     name = "codespan-reporting",
-    srcs = glob(["vendor/codespan-reporting-0.11.0/src/**"]),
+    srcs = glob(["vendor/codespan-reporting-0.11.1/src/**"]),
     visibility = ["//visibility:public"],
     deps = [
         ":termcolor",
@@ -76,7 +76,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.60/src/**"]),
+    srcs = glob(["vendor/syn-1.0.64/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
