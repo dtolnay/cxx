@@ -349,5 +349,7 @@ fn test_raw_ptr() {
 
     let c3 = ffi::c_return_opaque_raw_ptr(2025);
     assert_eq!(2025, unsafe { ffi::c_take_opaque_raw_ptr(c3) });
-    assert_eq!(2025, unsafe { ffi::c_take_opaque_mut_raw_ptr(c3 as *mut ffi::C) }); // deletes c3
+    assert_eq!(2025, unsafe {
+        ffi::c_take_opaque_mut_raw_ptr(c3 as *mut ffi::C)
+    }); // deletes c3
 }

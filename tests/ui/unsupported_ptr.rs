@@ -22,8 +22,8 @@ mod ffi3 {
         type C;
 
         fn get_ptr_ptr() -> *mut *mut C;
-        fn get_ptr_reference() -> *mut & C;
-        fn get_reference_ptr() -> & *mut C;
+        fn get_ptr_reference() -> *mut &C;
+        fn get_reference_ptr() -> &*mut C;
     }
 }
 

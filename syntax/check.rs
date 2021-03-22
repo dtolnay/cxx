@@ -236,7 +236,9 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
 }
 
 fn check_type_ptr(cx: &mut Check, ty: &Ptr) {
-    if let Type::Ident(_) = ty.inner { return }
+    if let Type::Ident(_) = ty.inner {
+        return;
+    }
 
     cx.error(ty, "unsupported pointer type");
 }

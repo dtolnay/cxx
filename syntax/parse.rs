@@ -11,8 +11,11 @@ use crate::syntax::{
 use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
 use std::mem;
-use syn::{TypePtr, parse::{ParseStream, Parser}};
 use syn::punctuated::Punctuated;
+use syn::{
+    parse::{ParseStream, Parser},
+    TypePtr,
+};
 use syn::{
     Abi, Attribute, Error, Expr, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
     GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lit, LitStr,
@@ -588,7 +591,10 @@ fn parse_extern_fn(
                     let name = pair(Namespace::default(), &ident, None, None);
                     if let Type::Ptr(_) = &ty {
                         if unsafety.is_none() {
-                            return Err(Error::new_spanned(arg, "pointer argument requires that the function be marked unsafe"));
+                            return Err(Error::new_spanned(
+                                arg,
+                                "pointer argument requires that the function be marked unsafe",
+                            ));
                         }
                     }
                     args.push_value(Var {
@@ -1105,7 +1111,7 @@ fn parse_type_ptr(ty: &TypePtr) -> Result<Type> {
     }
 
     let inner = parse_type(&ty.elem)?;
-    
+
     Ok(Type::Ptr(Box::new(Ptr {
         star,
         mutable,

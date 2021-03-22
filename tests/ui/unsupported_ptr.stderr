@@ -27,14 +27,14 @@ error: unsupported pointer type
 error: unsupported pointer type
   --> $DIR/unsupported_ptr.rs:25:35
    |
-25 |         fn get_ptr_reference() -> *mut & C;
-   |                                   ^^^^^^^^
+25 |         fn get_ptr_reference() -> *mut &C;
+   |                                   ^^^^^^^
 
 error: unsupported reference type
   --> $DIR/unsupported_ptr.rs:26:35
    |
-26 |         fn get_reference_ptr() -> & *mut C;
-   |                                   ^^^^^^^^
+26 |         fn get_reference_ptr() -> &*mut C;
+   |                                   ^^^^^^^
 
 error: unsupported vector target type
   --> $DIR/unsupported_ptr.rs:35:42
