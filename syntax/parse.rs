@@ -633,7 +633,6 @@ fn parse_extern_fn(
     let mut throws_tokens = None;
     let ret = parse_return_type(&foreign_fn.sig.output, &mut throws_tokens)?;
     let throws = throws_tokens.is_some();
-    let unsafety = foreign_fn.sig.unsafety;
     let fn_token = foreign_fn.sig.fn_token;
     let inherited_span = unsafety.map_or(fn_token.span, |unsafety| unsafety.span);
     let visibility = visibility_pub(&foreign_fn.vis, inherited_span);
