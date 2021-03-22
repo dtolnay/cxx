@@ -2,6 +2,7 @@
     clippy::boxed_local,
     clippy::just_underscores_and_digits,
     clippy::let_underscore_drop,
+    clippy::missing_safety_doc,
     clippy::must_use_candidate,
     clippy::needless_lifetimes,
     clippy::needless_pass_by_value,
@@ -163,11 +164,7 @@ pub mod ffi {
         fn c_take_nested_ns_shared(shared: ABShared);
         fn c_take_rust_vec_ns_shared(v: Vec<AShared>);
         fn c_take_rust_vec_nested_ns_shared(v: Vec<ABShared>);
-        /// # Unsafety
-        /// To keep clippy happy.
         unsafe fn c_take_opaque_mut_raw_ptr(c: *mut C) -> usize;
-        /// # Unsafety
-        /// To keep clippy happy.
         unsafe fn c_take_opaque_raw_ptr(c: *const C) -> usize;
 
         fn c_try_return_void() -> Result<()>;
