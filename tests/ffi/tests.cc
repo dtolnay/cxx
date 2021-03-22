@@ -207,22 +207,12 @@ Enum c_return_enum(uint16_t n) {
   }
 }
 
-const C* c_return_opaque_raw_ptr(size_t c) {
+const C* c_return_const_ptr(size_t c) {
   return new C(c);
 }
 
-C* c_return_opaque_mut_raw_ptr(size_t c) {
+C* c_return_mut_ptr(size_t c) {
   return new C(c);
-}
-
-size_t c_take_opaque_raw_ptr(const C* c) {
-  return c->get();
-}
-
-size_t c_take_opaque_mut_raw_ptr(C* c) {
-  size_t result = c->get();
-  delete c;
-  return result;
 }
 
 Borrow::Borrow(const std::string &s) : s(s) {}
@@ -524,6 +514,16 @@ void c_take_nested_ns_enum(::A::B::ABEnum e) {
   if (e == ::A::B::ABEnum::ABAVal) {
     cxx_test_suite_set_correct();
   }
+}
+
+size_t c_take_const_ptr(const C* c) {
+  return c->get();
+}
+
+size_t c_take_mut_ptr(C* c) {
+  size_t result = c->get();
+  delete c;
+  return result;
 }
 
 void c_try_return_void() {}
