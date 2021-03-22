@@ -331,9 +331,9 @@ returns of functions.
 <tr><td>[T; N]</td><td>std::array&lt;T, N&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
 <tr><td>Vec&lt;T&gt;</td><td>rust::Vec&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
 <tr><td><a href="https://docs.rs/cxx/1.0/cxx/struct.CxxVector.html">CxxVector&lt;T&gt;</a></td><td>std::vector&lt;T&gt;</td><td><sup><i>cannot be passed by value, cannot hold opaque Rust type</i></sup></td></tr>
+<tr><td>*mut T, *const T</td><td>T*, const T*</td><td></td></tr>
 <tr><td>fn(T, U) -&gt; V</td><td>rust::Fn&lt;V(T, U)&gt;</td><td><sup><i>only passing from Rust to C++ is implemented so far</i></sup></td></tr>
 <tr><td>Result&lt;T&gt;</td><td>throw/catch</td><td><sup><i>allowed as return type only</i></sup></td></tr>
-<tr><td>*mut T, *const T</td><td>T*, const T*</td><td></td></tr>
 </table>
 
 The C++ API of the `rust` namespace is defined by the *include/cxx.h* file in
