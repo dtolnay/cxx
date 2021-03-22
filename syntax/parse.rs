@@ -547,7 +547,6 @@ fn parse_extern_fn(
         ));
     }
 
-    let unsafety = foreign_fn.sig.unsafety;
     let mut receiver = None;
     let mut args = Punctuated::new();
     for arg in foreign_fn.sig.inputs.pairs() {
@@ -584,14 +583,6 @@ fn parse_extern_fn(
                     let attrs = OtherAttrs::none();
                     let visibility = Token![pub](ident.span());
                     let name = pair(Namespace::default(), &ident, None, None);
-                    if let Type::Ptr(_) = &ty {
-                        if unsafety.is_none() {
-                            return Err(Error::new_spanned(
-                                arg,
-                                "pointer argument requires that the function be marked unsafe",
-                            ));
-                        }
-                    }
                     args.push_value(Var {
                         doc,
                         attrs,
@@ -628,6 +619,7 @@ fn parse_extern_fn(
     let mut throws_tokens = None;
     let ret = parse_return_type(&foreign_fn.sig.output, &mut throws_tokens)?;
     let throws = throws_tokens.is_some();
+    let unsafety = foreign_fn.sig.unsafety;
     let fn_token = foreign_fn.sig.fn_token;
     let inherited_span = unsafety.map_or(fn_token.span, |unsafety| unsafety.span);
     let visibility = visibility_pub(&foreign_fn.vis, inherited_span);
