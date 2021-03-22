@@ -66,7 +66,7 @@ void panic [[noreturn]] (const char *msg) {
 #endif
 }
 
-template void panic<std::out_of_range>[[noreturn]] (const char *msg);
+template void panic<std::out_of_range> [[noreturn]] (const char *msg);
 
 String::String() noexcept { cxxbridge1$string$new(this); }
 

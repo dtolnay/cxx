@@ -316,7 +316,7 @@ public:
   void push_back(const T &value);
   void push_back(T &&value);
   template <typename... Args>
-  void emplace_back(Args &&... args);
+  void emplace_back(Args &&...args);
 
   using iterator = typename Slice<T>::iterator;
   iterator begin() noexcept;
@@ -766,7 +766,7 @@ T &Box<T>::operator*() noexcept {
 
 template <typename T>
 template <typename... Fields>
-Box<T> Box<T>::in_place(Fields &&... fields) {
+Box<T> Box<T>::in_place(Fields &&...fields) {
   allocation alloc;
   auto ptr = alloc.ptr;
   ::new (ptr) T{std::forward<Fields>(fields)...};
@@ -920,7 +920,7 @@ void Vec<T>::push_back(T &&value) {
 
 template <typename T>
 template <typename... Args>
-void Vec<T>::emplace_back(Args &&... args) {
+void Vec<T>::emplace_back(Args &&...args) {
   auto size = this->size();
   this->reserve_total(size + 1);
   ::new (reinterpret_cast<T *>(reinterpret_cast<char *>(this->data()) +

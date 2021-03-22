@@ -88,7 +88,7 @@ public:
   json(const json &) = default;
   json(json &&) = default;
   template <typename... T>
-  json(T &&... value) : value(std::forward<T>(value)...) {}
+  json(T &&...value) : value(std::forward<T>(value)...) {}
 
   bool isNull() const;
   bool isNumber() const;
