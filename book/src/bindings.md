@@ -20,7 +20,7 @@ returns of extern functions.
 <tr><td style="padding:3px 6px">[T; N]</td><td style="padding:3px 6px">std::array&lt;T, N&gt;</td><td style="padding:3px 6px"><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
 <tr><td style="padding:3px 6px">Vec&lt;T&gt;</td><td style="padding:3px 6px"><b><a href="binding/vec.md">rust::Vec&lt;T&gt;</a></b></td><td style="padding:3px 6px"><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
 <tr><td style="padding:3px 6px"><b><a href="binding/cxxvector.md">CxxVector&lt;T&gt;</a></b></td><td style="padding:3px 6px">std::vector&lt;T&gt;</td><td style="padding:3px 6px"><sup><i>cannot be passed by value, cannot hold opaque Rust type</i></sup></td></tr>
-<tr><td style="padding:3px 6px"><b><a href="binding/raw_ptr.md">*const T, *mut T</a></b></td><td style="padding:3px 6px">T*, const T*</td><td style="padding:3px 6px"></td></tr>
+<tr><td style="padding:3px 6px"><b><a href="binding/rawptr.md">*const T, *mut T</a></b></td><td style="padding:3px 6px">T*, const T*</td><td style="padding:3px 6px"></td></tr>
 <tr><td style="padding:3px 6px">fn(T, U) -&gt; V</td><td style="padding:3px 6px"><b><a href="binding/fn.md">rust::Fn&lt;V(T, U)&gt;</a></b></td><td style="padding:3px 6px"><sup><i>only passing from Rust to C++ is implemented so far</i></sup></td></tr>
 <tr><td style="padding:3px 6px"><b><a href="binding/result.md">Result&lt;T&gt;</a></b></td><td style="padding:3px 6px">throw/catch</td><td style="padding:3px 6px"><sup><i>allowed as return type only</i></sup></td></tr>
 </table>

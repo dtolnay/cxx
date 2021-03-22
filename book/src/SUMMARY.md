@@ -32,5 +32,6 @@
     - [SharedPtr\<T\> &mdash; std::shared\_ptr\<T\>](binding/sharedptr.md)
     - [Vec\<T\> &mdash; rust::Vec\<T\>](binding/vec.md)
     - [CxxVector\<T\> &mdash; std::vector\<T\>](binding/cxxvector.md)
+    - [*mut T, *const T raw pointers](binding/rawptr.md)
     - [Function pointers](binding/fn.md)
     - [Result\<T\>](binding/result.md)
