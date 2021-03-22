@@ -1,11 +1,9 @@
 use crate::syntax::{
-    Array, ExternFn, Include, Lifetimes, Receiver, Ref, Signature, SliceRef, Ty1, Type, Var,
+    Array, ExternFn, Include, Lifetimes, Ptr, Receiver, Ref, Signature, SliceRef, Ty1, Type, Var,
 };
 use std::hash::{Hash, Hasher};
 use std::mem;
 use std::ops::{Deref, DerefMut};
-
-use super::Ptr;
 
 impl PartialEq for Include {
     fn eq(&self, other: &Self) -> bool {

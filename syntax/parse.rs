@@ -5,26 +5,21 @@ use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
     attrs, error, Api, Array, Derive, Doc, Enum, ExternFn, ExternType, ForeignName, Impl, Include,
-    IncludeKind, Lang, Lifetimes, NamedType, Namespace, Pair, Receiver, Ref, Signature, SliceRef,
-    Struct, Ty1, Type, TypeAlias, Var, Variant,
+    IncludeKind, Lang, Lifetimes, NamedType, Namespace, Pair, Ptr, Receiver, Ref, Signature,
+    SliceRef, Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
 use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
 use std::mem;
+use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
-use syn::{
-    parse::{ParseStream, Parser},
-    TypePtr,
-};
 use syn::{
     Abi, Attribute, Error, Expr, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
     GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lit, LitStr,
     Pat, PathArguments, Result, ReturnType, Signature as RustSignature, Token, TraitBound,
-    TraitBoundModifier, Type as RustType, TypeArray, TypeBareFn, TypeParamBound, TypePath,
+    TraitBoundModifier, Type as RustType, TypeArray, TypeBareFn, TypeParamBound, TypePath, TypePtr,
     TypeReference, Variant as RustVariant, Visibility,
 };
-
-use super::Ptr;
 
 pub mod kw {
     syn::custom_keyword!(Pin);
