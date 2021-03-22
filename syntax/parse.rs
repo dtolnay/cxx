@@ -1100,9 +1100,6 @@ fn parse_type_ptr(ty: &TypePtr) -> Result<Type> {
     let mutable = ty.mutability.is_some();
     let constness = ty.const_token;
     let mutability = ty.mutability;
-    if !constness.is_some() && !mutable {
-        return Err(Error::new_spanned(ty, "pointer is neither const nor mut"));
-    }
 
     let inner = parse_type(&ty.elem)?;
 
