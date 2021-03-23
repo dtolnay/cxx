@@ -1,4 +1,4 @@
-error: unsupported pointer type
+error: support for pointer to pointer is not implemented yet
  --> $DIR/ptr_unsupported.rs:6:32
   |
 6 |         fn get_ptr_to_ptr() -> *mut *mut C;
@@ -10,7 +10,7 @@ error: C++ does not allow pointer to reference as a type
 7 |         fn get_ptr_to_reference() -> *mut &C;
   |                                      ^^^^^^^
 
-error: unsupported reference type
+error: support for reference to pointer is not implemented yet
  --> $DIR/ptr_unsupported.rs:8:38
   |
 8 |         fn get_reference_to_ptr() -> &*mut C;

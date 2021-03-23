@@ -222,9 +222,13 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
     }
 
     match ty.inner {
-        Type::Fn(_) | Type::Void(_) | Type::Ptr(_) => {}
+        Type::Fn(_) | Type::Void(_) => {}
         Type::Ref(_) => {
             cx.error(ty, "C++ does not allow references to references");
+            return;
+        }
+        Type::Ptr(_) => {
+            cx.error(ty, "support for reference to pointer is not implemented yet");
             return;
         }
         _ => return,
@@ -235,9 +239,13 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
 
 fn check_type_ptr(cx: &mut Check, ty: &Ptr) {
     match ty.inner {
-        Type::Ptr(_) | Type::Fn(_) | Type::Void(_) => {}
+        Type::Fn(_) | Type::Void(_) => {}
         Type::Ref(_) => {
             cx.error(ty, "C++ does not allow pointer to reference as a type");
+            return;
+        }
+        Type::Ptr(_) => {
+            cx.error(ty, "support for pointer to pointer is not implemented yet");
             return;
         }
         _ => return,
