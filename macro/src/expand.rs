@@ -512,6 +512,13 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                 },
                 _ => quote!(#var),
             },
+            Type::Ptr(ty) => {
+                if types.is_considered_improper_ctype(&ty.inner) {
+                    quote!(#var.cast())
+                } else {
+                    quote!(#var)
+                }
+            }
             Type::Str(_) => quote!(::cxx::private::RustStr::from(#var)),
             Type::SliceRef(ty) => match ty.mutable {
                 false => quote!(::cxx::private::RustSlice::from_ref(#var)),
@@ -608,6 +615,13 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                     }
                     _ => call,
                 },
+                Type::Ptr(ty) => {
+                    if types.is_considered_improper_ctype(&ty.inner) {
+                        quote!(#call.cast())
+                    } else {
+                        call
+                    }
+                }
                 Type::Str(_) => quote!(#call.as_str()),
                 Type::SliceRef(slice) => {
                     let inner = &slice.inner;
@@ -1570,6 +1584,15 @@ fn expand_extern_type(ty: &Type, types: &Types, proper: bool) -> TokenStream {
                     true => quote!(*#mutability ::std::ffi::c_void),
                 },
                 _ => quote!(#ty),
+            }
+        }
+        Type::Ptr(ty) => {
+            if proper && types.is_considered_improper_ctype(&ty.inner) {
+                let mutability = ty.mutability;
+                let constness = ty.constness;
+                quote!(*#mutability #constness ::std::ffi::c_void)
+            } else {
+                quote!(#ty)
             }
         }
         Type::Str(_) => quote!(::cxx::private::RustStr),
