@@ -1173,17 +1173,31 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write!(out, ">");
         }
         Type::Ref(r) => {
-            if !r.mutable {
-                write!(out, "const ");
+            if let Type::Ptr(_) = r.inner {
+                write_type_space(out, &r.inner);
+                if !r.mutable {
+                    write!(out, "const");
+                }
+            } else {
+                if !r.mutable {
+                    write!(out, "const ");
+                }
+                write_type(out, &r.inner);
             }
-            write_type(out, &r.inner);
             write!(out, " &");
         }
         Type::Ptr(p) => {
-            if !p.mutable {
-                write!(out, "const ");
+            if let Type::Ptr(_) = p.inner {
+                write_type_space(out, &p.inner);
+                if !p.mutable {
+                    write!(out, "const");
+                }
+            } else {
+                if !p.mutable {
+                    write!(out, "const ");
+                }
+                write_type(out, &p.inner);
             }
-            write_type(out, &p.inner);
             write!(out, " *");
         }
         Type::Str(_) => {
