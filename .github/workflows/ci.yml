@@ -94,6 +94,7 @@ jobs:
   clippy:
     name: Clippy
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@clippy
@@ -102,6 +103,7 @@ jobs:
   clang-tidy:
     name: Clang Tidy
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v2
       - name: Install clang-tidy
