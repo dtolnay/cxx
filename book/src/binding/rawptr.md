@@ -1,68 +1,100 @@
 {{#title *mut T, *const T — Rust ♡ C++}}
-# *mut T, *const T - Raw Pointers
+# *mut T,&ensp;*const T
 
-cxx supports tranfer of raw pointers across the FFI boundary.
+Generally you should use references (`&mut T`, `&T`) or [std::unique_ptr\<T\>]
+where possible over raw pointers, but raw pointers are available too as an
+unsafe fallback option.
 
-Generally, it's better to use the bindings for [std::unique_ptr\<T\>](uniqueptr.md)
-or references. You should resort to using raw pointers only where lifetimes
-are too complicated to model with standard cxx facilities.
+[std::unique_ptr\<T\>]: uniqueptr.md
 
-As is normal with raw pointers in Rust, you'll need to use `unsafe` when
-working with them. In particular, to pass any raw pointer into a cxx
-bridge function you will need to declare the function `unsafe`, even if
-the overall `extern "C++"` section is already marked as `unsafe`. By calling
-such a function, you're committing that you - the human - know enough about
-the lifetimes of those objects that the compiler doesn't need to do checks.
+### Restrictions:
 
-On the other hand, C++ functions can freely return raw pointers to
-Rust without `unsafe`, but actually using those raw pointers in any way is likely
-to require an `unsafe` keyword.
+Extern functions and function pointers taking a raw pointer as an argument must
+be declared `unsafe fn` i.e. unsafe to call. The same does not apply to
+functions which only *return* a raw pointer, though presumably doing anything
+useful with the returned pointer is going to involve unsafe code elsewhere
+anyway.
 
 ## Example
+
+This example illustrates making a Rust call to a canonical C-style `main`
+signature involving `char *argv[]`.
+
+```cpp
+// include/args.h
+
+#pragma once
+
+void parseArgs(int argc, char *argv[]);
+```
+
+```cpp
+// src/args.cc
+
+#include "example/include/args.h"
+#include <iostream>
+
+void parseArgs(int argc, char *argv[]) {
+  std::cout << argc << std::endl;
+  for (int i = 0; i < argc; i++) {
+    std::cout << '"' << argv[i] << '"' << std::endl;
+  }
+}
+```
 
 ```rust,noplayground
 // src/main.rs
 
+use std::env;
+use std::ffi::CString;
+use std::os::raw::c_char;
+use std::os::unix::ffi::OsStrExt;
+use std::ptr;
+
 #[cxx::bridge]
 mod ffi {
-    unsafe extern "C++" {
+    extern "C++" {
+        include!("example/include/args.h");
 
-        include!("tests/ffi/tests.h");
-        //include!("example/include/container.h");
-
-        type ComplexHierarchicContainer;
-
-        fn new_hierarchic_container() -> UniquePtr<ComplexHierarchicContainer>;
-        fn add_value(self: Pin<&mut ComplexHierarchicContainer>, key: &CxxString, value: &CxxString);
-        fn add_child(self: Pin<&mut ComplexHierarchicContainer>, key: &CxxString) -> *mut ComplexHierarchicContainer;
-        // ...
+        unsafe fn parseArgs(argc: i32, argv: *mut *mut c_char);
     }
 }
 
 fn main() {
-    let mut container = ffi17::new_hierarchic_container();
-    cxx::let_cxx_string!(key = "a");
-    let mut subcontainer = container.pin_mut().add_child(&key);
-    let mut subcontainer = unsafe { std::pin::Pin::new_unchecked(subcontainer.as_mut().unwrap()) };
-    cxx::let_cxx_string!(key2 = "b");
-    cxx::let_cxx_string!(value = "c");
-    subcontainer.add_value(&key2, &value);
-    // ...
+    // Convert from OsString to nul-terminated CString, truncating each argument
+    // at the first inner nul byte if present.
+    let args: Vec<CString> = env::args_os()
+        .map(|os_str| {
+            let bytes = os_str.as_bytes();
+            CString::new(bytes).unwrap_or_else(|nul_error| {
+                let nul_position = nul_error.nul_position();
+                let mut bytes = nul_error.into_vec();
+                bytes.truncate(nul_position);
+                CString::new(bytes).unwrap()
+            })
+        })
+        .collect();
+
+    // Convert from Vec<CString> of owned strings to Vec<*mut c_char> of
+    // borrowed string pointers.
+    //
+    // Once extern type stabilizes (https://github.com/rust-lang/rust/issues/43467)
+    // and https://internals.rust-lang.org/t/pre-rfc-make-cstr-a-thin-pointer/6258
+    // is implemented, and CStr pointers become thin, we can sidestep this step
+    // by accumulating the args as Vec<Box<CStr>> up front, then simply casting
+    // from *mut [Box<CStr>] to *mut [*mut CStr] to *mut *mut c_char.
+    let argc = args.len();
+    let mut argv: Vec<*mut c_char> = Vec::with_capacity(argc + 1);
+    for arg in &args {
+        argv.push(arg.as_ptr() as *mut c_char);
+    }
+    argv.push(ptr::null_mut()); // Nul terminator.
+
+    unsafe {
+        ffi::parseArgs(argc as i32, argv.as_mut_ptr());
+    }
+
+    // The CStrings go out of scope here. C function must not have held on to
+    // the pointers beyond this point.
 }
-```
-
-```cpp
-// include/container.h
-
-#pragma once
-
-class ComplexHierarchicContainer {
-public:
-    ComplexHierarchicContainer();
-    void add_value(const std::string& key, const std::string& value);
-    ComplexHierarchicContainer* add_child(const std::string& key);
-    // ...
-};
-
-std::unique_ptr<ComplexHierarchicContainer> new_hierarchic_container();
 ```
