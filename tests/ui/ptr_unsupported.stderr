@@ -1,29 +1,17 @@
-error: unsupported pointer type
- --> $DIR/ptr_unsupported.rs:6:32
+error: C++ does not allow pointer to reference as a type
+ --> $DIR/ptr_unsupported.rs:6:38
   |
-6 |         fn get_ptr_to_ptr() -> *mut *mut C;
-  |                                ^^^^^^^^^^^
-
-error: unsupported pointer type
- --> $DIR/ptr_unsupported.rs:7:38
-  |
-7 |         fn get_ptr_to_reference() -> *mut &C;
-  |                                      ^^^^^^^
-
-error: unsupported reference type
- --> $DIR/ptr_unsupported.rs:8:38
-  |
-8 |         fn get_reference_to_ptr() -> &*mut C;
+6 |         fn get_ptr_to_reference() -> *mut &C;
   |                                      ^^^^^^^
 
 error: unsupported unique_ptr target type
- --> $DIR/ptr_unsupported.rs:9:38
+ --> $DIR/ptr_unsupported.rs:7:38
   |
-9 |         fn get_uniqueptr_to_ptr() -> UniquePtr<*mut C>;
+7 |         fn get_uniqueptr_to_ptr() -> UniquePtr<*mut C>;
   |                                      ^^^^^^^^^^^^^^^^^
 
 error: unsupported vector target type
-  --> $DIR/ptr_unsupported.rs:10:45
-   |
-10 |         fn get_vector_of_ptr() -> UniquePtr<CxxVector<*mut C>>;
-   |                                             ^^^^^^^^^^^^^^^^^^
+ --> $DIR/ptr_unsupported.rs:8:45
+  |
+8 |         fn get_vector_of_ptr() -> UniquePtr<CxxVector<*mut C>>;
+  |                                             ^^^^^^^^^^^^^^^^^^
