@@ -1,14 +1,12 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::{
-    error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, NamedType, Receiver,
-    Ref, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
+    error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, NamedType, Ptr,
+    Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
 use std::fmt::Display;
-
-use super::Ptr;
 
 pub(crate) struct Check<'a> {
     apis: &'a [Api],
@@ -236,7 +234,9 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
 }
 
 fn check_type_ptr(cx: &mut Check, ty: &Ptr) {
-    if let Type::Ident(_) = ty.inner { return }
+    if let Type::Ident(_) = ty.inner {
+        return;
+    }
 
     cx.error(ty, "unsupported pointer type");
 }

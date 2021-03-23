@@ -5,23 +5,21 @@ use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
     attrs, error, Api, Array, Derive, Doc, Enum, ExternFn, ExternType, ForeignName, Impl, Include,
-    IncludeKind, Lang, Lifetimes, NamedType, Namespace, Pair, Receiver, Ref, Signature, SliceRef,
-    Struct, Ty1, Type, TypeAlias, Var, Variant,
+    IncludeKind, Lang, Lifetimes, NamedType, Namespace, Pair, Ptr, Receiver, Ref, Signature,
+    SliceRef, Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
 use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
 use std::mem;
-use syn::{TypePtr, parse::{ParseStream, Parser}};
+use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::{
     Abi, Attribute, Error, Expr, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
     GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lit, LitStr,
     Pat, PathArguments, Result, ReturnType, Signature as RustSignature, Token, TraitBound,
-    TraitBoundModifier, Type as RustType, TypeArray, TypeBareFn, TypeParamBound, TypePath,
+    TraitBoundModifier, Type as RustType, TypeArray, TypeBareFn, TypeParamBound, TypePath, TypePtr,
     TypeReference, Variant as RustVariant, Visibility,
 };
-
-use super::Ptr;
 
 pub mod kw {
     syn::custom_keyword!(Pin);
@@ -588,7 +586,10 @@ fn parse_extern_fn(
                     let name = pair(Namespace::default(), &ident, None, None);
                     if let Type::Ptr(_) = &ty {
                         if unsafety.is_none() {
-                            return Err(Error::new_spanned(arg, "pointer argument requires that the function be marked unsafe"));
+                            return Err(Error::new_spanned(
+                                arg,
+                                "pointer argument requires that the function be marked unsafe",
+                            ));
                         }
                     }
                     args.push_value(Var {
@@ -627,7 +628,6 @@ fn parse_extern_fn(
     let mut throws_tokens = None;
     let ret = parse_return_type(&foreign_fn.sig.output, &mut throws_tokens)?;
     let throws = throws_tokens.is_some();
-    let unsafety = foreign_fn.sig.unsafety;
     let fn_token = foreign_fn.sig.fn_token;
     let inherited_span = unsafety.map_or(fn_token.span, |unsafety| unsafety.span);
     let visibility = visibility_pub(&foreign_fn.vis, inherited_span);
@@ -1100,12 +1100,9 @@ fn parse_type_ptr(ty: &TypePtr) -> Result<Type> {
     let mutable = ty.mutability.is_some();
     let constness = ty.const_token;
     let mutability = ty.mutability;
-    if !constness.is_some() && !mutable {
-        return Err(Error::new_spanned(ty, "pointer is neither const nor mut"));
-    }
 
     let inner = parse_type(&ty.elem)?;
-    
+
     Ok(Type::Ptr(Box::new(Ptr {
         star,
         mutable,
