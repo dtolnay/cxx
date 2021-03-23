@@ -51,6 +51,7 @@ impl<'a> Types<'a> {
                 | Type::CxxVector(ty)
                 | Type::RustVec(ty) => visit(all, &ty.inner),
                 Type::Ref(r) => visit(all, &r.inner),
+                Type::Ptr(p) => visit(all, &p.inner),
                 Type::Array(a) => visit(all, &a.inner),
                 Type::SliceRef(s) => visit(all, &s.inner),
                 Type::Fn(f) => {

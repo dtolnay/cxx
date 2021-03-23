@@ -32,6 +32,7 @@ impl<'a> Types<'a> {
                 Definite(false)
             }
             Type::Ref(ty) => self.determine_improper_ctype(&ty.inner),
+            Type::Ptr(ty) => self.determine_improper_ctype(&ty.inner),
             Type::Array(ty) => self.determine_improper_ctype(&ty.inner),
         }
     }

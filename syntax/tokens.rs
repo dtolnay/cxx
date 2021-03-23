@@ -7,6 +7,8 @@ use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote_spanned, ToTokens};
 use syn::{token, Token};
 
+use super::Ptr;
+
 impl ToTokens for Type {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         match self {
@@ -27,6 +29,7 @@ impl ToTokens for Type {
             | Type::CxxVector(ty)
             | Type::RustVec(ty) => ty.to_tokens(tokens),
             Type::Ref(r) | Type::Str(r) => r.to_tokens(tokens),
+            Type::Ptr(p) => p.to_tokens(tokens),
             Type::Array(a) => a.to_tokens(tokens),
             Type::Fn(f) => f.to_tokens(tokens),
             Type::Void(span) => tokens.extend(quote_spanned!(*span=> ())),
@@ -97,6 +100,22 @@ impl ToTokens for Ref {
         if let Some((_pin, _langle, rangle)) = pin_tokens {
             rangle.to_tokens(tokens);
         }
+    }
+}
+
+impl ToTokens for Ptr {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let Ptr {
+            star,
+            mutable: _,
+            inner,
+            mutability,
+            constness,
+        } = self;
+        star.to_tokens(tokens);
+        mutability.to_tokens(tokens);
+        constness.to_tokens(tokens);
+        inner.to_tokens(tokens);
     }
 }
 

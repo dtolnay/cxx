@@ -5,6 +5,8 @@ use std::hash::{Hash, Hasher};
 use std::mem;
 use std::ops::{Deref, DerefMut};
 
+use super::Ptr;
+
 impl PartialEq for Include {
     fn eq(&self, other: &Self) -> bool {
         let Include {
@@ -47,6 +49,7 @@ impl Hash for Type {
             Type::SharedPtr(t) => t.hash(state),
             Type::WeakPtr(t) => t.hash(state),
             Type::Ref(t) => t.hash(state),
+            Type::Ptr(t) => t.hash(state),
             Type::Str(t) => t.hash(state),
             Type::RustVec(t) => t.hash(state),
             Type::CxxVector(t) => t.hash(state),
@@ -184,6 +187,42 @@ impl Hash for Ref {
         } = self;
         pinned.hash(state);
         lifetime.hash(state);
+        mutable.hash(state);
+        inner.hash(state);
+    }
+}
+
+impl Eq for Ptr {}
+
+impl PartialEq for Ptr {
+    fn eq(&self, other: &Ptr) -> bool {
+        let Ptr {
+            star: _,
+            mutable,
+            inner,
+            mutability: _,
+            constness: _,
+        } = self;
+        let Ptr {
+            star: _,
+            mutable: mutable2,
+            inner: inner2,
+            mutability: _,
+            constness: _,
+        } = other;
+        mutable == mutable2 && inner == inner2
+    }
+}
+
+impl Hash for Ptr {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let Ptr {
+            star: _,
+            mutable,
+            inner,
+            mutability: _,
+            constness: _,
+        } = self;
         mutable.hash(state);
         inner.hash(state);
     }

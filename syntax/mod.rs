@@ -204,6 +204,7 @@ pub enum Type {
     SharedPtr(Box<Ty1>),
     WeakPtr(Box<Ty1>),
     Ref(Box<Ref>),
+    Ptr(Box<Ptr>),
     Str(Box<Ref>),
     CxxVector(Box<Ty1>),
     Fn(Box<Signature>),
@@ -227,6 +228,14 @@ pub struct Ref {
     pub inner: Type,
     pub pin_tokens: Option<(kw::Pin, Token![<], Token![>])>,
     pub mutability: Option<Token![mut]>,
+}
+
+pub struct Ptr {
+    pub star: Token![*],
+    pub mutable: bool,
+    pub inner: Type,
+    pub mutability: Option<Token![mut]>,
+    pub constness: Option<Token![const]>,
 }
 
 pub struct SliceRef {
