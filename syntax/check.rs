@@ -425,6 +425,13 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
                     "passing a function pointer from C++ to Rust is not implemented yet",
                 );
             }
+        } else if let Type::Ptr(_) = arg.ty {
+            if efn.sig.unsafety.is_none() {
+                cx.error(
+                    arg,
+                    "pointer argument requires that the function be marked unsafe",
+                );
+            }
         } else if is_unsized(cx, &arg.ty) {
             let desc = describe(cx, &arg.ty);
             let msg = format!("passing {} by value is not supported", desc);
