@@ -272,6 +272,17 @@ fn check_type_fn(cx: &mut Check, ty: &Signature) {
     if ty.throws {
         cx.error(ty, "function pointer returning Result is not supported yet");
     }
+
+    for arg in &ty.args {
+        if let Type::Ptr(_) = arg.ty {
+            if ty.unsafety.is_none() {
+                cx.error(
+                    arg,
+                    "pointer argument requires that the function pointer be marked unsafe",
+                );
+            }
+        }
+    }
 }
 
 fn check_api_struct(cx: &mut Check, strct: &Struct) {
