@@ -235,7 +235,11 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
 
 fn check_type_ptr(cx: &mut Check, ty: &Ptr) {
     match ty.inner {
-        Type::Ref(_) | Type::Ptr(_) | Type::Fn(_) | Type::Void(_) => {}
+        Type::Ptr(_) | Type::Fn(_) | Type::Void(_) => {}
+        Type::Ref(_) => {
+            cx.error(ty, "C++ does not allow pointer to reference as a type");
+            return;
+        }
         _ => return,
     }
 
