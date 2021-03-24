@@ -1,6 +1,4 @@
 Checks:
-  # TODO: many of these need to be resolved.
-  # https://github.com/dtolnay/cxx/issues/500
   clang-analyzer-*,
   clang-diagnostic-*,
   cppcoreguidelines-*,
