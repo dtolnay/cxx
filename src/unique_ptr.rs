@@ -1,6 +1,7 @@
+use crate::fmt::display;
 use crate::kind::Trivial;
 use crate::string::CxxString;
-use crate::vector::{self, CxxVector, VectorElement};
+use crate::vector::{CxxVector, VectorElement};
 use crate::ExternType;
 use core::ffi::c_void;
 use core::fmt::{self, Debug, Display};
@@ -77,7 +78,10 @@ where
     pub fn pin_mut(&mut self) -> Pin<&mut T> {
         match self.as_mut() {
             Some(target) => target,
-            None => panic!("called pin_mut on a null UniquePtr<{}>", T::__NAME),
+            None => panic!(
+                "called pin_mut on a null UniquePtr<{}>",
+                display(T::__typename),
+            ),
         }
     }
 
@@ -127,7 +131,10 @@ where
     fn deref(&self) -> &Self::Target {
         match self.as_ref() {
             Some(target) => target,
-            None => panic!("called deref on a null UniquePtr<{}>", T::__NAME),
+            None => panic!(
+                "called deref on a null UniquePtr<{}>",
+                display(T::__typename),
+            ),
         }
     }
 }
@@ -139,7 +146,10 @@ where
     fn deref_mut(&mut self) -> &mut Self::Target {
         match self.as_mut() {
             Some(target) => Pin::into_inner(target),
-            None => panic!("called deref_mut on a null UniquePtr<{}>", T::__NAME),
+            None => panic!(
+                "called deref_mut on a null UniquePtr<{}>",
+                display(T::__typename),
+            ),
         }
     }
 }
@@ -172,7 +182,7 @@ where
 // codebase.
 pub unsafe trait UniquePtrTarget {
     #[doc(hidden)]
-    const __NAME: &'static dyn Display;
+    fn __typename(f: &mut fmt::Formatter) -> fmt::Result;
     #[doc(hidden)]
     fn __null() -> *mut c_void;
     #[doc(hidden)]
@@ -209,7 +219,9 @@ extern "C" {
 }
 
 unsafe impl UniquePtrTarget for CxxString {
-    const __NAME: &'static dyn Display = &"CxxString";
+    fn __typename(f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str("CxxString")
+    }
     fn __null() -> *mut c_void {
         let mut repr = ptr::null_mut::<c_void>();
         unsafe {
@@ -235,9 +247,11 @@ unsafe impl UniquePtrTarget for CxxString {
 
 unsafe impl<T> UniquePtrTarget for CxxVector<T>
 where
-    T: VectorElement + 'static,
+    T: VectorElement,
 {
-    const __NAME: &'static dyn Display = &vector::TypeName::<T>::new();
+    fn __typename(f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "CxxVector<{}>", display(T::__typename))
+    }
     fn __null() -> *mut c_void {
         T::__unique_ptr_null()
     }

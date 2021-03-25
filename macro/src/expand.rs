@@ -1276,7 +1276,9 @@ fn expand_unique_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
 
     quote_spanned! {end_span=>
         #unsafe_token impl #impl_generics ::cxx::private::UniquePtrTarget for #ident #ty_generics {
-            const __NAME: &'static dyn ::std::fmt::Display = &#name;
+            fn __typename(f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                f.write_str(#name)
+            }
             fn __null() -> *mut ::std::ffi::c_void {
                 extern "C" {
                     #[link_name = #link_null]
@@ -1361,7 +1363,9 @@ fn expand_shared_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
 
     quote_spanned! {end_span=>
         #unsafe_token impl #impl_generics ::cxx::private::SharedPtrTarget for #ident #ty_generics {
-            const __NAME: &'static dyn ::std::fmt::Display = &#name;
+            fn __typename(f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                f.write_str(#name)
+            }
             unsafe fn __null(new: *mut ::std::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_null]
@@ -1418,7 +1422,9 @@ fn expand_weak_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -
 
     quote_spanned! {end_span=>
         #unsafe_token impl #impl_generics ::cxx::private::WeakPtrTarget for #ident #ty_generics {
-            const __NAME: &'static dyn ::std::fmt::Display = &#name;
+            fn __typename(f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                f.write_str(#name)
+            }
             unsafe fn __null(new: *mut ::std::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_null]
@@ -1487,7 +1493,9 @@ fn expand_cxx_vector(elem: &Ident, explicit_impl: Option<&Impl>, types: &Types) 
 
     quote_spanned! {end_span=>
         #unsafe_token impl #impl_generics ::cxx::private::VectorElement for #elem #ty_generics {
-            const __NAME: &'static dyn ::std::fmt::Display = &#name;
+            fn __typename(f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                f.write_str(#name)
+            }
             fn __vector_size(v: &::cxx::CxxVector<Self>) -> usize {
                 extern "C" {
                     #[link_name = #link_size]

@@ -402,6 +402,7 @@ mod macros;
 
 mod exception;
 mod extern_type;
+mod fmt;
 mod function;
 mod opaque;
 mod result;

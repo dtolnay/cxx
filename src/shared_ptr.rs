@@ -1,3 +1,4 @@
+use crate::fmt::display;
 use crate::kind::Trivial;
 use crate::string::CxxString;
 use crate::weak_ptr::{WeakPtr, WeakPtrTarget};
@@ -119,7 +120,10 @@ where
     fn deref(&self) -> &Self::Target {
         match self.as_ref() {
             Some(target) => target,
-            None => panic!("called deref on a null SharedPtr<{}>", T::__NAME),
+            None => panic!(
+                "called deref on a null SharedPtr<{}>",
+                display(T::__typename),
+            ),
         }
     }
 }
@@ -152,7 +156,7 @@ where
 // codebase.
 pub unsafe trait SharedPtrTarget {
     #[doc(hidden)]
-    const __NAME: &'static dyn Display;
+    fn __typename(f: &mut fmt::Formatter) -> fmt::Result;
     #[doc(hidden)]
     unsafe fn __null(new: *mut c_void);
     #[doc(hidden)]
@@ -177,7 +181,9 @@ pub unsafe trait SharedPtrTarget {
 macro_rules! impl_shared_ptr_target {
     ($segment:expr, $name:expr, $ty:ty) => {
         unsafe impl SharedPtrTarget for $ty {
-            const __NAME: &'static dyn Display = &$name;
+            fn __typename(f: &mut fmt::Formatter) -> fmt::Result {
+                f.write_str($name)
+            }
             unsafe fn __null(new: *mut c_void) {
                 extern "C" {
                     attr! {
