@@ -178,8 +178,31 @@ where
     }
 }
 
-// Methods are private; not intended to be implemented outside of cxxbridge
-// codebase.
+/// Trait bound for types which may be used as the `T` inside of a
+/// `UniquePtr<T>` in generic code.
+///
+/// This trait has no publicly callable or implementable methods. Implementing
+/// it outside of the CXX codebase is not supported.
+///
+/// # Example
+///
+/// A bound `T: UniquePtrTarget` may be necessary when manipulating
+/// [`UniquePtr`] in generic code.
+///
+/// ```
+/// use cxx::memory::{UniquePtr, UniquePtrTarget};
+/// use std::fmt::Display;
+///
+/// pub fn take_generic_ptr<T>(ptr: UniquePtr<T>)
+/// where
+///     T: UniquePtrTarget + Display,
+/// {
+///     println!("the unique_ptr points to: {}", *ptr);
+/// }
+/// ```
+///
+/// Writing the same generic function without a `UniquePtrTarget` trait bound
+/// would not compile.
 pub unsafe trait UniquePtrTarget {
     #[doc(hidden)]
     fn __typename(f: &mut fmt::Formatter) -> fmt::Result;
