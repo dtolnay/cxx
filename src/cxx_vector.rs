@@ -260,9 +260,34 @@ where
     }
 }
 
-// Methods are private; not intended to be implemented outside of cxxbridge
-// codebase.
-#[doc(hidden)]
+/// Trait bound for types which may be used as the `T` inside of a
+/// `CxxVector<T>` in generic code.
+///
+/// This trait has no publicly callable or implementable methods. Implementing
+/// it outside of the CXX codebase is not supported.
+///
+/// # Example
+///
+/// A bound `T: VectorElement` may be necessary when manipulating [`CxxVector`]
+/// in generic code.
+///
+/// ```
+/// use cxx::vector::{CxxVector, VectorElement};
+/// use std::fmt::Display;
+///
+/// pub fn take_generic_vector<T>(vector: &CxxVector<T>)
+/// where
+///     T: VectorElement + Display,
+/// {
+///     println!("the vector elements are:");
+///     for element in vector {
+///         println!("  • {}", element);
+///     }
+/// }
+/// ```
+///
+/// Writing the same generic function without a `VectorElement` trait bound
+/// would not compile.
 pub unsafe trait VectorElement: Sized {
     fn __typename(f: &mut fmt::Formatter) -> fmt::Result;
     fn __vector_size(v: &CxxVector<Self>) -> usize;
