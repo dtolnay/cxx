@@ -247,7 +247,7 @@ unsafe impl UniquePtrTarget for CxxString {
 
 unsafe impl<T> UniquePtrTarget for CxxVector<T>
 where
-    T: VectorElement + 'static,
+    T: VectorElement,
 {
     fn __typename(f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "CxxVector<{}>", display(T::__typename))
