@@ -5,7 +5,7 @@ use crate::extern_type::ExternType;
 use crate::kind::Trivial;
 use crate::string::CxxString;
 use core::ffi::c_void;
-use core::fmt::{self, Debug, Display};
+use core::fmt::{self, Debug};
 use core::iter::FusedIterator;
 use core::marker::{PhantomData, PhantomPinned};
 use core::mem;
@@ -263,32 +263,11 @@ where
     }
 }
 
-pub(crate) struct TypeName<T> {
-    element: PhantomData<T>,
-}
-
-impl<T> TypeName<T> {
-    pub const fn new() -> Self {
-        TypeName {
-            element: PhantomData,
-        }
-    }
-}
-
-impl<T> Display for TypeName<T>
-where
-    T: VectorElement,
-{
-    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        write!(formatter, "CxxVector<{}>", T::__NAME)
-    }
-}
-
 // Methods are private; not intended to be implemented outside of cxxbridge
 // codebase.
 #[doc(hidden)]
 pub unsafe trait VectorElement: Sized {
-    const __NAME: &'static dyn Display;
+    fn __typename(f: &mut fmt::Formatter) -> fmt::Result;
     fn __vector_size(v: &CxxVector<Self>) -> usize;
     unsafe fn __get_unchecked(v: *mut CxxVector<Self>, pos: usize) -> *mut Self;
     fn __unique_ptr_null() -> *mut c_void;
@@ -303,7 +282,9 @@ macro_rules! impl_vector_element {
         const_assert_eq!(1, mem::align_of::<CxxVector<$ty>>());
 
         unsafe impl VectorElement for $ty {
-            const __NAME: &'static dyn Display = &$name;
+            fn __typename(f: &mut fmt::Formatter) -> fmt::Result {
+                f.write_str($name)
+            }
             fn __vector_size(v: &CxxVector<$ty>) -> usize {
                 extern "C" {
                     attr! {

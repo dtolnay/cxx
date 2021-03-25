@@ -1,7 +1,7 @@
 use crate::shared_ptr::{SharedPtr, SharedPtrTarget};
 use crate::string::CxxString;
 use core::ffi::c_void;
-use core::fmt::{self, Debug, Display};
+use core::fmt::{self, Debug};
 use core::marker::PhantomData;
 use core::mem::MaybeUninit;
 
@@ -95,7 +95,7 @@ where
 // codebase.
 pub unsafe trait WeakPtrTarget {
     #[doc(hidden)]
-    const __NAME: &'static dyn Display;
+    fn __typename(f: &mut fmt::Formatter) -> fmt::Result;
     #[doc(hidden)]
     unsafe fn __null(new: *mut c_void);
     #[doc(hidden)]
@@ -111,7 +111,9 @@ pub unsafe trait WeakPtrTarget {
 macro_rules! impl_weak_ptr_target {
     ($segment:expr, $name:expr, $ty:ty) => {
         unsafe impl WeakPtrTarget for $ty {
-            const __NAME: &'static dyn Display = &$name;
+            fn __typename(f: &mut fmt::Formatter) -> fmt::Result {
+                f.write_str($name)
+            }
             unsafe fn __null(new: *mut c_void) {
                 extern "C" {
                     attr! {
