@@ -13,9 +13,6 @@ use core::pin::Pin;
 use core::ptr;
 use core::slice;
 
-#[doc(inline)]
-pub use crate::Vector;
-
 /// Binding to C++ `std::vector<T, std::allocator<T>>`.
 ///
 /// # Invariants
