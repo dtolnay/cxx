@@ -152,8 +152,31 @@ where
     }
 }
 
-// Methods are private; not intended to be implemented outside of cxxbridge
-// codebase.
+/// Trait bound for types which may be used as the `T` inside of a
+/// `SharedPtr<T>` in generic code.
+///
+/// This trait has no publicly callable or implementable methods. Implementing
+/// it outside of the CXX codebase is not supported.
+///
+/// # Example
+///
+/// A bound `T: SharedPtrTarget` may be necessary when manipulating
+/// [`SharedPtr`] in generic code.
+///
+/// ```
+/// use cxx::memory::{SharedPtr, SharedPtrTarget};
+/// use std::fmt::Display;
+///
+/// pub fn take_generic_ptr<T>(ptr: SharedPtr<T>)
+/// where
+///     T: SharedPtrTarget + Display,
+/// {
+///     println!("the shared_ptr points to: {}", *ptr);
+/// }
+/// ```
+///
+/// Writing the same generic function without a `SharedPtrTarget` trait bound
+/// would not compile.
 pub unsafe trait SharedPtrTarget {
     #[doc(hidden)]
     fn __typename(f: &mut fmt::Formatter) -> fmt::Result;
