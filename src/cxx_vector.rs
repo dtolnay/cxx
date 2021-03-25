@@ -260,17 +260,50 @@ where
     }
 }
 
-// Methods are private; not intended to be implemented outside of cxxbridge
-// codebase.
-#[doc(hidden)]
+/// Trait bound for types which may be used as the `T` inside of a
+/// `CxxVector<T>` in generic code.
+///
+/// This trait has no publicly callable or implementable methods. Implementing
+/// it outside of the CXX codebase is not supported.
+///
+/// # Example
+///
+/// A bound `T: VectorElement` may be necessary when manipulating [`CxxVector`]
+/// in generic code.
+///
+/// ```
+/// use cxx::vector::{CxxVector, VectorElement};
+/// use std::fmt::Display;
+///
+/// pub fn take_generic_vector<T>(vector: &CxxVector<T>)
+/// where
+///     T: VectorElement + Display,
+/// {
+///     println!("the vector elements are:");
+///     for element in vector {
+///         println!("  • {}", element);
+///     }
+/// }
+/// ```
+///
+/// Writing the same generic function without a `VectorElement` trait bound
+/// would not compile.
 pub unsafe trait VectorElement: Sized {
+    #[doc(hidden)]
     fn __typename(f: &mut fmt::Formatter) -> fmt::Result;
+    #[doc(hidden)]
     fn __vector_size(v: &CxxVector<Self>) -> usize;
+    #[doc(hidden)]
     unsafe fn __get_unchecked(v: *mut CxxVector<Self>, pos: usize) -> *mut Self;
+    #[doc(hidden)]
     fn __unique_ptr_null() -> *mut c_void;
+    #[doc(hidden)]
     unsafe fn __unique_ptr_raw(raw: *mut CxxVector<Self>) -> *mut c_void;
+    #[doc(hidden)]
     unsafe fn __unique_ptr_get(repr: *mut c_void) -> *const CxxVector<Self>;
+    #[doc(hidden)]
     unsafe fn __unique_ptr_release(repr: *mut c_void) -> *mut CxxVector<Self>;
+    #[doc(hidden)]
     unsafe fn __unique_ptr_drop(repr: *mut c_void);
 }
 
@@ -279,9 +312,11 @@ macro_rules! impl_vector_element {
         const_assert_eq!(1, mem::align_of::<CxxVector<$ty>>());
 
         unsafe impl VectorElement for $ty {
+            #[doc(hidden)]
             fn __typename(f: &mut fmt::Formatter) -> fmt::Result {
                 f.write_str($name)
             }
+            #[doc(hidden)]
             fn __vector_size(v: &CxxVector<$ty>) -> usize {
                 extern "C" {
                     attr! {
@@ -291,6 +326,7 @@ macro_rules! impl_vector_element {
                 }
                 unsafe { __vector_size(v) }
             }
+            #[doc(hidden)]
             unsafe fn __get_unchecked(v: *mut CxxVector<$ty>, pos: usize) -> *mut $ty {
                 extern "C" {
                     attr! {
@@ -300,6 +336,7 @@ macro_rules! impl_vector_element {
                 }
                 __get_unchecked(v, pos)
             }
+            #[doc(hidden)]
             fn __unique_ptr_null() -> *mut c_void {
                 extern "C" {
                     attr! {
@@ -311,6 +348,7 @@ macro_rules! impl_vector_element {
                 unsafe { __unique_ptr_null(&mut repr) }
                 repr
             }
+            #[doc(hidden)]
             unsafe fn __unique_ptr_raw(raw: *mut CxxVector<Self>) -> *mut c_void {
                 extern "C" {
                     attr! {
@@ -322,6 +360,7 @@ macro_rules! impl_vector_element {
                 __unique_ptr_raw(&mut repr, raw);
                 repr
             }
+            #[doc(hidden)]
             unsafe fn __unique_ptr_get(repr: *mut c_void) -> *const CxxVector<Self> {
                 extern "C" {
                     attr! {
@@ -331,6 +370,7 @@ macro_rules! impl_vector_element {
                 }
                 __unique_ptr_get(&repr)
             }
+            #[doc(hidden)]
             unsafe fn __unique_ptr_release(mut repr: *mut c_void) -> *mut CxxVector<Self> {
                 extern "C" {
                     attr! {
@@ -340,6 +380,7 @@ macro_rules! impl_vector_element {
                 }
                 __unique_ptr_release(&mut repr)
             }
+            #[doc(hidden)]
             unsafe fn __unique_ptr_drop(mut repr: *mut c_void) {
                 extern "C" {
                     attr! {

@@ -178,8 +178,31 @@ where
     }
 }
 
-// Methods are private; not intended to be implemented outside of cxxbridge
-// codebase.
+/// Trait bound for types which may be used as the `T` inside of a
+/// `UniquePtr<T>` in generic code.
+///
+/// This trait has no publicly callable or implementable methods. Implementing
+/// it outside of the CXX codebase is not supported.
+///
+/// # Example
+///
+/// A bound `T: UniquePtrTarget` may be necessary when manipulating
+/// [`UniquePtr`] in generic code.
+///
+/// ```
+/// use cxx::memory::{UniquePtr, UniquePtrTarget};
+/// use std::fmt::Display;
+///
+/// pub fn take_generic_ptr<T>(ptr: UniquePtr<T>)
+/// where
+///     T: UniquePtrTarget + Display,
+/// {
+///     println!("the unique_ptr points to: {}", *ptr);
+/// }
+/// ```
+///
+/// Writing the same generic function without a `UniquePtrTarget` trait bound
+/// would not compile.
 pub unsafe trait UniquePtrTarget {
     #[doc(hidden)]
     fn __typename(f: &mut fmt::Formatter) -> fmt::Result;
@@ -219,9 +242,11 @@ extern "C" {
 }
 
 unsafe impl UniquePtrTarget for CxxString {
+    #[doc(hidden)]
     fn __typename(f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str("CxxString")
     }
+    #[doc(hidden)]
     fn __null() -> *mut c_void {
         let mut repr = ptr::null_mut::<c_void>();
         unsafe {
@@ -229,17 +254,21 @@ unsafe impl UniquePtrTarget for CxxString {
         }
         repr
     }
+    #[doc(hidden)]
     unsafe fn __raw(raw: *mut Self) -> *mut c_void {
         let mut repr = ptr::null_mut::<c_void>();
         unique_ptr_std_string_raw(&mut repr, raw);
         repr
     }
+    #[doc(hidden)]
     unsafe fn __get(repr: *mut c_void) -> *const Self {
         unique_ptr_std_string_get(&repr)
     }
+    #[doc(hidden)]
     unsafe fn __release(mut repr: *mut c_void) -> *mut Self {
         unique_ptr_std_string_release(&mut repr)
     }
+    #[doc(hidden)]
     unsafe fn __drop(mut repr: *mut c_void) {
         unique_ptr_std_string_drop(&mut repr);
     }
@@ -249,21 +278,27 @@ unsafe impl<T> UniquePtrTarget for CxxVector<T>
 where
     T: VectorElement,
 {
+    #[doc(hidden)]
     fn __typename(f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "CxxVector<{}>", display(T::__typename))
     }
+    #[doc(hidden)]
     fn __null() -> *mut c_void {
         T::__unique_ptr_null()
     }
+    #[doc(hidden)]
     unsafe fn __raw(raw: *mut Self) -> *mut c_void {
         T::__unique_ptr_raw(raw)
     }
+    #[doc(hidden)]
     unsafe fn __get(repr: *mut c_void) -> *const Self {
         T::__unique_ptr_get(repr)
     }
+    #[doc(hidden)]
     unsafe fn __release(repr: *mut c_void) -> *mut Self {
         T::__unique_ptr_release(repr)
     }
+    #[doc(hidden)]
     unsafe fn __drop(repr: *mut c_void) {
         T::__unique_ptr_drop(repr);
     }

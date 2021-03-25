@@ -152,8 +152,31 @@ where
     }
 }
 
-// Methods are private; not intended to be implemented outside of cxxbridge
-// codebase.
+/// Trait bound for types which may be used as the `T` inside of a
+/// `SharedPtr<T>` in generic code.
+///
+/// This trait has no publicly callable or implementable methods. Implementing
+/// it outside of the CXX codebase is not supported.
+///
+/// # Example
+///
+/// A bound `T: SharedPtrTarget` may be necessary when manipulating
+/// [`SharedPtr`] in generic code.
+///
+/// ```
+/// use cxx::memory::{SharedPtr, SharedPtrTarget};
+/// use std::fmt::Display;
+///
+/// pub fn take_generic_ptr<T>(ptr: SharedPtr<T>)
+/// where
+///     T: SharedPtrTarget + Display,
+/// {
+///     println!("the shared_ptr points to: {}", *ptr);
+/// }
+/// ```
+///
+/// Writing the same generic function without a `SharedPtrTarget` trait bound
+/// would not compile.
 pub unsafe trait SharedPtrTarget {
     #[doc(hidden)]
     fn __typename(f: &mut fmt::Formatter) -> fmt::Result;
@@ -181,9 +204,11 @@ pub unsafe trait SharedPtrTarget {
 macro_rules! impl_shared_ptr_target {
     ($segment:expr, $name:expr, $ty:ty) => {
         unsafe impl SharedPtrTarget for $ty {
+            #[doc(hidden)]
             fn __typename(f: &mut fmt::Formatter) -> fmt::Result {
                 f.write_str($name)
             }
+            #[doc(hidden)]
             unsafe fn __null(new: *mut c_void) {
                 extern "C" {
                     attr! {
@@ -193,6 +218,7 @@ macro_rules! impl_shared_ptr_target {
                 }
                 __null(new);
             }
+            #[doc(hidden)]
             unsafe fn __new(value: Self, new: *mut c_void) {
                 extern "C" {
                     attr! {
@@ -202,6 +228,7 @@ macro_rules! impl_shared_ptr_target {
                 }
                 __uninit(new).cast::<$ty>().write(value);
             }
+            #[doc(hidden)]
             unsafe fn __clone(this: *const c_void, new: *mut c_void) {
                 extern "C" {
                     attr! {
@@ -211,6 +238,7 @@ macro_rules! impl_shared_ptr_target {
                 }
                 __clone(this, new);
             }
+            #[doc(hidden)]
             unsafe fn __get(this: *const c_void) -> *const Self {
                 extern "C" {
                     attr! {
@@ -220,6 +248,7 @@ macro_rules! impl_shared_ptr_target {
                 }
                 __get(this).cast()
             }
+            #[doc(hidden)]
             unsafe fn __drop(this: *mut c_void) {
                 extern "C" {
                     attr! {

@@ -405,6 +405,7 @@ mod exception;
 mod extern_type;
 mod fmt;
 mod function;
+pub mod memory;
 mod opaque;
 mod result;
 mod rust_slice;
