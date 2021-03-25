@@ -128,6 +128,7 @@ pub mod ffi {
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);
         fn c_take_box(r: Box<R>);
+        fn c_clone_box(r: Box<R>);
         fn c_take_ref_r(r: &R);
         fn c_take_ref_c(c: &C);
         fn c_take_str(s: &str);
@@ -242,7 +243,7 @@ pub mod ffi {
     }
 
     extern "Rust" {
-        type R;
+        type R: Clone;
 
         fn r_return_primitive() -> usize;
         fn r_return_shared() -> Shared;
@@ -376,7 +377,7 @@ mod other {
     }
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct R(pub usize);
 
 impl R {

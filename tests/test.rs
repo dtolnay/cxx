@@ -120,6 +120,7 @@ fn test_c_take() {
     check!(ffi::ns_c_take_ns_shared(ffi::AShared { z: 2020 }));
     check!(ffi::c_take_nested_ns_shared(ffi::ABShared { z: 2020 }));
     check!(ffi::c_take_box(Box::new(R(2020))));
+    check!(ffi::c_clone_box(Box::new(R(2020))));
     check!(ffi::c_take_ref_c(&unique_ptr));
     check!(ffi2::c_take_ref_ns_c(&unique_ptr_ns));
     check!(cxx_test_suite::module::ffi::c_take_unique_ptr(unique_ptr));

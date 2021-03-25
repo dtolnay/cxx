@@ -1,10 +1,12 @@
-use crate::syntax::{Lifetimes, NamedType, Pair, Types};
+use crate::syntax::{Derive, Lifetimes, NamedType, Pair, Types};
 use proc_macro2::Ident;
 
 #[derive(Copy, Clone)]
 pub struct Resolution<'a> {
     pub name: &'a Pair,
     pub generics: &'a Lifetimes,
+    pub derives: Option<&'a Vec<Derive>>,
+    pub bounds: Option<&'a Vec<Derive>>,
 }
 
 impl<'a> Types<'a> {
