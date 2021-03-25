@@ -54,6 +54,8 @@ std::vector<uint8_t> &C::get_v() { return this->v; }
 
 size_t c_return_primitive() { return 2020; }
 
+char32_t c_return_char() { return U'\U0001f643'; }
+
 Shared c_return_shared() { return Shared{2020}; }
 
 ::A::AShared c_return_ns_shared() { return ::A::AShared{2020}; }
@@ -223,6 +225,12 @@ std::unique_ptr<Borrow> c_return_borrow(const std::string &s) {
 
 void c_take_primitive(size_t n) {
   if (n == 2020) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_char(char32_t c) {
+  if (c == U'\U0001f643') {
     cxx_test_suite_set_correct();
   }
 }
@@ -730,6 +738,7 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(rust::align_of<size_t>() == alignof(size_t));
 
   ASSERT(r_return_primitive() == 2020);
+  ASSERT(r_return_char() == U'\U0001f643');
   ASSERT(r_return_shared().z == 2020);
   ASSERT(cxx_test_suite_r_is_correct(&*r_return_box()));
   ASSERT(r_return_unique_ptr()->get() == 2020);
@@ -745,6 +754,7 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(r_return_enum(2021) == Enum::CVal);
 
   r_take_primitive(2020);
+  r_take_char(U'\U0001f643');
   r_take_shared(Shared{2020});
   r_take_unique_ptr(std::unique_ptr<C>(new C{2020}));
   r_take_shared_ptr(std::shared_ptr<C>(new C{2020}));

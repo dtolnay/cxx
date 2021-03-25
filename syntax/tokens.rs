@@ -14,7 +14,7 @@ impl ToTokens for Type {
                 if ident.rust == Char {
                     let span = ident.rust.span();
                     tokens.extend(quote_spanned!(span=> ::std::os::raw::));
-                } else if ident.rust == CxxString {
+                } else if ident.rust == CxxChar || ident.rust == CxxString {
                     let span = ident.rust.span();
                     tokens.extend(quote_spanned!(span=> ::cxx::));
                 }

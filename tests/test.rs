@@ -12,6 +12,7 @@ use cxx::SharedPtr;
 use cxx_test_suite::module::ffi2;
 use cxx_test_suite::{cast, ffi, R};
 use std::cell::Cell;
+use std::convert::TryInto;
 use std::ffi::CStr;
 
 thread_local! {
@@ -38,6 +39,7 @@ fn test_c_return() {
     let nested_ns_shared = ffi::ABShared { z: 2020 };
 
     assert_eq!(2020, ffi::c_return_primitive());
+    assert_eq!(Some('🙃'), ffi::c_return_char().try_into().ok());
     assert_eq!(2020, ffi::c_return_shared().z);
     assert_eq!(2020, ffi::c_return_box().0);
     ffi::c_return_unique_ptr();
@@ -115,6 +117,7 @@ fn test_c_take() {
     let unique_ptr_ns = ffi2::c_return_ns_unique_ptr();
 
     check!(ffi::c_take_primitive(2020));
+    check!(ffi::c_take_char('🙃'.into()));
     check!(ffi::c_take_shared(ffi::Shared { z: 2020 }));
     check!(ffi::c_take_ns_shared(ffi::AShared { z: 2020 }));
     check!(ffi::ns_c_take_ns_shared(ffi::AShared { z: 2020 }));

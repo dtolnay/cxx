@@ -400,6 +400,8 @@ extern crate std;
 #[macro_use]
 mod macros;
 
+#[path = "cxx_char.rs"]
+mod char;
 mod exception;
 mod extern_type;
 mod function;
@@ -421,6 +423,7 @@ mod unwind;
 pub mod vector;
 mod weak_ptr;
 
+pub use crate::char::CxxChar;
 pub use crate::exception::Exception;
 pub use crate::extern_type::{kind, ExternType};
 pub use crate::shared_ptr::SharedPtr;
@@ -430,6 +433,13 @@ pub use crate::unique_ptr::UniquePtr;
 pub use crate::vector::CxxVector;
 pub use crate::weak_ptr::WeakPtr;
 pub use cxxbridge_macro::bridge;
+
+/// Synonym for `CxxChar`.
+///
+/// To avoid confusion with Rust's built-in char type you probably
+/// shouldn't import this type with `use`. Instead, write `cxx::Char`, or
+/// import and use `CxxChar`.
+pub type Char = CxxChar;
 
 /// Synonym for `CxxString`.
 ///
