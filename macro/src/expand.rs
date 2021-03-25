@@ -1255,6 +1255,7 @@ fn expand_unique_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
         || types.aliases.contains_key(ident);
     let new_method = if can_construct_from_value {
         Some(quote! {
+            #[doc(hidden)]
             fn __new(value: Self) -> *mut ::std::ffi::c_void {
                 extern "C" {
                     #[link_name = #link_uninit]
@@ -1276,9 +1277,11 @@ fn expand_unique_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
 
     quote_spanned! {end_span=>
         #unsafe_token impl #impl_generics ::cxx::private::UniquePtrTarget for #ident #ty_generics {
+            #[doc(hidden)]
             fn __typename(f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
                 f.write_str(#name)
             }
+            #[doc(hidden)]
             fn __null() -> *mut ::std::ffi::c_void {
                 extern "C" {
                     #[link_name = #link_null]
@@ -1289,6 +1292,7 @@ fn expand_unique_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
                 repr
             }
             #new_method
+            #[doc(hidden)]
             unsafe fn __raw(raw: *mut Self) -> *mut ::std::ffi::c_void {
                 extern "C" {
                     #[link_name = #link_raw]
@@ -1298,6 +1302,7 @@ fn expand_unique_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
                 __raw(&mut repr, raw.cast());
                 repr
             }
+            #[doc(hidden)]
             unsafe fn __get(repr: *mut ::std::ffi::c_void) -> *const Self {
                 extern "C" {
                     #[link_name = #link_get]
@@ -1305,6 +1310,7 @@ fn expand_unique_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
                 }
                 __get(&repr).cast()
             }
+            #[doc(hidden)]
             unsafe fn __release(mut repr: *mut ::std::ffi::c_void) -> *mut Self {
                 extern "C" {
                     #[link_name = #link_release]
@@ -1312,6 +1318,7 @@ fn expand_unique_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
                 }
                 __release(&mut repr).cast()
             }
+            #[doc(hidden)]
             unsafe fn __drop(mut repr: *mut ::std::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_drop]
@@ -1344,6 +1351,7 @@ fn expand_shared_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
         || types.aliases.contains_key(ident);
     let new_method = if can_construct_from_value {
         Some(quote! {
+            #[doc(hidden)]
             unsafe fn __new(value: Self, new: *mut ::std::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_uninit]
@@ -1363,9 +1371,11 @@ fn expand_shared_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
 
     quote_spanned! {end_span=>
         #unsafe_token impl #impl_generics ::cxx::private::SharedPtrTarget for #ident #ty_generics {
+            #[doc(hidden)]
             fn __typename(f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
                 f.write_str(#name)
             }
+            #[doc(hidden)]
             unsafe fn __null(new: *mut ::std::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_null]
@@ -1374,6 +1384,7 @@ fn expand_shared_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
                 __null(new);
             }
             #new_method
+            #[doc(hidden)]
             unsafe fn __clone(this: *const ::std::ffi::c_void, new: *mut ::std::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_clone]
@@ -1381,6 +1392,7 @@ fn expand_shared_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
                 }
                 __clone(this, new);
             }
+            #[doc(hidden)]
             unsafe fn __get(this: *const ::std::ffi::c_void) -> *const Self {
                 extern "C" {
                     #[link_name = #link_get]
@@ -1388,6 +1400,7 @@ fn expand_shared_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
                 }
                 __get(this).cast()
             }
+            #[doc(hidden)]
             unsafe fn __drop(this: *mut ::std::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_drop]
@@ -1422,9 +1435,11 @@ fn expand_weak_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -
 
     quote_spanned! {end_span=>
         #unsafe_token impl #impl_generics ::cxx::private::WeakPtrTarget for #ident #ty_generics {
+            #[doc(hidden)]
             fn __typename(f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
                 f.write_str(#name)
             }
+            #[doc(hidden)]
             unsafe fn __null(new: *mut ::std::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_null]
@@ -1432,6 +1447,7 @@ fn expand_weak_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -
                 }
                 __null(new);
             }
+            #[doc(hidden)]
             unsafe fn __clone(this: *const ::std::ffi::c_void, new: *mut ::std::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_clone]
@@ -1439,6 +1455,7 @@ fn expand_weak_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -
                 }
                 __clone(this, new);
             }
+            #[doc(hidden)]
             unsafe fn __downgrade(shared: *const ::std::ffi::c_void, weak: *mut ::std::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_downgrade]
@@ -1446,6 +1463,7 @@ fn expand_weak_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -
                 }
                 __downgrade(shared, weak);
             }
+            #[doc(hidden)]
             unsafe fn __upgrade(weak: *const ::std::ffi::c_void, shared: *mut ::std::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_upgrade]
@@ -1453,6 +1471,7 @@ fn expand_weak_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -
                 }
                 __upgrade(weak, shared);
             }
+            #[doc(hidden)]
             unsafe fn __drop(this: *mut ::std::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_drop]
@@ -1493,9 +1512,11 @@ fn expand_cxx_vector(elem: &Ident, explicit_impl: Option<&Impl>, types: &Types) 
 
     quote_spanned! {end_span=>
         #unsafe_token impl #impl_generics ::cxx::private::VectorElement for #elem #ty_generics {
+            #[doc(hidden)]
             fn __typename(f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
                 f.write_str(#name)
             }
+            #[doc(hidden)]
             fn __vector_size(v: &::cxx::CxxVector<Self>) -> usize {
                 extern "C" {
                     #[link_name = #link_size]
@@ -1503,6 +1524,7 @@ fn expand_cxx_vector(elem: &Ident, explicit_impl: Option<&Impl>, types: &Types) 
                 }
                 unsafe { __vector_size(v) }
             }
+            #[doc(hidden)]
             unsafe fn __get_unchecked(v: *mut ::cxx::CxxVector<Self>, pos: usize) -> *mut Self {
                 extern "C" {
                     #[link_name = #link_get_unchecked]
@@ -1510,6 +1532,7 @@ fn expand_cxx_vector(elem: &Ident, explicit_impl: Option<&Impl>, types: &Types) 
                 }
                 __get_unchecked(v, pos)
             }
+            #[doc(hidden)]
             fn __unique_ptr_null() -> *mut ::std::ffi::c_void {
                 extern "C" {
                     #[link_name = #link_unique_ptr_null]
@@ -1519,6 +1542,7 @@ fn expand_cxx_vector(elem: &Ident, explicit_impl: Option<&Impl>, types: &Types) 
                 unsafe { __unique_ptr_null(&mut repr) }
                 repr
             }
+            #[doc(hidden)]
             unsafe fn __unique_ptr_raw(raw: *mut ::cxx::CxxVector<Self>) -> *mut ::std::ffi::c_void {
                 extern "C" {
                     #[link_name = #link_unique_ptr_raw]
@@ -1528,6 +1552,7 @@ fn expand_cxx_vector(elem: &Ident, explicit_impl: Option<&Impl>, types: &Types) 
                 __unique_ptr_raw(&mut repr, raw);
                 repr
             }
+            #[doc(hidden)]
             unsafe fn __unique_ptr_get(repr: *mut ::std::ffi::c_void) -> *const ::cxx::CxxVector<Self> {
                 extern "C" {
                     #[link_name = #link_unique_ptr_get]
@@ -1535,6 +1560,7 @@ fn expand_cxx_vector(elem: &Ident, explicit_impl: Option<&Impl>, types: &Types) 
                 }
                 __unique_ptr_get(&repr)
             }
+            #[doc(hidden)]
             unsafe fn __unique_ptr_release(mut repr: *mut ::std::ffi::c_void) -> *mut ::cxx::CxxVector<Self> {
                 extern "C" {
                     #[link_name = #link_unique_ptr_release]
@@ -1542,6 +1568,7 @@ fn expand_cxx_vector(elem: &Ident, explicit_impl: Option<&Impl>, types: &Types) 
                 }
                 __unique_ptr_release(&mut repr)
             }
+            #[doc(hidden)]
             unsafe fn __unique_ptr_drop(mut repr: *mut ::std::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_unique_ptr_drop]
