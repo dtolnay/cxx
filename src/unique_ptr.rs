@@ -1,7 +1,7 @@
+use crate::cxx_vector::{CxxVector, VectorElement};
 use crate::fmt::display;
 use crate::kind::Trivial;
 use crate::string::CxxString;
-use crate::vector::{CxxVector, VectorElement};
 use crate::ExternType;
 use core::ffi::c_void;
 use core::fmt::{self, Debug, Display};

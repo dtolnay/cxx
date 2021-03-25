@@ -400,6 +400,7 @@ extern crate std;
 #[macro_use]
 mod macros;
 
+mod cxx_vector;
 mod exception;
 mod extern_type;
 mod fmt;
@@ -418,17 +419,15 @@ mod symbols;
 mod type_id;
 mod unique_ptr;
 mod unwind;
-#[path = "cxx_vector.rs"]
 pub mod vector;
 mod weak_ptr;
 
+pub use crate::cxx_vector::CxxVector;
 pub use crate::exception::Exception;
 pub use crate::extern_type::{kind, ExternType};
 pub use crate::shared_ptr::SharedPtr;
 pub use crate::string::CxxString;
 pub use crate::unique_ptr::UniquePtr;
-#[doc(inline)]
-pub use crate::vector::CxxVector;
 pub use crate::weak_ptr::WeakPtr;
 pub use cxxbridge_macro::bridge;
 
@@ -449,6 +448,7 @@ pub type Vector<T> = CxxVector<T>;
 // Not public API.
 #[doc(hidden)]
 pub mod private {
+    pub use crate::cxx_vector::VectorElement;
     pub use crate::extern_type::{verify_extern_kind, verify_extern_type};
     pub use crate::function::FatFunction;
     pub use crate::opaque::Opaque;
@@ -462,7 +462,6 @@ pub mod private {
     pub use crate::string::StackString;
     pub use crate::unique_ptr::UniquePtrTarget;
     pub use crate::unwind::catch_unwind;
-    pub use crate::vector::VectorElement;
     pub use crate::weak_ptr::WeakPtrTarget;
     pub use cxxbridge_macro::type_id;
 }
