@@ -27,6 +27,7 @@ mod tokens;
 mod toposort;
 pub mod trivial;
 pub mod types;
+mod visit;
 
 use self::attrs::OtherAttrs;
 use self::discriminant::Discriminant;
