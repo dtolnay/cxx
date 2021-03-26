@@ -1,0 +1,5 @@
+error: &mut return type is not allowed unless there is a &mut argument
+ --> $DIR/mut_return.rs:6:9
+  |
+6 |         fn f(t: &Thing) -> Pin<&mut CxxString>;
+  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
