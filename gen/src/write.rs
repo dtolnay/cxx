@@ -873,7 +873,13 @@ fn write_rust_function_decl_impl(
         if needs_comma {
             write!(out, ", ");
         }
-        write_return_type(out, &sig.ret);
+        match sig.ret.as_ref().unwrap() {
+            Type::Ref(ret) => {
+                write_pointee_type(out, &ret.inner, ret.mutable);
+                write!(out, " *");
+            }
+            ret => write_type_space(out, ret),
+        }
         write!(out, "*return$");
         needs_comma = true;
     }
@@ -968,7 +974,13 @@ fn write_rust_function_shim_impl(
     if indirect_return {
         out.builtin.maybe_uninit = true;
         write!(out, "::rust::MaybeUninit<");
-        write_type(out, sig.ret.as_ref().unwrap());
+        match sig.ret.as_ref().unwrap() {
+            Type::Ref(ret) => {
+                write_pointee_type(out, &ret.inner, ret.mutable);
+                write!(out, " *");
+            }
+            ret => write_type(out, ret),
+        }
         writeln!(out, "> return$;");
         write!(out, "  ");
     } else if let Some(ret) = &sig.ret {
@@ -1051,8 +1063,15 @@ fn write_rust_function_shim_impl(
         writeln!(out, "  }}");
     }
     if indirect_return {
-        out.include.utility = true;
-        writeln!(out, "  return ::std::move(return$.value);");
+        write!(out, "  return ");
+        match sig.ret.as_ref().unwrap() {
+            Type::Ref(_) => write!(out, "*return$.value"),
+            _ => {
+                out.include.utility = true;
+                write!(out, "::std::move(return$.value)");
+            }
+        }
+        writeln!(out, ";");
     }
     writeln!(out, "}}");
 }
