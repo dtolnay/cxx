@@ -5,6 +5,7 @@ use crate::syntax::report::Errors;
 use crate::syntax::resolve::Resolution;
 use crate::syntax::set::{OrderedSet, UnorderedSet};
 use crate::syntax::trivial::{self, TrivialReason};
+use crate::syntax::visit::{self, Visit};
 use crate::syntax::{
     toposort, Api, Atom, Enum, ExternType, Impl, Lifetimes, Pair, Struct, Type, TypeAlias,
 };
@@ -41,28 +42,16 @@ impl<'a> Types<'a> {
         let toposorted_structs = Vec::new();
 
         fn visit<'a>(all: &mut OrderedSet<&'a Type>, ty: &'a Type) {
-            all.insert(ty);
-            match ty {
-                Type::Ident(_) | Type::Str(_) | Type::Void(_) => {}
-                Type::RustBox(ty)
-                | Type::UniquePtr(ty)
-                | Type::SharedPtr(ty)
-                | Type::WeakPtr(ty)
-                | Type::CxxVector(ty)
-                | Type::RustVec(ty) => visit(all, &ty.inner),
-                Type::Ref(r) => visit(all, &r.inner),
-                Type::Ptr(p) => visit(all, &p.inner),
-                Type::Array(a) => visit(all, &a.inner),
-                Type::SliceRef(s) => visit(all, &s.inner),
-                Type::Fn(f) => {
-                    if let Some(ret) = &f.ret {
-                        visit(all, ret);
-                    }
-                    for arg in &f.args {
-                        visit(all, &arg.ty);
-                    }
+            struct CollectTypes<'s, 'a>(&'s mut OrderedSet<&'a Type>);
+
+            impl<'s, 'a> Visit<'a> for CollectTypes<'s, 'a> {
+                fn visit_type(&mut self, ty: &'a Type) {
+                    self.0.insert(ty);
+                    visit::visit_type(self, ty);
                 }
             }
+
+            CollectTypes(all).visit_type(ty);
         }
 
         let mut add_resolution = |name: &'a Pair, generics: &'a Lifetimes| {
