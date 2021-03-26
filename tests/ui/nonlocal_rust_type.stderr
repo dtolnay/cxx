@@ -1,0 +1,27 @@
+error[E0117]: only traits defined in the current crate can be implemented for arbitrary types
+  --> $DIR/nonlocal_rust_type.rs:10:9
+   |
+10 |         type OptBuilder<'a>;
+   |         ^^^^^--------------
+   |         |    |
+   |         |    `Option` is not defined in the current crate
+   |         impl doesn't use only types from inside the current crate
+   |
+   = note: define and implement a trait or new type instead
+
+error[E0117]: only traits defined in the current crate can be implemented for arbitrary types
+  --> $DIR/nonlocal_rust_type.rs:7:1
+   |
+7  |   #[cxx::bridge]
+   |   ^^^^^^^^^^^^^^ impl doesn't use only types from inside the current crate
+...
+10 |           type OptBuilder<'a>;
+   |  ___________________________-
+11 | |     }
+12 | |
+13 | |     struct MyBuilder<'a> {
+14 | |         rs: Box<OptBuilder<'a>>,
+   | |__________________________- `Option` is not defined in the current crate
+   |
+   = note: define and implement a trait or new type instead
+   = note: this error originates in an attribute macro (in Nightly builds, run with -Z macro-backtrace for more info)
