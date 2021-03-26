@@ -3,15 +3,3 @@ error: &mut return type is not allowed unless there is a &mut argument
    |
 10 |         fn f(t: &Thing) -> Pin<&mut CxxString>;
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-error: &mut return type is not allowed unless there is a &mut argument
-  --> $DIR/mut_return.rs:12:9
-   |
-12 |         fn h(t: Box<Mut>) -> Pin<&mut CxxString>;
-   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-error: &mut return type is not allowed unless there is a &mut argument
-  --> $DIR/mut_return.rs:13:9
-   |
-13 |         fn i<'a>(t: Box<Mut<'a>>) -> Pin<&'a mut CxxString>;
-   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

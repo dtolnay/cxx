@@ -1,5 +1,6 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
+use crate::syntax::visit::{self, Visit};
 use crate::syntax::{
     error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, NamedType, Ptr,
     Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
@@ -518,18 +519,43 @@ fn check_mut_return_restriction(cx: &mut Check, efn: &ExternFn) {
         _ => return,
     }
 
-    if let Some(r) = &efn.receiver {
-        if r.mutable {
+    if let Some(receiver) = &efn.receiver {
+        if receiver.mutable {
+            return;
+        }
+        let resolve = cx.types.resolve(&receiver.ty);
+        if !resolve.generics.lifetimes.is_empty() {
             return;
         }
     }
 
-    for arg in &efn.args {
-        if let Type::Ref(ty) = &arg.ty {
-            if ty.mutable {
-                return;
-            }
+    struct FindLifetimeMut<'a> {
+        cx: &'a Check<'a>,
+        found: bool,
+    }
+
+    impl<'t, 'a> Visit<'t> for FindLifetimeMut<'a> {
+        fn visit_type(&mut self, ty: &'t Type) {
+            self.found |= match ty {
+                Type::Ref(ty) => ty.mutable,
+                Type::Ident(ident) => {
+                    let resolve = self.cx.types.resolve(ident);
+                    !resolve.generics.lifetimes.is_empty()
+                }
+                _ => false,
+            };
+            visit::visit_type(self, ty);
         }
+    }
+
+    let mut visitor = FindLifetimeMut { cx, found: false };
+
+    for arg in &efn.args {
+        visitor.visit_type(&arg.ty);
+    }
+
+    if visitor.found {
+        return;
     }
 
     cx.error(
