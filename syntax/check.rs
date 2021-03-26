@@ -199,7 +199,7 @@ fn check_type_cxx_vector(cx: &mut Check, ptr: &Ty1) {
         }
     }
 
-    cx.error(ptr, "unsupported vector target type");
+    cx.error(ptr, "unsupported vector element type");
 }
 
 fn check_type_ref(cx: &mut Check, ty: &Ref) {

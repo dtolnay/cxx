@@ -10,7 +10,7 @@ error: unsupported unique_ptr target type
 7 |         fn get_uniqueptr_to_ptr() -> UniquePtr<*mut C>;
   |                                      ^^^^^^^^^^^^^^^^^
 
-error: unsupported vector target type
+error: unsupported vector element type
  --> $DIR/ptr_unsupported.rs:8:45
   |
 8 |         fn get_vector_of_ptr() -> UniquePtr<CxxVector<*mut C>>;
