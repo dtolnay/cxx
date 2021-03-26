@@ -484,12 +484,15 @@ Fn<Ret(Args...)> Fn<Ret(Args...)>::operator*() const noexcept {
 }
 #endif // CXXBRIDGE1_RUST_FN
 
-#ifndef CXXBRIDGE1_RUST_BITCOPY
-#define CXXBRIDGE1_RUST_BITCOPY
+#ifndef CXXBRIDGE1_RUST_BITCOPY_T
+#define CXXBRIDGE1_RUST_BITCOPY_T
 struct unsafe_bitcopy_t final {
   explicit unsafe_bitcopy_t() = default;
 };
+#endif // CXXBRIDGE1_RUST_BITCOPY_T
 
+#ifndef CXXBRIDGE1_RUST_BITCOPY
+#define CXXBRIDGE1_RUST_BITCOPY
 constexpr unsafe_bitcopy_t unsafe_bitcopy{};
 #endif // CXXBRIDGE1_RUST_BITCOPY
 
