@@ -508,6 +508,11 @@ fn check_api_impl(cx: &mut Check, imp: &Impl) {
 }
 
 fn check_mut_return_restriction(cx: &mut Check, efn: &ExternFn) {
+    if efn.sig.unsafety.is_some() {
+        // Unrestricted as long as the function is made unsafe-to-call.
+        return;
+    }
+
     match &efn.ret {
         Some(Type::Ref(ty)) if ty.mutable => {}
         _ => return,
