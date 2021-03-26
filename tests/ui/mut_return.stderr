@@ -5,7 +5,7 @@ error: &mut return type is not allowed unless there is a &mut argument
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: &mut return type is not allowed unless there is a &mut argument
- --> $DIR/mut_return.rs:7:16
+ --> $DIR/mut_return.rs:7:9
   |
 7 |         unsafe fn g(t: &Thing) -> Pin<&mut CxxString>;
-  |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
