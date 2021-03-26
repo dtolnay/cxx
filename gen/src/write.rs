@@ -1173,31 +1173,11 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write!(out, ">");
         }
         Type::Ref(r) => {
-            if let Type::Ptr(_) = r.inner {
-                write_type_space(out, &r.inner);
-                if !r.mutable {
-                    write!(out, "const");
-                }
-            } else {
-                if !r.mutable {
-                    write!(out, "const ");
-                }
-                write_type(out, &r.inner);
-            }
+            write_pointee_type(out, &r.inner, r.mutable);
             write!(out, " &");
         }
         Type::Ptr(p) => {
-            if let Type::Ptr(_) = p.inner {
-                write_type_space(out, &p.inner);
-                if !p.mutable {
-                    write!(out, "const");
-                }
-            } else {
-                if !p.mutable {
-                    write!(out, "const ");
-                }
-                write_type(out, &p.inner);
-            }
+            write_pointee_type(out, &p.inner, p.mutable);
             write!(out, " *");
         }
         Type::Str(_) => {
@@ -1232,6 +1212,21 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write!(out, ", {}>", &a.len);
         }
         Type::Void(_) => unreachable!(),
+    }
+}
+
+// Write just the T type behind a &T or &mut T or *const T or *mut T.
+fn write_pointee_type(out: &mut OutFile, inner: &Type, mutable: bool) {
+    if let Type::Ptr(_) = inner {
+        write_type_space(out, inner);
+        if !mutable {
+            write!(out, "const");
+        }
+    } else {
+        if !mutable {
+            write!(out, "const ");
+        }
+        write_type(out, inner);
     }
 }
 
