@@ -48,11 +48,6 @@ pub(super) fn write(out: &mut OutFile) {
     let builtin = &mut out.builtin;
     let out = &mut builtin.content;
 
-    let cxx_header = include
-        .custom
-        .iter()
-        .any(|header| header.path == "rust/cxx.h" || header.path == "rust\\cxx.h");
-
     if builtin.rust_string {
         include.array = true;
         include.cstdint = true;
@@ -132,6 +127,7 @@ pub(super) fn write(out: &mut OutFile) {
     out.begin_block(Block::Namespace("rust"));
     out.begin_block(Block::InlineNamespace("cxxbridge1"));
 
+    let cxx_header = include.has_cxx_header();
     if !cxx_header {
         writeln!(out, "// #include \"rust/cxx.h\"");
 

@@ -50,6 +50,12 @@ impl<'a> Includes<'a> {
     pub fn insert(&mut self, include: impl Into<Include>) {
         self.custom.push(include.into());
     }
+
+    pub fn has_cxx_header(&self) -> bool {
+        self.custom
+            .iter()
+            .any(|header| header.path == "rust/cxx.h" || header.path == "rust\\cxx.h")
+    }
 }
 
 pub(super) fn write(out: &mut OutFile) {
