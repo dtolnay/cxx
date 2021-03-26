@@ -15,6 +15,7 @@ pub struct Builtins<'a> {
     pub opaque: bool,
     pub layout: bool,
     pub unsafe_bitcopy: bool,
+    pub unsafe_bitcopy_t: bool,
     pub rust_error: bool,
     pub manually_drop: bool,
     pub maybe_uninit: bool,
@@ -74,7 +75,7 @@ pub(super) fn write(out: &mut OutFile) {
         include.utility = true;
         builtin.panic = true;
         builtin.rust_slice = true;
-        builtin.unsafe_bitcopy = true;
+        builtin.unsafe_bitcopy_t = true;
     }
 
     if builtin.rust_slice {
@@ -124,6 +125,10 @@ pub(super) fn write(out: &mut OutFile) {
         include.type_traits = true;
     }
 
+    if builtin.unsafe_bitcopy {
+        builtin.unsafe_bitcopy_t = true;
+    }
+
     out.begin_block(Block::Namespace("rust"));
     out.begin_block(Block::InlineNamespace("cxxbridge1"));
 
@@ -165,6 +170,7 @@ pub(super) fn write(out: &mut OutFile) {
         ifndef::write(out, builtin.rust_str, "CXXBRIDGE1_RUST_STR");
         ifndef::write(out, builtin.rust_slice, "CXXBRIDGE1_RUST_SLICE");
         ifndef::write(out, builtin.rust_box, "CXXBRIDGE1_RUST_BOX");
+        ifndef::write(out, builtin.unsafe_bitcopy_t, "CXXBRIDGE1_RUST_BITCOPY_T");
         ifndef::write(out, builtin.unsafe_bitcopy, "CXXBRIDGE1_RUST_BITCOPY");
         ifndef::write(out, builtin.rust_vec, "CXXBRIDGE1_RUST_VEC");
         ifndef::write(out, builtin.rust_fn, "CXXBRIDGE1_RUST_FN");
