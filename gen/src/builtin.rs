@@ -48,6 +48,11 @@ pub(super) fn write(out: &mut OutFile) {
     let builtin = &mut out.builtin;
     let out = &mut builtin.content;
 
+    let cxx_header = include
+        .custom
+        .iter()
+        .any(|header| header.path == "rust/cxx.h" || header.path == "rust\\cxx.h");
+
     if builtin.rust_string {
         include.array = true;
         include.cstdint = true;
@@ -126,51 +131,54 @@ pub(super) fn write(out: &mut OutFile) {
 
     out.begin_block(Block::Namespace("rust"));
     out.begin_block(Block::InlineNamespace("cxxbridge1"));
-    writeln!(out, "// #include \"rust/cxx.h\"");
 
-    ifndef::write(out, builtin.panic, "CXXBRIDGE1_PANIC");
+    if !cxx_header {
+        writeln!(out, "// #include \"rust/cxx.h\"");
 
-    if builtin.rust_string {
+        ifndef::write(out, builtin.panic, "CXXBRIDGE1_PANIC");
+
+        if builtin.rust_string {
+            out.next_section();
+            writeln!(out, "struct unsafe_bitcopy_t;");
+        }
+
+        if builtin.friend_impl {
+            out.begin_block(Block::AnonymousNamespace);
+            writeln!(out, "template <typename T>");
+            writeln!(out, "class impl;");
+            out.end_block(Block::AnonymousNamespace);
+        }
+
         out.next_section();
-        writeln!(out, "struct unsafe_bitcopy_t;");
-    }
+        if builtin.rust_str && !builtin.rust_string {
+            writeln!(out, "class String;");
+        }
+        if builtin.layout && !builtin.opaque {
+            writeln!(out, "class Opaque;");
+        }
 
-    if builtin.friend_impl {
-        out.begin_block(Block::AnonymousNamespace);
-        writeln!(out, "template <typename T>");
-        writeln!(out, "class impl;");
-        out.end_block(Block::AnonymousNamespace);
-    }
+        if builtin.rust_slice {
+            out.next_section();
+            writeln!(out, "template <typename T>");
+            writeln!(out, "::std::size_t size_of();");
+            writeln!(out, "template <typename T>");
+            writeln!(out, "::std::size_t align_of();");
+        }
 
-    out.next_section();
-    if builtin.rust_str && !builtin.rust_string {
-        writeln!(out, "class String;");
+        ifndef::write(out, builtin.rust_string, "CXXBRIDGE1_RUST_STRING");
+        ifndef::write(out, builtin.rust_str, "CXXBRIDGE1_RUST_STR");
+        ifndef::write(out, builtin.rust_slice, "CXXBRIDGE1_RUST_SLICE");
+        ifndef::write(out, builtin.rust_box, "CXXBRIDGE1_RUST_BOX");
+        ifndef::write(out, builtin.unsafe_bitcopy, "CXXBRIDGE1_RUST_BITCOPY");
+        ifndef::write(out, builtin.rust_vec, "CXXBRIDGE1_RUST_VEC");
+        ifndef::write(out, builtin.rust_fn, "CXXBRIDGE1_RUST_FN");
+        ifndef::write(out, builtin.rust_error, "CXXBRIDGE1_RUST_ERROR");
+        ifndef::write(out, builtin.rust_isize, "CXXBRIDGE1_RUST_ISIZE");
+        ifndef::write(out, builtin.opaque, "CXXBRIDGE1_RUST_OPAQUE");
+        ifndef::write(out, builtin.is_complete, "CXXBRIDGE1_IS_COMPLETE");
+        ifndef::write(out, builtin.layout, "CXXBRIDGE1_LAYOUT");
+        ifndef::write(out, builtin.relocatable, "CXXBRIDGE1_RELOCATABLE");
     }
-    if builtin.layout && !builtin.opaque {
-        writeln!(out, "class Opaque;");
-    }
-
-    if builtin.rust_slice {
-        out.next_section();
-        writeln!(out, "template <typename T>");
-        writeln!(out, "::std::size_t size_of();");
-        writeln!(out, "template <typename T>");
-        writeln!(out, "::std::size_t align_of();");
-    }
-
-    ifndef::write(out, builtin.rust_string, "CXXBRIDGE1_RUST_STRING");
-    ifndef::write(out, builtin.rust_str, "CXXBRIDGE1_RUST_STR");
-    ifndef::write(out, builtin.rust_slice, "CXXBRIDGE1_RUST_SLICE");
-    ifndef::write(out, builtin.rust_box, "CXXBRIDGE1_RUST_BOX");
-    ifndef::write(out, builtin.unsafe_bitcopy, "CXXBRIDGE1_RUST_BITCOPY");
-    ifndef::write(out, builtin.rust_vec, "CXXBRIDGE1_RUST_VEC");
-    ifndef::write(out, builtin.rust_fn, "CXXBRIDGE1_RUST_FN");
-    ifndef::write(out, builtin.rust_error, "CXXBRIDGE1_RUST_ERROR");
-    ifndef::write(out, builtin.rust_isize, "CXXBRIDGE1_RUST_ISIZE");
-    ifndef::write(out, builtin.opaque, "CXXBRIDGE1_RUST_OPAQUE");
-    ifndef::write(out, builtin.is_complete, "CXXBRIDGE1_IS_COMPLETE");
-    ifndef::write(out, builtin.layout, "CXXBRIDGE1_LAYOUT");
-    ifndef::write(out, builtin.relocatable, "CXXBRIDGE1_RELOCATABLE");
 
     if builtin.rust_str_new_unchecked {
         out.next_section();
