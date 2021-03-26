@@ -469,8 +469,6 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
     if efn.lang == Lang::Cxx {
         check_mut_return_restriction(cx, efn);
     }
-
-    check_multiple_arg_lifetimes(cx, efn);
 }
 
 fn check_api_type_alias(cx: &mut Check, alias: &TypeAlias) {
@@ -562,35 +560,6 @@ fn check_mut_return_restriction(cx: &mut Check, efn: &ExternFn) {
         efn,
         "&mut return type is not allowed unless there is a &mut argument",
     );
-}
-
-fn check_multiple_arg_lifetimes(cx: &mut Check, efn: &ExternFn) {
-    if efn.lang == Lang::Cxx && efn.trusted {
-        return;
-    }
-
-    match &efn.ret {
-        Some(Type::Ref(_)) => {}
-        _ => return,
-    }
-
-    let mut reference_args = 0;
-    for arg in &efn.args {
-        if let Type::Ref(_) = &arg.ty {
-            reference_args += 1;
-        }
-    }
-
-    if efn.receiver.is_some() {
-        reference_args += 1;
-    }
-
-    if reference_args != 1 {
-        cx.error(
-            efn,
-            "functions that return a reference must take exactly one input reference",
-        );
-    }
 }
 
 fn check_reserved_name(cx: &mut Check, ident: &Ident) {
