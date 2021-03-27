@@ -755,6 +755,7 @@ fn expand_rust_type_impl(ety: &ExternType) -> TokenStream {
     let unsafe_impl = quote_spanned!(ety.type_token.span=> unsafe impl);
 
     let mut impls = quote_spanned! {span=>
+        #[doc(hidden)]
         #unsafe_impl #generics ::cxx::private::RustType for #ident #generics {}
     };
 
