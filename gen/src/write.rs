@@ -1374,8 +1374,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
 }
 
 fn write_rust_box_extern(out: &mut OutFile, key: NamedImplKey) {
-    let ident = key.rust;
-    let resolve = out.types.resolve(ident);
+    let resolve = out.types.resolve(&key);
     let inner = resolve.name.to_fully_qualified();
     let instance = resolve.name.to_symbol();
 
@@ -1441,8 +1440,7 @@ fn write_rust_vec_extern(out: &mut OutFile, key: NamedImplKey) {
 }
 
 fn write_rust_box_impl(out: &mut OutFile, key: NamedImplKey) {
-    let ident = key.rust;
-    let resolve = out.types.resolve(ident);
+    let resolve = out.types.resolve(&key);
     let inner = resolve.name.to_fully_qualified();
     let instance = resolve.name.to_symbol();
 
@@ -1741,8 +1739,7 @@ fn write_shared_ptr(out: &mut OutFile, key: NamedImplKey) {
 }
 
 fn write_weak_ptr(out: &mut OutFile, key: NamedImplKey) {
-    let ident = key.rust;
-    let resolve = out.types.resolve(ident);
+    let resolve = out.types.resolve(&key);
     let inner = resolve.name.to_fully_qualified();
     let instance = resolve.name.to_symbol();
 

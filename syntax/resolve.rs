@@ -1,3 +1,4 @@
+use crate::syntax::instantiate::NamedImplKey;
 use crate::syntax::{Lifetimes, NamedType, Pair, Types};
 use proc_macro2::Ident;
 
@@ -29,5 +30,11 @@ impl UnresolvedName for Ident {
 impl UnresolvedName for NamedType {
     fn ident(&self) -> &Ident {
         &self.rust
+    }
+}
+
+impl<'a> UnresolvedName for NamedImplKey<'a> {
+    fn ident(&self) -> &Ident {
+        self.rust
     }
 }
