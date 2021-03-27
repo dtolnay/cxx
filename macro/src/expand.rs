@@ -1,4 +1,3 @@
-use crate::derive;
 use crate::syntax::atom::Atom::*;
 use crate::syntax::attrs::{self, OtherAttrs};
 use crate::syntax::file::Module;
@@ -11,6 +10,7 @@ use crate::syntax::{
     Struct, Trait, Type, TypeAlias, Types,
 };
 use crate::type_id::Crate;
+use crate::{derive, generics};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
 use std::mem;
@@ -1137,11 +1137,7 @@ fn expand_rust_box(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -
     let local_dealloc = format_ident!("{}dealloc", local_prefix);
     let local_drop = format_ident!("{}drop", local_prefix);
 
-    let (impl_generics, ty_generics) = if let Some(imp) = explicit_impl {
-        (&imp.impl_generics, &imp.ty_generics)
-    } else {
-        (resolve.generics, resolve.generics)
-    };
+    let (impl_generics, ty_generics) = generics::split_for_impl(explicit_impl, resolve);
 
     let begin_span =
         explicit_impl.map_or_else(Span::call_site, |explicit| explicit.impl_token.span);
@@ -1189,11 +1185,7 @@ fn expand_rust_vec(elem: &Ident, types: &Types, explicit_impl: Option<&Impl>) ->
     let local_reserve_total = format_ident!("{}reserve_total", local_prefix);
     let local_set_len = format_ident!("{}set_len", local_prefix);
 
-    let (impl_generics, ty_generics) = if let Some(imp) = explicit_impl {
-        (&imp.impl_generics, &imp.ty_generics)
-    } else {
-        (resolve.generics, resolve.generics)
-    };
+    let (impl_generics, ty_generics) = generics::split_for_impl(explicit_impl, resolve);
 
     let begin_span =
         explicit_impl.map_or_else(Span::call_site, |explicit| explicit.impl_token.span);
@@ -1252,11 +1244,7 @@ fn expand_unique_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
     let link_release = format!("{}release", prefix);
     let link_drop = format!("{}drop", prefix);
 
-    let (impl_generics, ty_generics) = if let Some(imp) = explicit_impl {
-        (&imp.impl_generics, &imp.ty_generics)
-    } else {
-        (resolve.generics, resolve.generics)
-    };
+    let (impl_generics, ty_generics) = generics::split_for_impl(explicit_impl, resolve);
 
     let can_construct_from_value = types.structs.contains_key(ident)
         || types.enums.contains_key(ident)
@@ -1348,11 +1336,7 @@ fn expand_shared_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>)
     let link_get = format!("{}get", prefix);
     let link_drop = format!("{}drop", prefix);
 
-    let (impl_generics, ty_generics) = if let Some(imp) = explicit_impl {
-        (&imp.impl_generics, &imp.ty_generics)
-    } else {
-        (resolve.generics, resolve.generics)
-    };
+    let (impl_generics, ty_generics) = generics::split_for_impl(explicit_impl, resolve);
 
     let can_construct_from_value = types.structs.contains_key(ident)
         || types.enums.contains_key(ident)
@@ -1430,11 +1414,7 @@ fn expand_weak_ptr(ident: &Ident, types: &Types, explicit_impl: Option<&Impl>) -
     let link_upgrade = format!("{}upgrade", prefix);
     let link_drop = format!("{}drop", prefix);
 
-    let (impl_generics, ty_generics) = if let Some(imp) = explicit_impl {
-        (&imp.impl_generics, &imp.ty_generics)
-    } else {
-        (resolve.generics, resolve.generics)
-    };
+    let (impl_generics, ty_generics) = generics::split_for_impl(explicit_impl, resolve);
 
     let begin_span =
         explicit_impl.map_or_else(Span::call_site, |explicit| explicit.impl_token.span);
@@ -1507,11 +1487,7 @@ fn expand_cxx_vector(elem: &Ident, explicit_impl: Option<&Impl>, types: &Types) 
     let link_unique_ptr_release = format!("{}release", unique_ptr_prefix);
     let link_unique_ptr_drop = format!("{}drop", unique_ptr_prefix);
 
-    let (impl_generics, ty_generics) = if let Some(imp) = explicit_impl {
-        (&imp.impl_generics, &imp.ty_generics)
-    } else {
-        (resolve.generics, resolve.generics)
-    };
+    let (impl_generics, ty_generics) = generics::split_for_impl(explicit_impl, resolve);
 
     let begin_span =
         explicit_impl.map_or_else(Span::call_site, |explicit| explicit.impl_token.span);

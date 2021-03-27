@@ -1,0 +1,49 @@
+use crate::syntax::resolve::Resolution;
+use crate::syntax::Impl;
+use proc_macro2::TokenStream;
+use quote::ToTokens;
+
+pub struct ImplGenerics<'a> {
+    explicit_impl: Option<&'a Impl>,
+    resolve: Resolution<'a>,
+}
+
+pub struct TyGenerics<'a> {
+    explicit_impl: Option<&'a Impl>,
+    resolve: Resolution<'a>,
+}
+
+pub fn split_for_impl<'a>(
+    explicit_impl: Option<&'a Impl>,
+    resolve: Resolution<'a>,
+) -> (ImplGenerics<'a>, TyGenerics<'a>) {
+    let impl_generics = ImplGenerics {
+        explicit_impl,
+        resolve,
+    };
+    let ty_generics = TyGenerics {
+        explicit_impl,
+        resolve,
+    };
+    (impl_generics, ty_generics)
+}
+
+impl<'a> ToTokens for ImplGenerics<'a> {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        if let Some(imp) = self.explicit_impl {
+            imp.impl_generics.to_tokens(tokens);
+        } else {
+            self.resolve.generics.to_tokens(tokens);
+        }
+    }
+}
+
+impl<'a> ToTokens for TyGenerics<'a> {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        if let Some(imp) = self.explicit_impl {
+            imp.ty_generics.to_tokens(tokens);
+        } else {
+            self.resolve.generics.to_tokens(tokens);
+        }
+    }
+}

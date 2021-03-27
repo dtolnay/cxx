@@ -32,6 +32,7 @@ extern crate proc_macro;
 
 mod derive;
 mod expand;
+mod generics;
 mod syntax;
 mod type_id;
 
