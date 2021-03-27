@@ -22,7 +22,9 @@
     clippy::struct_excessive_bools,
     clippy::too_many_arguments,
     clippy::too_many_lines,
-    clippy::toplevel_ref_arg
+    clippy::toplevel_ref_arg,
+    // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6983
+    clippy::wrong_self_convention
 )]
 
 mod app;
