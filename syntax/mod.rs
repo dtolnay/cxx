@@ -20,7 +20,7 @@ mod parse;
 mod pod;
 pub mod qualified;
 pub mod report;
-mod resolve;
+pub mod resolve;
 pub mod set;
 pub mod symbol;
 mod tokens;
