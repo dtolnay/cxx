@@ -171,7 +171,7 @@ impl<'a> Types<'a> {
                 | ImplKey::SharedPtr(ident)
                 | ImplKey::WeakPtr(ident)
                 | ImplKey::CxxVector(ident) => {
-                    Atom::from(ident).is_none() && !aliases.contains_key(ident)
+                    Atom::from(ident.rust).is_none() && !aliases.contains_key(ident.rust)
                 }
             };
             if implicit_impl && !impls.contains_key(&impl_key) {
