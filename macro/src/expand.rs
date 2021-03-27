@@ -1138,7 +1138,7 @@ fn expand_rust_box(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
     let local_dealloc = format_ident!("{}dealloc", local_prefix);
     let local_drop = format_ident!("{}drop", local_prefix);
 
-    let (impl_generics, ty_generics) = generics::split_for_impl(explicit_impl, resolve);
+    let (impl_generics, ty_generics) = generics::split_for_impl(key, explicit_impl, resolve);
 
     let begin_span =
         explicit_impl.map_or_else(Span::call_site, |explicit| explicit.impl_token.span);
@@ -1187,7 +1187,7 @@ fn expand_rust_vec(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
     let local_reserve_total = format_ident!("{}reserve_total", local_prefix);
     let local_set_len = format_ident!("{}set_len", local_prefix);
 
-    let (impl_generics, ty_generics) = generics::split_for_impl(explicit_impl, resolve);
+    let (impl_generics, ty_generics) = generics::split_for_impl(key, explicit_impl, resolve);
 
     let begin_span =
         explicit_impl.map_or_else(Span::call_site, |explicit| explicit.impl_token.span);
@@ -1251,7 +1251,7 @@ fn expand_unique_ptr(
     let link_release = format!("{}release", prefix);
     let link_drop = format!("{}drop", prefix);
 
-    let (impl_generics, ty_generics) = generics::split_for_impl(explicit_impl, resolve);
+    let (impl_generics, ty_generics) = generics::split_for_impl(key, explicit_impl, resolve);
 
     let can_construct_from_value = types.structs.contains_key(ident)
         || types.enums.contains_key(ident)
@@ -1348,7 +1348,7 @@ fn expand_shared_ptr(
     let link_get = format!("{}get", prefix);
     let link_drop = format!("{}drop", prefix);
 
-    let (impl_generics, ty_generics) = generics::split_for_impl(explicit_impl, resolve);
+    let (impl_generics, ty_generics) = generics::split_for_impl(key, explicit_impl, resolve);
 
     let can_construct_from_value = types.structs.contains_key(ident)
         || types.enums.contains_key(ident)
@@ -1427,7 +1427,7 @@ fn expand_weak_ptr(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
     let link_upgrade = format!("{}upgrade", prefix);
     let link_drop = format!("{}drop", prefix);
 
-    let (impl_generics, ty_generics) = generics::split_for_impl(explicit_impl, resolve);
+    let (impl_generics, ty_generics) = generics::split_for_impl(key, explicit_impl, resolve);
 
     let begin_span =
         explicit_impl.map_or_else(Span::call_site, |explicit| explicit.impl_token.span);
@@ -1505,7 +1505,7 @@ fn expand_cxx_vector(
     let link_unique_ptr_release = format!("{}release", unique_ptr_prefix);
     let link_unique_ptr_drop = format!("{}drop", unique_ptr_prefix);
 
-    let (impl_generics, ty_generics) = generics::split_for_impl(explicit_impl, resolve);
+    let (impl_generics, ty_generics) = generics::split_for_impl(key, explicit_impl, resolve);
 
     let begin_span =
         explicit_impl.map_or_else(Span::call_site, |explicit| explicit.impl_token.span);

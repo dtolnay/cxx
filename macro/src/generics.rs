@@ -1,3 +1,4 @@
+use crate::syntax::instantiate::NamedImplKey;
 use crate::syntax::resolve::Resolution;
 use crate::syntax::Impl;
 use proc_macro2::TokenStream;
@@ -9,11 +10,13 @@ pub struct ImplGenerics<'a> {
 }
 
 pub struct TyGenerics<'a> {
+    key: NamedImplKey<'a>,
     explicit_impl: Option<&'a Impl>,
     resolve: Resolution<'a>,
 }
 
 pub fn split_for_impl<'a>(
+    key: NamedImplKey<'a>,
     explicit_impl: Option<&'a Impl>,
     resolve: Resolution<'a>,
 ) -> (ImplGenerics<'a>, TyGenerics<'a>) {
@@ -22,6 +25,7 @@ pub fn split_for_impl<'a>(
         resolve,
     };
     let ty_generics = TyGenerics {
+        key,
         explicit_impl,
         resolve,
     };
@@ -43,7 +47,9 @@ impl<'a> ToTokens for TyGenerics<'a> {
         if let Some(imp) = self.explicit_impl {
             imp.ty_generics.to_tokens(tokens);
         } else {
-            self.resolve.generics.to_tokens(tokens);
+            self.key.lt_token.to_tokens(tokens);
+            self.resolve.generics.lifetimes.to_tokens(tokens);
+            self.key.gt_token.to_tokens(tokens);
         }
     }
 }
