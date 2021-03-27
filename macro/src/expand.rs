@@ -506,10 +506,18 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                     false => quote!(::cxx::private::RustVec::from_ref(#var)),
                     true => quote!(::cxx::private::RustVec::from_mut(#var)),
                 },
-                inner if types.is_considered_improper_ctype(inner) => match ty.mutable {
-                    false => quote!(#var as *const #inner as *const ::std::ffi::c_void),
-                    true => quote!(#var as *mut #inner as *mut ::std::ffi::c_void),
-                },
+                inner if types.is_considered_improper_ctype(inner) => {
+                    let var = match ty.pinned {
+                        false => quote!(#var),
+                        true => quote!(::std::pin::Pin::into_inner_unchecked(#var)),
+                    };
+                    match ty.mutable {
+                        false => {
+                            quote!(#var as *const #inner as *const ::std::ffi::c_void)
+                        }
+                        true => quote!(#var as *mut #inner as *mut ::std::ffi::c_void),
+                    }
+                }
                 _ => quote!(#var),
             },
             Type::Ptr(ty) => {

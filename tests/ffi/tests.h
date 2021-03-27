@@ -184,6 +184,9 @@ size_t c_get_use_count(const std::weak_ptr<C> &weak) noexcept;
 
 void c_take_trivial_ptr(std::unique_ptr<D> d);
 void c_take_trivial_ref(const D &d);
+void c_take_trivial_mut_ref(D &d);
+void c_take_trivial_pin_ref(const D &d);
+void c_take_trivial_pin_mut_ref(D &d);
 void c_take_trivial(D d);
 
 void c_take_trivial_ns_ptr(std::unique_ptr<::G::G> g);
