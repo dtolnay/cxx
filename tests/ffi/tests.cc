@@ -604,17 +604,11 @@ void c_take_trivial_ref(const D &d) {
   }
 }
 
-void c_take_trivial_mut_ref(D &d) {
-  (void)d;
-}
+void c_take_trivial_mut_ref(D &d) { (void)d; }
 
-void c_take_trivial_pin_ref(const D &d) {
-  (void)d;
-}
+void c_take_trivial_pin_ref(const D &d) { (void)d; }
 
-void c_take_trivial_pin_mut_ref(D &d) {
-  (void)d;
-}
+void c_take_trivial_pin_mut_ref(D &d) { (void)d; }
 
 void D::c_take_trivial_ref_method() const {
   if (d == 30) {
