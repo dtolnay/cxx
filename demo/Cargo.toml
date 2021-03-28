@@ -9,7 +9,7 @@ edition = "2018"
 publish = false
 
 [dependencies]
-cxx = { version = "1.0", path = ".." }
+cxx = "1.0"
 
 [build-dependencies]
-cxx-build = { version = "1.0", path = "../gen/build" }
+cxx-build = "1.0"
