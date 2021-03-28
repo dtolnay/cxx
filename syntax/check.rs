@@ -521,7 +521,10 @@ fn check_mut_return_restriction(cx: &mut Check, efn: &ExternFn) {
         if receiver.mutable {
             return;
         }
-        let resolve = cx.types.resolve(&receiver.ty);
+        let resolve = match cx.types.try_resolve(&receiver.ty) {
+            Some(resolve) => resolve,
+            None => return,
+        };
         if !resolve.generics.lifetimes.is_empty() {
             return;
         }
@@ -536,9 +539,11 @@ fn check_mut_return_restriction(cx: &mut Check, efn: &ExternFn) {
         fn visit_type(&mut self, ty: &'t Type) {
             self.found |= match ty {
                 Type::Ref(ty) => ty.mutable,
-                Type::Ident(ident) => {
-                    let resolve = self.cx.types.resolve(ident);
-                    !resolve.generics.lifetimes.is_empty()
+                Type::Ident(ident) if Atom::from(&ident.rust).is_none() => {
+                    match self.cx.types.try_resolve(ident) {
+                        Some(resolve) => !resolve.generics.lifetimes.is_empty(),
+                        None => true,
+                    }
                 }
                 _ => false,
             };
