@@ -505,6 +505,7 @@ Slice<T>::Slice() noexcept {
 
 template <typename T>
 Slice<T>::Slice(T *s, std::size_t count) noexcept {
+  assert(s != nullptr);
   sliceInit(this, const_cast<typename std::remove_const<T>::type *>(s), count);
 }
 
