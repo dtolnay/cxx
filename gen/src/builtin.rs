@@ -71,6 +71,7 @@ pub(super) fn write(out: &mut OutFile) {
         include.initializer_list = true;
         include.iterator = true;
         include.new = true;
+        include.stdexcept = true;
         include.type_traits = true;
         include.utility = true;
         builtin.panic = true;
@@ -84,6 +85,7 @@ pub(super) fn write(out: &mut OutFile) {
         include.cstddef = true;
         include.cstdint = true;
         include.iterator = true;
+        include.stdexcept = true;
         include.type_traits = true;
         builtin.friend_impl = true;
         builtin.layout = true;
