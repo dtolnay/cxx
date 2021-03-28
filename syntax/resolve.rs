@@ -10,10 +10,11 @@ pub struct Resolution<'a> {
 
 impl<'a> Types<'a> {
     pub fn resolve(&self, ident: &impl UnresolvedName) -> Resolution<'a> {
-        *self
-            .resolutions
-            .get(ident.ident())
-            .expect("Unable to resolve type")
+        let ident = ident.ident();
+        match self.resolutions.get(ident) {
+            Some(resolution) => *resolution,
+            None => panic!("Unable to resolve type `{}`", ident),
+        }
     }
 }
 
