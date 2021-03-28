@@ -505,8 +505,12 @@ Slice<T>::Slice() noexcept {
 
 template <typename T>
 Slice<T>::Slice(T *s, std::size_t count) noexcept {
-  assert(s != nullptr);
-  sliceInit(this, const_cast<typename std::remove_const<T>::type *>(s), count);
+  assert(s != nullptr || count == 0);
+  sliceInit(this,
+            s == nullptr && count == 0
+                ? reinterpret_cast<void *>(align_of<T>())
+                : const_cast<typename std::remove_const<T>::type *>(s),
+            count);
 }
 
 template <typename T>
