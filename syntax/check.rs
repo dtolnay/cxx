@@ -514,6 +514,7 @@ fn check_mut_return_restriction(cx: &mut Check, efn: &ExternFn) {
 
     match &efn.ret {
         Some(Type::Ref(ty)) if ty.mutable => {}
+        Some(Type::SliceRef(slice)) if slice.mutable => {}
         _ => return,
     }
 

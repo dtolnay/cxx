@@ -11,6 +11,7 @@ mod ffi {
         unsafe fn g(t: &Thing) -> Pin<&mut CxxString>;
         fn h(t: Box<Mut>) -> Pin<&mut CxxString>;
         fn i<'a>(t: Box<Mut<'a>>) -> Pin<&'a mut CxxString>;
+        fn j(t: &Thing) -> &mut [u8];
     }
 }
 
