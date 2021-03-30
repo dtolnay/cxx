@@ -201,6 +201,7 @@ D c_return_trivial();
 std::unique_ptr<::G::G> c_return_trivial_ns_ptr();
 ::G::G c_return_trivial_ns();
 std::unique_ptr<E> c_return_opaque_ptr();
+E &c_return_opaque_mut_pin(E &e);
 std::unique_ptr<::F::F> c_return_ns_opaque_ptr();
 
 rust::String cOverloadedFunction(int32_t x);
