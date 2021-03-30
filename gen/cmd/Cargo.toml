@@ -1,6 +1,6 @@
 [package]
 name = "cxxbridge-cmd"
-version = "1.0.40"
+version = "1.0.41"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
