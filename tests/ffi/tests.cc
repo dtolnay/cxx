@@ -713,6 +713,8 @@ std::unique_ptr<E> c_return_opaque_ptr() {
   return e;
 }
 
+E &c_return_opaque_mut_pin(E &e) { return e; }
+
 std::unique_ptr<::F::F> c_return_ns_opaque_ptr() {
   auto f = std::unique_ptr<::F::F>(new ::F::F());
   f->f = 40;

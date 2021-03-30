@@ -619,7 +619,11 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                     },
                     inner if types.is_considered_improper_ctype(inner) => {
                         let mutability = ty.mutability;
-                        quote!(&#mutability *#call.cast())
+                        let deref_mut = quote!(&#mutability *#call.cast());
+                        match ty.pinned {
+                            false => deref_mut,
+                            true => quote!(::std::pin::Pin::new_unchecked(#deref_mut)),
+                        }
                     }
                     _ => call,
                 },
