@@ -1,0 +1,7 @@
+error: expected one of `!`, `(`, `+`, `::`, `<`, `where`, or `{`, found `'a`
+ --> $DIR/expected_named.rs:4:23
+  |
+4 |         type Borrowed<'a>;
+  |                       ^^ unexpected token
+5 |         fn borrowed() -> UniquePtr<Borrowed>;
+  |                                            - expected one of 7 possible tokens
