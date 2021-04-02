@@ -364,7 +364,7 @@
 //! </table>
 
 #![no_std]
-#![doc(html_root_url = "https://docs.rs/cxx/1.0.41")]
+#![doc(html_root_url = "https://docs.rs/cxx/1.0.42")]
 #![deny(improper_ctypes)]
 #![allow(non_camel_case_types)]
 #![allow(
