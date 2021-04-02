@@ -3,6 +3,7 @@ use crate::syntax::resolve::Resolution;
 use crate::syntax::Impl;
 use proc_macro2::TokenStream;
 use quote::ToTokens;
+use syn::Token;
 
 pub struct ImplGenerics<'a> {
     explicit_impl: Option<&'a Impl>,
@@ -46,10 +47,17 @@ impl<'a> ToTokens for TyGenerics<'a> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         if let Some(imp) = self.explicit_impl {
             imp.ty_generics.to_tokens(tokens);
-        } else {
-            self.key.lt_token.to_tokens(tokens);
+        } else if !self.resolve.generics.lifetimes.is_empty() {
+            let span = self.key.rust.span();
+            self.key
+                .lt_token
+                .unwrap_or_else(|| Token![<](span))
+                .to_tokens(tokens);
             self.resolve.generics.lifetimes.to_tokens(tokens);
-            self.key.gt_token.to_tokens(tokens);
+            self.key
+                .gt_token
+                .unwrap_or_else(|| Token![>](span))
+                .to_tokens(tokens);
         }
     }
 }

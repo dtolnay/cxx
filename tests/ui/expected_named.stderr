@@ -1,7 +1,11 @@
-error: expected one of `!`, `(`, `+`, `::`, `<`, `where`, or `{`, found `'a`
- --> $DIR/expected_named.rs:4:23
+error[E0106]: missing lifetime specifier
+ --> $DIR/expected_named.rs:5:36
   |
-4 |         type Borrowed<'a>;
-  |                       ^^ unexpected token
 5 |         fn borrowed() -> UniquePtr<Borrowed>;
-  |                                            - expected one of 7 possible tokens
+  |                                    ^^^^^^^^ expected named lifetime parameter
+  |
+  = help: this function's return type contains a borrowed value, but there is no value for it to be borrowed from
+help: consider using the `'static` lifetime
+  |
+5 |         fn borrowed() -> UniquePtr<Borrowed<'static>>;
+  |                                    ^^^^^^^^^^^^^^^^^
