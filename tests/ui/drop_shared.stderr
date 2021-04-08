@@ -1,4 +1,4 @@
-error[E0119]: conflicting implementations of trait `ffi::_::forbid::Drop` for type `ffi::Shared`:
+error[E0119]: conflicting implementations of trait `ffi::_::forbid::Drop` for type `ffi::Shared`
  --> $DIR/drop_shared.rs:3:5
   |
 1 | #[cxx::bridge]
