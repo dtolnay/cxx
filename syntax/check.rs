@@ -2,24 +2,40 @@ use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::visit::{self, Visit};
 use crate::syntax::{
-    error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, NamedType, Ptr,
-    Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
+    error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Lifetimes,
+    NamedType, Ptr, Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
 use std::fmt::Display;
+use syn::{GenericParam, Generics, Lifetime};
 
 pub(crate) struct Check<'a> {
     apis: &'a [Api],
     types: &'a Types<'a>,
     errors: &'a mut Errors,
+    generator: Generator,
 }
 
-pub(crate) fn typecheck(cx: &mut Errors, apis: &[Api], types: &Types) {
+pub(crate) enum Generator {
+    // cxx-build crate, cxxbridge cli, cxx-gen.
+    #[allow(dead_code)]
+    Build,
+    // cxxbridge-macro. This is relevant in that the macro output is going to
+    // get fed straight to rustc, so for errors that rustc already contains
+    // logic to catch (probably with a better diagnostic than what the proc
+    // macro API is able to produce), we avoid duplicating them in our own
+    // diagnostics.
+    #[allow(dead_code)]
+    Macro,
+}
+
+pub(crate) fn typecheck(cx: &mut Errors, apis: &[Api], types: &Types, generator: Generator) {
     do_typecheck(&mut Check {
         apis,
         types,
         errors: cx,
+        generator,
     });
 }
 
@@ -294,6 +310,7 @@ fn check_type_fn(cx: &mut Check, ty: &Signature) {
 fn check_api_struct(cx: &mut Check, strct: &Struct) {
     let name = &strct.name;
     check_reserved_name(cx, &name.rust);
+    check_lifetimes(cx, &strct.generics);
 
     if strct.fields.is_empty() {
         let span = span_for_struct_error(strct);
@@ -330,6 +347,7 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
 
 fn check_api_enum(cx: &mut Check, enm: &Enum) {
     check_reserved_name(cx, &enm.name.rust);
+    check_lifetimes(cx, &enm.generics);
 
     if enm.variants.is_empty() && !enm.explicit_repr {
         let span = span_for_enum_error(enm);
@@ -349,6 +367,7 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
 
 fn check_api_type(cx: &mut Check, ety: &ExternType) {
     check_reserved_name(cx, &ety.name.rust);
+    check_lifetimes(cx, &ety.generics);
 
     for derive in &ety.derives {
         if derive.what == Trait::ExternType && ety.lang == Lang::Rust {
@@ -399,6 +418,8 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
             }
         }
     }
+
+    check_generics(cx, &efn.sig.generics);
 
     if let Some(receiver) = &efn.receiver {
         let ref span = span_for_receiver_error(receiver);
@@ -472,6 +493,8 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
 }
 
 fn check_api_type_alias(cx: &mut Check, alias: &TypeAlias) {
+    check_lifetimes(cx, &alias.generics);
+
     for derive in &alias.derives {
         let msg = format!("derive({}) on extern type alias is not supported", derive);
         cx.error(derive, msg);
@@ -480,6 +503,8 @@ fn check_api_type_alias(cx: &mut Check, alias: &TypeAlias) {
 
 fn check_api_impl(cx: &mut Check, imp: &Impl) {
     let ty = &imp.ty;
+
+    check_lifetimes(cx, &imp.impl_generics);
 
     if let Some(negative) = imp.negative_token {
         let span = quote!(#negative #ty);
@@ -580,6 +605,31 @@ fn check_reserved_name(cx: &mut Check, ident: &Ident) {
         || Atom::from(ident).is_some()
     {
         cx.error(ident, "reserved name");
+    }
+}
+
+fn check_reserved_lifetime(cx: &mut Check, lifetime: &Lifetime) {
+    if lifetime.ident == "static" {
+        match cx.generator {
+            Generator::Macro => { /* rustc already reports this */ }
+            Generator::Build => {
+                cx.error(lifetime, error::RESERVED_LIFETIME);
+            }
+        }
+    }
+}
+
+fn check_lifetimes(cx: &mut Check, generics: &Lifetimes) {
+    for lifetime in &generics.lifetimes {
+        check_reserved_lifetime(cx, lifetime);
+    }
+}
+
+fn check_generics(cx: &mut Check, generics: &Generics) {
+    for generic_param in &generics.params {
+        if let GenericParam::Lifetime(def) = generic_param {
+            check_reserved_lifetime(cx, &def.lifetime);
+        }
     }
 }
 

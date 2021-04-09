@@ -35,7 +35,8 @@ pub fn bridge(mut ffi: Module) -> Result<TokenStream> {
     let ref apis = syntax::parse_items(errors, content, trusted, namespace);
     let ref types = Types::collect(errors, apis);
     errors.propagate()?;
-    check::typecheck(errors, apis, types);
+    let generator = check::Generator::Macro;
+    check::typecheck(errors, apis, types, generator);
     errors.propagate()?;
 
     Ok(expand(ffi, doc, attrs, apis, types))

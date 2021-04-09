@@ -130,7 +130,8 @@ pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
     let ref types = Types::collect(errors, apis);
     check::precheck(errors, apis, opt);
     errors.propagate()?;
-    check::typecheck(errors, apis, types);
+    let generator = check::Generator::Build;
+    check::typecheck(errors, apis, types, generator);
     errors.propagate()?;
 
     // Some callers may wish to generate both header and implementation from the
