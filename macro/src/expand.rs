@@ -14,7 +14,7 @@ use crate::{derive, generics};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
 use std::mem;
-use syn::{parse_quote, punctuated, Lifetime, Result, Token};
+use syn::{parse_quote, punctuated, Generics, Lifetime, Result, Token};
 
 pub fn bridge(mut ffi: Module) -> Result<TokenStream> {
     let ref mut errors = Errors::new();
@@ -760,6 +760,7 @@ fn expand_function_pointer_trampoline(
         local_name,
         catch_unwind_label,
         None,
+        Some(&efn.generics),
         body_span,
     );
     let var = &var.rust;
@@ -901,6 +902,7 @@ fn expand_rust_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         local_name,
         catch_unwind_label,
         invoke,
+        None,
         body_span,
     )
 }
@@ -912,9 +914,10 @@ fn expand_rust_function_shim_impl(
     local_name: Ident,
     catch_unwind_label: String,
     invoke: Option<&Ident>,
+    outer_generics: Option<&Generics>,
     body_span: Span,
 ) -> TokenStream {
-    let generics = &sig.generics;
+    let generics = outer_generics.unwrap_or(&sig.generics);
     let receiver_var = sig
         .receiver
         .as_ref()
