@@ -204,6 +204,7 @@ fn test_c_callback() {
         0
     }
 
+    #[allow(clippy::ptr_arg)]
     fn callback_ref(s: &String) {
         if s == "2020" {
             cxx_test_suite_set_correct();
