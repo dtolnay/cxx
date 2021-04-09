@@ -475,7 +475,7 @@ void panic [[noreturn]] (const char *msg);
 #define CXXBRIDGE1_RUST_FN
 template <typename Ret, typename... Args>
 Ret Fn<Ret(Args...)>::operator()(Args... args) const noexcept {
-  return (*this->trampoline)(std::move(args)..., this->fn);
+  return (*this->trampoline)(std::forward<Args>(args)..., this->fn);
 }
 
 template <typename Ret, typename... Args>
