@@ -158,6 +158,8 @@ pub mod ffi {
         fn c_take_ref_shared_string(s: &SharedString) -> &SharedString;
         fn c_take_callback(callback: fn(String) -> usize);
         fn c_take_callback_ref(callback: fn(&String));
+        #[cxx_name = "c_take_callback_ref"]
+        fn c_take_callback_ref_lifetime<'a>(callback: fn(&'a String));
         fn c_take_callback_mut(callback: fn(&mut String));
         fn c_take_enum(e: Enum);
         fn c_take_ns_enum(e: AEnum);

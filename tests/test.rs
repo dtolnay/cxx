@@ -219,6 +219,7 @@ fn test_c_callback() {
 
     check!(ffi::c_take_callback(callback));
     check!(ffi::c_take_callback_ref(callback_ref));
+    check!(ffi::c_take_callback_ref_lifetime(callback_ref));
     check!(ffi::c_take_callback_mut(callback_mut));
 }
 
