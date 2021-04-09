@@ -157,6 +157,8 @@ pub mod ffi {
         fn c_take_ref_rust_vec_copy(v: &Vec<u8>);
         fn c_take_ref_shared_string(s: &SharedString) -> &SharedString;
         fn c_take_callback(callback: fn(String) -> usize);
+        fn c_take_callback_ref(callback: fn(&String));
+        fn c_take_callback_mut(callback: fn(&mut String));
         fn c_take_enum(e: Enum);
         fn c_take_ns_enum(e: AEnum);
         fn c_take_nested_ns_enum(e: ABEnum);

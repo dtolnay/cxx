@@ -160,6 +160,8 @@ void c_take_ref_rust_vec_index(const rust::Vec<uint8_t> &v);
 void c_take_ref_rust_vec_copy(const rust::Vec<uint8_t> &v);
 const SharedString &c_take_ref_shared_string(const SharedString &s);
 void c_take_callback(rust::Fn<size_t(rust::String)> callback);
+void c_take_callback_ref(rust::Fn<void(const rust::String &)> callback);
+void c_take_callback_mut(rust::Fn<void(rust::String &)> callback);
 void c_take_enum(Enum e);
 void c_take_ns_enum(::A::AEnum e);
 void c_take_nested_ns_enum(::A::B::ABEnum e);
