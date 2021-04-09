@@ -1,10 +1,15 @@
 error[E0277]: `PhantomPinned` cannot be unpinned
- --> $DIR/rust_pinned.rs:6:14
-  |
-6 |         type Pinned;
-  |         -----^^^^^^-
-  |         |    |
-  |         |    within `Pinned`, the trait `Unpin` is not implemented for `PhantomPinned`
-  |         required by this bound in `__AssertUnpin`
-  |
-  = note: required because it appears within the type `Pinned`
+  --> $DIR/rust_pinned.rs:6:14
+   |
+6  |         type Pinned;
+   |         -----^^^^^^-
+   |         |    |
+   |         |    within `Pinned`, the trait `Unpin` is not implemented for `PhantomPinned`
+   |         required by this bound in `__AssertUnpin`
+   |
+   = note: consider using `Box::pin`
+note: required because it appears within the type `Pinned`
+  --> $DIR/rust_pinned.rs:10:12
+   |
+10 | pub struct Pinned {
+   |            ^^^^^^

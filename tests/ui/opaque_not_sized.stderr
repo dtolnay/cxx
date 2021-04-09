@@ -8,4 +8,8 @@ error[E0277]: the size for values of type `str` cannot be known at compilation t
   |         required by this bound in `__AssertSized`
   |
   = help: within `TypeR`, the trait `Sized` is not implemented for `str`
-  = note: required because it appears within the type `TypeR`
+note: required because it appears within the type `TypeR`
+ --> $DIR/opaque_not_sized.rs:8:8
+  |
+8 | struct TypeR(str);
+  |        ^^^^^

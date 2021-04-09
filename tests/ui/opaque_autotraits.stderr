@@ -10,7 +10,11 @@ error[E0277]: `*const u8` cannot be sent between threads safely
    = help: within `ffi::Opaque`, the trait `Send` is not implemented for `*const u8`
    = note: required because it appears within the type `[*const u8; 0]`
    = note: required because it appears within the type `cxx::private::Opaque`
-   = note: required because it appears within the type `ffi::Opaque`
+note: required because it appears within the type `ffi::Opaque`
+  --> $DIR/opaque_autotraits.rs:4:14
+   |
+4  |         type Opaque;
+   |              ^^^^^^
 
 error[E0277]: `*const u8` cannot be shared between threads safely
   --> $DIR/opaque_autotraits.rs:14:5
@@ -24,7 +28,11 @@ error[E0277]: `*const u8` cannot be shared between threads safely
    = help: within `ffi::Opaque`, the trait `Sync` is not implemented for `*const u8`
    = note: required because it appears within the type `[*const u8; 0]`
    = note: required because it appears within the type `cxx::private::Opaque`
-   = note: required because it appears within the type `ffi::Opaque`
+note: required because it appears within the type `ffi::Opaque`
+  --> $DIR/opaque_autotraits.rs:4:14
+   |
+4  |         type Opaque;
+   |              ^^^^^^
 
 error[E0277]: `PhantomPinned` cannot be unpinned
   --> $DIR/opaque_autotraits.rs:15:5
@@ -35,6 +43,11 @@ error[E0277]: `PhantomPinned` cannot be unpinned
 15 |     assert_unpin::<ffi::Opaque>();
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^ within `ffi::Opaque`, the trait `Unpin` is not implemented for `PhantomPinned`
    |
+   = note: consider using `Box::pin`
    = note: required because it appears within the type `PhantomData<PhantomPinned>`
    = note: required because it appears within the type `cxx::private::Opaque`
-   = note: required because it appears within the type `ffi::Opaque`
+note: required because it appears within the type `ffi::Opaque`
+  --> $DIR/opaque_autotraits.rs:4:14
+   |
+4  |         type Opaque;
+   |              ^^^^^^
