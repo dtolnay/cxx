@@ -131,7 +131,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
     quote! {
         #doc
         #attrs
-        #[deny(improper_ctypes)]
+        #[deny(improper_ctypes, improper_ctypes_definitions)]
         #[allow(non_camel_case_types, non_snake_case, clippy::upper_case_acronyms)]
         #vis #mod_token #ident #expanded
     }
