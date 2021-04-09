@@ -204,7 +204,21 @@ fn test_c_callback() {
         0
     }
 
+    fn callback_ref(s: &String) {
+        if s == "2020" {
+            cxx_test_suite_set_correct();
+        }
+    }
+
+    fn callback_mut(s: &mut String) {
+        if s == "2020" {
+            cxx_test_suite_set_correct();
+        }
+    }
+
     check!(ffi::c_take_callback(callback));
+    check!(ffi::c_take_callback_ref(callback_ref));
+    check!(ffi::c_take_callback_mut(callback_mut));
 }
 
 #[test]

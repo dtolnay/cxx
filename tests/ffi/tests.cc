@@ -494,6 +494,16 @@ void c_take_callback(rust::Fn<size_t(rust::String)> callback) {
   callback("2020");
 }
 
+void c_take_callback_ref(rust::Fn<void(const rust::String &)> callback) {
+  const rust::String string = "2020";
+  callback(string);
+}
+
+void c_take_callback_mut(rust::Fn<void(rust::String &)> callback) {
+  rust::String string = "2020";
+  callback(string);
+}
+
 void c_take_enum(Enum e) {
   if (e == Enum::AVal) {
     cxx_test_suite_set_correct();
