@@ -14,13 +14,28 @@ pub(crate) struct Check<'a> {
     apis: &'a [Api],
     types: &'a Types<'a>,
     errors: &'a mut Errors,
+    generator: Generator,
 }
 
-pub(crate) fn typecheck(cx: &mut Errors, apis: &[Api], types: &Types) {
+pub(crate) enum Generator {
+    // cxx-build crate, cxxbridge cli, cxx-gen.
+    #[allow(dead_code)]
+    Build,
+    // cxxbridge-macro. This is relevant in that the macro output is going to
+    // get fed straight to rustc, so for errors that rustc already contains
+    // logic to catch (probably with a better diagnostic than what the proc
+    // macro API is able to produce), we avoid duplicating them in our own
+    // diagnostics.
+    #[allow(dead_code)]
+    Macro,
+}
+
+pub(crate) fn typecheck(cx: &mut Errors, apis: &[Api], types: &Types, generator: Generator) {
     do_typecheck(&mut Check {
         apis,
         types,
         errors: cx,
+        generator,
     });
 }
 
@@ -595,7 +610,12 @@ fn check_reserved_name(cx: &mut Check, ident: &Ident) {
 
 fn check_reserved_lifetime(cx: &mut Check, lifetime: &Lifetime) {
     if lifetime.ident == "static" {
-        cx.error(lifetime, error::RESERVED_LIFETIME);
+        match cx.generator {
+            Generator::Macro => { /* rustc already reports this */ }
+            Generator::Build => {
+                cx.error(lifetime, error::RESERVED_LIFETIME);
+            }
+        }
     }
 }
 

@@ -4,7 +4,7 @@ use crate::syntax::{error, Api};
 use quote::{quote, quote_spanned};
 use std::path::{Component, Path};
 
-pub(super) use crate::syntax::check::typecheck;
+pub(super) use crate::syntax::check::{typecheck, Generator};
 
 pub(super) fn precheck(cx: &mut Errors, apis: &[Api], opt: &Opt) {
     if !opt.allow_dot_includes {
