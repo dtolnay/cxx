@@ -1,21 +1,24 @@
-use core::mem;
+use core::mem::{self, MaybeUninit};
 use core::ptr::NonNull;
 use core::str;
 
+// ABI compatible with C++ rust::Str (not necessarily &str).
 #[repr(C)]
 pub struct RustStr {
-    repr: NonNull<str>,
+    repr: [MaybeUninit<usize>; mem::size_of::<NonNull<str>>() / mem::size_of::<usize>()],
 }
 
 impl RustStr {
     pub fn from(repr: &str) -> Self {
         let repr = NonNull::from(repr);
-        RustStr { repr }
+        unsafe { mem::transmute::<NonNull<str>, RustStr>(repr) }
     }
 
     pub unsafe fn as_str<'a>(self) -> &'a str {
-        &*self.repr.as_ptr()
+        let repr = mem::transmute::<RustStr, NonNull<str>>(self);
+        &*repr.as_ptr()
     }
 }
 
-const_assert_eq!(mem::size_of::<Option<RustStr>>(), mem::size_of::<RustStr>());
+const_assert_eq!(mem::size_of::<NonNull<str>>(), mem::size_of::<RustStr>());
+const_assert_eq!(mem::align_of::<NonNull<str>>(), mem::align_of::<RustStr>());

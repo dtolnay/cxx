@@ -1,10 +1,11 @@
-use core::mem;
+use core::mem::{self, MaybeUninit};
 use core::ptr::{self, NonNull};
 use core::slice;
 
+// ABI compatible with C++ rust::Slice<T> (not necessarily &[T]).
 #[repr(C)]
 pub struct RustSlice {
-    repr: NonNull<[()]>,
+    repr: [MaybeUninit<usize>; mem::size_of::<NonNull<[()]>>() / mem::size_of::<usize>()],
 }
 
 impl RustSlice {
@@ -37,25 +38,27 @@ impl RustSlice {
         // https://doc.rust-lang.org/nightly/std/ptr/struct.NonNull.html#method.from_raw_parts
         // https://github.com/rust-lang/rust/issues/81513
         let ptr = ptr::slice_from_raw_parts_mut(ptr.as_ptr().cast(), len);
-        RustSlice {
-            repr: unsafe { NonNull::new_unchecked(ptr) },
-        }
+        unsafe { mem::transmute::<NonNull<[()]>, RustSlice>(NonNull::new_unchecked(ptr)) }
     }
 
     pub(crate) fn as_ptr<T>(&self) -> NonNull<T> {
-        self.repr.cast()
+        let rust_slice = RustSlice { repr: self.repr };
+        let repr = unsafe { mem::transmute::<RustSlice, NonNull<[()]>>(rust_slice) };
+        repr.cast()
     }
 
     pub(crate) fn len(&self) -> usize {
-        // TODO: use self.repr.len() when stable.
+        let rust_slice = RustSlice { repr: self.repr };
+        let repr = unsafe { mem::transmute::<RustSlice, NonNull<[()]>>(rust_slice) };
+        // TODO: use repr.len() when stable.
         // https://doc.rust-lang.org/nightly/std/ptr/struct.NonNull.html#method.len
         // https://github.com/rust-lang/rust/issues/71146
-        let slice = unsafe { self.repr.as_ref() };
-        slice.len()
+        unsafe { repr.as_ref() }.len()
     }
 }
 
+const_assert_eq!(mem::size_of::<NonNull<[()]>>(), mem::size_of::<RustSlice>());
 const_assert_eq!(
-    mem::size_of::<Option<RustSlice>>(),
-    mem::size_of::<RustSlice>(),
+    mem::align_of::<NonNull<[()]>>(),
+    mem::align_of::<RustSlice>(),
 );
