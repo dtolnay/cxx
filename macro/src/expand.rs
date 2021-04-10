@@ -722,6 +722,7 @@ fn expand_function_pointer_trampoline(
     let r_trampoline = mangle::r_trampoline(efn, var, types);
     let local_name = parse_quote!(__);
     let catch_unwind_label = format!("::{}::{}", efn.name.rust, var.rust);
+    let body_span = efn.semi_token.span;
     let shim = expand_rust_function_shim_impl(
         sig,
         types,
@@ -729,6 +730,7 @@ fn expand_function_pointer_trampoline(
         local_name,
         catch_unwind_label,
         None,
+        body_span,
     );
     let var = &var.rust;
 
@@ -861,6 +863,7 @@ fn expand_rust_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         Some(receiver) => format!("::{}::{}", receiver.ty.rust, efn.name.rust),
     };
     let invoke = Some(&efn.name.rust);
+    let body_span = efn.semi_token.span;
     expand_rust_function_shim_impl(
         efn,
         types,
@@ -868,6 +871,7 @@ fn expand_rust_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         local_name,
         catch_unwind_label,
         invoke,
+        body_span,
     )
 }
 
@@ -878,6 +882,7 @@ fn expand_rust_function_shim_impl(
     local_name: Ident,
     catch_unwind_label: String,
     invoke: Option<&Ident>,
+    body_span: Span,
 ) -> TokenStream {
     let generics = &sig.generics;
     let receiver_var = sig
@@ -954,65 +959,66 @@ fn expand_rust_function_shim_impl(
     };
     call.extend(quote! { (#(#vars),*) });
 
+    let span = body_span;
     let conversion = sig.ret.as_ref().and_then(|ret| match ret {
         Type::Ident(ident) if ident.rust == RustString => {
-            Some(quote!(::cxx::private::RustString::from))
+            Some(quote_spanned!(span=> ::cxx::private::RustString::from))
         }
-        Type::RustBox(_) => Some(quote!(::std::boxed::Box::into_raw)),
+        Type::RustBox(_) => Some(quote_spanned!(span=> ::std::boxed::Box::into_raw)),
         Type::RustVec(vec) => {
             if vec.inner == RustString {
-                Some(quote!(::cxx::private::RustVec::from_vec_string))
+                Some(quote_spanned!(span=> ::cxx::private::RustVec::from_vec_string))
             } else {
-                Some(quote!(::cxx::private::RustVec::from))
+                Some(quote_spanned!(span=> ::cxx::private::RustVec::from))
             }
         }
-        Type::UniquePtr(_) => Some(quote!(::cxx::UniquePtr::into_raw)),
+        Type::UniquePtr(_) => Some(quote_spanned!(span=> ::cxx::UniquePtr::into_raw)),
         Type::Ref(ty) => match &ty.inner {
             Type::Ident(ident) if ident.rust == RustString => match ty.mutable {
-                false => Some(quote!(::cxx::private::RustString::from_ref)),
-                true => Some(quote!(::cxx::private::RustString::from_mut)),
+                false => Some(quote_spanned!(span=> ::cxx::private::RustString::from_ref)),
+                true => Some(quote_spanned!(span=> ::cxx::private::RustString::from_mut)),
             },
             Type::RustVec(vec) if vec.inner == RustString => match ty.mutable {
-                false => Some(quote!(::cxx::private::RustVec::from_ref_vec_string)),
-                true => Some(quote!(::cxx::private::RustVec::from_mut_vec_string)),
+                false => Some(quote_spanned!(span=> ::cxx::private::RustVec::from_ref_vec_string)),
+                true => Some(quote_spanned!(span=> ::cxx::private::RustVec::from_mut_vec_string)),
             },
             Type::RustVec(_) => match ty.mutable {
-                false => Some(quote!(::cxx::private::RustVec::from_ref)),
-                true => Some(quote!(::cxx::private::RustVec::from_mut)),
+                false => Some(quote_spanned!(span=> ::cxx::private::RustVec::from_ref)),
+                true => Some(quote_spanned!(span=> ::cxx::private::RustVec::from_mut)),
             },
             _ => None,
         },
-        Type::Str(_) => Some(quote!(::cxx::private::RustStr::from)),
+        Type::Str(_) => Some(quote_spanned!(span=> ::cxx::private::RustStr::from)),
         Type::SliceRef(ty) => match ty.mutable {
-            false => Some(quote!(::cxx::private::RustSlice::from_ref)),
-            true => Some(quote!(::cxx::private::RustSlice::from_mut)),
+            false => Some(quote_spanned!(span=> ::cxx::private::RustSlice::from_ref)),
+            true => Some(quote_spanned!(span=> ::cxx::private::RustSlice::from_mut)),
         },
         _ => None,
     });
 
     let mut expr = match conversion {
         None => call,
-        Some(conversion) if !sig.throws => quote!(#conversion(#call)),
-        Some(conversion) => quote!(::std::result::Result::map(#call, #conversion)),
+        Some(conversion) if !sig.throws => quote_spanned!(span=> #conversion(#call)),
+        Some(conversion) => quote_spanned!(span=> ::std::result::Result::map(#call, #conversion)),
     };
 
     let mut outparam = None;
     let indirect_return = indirect_return(sig, types);
     if indirect_return {
         let ret = expand_extern_type(sig.ret.as_ref().unwrap(), types, false);
-        outparam = Some(quote!(__return: *mut #ret,));
+        outparam = Some(quote_spanned!(span=> __return: *mut #ret,));
     }
     if sig.throws {
         let out = match sig.ret {
-            Some(_) => quote!(__return),
-            None => quote!(&mut ()),
+            Some(_) => quote_spanned!(span=> __return),
+            None => quote_spanned!(span=> &mut ()),
         };
-        expr = quote!(::cxx::private::r#try(#out, #expr));
+        expr = quote_spanned!(span=> ::cxx::private::r#try(#out, #expr));
     } else if indirect_return {
-        expr = quote!(::std::ptr::write(__return, #expr));
+        expr = quote_spanned!(span=> ::std::ptr::write(__return, #expr));
     }
 
-    expr = quote!(::cxx::private::catch_unwind(__fn, move || #expr));
+    expr = quote_spanned!(span=> ::cxx::private::catch_unwind(__fn, move || #expr));
 
     let ret = if sig.throws {
         quote!(-> ::cxx::private::Result)
@@ -1021,11 +1027,11 @@ fn expand_rust_function_shim_impl(
     };
 
     let pointer = match invoke {
-        None => Some(quote!(__extern: *const ())),
+        None => Some(quote_spanned!(span=> __extern: *const ())),
         Some(_) => None,
     };
 
-    quote! {
+    quote_spanned! {span=>
         #[doc(hidden)]
         #[export_name = #link_name]
         unsafe extern "C" fn #local_name #generics(#(#all_args,)* #outparam #pointer) #ret {
