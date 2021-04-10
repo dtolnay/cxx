@@ -7,8 +7,9 @@ use std::os::raw::c_char;
 
 macro_rules! rust_vec_shims {
     ($segment:expr, $ty:ty) => {
-        const_assert_eq!(mem::size_of::<[usize; 3]>(), mem::size_of::<Vec<$ty>>());
-        const_assert_eq!(mem::align_of::<usize>(), mem::align_of::<Vec<$ty>>());
+        const_assert_eq!(mem::size_of::<[usize; 3]>(), mem::size_of::<RustVec<$ty>>());
+        const_assert_eq!(mem::size_of::<Vec<$ty>>(), mem::size_of::<RustVec<$ty>>());
+        const_assert_eq!(mem::align_of::<Vec<$ty>>(), mem::align_of::<RustVec<$ty>>());
 
         const _: () = {
             attr! {
