@@ -461,8 +461,9 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let receiver = efn.receiver.iter().map(|receiver| {
         let var = receiver.var;
         if receiver.pinned {
+            let colon = receiver.colon_token;
             let ty = receiver.ty_self();
-            quote!(#var: #ty)
+            quote!(#var #colon #ty)
         } else {
             let ampersand = receiver.ampersand;
             let lifetime = &receiver.lifetime;
@@ -884,8 +885,9 @@ fn expand_rust_function_shim_impl(
         .as_ref()
         .map(|receiver| quote_spanned!(receiver.var.span=> __self));
     let receiver = sig.receiver.as_ref().map(|receiver| {
+        let colon = receiver.colon_token;
         let receiver_type = receiver.ty();
-        quote!(#receiver_var: #receiver_type)
+        quote!(#receiver_var #colon #receiver_type)
     });
     let args = sig.args.iter().map(|arg| {
         let var = &arg.name.rust;
