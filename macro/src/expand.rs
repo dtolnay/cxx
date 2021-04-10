@@ -559,35 +559,37 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         .filter(|arg| types.needs_indirect_abi(&arg.ty))
         .map(|arg| {
             let var = &arg.name.rust;
+            let span = var.span();
             // These are arguments for which C++ has taken ownership of the data
             // behind the mut reference it received.
-            quote! {
+            quote_spanned! {span=>
                 let mut #var = ::std::mem::MaybeUninit::new(#var);
             }
         })
         .collect::<TokenStream>();
     let local_name = format_ident!("__{}", efn.name.rust);
+    let span = efn.semi_token.span;
     let call = if indirect_return {
         let ret = expand_extern_type(efn.ret.as_ref().unwrap(), types, true);
-        setup.extend(quote! {
+        setup.extend(quote_spanned! {span=>
             let mut __return = ::std::mem::MaybeUninit::<#ret>::uninit();
         });
         setup.extend(if efn.throws {
-            quote! {
+            quote_spanned! {span=>
                 #local_name(#(#vars,)* __return.as_mut_ptr()).exception()?;
             }
         } else {
-            quote! {
+            quote_spanned! {span=>
                 #local_name(#(#vars,)* __return.as_mut_ptr());
             }
         });
-        quote!(__return.assume_init())
+        quote_spanned!(span=> __return.assume_init())
     } else if efn.throws {
-        quote! {
+        quote_spanned! {span=>
             #local_name(#(#vars),*).exception()
         }
     } else {
-        quote! {
+        quote_spanned! {span=>
             #local_name(#(#vars),*)
         }
     };
@@ -598,72 +600,76 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         expr = match &efn.ret {
             None => call,
             Some(ret) => match ret {
-                Type::Ident(ident) if ident.rust == RustString => quote!(#call.into_string()),
-                Type::RustBox(_) => quote!(::std::boxed::Box::from_raw(#call)),
+                Type::Ident(ident) if ident.rust == RustString => {
+                    quote_spanned!(span=> #call.into_string())
+                }
+                Type::RustBox(_) => quote_spanned!(span=> ::std::boxed::Box::from_raw(#call)),
                 Type::RustVec(vec) => {
                     if vec.inner == RustString {
-                        quote!(#call.into_vec_string())
+                        quote_spanned!(span=> #call.into_vec_string())
                     } else {
-                        quote!(#call.into_vec())
+                        quote_spanned!(span=> #call.into_vec())
                     }
                 }
-                Type::UniquePtr(_) => quote!(::cxx::UniquePtr::from_raw(#call)),
+                Type::UniquePtr(_) => quote_spanned!(span=> ::cxx::UniquePtr::from_raw(#call)),
                 Type::Ref(ty) => match &ty.inner {
                     Type::Ident(ident) if ident.rust == RustString => match ty.mutable {
-                        false => quote!(#call.as_string()),
-                        true => quote!(#call.as_mut_string()),
+                        false => quote_spanned!(span=> #call.as_string()),
+                        true => quote_spanned!(span=> #call.as_mut_string()),
                     },
                     Type::RustVec(vec) if vec.inner == RustString => match ty.mutable {
-                        false => quote!(#call.as_vec_string()),
-                        true => quote!(#call.as_mut_vec_string()),
+                        false => quote_spanned!(span=> #call.as_vec_string()),
+                        true => quote_spanned!(span=> #call.as_mut_vec_string()),
                     },
                     Type::RustVec(_) => match ty.mutable {
-                        false => quote!(#call.as_vec()),
-                        true => quote!(#call.as_mut_vec()),
+                        false => quote_spanned!(span=> #call.as_vec()),
+                        true => quote_spanned!(span=> #call.as_mut_vec()),
                     },
                     inner if types.is_considered_improper_ctype(inner) => {
                         let mutability = ty.mutability;
-                        let deref_mut = quote!(&#mutability *#call.cast());
+                        let deref_mut = quote_spanned!(span=> &#mutability *#call.cast());
                         match ty.pinned {
                             false => deref_mut,
-                            true => quote!(::std::pin::Pin::new_unchecked(#deref_mut)),
+                            true => {
+                                quote_spanned!(span=> ::std::pin::Pin::new_unchecked(#deref_mut))
+                            }
                         }
                     }
                     _ => call,
                 },
                 Type::Ptr(ty) => {
                     if types.is_considered_improper_ctype(&ty.inner) {
-                        quote!(#call.cast())
+                        quote_spanned!(span=> #call.cast())
                     } else {
                         call
                     }
                 }
-                Type::Str(_) => quote!(#call.as_str()),
+                Type::Str(_) => quote_spanned!(span=> #call.as_str()),
                 Type::SliceRef(slice) => {
                     let inner = &slice.inner;
                     match slice.mutable {
-                        false => quote!(#call.as_slice::<#inner>()),
-                        true => quote!(#call.as_mut_slice::<#inner>()),
+                        false => quote_spanned!(span=> #call.as_slice::<#inner>()),
+                        true => quote_spanned!(span=> #call.as_mut_slice::<#inner>()),
                     }
                 }
                 _ => call,
             },
         };
         if efn.throws {
-            expr = quote!(::std::result::Result::Ok(#expr));
+            expr = quote_spanned!(span=> ::std::result::Result::Ok(#expr));
         }
     };
     let mut dispatch = quote!(#setup #expr);
     let visibility = efn.visibility;
     let unsafety = &efn.sig.unsafety;
     if unsafety.is_none() {
-        dispatch = quote!(unsafe { #dispatch });
+        dispatch = quote_spanned!(span=> unsafe { #dispatch });
     }
     let fn_token = efn.sig.fn_token;
     let ident = &efn.name.rust;
     let generics = &efn.generics;
     let arg_list = quote_spanned!(efn.sig.paren_token.span=> (#(#all_args,)*));
-    let fn_body = quote_spanned!(efn.semi_token.span=> {
+    let fn_body = quote_spanned!(span=> {
         extern "C" {
             #decl
         }
@@ -701,7 +707,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                 };
                 &elided_generics
             };
-            quote! {
+            quote_spanned! {ident.span()=>
                 impl #generics #receiver_ident #receiver_generics {
                     #doc
                     #attrs
