@@ -5,7 +5,7 @@ use core::mem::ManuallyDrop;
 
 #[repr(C)]
 pub struct RustVec<T> {
-    pub(crate) repr: Vec<T>,
+    repr: Vec<T>,
 }
 
 impl<T> RustVec<T> {
