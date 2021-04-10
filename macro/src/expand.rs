@@ -421,17 +421,18 @@ fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
     });
     let args = efn.args.iter().map(|arg| {
         let var = &arg.name.rust;
+        let colon = arg.colon_token;
         let ty = expand_extern_type(&arg.ty, types, true);
         if arg.ty == RustString {
-            quote!(#var: *const #ty)
+            quote!(#var #colon *const #ty)
         } else if let Type::RustVec(_) = arg.ty {
-            quote!(#var: *const #ty)
+            quote!(#var #colon *const #ty)
         } else if let Type::Fn(_) = arg.ty {
-            quote!(#var: ::cxx::private::FatFunction)
+            quote!(#var #colon ::cxx::private::FatFunction)
         } else if types.needs_indirect_abi(&arg.ty) {
-            quote!(#var: *mut #ty)
+            quote!(#var #colon *mut #ty)
         } else {
-            quote!(#var: #ty)
+            quote!(#var #colon #ty)
         }
     });
     let all_args = receiver.chain(args);
@@ -460,8 +461,9 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let receiver = efn.receiver.iter().map(|receiver| {
         let var = receiver.var;
         if receiver.pinned {
+            let colon = receiver.colon_token;
             let ty = receiver.ty_self();
-            quote!(#var: #ty)
+            quote!(#var #colon #ty)
         } else {
             let ampersand = receiver.ampersand;
             let lifetime = &receiver.lifetime;
@@ -883,16 +885,18 @@ fn expand_rust_function_shim_impl(
         .as_ref()
         .map(|receiver| quote_spanned!(receiver.var.span=> __self));
     let receiver = sig.receiver.as_ref().map(|receiver| {
+        let colon = receiver.colon_token;
         let receiver_type = receiver.ty();
-        quote!(#receiver_var: #receiver_type)
+        quote!(#receiver_var #colon #receiver_type)
     });
     let args = sig.args.iter().map(|arg| {
         let var = &arg.name.rust;
+        let colon = arg.colon_token;
         let ty = expand_extern_type(&arg.ty, types, false);
         if types.needs_indirect_abi(&arg.ty) {
-            quote!(#var: *mut #ty)
+            quote!(#var #colon *mut #ty)
         } else {
-            quote!(#var: #ty)
+            quote!(#var #colon #ty)
         }
     });
     let all_args = receiver.into_iter().chain(args);

@@ -339,6 +339,7 @@ impl PartialEq for Signature {
                     attrs: _,
                     visibility: _,
                     name: _,
+                    colon_token: _,
                     ty,
                 } = arg;
                 let Var {
@@ -346,6 +347,7 @@ impl PartialEq for Signature {
                     attrs: _,
                     visibility: _,
                     name: _,
+                    colon_token: _,
                     ty: ty2,
                 } = arg2;
                 ty == ty2
@@ -374,6 +376,7 @@ impl Hash for Signature {
                 attrs: _,
                 visibility: _,
                 name: _,
+                colon_token: _,
                 ty,
             } = arg;
             ty.hash(state);
@@ -393,6 +396,7 @@ impl PartialEq for Receiver {
             lifetime,
             mutable,
             var: _,
+            colon_token: _,
             ty,
             shorthand: _,
             pin_tokens: _,
@@ -404,6 +408,7 @@ impl PartialEq for Receiver {
             lifetime: lifetime2,
             mutable: mutable2,
             var: _,
+            colon_token: _,
             ty: ty2,
             shorthand: _,
             pin_tokens: _,
@@ -421,6 +426,7 @@ impl Hash for Receiver {
             lifetime,
             mutable,
             var: _,
+            colon_token: _,
             ty,
             shorthand: _,
             pin_tokens: _,

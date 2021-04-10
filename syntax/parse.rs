@@ -146,11 +146,13 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
         };
         let visibility = visibility_pub(&field.vis, ident.span());
         let name = pair(Namespace::default(), &ident, cxx_name, rust_name);
+        let colon_token = field.colon_token.unwrap();
         fields.push(Var {
             doc,
             attrs,
             visibility,
             name,
+            colon_token,
             ty,
         });
     }
@@ -560,6 +562,7 @@ fn parse_extern_fn(
                         lifetime: lifetime.clone(),
                         mutable: arg.mutability.is_some(),
                         var: arg.self_token,
+                        colon_token: Token![:](arg.self_token.span),
                         ty: NamedType::new(Ident::new("Self", arg.self_token.span)),
                         shorthand: true,
                         pin_tokens: None,
@@ -583,11 +586,13 @@ fn parse_extern_fn(
                     let attrs = OtherAttrs::none();
                     let visibility = Token![pub](ident.span());
                     let name = pair(Namespace::default(), &ident, None, None);
+                    let colon_token = arg.colon_token;
                     args.push_value(Var {
                         doc,
                         attrs,
                         visibility,
                         name,
+                        colon_token,
                         ty,
                     });
                     if let Some(comma) = comma {
@@ -603,6 +608,7 @@ fn parse_extern_fn(
                             lifetime: reference.lifetime,
                             mutable: reference.mutable,
                             var: Token![self](ident.rust.span()),
+                            colon_token: arg.colon_token,
                             ty: ident,
                             shorthand: false,
                             pin_tokens: reference.pin_tokens,
@@ -1272,11 +1278,16 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
         .iter()
         .enumerate()
         .map(|(i, arg)| {
-            let ty = parse_type(&arg.ty)?;
-            let ident = match &arg.name {
-                Some(ident) => ident.0.clone(),
-                None => format_ident!("arg{}", i),
+            let (ident, colon_token) = match &arg.name {
+                Some((ident, colon_token)) => (ident.clone(), *colon_token),
+                None => {
+                    let fn_span = ty.paren_token.span;
+                    let ident = format_ident!("arg{}", i, span = fn_span);
+                    let colon_token = Token![:](fn_span);
+                    (ident, colon_token)
+                }
             };
+            let ty = parse_type(&arg.ty)?;
             let doc = Doc::new();
             let attrs = OtherAttrs::none();
             let visibility = Token![pub](ident.span());
@@ -1286,6 +1297,7 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
                 attrs,
                 visibility,
                 name,
+                colon_token,
                 ty,
             })
         })

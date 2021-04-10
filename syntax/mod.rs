@@ -174,6 +174,7 @@ pub struct Var {
     pub attrs: OtherAttrs,
     pub visibility: Token![pub],
     pub name: Pair,
+    pub colon_token: Token![:],
     pub ty: Type,
 }
 
@@ -184,6 +185,7 @@ pub struct Receiver {
     pub mutable: bool,
     pub var: Token![self],
     pub ty: NamedType,
+    pub colon_token: Token![:],
     pub shorthand: bool,
     pub pin_tokens: Option<(kw::Pin, Token![<], Token![>])>,
     pub mutability: Option<Token![mut]>,

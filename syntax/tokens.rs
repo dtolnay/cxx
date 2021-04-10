@@ -43,6 +43,7 @@ impl ToTokens for Var {
             attrs: _,
             visibility: _,
             name,
+            colon_token: _,
             ty,
         } = self;
         name.rust.to_tokens(tokens);
@@ -310,6 +311,7 @@ impl ToTokens for ReceiverType<'_> {
             lifetime,
             mutable: _,
             var: _,
+            colon_token: _,
             ty,
             shorthand: _,
             pin_tokens,
@@ -337,6 +339,7 @@ impl ToTokens for ReceiverTypeSelf<'_> {
             lifetime,
             mutable: _,
             var: _,
+            colon_token: _,
             ty,
             shorthand: _,
             pin_tokens,
