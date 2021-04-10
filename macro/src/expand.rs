@@ -487,53 +487,54 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         .map(|receiver| receiver.var.to_token_stream());
     let arg_vars = efn.args.iter().map(|arg| {
         let var = &arg.name.rust;
+        let span = var.span();
         match &arg.ty {
             Type::Ident(ident) if ident.rust == RustString => {
-                quote!(#var.as_mut_ptr() as *const ::cxx::private::RustString)
+                quote_spanned!(span=> #var.as_mut_ptr() as *const ::cxx::private::RustString)
             }
-            Type::RustBox(_) => quote!(::std::boxed::Box::into_raw(#var)),
-            Type::UniquePtr(_) => quote!(::cxx::UniquePtr::into_raw(#var)),
-            Type::RustVec(_) => quote!(#var.as_mut_ptr() as *const ::cxx::private::RustVec<_>),
+            Type::RustBox(_) => quote_spanned!(span=> ::std::boxed::Box::into_raw(#var)),
+            Type::UniquePtr(_) => quote_spanned!(span=> ::cxx::UniquePtr::into_raw(#var)),
+            Type::RustVec(_) => quote_spanned!(span=> #var.as_mut_ptr() as *const ::cxx::private::RustVec<_>),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(ident) if ident.rust == RustString => match ty.mutable {
-                    false => quote!(::cxx::private::RustString::from_ref(#var)),
-                    true => quote!(::cxx::private::RustString::from_mut(#var)),
+                    false => quote_spanned!(span=> ::cxx::private::RustString::from_ref(#var)),
+                    true => quote_spanned!(span=> ::cxx::private::RustString::from_mut(#var)),
                 },
                 Type::RustVec(vec) if vec.inner == RustString => match ty.mutable {
-                    false => quote!(::cxx::private::RustVec::from_ref_vec_string(#var)),
-                    true => quote!(::cxx::private::RustVec::from_mut_vec_string(#var)),
+                    false => quote_spanned!(span=> ::cxx::private::RustVec::from_ref_vec_string(#var)),
+                    true => quote_spanned!(span=> ::cxx::private::RustVec::from_mut_vec_string(#var)),
                 },
                 Type::RustVec(_) => match ty.mutable {
-                    false => quote!(::cxx::private::RustVec::from_ref(#var)),
-                    true => quote!(::cxx::private::RustVec::from_mut(#var)),
+                    false => quote_spanned!(span=> ::cxx::private::RustVec::from_ref(#var)),
+                    true => quote_spanned!(span=> ::cxx::private::RustVec::from_mut(#var)),
                 },
                 inner if types.is_considered_improper_ctype(inner) => {
                     let var = match ty.pinned {
                         false => quote!(#var),
-                        true => quote!(::std::pin::Pin::into_inner_unchecked(#var)),
+                        true => quote_spanned!(span=> ::std::pin::Pin::into_inner_unchecked(#var)),
                     };
                     match ty.mutable {
                         false => {
-                            quote!(#var as *const #inner as *const ::std::ffi::c_void)
+                            quote_spanned!(span=> #var as *const #inner as *const ::std::ffi::c_void)
                         }
-                        true => quote!(#var as *mut #inner as *mut ::std::ffi::c_void),
+                        true => quote_spanned!(span=> #var as *mut #inner as *mut ::std::ffi::c_void),
                     }
                 }
                 _ => quote!(#var),
             },
             Type::Ptr(ty) => {
                 if types.is_considered_improper_ctype(&ty.inner) {
-                    quote!(#var.cast())
+                    quote_spanned!(span=> #var.cast())
                 } else {
                     quote!(#var)
                 }
             }
-            Type::Str(_) => quote!(::cxx::private::RustStr::from(#var)),
+            Type::Str(_) => quote_spanned!(span=> ::cxx::private::RustStr::from(#var)),
             Type::SliceRef(ty) => match ty.mutable {
-                false => quote!(::cxx::private::RustSlice::from_ref(#var)),
-                true => quote!(::cxx::private::RustSlice::from_mut(#var)),
+                false => quote_spanned!(span=> ::cxx::private::RustSlice::from_ref(#var)),
+                true => quote_spanned!(span=> ::cxx::private::RustSlice::from_mut(#var)),
             },
-            ty if types.needs_indirect_abi(ty) => quote!(#var.as_mut_ptr()),
+            ty if types.needs_indirect_abi(ty) => quote_spanned!(span=> #var.as_mut_ptr()),
             _ => quote!(#var),
         }
     });
@@ -898,43 +899,44 @@ fn expand_rust_function_shim_impl(
 
     let arg_vars = sig.args.iter().map(|arg| {
         let var = &arg.name.rust;
+        let span = var.span();
         match &arg.ty {
             Type::Ident(i) if i.rust == RustString => {
-                quote!(::std::mem::take((*#var).as_mut_string()))
+                quote_spanned!(span=> ::std::mem::take((*#var).as_mut_string()))
             }
-            Type::RustBox(_) => quote!(::std::boxed::Box::from_raw(#var)),
+            Type::RustBox(_) => quote_spanned!(span=> ::std::boxed::Box::from_raw(#var)),
             Type::RustVec(vec) => {
                 if vec.inner == RustString {
-                    quote!(::std::mem::take((*#var).as_mut_vec_string()))
+                    quote_spanned!(span=> ::std::mem::take((*#var).as_mut_vec_string()))
                 } else {
-                    quote!(::std::mem::take((*#var).as_mut_vec()))
+                    quote_spanned!(span=> ::std::mem::take((*#var).as_mut_vec()))
                 }
             }
-            Type::UniquePtr(_) => quote!(::cxx::UniquePtr::from_raw(#var)),
+            Type::UniquePtr(_) => quote_spanned!(span=> ::cxx::UniquePtr::from_raw(#var)),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(i) if i.rust == RustString => match ty.mutable {
-                    false => quote!(#var.as_string()),
-                    true => quote!(#var.as_mut_string()),
+                    false => quote_spanned!(span=> #var.as_string()),
+                    true => quote_spanned!(span=> #var.as_mut_string()),
                 },
                 Type::RustVec(vec) if vec.inner == RustString => match ty.mutable {
-                    false => quote!(#var.as_vec_string()),
-                    true => quote!(#var.as_mut_vec_string()),
+                    false => quote_spanned!(span=> #var.as_vec_string()),
+                    true => quote_spanned!(span=> #var.as_mut_vec_string()),
                 },
                 Type::RustVec(_) => match ty.mutable {
-                    false => quote!(#var.as_vec()),
-                    true => quote!(#var.as_mut_vec()),
+                    false => quote_spanned!(span=> #var.as_vec()),
+                    true => quote_spanned!(span=> #var.as_mut_vec()),
                 },
                 _ => quote!(#var),
             },
-            Type::Str(_) => quote!(#var.as_str()),
+            Type::Str(_) => quote_spanned!(span=> #var.as_str()),
             Type::SliceRef(slice) => {
                 let inner = &slice.inner;
                 match slice.mutable {
-                    false => quote!(#var.as_slice::<#inner>()),
-                    true => quote!(#var.as_mut_slice::<#inner>()),
+                    false => quote_spanned!(span=> #var.as_slice::<#inner>()),
+                    true => quote_spanned!(span=> #var.as_mut_slice::<#inner>()),
                 }
             }
-            ty if types.needs_indirect_abi(ty) => quote!(::std::ptr::read(#var)),
+            ty if types.needs_indirect_abi(ty) => quote_spanned!(span=> ::std::ptr::read(#var)),
             _ => quote!(#var),
         }
     });
