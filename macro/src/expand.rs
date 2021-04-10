@@ -420,18 +420,18 @@ fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
         quote!(_: #receiver_type)
     });
     let args = efn.args.iter().map(|arg| {
-        let ident = &arg.name.rust;
+        let var = &arg.name.rust;
         let ty = expand_extern_type(&arg.ty, types, true);
         if arg.ty == RustString {
-            quote!(#ident: *const #ty)
+            quote!(#var: *const #ty)
         } else if let Type::RustVec(_) = arg.ty {
-            quote!(#ident: *const #ty)
+            quote!(#var: *const #ty)
         } else if let Type::Fn(_) = arg.ty {
-            quote!(#ident: ::cxx::private::FatFunction)
+            quote!(#var: ::cxx::private::FatFunction)
         } else if types.needs_indirect_abi(&arg.ty) {
-            quote!(#ident: *mut #ty)
+            quote!(#var: *mut #ty)
         } else {
-            quote!(#ident: #ty)
+            quote!(#var: #ty)
         }
     });
     let all_args = receiver.chain(args);
@@ -886,56 +886,56 @@ fn expand_rust_function_shim_impl(
         quote!(#receiver_var: #receiver_type)
     });
     let args = sig.args.iter().map(|arg| {
-        let ident = &arg.name.rust;
+        let var = &arg.name.rust;
         let ty = expand_extern_type(&arg.ty, types, false);
         if types.needs_indirect_abi(&arg.ty) {
-            quote!(#ident: *mut #ty)
+            quote!(#var: *mut #ty)
         } else {
-            quote!(#ident: #ty)
+            quote!(#var: #ty)
         }
     });
     let all_args = receiver.into_iter().chain(args);
 
     let arg_vars = sig.args.iter().map(|arg| {
-        let ident = &arg.name.rust;
+        let var = &arg.name.rust;
         match &arg.ty {
             Type::Ident(i) if i.rust == RustString => {
-                quote!(::std::mem::take((*#ident).as_mut_string()))
+                quote!(::std::mem::take((*#var).as_mut_string()))
             }
-            Type::RustBox(_) => quote!(::std::boxed::Box::from_raw(#ident)),
+            Type::RustBox(_) => quote!(::std::boxed::Box::from_raw(#var)),
             Type::RustVec(vec) => {
                 if vec.inner == RustString {
-                    quote!(::std::mem::take((*#ident).as_mut_vec_string()))
+                    quote!(::std::mem::take((*#var).as_mut_vec_string()))
                 } else {
-                    quote!(::std::mem::take((*#ident).as_mut_vec()))
+                    quote!(::std::mem::take((*#var).as_mut_vec()))
                 }
             }
-            Type::UniquePtr(_) => quote!(::cxx::UniquePtr::from_raw(#ident)),
+            Type::UniquePtr(_) => quote!(::cxx::UniquePtr::from_raw(#var)),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(i) if i.rust == RustString => match ty.mutable {
-                    false => quote!(#ident.as_string()),
-                    true => quote!(#ident.as_mut_string()),
+                    false => quote!(#var.as_string()),
+                    true => quote!(#var.as_mut_string()),
                 },
                 Type::RustVec(vec) if vec.inner == RustString => match ty.mutable {
-                    false => quote!(#ident.as_vec_string()),
-                    true => quote!(#ident.as_mut_vec_string()),
+                    false => quote!(#var.as_vec_string()),
+                    true => quote!(#var.as_mut_vec_string()),
                 },
                 Type::RustVec(_) => match ty.mutable {
-                    false => quote!(#ident.as_vec()),
-                    true => quote!(#ident.as_mut_vec()),
+                    false => quote!(#var.as_vec()),
+                    true => quote!(#var.as_mut_vec()),
                 },
-                _ => quote!(#ident),
+                _ => quote!(#var),
             },
-            Type::Str(_) => quote!(#ident.as_str()),
+            Type::Str(_) => quote!(#var.as_str()),
             Type::SliceRef(slice) => {
                 let inner = &slice.inner;
                 match slice.mutable {
-                    false => quote!(#ident.as_slice::<#inner>()),
-                    true => quote!(#ident.as_mut_slice::<#inner>()),
+                    false => quote!(#var.as_slice::<#inner>()),
+                    true => quote!(#var.as_mut_slice::<#inner>()),
                 }
             }
-            ty if types.needs_indirect_abi(ty) => quote!(::std::ptr::read(#ident)),
-            _ => quote!(#ident),
+            ty if types.needs_indirect_abi(ty) => quote!(::std::ptr::read(#var)),
+            _ => quote!(#var),
         }
     });
     let vars = receiver_var.into_iter().chain(arg_vars);
