@@ -43,6 +43,7 @@ impl ToTokens for Var {
             attrs: _,
             visibility: _,
             name,
+            colon_token: _,
             ty,
         } = self;
         name.rust.to_tokens(tokens);

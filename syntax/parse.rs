@@ -146,11 +146,13 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
         };
         let visibility = visibility_pub(&field.vis, ident.span());
         let name = pair(Namespace::default(), &ident, cxx_name, rust_name);
+        let colon_token = field.colon_token.unwrap();
         fields.push(Var {
             doc,
             attrs,
             visibility,
             name,
+            colon_token,
             ty,
         });
     }
@@ -583,11 +585,13 @@ fn parse_extern_fn(
                     let attrs = OtherAttrs::none();
                     let visibility = Token![pub](ident.span());
                     let name = pair(Namespace::default(), &ident, None, None);
+                    let colon_token = arg.colon_token;
                     args.push_value(Var {
                         doc,
                         attrs,
                         visibility,
                         name,
+                        colon_token,
                         ty,
                     });
                     if let Some(comma) = comma {
@@ -1267,15 +1271,21 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
         ));
     }
 
+    let fn_span = ty.fn_token.span;
+
     let args = ty
         .inputs
         .iter()
         .enumerate()
         .map(|(i, arg)| {
             let ty = parse_type(&arg.ty)?;
-            let ident = match &arg.name {
-                Some(ident) => ident.0.clone(),
-                None => format_ident!("arg{}", i),
+            let (ident, colon_token) = match &arg.name {
+                Some((ident, colon_token)) => (ident.clone(), *colon_token),
+                None => {
+                    let ident = format_ident!("arg{}", i, span = fn_span);
+                    let colon_token = Token![:](fn_span);
+                    (ident, colon_token)
+                }
             };
             let doc = Doc::new();
             let attrs = OtherAttrs::none();
@@ -1286,6 +1296,7 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
                 attrs,
                 visibility,
                 name,
+                colon_token,
                 ty,
             })
         })

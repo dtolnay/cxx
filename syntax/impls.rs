@@ -339,6 +339,7 @@ impl PartialEq for Signature {
                     attrs: _,
                     visibility: _,
                     name: _,
+                    colon_token: _,
                     ty,
                 } = arg;
                 let Var {
@@ -346,6 +347,7 @@ impl PartialEq for Signature {
                     attrs: _,
                     visibility: _,
                     name: _,
+                    colon_token: _,
                     ty: ty2,
                 } = arg2;
                 ty == ty2
@@ -374,6 +376,7 @@ impl Hash for Signature {
                 attrs: _,
                 visibility: _,
                 name: _,
+                colon_token: _,
                 ty,
             } = arg;
             ty.hash(state);

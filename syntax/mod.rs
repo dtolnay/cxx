@@ -174,6 +174,7 @@ pub struct Var {
     pub attrs: OtherAttrs,
     pub visibility: Token![pub],
     pub name: Pair,
+    pub colon_token: Token![:],
     pub ty: Type,
 }
 
