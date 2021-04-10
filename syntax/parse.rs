@@ -1273,22 +1273,21 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
         ));
     }
 
-    let fn_span = ty.fn_token.span;
-
     let args = ty
         .inputs
         .iter()
         .enumerate()
         .map(|(i, arg)| {
-            let ty = parse_type(&arg.ty)?;
             let (ident, colon_token) = match &arg.name {
                 Some((ident, colon_token)) => (ident.clone(), *colon_token),
                 None => {
+                    let fn_span = ty.paren_token.span;
                     let ident = format_ident!("arg{}", i, span = fn_span);
                     let colon_token = Token![:](fn_span);
                     (ident, colon_token)
                 }
             };
+            let ty = parse_type(&arg.ty)?;
             let doc = Doc::new();
             let attrs = OtherAttrs::none();
             let visibility = Token![pub](ident.span());
