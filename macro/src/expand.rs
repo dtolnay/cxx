@@ -1639,47 +1639,72 @@ fn indirect_return(sig: &Signature, types: &Types) -> bool {
 
 fn expand_extern_type(ty: &Type, types: &Types, proper: bool) -> TokenStream {
     match ty {
-        Type::Ident(ident) if ident.rust == RustString => quote!(::cxx::private::RustString),
+        Type::Ident(ident) if ident.rust == RustString => {
+            let span = ident.rust.span();
+            quote_spanned!(span=> ::cxx::private::RustString)
+        }
         Type::RustBox(ty) | Type::UniquePtr(ty) => {
+            let span = ty.name.span();
             if proper && types.is_considered_improper_ctype(&ty.inner) {
-                quote!(*mut ::std::ffi::c_void)
+                quote_spanned!(span=> *mut ::std::ffi::c_void)
             } else {
                 let inner = expand_extern_type(&ty.inner, types, proper);
-                quote!(*mut #inner)
+                quote_spanned!(span=> *mut #inner)
             }
         }
         Type::RustVec(ty) => {
+            let span = ty.name.span();
+            let langle = ty.langle;
             let elem = expand_extern_type(&ty.inner, types, proper);
-            quote!(::cxx::private::RustVec<#elem>)
+            let rangle = ty.rangle;
+            quote_spanned!(span=> ::cxx::private::RustVec #langle #elem #rangle)
         }
         Type::Ref(ty) => {
+            let ampersand = ty.ampersand;
+            let lifetime = &ty.lifetime;
             let mutability = ty.mutability;
             match &ty.inner {
                 Type::Ident(ident) if ident.rust == RustString => {
-                    quote!(&#mutability ::cxx::private::RustString)
+                    let span = ident.rust.span();
+                    quote_spanned!(span=> #ampersand #lifetime #mutability ::cxx::private::RustString)
                 }
                 Type::RustVec(ty) => {
+                    let span = ty.name.span();
+                    let langle = ty.langle;
                     let inner = expand_extern_type(&ty.inner, types, proper);
-                    quote!(&#mutability ::cxx::private::RustVec<#inner>)
+                    let rangle = ty.rangle;
+                    quote_spanned!(span=> #ampersand #lifetime #mutability ::cxx::private::RustVec #langle #inner #rangle)
                 }
-                inner if proper && types.is_considered_improper_ctype(inner) => match ty.mutable {
-                    false => quote!(*const ::std::ffi::c_void),
-                    true => quote!(*#mutability ::std::ffi::c_void),
-                },
+                inner if proper && types.is_considered_improper_ctype(inner) => {
+                    let star = Token![*](ampersand.span);
+                    match ty.mutable {
+                        false => quote!(#star const ::std::ffi::c_void),
+                        true => quote!(#star #mutability ::std::ffi::c_void),
+                    }
+                }
                 _ => quote!(#ty),
             }
         }
         Type::Ptr(ty) => {
             if proper && types.is_considered_improper_ctype(&ty.inner) {
+                let star = ty.star;
                 let mutability = ty.mutability;
                 let constness = ty.constness;
-                quote!(*#mutability #constness ::std::ffi::c_void)
+                quote!(#star #mutability #constness ::std::ffi::c_void)
             } else {
                 quote!(#ty)
             }
         }
-        Type::Str(_) => quote!(::cxx::private::RustStr),
-        Type::SliceRef(_) => quote!(::cxx::private::RustSlice),
+        Type::Str(ty) => {
+            let span = ty.ampersand.span;
+            let rust_str = Ident::new("RustStr", syn::spanned::Spanned::span(&ty.inner));
+            quote_spanned!(span=> ::cxx::private::#rust_str)
+        }
+        Type::SliceRef(ty) => {
+            let span = ty.ampersand.span;
+            let rust_slice = Ident::new("RustSlice", ty.bracket.span);
+            quote_spanned!(span=> ::cxx::private::#rust_slice)
+        }
         _ => quote!(#ty),
     }
 }
