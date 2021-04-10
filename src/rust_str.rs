@@ -16,7 +16,7 @@ impl RustStr {
 
     pub unsafe fn as_str<'a>(self) -> &'a str {
         let repr = mem::transmute::<RustStr, NonNull<str>>(self);
-        repr.as_ref()
+        &*repr.as_ptr()
     }
 }
 
