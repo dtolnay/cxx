@@ -421,17 +421,18 @@ fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
     });
     let args = efn.args.iter().map(|arg| {
         let var = &arg.name.rust;
+        let colon = arg.colon_token;
         let ty = expand_extern_type(&arg.ty, types, true);
         if arg.ty == RustString {
-            quote!(#var: *const #ty)
+            quote!(#var #colon *const #ty)
         } else if let Type::RustVec(_) = arg.ty {
-            quote!(#var: *const #ty)
+            quote!(#var #colon *const #ty)
         } else if let Type::Fn(_) = arg.ty {
-            quote!(#var: ::cxx::private::FatFunction)
+            quote!(#var #colon ::cxx::private::FatFunction)
         } else if types.needs_indirect_abi(&arg.ty) {
-            quote!(#var: *mut #ty)
+            quote!(#var #colon *mut #ty)
         } else {
-            quote!(#var: #ty)
+            quote!(#var #colon #ty)
         }
     });
     let all_args = receiver.chain(args);
@@ -888,11 +889,12 @@ fn expand_rust_function_shim_impl(
     });
     let args = sig.args.iter().map(|arg| {
         let var = &arg.name.rust;
+        let colon = arg.colon_token;
         let ty = expand_extern_type(&arg.ty, types, false);
         if types.needs_indirect_abi(&arg.ty) {
-            quote!(#var: *mut #ty)
+            quote!(#var #colon *mut #ty)
         } else {
-            quote!(#var: #ty)
+            quote!(#var #colon #ty)
         }
     });
     let all_args = receiver.into_iter().chain(args);
