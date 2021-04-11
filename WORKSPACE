@@ -17,7 +17,7 @@ load("@rules_rust//rust:repositories.bzl", "rust_repositories")
 
 rust_repositories(
     edition = "2018",
-    version = "1.50.0",
+    version = "1.51.0",
 )
 
 vendor(
