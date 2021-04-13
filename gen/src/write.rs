@@ -1205,7 +1205,14 @@ fn write_type(out: &mut OutFile, ty: &Type) {
         Type::SliceRef(slice) => {
             write!(out, "::rust::Slice<");
             if slice.mutability.is_none() {
-                write!(out, "const ");
+                match slice.inner {
+                    Type::Ref(_) => {
+                        write!(out, "");
+                    }
+                    _ => {
+                        write!(out, "const ");
+                    }
+                }
             }
             write_type(out, &slice.inner);
             write!(out, ">");
