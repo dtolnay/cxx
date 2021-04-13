@@ -1208,7 +1208,7 @@ fn write_type(out: &mut OutFile, ty: &Type) {
                 match slice.inner {
                     Type::Ref(_) => {
                         write_type(out, &slice.inner);
-                        write!(out, "const")
+                        write!(out, "const");
                     }
                     _ => {
                         write!(out, "const ");
