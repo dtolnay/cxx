@@ -962,8 +962,11 @@ fn write_rust_function_shim_impl(
         // We've already defined this inside the struct.
         return;
     }
-    for line in doc.to_string().lines() {
-        writeln!(out, "//{}", line);
+    if sig.receiver.is_none() {
+        // Member functions already documented at their declaration.
+        for line in doc.to_string().lines() {
+            writeln!(out, "//{}", line);
+        }
     }
     write_rust_function_shim_decl(out, local_name, sig, indirect_call);
     if out.header {
