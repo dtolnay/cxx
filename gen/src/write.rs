@@ -1207,17 +1207,15 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             if slice.mutability.is_none() {
                 match slice.inner {
                     Type::Ref(_) => {
-                        write_type(out, &slice.inner);
-                        write!(out, "const");
+                        write!(out, "");
                     }
                     _ => {
                         write!(out, "const ");
                         write_type(out, &slice.inner);
                     }
                 }
-            } else {
-                write_type(out, &slice.inner);
             }
+            write_type(out, &slice.inner);
             write!(out, ">");
         }
         Type::Fn(f) => {

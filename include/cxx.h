@@ -167,7 +167,7 @@ public:
   std::size_t length() const noexcept;
   bool empty() const noexcept;
 
-  T &operator[](std::size_t n) const noexcept;
+  typename std::add_lvalue_reference<T>::type operator[](std::size_t n) const noexcept;
   T &at(std::size_t n) const;
   T &front() const noexcept;
   T &back() const noexcept;
