@@ -249,9 +249,12 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
         writeln!(out, "{};", field.name.cxx);
     }
 
-    writeln!(out);
+    out.next_section();
 
     for method in methods {
+        if !method.doc.is_empty() {
+            out.next_section();
+        }
         for line in method.doc.to_string().lines() {
             writeln!(out, "  //{}", line);
         }
@@ -261,6 +264,9 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
         let indirect_call = false;
         write_rust_function_shim_decl(out, &local_name, sig, indirect_call);
         writeln!(out, ";");
+        if !method.doc.is_empty() {
+            out.next_section();
+        }
     }
 
     if operator_eq {
@@ -336,7 +342,10 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
         ety.name.cxx,
     );
 
-    for method in methods {
+    for (i, method) in methods.iter().enumerate() {
+        if i > 0 && !method.doc.is_empty() {
+            out.next_section();
+        }
         for line in method.doc.to_string().lines() {
             writeln!(out, "  //{}", line);
         }
@@ -346,6 +355,9 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
         let indirect_call = false;
         write_rust_function_shim_decl(out, &local_name, sig, indirect_call);
         writeln!(out, ";");
+        if !method.doc.is_empty() {
+            out.next_section();
+        }
     }
 
     writeln!(out, "  ~{}() = delete;", ety.name.cxx);
