@@ -224,7 +224,19 @@ impl OtherAttrs {
 impl ToTokens for OtherAttrs {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         for attr in &self.0 {
-            attr.to_tokens(tokens);
+            let Attribute {
+                pound_token,
+                style,
+                bracket_token,
+                path,
+                tokens: attr_tokens,
+            } = attr;
+            pound_token.to_tokens(tokens);
+            let _ = style; // ignore; render outer and inner attrs both as outer
+            bracket_token.surround(tokens, |tokens| {
+                path.to_tokens(tokens);
+                attr_tokens.to_tokens(tokens);
+            });
         }
     }
 }
