@@ -17,6 +17,10 @@ impl Doc {
         self.fragments.push(lit);
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.fragments.is_empty()
+    }
+
     pub fn to_string(&self) -> String {
         let mut doc = String::new();
         for lit in &self.fragments {

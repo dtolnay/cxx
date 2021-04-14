@@ -9,7 +9,7 @@ use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::{
-    derive, mangle, Api, Enum, ExternFn, ExternType, Pair, Signature, Struct, Trait, Type,
+    derive, mangle, Api, Doc, Enum, ExternFn, ExternType, Pair, Signature, Struct, Trait, Type,
     TypeAlias, Types, Var,
 };
 use proc_macro2::Ident;
@@ -249,14 +249,24 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
         writeln!(out, "{};", field.name.cxx);
     }
 
-    writeln!(out);
+    out.next_section();
 
     for method in methods {
+        if !method.doc.is_empty() {
+            out.next_section();
+        }
+        for line in method.doc.to_string().lines() {
+            writeln!(out, "  //{}", line);
+        }
         write!(out, "  ");
         let sig = &method.sig;
         let local_name = method.name.cxx.to_string();
-        write_rust_function_shim_decl(out, &local_name, sig, false);
+        let indirect_call = false;
+        write_rust_function_shim_decl(out, &local_name, sig, indirect_call);
         writeln!(out, ";");
+        if !method.doc.is_empty() {
+            out.next_section();
+        }
     }
 
     if operator_eq {
@@ -332,12 +342,22 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
         ety.name.cxx,
     );
 
-    for method in methods {
+    for (i, method) in methods.iter().enumerate() {
+        if i > 0 && !method.doc.is_empty() {
+            out.next_section();
+        }
+        for line in method.doc.to_string().lines() {
+            writeln!(out, "  //{}", line);
+        }
         write!(out, "  ");
         let sig = &method.sig;
         let local_name = method.name.cxx.to_string();
-        write_rust_function_shim_decl(out, &local_name, sig, false);
+        let indirect_call = false;
+        write_rust_function_shim_decl(out, &local_name, sig, indirect_call);
         writeln!(out, ";");
+        if !method.doc.is_empty() {
+            out.next_section();
+        }
     }
 
     writeln!(out, "  ~{}() = delete;", ety.name.cxx);
@@ -824,7 +844,8 @@ fn write_function_pointer_trampoline(out: &mut OutFile, efn: &ExternFn, var: &Pa
 
     out.next_section();
     let c_trampoline = mangle::c_trampoline(efn, var, out.types).to_string();
-    write_rust_function_shim_impl(out, &c_trampoline, f, &r_trampoline, indirect_call);
+    let doc = Doc::new();
+    write_rust_function_shim_impl(out, &c_trampoline, f, &doc, &r_trampoline, indirect_call);
 }
 
 fn write_rust_function_decl<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
@@ -894,9 +915,6 @@ fn write_rust_function_decl_impl(
 
 fn write_rust_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     out.set_namespace(&efn.name.namespace);
-    for line in efn.doc.to_string().lines() {
-        writeln!(out, "//{}", line);
-    }
     let local_name = match &efn.sig.receiver {
         None => efn.name.cxx.to_string(),
         Some(receiver) => format!(
@@ -905,9 +923,10 @@ fn write_rust_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
             efn.name.cxx,
         ),
     };
+    let doc = &efn.doc;
     let invoke = mangle::extern_fn(efn, out.types);
     let indirect_call = false;
-    write_rust_function_shim_impl(out, &local_name, efn, &invoke, indirect_call);
+    write_rust_function_shim_impl(out, &local_name, efn, doc, &invoke, indirect_call);
 }
 
 fn write_rust_function_shim_decl(
@@ -947,12 +966,19 @@ fn write_rust_function_shim_impl(
     out: &mut OutFile,
     local_name: &str,
     sig: &Signature,
+    doc: &Doc,
     invoke: &Symbol,
     indirect_call: bool,
 ) {
     if out.header && sig.receiver.is_some() {
         // We've already defined this inside the struct.
         return;
+    }
+    if sig.receiver.is_none() {
+        // Member functions already documented at their declaration.
+        for line in doc.to_string().lines() {
+            writeln!(out, "//{}", line);
+        }
     }
     write_rust_function_shim_decl(out, local_name, sig, indirect_call);
     if out.header {
