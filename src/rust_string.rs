@@ -1,5 +1,6 @@
 use alloc::string::String;
 use core::mem::{self, MaybeUninit};
+use core::ptr;
 
 // ABI compatible with C++ rust::String (not necessarily alloc::string::String).
 #[repr(C)]
@@ -30,6 +31,12 @@ impl RustString {
 
     pub fn as_mut_string(&mut self) -> &mut String {
         unsafe { &mut *(self as *mut RustString as *mut String) }
+    }
+}
+
+impl Drop for RustString {
+    fn drop(&mut self) {
+        unsafe { ptr::drop_in_place(self.as_mut_string()) }
     }
 }
 
