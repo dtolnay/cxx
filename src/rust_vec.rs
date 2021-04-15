@@ -4,6 +4,7 @@ use alloc::vec::Vec;
 use core::ffi::c_void;
 use core::marker::PhantomData;
 use core::mem::{self, ManuallyDrop, MaybeUninit};
+use core::ptr;
 
 // ABI compatible with C++ rust::Vec<T> (not necessarily alloc::vec::Vec<T>).
 #[repr(C)]
@@ -97,5 +98,11 @@ impl RustVec<RustString> {
 
     pub fn as_mut_vec_string(&mut self) -> &mut Vec<String> {
         unsafe { &mut *(self as *mut RustVec<RustString> as *mut Vec<String>) }
+    }
+}
+
+impl<T> Drop for RustVec<T> {
+    fn drop(&mut self) {
+        unsafe { ptr::drop_in_place(self.as_mut_vec()) }
     }
 }
