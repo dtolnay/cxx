@@ -1,3 +1,5 @@
+#![allow(missing_docs)]
+
 use alloc::string::String;
 use core::mem::{self, MaybeUninit};
 use core::ptr;

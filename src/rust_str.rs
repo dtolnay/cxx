@@ -1,3 +1,5 @@
+#![allow(missing_docs)]
+
 use core::mem::{self, MaybeUninit};
 use core::ptr::NonNull;
 use core::str;

@@ -1,3 +1,5 @@
+#![allow(missing_docs)]
+
 use core::marker::{PhantomData, PhantomPinned};
 use core::mem;
 

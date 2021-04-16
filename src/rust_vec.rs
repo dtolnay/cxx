@@ -1,3 +1,5 @@
+#![allow(missing_docs)]
+
 use crate::rust_string::RustString;
 use alloc::string::String;
 use alloc::vec::Vec;
