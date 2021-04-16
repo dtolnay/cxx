@@ -8,7 +8,7 @@ use core::ffi::c_void;
 use core::fmt::{self, Debug};
 use core::iter::FusedIterator;
 use core::marker::{PhantomData, PhantomPinned};
-use core::mem;
+use core::mem::{self, ManuallyDrop};
 use core::pin::Pin;
 use core::ptr;
 use core::slice;
@@ -145,6 +145,22 @@ where
     /// Returns an iterator over elements of type `Pin<&mut T>`.
     pub fn iter_mut(self: Pin<&mut Self>) -> IterMut<T> {
         IterMut { v: self, index: 0 }
+    }
+
+    /// Appends an element to the back of the vector.
+    ///
+    /// Matches the behavior of C++ [std::vector\<T\>::push_back][push_back].
+    ///
+    /// [push_back]: https://en.cppreference.com/w/cpp/container/vector/push_back
+    pub fn push(self: Pin<&mut Self>, value: T)
+    where
+        T: ExternType<Kind = Trivial>,
+    {
+        let mut value = ManuallyDrop::new(value);
+        unsafe {
+            // C++ calls move constructor followed by destructor on `value`.
+            T::__push_back(self, &mut value);
+        }
     }
 }
 
@@ -296,6 +312,14 @@ pub unsafe trait VectorElement: Sized {
     #[doc(hidden)]
     unsafe fn __get_unchecked(v: *mut CxxVector<Self>, pos: usize) -> *mut Self;
     #[doc(hidden)]
+    unsafe fn __push_back(v: Pin<&mut CxxVector<Self>>, value: &mut ManuallyDrop<Self>) {
+        // Opaque C type vector elements do not get this method because they can
+        // never exist by value on the Rust side of the bridge.
+        let _ = v;
+        let _ = value;
+        unreachable!()
+    }
+    #[doc(hidden)]
     fn __unique_ptr_null() -> *mut c_void;
     #[doc(hidden)]
     unsafe fn __unique_ptr_raw(raw: *mut CxxVector<Self>) -> *mut c_void;
@@ -307,8 +331,24 @@ pub unsafe trait VectorElement: Sized {
     unsafe fn __unique_ptr_drop(repr: *mut c_void);
 }
 
+macro_rules! vector_element_push_back {
+    (opaque, $segment:expr, $ty:ty) => {};
+    (trivial, $segment:expr, $ty:ty) => {
+        #[doc(hidden)]
+        unsafe fn __push_back(v: Pin<&mut CxxVector<$ty>>, value: &mut ManuallyDrop<$ty>) {
+            extern "C" {
+                attr! {
+                    #[link_name = concat!("cxxbridge1$std$vector$", $segment, "$push_back")]
+                    fn __push_back(_: Pin<&mut CxxVector<$ty>>, _: &mut ManuallyDrop<$ty>);
+                }
+            }
+            __push_back(v, value);
+        }
+    };
+}
+
 macro_rules! impl_vector_element {
-    ($segment:expr, $name:expr, $ty:ty) => {
+    ($kind:ident, $segment:expr, $name:expr, $ty:ty) => {
         const_assert_eq!(1, mem::align_of::<CxxVector<$ty>>());
 
         unsafe impl VectorElement for $ty {
@@ -336,6 +376,7 @@ macro_rules! impl_vector_element {
                 }
                 __get_unchecked(v, pos)
             }
+            vector_element_push_back!($kind, $segment, $ty);
             #[doc(hidden)]
             fn __unique_ptr_null() -> *mut c_void {
                 extern "C" {
@@ -396,7 +437,7 @@ macro_rules! impl_vector_element {
 
 macro_rules! impl_vector_element_for_primitive {
     ($ty:ident) => {
-        impl_vector_element!(stringify!($ty), stringify!($ty), $ty);
+        impl_vector_element!(trivial, stringify!($ty), stringify!($ty), $ty);
     };
 }
 
@@ -413,4 +454,4 @@ impl_vector_element_for_primitive!(isize);
 impl_vector_element_for_primitive!(f32);
 impl_vector_element_for_primitive!(f64);
 
-impl_vector_element!("string", "CxxString", CxxString);
+impl_vector_element!(opaque, "string", "CxxString", CxxString);

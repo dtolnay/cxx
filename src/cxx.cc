@@ -427,6 +427,13 @@ using isize_if_unique =
 } // namespace cxxbridge1
 } // namespace rust
 
+namespace {
+template <typename T>
+void destroy(T *ptr) {
+  ptr->~T();
+}
+} // namespace
+
 extern "C" {
 void cxxbridge1$unique_ptr$std$string$null(
     std::unique_ptr<std::string> *ptr) noexcept {
@@ -489,6 +496,13 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
   void cxxbridge1$unique_ptr$std$vector$##RUST_TYPE##$drop(                    \
       std::unique_ptr<std::vector<CXX_TYPE>> *ptr) noexcept {                  \
     ptr->~unique_ptr();                                                        \
+  }
+
+#define STD_VECTOR_TRIVIAL_OPS(RUST_TYPE, CXX_TYPE)                            \
+  void cxxbridge1$std$vector$##RUST_TYPE##$push_back(                          \
+      std::vector<CXX_TYPE> *v, CXX_TYPE *value) noexcept {                    \
+    v->push_back(std::move(*value));                                           \
+    destroy(value);                                                            \
   }
 
 #define RUST_VEC_EXTERNS(RUST_TYPE, CXX_TYPE)                                  \
@@ -603,10 +617,13 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
   MACRO(f32, float)                                                            \
   MACRO(f64, double)
 
-#define FOR_EACH_STD_VECTOR(MACRO)                                             \
+#define FOR_EACH_TRIVIAL_STD_VECTOR(MACRO)                                     \
   FOR_EACH_NUMERIC(MACRO)                                                      \
   MACRO(usize, std::size_t)                                                    \
-  MACRO(isize, rust::isize)                                                    \
+  MACRO(isize, rust::isize)
+
+#define FOR_EACH_STD_VECTOR(MACRO)                                             \
+  FOR_EACH_TRIVIAL_STD_VECTOR(MACRO)                                           \
   MACRO(string, std::string)
 
 #define FOR_EACH_RUST_VEC(MACRO)                                               \
@@ -627,6 +644,7 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
 
 extern "C" {
 FOR_EACH_STD_VECTOR(STD_VECTOR_OPS)
+FOR_EACH_TRIVIAL_STD_VECTOR(STD_VECTOR_TRIVIAL_OPS)
 FOR_EACH_RUST_VEC(RUST_VEC_EXTERNS)
 FOR_EACH_SHARED_PTR(SHARED_PTR_OPS)
 } // extern "C"
