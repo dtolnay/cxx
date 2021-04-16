@@ -1,5 +1,5 @@
 use alloc::boxed::Box;
-use core::fmt::{self, Debug, Display};
+use core::fmt::{self, Display};
 
 /// Exception thrown from an `extern "C++"` function.
 #[derive(Debug)]
