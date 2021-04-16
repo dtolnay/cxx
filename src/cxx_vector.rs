@@ -8,7 +8,7 @@ use core::ffi::c_void;
 use core::fmt::{self, Debug};
 use core::iter::FusedIterator;
 use core::marker::{PhantomData, PhantomPinned};
-use core::mem::{self, ManuallyDrop};
+use core::mem::{self, ManuallyDrop, MaybeUninit};
 use core::pin::Pin;
 use core::ptr;
 use core::slice;
@@ -160,6 +160,21 @@ where
         unsafe {
             // C++ calls move constructor followed by destructor on `value`.
             T::__push_back(self, &mut value);
+        }
+    }
+
+    pub fn pop(self: Pin<&mut Self>) -> Option<T>
+    where
+        T: ExternType<Kind = Trivial>,
+    {
+        if self.is_empty() {
+            None
+        } else {
+            let mut value = MaybeUninit::uninit();
+            Some(unsafe {
+                T::__pop_back(self, &mut value);
+                value.assume_init()
+            })
         }
     }
 }
@@ -320,6 +335,14 @@ pub unsafe trait VectorElement: Sized {
         unreachable!()
     }
     #[doc(hidden)]
+    unsafe fn __pop_back(v: Pin<&mut CxxVector<Self>>, out: &mut MaybeUninit<Self>) {
+        // Opaque C type vector elements do not get this method because they can
+        // never exist by value on the Rust side of the bridge.
+        let _ = v;
+        let _ = out;
+        unreachable!()
+    }
+    #[doc(hidden)]
     fn __unique_ptr_null() -> *mut c_void;
     #[doc(hidden)]
     unsafe fn __unique_ptr_raw(raw: *mut CxxVector<Self>) -> *mut c_void;
@@ -331,7 +354,7 @@ pub unsafe trait VectorElement: Sized {
     unsafe fn __unique_ptr_drop(repr: *mut c_void);
 }
 
-macro_rules! vector_element_push_back {
+macro_rules! vector_element_by_value_methods {
     (opaque, $segment:expr, $ty:ty) => {};
     (trivial, $segment:expr, $ty:ty) => {
         #[doc(hidden)]
@@ -343,6 +366,16 @@ macro_rules! vector_element_push_back {
                 }
             }
             __push_back(v, value);
+        }
+        #[doc(hidden)]
+        unsafe fn __pop_back(v: Pin<&mut CxxVector<$ty>>, out: &mut MaybeUninit<$ty>) {
+            extern "C" {
+                attr! {
+                    #[link_name = concat!("cxxbridge1$std$vector$", $segment, "$pop_back")]
+                    fn __pop_back(_: Pin<&mut CxxVector<$ty>>, _: &mut MaybeUninit<$ty>);
+                }
+            }
+            __pop_back(v, out);
         }
     };
 }
@@ -376,7 +409,7 @@ macro_rules! impl_vector_element {
                 }
                 __get_unchecked(v, pos)
             }
-            vector_element_push_back!($kind, $segment, $ty);
+            vector_element_by_value_methods!($kind, $segment, $ty);
             #[doc(hidden)]
             fn __unique_ptr_null() -> *mut c_void {
                 extern "C" {

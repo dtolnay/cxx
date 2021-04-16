@@ -1833,6 +1833,7 @@ fn write_cxx_vector(out: &mut OutFile, key: NamedImplKey) {
     );
     writeln!(out, "  return s.size();");
     writeln!(out, "}}");
+
     writeln!(
         out,
         "{} *cxxbridge1$std$vector${}$get_unchecked(::std::vector<{}> *s, ::std::size_t pos) noexcept {{",
@@ -1840,6 +1841,7 @@ fn write_cxx_vector(out: &mut OutFile, key: NamedImplKey) {
     );
     writeln!(out, "  return &(*s)[pos];");
     writeln!(out, "}}");
+
     if out.types.is_maybe_trivial(element) {
         writeln!(
             out,
@@ -1848,6 +1850,15 @@ fn write_cxx_vector(out: &mut OutFile, key: NamedImplKey) {
         );
         writeln!(out, "  v->push_back(::std::move(*value));");
         writeln!(out, "  ::rust::destroy(value);");
+        writeln!(out, "}}");
+
+        writeln!(
+            out,
+            "void cxxbridge1$std$vector${}$pop_back(::std::vector<{}> *v, {} *out) noexcept {{",
+            instance, inner, inner,
+        );
+        writeln!(out, "  ::new (out) {}(::std::move(v->back()));", inner);
+        writeln!(out, "  v->pop_back();");
         writeln!(out, "}}");
     }
 
