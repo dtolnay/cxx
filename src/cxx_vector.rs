@@ -163,6 +163,8 @@ where
         }
     }
 
+    /// Removes the last element from a vector and returns it, or `None` if the
+    /// vector is empty.
     pub fn pop(self: Pin<&mut Self>) -> Option<T>
     where
         T: ExternType<Kind = Trivial>,
