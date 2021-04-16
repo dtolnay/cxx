@@ -167,6 +167,7 @@ pub mod kind {
     /// indirection.
     pub enum Trivial {}
 
+    #[allow(missing_docs)]
     pub trait Kind: private::Sealed {}
     impl Kind for Opaque {}
     impl Kind for Trivial {}

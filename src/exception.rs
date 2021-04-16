@@ -16,6 +16,7 @@ impl Display for Exception {
 impl std::error::Error for Exception {}
 
 impl Exception {
+    #[allow(missing_docs)]
     pub fn what(&self) -> &str {
         &self.what
     }

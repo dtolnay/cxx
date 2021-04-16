@@ -93,6 +93,7 @@ where
 
 // Methods are private; not intended to be implemented outside of cxxbridge
 // codebase.
+#[allow(missing_docs)]
 pub unsafe trait WeakPtrTarget {
     #[doc(hidden)]
     fn __typename(f: &mut fmt::Formatter) -> fmt::Result;

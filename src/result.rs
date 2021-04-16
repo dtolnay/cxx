@@ -1,3 +1,5 @@
+#![allow(missing_docs)]
+
 use crate::exception::Exception;
 use alloc::boxed::Box;
 use alloc::string::{String, ToString};
