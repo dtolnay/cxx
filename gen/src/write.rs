@@ -1823,6 +1823,8 @@ fn write_cxx_vector(out: &mut OutFile, key: NamedImplKey) {
     let instance = element.to_mangled(out.types);
 
     out.include.cstddef = true;
+    out.include.utility = true;
+    out.builtin.destroy = true;
 
     writeln!(
         out,
@@ -1838,6 +1840,16 @@ fn write_cxx_vector(out: &mut OutFile, key: NamedImplKey) {
     );
     writeln!(out, "  return &(*s)[pos];");
     writeln!(out, "}}");
+    if out.types.is_maybe_trivial(element) {
+        writeln!(
+            out,
+            "void cxxbridge1$std$vector${}$push_back(::std::vector<{}> *v, {} *value) noexcept {{",
+            instance, inner, inner,
+        );
+        writeln!(out, "  v->push_back(::std::move(*value));");
+        writeln!(out, "  ::rust::destroy(value);");
+        writeln!(out, "}}");
+    }
 
     out.include.memory = true;
     write_unique_ptr_common(out, UniquePtr::CxxVector(element));
