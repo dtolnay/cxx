@@ -250,6 +250,14 @@ impl<'a> Types<'a> {
             ImproperCtype::Depends(ident) => self.struct_improper_ctypes.contains(ident),
         }
     }
+
+    // Types which we need to assume could possibly exist by value on the Rust
+    // side.
+    pub fn is_maybe_trivial(&self, ty: &Ident) -> bool {
+        self.structs.contains_key(ty)
+            || self.enums.contains_key(ty)
+            || self.aliases.contains_key(ty)
+    }
 }
 
 impl<'t, 'a> IntoIterator for &'t Types<'a> {

@@ -1592,11 +1592,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
         // know at code generation time, so we generate both C++ and Rust side
         // bindings for a "new" method anyway. But the Rust code can't be called
         // for Opaque types because the 'new' method is not implemented.
-        UniquePtr::Ident(ident) => {
-            out.types.structs.contains_key(ident)
-                || out.types.enums.contains_key(ident)
-                || out.types.aliases.contains_key(ident)
-        }
+        UniquePtr::Ident(ident) => out.types.is_maybe_trivial(ident),
         UniquePtr::CxxVector(_) => false,
     };
 
@@ -1704,9 +1700,7 @@ fn write_shared_ptr(out: &mut OutFile, key: NamedImplKey) {
     // know at code generation time, so we generate both C++ and Rust side
     // bindings for a "new" method anyway. But the Rust code can't be called for
     // Opaque types because the 'new' method is not implemented.
-    let can_construct_from_value = out.types.structs.contains_key(ident)
-        || out.types.enums.contains_key(ident)
-        || out.types.aliases.contains_key(ident);
+    let can_construct_from_value = out.types.is_maybe_trivial(ident);
 
     writeln!(
         out,

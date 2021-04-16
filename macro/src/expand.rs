@@ -1302,9 +1302,7 @@ fn expand_unique_ptr(
 
     let (impl_generics, ty_generics) = generics::split_for_impl(key, explicit_impl, resolve);
 
-    let can_construct_from_value = types.structs.contains_key(ident)
-        || types.enums.contains_key(ident)
-        || types.aliases.contains_key(ident);
+    let can_construct_from_value = types.is_maybe_trivial(ident);
     let new_method = if can_construct_from_value {
         Some(quote! {
             #[doc(hidden)]
@@ -1398,9 +1396,7 @@ fn expand_shared_ptr(
 
     let (impl_generics, ty_generics) = generics::split_for_impl(key, explicit_impl, resolve);
 
-    let can_construct_from_value = types.structs.contains_key(ident)
-        || types.enums.contains_key(ident)
-        || types.aliases.contains_key(ident);
+    let can_construct_from_value = types.is_maybe_trivial(ident);
     let new_method = if can_construct_from_value {
         Some(quote! {
             #[doc(hidden)]
