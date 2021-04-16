@@ -773,9 +773,9 @@ fn expand_function_pointer_trampoline(
                     fn trampoline();
                 }
                 #shim
-                trampoline as usize as *const ()
+                trampoline as usize as *const ::std::ffi::c_void
             },
-            ptr: #var as usize as *const (),
+            ptr: #var as usize as *const ::std::ffi::c_void,
         };
     }
 }

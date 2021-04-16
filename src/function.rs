@@ -1,5 +1,7 @@
+use core::ffi::c_void;
+
 #[repr(C)]
 pub struct FatFunction {
-    pub trampoline: *const (),
-    pub ptr: *const (),
+    pub trampoline: *const c_void,
+    pub ptr: *const c_void,
 }
