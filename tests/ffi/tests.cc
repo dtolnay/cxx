@@ -336,7 +336,7 @@ void c_take_unique_ptr_string(std::unique_ptr<std::string> s) {
 }
 
 void c_take_unique_ptr_vector_u8(std::unique_ptr<std::vector<uint8_t>> v) {
-  if (v->size() == 4) {
+  if (v->size() == 3) {
     cxx_test_suite_set_correct();
   }
 }

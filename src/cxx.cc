@@ -503,6 +503,11 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
       std::vector<CXX_TYPE> *v, CXX_TYPE *value) noexcept {                    \
     v->push_back(std::move(*value));                                           \
     destroy(value);                                                            \
+  }                                                                            \
+  void cxxbridge1$std$vector$##RUST_TYPE##$pop_back(std::vector<CXX_TYPE> *v,  \
+                                                    CXX_TYPE *out) noexcept {  \
+    new (out) CXX_TYPE(std::move(v->back()));                                  \
+    v->pop_back();                                                             \
   }
 
 #define RUST_VEC_EXTERNS(RUST_TYPE, CXX_TYPE)                                  \

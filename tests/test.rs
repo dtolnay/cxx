@@ -150,9 +150,9 @@ fn test_c_take() {
     check!(ffi::c_take_unique_ptr_string(
         ffi::c_return_unique_ptr_string()
     ));
-    check!(ffi::c_take_unique_ptr_vector_u8(
-        ffi::c_return_unique_ptr_vector_u8()
-    ));
+    let mut vector = ffi::c_return_unique_ptr_vector_u8();
+    assert_eq!(vector.pin_mut().pop(), Some(9));
+    check!(ffi::c_take_unique_ptr_vector_u8(vector));
     let mut vector = ffi::c_return_unique_ptr_vector_f64();
     vector.pin_mut().push(9.0);
     check!(ffi::c_take_unique_ptr_vector_f64(vector));

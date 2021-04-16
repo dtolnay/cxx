@@ -1538,6 +1538,7 @@ fn expand_cxx_vector(
     let link_size = format!("{}size", prefix);
     let link_get_unchecked = format!("{}get_unchecked", prefix);
     let link_push_back = format!("{}push_back", prefix);
+    let link_pop_back = format!("{}pop_back", prefix);
     let unique_ptr_prefix = format!(
         "cxxbridge1$unique_ptr$std$vector${}$",
         resolve.name.to_symbol(),
@@ -1555,7 +1556,7 @@ fn expand_cxx_vector(
     let unsafe_token = format_ident!("unsafe", span = begin_span);
 
     let can_pass_element_by_value = types.is_maybe_trivial(elem);
-    let push_back_method = if can_pass_element_by_value {
+    let by_value_methods = if can_pass_element_by_value {
         Some(quote_spanned! {end_span=>
             #[doc(hidden)]
             unsafe fn __push_back(
@@ -1570,6 +1571,20 @@ fn expand_cxx_vector(
                     );
                 }
                 __push_back(this, value);
+            }
+            #[doc(hidden)]
+            unsafe fn __pop_back(
+                this: ::std::pin::Pin<&mut ::cxx::CxxVector<Self>>,
+                out: &mut ::std::mem::MaybeUninit<Self>,
+            ) {
+                extern "C" {
+                    #[link_name = #link_pop_back]
+                    fn __pop_back #impl_generics(
+                        this: ::std::pin::Pin<&mut ::cxx::CxxVector<#elem #ty_generics>>,
+                        out: &mut ::std::mem::MaybeUninit<#elem #ty_generics>,
+                    );
+                }
+                __pop_back(this, out);
             }
         })
     } else {
@@ -1598,7 +1613,7 @@ fn expand_cxx_vector(
                 }
                 __get_unchecked(v, pos)
             }
-            #push_back_method
+            #by_value_methods
             #[doc(hidden)]
             fn __unique_ptr_null() -> *mut ::std::ffi::c_void {
                 extern "C" {
