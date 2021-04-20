@@ -983,14 +983,22 @@ fn expand_rust_function_shim_impl(
             _ => quote!(#var),
         }
     });
-    let vars = receiver_var.into_iter().chain(arg_vars);
+    let vars: Vec<_> = receiver_var.into_iter().chain(arg_vars).collect();
 
     let wrap_super = invoke.map(|invoke| expand_rust_function_shim_super(sig, &local_name, invoke));
 
+    let mut requires_closure;
     let mut call = match invoke {
-        Some(_) => quote!(#local_name),
-        None => quote!(::std::mem::transmute::<*const (), #sig>(__extern)),
+        Some(_) => {
+            requires_closure = false;
+            quote!(#local_name)
+        }
+        None => {
+            requires_closure = true;
+            quote!(::std::mem::transmute::<*const (), #sig>(__extern))
+        }
     };
+    requires_closure |= !vars.is_empty();
     call.extend(quote! { (#(#vars),*) });
 
     let span = body_span;
@@ -1032,8 +1040,14 @@ fn expand_rust_function_shim_impl(
 
     let mut expr = match conversion {
         None => call,
-        Some(conversion) if !sig.throws => quote_spanned!(span=> #conversion(#call)),
-        Some(conversion) => quote_spanned!(span=> ::std::result::Result::map(#call, #conversion)),
+        Some(conversion) if !sig.throws => {
+            requires_closure = true;
+            quote_spanned!(span=> #conversion(#call))
+        }
+        Some(conversion) => {
+            requires_closure = true;
+            quote_spanned!(span=> ::std::result::Result::map(#call, #conversion))
+        }
     };
 
     let mut outparam = None;
@@ -1047,12 +1061,20 @@ fn expand_rust_function_shim_impl(
             Some(_) => quote_spanned!(span=> __return),
             None => quote_spanned!(span=> &mut ()),
         };
+        requires_closure = true;
         expr = quote_spanned!(span=> ::cxx::private::r#try(#out, #expr));
     } else if indirect_return {
+        requires_closure = true;
         expr = quote_spanned!(span=> ::std::ptr::write(__return, #expr));
     }
 
-    expr = quote_spanned!(span=> ::cxx::private::catch_unwind(__fn, move || #expr));
+    let closure = if requires_closure {
+        quote_spanned!(span=> move || #expr)
+    } else {
+        quote!(#local_name)
+    };
+
+    expr = quote_spanned!(span=> ::cxx::private::catch_unwind(__fn, #closure));
 
     let ret = if sig.throws {
         quote!(-> ::cxx::private::Result)
