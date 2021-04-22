@@ -30,7 +30,6 @@ pub mod types;
 mod visit;
 
 use self::attrs::OtherAttrs;
-use self::discriminant::Discriminant;
 use self::namespace::Namespace;
 use self::parse::kw;
 use self::symbol::Symbol;
@@ -41,6 +40,7 @@ use syn::{Attribute, Expr, Generics, Lifetime, LitInt, Token, Type as RustType};
 
 pub use self::atom::Atom;
 pub use self::derive::{Derive, Trait};
+pub use self::discriminant::Discriminant;
 pub use self::doc::Doc;
 pub use self::names::ForeignName;
 pub use self::parse::parse_items;

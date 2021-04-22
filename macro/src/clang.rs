@@ -1,13 +1,14 @@
 use crate::syntax::attrs::OtherAttrs;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
-use crate::syntax::{Api, Doc, Enum, ForeignName, Pair, Variant};
+use crate::syntax::{Api, Discriminant, Doc, Enum, ForeignName, Pair, Variant};
 use proc_macro2::Ident;
 use quote::format_ident;
 use serde::Deserialize;
 use std::env;
 use std::fs;
 use std::path::PathBuf;
+use std::str::FromStr;
 
 const CXX_CLANG_AST: &str = "CXX_CLANG_AST";
 
@@ -18,6 +19,8 @@ enum Clang {
     NamespaceDecl(NamespaceDecl),
     EnumDecl(EnumDecl),
     EnumConstantDecl(EnumConstantDecl),
+    ImplicitCastExpr,
+    ConstantExpr(ConstantExpr),
     Unknown,
 }
 
@@ -34,6 +37,11 @@ struct EnumDecl {
 #[derive(Deserialize)]
 struct EnumConstantDecl {
     name: String,
+}
+
+#[derive(Deserialize)]
+struct ConstantExpr {
+    value: String,
 }
 
 pub fn load(cx: &mut Errors, apis: &mut [Api]) {
@@ -151,6 +159,32 @@ fn traverse<'a>(
                     Ok(ident) => ident,
                     Err(_) => format_ident!("__Variant{}", enm.variants.len()),
                 };
+                let discriminant = match discriminant_value(&node.inner) {
+                    ParsedDiscriminant::Constant(discriminant) => discriminant,
+                    ParsedDiscriminant::Successor => match enm.variants.last() {
+                        None => Discriminant::zero(),
+                        Some(last) => match last.discriminant.checked_succ() {
+                            Some(discriminant) => discriminant,
+                            None => {
+                                let span = &enm.variants_from_header_attr;
+                                let msg = format!(
+                                    "overflow processing discriminant value for variant: {}",
+                                    decl.name,
+                                );
+                                return cx.error(span, msg);
+                            }
+                        },
+                    },
+                    ParsedDiscriminant::Fail => {
+                        let span = &enm.variants_from_header_attr;
+                        let msg = format!(
+                            "failed to obtain discriminant value for variant: {}",
+                            decl.name,
+                        );
+                        cx.error(span, msg);
+                        Discriminant::zero()
+                    }
+                };
                 enm.variants.push(Variant {
                     doc: Doc::new(),
                     attrs: OtherAttrs::none(),
@@ -159,7 +193,7 @@ fn traverse<'a>(
                         cxx: cxx_name,
                         rust: rust_name,
                     },
-                    discriminant: unimplemented!(),
+                    discriminant,
                     expr: None,
                 });
             }
@@ -171,5 +205,35 @@ fn traverse<'a>(
     }
     if let Clang::NamespaceDecl(_) = &node.kind {
         let _ = namespace.pop().unwrap();
+    }
+}
+
+enum ParsedDiscriminant {
+    Constant(Discriminant),
+    Successor,
+    Fail,
+}
+
+fn discriminant_value(mut clang: &[Node]) -> ParsedDiscriminant {
+    if clang.is_empty() {
+        // No discriminant expression provided; use successor of previous
+        // descriminant.
+        return ParsedDiscriminant::Successor;
+    }
+
+    loop {
+        if clang.len() != 1 {
+            return ParsedDiscriminant::Fail;
+        }
+
+        let node = &clang[0];
+        match &node.kind {
+            Clang::ImplicitCastExpr => clang = &node.inner,
+            Clang::ConstantExpr(expr) => match Discriminant::from_str(&expr.value) {
+                Ok(discriminant) => return ParsedDiscriminant::Constant(discriminant),
+                Err(_) => return ParsedDiscriminant::Fail,
+            },
+            _ => return ParsedDiscriminant::Fail,
+        }
     }
 }
