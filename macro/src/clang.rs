@@ -79,6 +79,19 @@ pub fn load(cx: &mut Errors, apis: &mut [Api]) {
 
     let ref mut namespace = Vec::new();
     traverse(root, namespace, variants_from_header, None);
+
+    for enm in variants_from_header {
+        if enm.variants.is_empty() {
+            let span = &enm.variants_from_header_attr;
+            let mut msg = "failed to find any C++ definition of enum ".to_owned();
+            for name in &enm.name.namespace {
+                msg += &name.to_string();
+                msg += "::";
+            }
+            msg += &enm.name.cxx.to_string();
+            cx.error(span, msg);
+        }
+    }
 }
 
 fn traverse<'a>(
