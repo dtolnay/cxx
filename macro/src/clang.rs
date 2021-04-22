@@ -10,7 +10,19 @@ enum Clang {
 }
 
 pub fn load(cx: &mut Errors, apis: &mut [Api]) {
+    let mut variants_from_header = Vec::new();
+    for api in apis {
+        if let Api::Enum(enm) = api {
+            if enm.variants_from_header {
+                variants_from_header.push(enm);
+            }
+        }
+    }
+
+    if variants_from_header.is_empty() {
+        return;
+    }
+
     let _ = cx;
-    let _ = apis;
     unimplemented!()
 }
