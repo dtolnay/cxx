@@ -68,3 +68,9 @@ impl Display for ForeignName {
         formatter.write_str(&self.text)
     }
 }
+
+impl PartialEq<str> for ForeignName {
+    fn eq(&self, rhs: &str) -> bool {
+        self.text == rhs
+    }
+}
