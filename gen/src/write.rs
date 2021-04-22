@@ -101,10 +101,10 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
             }
             Api::Enum(enm) => {
                 out.next_section();
-                if out.types.cxx.contains(&enm.name.rust) {
-                    check_enum(out, enm);
-                } else {
+                if !out.types.cxx.contains(&enm.name.rust) {
                     write_enum(out, enm);
+                } else if !enm.variants_from_header {
+                    check_enum(out, enm);
                 }
             }
             Api::RustType(ety) => {
