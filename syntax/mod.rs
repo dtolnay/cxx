@@ -37,7 +37,7 @@ use self::symbol::Symbol;
 use proc_macro2::{Ident, Span};
 use syn::punctuated::Punctuated;
 use syn::token::{Brace, Bracket, Paren};
-use syn::{Expr, Generics, Lifetime, LitInt, Token, Type as RustType};
+use syn::{Attribute, Expr, Generics, Lifetime, LitInt, Token, Type as RustType};
 
 pub use self::atom::Atom;
 pub use self::derive::{Derive, Trait};
@@ -112,6 +112,7 @@ pub struct Enum {
     pub brace_token: Brace,
     pub variants: Vec<Variant>,
     pub variants_from_header: bool,
+    pub variants_from_header_attr: Option<Attribute>,
     pub repr: Atom,
     pub repr_type: Type,
     pub explicit_repr: bool,

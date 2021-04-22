@@ -33,7 +33,7 @@ pub struct Parser<'a> {
     pub namespace: Option<&'a mut Namespace>,
     pub cxx_name: Option<&'a mut Option<ForeignName>>,
     pub rust_name: Option<&'a mut Option<Ident>>,
-    pub variants_from_header: Option<&'a mut bool>,
+    pub variants_from_header: Option<&'a mut Option<Attribute>>,
 
     // Suppress clippy needless_update lint ("struct update has no effect, all
     // the fields in the struct have already been specified") when preemptively
@@ -130,7 +130,7 @@ pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> Othe
                 cx.push(err);
             }
             if let Some(variants_from_header) = &mut parser.variants_from_header {
-                **variants_from_header = true;
+                **variants_from_header = Some(attr);
                 continue;
             }
         } else if attr.path.is_ident("allow")

@@ -187,7 +187,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
     let mut namespace = namespace.clone();
     let mut cxx_name = None;
     let mut rust_name = None;
-    let mut variants_from_header = false;
+    let mut variants_from_header = None;
     let attrs = attrs::parse(
         cx,
         item.attrs,
@@ -246,6 +246,8 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
         lifetimes: Punctuated::new(),
         gt_token: None,
     };
+    let variants_from_header_attr = variants_from_header;
+    let variants_from_header = variants_from_header_attr.is_some();
 
     Api::Enum(Enum {
         doc,
@@ -258,6 +260,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
         brace_token,
         variants,
         variants_from_header,
+        variants_from_header_attr,
         repr,
         repr_type,
         explicit_repr,
