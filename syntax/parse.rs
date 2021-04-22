@@ -187,6 +187,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
     let mut namespace = namespace.clone();
     let mut cxx_name = None;
     let mut rust_name = None;
+    let mut variants_from_header = false;
     let attrs = attrs::parse(
         cx,
         item.attrs,
@@ -197,6 +198,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
             namespace: Some(&mut namespace),
             cxx_name: Some(&mut cxx_name),
             rust_name: Some(&mut rust_name),
+            variants_from_header: Some(&mut variants_from_header),
             ..Default::default()
         },
     );
@@ -255,6 +257,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
         generics,
         brace_token,
         variants,
+        variants_from_header,
         repr,
         repr_type,
         explicit_repr,

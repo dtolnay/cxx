@@ -111,6 +111,7 @@ pub struct Enum {
     pub generics: Lifetimes,
     pub brace_token: Brace,
     pub variants: Vec<Variant>,
+    pub variants_from_header: bool,
     pub repr: Atom,
     pub repr_type: Type,
     pub explicit_repr: bool,
