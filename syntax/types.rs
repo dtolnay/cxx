@@ -101,6 +101,11 @@ impl<'a> Types<'a> {
                         duplicate_name(cx, enm, ident);
                     }
                     enums.insert(ident, enm);
+                    if enm.variants_from_header {
+                        // #![variants_from_header] enums are implicitly extern
+                        // C++ type.
+                        cxx.insert(&enm.name.rust);
+                    }
                     add_resolution(&enm.name, &enm.generics);
                 }
                 Api::CxxType(ety) => {
