@@ -349,11 +349,19 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
     check_reserved_name(cx, &enm.name.rust);
     check_lifetimes(cx, &enm.generics);
 
-    if enm.variants.is_empty() && !enm.explicit_repr {
+    if enm.variants.is_empty() && !enm.explicit_repr && !enm.variants_from_header {
         let span = span_for_enum_error(enm);
         cx.error(
             span,
             "explicit #[repr(...)] is required for enum without any variants",
+        );
+    }
+
+    if enm.variants_from_header && !enm.variants.is_empty() {
+        let span = span_for_enum_error(enm);
+        cx.error(
+            span,
+            "enum with #![variants_from_header] must be written with no explicit variants",
         );
     }
 
