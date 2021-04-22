@@ -3,6 +3,7 @@ use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::{Api, Doc, Enum, ForeignName, Pair, Variant};
 use proc_macro2::Ident;
+use quote::format_ident;
 use serde::Deserialize;
 use std::env;
 use std::fs;
@@ -78,7 +79,7 @@ pub fn load(cx: &mut Errors, apis: &mut [Api]) {
     };
 
     let ref mut namespace = Vec::new();
-    traverse(root, namespace, variants_from_header, None);
+    traverse(cx, root, namespace, variants_from_header, None);
 
     for enm in variants_from_header {
         if enm.variants.is_empty() {
@@ -95,6 +96,7 @@ pub fn load(cx: &mut Errors, apis: &mut [Api]) {
 }
 
 fn traverse<'a>(
+    cx: &mut Errors,
     node: &'a Node,
     namespace: &mut Vec<&'a str>,
     variants_from_header: &mut [&mut Enum],
@@ -139,11 +141,15 @@ fn traverse<'a>(
                     .span();
                 let cxx_name = match ForeignName::parse(&decl.name, span) {
                     Ok(foreign_name) => foreign_name,
-                    Err(_) => return,
+                    Err(_) => {
+                        let span = &enm.variants_from_header_attr;
+                        let msg = format!("unsupported C++ variant name: {}", decl.name);
+                        return cx.error(span, msg);
+                    }
                 };
                 let rust_name: Ident = match syn::parse_str(&decl.name) {
                     Ok(ident) => ident,
-                    Err(_) => return,
+                    Err(_) => format_ident!("__Variant{}", enm.variants.len()),
                 };
                 enm.variants.push(Variant {
                     doc: Doc::new(),
@@ -161,7 +167,7 @@ fn traverse<'a>(
         _ => {}
     }
     for inner in &node.inner {
-        traverse(inner, namespace, variants_from_header, idx);
+        traverse(cx, inner, namespace, variants_from_header, idx);
     }
     if let Clang::NamespaceDecl(_) = &node.kind {
         let _ = namespace.pop().unwrap();
