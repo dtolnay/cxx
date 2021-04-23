@@ -36,6 +36,9 @@ mod generics;
 mod syntax;
 mod type_id;
 
+#[cfg(feature = "experimental")]
+mod clang;
+
 use crate::syntax::file::Module;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::qualified::QualifiedName;

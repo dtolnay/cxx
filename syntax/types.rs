@@ -7,7 +7,7 @@ use crate::syntax::set::{OrderedSet, UnorderedSet};
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::visit::{self, Visit};
 use crate::syntax::{
-    toposort, Api, Atom, Enum, ExternType, Impl, Lifetimes, Pair, Struct, Type, TypeAlias,
+    toposort, Api, Atom, Enum, EnumRepr, ExternType, Impl, Lifetimes, Pair, Struct, Type, TypeAlias,
 };
 use proc_macro2::Ident;
 use quote::ToTokens;
@@ -88,7 +88,12 @@ impl<'a> Types<'a> {
                     add_resolution(&strct.name, &strct.generics);
                 }
                 Api::Enum(enm) => {
-                    all.insert(&enm.repr_type);
+                    match &enm.repr {
+                        EnumRepr::Native { atom: _, repr_type } => {
+                            all.insert(repr_type);
+                        }
+                        EnumRepr::Foreign { rust_type: _ } => {}
+                    }
                     let ident = &enm.name.rust;
                     if !type_names.insert(ident)
                         && (!cxx.contains(ident)
@@ -101,6 +106,11 @@ impl<'a> Types<'a> {
                         duplicate_name(cx, enm, ident);
                     }
                     enums.insert(ident, enm);
+                    if enm.variants_from_header {
+                        // #![variants_from_header] enums are implicitly extern
+                        // C++ type.
+                        cxx.insert(&enm.name.rust);
+                    }
                     add_resolution(&enm.name, &enm.generics);
                 }
                 Api::CxxType(ety) => {

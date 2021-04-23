@@ -91,17 +91,32 @@ impl Parse for Item {
 
         let item = input.parse()?;
         match item {
-            RustItem::Struct(item) => Ok(Item::Struct(ItemStruct { attrs, ..item })),
-            RustItem::Enum(item) => Ok(Item::Enum(ItemEnum { attrs, ..item })),
-            RustItem::ForeignMod(item) => Ok(Item::ForeignMod(ItemForeignMod {
-                attrs,
-                unsafety,
-                abi: item.abi,
-                brace_token: item.brace_token,
-                items: item.items,
-            })),
-            RustItem::Impl(item) => Ok(Item::Impl(ItemImpl { attrs, ..item })),
-            RustItem::Use(item) => Ok(Item::Use(ItemUse { attrs, ..item })),
+            RustItem::Struct(mut item) => {
+                item.attrs.splice(..0, attrs);
+                Ok(Item::Struct(item))
+            }
+            RustItem::Enum(mut item) => {
+                item.attrs.splice(..0, attrs);
+                Ok(Item::Enum(item))
+            }
+            RustItem::ForeignMod(mut item) => {
+                item.attrs.splice(..0, attrs);
+                Ok(Item::ForeignMod(ItemForeignMod {
+                    attrs: item.attrs,
+                    unsafety,
+                    abi: item.abi,
+                    brace_token: item.brace_token,
+                    items: item.items,
+                }))
+            }
+            RustItem::Impl(mut item) => {
+                item.attrs.splice(..0, attrs);
+                Ok(Item::Impl(item))
+            }
+            RustItem::Use(mut item) => {
+                item.attrs.splice(..0, attrs);
+                Ok(Item::Use(item))
+            }
             other => Ok(Item::Other(other)),
         }
     }

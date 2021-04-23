@@ -4,7 +4,7 @@ use crate::syntax::Atom::{self, *};
 use crate::syntax::{Derive, Doc, ForeignName};
 use proc_macro2::{Ident, TokenStream};
 use quote::ToTokens;
-use syn::parse::{ParseStream, Parser as _};
+use syn::parse::{Nothing, Parse, ParseStream, Parser as _};
 use syn::{Attribute, Error, LitStr, Path, Result, Token};
 
 // Intended usage:
@@ -33,6 +33,7 @@ pub struct Parser<'a> {
     pub namespace: Option<&'a mut Namespace>,
     pub cxx_name: Option<&'a mut Option<ForeignName>>,
     pub rust_name: Option<&'a mut Option<Ident>>,
+    pub variants_from_header: Option<&'a mut Option<Attribute>>,
 
     // Suppress clippy needless_update lint ("struct update has no effect, all
     // the fields in the struct have already been specified") when preemptively
@@ -120,6 +121,14 @@ pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> Othe
                     cx.push(err);
                     break;
                 }
+            }
+        } else if attr.path.is_ident("variants_from_header") && cfg!(feature = "experimental") {
+            if let Err(err) = Nothing::parse.parse2(attr.tokens.clone()) {
+                cx.push(err);
+            }
+            if let Some(variants_from_header) = &mut parser.variants_from_header {
+                **variants_from_header = Some(attr);
+                continue;
             }
         } else if attr.path.is_ident("allow")
             || attr.path.is_ident("warn")

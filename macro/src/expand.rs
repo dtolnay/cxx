@@ -32,9 +32,12 @@ pub fn bridge(mut ffi: Module) -> Result<TokenStream> {
     let content = mem::take(&mut ffi.content);
     let trusted = ffi.unsafety.is_some();
     let namespace = &ffi.namespace;
-    let ref apis = syntax::parse_items(errors, content, trusted, namespace);
+    let ref mut apis = syntax::parse_items(errors, content, trusted, namespace);
+    #[cfg(feature = "experimental")]
+    crate::clang::load(errors, apis);
     let ref types = Types::collect(errors, apis);
     errors.propagate()?;
+
     let generator = check::Generator::Macro;
     check::typecheck(errors, apis, types, generator);
     errors.propagate()?;
@@ -290,7 +293,7 @@ fn expand_enum(enm: &Enum) -> TokenStream {
     let ident = &enm.name.rust;
     let doc = &enm.doc;
     let attrs = &enm.attrs;
-    let repr = enm.repr;
+    let repr = &enm.repr;
     let type_id = type_id(&enm.name);
     let variants = enm.variants.iter().map(|variant| {
         let doc = &variant.doc;

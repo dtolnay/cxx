@@ -9,8 +9,8 @@ use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::{
-    derive, mangle, Api, Doc, Enum, ExternFn, ExternType, Pair, Signature, Struct, Trait, Type,
-    TypeAlias, Types, Var,
+    derive, mangle, Api, Doc, Enum, EnumRepr, ExternFn, ExternType, Pair, Signature, Struct, Trait,
+    Type, TypeAlias, Types, Var,
 };
 use proc_macro2::Ident;
 
@@ -101,10 +101,10 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
             }
             Api::Enum(enm) => {
                 out.next_section();
-                if out.types.cxx.contains(&enm.name.rust) {
-                    check_enum(out, enm);
-                } else {
+                if !out.types.cxx.contains(&enm.name.rust) {
                     write_enum(out, enm);
+                } else if !enm.variants_from_header {
+                    check_enum(out, enm);
                 }
             }
             Api::RustType(ety) => {
@@ -317,8 +317,12 @@ fn write_struct_decl(out: &mut OutFile, ident: &Pair) {
 }
 
 fn write_enum_decl(out: &mut OutFile, enm: &Enum) {
+    let repr = match &enm.repr {
+        EnumRepr::Foreign { .. } => return,
+        EnumRepr::Native { atom, .. } => *atom,
+    };
     write!(out, "enum class {} : ", enm.name.cxx);
-    write_atom(out, enm.repr);
+    write_atom(out, repr);
     writeln!(out, ";");
 }
 
@@ -376,6 +380,10 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
 }
 
 fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
+    let repr = match &enm.repr {
+        EnumRepr::Foreign { .. } => return,
+        EnumRepr::Native { atom, .. } => *atom,
+    };
     out.set_namespace(&enm.name.namespace);
     let guard = format!("CXXBRIDGE1_ENUM_{}", enm.name.to_symbol());
     writeln!(out, "#ifndef {}", guard);
@@ -384,7 +392,7 @@ fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
         writeln!(out, "//{}", line);
     }
     write!(out, "enum class {} : ", enm.name.cxx);
-    write_atom(out, enm.repr);
+    write_atom(out, repr);
     writeln!(out, " {{");
     for variant in &enm.variants {
         for line in variant.doc.to_string().lines() {
@@ -397,6 +405,10 @@ fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
 }
 
 fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
+    let repr = match &enm.repr {
+        EnumRepr::Foreign { .. } => return,
+        EnumRepr::Native { atom, .. } => *atom,
+    };
     out.set_namespace(&enm.name.namespace);
     out.include.type_traits = true;
     writeln!(
@@ -405,11 +417,11 @@ fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
         enm.name.cxx,
     );
     write!(out, "static_assert(sizeof({}) == sizeof(", enm.name.cxx);
-    write_atom(out, enm.repr);
+    write_atom(out, repr);
     writeln!(out, "), \"incorrect size\");");
     for variant in &enm.variants {
         write!(out, "static_assert(static_cast<");
-        write_atom(out, enm.repr);
+        write_atom(out, repr);
         writeln!(
             out,
             ">({}::{}) == {}, \"disagrees with the value in #[cxx::bridge]\");",
