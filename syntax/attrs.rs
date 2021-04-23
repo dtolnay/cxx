@@ -5,7 +5,7 @@ use crate::syntax::{Derive, Doc, ForeignName};
 use proc_macro2::{Ident, TokenStream};
 use quote::ToTokens;
 use syn::parse::{Nothing, Parse, ParseStream, Parser as _};
-use syn::{AttrStyle, Attribute, Error, LitStr, Path, Result, Token};
+use syn::{Attribute, Error, LitStr, Path, Result, Token};
 
 // Intended usage:
 //
@@ -122,10 +122,7 @@ pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> Othe
                     break;
                 }
             }
-        } else if attr.path.is_ident("variants_from_header")
-            && matches!(attr.style, AttrStyle::Inner(_))
-            && cfg!(feature = "experimental")
-        {
+        } else if attr.path.is_ident("variants_from_header") && cfg!(feature = "experimental") {
             if let Err(err) = Nothing::parse.parse2(attr.tokens.clone()) {
                 cx.push(err);
             }
