@@ -4,9 +4,9 @@ use crate::syntax::file::{Item, ItemForeignMod};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
-    attrs, error, Api, Array, Derive, Doc, Enum, ExternFn, ExternType, ForeignName, Impl, Include,
-    IncludeKind, Lang, Lifetimes, NamedType, Namespace, Pair, Ptr, Receiver, Ref, Signature,
-    SliceRef, Struct, Ty1, Type, TypeAlias, Var, Variant,
+    attrs, error, Api, Array, Derive, Doc, Enum, EnumRepr, ExternFn, ExternType, ForeignName, Impl,
+    Include, IncludeKind, Lang, Lifetimes, NamedType, Namespace, Pair, Ptr, Receiver, Ref,
+    Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
 use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
@@ -241,6 +241,10 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
     let name = pair(namespace, &item.ident, cxx_name, rust_name);
     let repr_ident = Ident::new(repr.as_ref(), Span::call_site());
     let repr_type = Type::Ident(NamedType::new(repr_ident));
+    let repr = EnumRepr::Native {
+        atom: repr,
+        repr_type,
+    };
     let generics = Lifetimes {
         lt_token: None,
         lifetimes: Punctuated::new(),
@@ -262,7 +266,6 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
         variants_from_header,
         variants_from_header_attr,
         repr,
-        repr_type,
         explicit_repr,
     })
 }

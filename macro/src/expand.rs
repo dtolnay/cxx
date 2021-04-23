@@ -293,7 +293,7 @@ fn expand_enum(enm: &Enum) -> TokenStream {
     let ident = &enm.name.rust;
     let doc = &enm.doc;
     let attrs = &enm.attrs;
-    let repr = enm.repr;
+    let repr = &enm.repr;
     let type_id = type_id(&enm.name);
     let variants = enm.variants.iter().map(|variant| {
         let doc = &variant.doc;

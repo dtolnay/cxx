@@ -1,7 +1,7 @@
 use crate::syntax::atom::Atom::*;
 use crate::syntax::{
-    Array, Atom, Derive, Enum, ExternFn, ExternType, Impl, Lifetimes, NamedType, Ptr, Receiver,
-    Ref, Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var,
+    Array, Atom, Derive, Enum, EnumRepr, ExternFn, ExternType, Impl, Lifetimes, NamedType, Ptr,
+    Receiver, Ref, Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote_spanned, ToTokens};
@@ -276,6 +276,15 @@ impl ToTokens for Signature {
             langle.to_tokens(tokens);
             token::Paren(langle.span).surround(tokens, |_| ());
             rangle.to_tokens(tokens);
+        }
+    }
+}
+
+impl ToTokens for EnumRepr {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        match self {
+            EnumRepr::Native { atom, repr_type: _ } => atom.to_tokens(tokens),
+            EnumRepr::Foreign { rust_type } => rust_type.to_tokens(tokens),
         }
     }
 }
