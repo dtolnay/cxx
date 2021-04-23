@@ -6,6 +6,7 @@ use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{format_ident, quote};
 use serde::Deserialize;
 use std::env;
+use std::fmt::{self, Display};
 use std::fs;
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -100,12 +101,8 @@ pub fn load(cx: &mut Errors, apis: &mut [Api]) {
     for enm in variants_from_header {
         if enm.variants.is_empty() {
             let span = &enm.variants_from_header_attr;
-            let mut msg = "failed to find any C++ definition of enum ".to_owned();
-            for name in &enm.name.namespace {
-                msg += &name.to_string();
-                msg += "::";
-            }
-            msg += &enm.name.cxx.to_string();
+            let name = CxxName(&enm.name);
+            let msg = format!("failed to find any C++ definition of enum {}", name);
             cx.error(span, msg);
         }
     }
@@ -141,12 +138,8 @@ fn traverse<'a>(
                         break;
                     } else {
                         let span = &enm.variants_from_header_attr;
-                        let mut msg = "found multiple C++ definitions of enum ".to_owned();
-                        for name in &enm.name.namespace {
-                            msg += &name.to_string();
-                            msg += "::";
-                        }
-                        msg += &enm.name.cxx.to_string();
+                        let name = CxxName(&enm.name);
+                        let msg = format!("found multiple C++ definitions of enum {}", name);
                         cx.error(span, msg);
                         return;
                     }
@@ -263,4 +256,16 @@ fn span_for_enum_error(enm: &Enum) -> TokenStream {
     let mut brace_token = Group::new(Delimiter::Brace, TokenStream::new());
     brace_token.set_span(enm.brace_token.span);
     quote!(#enum_token #brace_token)
+}
+
+struct CxxName<'a>(&'a Pair);
+
+impl<'a> Display for CxxName<'a> {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        for namespace in &self.0.namespace {
+            Display::fmt(namespace, formatter)?;
+            formatter.write_str("::")?;
+        }
+        Display::fmt(&self.0.cxx, formatter)
+    }
 }
