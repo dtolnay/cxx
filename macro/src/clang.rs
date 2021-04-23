@@ -136,8 +136,20 @@ fn traverse<'a>(
             idx = None;
             for (i, enm) in variants_from_header.iter().enumerate() {
                 if enm.name.cxx == **name && enm.name.namespace.iter().eq(&*namespace) {
-                    idx = Some(i);
-                    break;
+                    if enm.variants.is_empty() {
+                        idx = Some(i);
+                        break;
+                    } else {
+                        let span = &enm.variants_from_header_attr;
+                        let mut msg = "found multiple C++ definitions of enum ".to_owned();
+                        for name in &enm.name.namespace {
+                            msg += &name.to_string();
+                            msg += "::";
+                        }
+                        msg += &enm.name.cxx.to_string();
+                        cx.error(span, msg);
+                        return;
+                    }
                 }
             }
             if idx.is_none() {
