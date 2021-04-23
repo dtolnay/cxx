@@ -357,14 +357,6 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
         );
     }
 
-    if enm.variants_from_header && !enm.variants.is_empty() {
-        let span = span_for_enum_error(enm);
-        cx.error(
-            span,
-            "enum with #![variants_from_header] must be written with no explicit variants",
-        );
-    }
-
     for derive in &enm.derives {
         if derive.what == Trait::Default || derive.what == Trait::ExternType {
             let msg = format!("derive({}) on shared enum is not supported", derive);

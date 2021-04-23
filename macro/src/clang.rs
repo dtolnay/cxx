@@ -2,8 +2,8 @@ use crate::syntax::attrs::OtherAttrs;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::{Api, Discriminant, Doc, Enum, ForeignName, Pair, Variant};
-use proc_macro2::Ident;
-use quote::format_ident;
+use proc_macro2::{Delimiter, Group, Ident, TokenStream};
+use quote::{format_ident, quote};
 use serde::Deserialize;
 use std::env;
 use std::fs;
@@ -49,7 +49,15 @@ pub fn load(cx: &mut Errors, apis: &mut [Api]) {
     for api in apis {
         if let Api::Enum(enm) = api {
             if enm.variants_from_header {
-                variants_from_header.push(enm);
+                if enm.variants.is_empty() {
+                    variants_from_header.push(enm);
+                } else {
+                    let span = span_for_enum_error(enm);
+                    cx.error(
+                        span,
+                        "enum with #![variants_from_header] must be written with no explicit variants",
+                    );
+                }
             }
         }
     }
@@ -236,4 +244,11 @@ fn discriminant_value(mut clang: &[Node]) -> ParsedDiscriminant {
             _ => return ParsedDiscriminant::Fail,
         }
     }
+}
+
+fn span_for_enum_error(enm: &Enum) -> TokenStream {
+    let enum_token = enm.enum_token;
+    let mut brace_token = Group::new(Delimiter::Brace, TokenStream::new());
+    brace_token.set_span(enm.brace_token.span);
+    quote!(#enum_token #brace_token)
 }
