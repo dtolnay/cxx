@@ -1,15 +1,16 @@
 use crate::syntax::attrs::OtherAttrs;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
-use crate::syntax::{Api, Discriminant, Doc, Enum, ForeignName, Pair, Variant};
+use crate::syntax::{Api, Discriminant, Doc, Enum, EnumRepr, ForeignName, Pair, Variant};
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
-use quote::{format_ident, quote};
+use quote::{format_ident, quote, quote_spanned};
 use serde::Deserialize;
 use std::env;
 use std::fmt::{self, Display};
 use std::fs;
 use std::path::PathBuf;
 use std::str::FromStr;
+use syn::{parse_quote, Path};
 
 const CXX_CLANG_AST: &str = "CXX_CLANG_AST";
 
@@ -33,6 +34,8 @@ struct NamespaceDecl {
 #[derive(Deserialize)]
 struct EnumDecl {
     name: Option<String>,
+    #[serde(rename = "fixedUnderlyingType")]
+    fixed_underlying_type: Option<Type>,
 }
 
 #[derive(Deserialize)]
@@ -43,6 +46,14 @@ struct EnumConstantDecl {
 #[derive(Deserialize)]
 struct ConstantExpr {
     value: String,
+}
+
+#[derive(Deserialize)]
+struct Type {
+    #[serde(rename = "qualType")]
+    qual_type: String,
+    #[serde(rename = "desugaredQualType")]
+    desugared_qual_type: Option<String>,
 }
 
 pub fn load(cx: &mut Errors, apis: &mut [Api]) {
@@ -131,18 +142,40 @@ fn traverse<'a>(
                 None => return,
             };
             idx = None;
-            for (i, enm) in variants_from_header.iter().enumerate() {
+            for (i, enm) in variants_from_header.iter_mut().enumerate() {
                 if enm.name.cxx == **name && enm.name.namespace.iter().eq(&*namespace) {
-                    if enm.variants.is_empty() {
-                        idx = Some(i);
-                        break;
-                    } else {
+                    if !enm.variants.is_empty() {
                         let span = &enm.variants_from_header_attr;
-                        let name = CxxName(&enm.name);
-                        let msg = format!("found multiple C++ definitions of enum {}", name);
+                        let qual_name = CxxName(&enm.name);
+                        let msg = format!("found multiple C++ definitions of enum {}", qual_name);
                         cx.error(span, msg);
                         return;
                     }
+                    let fixed_underlying_type = match &decl.fixed_underlying_type {
+                        Some(fixed_underlying_type) => fixed_underlying_type,
+                        None => {
+                            let span = &enm.variants_from_header_attr;
+                            let name = &enm.name.cxx;
+                            let qual_name = CxxName(&enm.name);
+                            let msg = format!(
+                                "implicit implementation-defined repr for enum {} is not supported yet; consider changing its C++ definition to `enum {}: int {{...}}",
+                                qual_name, name,
+                            );
+                            cx.error(span, msg);
+                            return;
+                        }
+                    };
+                    let repr = translate_qual_type(
+                        cx,
+                        &enm,
+                        fixed_underlying_type
+                            .desugared_qual_type
+                            .as_ref()
+                            .unwrap_or(&fixed_underlying_type.qual_type),
+                    );
+                    enm.repr = EnumRepr::Foreign { rust_type: repr };
+                    idx = Some(i);
+                    break;
                 }
             }
             if idx.is_none() {
@@ -219,6 +252,43 @@ fn traverse<'a>(
     if let Clang::NamespaceDecl(_) = &node.kind {
         let _ = namespace.pop().unwrap();
     }
+}
+
+fn translate_qual_type(cx: &mut Errors, enm: &Enum, qual_type: &str) -> Path {
+    let rust_std_name = match qual_type {
+        "char" => "c_char",
+        "int" => "c_int",
+        "long" => "c_long",
+        "long long" => "c_longlong",
+        "signed char" => "c_schar",
+        "short" => "c_short",
+        "unsigned char" => "c_uchar",
+        "unsigned int" => "c_uint",
+        "unsigned long" => "c_ulong",
+        "unsigned long long" => "c_ulonglong",
+        "unsigned short" => "c_ushort",
+        unsupported => {
+            let span = &enm.variants_from_header_attr;
+            let qual_name = CxxName(&enm.name);
+            let msg = format!(
+                "unsupported underlying type for {}: {}",
+                qual_name, unsupported,
+            );
+            cx.error(span, msg);
+            "c_int"
+        }
+    };
+    let span = enm
+        .variants_from_header_attr
+        .as_ref()
+        .unwrap()
+        .path
+        .get_ident()
+        .unwrap()
+        .span();
+    let ident = Ident::new(rust_std_name, span);
+    let path = quote_spanned!(span=> ::std::os::raw::#ident);
+    parse_quote!(#path)
 }
 
 enum ParsedDiscriminant {
