@@ -93,22 +93,26 @@ pub fn load(cx: &mut Errors, apis: &mut [Api]) {
         }
     };
 
-    let memmap = match File::open(&ast_dump_path).and_then(|file| unsafe { Mmap::map(&file) }) {
-        Ok(memmap) => memmap,
+    let memmap = File::open(&ast_dump_path).and_then(|file| unsafe { Mmap::map(&file) });
+    let mut gunzipped;
+    let ast_dump_bytes = match match memmap {
+        Ok(ref memmap) => {
+            let is_gzipped = memmap.get(..2) == Some(b"\x1f\x8b");
+            if is_gzipped {
+                gunzipped = Vec::new();
+                let decode_result = GzDecoder::new(&mut gunzipped).write_all(&memmap);
+                decode_result.map(|_| gunzipped.as_slice())
+            } else {
+                Ok(&memmap as &[u8])
+            }
+        }
+        Err(error) => Err(error),
+    } {
+        Ok(bytes) => bytes,
         Err(error) => {
             let msg = format!("failed to read {}: {}", ast_dump_path.display(), error);
             return cx.error(span, msg);
         }
-    };
-
-    let is_gzipped = memmap.get(..2) == Some(b"\x1f\x8b");
-    let mut gunzipped;
-    let ast_dump_bytes: &[u8] = if is_gzipped {
-        gunzipped = Vec::new();
-        GzDecoder::new(&mut gunzipped).write_all(&memmap).unwrap();
-        &gunzipped
-    } else {
-        &memmap
     };
 
     let ref root: Node = match serde_json::from_slice(ast_dump_bytes) {
