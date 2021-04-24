@@ -143,6 +143,7 @@ version = "1.0.46"
 dependencies = [
  "clang-ast",
  "cxx",
+ "memmap",
  "proc-macro2",
  "quote",
  "serde",
@@ -213,6 +214,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8f1becd27d473556dc610b8afa1636ef90747b574a84553bc11e82371d5ef2d1"
 dependencies = [
  "cc",
+]
+
+[[package]]
+name = "memmap"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6585fd95e7bb50d6cc31e20d4cf9afb4e2ba16c5846fc76793f11218da9c475b"
+dependencies = [
+ "libc",
+ "winapi",
 ]
 
 [[package]]
