@@ -2,6 +2,7 @@ use crate::syntax::attrs::OtherAttrs;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::{Api, Discriminant, Doc, Enum, EnumRepr, ForeignName, Pair, Variant};
+use flate2::write::GzDecoder;
 use memmap::Mmap;
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{format_ident, quote, quote_spanned};
@@ -9,6 +10,7 @@ use serde::Deserialize;
 use std::env;
 use std::fmt::{self, Display};
 use std::fs::File;
+use std::io::Write;
 use std::path::PathBuf;
 use std::str::FromStr;
 use syn::{parse_quote, Path};
@@ -91,16 +93,25 @@ pub fn load(cx: &mut Errors, apis: &mut [Api]) {
         }
     };
 
-    let ast_dump_bytes =
-        match File::open(&ast_dump_path).and_then(|file| unsafe { Mmap::map(&file) }) {
-            Ok(memmap) => memmap,
-            Err(error) => {
-                let msg = format!("failed to read {}: {}", ast_dump_path.display(), error);
-                return cx.error(span, msg);
-            }
-        };
+    let memmap = match File::open(&ast_dump_path).and_then(|file| unsafe { Mmap::map(&file) }) {
+        Ok(memmap) => memmap,
+        Err(error) => {
+            let msg = format!("failed to read {}: {}", ast_dump_path.display(), error);
+            return cx.error(span, msg);
+        }
+    };
 
-    let ref root: Node = match serde_json::from_slice(&ast_dump_bytes) {
+    let is_gzipped = memmap.get(..2) == Some(b"\x1f\x8b");
+    let mut gunzipped;
+    let ast_dump_bytes: &[u8] = if is_gzipped {
+        gunzipped = Vec::new();
+        GzDecoder::new(&mut gunzipped).write_all(&memmap).unwrap();
+        &gunzipped
+    } else {
+        &memmap
+    };
+
+    let ref root: Node = match serde_json::from_slice(ast_dump_bytes) {
         Ok(root) => root,
         Err(error) => {
             let msg = format!("failed to read {}: {}", ast_dump_path.display(), error);
