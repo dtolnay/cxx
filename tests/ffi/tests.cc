@@ -211,6 +211,8 @@ const C *c_return_const_ptr(size_t c) { return new C(c); }
 
 C *c_return_mut_ptr(size_t c) { return new C(c); }
 
+char c_return_char() { return 'a'; }
+
 Borrow::Borrow(const std::string &s) : s(s) {}
 
 void Borrow::const_member() const {}

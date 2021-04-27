@@ -91,6 +91,7 @@ fn test_c_return() {
         enm @ ffi::ABEnum::ABAVal => assert_eq!(0, enm.repr),
         _ => assert!(false),
     }
+    assert_eq!(ffi::c_return_char(), 'a' as i8);
 }
 
 #[test]

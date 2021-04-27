@@ -120,6 +120,7 @@ Enum c_return_enum(uint16_t n);
 std::unique_ptr<Borrow> c_return_borrow(const std::string &s);
 const C *c_return_const_ptr(size_t n);
 C *c_return_mut_ptr(size_t n);
+char c_return_char();
 
 void c_take_primitive(size_t n);
 void c_take_shared(Shared shared);
