@@ -125,6 +125,19 @@ pub mod ffi {
         fn c_return_const_ptr(n: usize) -> *const C;
         fn c_return_mut_ptr(n: usize) -> *mut C;
         fn c_return_char() -> c_char;
+        fn c_return_cint() -> c_int;
+        fn c_return_cdouble() -> c_double;
+        fn c_return_cfloat() -> c_float;
+        fn c_return_clong() -> c_long;
+        fn c_return_clonglong() -> c_longlong;
+        fn c_return_cschar() -> c_schar;
+        fn c_return_cshort() -> c_short;
+        fn c_return_cuchar() -> c_uchar;
+        fn c_return_cuint() -> c_uint;
+        fn c_return_culong() -> c_ulong;
+        fn c_return_culonglong() -> c_ulonglong;
+        fn c_return_cushort() -> c_ushort;
+        fn c_return_unique_ptr_vector_ulonglong() -> UniquePtr<CxxVector<c_ulonglong>>;
 
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);

@@ -211,7 +211,10 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
                 Some(Isize) => out.builtin.rust_isize = true,
                 Some(CxxString) => out.include.string = true,
                 Some(RustString) => out.builtin.rust_string = true,
-                Some(Bool) | Some(Char) | Some(F32) | Some(F64) | None => {}
+                Some(Bool) | Some(Char) | Some(F32) | Some(F64) | Some(CInt) | Some(CDouble)
+                | Some(CFloat) | Some(CLong) | Some(CLongLong) | Some(CSChar) | Some(CShort)
+                | Some(CUChar) | Some(CUInt) | Some(CULong) | Some(CULongLong) | Some(CUShort)
+                | None => {}
             },
             Type::RustBox(_) => out.builtin.rust_box = true,
             Type::RustVec(_) => out.builtin.rust_vec = true,
@@ -1305,6 +1308,18 @@ fn write_atom(out: &mut OutFile, atom: Atom) {
         F64 => write!(out, "double"),
         CxxString => write!(out, "::std::string"),
         RustString => write!(out, "::rust::String"),
+        CInt => write!(out, "int"),
+        CDouble => write!(out, "double"),
+        CFloat => write!(out, "float"),
+        CLong => write!(out, "long"),
+        CLongLong => write!(out, "long long"),
+        CSChar => write!(out, "signed char"),
+        CShort => write!(out, "short"),
+        CUChar => write!(out, "unsigned char"),
+        CUInt => write!(out, "unsigned int"),
+        CULong => write!(out, "unsigned long"),
+        CULongLong => write!(out, "unsigned long long"),
+        CUShort => write!(out, "unsigned short"),
     }
 }
 

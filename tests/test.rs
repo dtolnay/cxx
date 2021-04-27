@@ -92,6 +92,24 @@ fn test_c_return() {
         _ => assert!(false),
     }
     assert_eq!(ffi::c_return_char(), 'a' as i8);
+    assert_eq!(ffi::c_return_cint(), 7 as std::os::raw::c_int);
+    assert_eq!(ffi::c_return_cdouble(), 8 as std::os::raw::c_double);
+    assert_eq!(ffi::c_return_cfloat(), 9 as std::os::raw::c_float);
+    assert_eq!(ffi::c_return_clong(), 10 as std::os::raw::c_long);
+    assert_eq!(ffi::c_return_clonglong(), 11 as std::os::raw::c_longlong);
+    assert_eq!(ffi::c_return_cschar(), 12 as std::os::raw::c_schar);
+    assert_eq!(ffi::c_return_cshort(), 13 as std::os::raw::c_short);
+    assert_eq!(ffi::c_return_cuchar(), 14 as std::os::raw::c_uchar);
+    assert_eq!(ffi::c_return_cuint(), 15 as std::os::raw::c_uint);
+    assert_eq!(ffi::c_return_culong(), 16 as std::os::raw::c_ulong);
+    assert_eq!(ffi::c_return_culonglong(), 17 as std::os::raw::c_ulonglong);
+    assert_eq!(ffi::c_return_cushort(), 18 as std::os::raw::c_ushort);
+    assert_eq!(
+        39 as std::os::raw::c_ulong,
+        ffi::c_return_unique_ptr_vector_ulonglong()
+            .into_iter()
+            .sum(),
+    );
 }
 
 #[test]
