@@ -32,6 +32,7 @@ public:
   const char *data() const noexcept;
   size_t size() const noexcept;
   size_t length() const noexcept;
+  bool empty() const noexcept;
 
   const char *c_str() noexcept;
 
