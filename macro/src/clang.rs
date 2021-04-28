@@ -1,8 +1,8 @@
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 pub type Node = clang_ast::Node<Clang>;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub enum Clang {
     NamespaceDecl(NamespaceDecl),
     EnumDecl(EnumDecl),
@@ -12,29 +12,29 @@ pub enum Clang {
     Unknown,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct NamespaceDecl {
     pub name: Option<Box<str>>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct EnumDecl {
     pub name: Option<Box<str>>,
     #[serde(rename = "fixedUnderlyingType")]
     pub fixed_underlying_type: Option<Type>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct EnumConstantDecl {
     pub name: Box<str>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct ConstantExpr {
     pub value: Box<str>,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct Type {
     #[serde(rename = "qualType")]
     pub qual_type: Box<str>,
