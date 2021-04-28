@@ -14,13 +14,18 @@ pub enum Clang {
 
 #[derive(Deserialize, Serialize)]
 pub struct NamespaceDecl {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<Box<str>>,
 }
 
 #[derive(Deserialize, Serialize)]
 pub struct EnumDecl {
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<Box<str>>,
-    #[serde(rename = "fixedUnderlyingType")]
+    #[serde(
+        rename = "fixedUnderlyingType",
+        skip_serializing_if = "Option::is_none"
+    )]
     pub fixed_underlying_type: Option<Type>,
 }
 
@@ -38,7 +43,7 @@ pub struct ConstantExpr {
 pub struct Type {
     #[serde(rename = "qualType")]
     pub qual_type: Box<str>,
-    #[serde(rename = "desugaredQualType")]
+    #[serde(rename = "desugaredQualType", skip_serializing_if = "Option::is_none")]
     pub desugared_qual_type: Option<Box<str>>,
 }
 
