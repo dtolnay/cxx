@@ -34,7 +34,7 @@ pub fn bridge(mut ffi: Module) -> Result<TokenStream> {
     let namespace = &ffi.namespace;
     let ref mut apis = syntax::parse_items(errors, content, trusted, namespace);
     #[cfg(feature = "experimental")]
-    crate::clang::load(errors, apis);
+    crate::load::load(errors, apis);
     let ref types = Types::collect(errors, apis);
     errors.propagate()?;
 
