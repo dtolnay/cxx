@@ -14,33 +14,33 @@ pub enum Clang {
 
 #[derive(Deserialize)]
 pub struct NamespaceDecl {
-    pub name: Option<String>,
+    pub name: Option<Box<str>>,
 }
 
 #[derive(Deserialize)]
 pub struct EnumDecl {
-    pub name: Option<String>,
+    pub name: Option<Box<str>>,
     #[serde(rename = "fixedUnderlyingType")]
     pub fixed_underlying_type: Option<Type>,
 }
 
 #[derive(Deserialize)]
 pub struct EnumConstantDecl {
-    pub name: String,
+    pub name: Box<str>,
 }
 
 #[derive(Deserialize)]
 pub struct ConstantExpr {
-    pub value: String,
+    pub value: Box<str>,
 }
 
 #[derive(Deserialize)]
 pub struct Type {
     #[serde(rename = "qualType")]
-    pub qual_type: String,
+    pub qual_type: Box<str>,
     #[serde(rename = "desugaredQualType")]
-    pub desugared_qual_type: Option<String>,
+    pub desugared_qual_type: Option<Box<str>>,
 }
 
 #[cfg(all(test, target_pointer_width = "64"))]
-const _: [(); std::mem::size_of::<Node>()] = [(); 112];
+const _: [(); std::mem::size_of::<Node>()] = [(); 88];
