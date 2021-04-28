@@ -53,6 +53,7 @@ public:
   const char *data() const noexcept;
   std::size_t size() const noexcept;
   std::size_t length() const noexcept;
+  bool empty() const noexcept;
 
   const char *c_str() noexcept;
 
@@ -105,6 +106,7 @@ public:
   const char *data() const noexcept;
   std::size_t size() const noexcept;
   std::size_t length() const noexcept;
+  bool empty() const noexcept;
 
   // Important in order for System V ABI to pass in registers.
   Str(const Str &) noexcept = default;

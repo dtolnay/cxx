@@ -131,6 +131,8 @@ std::size_t String::length() const noexcept {
   return cxxbridge1$string$len(this);
 }
 
+bool String::empty() const noexcept { return this->size() == 0; }
+
 const char *String::c_str() noexcept {
   auto len = this->length();
   cxxbridge1$string$reserve_total(this, len + 1);
@@ -227,6 +229,8 @@ const char *Str::data() const noexcept { return cxxbridge1$str$ptr(this); }
 std::size_t Str::size() const noexcept { return cxxbridge1$str$len(this); }
 
 std::size_t Str::length() const noexcept { return this->size(); }
+
+bool Str::empty() const noexcept { return this->size() == 0; }
 
 Str::const_iterator Str::begin() const noexcept { return this->cbegin(); }
 
