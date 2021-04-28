@@ -41,3 +41,6 @@ pub struct Type {
     #[serde(rename = "desugaredQualType")]
     pub desugared_qual_type: Option<String>,
 }
+
+#[cfg(all(test, target_pointer_width = "64"))]
+const _: [(); std::mem::size_of::<Node>()] = [(); 112];
