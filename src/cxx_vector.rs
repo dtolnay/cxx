@@ -384,6 +384,7 @@ macro_rules! vector_element_by_value_methods {
 
 macro_rules! impl_vector_element {
     ($kind:ident, $segment:expr, $name:expr, $ty:ty) => {
+        const_assert_eq!(0, mem::size_of::<CxxVector<$ty>>());
         const_assert_eq!(1, mem::align_of::<CxxVector<$ty>>());
 
         unsafe impl VectorElement for $ty {
