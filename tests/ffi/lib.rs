@@ -326,6 +326,7 @@ pub mod ffi {
     }
 
     impl Box<Shared> {}
+    impl CxxVector<SharedString> {}
 }
 
 mod other {

@@ -1593,10 +1593,10 @@ fn expand_cxx_vector(
                     #[link_name = #link_push_back]
                     fn __push_back #impl_generics(
                         this: ::std::pin::Pin<&mut ::cxx::CxxVector<#elem #ty_generics>>,
-                        value: &mut ::std::mem::ManuallyDrop<#elem #ty_generics>,
+                        value: *mut ::std::ffi::c_void,
                     );
                 }
-                __push_back(this, value);
+                __push_back(this, value as *mut ::std::mem::ManuallyDrop<Self> as *mut ::std::ffi::c_void);
             }
             #[doc(hidden)]
             unsafe fn __pop_back(
@@ -1607,10 +1607,10 @@ fn expand_cxx_vector(
                     #[link_name = #link_pop_back]
                     fn __pop_back #impl_generics(
                         this: ::std::pin::Pin<&mut ::cxx::CxxVector<#elem #ty_generics>>,
-                        out: &mut ::std::mem::MaybeUninit<#elem #ty_generics>,
+                        out: *mut ::std::ffi::c_void,
                     );
                 }
-                __pop_back(this, out);
+                __pop_back(this, out as *mut ::std::mem::MaybeUninit<Self> as *mut ::std::ffi::c_void);
             }
         })
     } else {
@@ -1635,9 +1635,12 @@ fn expand_cxx_vector(
             unsafe fn __get_unchecked(v: *mut ::cxx::CxxVector<Self>, pos: usize) -> *mut Self {
                 extern "C" {
                     #[link_name = #link_get_unchecked]
-                    fn __get_unchecked #impl_generics(_: *mut ::cxx::CxxVector<#elem #ty_generics>, _: usize) -> *mut #elem #ty_generics;
+                    fn __get_unchecked #impl_generics(
+                        v: *mut ::cxx::CxxVector<#elem #ty_generics>,
+                        pos: usize,
+                    ) -> *mut ::std::ffi::c_void;
                 }
-                __get_unchecked(v, pos)
+                __get_unchecked(v, pos) as *mut Self
             }
             #by_value_methods
             #[doc(hidden)]
