@@ -1,5 +1,6 @@
 #![allow(missing_docs)]
 
+use crate::void;
 use core::marker::{PhantomData, PhantomPinned};
 use core::mem;
 
@@ -11,7 +12,7 @@ use core::mem;
 // . !Unpin
 #[repr(C, packed)]
 pub struct Opaque {
-    _private: [*const u8; 0],
+    _private: [*const void; 0],
     _pinned: PhantomData<PhantomPinned>,
 }
 

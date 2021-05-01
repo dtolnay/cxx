@@ -1,14 +1,14 @@
-error[E0277]: `*const u8` cannot be sent between threads safely
+error[E0277]: `*const cxx::void` cannot be sent between threads safely
   --> $DIR/opaque_autotraits.rs:13:5
    |
 8  | fn assert_send<T: Send>() {}
    |                   ---- required by this bound in `assert_send`
 ...
 13 |     assert_send::<ffi::Opaque>();
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ `*const u8` cannot be sent between threads safely
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ `*const cxx::void` cannot be sent between threads safely
    |
-   = help: within `ffi::Opaque`, the trait `Send` is not implemented for `*const u8`
-   = note: required because it appears within the type `[*const u8; 0]`
+   = help: within `ffi::Opaque`, the trait `Send` is not implemented for `*const cxx::void`
+   = note: required because it appears within the type `[*const cxx::void; 0]`
    = note: required because it appears within the type `cxx::private::Opaque`
 note: required because it appears within the type `ffi::Opaque`
   --> $DIR/opaque_autotraits.rs:4:14
@@ -16,17 +16,17 @@ note: required because it appears within the type `ffi::Opaque`
 4  |         type Opaque;
    |              ^^^^^^
 
-error[E0277]: `*const u8` cannot be shared between threads safely
+error[E0277]: `*const cxx::void` cannot be shared between threads safely
   --> $DIR/opaque_autotraits.rs:14:5
    |
 9  | fn assert_sync<T: Sync>() {}
    |                   ---- required by this bound in `assert_sync`
 ...
 14 |     assert_sync::<ffi::Opaque>();
-   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ `*const u8` cannot be shared between threads safely
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^ `*const cxx::void` cannot be shared between threads safely
    |
-   = help: within `ffi::Opaque`, the trait `Sync` is not implemented for `*const u8`
-   = note: required because it appears within the type `[*const u8; 0]`
+   = help: within `ffi::Opaque`, the trait `Sync` is not implemented for `*const cxx::void`
+   = note: required because it appears within the type `[*const cxx::void; 0]`
    = note: required because it appears within the type `cxx::private::Opaque`
 note: required because it appears within the type `ffi::Opaque`
   --> $DIR/opaque_autotraits.rs:4:14
