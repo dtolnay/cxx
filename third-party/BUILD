@@ -111,5 +111,5 @@ rust_library(
 
 rust_library(
     name = "unicode-xid",
-    srcs = glob(["vendor/unicode-xid-0.2.1/src/**"]),
+    srcs = glob(["vendor/unicode-xid-0.2.2/src/**"]),
 )
