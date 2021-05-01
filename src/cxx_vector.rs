@@ -23,7 +23,13 @@ use core::slice;
 /// pointer, as in `&CxxVector<T>` or `UniquePtr<CxxVector<T>>`.
 #[repr(C, packed)]
 pub struct CxxVector<T> {
-    _private: [T; 0],
+    // A thing, because repr(C) structs are not allowed to consist exclusively
+    // of PhantomData fields.
+    _void: [c_void; 0],
+    // The conceptual vector elements to ensure that autotraits are propagated
+    // correctly, e.g. CxxVector is UnwindSafe iff T is.
+    _elements: PhantomData<[T]>,
+    // Prevent unpin operation from Pin<&mut CxxVector<T>> to &mut CxxVector<T>.
     _pinned: PhantomData<PhantomPinned>,
 }
 
