@@ -15,7 +15,7 @@ pub struct SharedPtr<T>
 where
     T: SharedPtrTarget,
 {
-    repr: [*mut c_void; 2],
+    repr: [MaybeUninit<*mut c_void>; 2],
     ty: PhantomData<T>,
 }
 

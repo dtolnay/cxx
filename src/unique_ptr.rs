@@ -6,10 +6,9 @@ use crate::ExternType;
 use core::ffi::c_void;
 use core::fmt::{self, Debug, Display};
 use core::marker::PhantomData;
-use core::mem;
+use core::mem::{self, MaybeUninit};
 use core::ops::{Deref, DerefMut};
 use core::pin::Pin;
-use core::ptr;
 
 /// Binding to C++ `std::unique_ptr<T, std::default_delete<T>>`.
 #[repr(C)]
@@ -17,7 +16,7 @@ pub struct UniquePtr<T>
 where
     T: UniquePtrTarget,
 {
-    repr: *mut c_void,
+    repr: MaybeUninit<*mut c_void>,
     ty: PhantomData<T>,
 }
 
@@ -207,9 +206,9 @@ pub unsafe trait UniquePtrTarget {
     #[doc(hidden)]
     fn __typename(f: &mut fmt::Formatter) -> fmt::Result;
     #[doc(hidden)]
-    fn __null() -> *mut c_void;
+    fn __null() -> MaybeUninit<*mut c_void>;
     #[doc(hidden)]
-    fn __new(value: Self) -> *mut c_void
+    fn __new(value: Self) -> MaybeUninit<*mut c_void>
     where
         Self: Sized,
     {
@@ -219,26 +218,26 @@ pub unsafe trait UniquePtrTarget {
         unreachable!()
     }
     #[doc(hidden)]
-    unsafe fn __raw(raw: *mut Self) -> *mut c_void;
+    unsafe fn __raw(raw: *mut Self) -> MaybeUninit<*mut c_void>;
     #[doc(hidden)]
-    unsafe fn __get(repr: *mut c_void) -> *const Self;
+    unsafe fn __get(repr: MaybeUninit<*mut c_void>) -> *const Self;
     #[doc(hidden)]
-    unsafe fn __release(repr: *mut c_void) -> *mut Self;
+    unsafe fn __release(repr: MaybeUninit<*mut c_void>) -> *mut Self;
     #[doc(hidden)]
-    unsafe fn __drop(repr: *mut c_void);
+    unsafe fn __drop(repr: MaybeUninit<*mut c_void>);
 }
 
 extern "C" {
     #[link_name = "cxxbridge1$unique_ptr$std$string$null"]
-    fn unique_ptr_std_string_null(this: *mut *mut c_void);
+    fn unique_ptr_std_string_null(this: *mut MaybeUninit<*mut c_void>);
     #[link_name = "cxxbridge1$unique_ptr$std$string$raw"]
-    fn unique_ptr_std_string_raw(this: *mut *mut c_void, raw: *mut CxxString);
+    fn unique_ptr_std_string_raw(this: *mut MaybeUninit<*mut c_void>, raw: *mut CxxString);
     #[link_name = "cxxbridge1$unique_ptr$std$string$get"]
-    fn unique_ptr_std_string_get(this: *const *mut c_void) -> *const CxxString;
+    fn unique_ptr_std_string_get(this: *const MaybeUninit<*mut c_void>) -> *const CxxString;
     #[link_name = "cxxbridge1$unique_ptr$std$string$release"]
-    fn unique_ptr_std_string_release(this: *mut *mut c_void) -> *mut CxxString;
+    fn unique_ptr_std_string_release(this: *mut MaybeUninit<*mut c_void>) -> *mut CxxString;
     #[link_name = "cxxbridge1$unique_ptr$std$string$drop"]
-    fn unique_ptr_std_string_drop(this: *mut *mut c_void);
+    fn unique_ptr_std_string_drop(this: *mut MaybeUninit<*mut c_void>);
 }
 
 unsafe impl UniquePtrTarget for CxxString {
@@ -247,29 +246,29 @@ unsafe impl UniquePtrTarget for CxxString {
         f.write_str("CxxString")
     }
     #[doc(hidden)]
-    fn __null() -> *mut c_void {
-        let mut repr = ptr::null_mut::<c_void>();
+    fn __null() -> MaybeUninit<*mut c_void> {
+        let mut repr = MaybeUninit::uninit();
         unsafe {
             unique_ptr_std_string_null(&mut repr);
         }
         repr
     }
     #[doc(hidden)]
-    unsafe fn __raw(raw: *mut Self) -> *mut c_void {
-        let mut repr = ptr::null_mut::<c_void>();
+    unsafe fn __raw(raw: *mut Self) -> MaybeUninit<*mut c_void> {
+        let mut repr = MaybeUninit::uninit();
         unique_ptr_std_string_raw(&mut repr, raw);
         repr
     }
     #[doc(hidden)]
-    unsafe fn __get(repr: *mut c_void) -> *const Self {
+    unsafe fn __get(repr: MaybeUninit<*mut c_void>) -> *const Self {
         unique_ptr_std_string_get(&repr)
     }
     #[doc(hidden)]
-    unsafe fn __release(mut repr: *mut c_void) -> *mut Self {
+    unsafe fn __release(mut repr: MaybeUninit<*mut c_void>) -> *mut Self {
         unique_ptr_std_string_release(&mut repr)
     }
     #[doc(hidden)]
-    unsafe fn __drop(mut repr: *mut c_void) {
+    unsafe fn __drop(mut repr: MaybeUninit<*mut c_void>) {
         unique_ptr_std_string_drop(&mut repr);
     }
 }
@@ -283,23 +282,23 @@ where
         write!(f, "CxxVector<{}>", display(T::__typename))
     }
     #[doc(hidden)]
-    fn __null() -> *mut c_void {
+    fn __null() -> MaybeUninit<*mut c_void> {
         T::__unique_ptr_null()
     }
     #[doc(hidden)]
-    unsafe fn __raw(raw: *mut Self) -> *mut c_void {
+    unsafe fn __raw(raw: *mut Self) -> MaybeUninit<*mut c_void> {
         T::__unique_ptr_raw(raw)
     }
     #[doc(hidden)]
-    unsafe fn __get(repr: *mut c_void) -> *const Self {
+    unsafe fn __get(repr: MaybeUninit<*mut c_void>) -> *const Self {
         T::__unique_ptr_get(repr)
     }
     #[doc(hidden)]
-    unsafe fn __release(repr: *mut c_void) -> *mut Self {
+    unsafe fn __release(repr: MaybeUninit<*mut c_void>) -> *mut Self {
         T::__unique_ptr_release(repr)
     }
     #[doc(hidden)]
-    unsafe fn __drop(repr: *mut c_void) {
+    unsafe fn __drop(repr: MaybeUninit<*mut c_void>) {
         T::__unique_ptr_drop(repr);
     }
 }

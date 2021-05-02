@@ -16,7 +16,7 @@ pub struct WeakPtr<T>
 where
     T: WeakPtrTarget,
 {
-    repr: [*mut c_void; 2],
+    repr: [MaybeUninit<*mut c_void>; 2],
     ty: PhantomData<T>,
 }
 
