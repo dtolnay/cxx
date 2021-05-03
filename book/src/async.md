@@ -87,7 +87,7 @@ void shim_doThing(
 
 ### Streams
 
-The async approach can be extended to support streaming data as well using a channel such as [`futures::channel::mpsc::unbounded`] instead of oneshot and passing `DoThingContext` to the closure as a reference:
+The async example above can be extended to support streaming data as well using a channel such as [`futures::channel::mpsc::unbounded`] instead of oneshot and passing `DoThingContext` to the closure as a reference:
 
 [`futures::channel::mpsc::unbounded`]: https://docs.rs/futures/0.3.8/futures/channel/mpsc/fn.unbounded.html
 
