@@ -84,3 +84,25 @@ void shim_doThing(
       });
 }
 ```
+
+### Streams
+
+The async approach can be extended to support streaming data as well using a channel such as [`futures::channel::mpsc::unbounded`] instead of oneshot and passing `DoThingContext` to the closure as a reference:
+
+[`futures::channel::mpsc::unbounded`]: https://docs.rs/futures/0.3.8/futures/channel/mpsc/fn.unbounded.html
+
+```cpp
+// bridge_shim.cc
+
+#include "path/to/bridge.rs.h"
+#include "rust/cxx.h"
+
+void shim_doThing(
+    Arg arg,
+    rust::Fn<void(const DoThingContext &ctx, Ret ret)> done,
+    rust::Box<DoThingContext> ctx) noexcept {
+        done(*ctx, std::move(res));
+        done(*ctx, std::move(res));
+        done(*ctx, std::move(res));
+}
+```
