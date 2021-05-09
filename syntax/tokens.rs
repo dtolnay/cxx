@@ -81,13 +81,19 @@ impl ToTokens for Ref {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let Ref {
             pinned: _,
+            option: _,
             ampersand,
             lifetime,
             mutable: _,
             inner,
             pin_tokens,
+            option_tokens,
             mutability,
         } = self;
+        if let Some((option, langle, _rangle)) = option_tokens {
+            tokens.extend(quote_spanned!(option.span=> ::std::option::Option));
+            langle.to_tokens(tokens);
+        }
         if let Some((pin, langle, _rangle)) = pin_tokens {
             tokens.extend(quote_spanned!(pin.span=> ::std::pin::Pin));
             langle.to_tokens(tokens);
@@ -97,6 +103,9 @@ impl ToTokens for Ref {
         mutability.to_tokens(tokens);
         inner.to_tokens(tokens);
         if let Some((_pin, _langle, rangle)) = pin_tokens {
+            rangle.to_tokens(tokens);
+        }
+        if let Some((_option, _langle, rangle)) = option_tokens {
             rangle.to_tokens(tokens);
         }
     }
