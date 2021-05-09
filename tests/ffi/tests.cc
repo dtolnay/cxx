@@ -94,7 +94,9 @@ const size_t &c_return_nested_ns_ref(const ::A::B::ABShared &shared) {
 
 size_t &c_return_mut(Shared &shared) { return shared.z; }
 
-const size_t *c_return_opt(const Shared &shared) { return &shared.z; }
+const size_t *c_return_opt_ref(const Shared &shared) { return &shared.z; }
+
+size_t *c_return_opt_mut(Shared &shared) { return &shared.z; }
 
 rust::Str c_return_str(const Shared &shared) {
   (void)shared;
@@ -271,7 +273,15 @@ void c_take_ref_c(const C &c) {
   }
 }
 
-void c_take_opt_r(const R *r) {
+void c_take_opt_ref_r(const R *r) {
+  if (r) {
+    c_take_ref_r(*r);
+  } else {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_opt_mut_r(R *r) {
   if (r) {
     c_take_ref_r(*r);
   } else {

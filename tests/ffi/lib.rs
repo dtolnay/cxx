@@ -99,7 +99,8 @@ pub mod ffi {
         fn c_return_shared_ptr() -> SharedPtr<C>;
         fn c_return_ref(shared: &Shared) -> &usize;
         fn c_return_mut(shared: &mut Shared) -> &mut usize;
-        fn c_return_opt(shared: &Shared) -> Option<&usize>;
+        fn c_return_opt_ref(shared: &Shared) -> Option<&usize>;
+        fn c_return_opt_mut(shared: &mut Shared) -> Option<&mut usize>;
         fn c_return_str(shared: &Shared) -> &str;
         fn c_return_slice_char(shared: &Shared) -> &[c_char];
         fn c_return_mutsliceu8(slice: &mut [u8]) -> &mut [u8];
@@ -131,7 +132,8 @@ pub mod ffi {
         fn c_take_box(r: Box<R>);
         fn c_take_ref_r(r: &R);
         fn c_take_ref_c(c: &C);
-        fn c_take_opt_r(r: Option<&R>);
+        fn c_take_opt_ref_r(r: Option<&R>);
+        fn c_take_opt_mut_r(r: Option<&mut R>);
         fn c_take_str(s: &str);
         fn c_take_slice_char(s: &[c_char]);
         fn c_take_slice_shared(s: &[Shared]);
