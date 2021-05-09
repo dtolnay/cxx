@@ -538,7 +538,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                         true => quote_spanned!(span=> |var| var as *mut #inner as *mut ::std::ffi::c_void),
                     };
                     match (ty.option, ty.mutable) {
-                        (false, _) => quote_spanned!(span=> (#to_ptr)(#var)),
+                        (false, _) => quote_spanned!(span=> #[allow(clippy::redundant_closure_call)] (#to_ptr)(#var)),
                         (true, false) => quote_spanned!(span=> #var.map_or(::std::ptr::null(), #to_ptr)),
                         (true, true) => quote_spanned!(span=> #var.map_or(::std::ptr::null_mut(), #to_ptr)),
                     }
