@@ -92,6 +92,14 @@ fn test_c_return() {
         _ => assert!(false),
     }
     assert_eq!(ffi::c_return_char(), 'a' as i8);
+}
+
+#[test]
+#[allow(clippy::unnecessary_cast)] // because we want explicitly
+                                   // to check that these types match the various std::os::raw
+                                   // types, even when those types are actually just
+                                   // aliases for i32, etc.
+fn test_c_return_raw_types() {
     assert_eq!(ffi::c_return_cint(), 7 as std::os::raw::c_int);
     assert_eq!(ffi::c_return_cdouble(), 8 as std::os::raw::c_double);
     assert_eq!(ffi::c_return_cfloat(), 9 as std::os::raw::c_float);
