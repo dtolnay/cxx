@@ -105,7 +105,7 @@ fn test_c_return() {
     assert_eq!(ffi::c_return_culonglong(), 17 as std::os::raw::c_ulonglong);
     assert_eq!(ffi::c_return_cushort(), 18 as std::os::raw::c_ushort);
     assert_eq!(
-        39 as std::os::raw::c_ulong,
+        39 as std::os::raw::c_ulonglong,
         ffi::c_return_unique_ptr_vector_ulonglong()
             .into_iter()
             .sum(),
