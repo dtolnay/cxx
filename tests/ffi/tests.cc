@@ -215,8 +215,6 @@ char c_return_char() { return 'a'; }
 
 int c_return_cint() { return 7; }
 
-double c_return_cdouble() { return 8.0; }
-float c_return_cfloat() { return 9.0; }
 long c_return_clong() { return 10; }
 long long c_return_clonglong() { return 11; }
 signed char c_return_cschar() { return 12; }

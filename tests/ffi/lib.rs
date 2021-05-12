@@ -126,8 +126,6 @@ pub mod ffi {
         fn c_return_mut_ptr(n: usize) -> *mut C;
         fn c_return_char() -> c_char;
         fn c_return_cint() -> c_int;
-        fn c_return_cdouble() -> c_double;
-        fn c_return_cfloat() -> c_float;
         fn c_return_clong() -> c_long;
         fn c_return_clonglong() -> c_longlong;
         fn c_return_cschar() -> c_schar;

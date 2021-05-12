@@ -122,8 +122,6 @@ const C *c_return_const_ptr(size_t n);
 C *c_return_mut_ptr(size_t n);
 char c_return_char();
 int c_return_cint();
-double c_return_cdouble();
-float c_return_cfloat();
 long c_return_clong();
 long long c_return_clonglong();
 signed char c_return_cschar();

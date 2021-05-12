@@ -13,8 +13,6 @@ impl ToTokens for Type {
             Type::Ident(ident) => {
                 if ident.rust == Char
                     || ident.rust == CInt
-                    || ident.rust == CDouble
-                    || ident.rust == CFloat
                     || ident.rust == CLong
                     || ident.rust == CLongLong
                     || ident.rust == CSChar

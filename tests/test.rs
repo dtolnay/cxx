@@ -101,8 +101,6 @@ fn test_c_return() {
                                    // aliases for i32, etc.
 fn test_c_return_raw_types() {
     assert_eq!(ffi::c_return_cint(), 7 as std::os::raw::c_int);
-    assert_eq!(ffi::c_return_cdouble(), 8 as std::os::raw::c_double);
-    assert_eq!(ffi::c_return_cfloat(), 9 as std::os::raw::c_float);
     assert_eq!(ffi::c_return_clong(), 10 as std::os::raw::c_long);
     assert_eq!(ffi::c_return_clonglong(), 11 as std::os::raw::c_longlong);
     assert_eq!(ffi::c_return_cschar(), 12 as std::os::raw::c_schar);
