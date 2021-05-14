@@ -659,12 +659,24 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                     },
                     inner if types.is_considered_improper_ctype(inner) => {
                         let mutability = ty.mutability;
-                        let deref_mut = quote_spanned!(span=> &#mutability *#call.cast());
-                        match ty.pinned {
-                            false => deref_mut,
+                        let call = quote_spanned!(span=> let __ptr = #call);
+                        let unpinned = quote_spanned!(span=> &#mutability *__ptr.cast());
+                        let maybe_pinned = match ty.pinned {
+                            false => unpinned,
                             true => {
-                                quote_spanned!(span=> ::std::pin::Pin::new_unchecked(#deref_mut))
+                                quote_spanned!(span=> ::std::pin::Pin::new_unchecked(#unpinned))
                             }
+                        };
+                        match ty.option {
+                            false => quote_spanned!(span=> #call; #maybe_pinned),
+                            true => quote_spanned! {span=>
+                                #call;
+                                if __ptr.is_null() {
+                                    ::std::option::Option::None
+                                } else {
+                                    ::std::option::Option::Some(#maybe_pinned)
+                                }
+                            },
                         }
                     }
                     _ => call,
