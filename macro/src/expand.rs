@@ -527,16 +527,15 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                     true => quote_spanned!(span=> ::cxx::private::RustVec::from_mut(#var)),
                 },
                 inner if types.is_considered_improper_ctype(inner) => {
-                    let var = match ty.pinned {
-                        false => quote!(#var),
-                        true => quote_spanned!(span=> ::std::pin::Pin::into_inner_unchecked(#var)),
+                    let unpin = match ty.pinned {
+                        false => quote!(),
+                        true => quote_spanned!(span=> ::std::pin::Pin::into_inner_unchecked),
                     };
-                    let to_ptr = match ty.mutable {
-                        false => {
-                            quote_spanned!(span=> |var| var as *const #inner as *const ::std::ffi::c_void)
-                        }
-                        true => quote_spanned!(span=> |var| var as *mut #inner as *mut ::std::ffi::c_void),
+                    let raw_mutability = match ty.mutable {
+                        false => quote_spanned!(span=> const),
+                        true => quote_spanned!(span=> mut),
                     };
+                    let to_ptr = quote_spanned!(span=> |var| #unpin(var) as *#raw_mutability #inner as *#raw_mutability ::std::ffi::c_void);
                     match (ty.option, ty.mutable) {
                         (false, _) => quote_spanned!(span=> #[allow(clippy::redundant_closure_call)] (#to_ptr)(#var)),
                         (true, false) => quote_spanned!(span=> #var.map_or(::std::ptr::null(), #to_ptr)),
