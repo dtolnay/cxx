@@ -136,6 +136,7 @@ void c_take_opt_mut_r(R *r);
 void c_take_opt_ref_c(const C *c);
 void c_take_opt_mut_c(C *c);
 void c_take_ref_ns_c(const ::H::H &h);
+E *c_roundtrip_opaque_opt_mut_pin_ref(E *e);
 void c_take_str(rust::Str s);
 void c_take_slice_char(rust::Slice<const char> s);
 void c_take_slice_shared(rust::Slice<const Shared> s);

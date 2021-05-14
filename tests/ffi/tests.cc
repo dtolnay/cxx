@@ -311,6 +311,8 @@ void c_take_ref_ns_c(const ::H::H &h) {
   }
 }
 
+E *c_roundtrip_opaque_opt_mut_pin_ref(E *e) { return e; }
+
 void c_take_str(rust::Str s) {
   if (std::string(s) == "2020") {
     cxx_test_suite_set_correct();
