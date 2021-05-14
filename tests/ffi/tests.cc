@@ -289,6 +289,22 @@ void c_take_opt_mut_r(R *r) {
   }
 }
 
+void c_take_opt_ref_c(const C *c) {
+  if (c) {
+    c_take_ref_c(*c);
+  } else {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_opt_mut_c(C *c) {
+  if (c) {
+    c_take_ref_c(*c);
+  } else {
+    cxx_test_suite_set_correct();
+  }
+}
+
 void c_take_ref_ns_c(const ::H::H &h) {
   if (h.h == "hello") {
     cxx_test_suite_set_correct();
@@ -639,6 +655,14 @@ void c_take_trivial_mut_ref(D &d) { (void)d; }
 void c_take_trivial_pin_ref(const D &d) { (void)d; }
 
 void c_take_trivial_pin_mut_ref(D &d) { (void)d; }
+
+void c_take_trivial_opt_ref(const D *d) { (void)d; }
+
+void c_take_trivial_opt_mut_ref(D *d) { (void)d; }
+
+void c_take_trivial_opt_pin_ref(const D *d) { (void)d; }
+
+void c_take_trivial_opt_pin_mut_ref(D *d) { (void)d; }
 
 void D::c_take_trivial_ref_method() const {
   if (d == 30) {

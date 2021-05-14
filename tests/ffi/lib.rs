@@ -134,6 +134,8 @@ pub mod ffi {
         fn c_take_ref_c(c: &C);
         fn c_take_opt_ref_r(r: Option<&R>);
         fn c_take_opt_mut_r(r: Option<&mut R>);
+        fn c_take_opt_ref_c(r: Option<&C>);
+        fn c_take_opt_mut_c(r: Option<Pin<&mut C>>);
         fn c_take_str(s: &str);
         fn c_take_slice_char(s: &[c_char]);
         fn c_take_slice_shared(s: &[Shared]);
