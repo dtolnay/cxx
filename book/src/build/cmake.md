@@ -22,3 +22,11 @@ what is available in these links, feel free to make a PR adding it to this list.
   - Tested on Windows 10 with MSVC, and on Linux
 
 ---
+
+- **<https://github.com/trondhe/rusty_cmake>**
+
+  - Simple alias target that can be linked into a Cpp project
+  - Only tested with Cpp calling into Rust
+  - Tested on Windows 10 with -gnu target, and on Linux
+
+---
