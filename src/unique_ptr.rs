@@ -84,6 +84,30 @@ where
         }
     }
 
+    /// Returns a pointer to the object owned by this UniquePtr
+    /// if any, otherwise the null pointer.
+    pub fn as_ptr(&self) -> *const T {
+        match self.as_ref() {
+            Some(target) => target as *const T,
+            None => std::ptr::null(),
+        }
+    }
+
+    /// Returns a mutable pointer to the object owned by this UniquePtr
+    /// if any, otherwise the null pointer.
+    ///
+    /// # Safety
+    ///
+    /// This funtion is unsafe because improper modification of the
+    /// resultant raw pointer may invalidate the UniquePtr (for example,
+    /// freeing the underlying pointer.)
+    pub unsafe fn as_mut_ptr(&mut self) -> *mut T {
+        match self.as_mut() {
+            Some(target) => target.get_unchecked_mut(),
+            None => std::ptr::null_mut(),
+        }
+    }
+
     /// Consumes the UniquePtr, releasing its ownership of the heap-allocated T.
     ///
     /// Matches the behavior of [std::unique_ptr\<T\>::release](https://en.cppreference.com/w/cpp/memory/unique_ptr/release).
