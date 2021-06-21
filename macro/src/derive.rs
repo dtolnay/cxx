@@ -16,7 +16,7 @@ pub fn expand_struct(strct: &Struct, actual_derives: &mut Option<TokenStream>) -
             Trait::Debug => expanded.extend(struct_debug(strct, span)),
             Trait::Default => expanded.extend(struct_default(strct, span)),
             #[cfg(feature = "serde-derive")]
-            Trait::Deserialize => traits.push(quote_spanned!(span=> serde::Deserialize)),
+            Trait::Deserialize => traits.push(quote!(serde::Deserialize)),
             Trait::Eq => traits.push(quote_spanned!(span=> ::std::cmp::Eq)),
             Trait::ExternType => unreachable!(),
             Trait::Hash => traits.push(quote_spanned!(span=> ::std::hash::Hash)),
@@ -24,7 +24,7 @@ pub fn expand_struct(strct: &Struct, actual_derives: &mut Option<TokenStream>) -
             Trait::PartialEq => traits.push(quote_spanned!(span=> ::std::cmp::PartialEq)),
             Trait::PartialOrd => expanded.extend(struct_partial_ord(strct, span)),
             #[cfg(feature = "serde-derive")]
-            Trait::Serialize => traits.push(quote_spanned!(span=> serde::Serialize))
+            Trait::Serialize => traits.push(quote!(serde::Serialize))
         }
     }
 
