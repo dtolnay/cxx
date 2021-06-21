@@ -57,10 +57,6 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
         }
     }
 
-    if cfg!(feature = "serde-derive") {
-        expanded.extend()
-    }
-
     for api in apis {
         match api {
             Api::Include(_) | Api::Impl(_) => {}
