@@ -28,6 +28,8 @@
     clippy::wrong_self_convention
 )]
 
+#[cfg(feature = "serde-derive")]
+extern crate serde;
 extern crate proc_macro;
 
 mod derive;
@@ -40,6 +42,7 @@ mod type_id;
 mod clang;
 #[cfg(feature = "experimental")]
 mod load;
+
 
 use crate::syntax::file::Module;
 use crate::syntax::namespace::Namespace;
