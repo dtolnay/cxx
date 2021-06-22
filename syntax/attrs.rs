@@ -43,6 +43,7 @@ pub struct Parser<'a> {
 
 pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> OtherAttrs {
     let mut passthrough_attrs = Vec::new();
+    let mut passthrough_attrs = Vec::new();
     for attr in attrs {
         if attr.path.is_ident("doc") {
             match parse_doc_attribute.parse2(attr.tokens.clone()) {
