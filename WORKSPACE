@@ -1,7 +1,6 @@
 workspace(name = "cxx.rs")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("//tools/bazel:vendor.bzl", "vendor")
 
 http_archive(
     name = "rules_rust",
@@ -15,12 +14,17 @@ http_archive(
 
 load("@rules_rust//rust:repositories.bzl", "rust_repositories")
 
+RUST_VERSION = "1.51.0"
+
 rust_repositories(
     edition = "2018",
-    version = "1.51.0",
+    version = RUST_VERSION,
 )
+
+load("//tools/bazel:vendor.bzl", "vendor")
 
 vendor(
     name = "third-party",
     lockfile = "//third-party:Cargo.lock",
+    cargo_version = RUST_VERSION,
 )
