@@ -2,6 +2,8 @@
 of a crate in the current workspace.
 """
 
+load("@rules_rust//rust:repositories.bzl", "load_arbitrary_tool", "DEFAULT_RUST_VERSION")
+
 def _impl(repository_ctx):
     # Link cxx repository into @third-party.
     lockfile = repository_ctx.path(repository_ctx.attr.lockfile)
@@ -14,8 +16,27 @@ def _impl(repository_ctx):
     root_lockfile = repository_ctx.path("workspace/Cargo.lock")
     _copy_file(repository_ctx, src = vendor_lockfile, dst = root_lockfile)
 
-    # Execute cargo vendor.
-    cmd = ["cargo", "vendor", "--versioned-dirs", "third-party/vendor"]
+    # Figure out which version of cargo to use.
+    if repository_ctx.attr.target_triple:
+        target_triple = repository_ctx.attr.target_triple
+    elif "mac" in repository_ctx.os.name:
+        target_triple = "x86_64-apple-darwin"
+    elif "windows" in repository_ctx.os.name:
+        target_triple = "x86_64-pc-windows-msvc"
+    else:
+        target_triple = "x86_64-unknown-linux-gnu"
+
+    # Download cargo.
+    load_arbitrary_tool(
+        ctx = repository_ctx,
+        tool_name = "cargo",
+        tool_subdirectories = ["cargo"],
+        version = repository_ctx.attr.cargo_version,
+        iso_date = repository_ctx.attr.cargo_iso_date,
+        target_triple = target_triple,
+    )
+    
+    cmd = ["{}/bin/cargo".format(repository_ctx.path(".")), "vendor", "--versioned-dirs", "third-party/vendor"]
     result = repository_ctx.execute(
         cmd,
         quiet = True,
@@ -54,6 +75,16 @@ def _log_cargo_vendor(repository_ctx, result):
 vendor = repository_rule(
     doc = "A rule used to vendor the dependencies of a crate in the current workspace",
     attrs = {
+        "cargo_version": attr.string(
+            doc = "The version of cargo to use",
+            default = DEFAULT_RUST_VERSION,
+        ),
+        "cargo_iso_date": attr.string(
+            doc = "The date of the tool (or None, if the version is a specific version)",
+        ),
+        "target_triple": attr.string(
+            doc = "The target triple of the cargo binary to download",
+        ),
         "lockfile": attr.label(
             doc = "A lockfile providing the set of crates to vendor",
         ),
