@@ -11,7 +11,18 @@ impl ToTokens for Type {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         match self {
             Type::Ident(ident) => {
-                if ident.rust == Char {
+                if ident.rust == Char
+                    || ident.rust == CInt
+                    || ident.rust == CLong
+                    || ident.rust == CLongLong
+                    || ident.rust == CSChar
+                    || ident.rust == CShort
+                    || ident.rust == CUChar
+                    || ident.rust == CUInt
+                    || ident.rust == CULong
+                    || ident.rust == CULongLong
+                    || ident.rust == CUShort
+                {
                     let span = ident.rust.span();
                     tokens.extend(quote_spanned!(span=> ::std::os::raw::));
                 } else if ident.rust == CxxString {

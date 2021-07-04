@@ -20,6 +20,16 @@ pub enum Atom {
     F64,
     CxxString,
     RustString,
+    CInt,
+    CLong,
+    CLongLong,
+    CSChar,
+    CShort,
+    CUChar,
+    CUInt,
+    CULong,
+    CULongLong,
+    CUShort,
 }
 
 impl Atom {
@@ -46,6 +56,16 @@ impl Atom {
             "f64" => Some(F64),
             "CxxString" => Some(CxxString),
             "String" => Some(RustString),
+            "c_int" => Some(CInt),
+            "c_long" => Some(CLong),
+            "c_longlong" => Some(CLongLong),
+            "c_schar" => Some(CSChar),
+            "c_short" => Some(CShort),
+            "c_uchar" => Some(CUChar),
+            "c_uint" => Some(CUInt),
+            "c_ulong" => Some(CULong),
+            "c_ulonglong" => Some(CULongLong),
+            "c_ushort" => Some(CUShort),
             _ => None,
         }
     }
@@ -77,6 +97,16 @@ impl AsRef<str> for Atom {
             F64 => "f64",
             CxxString => "CxxString",
             RustString => "String",
+            CInt => "c_int",
+            CLong => "c_long",
+            CLongLong => "c_longlong",
+            CSChar => "c_schar",
+            CShort => "c_short",
+            CUChar => "c_uchar",
+            CUInt => "c_uint",
+            CULong => "c_ulong",
+            CULongLong => "c_ulonglong",
+            CUShort => "c_ushort",
         }
     }
 }
