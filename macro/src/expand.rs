@@ -169,8 +169,8 @@ fn expand_struct(strct: &Struct) -> TokenStream {
 
     quote! {
         #doc
-        #attrs
         #derives
+        #attrs
         #[repr(C)]
         #struct_def
 

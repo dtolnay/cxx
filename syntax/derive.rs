@@ -13,12 +13,16 @@ pub enum Trait {
     Copy,
     Debug,
     Default,
+    #[cfg(feature = "serde-derive")]
+    Deserialize,
     Eq,
     ExternType,
     Hash,
     Ord,
     PartialEq,
     PartialOrd,
+    #[cfg(feature = "serde-derive")]
+    Serialize
 }
 
 impl Derive {
@@ -28,12 +32,16 @@ impl Derive {
             "Copy" => Trait::Copy,
             "Debug" => Trait::Debug,
             "Default" => Trait::Default,
+            #[cfg(feature = "serde-derive")]
+            "Deserialize" => Trait::Deserialize,
             "Eq" => Trait::Eq,
             "ExternType" => Trait::ExternType,
             "Hash" => Trait::Hash,
             "Ord" => Trait::Ord,
             "PartialEq" => Trait::PartialEq,
             "PartialOrd" => Trait::PartialOrd,
+            #[cfg(feature = "serde-derive")]
+            "Serialize" => Trait::Serialize,
             _ => return None,
         };
         let span = ident.span();
@@ -54,12 +62,16 @@ impl AsRef<str> for Trait {
             Trait::Copy => "Copy",
             Trait::Debug => "Debug",
             Trait::Default => "Default",
+            #[cfg(feature = "serde-derive")]
+            Trait::Deserialize => "Deserialize",
             Trait::Eq => "Eq",
             Trait::ExternType => "ExternType",
             Trait::Hash => "Hash",
             Trait::Ord => "Ord",
             Trait::PartialEq => "PartialEq",
             Trait::PartialOrd => "PartialOrd",
+            #[cfg(feature = "serde-derive")]
+            Trait::Serialize => "Serialize",
         }
     }
 }
