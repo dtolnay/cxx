@@ -769,7 +769,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         write!(out, "return ");
     }
     match &efn.ret {
-        Some(Type::Ref(_)) => write!(out, "&"),
+        Some(Type::Ref(ty)) if !ty.option => write!(out, "&"),
         Some(Type::Str(_)) if !indirect_return => {
             out.builtin.rust_str_repr = true;
             write!(out, "::rust::impl<::rust::Str>::repr(");
@@ -1231,7 +1231,11 @@ fn write_type(out: &mut OutFile, ty: &Type) {
         }
         Type::Ref(r) => {
             write_pointee_type(out, &r.inner, r.mutable);
-            write!(out, " &");
+            if r.option {
+                write!(out, " *")
+            } else {
+                write!(out, " &");
+            }
         }
         Type::Ptr(p) => {
             write_pointee_type(out, &p.inner, p.mutable);

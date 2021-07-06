@@ -527,15 +527,19 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                     true => quote_spanned!(span=> ::cxx::private::RustVec::from_mut(#var)),
                 },
                 inner if types.is_considered_improper_ctype(inner) => {
-                    let var = match ty.pinned {
-                        false => quote!(#var),
-                        true => quote_spanned!(span=> ::std::pin::Pin::into_inner_unchecked(#var)),
+                    let unpin = match ty.pinned {
+                        false => quote!(),
+                        true => quote_spanned!(span=> ::std::pin::Pin::into_inner_unchecked),
                     };
-                    match ty.mutable {
-                        false => {
-                            quote_spanned!(span=> #var as *const #inner as *const ::std::ffi::c_void)
-                        }
-                        true => quote_spanned!(span=> #var as *mut #inner as *mut ::std::ffi::c_void),
+                    let raw_mutability = match ty.mutable {
+                        false => quote_spanned!(span=> const),
+                        true => quote_spanned!(span=> mut),
+                    };
+                    let to_ptr = quote_spanned!(span=> |var| #unpin(var) as *#raw_mutability #inner as *#raw_mutability ::std::ffi::c_void);
+                    match (ty.option, ty.mutable) {
+                        (false, _) => quote_spanned!(span=> #[allow(clippy::redundant_closure_call)] (#to_ptr)(#var)),
+                        (true, false) => quote_spanned!(span=> #var.map_or(::std::ptr::null(), #to_ptr)),
+                        (true, true) => quote_spanned!(span=> #var.map_or(::std::ptr::null_mut(), #to_ptr)),
                     }
                 }
                 _ => quote!(#var),
@@ -655,12 +659,24 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                     },
                     inner if types.is_considered_improper_ctype(inner) => {
                         let mutability = ty.mutability;
-                        let deref_mut = quote_spanned!(span=> &#mutability *#call.cast());
-                        match ty.pinned {
-                            false => deref_mut,
+                        let call = quote_spanned!(span=> let __ptr = #call);
+                        let unpinned = quote_spanned!(span=> &#mutability *__ptr.cast());
+                        let maybe_pinned = match ty.pinned {
+                            false => unpinned,
                             true => {
-                                quote_spanned!(span=> ::std::pin::Pin::new_unchecked(#deref_mut))
+                                quote_spanned!(span=> ::std::pin::Pin::new_unchecked(#unpinned))
                             }
+                        };
+                        match ty.option {
+                            false => quote_spanned!(span=> #call; #maybe_pinned),
+                            true => quote_spanned! {span=>
+                                #call;
+                                if __ptr.is_null() {
+                                    ::std::option::Option::None
+                                } else {
+                                    ::std::option::Option::Some(#maybe_pinned)
+                                }
+                            },
                         }
                     }
                     _ => call,
