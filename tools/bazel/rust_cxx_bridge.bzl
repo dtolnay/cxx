@@ -41,9 +41,11 @@ def rust_cxx_bridge(name, src, deps = []):
         name = name,
         srcs = [src + ".cc"],
         deps = deps + [":%s/include" % name],
+        compiler_flags = ["-std=c++17"],
     )
 
     cc_library(
         name = "%s/include" % name,
         hdrs = [src + ".h"],
+        compiler_flags = ["-std=c++17"],
     )

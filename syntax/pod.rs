@@ -24,10 +24,12 @@ impl<'a> Types<'a> {
             }
             Type::RustBox(_)
             | Type::RustVec(_)
+            | Type::RustOption(_)
             | Type::UniquePtr(_)
             | Type::SharedPtr(_)
             | Type::WeakPtr(_)
             | Type::CxxVector(_)
+            | Type::CxxOptional(_)
             | Type::Void(_) => false,
             Type::Ref(_) | Type::Str(_) | Type::Fn(_) | Type::SliceRef(_) | Type::Ptr(_) => true,
             Type::Array(array) => self.is_guaranteed_pod(&array.inner),

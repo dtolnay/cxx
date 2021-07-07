@@ -9,6 +9,7 @@
 #include <iosfwd>
 #include <iterator>
 #include <new>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
@@ -807,6 +808,130 @@ T *Box<T>::into_raw() noexcept {
 template <typename T>
 Box<T>::Box(uninit) noexcept {}
 #endif // CXXBRIDGE1_RUST_BOX
+
+#ifndef CXXBRIDGE1_RUST_OPTION
+template <typename T>
+class Option final {
+public:
+  Option() noexcept;
+  // Option(const Option&) noexcept;
+  Option(Option&&) noexcept;
+  // Option(T) noexcept;
+  // Option(const T&) noexcept;
+  Option(T&&) noexcept;
+  ~Option() noexcept;
+  void drop() noexcept;
+
+  // Option &operator=(Option &&) &noexcept;
+
+  const T *operator->() const;
+  const T &operator*() const;
+  T *operator->();
+  T &operator*();
+
+  bool has_value() const noexcept;
+  T& value();
+private:
+  union OptionContents {
+    T value;
+    size_t empty;
+
+    OptionContents() {
+      empty = 0;
+    }
+    // Destruction handled in Option since it knows if type was created
+    ~OptionContents() {}
+  };
+  OptionContents inner;  // Avoid initialization
+};
+#endif // CXXBRIDGE1_RUST_OPTION
+
+#ifndef CXXBRIDGE1_RUST_OPTION
+#define CXXBRIDGE1_RUST_OPTION
+template <typename T>
+Option<T>::Option() noexcept {}
+
+// template <typename T>
+// Option<T>::Option(const Option& other) noexcept {
+//   initialized = other.initialized;
+//   if (initialized) {
+//     inner.value = other.inner.value;
+//   }
+// }
+
+template <typename T>
+Option<T>::Option(Option&& other) noexcept {
+  if (other.inner.empty != 0) {
+    inner.value = std::move(other.inner.value);
+  }
+  other.inner.empty = 0;
+}
+
+// template <typename T>
+// Option<T>::Option(T value) noexcept {
+//   initialized = true;
+//   inner.value = value;
+// }
+// 
+// template <typename T>
+// Option<T>::Option(const T& value) noexcept {
+//   initialized = true;
+//   inner.value = value;
+// }
+// 
+// template <typename T>
+// Option<T>::Option(T&& value) noexcept {
+//   initialized = true;
+//   inner.value = value;
+// }
+
+template <typename T>
+Option<T>::~Option() noexcept {
+  if (inner.empty != 0) {
+    inner.value.~T();
+  }
+}
+
+// template <typename T>
+// Option<T> &Option<T>::operator=(Option &&other) &noexcept {
+//   initialized = other.initialized;
+//   if (initialized) {
+//     inner.value = other.inner.value;
+//   }
+//   return *this;
+// }
+
+template <typename T>
+const T *Option<T>::operator->() const {
+  return &inner.value;
+}
+
+template <typename T>
+const T &Option<T>::operator*() const {
+  return inner.value;
+}
+
+template <typename T>
+T *Option<T>::operator->() {
+  return &inner.value;
+}
+
+template <typename T>
+T &Option<T>::operator*() {
+  return inner.value;
+}
+
+template <typename T>
+bool Option<T>::has_value() const noexcept {
+  return inner.empty != 0;
+}
+
+template <typename T>
+T& Option<T>::value() {
+  return inner.value;
+}
+#endif // CXXBRIDGE1_RUST_OPTION
+ 
 
 #ifndef CXXBRIDGE1_RUST_VEC
 #define CXXBRIDGE1_RUST_VEC

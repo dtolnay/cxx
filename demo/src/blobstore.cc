@@ -2,9 +2,12 @@
 #include "demo/src/main.rs.h"
 #include <algorithm>
 #include <functional>
+#include <vector>
 #include <set>
 #include <string>
 #include <unordered_map>
+#include <optional>
+#include <iostream>
 
 namespace org {
 namespace blobstore {
@@ -27,6 +30,16 @@ BlobstoreClient::BlobstoreClient() : impl(new class BlobstoreClient::impl) {}
 // Upload a new blob and return a blobid that serves as a handle to the blob.
 uint64_t BlobstoreClient::put(MultiBuf &buf) const {
   std::string contents;
+  BlobMetadata metadata{};
+  metadata.tags.push_back("cpp");
+  metadata.size = 1;
+
+  auto option = some_optional_stuff(std::make_unique<std::optional<BlobMetadata>>(std::optional<BlobMetadata>(metadata)));
+  std::cout << "has_value: " << option.has_value() << std::endl;
+  auto value = std::move(option.value());
+  std::cout << "value->size: " << value->size << std::endl;
+  std::cout << "value->tags[0]: " << value->tags[0] << std::endl;
+  std::cout << "foo: " << foo(std::make_unique<std::vector<BlobMetadata>>()) << std::endl;
 
   // Traverse the caller's chunk iterator.
   //

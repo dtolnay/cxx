@@ -613,6 +613,55 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
     self->~weak_ptr();                                                         \
   }
 
+#define STD_OPTIONAL_OPS(RUST_TYPE, CXX_TYPE)                                  \
+  bool cxxbridge1$std$optional$##RUST_TYPE##$has_value(                        \
+      const std::optional<CXX_TYPE> &o) noexcept {                             \
+    return o.has_value();                                                      \
+  }                                                                            \
+  const CXX_TYPE *cxxbridge1$std$optional$##RUST_TYPE##$value(                 \
+      const std::optional<CXX_TYPE> &o) noexcept {                             \
+    return &(o.value());                                                       \
+  }                                                                            \
+  CXX_TYPE *cxxbridge1$std$optional$##RUST_TYPE##$value_mut(                   \
+      std::optional<CXX_TYPE> &o) noexcept {                                   \
+    return &(o.value());                                                       \
+  }                                                                            \
+  void cxxbridge1$unique_ptr$std$optional$##RUST_TYPE##$null(                  \
+      std::unique_ptr<std::optional<CXX_TYPE>> *ptr) noexcept {                \
+    new (ptr) std::unique_ptr<std::optional<CXX_TYPE>>();                      \
+  }                                                                            \
+  void cxxbridge1$unique_ptr$std$optional$##RUST_TYPE##$raw(                   \
+      std::unique_ptr<std::optional<CXX_TYPE>> *ptr,                           \
+      std::optional<CXX_TYPE> *raw) noexcept {                                   \
+    new (ptr) std::unique_ptr<std::optional<CXX_TYPE>>(raw);                   \
+  }                                                                            \
+  const std::optional<CXX_TYPE>                                                \
+      *cxxbridge1$unique_ptr$std$optional$##RUST_TYPE##$get(                   \
+          const std::unique_ptr<std::optional<CXX_TYPE>> &ptr) noexcept {      \
+    return ptr.get();                                                          \
+  }                                                                            \
+  std::optional<CXX_TYPE>                                                      \
+      *cxxbridge1$unique_ptr$std$optional$##RUST_TYPE##$release(               \
+          std::unique_ptr<std::optional<CXX_TYPE>> &ptr) noexcept {            \
+    return ptr.release();                                                      \
+  }                                                                            \
+  void cxxbridge1$unique_ptr$std$optional$##RUST_TYPE##$drop(                  \
+      std::unique_ptr<std::optional<CXX_TYPE>> *ptr) noexcept {                \
+    ptr->~unique_ptr();                                                        \
+  }
+
+#define RUST_OPTION_EXTERNS(RUST_TYPE, CXX_TYPE)                               \
+  void cxxbridge1$rust_option$##RUST_TYPE##$new(                               \
+      rust::Option<CXX_TYPE> *ptr) noexcept;                                   \
+  void cxxbridge1$rust_option$##RUST_TYPE##$drop(                              \
+      rust::Option<CXX_TYPE> *ptr) noexcept;
+
+#define RUST_OPTION_OPS(RUST_TYPE, CXX_TYPE)                                   \
+  template <>                                                                  \
+  Option<CXX_TYPE>::Option() noexcept {                                        \
+    cxxbridge1$rust_option$##RUST_TYPE##$new(this);                            \
+  }
+
 // Usize and isize are the same type as one of the below.
 #define FOR_EACH_NUMERIC(MACRO)                                                \
   MACRO(u8, std::uint8_t)                                                      \
@@ -651,15 +700,29 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
   MACRO(isize, rust::isize)                                                    \
   MACRO(string, std::string)
 
+#define FOR_EACH_STD_OPTIONAL(MACRO)                                           \
+  FOR_EACH_NUMERIC(MACRO)                                                      \
+  MACRO(string, std::string)
+
+#define FOR_EACH_RUST_OPTION(MACRO)                                            \
+  FOR_EACH_NUMERIC(MACRO)                                                      \
+  MACRO(bool, bool)                                                            \
+  MACRO(char, char)                                                            \
+  MACRO(string, rust::String)                                                  \
+  MACRO(str, rust::Str)
+
 extern "C" {
 FOR_EACH_STD_VECTOR(STD_VECTOR_OPS)
 FOR_EACH_TRIVIAL_STD_VECTOR(STD_VECTOR_TRIVIAL_OPS)
 FOR_EACH_RUST_VEC(RUST_VEC_EXTERNS)
 FOR_EACH_SHARED_PTR(SHARED_PTR_OPS)
+FOR_EACH_STD_OPTIONAL(STD_OPTIONAL_OPS)
+FOR_EACH_RUST_OPTION(RUST_OPTION_EXTERNS)
 } // extern "C"
 
 namespace rust {
 inline namespace cxxbridge1 {
 FOR_EACH_RUST_VEC(RUST_VEC_OPS)
+// FOR_EACH_RUST_OPTION(RUST_OPTION_OPS)
 } // namespace cxxbridge1
 } // namespace rust

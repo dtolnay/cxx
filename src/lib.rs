@@ -400,6 +400,7 @@ extern crate std;
 #[macro_use]
 mod macros;
 
+mod cxx_optional;
 mod cxx_vector;
 mod exception;
 mod extern_type;
@@ -407,7 +408,9 @@ mod fmt;
 mod function;
 pub mod memory;
 mod opaque;
+pub mod optional;
 mod result;
+mod rust_option;
 mod rust_slice;
 mod rust_str;
 mod rust_string;
@@ -423,9 +426,11 @@ mod unwind;
 pub mod vector;
 mod weak_ptr;
 
+pub use crate::cxx_optional::CxxOptional;
 pub use crate::cxx_vector::CxxVector;
 pub use crate::exception::Exception;
 pub use crate::extern_type::{kind, ExternType};
+pub use crate::rust_option::RustOption;
 pub use crate::shared_ptr::SharedPtr;
 pub use crate::string::CxxString;
 pub use crate::unique_ptr::UniquePtr;
@@ -446,18 +451,27 @@ pub type String = CxxString;
 /// import and use `CxxVector`.
 pub type Vector<T> = CxxVector<T>;
 
+/// Synonym for `CxxOptional`.
+///
+/// To avoid confusion with Rust's standard library option you probably
+/// shouldn't import this type with `use`. Instead, write `cxx::Optional<T>`, or
+/// import and use `CxxOptional`.
+pub type Optional<T> = CxxOptional<T>;
+
 // Not public API.
 #[doc(hidden)]
 pub mod private {
+    pub use crate::cxx_optional::OptionalElement;
     pub use crate::cxx_vector::VectorElement;
     pub use crate::extern_type::{verify_extern_kind, verify_extern_type};
     pub use crate::function::FatFunction;
     pub use crate::opaque::Opaque;
     pub use crate::result::{r#try, Result};
+    pub use crate::rust_option::RustOption;
     pub use crate::rust_slice::RustSlice;
     pub use crate::rust_str::RustStr;
     pub use crate::rust_string::RustString;
-    pub use crate::rust_type::{ImplBox, ImplVec, RustType};
+    pub use crate::rust_type::{ImplBox, ImplOption, ImplVec, RustType};
     pub use crate::rust_vec::RustVec;
     pub use crate::shared_ptr::SharedPtrTarget;
     pub use crate::string::StackString;

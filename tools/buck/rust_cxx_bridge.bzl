@@ -26,9 +26,11 @@ def rust_cxx_bridge(name, src, deps = []):
         srcs = [":%s/source" % name],
         preferred_linkage = "static",
         deps = deps + [":%s/include" % name],
+        compiler_flags = ["-std=c++17"],
     )
 
     cxx_library(
         name = "%s/include" % name,
         exported_headers = [":%s/header" % name],
+        compiler_flags = ["-std=c++17"],
     )

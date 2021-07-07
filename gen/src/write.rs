@@ -3,7 +3,7 @@ use crate::gen::nested::NamespaceEntries;
 use crate::gen::out::OutFile;
 use crate::gen::{builtin, include, Opt};
 use crate::syntax::atom::Atom::{self, *};
-use crate::syntax::instantiate::{ImplKey, NamedImplKey};
+use crate::syntax::instantiate::{ImplKey, NamedImplKey, OptionInner};
 use crate::syntax::map::UnorderedMap as Map;
 use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::Symbol;
@@ -215,10 +215,12 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
             },
             Type::RustBox(_) => out.builtin.rust_box = true,
             Type::RustVec(_) => out.builtin.rust_vec = true,
+            Type::RustOption(_) => out.builtin.rust_option = true,
             Type::UniquePtr(_) => out.include.memory = true,
             Type::SharedPtr(_) | Type::WeakPtr(_) => out.include.memory = true,
             Type::Str(_) => out.builtin.rust_str = true,
             Type::CxxVector(_) => out.include.vector = true,
+            Type::CxxOptional(_) => out.include.optional = true,
             Type::Fn(_) => out.builtin.rust_fn = true,
             Type::SliceRef(_) => out.builtin.rust_slice = true,
             Type::Array(_) => out.include.array = true,
@@ -1209,6 +1211,11 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write_type(out, &ty.inner);
             write!(out, ">");
         }
+        Type::RustOption(ty) => {
+            write!(out, "::rust::Option<");
+            write_type(out, &ty.inner);
+            write!(out, ">");
+        }
         Type::UniquePtr(ptr) => {
             write!(out, "::std::unique_ptr<");
             write_type(out, &ptr.inner);
@@ -1226,6 +1233,11 @@ fn write_type(out: &mut OutFile, ty: &Type) {
         }
         Type::CxxVector(ty) => {
             write!(out, "::std::vector<");
+            write_type(out, &ty.inner);
+            write!(out, ">");
+        }
+        Type::CxxOptional(ty) => {
+            write!(out, "::std::optional<");
             write_type(out, &ty.inner);
             write!(out, ">");
         }
@@ -1323,6 +1335,8 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
         | Type::Str(_)
         | Type::CxxVector(_)
         | Type::RustVec(_)
+        | Type::CxxOptional(_)
+        | Type::RustOption(_)
         | Type::SliceRef(_)
         | Type::Fn(_)
         | Type::Array(_) => write!(out, " "),
@@ -1335,6 +1349,11 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
 enum UniquePtr<'a> {
     Ident(&'a Ident),
     CxxVector(&'a Ident),
+    CxxOptional(&'a Ident),
+}
+
+enum RustOption<'a> {
+    RustBox(&'a Ident),
 }
 
 trait ToTypename {
@@ -1354,6 +1373,17 @@ impl<'a> ToTypename for UniquePtr<'a> {
             UniquePtr::CxxVector(element) => {
                 format!("::std::vector<{}>", element.to_typename(types))
             }
+            UniquePtr::CxxOptional(element) => {
+                format!("::std::optional<{}>", element.to_typename(types))
+            }
+        }
+    }
+}
+
+impl<'a> ToTypename for RustOption<'a> {
+    fn to_typename(&self, types: &Types) -> String {
+        match self {
+            RustOption::RustBox(inner) => format!("::rust::cxxbridge1::Box<{}>", inner.to_typename(types)),
         }
     }
 }
@@ -1373,6 +1403,17 @@ impl<'a> ToMangled for UniquePtr<'a> {
         match self {
             UniquePtr::Ident(ident) => ident.to_mangled(types),
             UniquePtr::CxxVector(element) => element.to_mangled(types).prefix_with("std$vector$"),
+            UniquePtr::CxxOptional(element) => {
+                element.to_mangled(types).prefix_with("std$optional$")
+            }
+        }
+    }
+}
+
+impl<'a> ToMangled for RustOption<'a> {
+    fn to_mangled(&self, types: &Types) -> Symbol {
+        match self {
+            RustOption::RustBox(inner) => inner.to_mangled(types).prefix_with("cxxbridge1$rust_box$"),
         }
     }
 }
@@ -1390,10 +1431,12 @@ fn write_generic_instantiations(out: &mut OutFile) {
         match *impl_key {
             ImplKey::RustBox(ident) => write_rust_box_extern(out, ident),
             ImplKey::RustVec(ident) => write_rust_vec_extern(out, ident),
+            ImplKey::RustOption(ident) => write_rust_option_extern(out, ident),
             ImplKey::UniquePtr(ident) => write_unique_ptr(out, ident),
             ImplKey::SharedPtr(ident) => write_shared_ptr(out, ident),
             ImplKey::WeakPtr(ident) => write_weak_ptr(out, ident),
             ImplKey::CxxVector(ident) => write_cxx_vector(out, ident),
+            ImplKey::CxxOptional(ident) => write_cxx_optional(out, ident),
         }
     }
     out.end_block(Block::ExternC);
@@ -1404,6 +1447,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
         match *impl_key {
             ImplKey::RustBox(ident) => write_rust_box_impl(out, ident),
             ImplKey::RustVec(ident) => write_rust_vec_impl(out, ident),
+            ImplKey::RustOption(ident) => write_rust_option_impl(out, ident),
             _ => {}
         }
     }
@@ -1473,6 +1517,28 @@ fn write_rust_vec_extern(out: &mut OutFile, key: NamedImplKey) {
     writeln!(
         out,
         "void cxxbridge1$rust_vec${}$set_len(::rust::Vec<{}> *ptr, ::std::size_t len) noexcept;",
+        instance, inner,
+    );
+}
+
+fn write_rust_option_extern(out: &mut OutFile, inner: OptionInner) {
+    let element= match inner {
+        OptionInner::RustBox(key) => RustOption::RustBox(key.rust),
+    };
+    let inner = element.to_typename(out.types);
+    let instance = element.to_mangled(out.types);
+
+    out.include.cstddef = true;
+    out.include.optional = true;
+
+    writeln!(
+        out,
+        "void cxxbridge1$rust_option${}$new(const ::rust::Option<{}> *ptr) noexcept;",
+        instance, inner,
+    );
+    writeln!(
+        out,
+        "void cxxbridge1$rust_option${}$drop(::rust::Option<{}> *ptr) noexcept;",
         instance, inner,
     );
 }
@@ -1587,6 +1653,32 @@ fn write_rust_vec_impl(out: &mut OutFile, key: NamedImplKey) {
     writeln!(out, "}}");
 }
 
+fn write_rust_option_impl(out: &mut OutFile, inner: OptionInner) {
+    let element= match inner {
+        OptionInner::RustBox(key) => RustOption::RustBox(key.rust),
+    };
+    let inner = element.to_typename(out.types);
+    let instance = element.to_mangled(out.types);
+
+    out.include.optional = true;
+
+    writeln!(out, "template <>");
+    begin_function_definition(out);
+    writeln!(out, "Option<{}>::Option() noexcept {{", inner);
+    writeln!(out, "  cxxbridge1$rust_option${}$new(this);", instance);
+    writeln!(out, "}}");
+
+    writeln!(out, "template <>");
+    begin_function_definition(out);
+    writeln!(out, "void Option<{}>::drop() noexcept {{", inner);
+    writeln!(
+        out,
+        "  return cxxbridge1$rust_option${}$drop(this);",
+        instance
+    );
+    writeln!(out, "}}");
+}
+
 fn write_unique_ptr(out: &mut OutFile, key: NamedImplKey) {
     let ty = UniquePtr::Ident(key.rust);
     write_unique_ptr_common(out, ty);
@@ -1606,6 +1698,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
         // for Opaque types because the 'new' method is not implemented.
         UniquePtr::Ident(ident) => out.types.is_maybe_trivial(ident),
         UniquePtr::CxxVector(_) => false,
+        UniquePtr::CxxOptional(_) => false,
     };
 
     let conditional_delete = match ty {
@@ -1613,6 +1706,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
             !out.types.structs.contains_key(ident) && !out.types.enums.contains_key(ident)
         }
         UniquePtr::CxxVector(_) => false,
+        UniquePtr::CxxOptional(_) => false,
     };
 
     if conditional_delete {
@@ -1620,6 +1714,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
         let definition = match ty {
             UniquePtr::Ident(ty) => &out.types.resolve(ty).name.cxx,
             UniquePtr::CxxVector(_) => unreachable!(),
+            UniquePtr::CxxOptional(_) => unreachable!(),
         };
         writeln!(
             out,
@@ -1876,4 +1971,39 @@ fn write_cxx_vector(out: &mut OutFile, key: NamedImplKey) {
 
     out.include.memory = true;
     write_unique_ptr_common(out, UniquePtr::CxxVector(element));
+}
+
+fn write_cxx_optional(out: &mut OutFile, key: NamedImplKey) {
+    let element = key.rust;
+    let inner = element.to_typename(out.types);
+    let instance = element.to_mangled(out.types);
+
+    out.include.optional = true;
+    out.include.memory = true;
+
+    writeln!(
+        out,
+        "bool cxxbridge1$std$optional${}$has_value(const ::std::optional<{}> &s) noexcept {{",
+        instance, inner,
+    );
+    writeln!(out, "  return s.has_value();");
+    writeln!(out, "}}");
+
+    writeln!(
+        out,
+        "{} const *cxxbridge1$std$optional${}$value(::std::optional<{}> const *s) noexcept {{",
+        inner, instance, inner,
+    );
+    writeln!(out, "  return &s->value();");
+    writeln!(out, "}}");
+
+    writeln!(
+        out,
+        "{} *cxxbridge1$std$optional${}$value_mut(::std::optional<{}> *s) noexcept {{",
+        inner, instance, inner,
+    );
+    writeln!(out, "  return &s->value();");
+    writeln!(out, "}}");
+
+    write_unique_ptr_common(out, UniquePtr::CxxOptional(element));
 }

@@ -1,3 +1,5 @@
+use cxx::{CxxOptional, UniquePtr, CxxVector};
+
 #[cxx::bridge(namespace = "org::blobstore")]
 mod ffi {
     // Shared structs with fields visible to both languages.
@@ -11,6 +13,8 @@ mod ffi {
         type MultiBuf;
 
         fn next_chunk(buf: &mut MultiBuf) -> &[u8];
+        fn some_optional_stuff(cpp: UniquePtr<CxxOptional<BlobMetadata>>) -> Option<Box<BlobMetadata>>;
+        fn foo(_: UniquePtr<CxxVector<BlobMetadata>>) -> u32;
     }
 
     // C++ types and signatures exposed to Rust.
@@ -39,6 +43,15 @@ pub fn next_chunk(buf: &mut MultiBuf) -> &[u8] {
     let next = buf.chunks.get(buf.pos);
     buf.pos += 1;
     next.map_or(&[], Vec::as_slice)
+}
+pub fn some_optional_stuff(cpp: UniquePtr<CxxOptional<ffi::BlobMetadata>>) -> Option<Box<ffi::BlobMetadata>> {
+    println!("cpp tags: {:?}", cpp.value().unwrap().tags);
+    // cpp.value().map(|b| Box::new(ffi::BlobMetadata { size: b.size, tags: b.tags.clone()}))
+    // Box::new(ffi::BlobMetadata { size: 0, tags: Vec::new()})
+    Some(Box::new(ffi::BlobMetadata { size: 1, tags: vec!["optional".to_owned()]}))
+}
+pub fn foo(cpp: UniquePtr<CxxVector<ffi::BlobMetadata>>) -> u32 {
+    cpp.len() as u32
 }
 
 fn main() {

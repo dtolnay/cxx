@@ -1,3 +1,4 @@
+use crate::cxx_optional::{CxxOptional, OptionalElement};
 use crate::cxx_vector::{CxxVector, VectorElement};
 use crate::fmt::display;
 use crate::kind::Trivial;
@@ -280,6 +281,36 @@ where
     #[doc(hidden)]
     fn __typename(f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "CxxVector<{}>", display(T::__typename))
+    }
+    #[doc(hidden)]
+    fn __null() -> MaybeUninit<*mut c_void> {
+        T::__unique_ptr_null()
+    }
+    #[doc(hidden)]
+    unsafe fn __raw(raw: *mut Self) -> MaybeUninit<*mut c_void> {
+        T::__unique_ptr_raw(raw)
+    }
+    #[doc(hidden)]
+    unsafe fn __get(repr: MaybeUninit<*mut c_void>) -> *const Self {
+        T::__unique_ptr_get(repr)
+    }
+    #[doc(hidden)]
+    unsafe fn __release(repr: MaybeUninit<*mut c_void>) -> *mut Self {
+        T::__unique_ptr_release(repr)
+    }
+    #[doc(hidden)]
+    unsafe fn __drop(repr: MaybeUninit<*mut c_void>) {
+        T::__unique_ptr_drop(repr);
+    }
+}
+
+unsafe impl<T> UniquePtrTarget for CxxOptional<T>
+where
+    T: OptionalElement,
+{
+    #[doc(hidden)]
+    fn __typename(f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "CxxOptional<{}>", display(T::__typename))
     }
     #[doc(hidden)]
     fn __null() -> MaybeUninit<*mut c_void> {

@@ -1,7 +1,7 @@
 use crate::syntax::atom::Atom::*;
 use crate::syntax::attrs::{self, OtherAttrs};
 use crate::syntax::file::Module;
-use crate::syntax::instantiate::{ImplKey, NamedImplKey};
+use crate::syntax::instantiate::{ImplKey, NamedImplKey, OptionInner};
 use crate::syntax::qualified::QualifiedName;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
@@ -96,6 +96,9 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
             ImplKey::RustVec(ident) => {
                 hidden.extend(expand_rust_vec(ident, types, explicit_impl));
             }
+            ImplKey::RustOption(ident) => {
+                hidden.extend(expand_rust_option(ident, types, explicit_impl));
+            }
             ImplKey::UniquePtr(ident) => {
                 expanded.extend(expand_unique_ptr(ident, types, explicit_impl));
             }
@@ -107,6 +110,9 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
             }
             ImplKey::CxxVector(ident) => {
                 expanded.extend(expand_cxx_vector(ident, explicit_impl, types));
+            }
+            ImplKey::CxxOptional(ident) => {
+                expanded.extend(expand_cxx_optional(ident, explicit_impl, types));
             }
         }
     }
@@ -513,6 +519,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                 }
             }
             Type::RustVec(_) => quote_spanned!(span=> #var.as_mut_ptr() as *const ::cxx::private::RustVec<_>),
+            Type::RustOption(_) => quote_spanned!(span=> #var.as_mut_ptr() as *const ::cxx::private::RustOption<_>),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(ident) if ident.rust == RustString => match ty.mutable {
                     false => quote_spanned!(span=> ::cxx::private::RustString::from_ref(#var)),
@@ -1310,6 +1317,39 @@ fn expand_rust_vec(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
     }
 }
 
+fn expand_rust_option(
+    inner: OptionInner,
+    types: &Types,
+    explicit_impl: Option<&Impl>,
+) -> TokenStream {
+    let key = match inner {
+        OptionInner::RustBox(key) => key,
+    };
+    let elem = key.rust;
+    let resolve = types.resolve(elem);
+    let link_prefix = format!("cxxbridge1$rust_option$cxxbridge1$box${}$", resolve.name.to_symbol());
+    let link_new = format!("{}new", link_prefix);
+
+    let local_prefix = format_ident!("{}__option_", elem);
+    let local_new = format_ident!("{}new", local_prefix);
+
+    let (impl_generics, ty_generics) = generics::split_for_impl(key, explicit_impl, resolve);
+
+    let begin_span = explicit_impl.map_or(key.begin_span, |explicit| explicit.impl_token.span);
+    let end_span = explicit_impl.map_or(key.end_span, |explicit| explicit.brace_token.span);
+    let unsafe_token = format_ident!("unsafe", span = begin_span);
+
+    quote_spanned! {end_span=>
+        #[doc(hidden)]
+        #unsafe_token impl #impl_generics ::cxx::private::ImplOption for Box<#elem> #ty_generics {}
+        #[doc(hidden)]
+        #[export_name = #link_new]
+        unsafe extern "C" fn #local_new #impl_generics(this: *mut ::cxx::private::RustOption<Box<#elem #ty_generics>>) {
+            ::std::ptr::write(this, ::cxx::private::RustOption::new());
+        }
+    }
+}
+
 fn expand_unique_ptr(
     key: NamedImplKey,
     types: &Types,
@@ -1676,6 +1716,113 @@ fn expand_cxx_vector(
                 extern "C" {
                     #[link_name = #link_unique_ptr_release]
                     fn __unique_ptr_release #impl_generics(this: *mut ::std::mem::MaybeUninit<*mut ::std::ffi::c_void>) -> *mut ::cxx::CxxVector<#elem #ty_generics>;
+                }
+                __unique_ptr_release(&mut repr)
+            }
+            #[doc(hidden)]
+            unsafe fn __unique_ptr_drop(mut repr: ::std::mem::MaybeUninit<*mut ::std::ffi::c_void>) {
+                extern "C" {
+                    #[link_name = #link_unique_ptr_drop]
+                    fn __unique_ptr_drop(this: *mut ::std::mem::MaybeUninit<*mut ::std::ffi::c_void>);
+                }
+                __unique_ptr_drop(&mut repr);
+            }
+        }
+    }
+}
+
+fn expand_cxx_optional(
+    key: NamedImplKey,
+    explicit_impl: Option<&Impl>,
+    types: &Types,
+) -> TokenStream {
+    let elem = key.rust;
+    let name = elem.to_string();
+    let resolve = types.resolve(elem);
+    let prefix = format!("cxxbridge1$std$optional${}$", resolve.name.to_symbol());
+    let link_has_value = format!("{}has_value", prefix);
+    let link_value = format!("{}value", prefix);
+    let link_value_mut = format!("{}value_mut", prefix);
+
+    let unique_ptr_prefix = format!(
+        "cxxbridge1$unique_ptr$std$optional${}$",
+        resolve.name.to_symbol(),
+    );
+    let link_unique_ptr_null = format!("{}null", unique_ptr_prefix);
+    let link_unique_ptr_raw = format!("{}raw", unique_ptr_prefix);
+    let link_unique_ptr_get = format!("{}get", unique_ptr_prefix);
+    let link_unique_ptr_release = format!("{}release", unique_ptr_prefix);
+    let link_unique_ptr_drop = format!("{}drop", unique_ptr_prefix);
+
+    let (impl_generics, ty_generics) = generics::split_for_impl(key, explicit_impl, resolve);
+
+    let begin_span = explicit_impl.map_or(key.begin_span, |explicit| explicit.impl_token.span);
+    let end_span = explicit_impl.map_or(key.end_span, |explicit| explicit.brace_token.span);
+    let unsafe_token = format_ident!("unsafe", span = begin_span);
+
+    quote_spanned! {end_span=>
+        #unsafe_token impl #impl_generics ::cxx::private::OptionalElement for #elem #ty_generics {
+            #[doc(hidden)]
+            fn __typename(f: &mut ::std::fmt::Formatter) -> ::std::fmt::Result {
+                f.write_str(#name)
+            }
+            #[doc(hidden)]
+            fn __has_value(o: *const ::cxx::CxxOptional<Self>) -> bool {
+                extern "C" {
+                    #[link_name = #link_has_value]
+                    fn __has_value(_: *const ::cxx::CxxOptional<#elem #ty_generics>) -> bool;
+                }
+                unsafe { __has_value(o) }
+            }
+            #[doc(hidden)]
+            unsafe fn __value<'a>(o: &'a ::cxx::CxxOptional<Self>) -> &'a Self {
+                extern "C" {
+                    #[link_name = #link_value]
+                    fn __value(_: *const ::cxx::CxxOptional<#elem #ty_generics>) -> *const ::std::ffi::c_void;
+                }
+                (__value(o as *const ::cxx::CxxOptional<Self>) as *const Self).as_ref().unwrap()
+            }
+            #[doc(hidden)]
+            unsafe fn __value_mut<'a>(o: &'a mut ::cxx::CxxOptional<Self>) -> &'a mut Self {
+                extern "C" {
+                    #[link_name = #link_value_mut]
+                    fn __value_mut(_: *mut ::cxx::CxxOptional<#elem #ty_generics>) -> *mut ::std::ffi::c_void;
+                }
+                (__value_mut(o as *mut ::cxx::CxxOptional<Self>) as *mut Self).as_mut().unwrap()
+            }
+            #[doc(hidden)]
+            fn __unique_ptr_null() -> ::std::mem::MaybeUninit<*mut ::std::ffi::c_void> {
+                extern "C" {
+                    #[link_name = #link_unique_ptr_null]
+                    fn __unique_ptr_null(this: *mut ::std::mem::MaybeUninit<*mut ::std::ffi::c_void>);
+                }
+                let mut repr = ::std::mem::MaybeUninit::uninit();
+                unsafe { __unique_ptr_null(&mut repr) }
+                repr
+            }
+            #[doc(hidden)]
+            unsafe fn __unique_ptr_raw(raw: *mut ::cxx::CxxOptional<Self>) -> ::std::mem::MaybeUninit<*mut ::std::ffi::c_void> {
+                extern "C" {
+                    #[link_name = #link_unique_ptr_raw]
+                    fn __unique_ptr_raw(this: *mut ::std::mem::MaybeUninit<*mut ::std::ffi::c_void>, raw: *mut ::cxx::CxxOptional<#elem #ty_generics>);
+                }
+                let mut repr = ::std::mem::MaybeUninit::uninit();
+                __unique_ptr_raw(&mut repr, raw);
+                repr
+            }
+            #[doc(hidden)]
+            unsafe fn __unique_ptr_get(repr: ::std::mem::MaybeUninit<*mut ::std::ffi::c_void>) -> *const ::cxx::CxxOptional<Self> {
+                extern "C" {
+                    #[link_name = #link_unique_ptr_get]
+                    fn __unique_ptr_get(this: *const ::std::mem::MaybeUninit<*mut ::std::ffi::c_void>) -> *const ::cxx::CxxOptional<#elem #ty_generics>;
+                }
+                __unique_ptr_get(&repr)
+            }
+            #[doc(hidden)]
+            unsafe fn __unique_ptr_release(mut repr: ::std::mem::MaybeUninit<*mut ::std::ffi::c_void>) -> *mut ::cxx::CxxOptional<Self> {
+                extern "C" {
+                    #[link_name = #link_unique_ptr_release]
+                    fn __unique_ptr_release(this: *mut ::std::mem::MaybeUninit<*mut ::std::ffi::c_void>) -> *mut ::cxx::CxxOptional<#elem #ty_generics>;
                 }
                 __unique_ptr_release(&mut repr)
             }

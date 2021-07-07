@@ -24,13 +24,16 @@ impl<'a> Types<'a> {
             }
             Type::RustBox(_)
             | Type::RustVec(_)
+            | Type::RustOption(_)
             | Type::Str(_)
             | Type::Fn(_)
             | Type::Void(_)
             | Type::SliceRef(_) => Definite(true),
-            Type::UniquePtr(_) | Type::SharedPtr(_) | Type::WeakPtr(_) | Type::CxxVector(_) => {
-                Definite(false)
-            }
+            Type::UniquePtr(_)
+            | Type::SharedPtr(_)
+            | Type::WeakPtr(_)
+            | Type::CxxVector(_)
+            | Type::CxxOptional(_) => Definite(false),
             Type::Ref(ty) => self.determine_improper_ctype(&ty.inner),
             Type::Ptr(ty) => self.determine_improper_ctype(&ty.inner),
             Type::Array(ty) => self.determine_improper_ctype(&ty.inner),
