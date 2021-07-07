@@ -1,0 +1,5 @@
+error: unsupported element type of Option
+ --> tests/ui/option_slice.rs:4:19
+  |
+4 |         fn f() -> Option<&'static [u8]>;
+  |                   ^^^^^^^^^^^^^^^^^^^^^

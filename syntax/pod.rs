@@ -24,6 +24,7 @@ impl<'a> Types<'a> {
             }
             Type::RustBox(_)
             | Type::RustVec(_)
+            | Type::RustOption(_)
             | Type::UniquePtr(_)
             | Type::SharedPtr(_)
             | Type::WeakPtr(_)

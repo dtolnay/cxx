@@ -3,7 +3,7 @@ use crate::gen::nested::NamespaceEntries;
 use crate::gen::out::OutFile;
 use crate::gen::{builtin, include, Opt};
 use crate::syntax::atom::Atom::{self, *};
-use crate::syntax::instantiate::{ImplKey, NamedImplKey};
+use crate::syntax::instantiate::{ImplKey, NamedImplKey, OptionInner};
 use crate::syntax::map::UnorderedMap as Map;
 use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::{self, Symbol};
@@ -214,6 +214,7 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
             },
             Type::RustBox(_) => out.builtin.rust_box = true,
             Type::RustVec(_) => out.builtin.rust_vec = true,
+            Type::RustOption(_) => out.builtin.rust_option = true,
             Type::UniquePtr(_) => out.include.memory = true,
             Type::SharedPtr(_) | Type::WeakPtr(_) => out.include.memory = true,
             Type::Str(_) => out.builtin.rust_str = true,
@@ -836,6 +837,8 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
             out.builtin.unsafe_bitcopy = true;
             write_type(out, &arg.ty);
             write!(out, "(::rust::unsafe_bitcopy, *{})", arg.name.cxx);
+        } else if let Type::RustOption(_) = arg.ty {
+            write!(out, "std::move(* {})", arg.name.cxx);
         } else if out.types.needs_indirect_abi(&arg.ty) {
             out.include.utility = true;
             write!(out, "::std::move(*{})", arg.name.cxx);
@@ -1235,6 +1238,21 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write_type(out, &ty.inner);
             write!(out, ">");
         }
+        Type::RustOption(ty) => {
+            write!(out, "::rust::Option<");
+            match &ty.inner {
+                Type::RustBox(_) => write_type(out, &ty.inner),
+                Type::Ref(r) => {
+                    write_type_space(out, &r.inner);
+                    if !r.mutable {
+                        write!(out, "const ");
+                    }
+                    write!(out, "*");
+                }
+                _ => unreachable!(),
+            }
+            write!(out, ">");
+        }
         Type::UniquePtr(ptr) => {
             write!(out, "::std::unique_ptr<");
             write_type(out, &ptr.inner);
@@ -1340,6 +1358,7 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
         | Type::Str(_)
         | Type::CxxVector(_)
         | Type::RustVec(_)
+        | Type::RustOption(_)
         | Type::SliceRef(_)
         | Type::Fn(_)
         | Type::Array(_) => write!(out, " "),
@@ -1352,6 +1371,12 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
 enum UniquePtr<'a> {
     Ident(&'a Ident),
     CxxVector(&'a Ident),
+}
+
+enum RustOption<'a> {
+    RustBox(&'a Ident),
+    Ref(&'a Ident),
+    MutRef(&'a Ident),
 }
 
 trait ToTypename {
@@ -1371,6 +1396,18 @@ impl<'a> ToTypename for UniquePtr<'a> {
             UniquePtr::CxxVector(element) => {
                 format!("::std::vector<{}>", element.to_typename(types))
             }
+        }
+    }
+}
+
+impl<'a> ToTypename for RustOption<'a> {
+    fn to_typename(&self, types: &Types) -> String {
+        match self {
+            RustOption::RustBox(inner) => {
+                format!("::rust::cxxbridge1::Box<{}>", inner.to_typename(types))
+            }
+            RustOption::Ref(inner) => format!("const {}*", inner.to_typename(types)),
+            RustOption::MutRef(inner) => format!("{}*", inner.to_typename(types)),
         }
     }
 }
@@ -1396,6 +1433,22 @@ impl<'a> ToMangled for UniquePtr<'a> {
     }
 }
 
+impl<'a> ToMangled for RustOption<'a> {
+    fn to_mangled(&self, types: &Types) -> Symbol {
+        match self {
+            RustOption::RustBox(inner) => symbol::join(&[&"Box", &inner.to_mangled(types)]),
+            RustOption::Ref(inner) => {
+                let symbol = symbol::join(&[&"const", &inner.to_mangled(types)]);
+                symbol
+            }
+            RustOption::MutRef(inner) => {
+                let symbol = symbol::join(&[&inner.to_mangled(types)]);
+                symbol
+            }
+        }
+    }
+}
+
 fn write_generic_instantiations(out: &mut OutFile) {
     if out.header {
         return;
@@ -1409,6 +1462,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
         match *impl_key {
             ImplKey::RustBox(ident) => write_rust_box_extern(out, ident),
             ImplKey::RustVec(ident) => write_rust_vec_extern(out, ident),
+            ImplKey::RustOption(ident) => write_rust_option_extern(out, ident),
             ImplKey::UniquePtr(ident) => write_unique_ptr(out, ident),
             ImplKey::SharedPtr(ident) => write_shared_ptr(out, ident),
             ImplKey::WeakPtr(ident) => write_weak_ptr(out, ident),
@@ -1423,6 +1477,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
         match *impl_key {
             ImplKey::RustBox(ident) => write_rust_box_impl(out, ident),
             ImplKey::RustVec(ident) => write_rust_vec_impl(out, ident),
+            ImplKey::RustOption(ident) => write_rust_option_impl(out, ident),
             _ => {}
         }
     }
@@ -1498,6 +1553,53 @@ fn write_rust_vec_extern(out: &mut OutFile, key: NamedImplKey) {
         out,
         "void cxxbridge1$rust_vec${}$truncate(::rust::Vec<{}> *ptr, ::std::size_t len) noexcept;",
         instance, inner,
+    );
+}
+
+fn write_rust_option_extern(out: &mut OutFile, inner: OptionInner) {
+    out.include.cstddef = true;
+    let element = match inner {
+        OptionInner::RustBox(key) => RustOption::RustBox(key.rust),
+        OptionInner::Ref(key) => {
+            if out.types.try_resolve(key.rust).is_none() {
+                return;
+            }
+            RustOption::Ref(key.rust)
+        }
+        OptionInner::MutRef(key) => {
+            if out.types.try_resolve(key.rust).is_none() {
+                return;
+            }
+            RustOption::MutRef(key.rust)
+        }
+    };
+    let inner = element.to_typename(out.types);
+    let instance = element.to_mangled(out.types);
+
+    writeln!(
+        out,
+        "void cxxbridge1$rust_option${}$new(const ::rust::Option<{}> *ptr) noexcept;",
+        instance, inner,
+    );
+    writeln!(
+        out,
+        "void cxxbridge1$rust_option${}$drop(::rust::Option<{}> *ptr) noexcept;",
+        instance, inner,
+    );
+    writeln!(
+        out,
+        "bool cxxbridge1$rust_option${}$has_value(::rust::Option<{}> const *ptr) noexcept;",
+        instance, inner
+    );
+    writeln!(
+        out,
+        "{}* cxxbridge1$rust_option${}$value_ptr(::rust::Option<{0}> *ptr) noexcept;",
+        inner, instance
+    );
+    writeln!(
+        out,
+        "void cxxbridge1$rust_option${}$set(::rust::Option<{1}> *ptr, {1}&& value) noexcept;",
+        instance, inner
     );
 }
 
@@ -1617,6 +1719,72 @@ fn write_rust_vec_impl(out: &mut OutFile, key: NamedImplKey) {
         out,
         "  return cxxbridge1$rust_vec${}$truncate(this, len);",
         instance,
+    );
+    writeln!(out, "}}");
+}
+
+fn write_rust_option_impl(out: &mut OutFile, inner: OptionInner) {
+    let element = match inner {
+        OptionInner::RustBox(key) => RustOption::RustBox(key.rust),
+        OptionInner::Ref(key) => {
+            if out.types.try_resolve(key.rust).is_none() {
+                return;
+            }
+            RustOption::Ref(key.rust)
+        }
+        OptionInner::MutRef(key) => {
+            if out.types.try_resolve(key.rust).is_none() {
+                return;
+            }
+            RustOption::MutRef(key.rust)
+        }
+    };
+    let inner = element.to_typename(out.types);
+    let instance = element.to_mangled(out.types);
+
+    writeln!(out, "template <>");
+    begin_function_definition(out);
+    writeln!(out, "Option<{}>::Option() noexcept {{", inner);
+    writeln!(out, "  cxxbridge1$rust_option${}$new(this);", instance);
+    writeln!(out, "}}");
+
+    writeln!(out, "template <>");
+    begin_function_definition(out);
+    writeln!(out, "void Option<{}>::drop() noexcept {{", inner);
+    writeln!(
+        out,
+        "  return cxxbridge1$rust_option${}$drop(this);",
+        instance
+    );
+    writeln!(out, "}}");
+
+    writeln!(out, "template <>");
+    begin_function_definition(out);
+    writeln!(out, "bool Option<{}>::has_value() const noexcept {{", inner);
+    writeln!(
+        out,
+        "  return cxxbridge1$rust_option${}$has_value(this);",
+        instance
+    );
+    writeln!(out, "}}");
+
+    writeln!(out, "template <>");
+    begin_function_definition(out);
+    writeln!(out, "{0}* Option<{0}>::value_ptr() noexcept {{", inner);
+    writeln!(
+        out,
+        "  return cxxbridge1$rust_option${}$value_ptr(this);",
+        instance
+    );
+    writeln!(out, "}}");
+
+    writeln!(out, "template <>");
+    begin_function_definition(out);
+    writeln!(out, "void Option<{0}>::set({0}&& value) noexcept {{", inner);
+    writeln!(
+        out,
+        "  return cxxbridge1$rust_option${}$set(this, ::std::move(value));",
+        instance
     );
     writeln!(out, "}}");
 }

@@ -22,6 +22,7 @@ use cxx::{type_id, CxxString, CxxVector, ExternType, SharedPtr, UniquePtr};
 use std::fmt::{self, Display};
 use std::mem::MaybeUninit;
 use std::os::raw::c_char;
+use std::pin::Pin;
 
 #[cxx::bridge(namespace = "tests")]
 pub mod ffi {
@@ -122,6 +123,15 @@ pub mod ffi {
         fn c_return_mut_rust_vec(c: Pin<&mut C>) -> &mut Vec<u8>;
         fn c_return_rust_vec_string() -> Vec<String>;
         fn c_return_rust_vec_bool() -> Vec<bool>;
+        fn c_return_rust_option_box() -> Option<Box<Shared>>;
+        fn c_return_rust_ref_option_shared(s: &Shared) -> Option<&Shared>;
+        fn c_return_rust_mut_option_shared(s: &mut Shared) -> Option<&mut Shared>;
+        fn c_return_rust_pin_mut_option_shared(s: Pin<&mut Shared>) -> Option<Pin<&mut Shared>>;
+        fn c_return_rust_ref_option_opaque(c: &C) -> Option<&C>;
+        fn c_return_rust_pin_mut_option_opaque(c: Pin<&mut C>) -> Option<Pin<&mut C>>;
+        fn c_return_rust_ref_option_native(u: &u8) -> Option<&u8>;
+        fn c_return_rust_mut_option_native(u: &mut u8) -> Option<&mut u8>;
+        fn c_return_rust_pin_mut_option_native(u: Pin<&mut u8>) -> Option<Pin<&mut u8>>;
         fn c_return_identity(_: usize) -> usize;
         fn c_return_sum(_: usize, _: usize) -> usize;
         fn c_return_enum(n: u16) -> Enum;
@@ -164,6 +174,17 @@ pub mod ffi {
         fn c_take_ref_rust_vec_string(v: &Vec<String>);
         fn c_take_ref_rust_vec_index(v: &Vec<u8>);
         fn c_take_ref_rust_vec_copy(v: &Vec<u8>);
+        fn c_take_rust_option_box(rust: Option<Box<Shared>>);
+        fn c_take_rust_ref_option_shared(rust: Option<&Shared>);
+        fn c_take_rust_mut_option_shared(rust: Option<&mut Shared>);
+        fn c_take_rust_pin_mut_option_shared(rust: Option<Pin<&mut Shared>>);
+        fn c_take_rust_ref_option_opaque(rust: Option<&R>);
+        fn c_take_rust_mut_option_opaque(rust: Option<&mut R>);
+        fn c_take_rust_pin_mut_option_opaque(rust: Option<Pin<&mut R>>);
+        fn c_take_rust_ref_option_native(rust: Option<&u8>);
+        fn c_take_rust_mut_option_native(rust: Option<&mut u8>);
+        fn c_take_rust_pin_mut_option_native(rust: Option<Pin<&mut u8>>);
+
         fn c_take_ref_shared_string(s: &SharedString) -> &SharedString;
         fn c_take_callback(callback: fn(String) -> usize);
         fn c_take_callback_ref(callback: fn(&String));
@@ -193,6 +214,15 @@ pub mod ffi {
         fn c_try_return_rust_vec() -> Result<Vec<u8>>;
         fn c_try_return_rust_vec_string() -> Result<Vec<String>>;
         fn c_try_return_ref_rust_vec(c: &C) -> Result<&Vec<u8>>;
+        fn c_try_return_rust_option_box() -> Result<Option<Box<Shared>>>;
+        fn c_try_return_rust_ref_option_shared() -> Result<Option<&'static Shared>>;
+        fn c_try_return_rust_mut_option_shared() -> Result<Option<&'static mut Shared>>;
+        fn c_try_return_rust_pin_mut_option_shared() -> Result<Option<Pin<&'static mut Shared>>>;
+        fn c_try_return_rust_ref_option_opaque() -> Result<Option<&'static C>>;
+        fn c_try_return_rust_pin_mut_option_opaque() -> Result<Option<Pin<&'static mut C>>>;
+        fn c_try_return_rust_ref_option_native() -> Result<Option<&'static u8>>;
+        fn c_try_return_rust_mut_option_native() -> Result<Option<&'static mut u8>>;
+        fn c_try_return_rust_pin_mut_option_native() -> Result<Option<Pin<&'static mut u8>>>;
 
         fn get(self: &C) -> usize;
         fn set(self: Pin<&mut C>, n: usize) -> usize;
@@ -278,6 +308,29 @@ pub mod ffi {
         fn r_return_rust_vec_extern_struct() -> Vec<Job>;
         fn r_return_ref_rust_vec(shared: &Shared) -> &Vec<u8>;
         fn r_return_mut_rust_vec(shared: &mut Shared) -> &mut Vec<u8>;
+        fn r_return_rust_option_box() -> Option<Box<Shared>>;
+        fn r_return_rust_option_box_generic() -> Option<Box<StructWithLifetime<'static>>>;
+        unsafe fn r_return_rust_option_ref_shared<'a>(shared: &'a Shared) -> Option<&'a Shared>;
+        fn r_return_rust_option_ref_generic() -> Option<&'static StructWithLifetime<'static>>;
+        unsafe fn r_return_rust_option_mut_shared<'a>(
+            shared: &'a mut Shared,
+        ) -> Option<&'a mut Shared>;
+        fn r_return_rust_option_mut_generic() -> Option<&'static mut StructWithLifetime<'static>>;
+        unsafe fn r_return_rust_option_pin_mut_shared<'a>(
+            shared: Pin<&'a mut Shared>,
+        ) -> Option<Pin<&'a mut Shared>>;
+        fn r_return_rust_option_pin_mut_generic(
+        ) -> Option<Pin<&'static mut StructWithLifetime<'static>>>;
+        unsafe fn r_return_rust_option_ref_opaque<'a>(opaque: &'a R) -> Option<&'a R>;
+        unsafe fn r_return_rust_option_mut_opaque<'a>(opaque: &'a mut R) -> Option<&'a mut R>;
+        unsafe fn r_return_rust_option_pin_mut_opaque<'a>(
+            opaque: Pin<&'a mut R>,
+        ) -> Option<Pin<&'a mut R>>;
+        unsafe fn r_return_rust_option_ref_native<'a>(native: &'a u8) -> Option<&'a u8>;
+        unsafe fn r_return_rust_option_mut_native<'a>(native: &'a mut u8) -> Option<&'a mut u8>;
+        unsafe fn r_return_rust_option_pin_mut_native<'a>(
+            native: Pin<&'a mut u8>,
+        ) -> Option<Pin<&'a mut u8>>;
         fn r_return_identity(_: usize) -> usize;
         fn r_return_sum(_: usize, _: usize) -> usize;
         fn r_return_enum(n: u32) -> Enum;
@@ -299,11 +352,46 @@ pub mod ffi {
         fn r_take_rust_vec_string(v: Vec<String>);
         fn r_take_ref_rust_vec(v: &Vec<u8>);
         fn r_take_ref_rust_vec_string(v: &Vec<String>);
+        fn r_take_rust_option_box(o: Option<Box<Shared>>);
+        fn r_take_rust_option_ref_shared(o: Option<&Shared>);
+        fn r_take_rust_option_mut_shared(o: Option<&mut Shared>);
+        fn r_take_rust_option_pin_mut_shared(o: Option<Pin<&mut Shared>>);
+        fn r_take_rust_option_ref_opaque(o: Option<&C>);
+        fn r_take_rust_option_pin_mut_opaque(o: Option<Pin<&mut C>>);
+        fn r_take_rust_option_ref_native(o: Option<&u8>);
+        fn r_take_rust_option_mut_native(o: Option<&mut u8>);
+        fn r_take_rust_option_pin_mut_native(o: Option<Pin<&mut u8>>);
+
         fn r_take_enum(e: Enum);
 
         fn r_try_return_void() -> Result<()>;
         fn r_try_return_primitive() -> Result<usize>;
         fn r_try_return_box() -> Result<Box<R>>;
+        fn r_try_return_rust_option_box() -> Result<Option<Box<Shared>>>;
+        unsafe fn r_try_return_rust_option_ref_shared<'a>(
+            shared: &'a Shared,
+        ) -> Result<Option<&'a Shared>>;
+        unsafe fn r_try_return_rust_option_mut_shared<'a>(
+            shared: &'a mut Shared,
+        ) -> Result<Option<&'a mut Shared>>;
+        unsafe fn r_try_return_rust_option_pin_mut_shared<'a>(
+            shared: Pin<&'a mut Shared>,
+        ) -> Result<Option<Pin<&'a mut Shared>>>;
+        unsafe fn r_try_return_rust_option_ref_opaque<'a>(opaque: &'a R) -> Result<Option<&'a R>>;
+        unsafe fn r_try_return_rust_option_mut_opaque<'a>(
+            opaque: &'a mut R,
+        ) -> Result<Option<&'a mut R>>;
+        unsafe fn r_try_return_rust_option_pin_mut_opaque<'a>(
+            opaque: Pin<&'a mut R>,
+        ) -> Result<Option<Pin<&'a mut R>>>;
+        unsafe fn r_try_return_rust_option_ref_native<'a>(native: &'a u8)
+            -> Result<Option<&'a u8>>;
+        unsafe fn r_try_return_rust_option_mut_native<'a>(
+            native: &'a mut u8,
+        ) -> Result<Option<&'a mut u8>>;
+        unsafe fn r_try_return_rust_option_pin_mut_native<'a>(
+            native: Pin<&'a mut u8>,
+        ) -> Result<Option<Pin<&'a mut u8>>>;
         fn r_fail_return_primitive() -> Result<usize>;
         fn r_try_return_sliceu8(s: &[u8]) -> Result<&[u8]>;
         fn r_try_return_mutsliceu8(s: &mut [u8]) -> Result<&mut [u8]>;
@@ -528,6 +616,71 @@ fn r_return_mut_rust_vec(shared: &mut ffi::Shared) -> &mut Vec<u8> {
     unimplemented!()
 }
 
+fn r_return_rust_option_box() -> Option<Box<ffi::Shared>> {
+    Some(Box::new(ffi::Shared { z: 42 }))
+}
+
+fn r_return_rust_option_box_generic() -> Option<Box<ffi::StructWithLifetime<'static>>> {
+    Some(Box::new(ffi::StructWithLifetime { s: &"abc" }))
+}
+
+unsafe fn r_return_rust_option_ref_shared<'a>(shared: &'a ffi::Shared) -> Option<&'a ffi::Shared> {
+    Some(shared)
+}
+
+fn r_return_rust_option_ref_generic() -> Option<&'static ffi::StructWithLifetime<'static>> {
+    None
+}
+
+unsafe fn r_return_rust_option_mut_shared<'a>(
+    shared: &'a mut ffi::Shared,
+) -> Option<&'a mut ffi::Shared> {
+    Some(shared)
+}
+
+fn r_return_rust_option_mut_generic() -> Option<&'static mut ffi::StructWithLifetime<'static>> {
+    None
+}
+
+unsafe fn r_return_rust_option_pin_mut_shared<'a>(
+    shared: Pin<&'a mut ffi::Shared>,
+) -> Option<Pin<&'a mut ffi::Shared>> {
+    Some(shared)
+}
+
+fn r_return_rust_option_pin_mut_generic(
+) -> Option<Pin<&'static mut ffi::StructWithLifetime<'static>>> {
+    None
+}
+
+unsafe fn r_return_rust_option_ref_opaque<'a>(opaque: &'a R) -> Option<&'a R> {
+    Some(opaque)
+}
+
+unsafe fn r_return_rust_option_mut_opaque<'a>(opaque: &'a mut R) -> Option<&'a mut R> {
+    Some(opaque)
+}
+
+unsafe fn r_return_rust_option_pin_mut_opaque<'a>(
+    opaque: Pin<&'a mut R>,
+) -> Option<Pin<&'a mut R>> {
+    Some(opaque)
+}
+
+unsafe fn r_return_rust_option_ref_native<'a>(native: &'a u8) -> Option<&'a u8> {
+    Some(native)
+}
+
+unsafe fn r_return_rust_option_mut_native<'a>(native: &'a mut u8) -> Option<&'a mut u8> {
+    Some(native)
+}
+
+unsafe fn r_return_rust_option_pin_mut_native<'a>(
+    native: Pin<&'a mut u8>,
+) -> Option<Pin<&'a mut u8>> {
+    Some(native)
+}
+
 fn r_return_identity(n: usize) -> usize {
     n
 }
@@ -618,6 +771,44 @@ fn r_take_ref_rust_vec_string(v: &Vec<String>) {
     let _ = v;
 }
 
+fn r_take_rust_option_box(o: Option<Box<ffi::Shared>>) {
+    let _ = o;
+}
+
+fn r_take_rust_option_ref_shared(o: Option<&ffi::Shared>) {
+    let _ = o;
+}
+
+fn r_take_rust_option_mut_shared(o: Option<&mut ffi::Shared>) {
+    let _ = o;
+}
+
+fn r_take_rust_option_pin_mut_shared(o: Option<Pin<&mut ffi::Shared>>) {
+    let _ = o;
+}
+
+fn r_take_rust_option_ref_opaque(o: Option<&ffi::C>) {
+    let _ = o;
+}
+
+fn r_take_rust_option_pin_mut_opaque(o: Option<Pin<&mut ffi::C>>) {
+    let _ = o;
+}
+
+fn r_take_rust_option_ref_native(o: Option<&u8>) {
+    let _ = o;
+}
+
+fn r_take_rust_option_mut_native(o: Option<&mut u8>) {
+    if let Some(x) = o {
+        *x += 1;
+    }
+}
+
+fn r_take_rust_option_pin_mut_native(o: Option<Pin<&mut u8>>) {
+    let _ = o;
+}
+
 fn r_take_enum(e: ffi::Enum) {
     let _ = e;
 }
@@ -632,6 +823,60 @@ fn r_try_return_primitive() -> Result<usize, Error> {
 
 fn r_try_return_box() -> Result<Box<R>, Error> {
     Ok(Box::new(R(2020)))
+}
+
+fn r_try_return_rust_option_box() -> Result<Option<Box<ffi::Shared>>, Error> {
+    Ok(Some(Box::new(ffi::Shared { z: 42 })))
+}
+
+unsafe fn r_try_return_rust_option_ref_shared<'a>(
+    shared: &'a ffi::Shared,
+) -> Result<Option<&'a ffi::Shared>, Error> {
+    Ok(Some(shared))
+}
+
+unsafe fn r_try_return_rust_option_mut_shared<'a>(
+    shared: &'a mut ffi::Shared,
+) -> Result<Option<&'a mut ffi::Shared>, Error> {
+    Ok(Some(shared))
+}
+
+unsafe fn r_try_return_rust_option_pin_mut_shared<'a>(
+    shared: Pin<&'a mut ffi::Shared>,
+) -> Result<Option<Pin<&'a mut ffi::Shared>>, Error> {
+    Ok(Some(shared))
+}
+
+unsafe fn r_try_return_rust_option_ref_opaque<'a>(opaque: &'a R) -> Result<Option<&'a R>, Error> {
+    Ok(Some(opaque))
+}
+
+unsafe fn r_try_return_rust_option_mut_opaque<'a>(
+    opaque: &'a mut R,
+) -> Result<Option<&'a mut R>, Error> {
+    Ok(Some(opaque))
+}
+
+unsafe fn r_try_return_rust_option_pin_mut_opaque<'a>(
+    opaque: Pin<&'a mut R>,
+) -> Result<Option<Pin<&'a mut R>>, Error> {
+    Ok(Some(opaque))
+}
+
+unsafe fn r_try_return_rust_option_ref_native<'a>(native: &'a u8) -> Result<Option<&'a u8>, Error> {
+    Ok(Some(native))
+}
+
+unsafe fn r_try_return_rust_option_mut_native<'a>(
+    native: &'a mut u8,
+) -> Result<Option<&'a mut u8>, Error> {
+    Ok(Some(native))
+}
+
+unsafe fn r_try_return_rust_option_pin_mut_native<'a>(
+    native: Pin<&'a mut u8>,
+) -> Result<Option<Pin<&'a mut u8>>, Error> {
+    Ok(Some(native))
 }
 
 fn r_fail_return_primitive() -> Result<usize, Error> {

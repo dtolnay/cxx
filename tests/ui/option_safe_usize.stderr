@@ -1,0 +1,13 @@
+error[E0080]: evaluation of `cxx::private::assert_option_safe::__SizeCheck::<usize>::_IS_NICHE` failed
+ --> src/rust_option.rs
+  |
+  |             assert!(core::mem::size_of::<Option<U>>() == core::mem::size_of::<U>());
+  |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the evaluated program panicked at 'assertion failed: core::mem::size_of::<Option<U>>() == core::mem::size_of::<U>()', $DIR/src/rust_option.rs:73:13
+  |
+  = note: this error originates in the macro `assert` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+note: erroneous constant encountered
+  --> src/rust_option.rs
+   |
+   |     let _: () = __SizeCheck::<T>::_IS_NICHE;
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

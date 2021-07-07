@@ -1,4 +1,4 @@
-use crate::syntax::{derive, Enum, Struct, Trait};
+use crate::syntax::{derive, Enum, Struct};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, quote_spanned, ToTokens};
 

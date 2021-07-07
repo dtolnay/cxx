@@ -181,6 +181,69 @@ rust::Vec<rust::String> c_return_rust_vec_string() {
 
 rust::Vec<bool> c_return_rust_vec_bool() { return {true, true, false}; }
 
+rust::Option<rust::Box<Shared>> c_return_rust_option_box() {
+  rust::Option<rust::Box<Shared>> opt; // Default constructor
+  opt.set(rust::Box<Shared>::in_place<size_t>(2020)); // Set value
+  rust::Option<rust::Box<Shared>> opt2(std::move(opt)); // Move constructor
+  return opt2;
+}
+
+rust::Option<const Shared*> c_return_rust_ref_option_shared(const Shared& s) {
+  rust::Option<const Shared*> opt; // Default constructor
+  opt.set(&s); // Set value
+  rust::Option<const Shared*> opt2(std::move(opt)); // Move constructor
+  return opt2;
+}
+
+rust::Option<Shared*> c_return_rust_mut_option_shared(Shared& s) {
+  rust::Option<Shared*> opt; // Default constructor
+  opt.set(&s); // Set value
+  rust::Option<Shared*> opt2(std::move(opt)); // Move constructor
+  return opt2;
+}
+
+rust::Option<Shared*> c_return_rust_pin_mut_option_shared(Shared& s) {
+  rust::Option<Shared*> opt; // Default constructor
+  opt.set(&s); // Set value
+  rust::Option<Shared*> opt2(std::move(opt)); // Move constructor
+  return opt2;
+}
+
+rust::Option<const C*> c_return_rust_ref_option_opaque(const C& c) {
+  rust::Option<const C*> opt; // Default constructor
+  opt.set(&c); // Set value
+  rust::Option<const C*> opt2(std::move(opt)); // Move constructor
+  return opt2;
+}
+
+rust::Option<C*> c_return_rust_pin_mut_option_opaque(C& c) {
+  rust::Option<C*> opt; // Default constructor
+  opt.set(&c); // Set value
+  rust::Option<C*> opt2(std::move(opt)); // Move constructor
+  return opt2;
+}
+
+rust::Option<const uint8_t*> c_return_rust_ref_option_native(const uint8_t& u) {
+  rust::Option<const uint8_t*> opt; // Default constructor
+  opt.set(&u); // Set value
+  rust::Option<const uint8_t*> opt2(std::move(opt)); // Move constructor
+  return opt2;
+}
+
+rust::Option<uint8_t*> c_return_rust_mut_option_native(uint8_t& u) {
+  rust::Option<uint8_t*> opt; // Default constructor
+  opt.set(&u); // Set value
+  rust::Option<uint8_t*> opt2(std::move(opt)); // Move constructor
+  return opt2;
+}
+
+rust::Option<uint8_t*> c_return_rust_pin_mut_option_native(uint8_t& u) {
+  rust::Option<uint8_t*> opt; // Default constructor
+  opt.set(&u); // Set value
+  rust::Option<uint8_t*> opt2(std::move(opt)); // Move constructor
+  return opt2;
+}
+
 size_t c_return_identity(size_t n) { return n; }
 
 size_t c_return_sum(size_t n1, size_t n2) { return n1 + n2; }
@@ -484,6 +547,7 @@ void c_take_ref_rust_vec(const rust::Vec<uint8_t> &v) {
   }
 }
 
+
 void c_take_ref_rust_vec_string(const rust::Vec<rust::String> &v) {
   (void)v;
   cxx_test_suite_set_correct();
@@ -504,6 +568,70 @@ void c_take_ref_rust_vec_copy(const rust::Vec<uint8_t> &v) {
   std::copy(v.begin(), v.end(), std::back_inserter(stdv));
   uint8_t sum = std::accumulate(stdv.begin(), stdv.end(), 0);
   if (sum == 200) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_rust_option_box(rust::Option<rust::Box<Shared>> opt) {
+  if (opt.has_value() && opt.value()->z == 2020) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_rust_ref_option_shared(rust::Option<const Shared*> opt) {
+  if (opt.has_value() && opt.value()->z == 2020) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_rust_mut_option_shared(rust::Option<Shared *> opt) {
+  if (opt.has_value() && opt.value()->z == 2020) {
+    opt.value()->z = 2021;
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_rust_pin_mut_option_shared(rust::Option<Shared *> opt) {
+  if (opt.has_value() && opt.value()->z == 2020) {
+    opt.value()->z = 2021;
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_rust_ref_option_opaque(rust::Option<const R*> opt) {
+  if (opt.has_value()) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_rust_mut_option_opaque(rust::Option<R *> opt) {
+  if (opt.has_value()) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_rust_pin_mut_option_opaque(rust::Option<R *> opt) {
+  if (opt.has_value()) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_rust_ref_option_native(rust::Option<const uint8_t*> opt) {
+  if (opt.has_value() && *(opt.value()) == 200) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_rust_mut_option_native(rust::Option<uint8_t *> opt) {
+  if (opt.has_value() && *(opt.value()) == 200) {
+    *(opt.value()) = 201;
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_rust_pin_mut_option_native(rust::Option<uint8_t *> opt) {
+  if (opt.has_value() && *(opt.value()) == 200) {
+    *(opt.value()) = 201;
     cxx_test_suite_set_correct();
   }
 }
@@ -562,6 +690,42 @@ size_t c_try_return_primitive() { return 2020; }
 size_t c_fail_return_primitive() { throw std::logic_error("logic error"); }
 
 rust::Box<R> c_try_return_box() { return c_return_box(); }
+
+rust::Option<rust::Box<Shared>> c_try_return_rust_option_box() {
+  throw std::runtime_error("unimplemented");
+}
+
+rust::Option<const Shared*> c_try_return_rust_ref_option_shared() {
+  throw std::runtime_error("unimplemented");
+}
+
+rust::Option<Shared*> c_try_return_rust_mut_option_shared() {
+  throw std::runtime_error("unimplemented");
+}
+
+rust::Option<Shared*> c_try_return_rust_pin_mut_option_shared() {
+  throw std::runtime_error("unimplemented");
+}
+
+rust::Option<const C*> c_try_return_rust_ref_option_opaque() {
+  throw std::runtime_error("unimplemented");
+}
+
+rust::Option<C*> c_try_return_rust_pin_mut_option_opaque() {
+  throw std::runtime_error("unimplemented");
+}
+
+rust::Option<const uint8_t*> c_try_return_rust_ref_option_native() {
+  throw std::runtime_error("unimplemented");
+}
+
+rust::Option<uint8_t*> c_try_return_rust_mut_option_native() {
+  throw std::runtime_error("unimplemented");
+}
+
+rust::Option<uint8_t*> c_try_return_rust_pin_mut_option_native() {
+  throw std::runtime_error("unimplemented");
+}
 
 const rust::String &c_try_return_ref(const rust::String &s) { return s; }
 
@@ -897,6 +1061,17 @@ extern "C" const char *cxx_run_test() noexcept {
   // https://github.com/dtolnay/cxx/issues/705
   (void)rust::Vec<size_t>();
   (void)rust::Vec<rust::isize>();
+
+  rust::Option<rust::Box<Shared>> opt; // Default constructor
+  ASSERT(!opt.has_value());
+  opt.set(rust::Box<Shared>::in_place<size_t>(2020)); // Set value
+  ASSERT(opt.has_value());
+  rust::Option<rust::Box<Shared>> opt2(std::move(opt)); // Move constructor
+  ASSERT(!opt.has_value());
+  ASSERT(opt2.has_value());
+  ASSERT(sizeof(rust::Option<rust::Box<Shared>>) == sizeof(void *));
+  ASSERT(sizeof(rust::Option<int*>) == sizeof(void *));
+  ASSERT(sizeof(rust::Option<const int*>) == sizeof(void *));
 
   cxx_test_suite_set_correct();
   return nullptr;

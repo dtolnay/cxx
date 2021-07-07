@@ -15,6 +15,7 @@ use cxx_test_suite::module::ffi2;
 use cxx_test_suite::{cast, ffi, R};
 use std::cell::Cell;
 use std::ffi::CStr;
+use std::pin::Pin;
 
 thread_local! {
     static CORRECT: Cell<bool> = const { Cell::new(false) };
@@ -35,13 +36,14 @@ macro_rules! check {
 
 #[test]
 fn test_c_return() {
-    let shared = ffi::Shared { z: 2020 };
+    let mut shared = ffi::Shared { z: 2020 };
     let ns_shared = ffi::AShared { z: 2020 };
     let nested_ns_shared = ffi::ABShared { z: 2020 };
 
     assert_eq!(2020, ffi::c_return_primitive());
     assert_eq!(2020, ffi::c_return_shared().z);
     assert_eq!(2020, ffi::c_return_box().0);
+    assert_eq!(2020, ffi::c_return_rust_option_box().unwrap().z);
     ffi::c_return_unique_ptr();
     ffi2::c_return_ns_unique_ptr();
     assert_eq!(2020, *ffi::c_return_ref(&shared));
@@ -74,6 +76,36 @@ fn test_c_return() {
     );
     assert_eq!(b"\x02\0\x02\0"[..], ffi::c_return_rust_vec_u8());
     assert_eq!([true, true, false][..], ffi::c_return_rust_vec_bool());
+    assert_eq!(
+        ffi::c_return_rust_option_box(),
+        Some(Box::new(ffi::Shared { z: 2020 }))
+    );
+    assert_eq!(
+        ffi::c_return_rust_ref_option_shared(&shared.clone()),
+        Some(&shared)
+    );
+    assert_eq!(
+        ffi::c_return_rust_mut_option_shared(&mut shared.clone()),
+        Some(&mut shared)
+    );
+    assert_eq!(
+        ffi::c_return_rust_pin_mut_option_shared(Pin::new(&mut shared.clone())),
+        Some(Pin::new(&mut shared))
+    );
+    let mut c = ffi::c_return_unique_ptr();
+    let cref = c.as_ref().unwrap();
+    assert!(ffi::c_return_rust_ref_option_opaque(cref).is_some());
+    let cpin = c.as_mut().unwrap();
+    assert!(ffi::c_return_rust_pin_mut_option_opaque(cpin).is_some());
+    assert_eq!(ffi::c_return_rust_ref_option_native(&200), Some(&200));
+    assert_eq!(
+        ffi::c_return_rust_mut_option_native(&mut 200),
+        Some(&mut 200)
+    );
+    assert_eq!(
+        ffi::c_return_rust_pin_mut_option_native(Pin::new(&mut 200)),
+        Some(Pin::new(&mut 200))
+    );
     assert_eq!(2020, ffi::c_return_identity(2020));
     assert_eq!(2021, ffi::c_return_sum(2020, 1));
     match ffi::c_return_enum(0) {
@@ -198,6 +230,29 @@ fn test_c_take() {
     check!(ffi::c_take_rust_vec_nested_ns_shared(
         nested_ns_shared_test_vec
     ));
+
+    check!(ffi::c_take_rust_option_box(Some(Box::new(ffi::Shared {
+        z: 2020
+    }))));
+    check!(ffi::c_take_rust_ref_option_shared(Some(&ffi::Shared {
+        z: 2020
+    })));
+    check!(ffi::c_take_rust_mut_option_shared(Some(&mut ffi::Shared {
+        z: 2020
+    })));
+    check!(ffi::c_take_rust_pin_mut_option_shared(Some(Pin::new(
+        &mut ffi::Shared { z: 2020 }
+    ))));
+    check!(ffi::c_take_rust_ref_option_opaque(Some(&R(2020))));
+    check!(ffi::c_take_rust_mut_option_opaque(Some(&mut R(2020))));
+    check!(ffi::c_take_rust_pin_mut_option_opaque(Some(Pin::new(
+        &mut R(2020)
+    ))));
+    check!(ffi::c_take_rust_ref_option_native(Some(&200)));
+    check!(ffi::c_take_rust_mut_option_native(Some(&mut 200)));
+    check!(ffi::c_take_rust_pin_mut_option_native(Some(Pin::new(
+        &mut 200
+    ))));
 
     check!(ffi::c_take_enum(ffi::Enum::AVal));
     check!(ffi::c_take_ns_enum(ffi::AEnum::AAVal));
