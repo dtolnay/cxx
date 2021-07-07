@@ -972,10 +972,12 @@ fn parse_impl(imp: ItemImpl) -> Result<Api> {
     let ty_generics = match &ty {
         Type::RustBox(ty)
         | Type::RustVec(ty)
+        | Type::RustOption(ty)
         | Type::UniquePtr(ty)
         | Type::SharedPtr(ty)
         | Type::WeakPtr(ty)
-        | Type::CxxVector(ty) => match &ty.inner {
+        | Type::CxxVector(ty)
+        | Type::CxxOptional(ty) => match &ty.inner {
             Type::Ident(ident) => ident.generics.clone(),
             _ => Lifetimes::default(),
         },
@@ -1167,6 +1169,16 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
                             rangle: generic.gt_token,
                         })));
                     }
+                } else if ident == "CxxOptional" && generic.args.len() == 1 {
+                    if let GenericArgument::Type(arg) = &generic.args[0] {
+                        let inner = parse_type(arg)?;
+                        return Ok(Type::CxxOptional(Box::new(Ty1 {
+                            name: ident,
+                            langle: generic.lt_token,
+                            inner,
+                            rangle: generic.gt_token,
+                        })));
+                    }
                 } else if ident == "Box" && generic.args.len() == 1 {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
                         let inner = parse_type(arg)?;
@@ -1181,6 +1193,16 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
                         let inner = parse_type(arg)?;
                         return Ok(Type::RustVec(Box::new(Ty1 {
+                            name: ident,
+                            langle: generic.lt_token,
+                            inner,
+                            rangle: generic.gt_token,
+                        })));
+                    }
+                } else if ident == "Option" && generic.args.len() == 1 {
+                    if let GenericArgument::Type(arg) = &generic.args[0] {
+                        let inner = parse_type(arg)?;
+                        return Ok(Type::RustOption(Box::new(Ty1 {
                             name: ident,
                             langle: generic.lt_token,
                             inner,

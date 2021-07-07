@@ -7,10 +7,17 @@ use syn::Token;
 pub enum ImplKey<'a> {
     RustBox(NamedImplKey<'a>),
     RustVec(NamedImplKey<'a>),
+    RustOption(OptionInner<'a>),
     UniquePtr(NamedImplKey<'a>),
     SharedPtr(NamedImplKey<'a>),
     WeakPtr(NamedImplKey<'a>),
     CxxVector(NamedImplKey<'a>),
+    CxxOptional(NamedImplKey<'a>),
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+pub enum OptionInner<'a> {
+    RustBox(NamedImplKey<'a>),
 }
 
 #[derive(Copy, Clone)]
@@ -32,6 +39,14 @@ impl Type {
             if let Type::Ident(ident) = &ty.inner {
                 return Some(ImplKey::RustVec(NamedImplKey::new(ty, ident)));
             }
+        } else if let Type::RustOption(ty) = self {
+            if let Type::RustBox(_) = &ty.inner {
+                let impl_key = ty.inner.impl_key()?;
+                match impl_key {
+                    ImplKey::RustBox(named) => return Some(ImplKey::RustOption(OptionInner::RustBox(named))),
+                    _ => unreachable!(), 
+                }
+            }
         } else if let Type::UniquePtr(ty) = self {
             if let Type::Ident(ident) = &ty.inner {
                 return Some(ImplKey::UniquePtr(NamedImplKey::new(ty, ident)));
@@ -47,6 +62,10 @@ impl Type {
         } else if let Type::CxxVector(ty) = self {
             if let Type::Ident(ident) = &ty.inner {
                 return Some(ImplKey::CxxVector(NamedImplKey::new(ty, ident)));
+            }
+        } else if let Type::CxxOptional(ty) = self {
+            if let Type::Ident(ident) = &ty.inner {
+                return Some(ImplKey::CxxOptional(NamedImplKey::new(ty, ident)));
             }
         }
         None

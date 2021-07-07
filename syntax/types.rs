@@ -175,14 +175,16 @@ impl<'a> Types<'a> {
                 None => continue,
             };
             let implicit_impl = match impl_key {
-                ImplKey::RustBox(ident)
-                | ImplKey::RustVec(ident)
+                ImplKey::RustVec(ident)
+                | ImplKey::RustBox(ident)
                 | ImplKey::UniquePtr(ident)
                 | ImplKey::SharedPtr(ident)
                 | ImplKey::WeakPtr(ident)
-                | ImplKey::CxxVector(ident) => {
+                | ImplKey::CxxVector(ident)
+                | ImplKey::CxxOptional(ident) => {
                     Atom::from(ident.rust).is_none() && !aliases.contains_key(ident.rust)
                 }
+                ImplKey::RustOption(_) => true,
             };
             if implicit_impl && !impls.contains_key(&impl_key) {
                 impls.insert(impl_key, None);

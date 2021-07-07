@@ -9,7 +9,7 @@ edition = "2018"
 publish = false
 
 [dependencies]
-cxx = "1.0"
+cxx = {version="1.0", features=["c++17"]}
 
 [build-dependencies]
 cxx-build = "1.0"

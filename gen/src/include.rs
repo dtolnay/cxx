@@ -33,6 +33,7 @@ pub struct Includes<'a> {
     pub iterator: bool,
     pub memory: bool,
     pub new: bool,
+    pub optional: bool,
     pub stdexcept: bool,
     pub string: bool,
     pub type_traits: bool,
@@ -94,6 +95,7 @@ pub(super) fn write(out: &mut OutFile) {
         iterator,
         memory,
         new,
+        optional,
         stdexcept,
         string,
         type_traits,
@@ -139,6 +141,9 @@ pub(super) fn write(out: &mut OutFile) {
     }
     if new && !cxx_header {
         writeln!(out, "#include <new>");
+    }
+    if optional && !cxx_header {
+        writeln!(out, "#include <optional>");
     }
     if stdexcept && !cxx_header {
         writeln!(out, "#include <stdexcept>");
