@@ -20,6 +20,7 @@ mod parse;
 mod pod;
 pub mod qualified;
 pub mod report;
+pub mod repr;
 pub mod resolve;
 pub mod set;
 pub mod symbol;
@@ -45,6 +46,10 @@ pub use self::doc::Doc;
 pub use self::names::ForeignName;
 pub use self::parse::parse_items;
 pub use self::types::Types;
+
+pub enum Alignment {
+    Align(u32),
+}
 
 pub enum Api {
     Include(Include),
@@ -92,6 +97,7 @@ pub struct ExternType {
 pub struct Struct {
     pub doc: Doc,
     pub derives: Vec<Derive>,
+    pub alignment: Option<Alignment>,
     pub attrs: OtherAttrs,
     pub visibility: Token![pub],
     pub struct_token: Token![struct],

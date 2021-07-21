@@ -6,12 +6,12 @@ use crate::syntax::qualified::QualifiedName;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    self, check, mangle, Api, Doc, Enum, ExternFn, ExternType, Impl, Lifetimes, Pair, Signature,
+    self, check, mangle, Alignment, Api, Doc, Enum, ExternFn, ExternType, Impl, Lifetimes, Pair, Signature,
     Struct, Trait, Type, TypeAlias, Types,
 };
 use crate::type_id::Crate;
 use crate::{derive, generics};
-use proc_macro2::{Ident, Span, TokenStream};
+use proc_macro2::{Ident, Literal, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
 use std::mem;
 use syn::{parse_quote, punctuated, Generics, Lifetime, Result, Token};
@@ -144,6 +144,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
 fn expand_struct(strct: &Struct) -> TokenStream {
     let ident = &strct.name.rust;
     let doc = &strct.doc;
+    let alignment = &strct.alignment;
     let attrs = &strct.attrs;
     let generics = &strct.generics;
     let type_id = type_id(&strct.name);
@@ -167,11 +168,20 @@ fn expand_struct(strct: &Struct) -> TokenStream {
         }
     };
 
+    let mut repr = quote! { #[repr(C)] };
+    if let Some(Alignment::Align(x)) = alignment {
+        // Suffix isn't allowed in repr(align)
+        let x = Literal::u32_unsuffixed(*x);
+        repr = quote! {
+            #repr
+            #[repr(align(#x))]
+        }
+    }
     quote! {
         #doc
         #attrs
         #derives
-        #[repr(C)]
+        #repr
         #struct_def
 
         unsafe impl #generics ::cxx::ExternType for #ident #generics {
