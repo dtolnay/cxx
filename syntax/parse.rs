@@ -200,7 +200,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
     let mut variants_from_header = None;
     let attrs = attrs::parse(
         cx,
-        item.attrs,
+        item.attrs.clone(),
         attrs::Parser {
             doc: Some(&mut doc),
             derives: Some(&mut derives),
@@ -224,10 +224,13 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
         cx.error(where_clause, "enum with where-clause is not supported");
     }
 
-    let repr = if let Some(Repr::Atom(atom)) = repr {
-        Some(atom)
-    } else {
-        None
+    let repr = match repr {
+        Some(Repr::Atom(atom)) => Some(atom),
+        Some(Repr::Align(_)) => {
+            cx.error(&item, "repr(align) on enums is not supported");
+            None
+        },
+        None => None,
     };
 
     let mut variants = Vec::new();
