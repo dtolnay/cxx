@@ -3,6 +3,8 @@ error[E0726]: implicit elided lifetime not allowed here
   |
 6 |         type T;
   |              ^- help: indicate the anonymous lifetime: `<'_>`
+  |
+  = note: assuming a `'static` lifetime...
 
 error[E0106]: missing lifetime specifier
  --> $DIR/unsupported_elided.rs:8:24
