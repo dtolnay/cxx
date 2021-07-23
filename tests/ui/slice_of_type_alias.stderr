@@ -1,0 +1,10 @@
+error[E0271]: type mismatch resolving `<ElementOpaque as ExternType>::Kind == Trivial`
+   --> $DIR/slice_of_type_alias.rs:13:9
+    |
+13  |         type ElementOpaque = crate::ElementOpaque;
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected enum `Trivial`, found enum `cxx::kind::Opaque`
+    |
+   ::: $WORKSPACE/src/extern_type.rs
+    |
+    | pub fn verify_extern_kind<T: ExternType<Kind = Kind>, Kind: self::Kind>() {}
+    |                                         ----------- required by this bound in `verify_extern_kind`
