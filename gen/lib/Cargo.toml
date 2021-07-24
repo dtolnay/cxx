@@ -1,6 +1,6 @@
 [package]
 name = "cxx-gen"
-version = "0.7.49"
+version = "0.7.50"
 authors = ["Adrian Taylor <adetaylor@chromium.org>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
