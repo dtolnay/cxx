@@ -15,8 +15,8 @@ unsafe extern "C" fn string_clone(this: &mut MaybeUninit<String>, other: &String
     ptr::write(this.as_mut_ptr(), other.clone());
 }
 
-#[export_name = "cxxbridge1$string$from"]
-unsafe extern "C" fn string_from(
+#[export_name = "cxxbridge1$string$from_utf8"]
+unsafe extern "C" fn string_from_utf8(
     this: &mut MaybeUninit<String>,
     ptr: *const u8,
     len: usize,
@@ -25,6 +25,22 @@ unsafe extern "C" fn string_from(
     match str::from_utf8(slice) {
         Ok(s) => {
             ptr::write(this.as_mut_ptr(), s.to_owned());
+            true
+        }
+        Err(_) => false,
+    }
+}
+
+#[export_name = "cxxbridge1$string$from_utf16"]
+unsafe extern "C" fn string_from_utf16(
+    this: &mut MaybeUninit<String>,
+    ptr: *const u16,
+    len: usize,
+) -> bool {
+    let slice = slice::from_raw_parts(ptr, len);
+    match String::from_utf16(slice) {
+        Ok(s) => {
+            ptr::write(this.as_mut_ptr(), s);
             true
         }
         Err(_) => false,
