@@ -43,6 +43,8 @@ public:
   String(const std::string &);
   String(const char *);
   String(const char *, std::size_t);
+  String(const char16_t *);
+  String(const char16_t *, std::size_t);
 
   String &operator=(const String &) &noexcept;
   String &operator=(String &&) &noexcept;

@@ -31,8 +31,10 @@ void cxxbridge1$cxx_string$push(std::string &s, const std::uint8_t *ptr,
 void cxxbridge1$string$new(rust::String *self) noexcept;
 void cxxbridge1$string$clone(rust::String *self,
                              const rust::String &other) noexcept;
-bool cxxbridge1$string$from(rust::String *self, const char *ptr,
-                            std::size_t len) noexcept;
+bool cxxbridge1$string$from_utf8(rust::String *self, const char *ptr,
+                                 std::size_t len) noexcept;
+bool cxxbridge1$string$from_utf16(rust::String *self, const char16_t *ptr,
+                                  std::size_t len) noexcept;
 void cxxbridge1$string$drop(rust::String *self) noexcept;
 const char *cxxbridge1$string$ptr(const rust::String *self) noexcept;
 std::size_t cxxbridge1$string$len(const rust::String *self) noexcept;
@@ -81,8 +83,14 @@ String::String(String &&other) noexcept : repr(other.repr) {
 String::~String() noexcept { cxxbridge1$string$drop(this); }
 
 static void initString(String *self, const char *s, std::size_t len) {
-  if (!cxxbridge1$string$from(self, s, len)) {
+  if (!cxxbridge1$string$from_utf8(self, s, len)) {
     panic<std::invalid_argument>("data for rust::String is not utf-8");
+  }
+}
+
+static void initString(String *self, const char16_t *s, std::size_t len) {
+  if (!cxxbridge1$string$from_utf16(self, s, len)) {
+    panic<std::invalid_argument>("data for rust::String is not utf-16");
   }
 }
 
@@ -97,6 +105,19 @@ String::String(const char *s, std::size_t len) {
   assert(s != nullptr || len == 0);
   initString(this,
              s == nullptr && len == 0 ? reinterpret_cast<const char *>(1) : s,
+             len);
+}
+
+String::String(const char16_t *s) {
+  assert(s != nullptr);
+  initString(this, s, std::char_traits<char16_t>::length(s));
+}
+
+String::String(const char16_t *s, std::size_t len) {
+  assert(s != nullptr || len == 0);
+  initString(this,
+             s == nullptr && len == 0 ? reinterpret_cast<const char16_t *>(2)
+                                      : s,
              len);
 }
 
