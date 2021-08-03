@@ -1,5 +1,5 @@
 use self::ImproperCtype::*;
-use crate::syntax::atom::Atom::{self, *};
+use crate::syntax::atom::Atom::*;
 use crate::syntax::{Type, Types};
 use proc_macro2::Ident;
 
@@ -14,7 +14,7 @@ impl<'a> Types<'a> {
         match ty {
             Type::Ident(ident) => {
                 let ident = &ident.rust;
-                if let Some(atom) = Atom::from(ident) {
+                if let Some(&atom) = self.builtins.get(ident) {
                     Definite(atom == RustString)
                 } else if let Some(strct) = self.structs.get(ident) {
                     Depends(&strct.name.rust) // iterate to fixed-point
