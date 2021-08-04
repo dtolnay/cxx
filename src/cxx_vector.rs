@@ -32,6 +32,52 @@ pub struct CxxVector<T> {
     _pinned: PhantomData<PhantomPinned>,
 }
 
+/// Construct a C++ std::vector<T> on the Rust stack.
+///
+/// # Syntax
+///
+/// In statement position:
+///
+/// ```
+/// # use cxx::{CxxVector, let_cxx_vector};
+/// let_cxx_vector!(var);
+/// # let _: std::pin::Pin<&mut CxxVector<i32>> = var;
+/// ```
+///
+/// An optional type hint may be provided:
+///
+/// ```
+/// # use cxx::{CxxVector, let_cxx_vector};
+/// let_cxx_vector!(var: CxxVector<i32>);
+/// ```
+///
+/// The macro expands to something resembling `let $var: Pin<&mut CxxVector<_>> =
+/// /*???*/;` The resulting [`Pin`] can be deref'd to `&CxxVector<T>` as needed.
+///
+/// # Example
+///
+/// ```
+/// use cxx::{let_cxx_vector, CxxVector};
+///
+/// fn f(s: &CxxVector<i32>) {/* ... */}
+///
+/// fn main() {
+///     let_cxx_vector!(v);
+///     // `Pin::as_mut` required to borrow the Pin for a shorter lifetime.
+///     v.as_mut().push(1);
+///     v.as_mut().push(2);
+///     f(&v);
+/// }
+/// ```
+#[macro_export]
+macro_rules! let_cxx_vector {
+    ($var:ident $(: $hint:ty)? $(,)?) => {
+        let mut cxx_stack_vector = $crate::private::StackVector::new();
+        #[allow(unused_mut, unused_unsafe)]
+        let mut $var $(: ::core::pin::Pin<&mut $hint>)* = unsafe { cxx_stack_vector.init() };
+    };
+}
+
 impl<T> CxxVector<T>
 where
     T: VectorElement,
@@ -359,6 +405,10 @@ pub unsafe trait VectorElement: Sized {
     unsafe fn __unique_ptr_release(repr: MaybeUninit<*mut c_void>) -> *mut CxxVector<Self>;
     #[doc(hidden)]
     unsafe fn __unique_ptr_drop(repr: MaybeUninit<*mut c_void>);
+    #[doc(hidden)]
+    unsafe fn __init(this: &mut MaybeUninit<CxxVector<Self>>);
+    #[doc(hidden)]
+    unsafe fn __destroy(this: &mut MaybeUninit<CxxVector<Self>>);
 }
 
 macro_rules! vector_element_by_value_methods {
@@ -472,6 +522,26 @@ macro_rules! impl_vector_element {
                 }
                 __unique_ptr_drop(&mut repr);
             }
+            #[doc(hidden)]
+            unsafe fn __init(this: &mut MaybeUninit<CxxVector<Self>>) {
+                extern "C" {
+                    attr! {
+                        #[link_name = concat!("cxxbridge1$std$vector$", $segment, "$init")]
+                        fn __init(this: &mut MaybeUninit<CxxVector<$ty>>);
+                    }
+                }
+                __init(this);
+            }
+            #[doc(hidden)]
+            unsafe fn __destroy(this: &mut MaybeUninit<CxxVector<Self>>) {
+                extern "C" {
+                    attr! {
+                        #[link_name = concat!("cxxbridge1$std$vector$", $segment, "$destroy")]
+                        fn __destroy(this: &mut MaybeUninit<CxxVector<$ty>>);
+                    }
+                }
+                __destroy(this);
+            }
         }
     };
 }
@@ -496,3 +566,38 @@ impl_vector_element_for_primitive!(f32);
 impl_vector_element_for_primitive!(f64);
 
 impl_vector_element!(opaque, "string", "CxxString", CxxString);
+
+#[doc(hidden)]
+#[repr(C)]
+pub struct StackVector<T: VectorElement> {
+    // Static assertions in cxx.cc validate that this is large enough and
+    // aligned enough.
+    space: MaybeUninit<[usize; 8]>,
+    // Conceptually this holds a CxxVector in the space above
+    data: PhantomData<CxxVector<T>>,
+}
+
+#[allow(missing_docs)]
+impl<T: VectorElement> StackVector<T> {
+    pub fn new() -> Self {
+        StackVector {
+            space: MaybeUninit::uninit(),
+            data: PhantomData,
+        }
+    }
+
+    pub unsafe fn init(&mut self) -> Pin<&mut CxxVector<T>> {
+        let this = &mut *self.space.as_mut_ptr().cast::<MaybeUninit<CxxVector<T>>>();
+        T::__init(this);
+        Pin::new_unchecked(&mut *this.as_mut_ptr())
+    }
+}
+
+impl<T: VectorElement> Drop for StackVector<T> {
+    fn drop(&mut self) {
+        unsafe {
+            let this = &mut *self.space.as_mut_ptr().cast::<MaybeUninit<CxxVector<T>>>();
+            T::__destroy(this);
+        }
+    }
+}

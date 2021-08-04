@@ -1565,6 +1565,8 @@ fn expand_cxx_vector(
     let link_get_unchecked = format!("{}get_unchecked", prefix);
     let link_push_back = format!("{}push_back", prefix);
     let link_pop_back = format!("{}pop_back", prefix);
+    let link_init = format!("{}init", prefix);
+    let link_destroy = format!("{}destroy", prefix);
     let unique_ptr_prefix = format!(
         "cxxbridge1$unique_ptr$std$vector${}$",
         resolve.name.to_symbol(),
@@ -1686,6 +1688,22 @@ fn expand_cxx_vector(
                     fn __unique_ptr_drop(this: *mut ::std::mem::MaybeUninit<*mut ::std::ffi::c_void>);
                 }
                 __unique_ptr_drop(&mut repr);
+            }
+            #[doc(hidden)]
+            unsafe fn __init(this: &mut ::std::mem::MaybeUninit<::cxx::CxxVector<Self>>) {
+                extern "C" {
+                    #[link_name = #link_init]
+                    fn __init(this: &mut ::std::mem::MaybeUninit<::cxx::CxxVector<#elem #ty_generics>>);
+                }
+                __init(this);
+            }
+            #[doc(hidden)]
+            unsafe fn __destroy(this: &mut ::std::mem::MaybeUninit<::cxx::CxxVector<Self>>) {
+                extern "C" {
+                    #[link_name = #link_destroy]
+                    fn __destroy(this: &mut ::std::mem::MaybeUninit<::cxx::CxxVector<#elem #ty_generics>>);
+                }
+                __destroy(this);
             }
         }
     }

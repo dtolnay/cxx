@@ -1854,6 +1854,43 @@ fn write_cxx_vector(out: &mut OutFile, key: NamedImplKey) {
     writeln!(out, "  return &(*s)[pos];");
     writeln!(out, "}}");
 
+    writeln!(
+        out,
+        "  static_assert(alignof(std::vector<{}>) <= alignof(void *),",
+        inner
+    );
+    writeln!(
+        out,
+        "    \"unexpectedly large std::vector<{}> alignment\");",
+        inner
+    );
+    writeln!(
+        out,
+        "  static_assert(sizeof(std::vector<{}>) <= 8 * sizeof(void *),",
+        inner
+    );
+    writeln!(
+        out,
+        "    \"unexpectedly large std::vector<{}> size\");",
+        inner
+    );
+
+    writeln!(
+        out,
+        "void cxxbridge1$std$vector${}$init(::std::vector<{}> *s) noexcept {{",
+        instance, inner,
+    );
+    writeln!(out, "  new (s) ::std::vector<{}>;", inner);
+    writeln!(out, "}}");
+
+    writeln!(
+        out,
+        "void cxxbridge1$std$vector${}$destroy(::std::vector<{}> *s) noexcept {{",
+        instance, inner,
+    );
+    writeln!(out, "  s->~vector();");
+    writeln!(out, "}}");
+
     if out.types.is_maybe_trivial(element) {
         writeln!(
             out,

@@ -521,7 +521,19 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
   void cxxbridge1$unique_ptr$std$vector$##RUST_TYPE##$drop(                    \
       std::unique_ptr<std::vector<CXX_TYPE>> *ptr) noexcept {                  \
     ptr->~unique_ptr();                                                        \
-  }
+  }                                                                            \
+  void cxxbridge1$std$vector$##RUST_TYPE##$init(                               \
+      std::vector<CXX_TYPE>* s) noexcept {                                     \
+    new (s) std::vector<CXX_TYPE>;                                             \
+  }                                                                            \
+  void cxxbridge1$std$vector$##RUST_TYPE##$destroy(                            \
+      std::vector<CXX_TYPE>* s) noexcept {                                     \
+    s->~vector();                                                              \
+  }                                                                            \
+  static_assert(alignof(std::vector<CXX_TYPE>) <= alignof(void *),             \
+                "unexpectedly large std::vector alignment");                   \
+  static_assert(sizeof(std::vector<CXX_TYPE>) <= 8 * sizeof(void *),           \
+                "unexpectedly large std::vector size");
 
 #define STD_VECTOR_TRIVIAL_OPS(RUST_TYPE, CXX_TYPE)                            \
   void cxxbridge1$std$vector$##RUST_TYPE##$push_back(                          \
