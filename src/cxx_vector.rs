@@ -51,31 +51,52 @@ pub struct CxxVector<T> {
 /// let_cxx_vector!(var: CxxVector<i32>);
 /// ```
 ///
+/// The vector may also have initial contents:
+///
+/// ```
+/// # use cxx::let_cxx_vector;
+/// let_cxx_vector!(var = [1i32, 2, 3]);
+/// ```
+///
 /// The macro expands to something resembling `let $var: Pin<&mut CxxVector<_>> =
 /// /*???*/;` The resulting [`Pin`] can be deref'd to `&CxxVector<T>` as needed.
 ///
 /// # Example
 ///
 /// ```
+/// # use std::pin::Pin;
 /// use cxx::{let_cxx_vector, CxxVector};
 ///
 /// fn f(s: &CxxVector<i32>) {/* ... */}
+/// fn g(s: Pin<&mut CxxVector<i32>>) {/* ... */}
 ///
 /// fn main() {
-///     let_cxx_vector!(v);
+///     let_cxx_vector!(v = [1, 2, 3]);
 ///     // `Pin::as_mut` required to borrow the Pin for a shorter lifetime.
-///     v.as_mut().push(1);
-///     v.as_mut().push(2);
+///     v.as_mut().push(4);
+///     v.as_mut().push(5);
+///     // Call function that borrows CxxVector immutably
 ///     f(&v);
+///     // Call function that borrows CxxVector exclusively
+///     g(v.as_mut());
 /// }
 /// ```
 #[macro_export]
 macro_rules! let_cxx_vector {
-    ($var:ident $(: $hint:ty)? $(,)?) => {
+    ($var:ident $(: $hint:ty)? $( = [ $($e:expr),* ])? $(,)?) => {
         let mut cxx_stack_vector = $crate::private::StackVector::new();
         #[allow(unused_mut, unused_unsafe)]
-        let mut $var $(: ::core::pin::Pin<&mut $hint>)* = unsafe { cxx_stack_vector.init() };
+        let mut $var = {
+            let mut inner $(: ::core::pin::Pin<&mut $hint>)* = unsafe { cxx_stack_vector.init() };
+            $($({
+                inner.as_mut().push($e);
+            })*)*
+            inner
+        };
     };
+    ($var:ident $(: $hint:ty)? $( = [ $($e:expr),+ $(,)? ])? $(,)?) => {
+        let_cxx_vector!($var $(: $hint)* $(= [ $($e),* ])*)
+    }
 }
 
 impl<T> CxxVector<T>
