@@ -1127,9 +1127,11 @@ fn expand_rust_function_shim_super(
             Some(ret) => quote!(#ret),
             None => quote!(()),
         };
-        let impl_trait = quote_spanned!(result.span=> impl);
-        let display = quote_spanned!(rangle.span=> ::std::fmt::Display);
-        quote!(-> ::std::result::Result<#ok, #impl_trait #display>)
+        // Set spans that result in the `Result<...>` written by the user being
+        // highlighted as the cause if their error type has no Display impl.
+        let result_begin = quote_spanned!(result.span=> ::std::result::Result<#ok, impl);
+        let result_end = quote_spanned!(rangle.span=> ::std::fmt::Display>);
+        quote!(-> #result_begin #result_end)
     } else {
         expand_return_type(&sig.ret)
     };
