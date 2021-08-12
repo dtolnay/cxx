@@ -6,7 +6,7 @@ load(
 
 rust_library(
     name = "bitflags",
-    srcs = glob(["vendor/bitflags-1.2.1/src/**"]),
+    srcs = glob(["vendor/bitflags-1.3.1/src/**"]),
 )
 
 rust_library(
