@@ -19,6 +19,8 @@ extern "C" {
     fn string_data(this: &CxxString) -> *const u8;
     #[link_name = "cxxbridge1$cxx_string$length"]
     fn string_length(this: &CxxString) -> usize;
+    #[link_name = "cxxbridge1$cxx_string$clear"]
+    fn string_clear(this: Pin<&mut CxxString>);
     #[link_name = "cxxbridge1$cxx_string$push"]
     fn string_push(this: Pin<&mut CxxString>, ptr: *const u8, len: usize);
 }
@@ -142,6 +144,21 @@ impl CxxString {
     /// [replacement character]: https://doc.rust-lang.org/std/char/constant.REPLACEMENT_CHARACTER.html
     pub fn to_string_lossy(&self) -> Cow<str> {
         String::from_utf8_lossy(self.as_bytes())
+    }
+
+    /// Removes all characters from the string.
+    ///
+    /// Matches the behavior of C++ [std::string::clear][clear].
+    ///
+    /// Note: **unlike** the guarantee of Rust's `std::string::String::clear`,
+    /// the C++ standard does not require that capacity is unchanged by this
+    /// operation. In practice existing implementations do not change the
+    /// capacity but all pointers, references, and iterators into the string
+    /// contents are nevertheless invalidated.
+    ///
+    /// [clear]: https://en.cppreference.com/w/cpp/string/basic_string/clear
+    pub fn clear(self: Pin<&mut Self>) {
+        unsafe { string_clear(self) }
     }
 
     /// Appends a given string slice onto the end of this C++ string.

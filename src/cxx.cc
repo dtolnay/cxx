@@ -22,6 +22,8 @@ std::size_t cxxbridge1$cxx_string$length(const std::string &s) noexcept {
   return s.length();
 }
 
+void cxxbridge1$cxx_string$clear(std::string &s) noexcept { s.clear(); }
+
 void cxxbridge1$cxx_string$push(std::string &s, const std::uint8_t *ptr,
                                 std::size_t len) noexcept {
   s.append(reinterpret_cast<const char *>(ptr), len);
