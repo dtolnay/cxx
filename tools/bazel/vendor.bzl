@@ -2,7 +2,7 @@
 of a crate in the current workspace.
 """
 
-load("@rules_rust//rust:repositories.bzl", "load_arbitrary_tool", "DEFAULT_RUST_VERSION")
+load("@rules_rust//rust:repositories.bzl", "DEFAULT_RUST_VERSION", "load_arbitrary_tool")
 
 def _impl(repository_ctx):
     # Link cxx repository into @third-party.
@@ -35,7 +35,7 @@ def _impl(repository_ctx):
         iso_date = repository_ctx.attr.cargo_iso_date,
         target_triple = target_triple,
     )
-    
+
     cmd = ["{}/bin/cargo".format(repository_ctx.path(".")), "vendor", "--versioned-dirs", "third-party/vendor"]
     result = repository_ctx.execute(
         cmd,
