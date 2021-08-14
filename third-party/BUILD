@@ -1,5 +1,5 @@
 load(
-    "//tools/bazel:rust.bzl",
+    "//tools/bazel:third_party.bzl",
     cargo_build_script = "third_party_cargo_build_script",
     glob = "third_party_glob",
     rust_library = "third_party_rust_library",
