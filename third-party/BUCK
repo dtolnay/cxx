@@ -42,7 +42,6 @@ rust_library(
 rust_library(
     name = "proc-macro2",
     srcs = glob(["vendor/proc-macro2-1.0.28/src/**"]),
-    visibility = ["PUBLIC"],
     features = [
         "proc-macro",
         "span-locations",
@@ -52,14 +51,15 @@ rust_library(
         "--cfg=use_proc_macro",
         "--cfg=wrap_proc_macro",
     ],
+    visibility = ["PUBLIC"],
     deps = [":unicode-xid"],
 )
 
 rust_library(
     name = "quote",
     srcs = glob(["vendor/quote-1.0.9/src/**"]),
-    visibility = ["PUBLIC"],
     features = ["proc-macro"],
+    visibility = ["PUBLIC"],
     deps = [":proc-macro2"],
 )
 
@@ -73,7 +73,6 @@ rust_library(
 rust_library(
     name = "syn",
     srcs = glob(["vendor/syn-1.0.74/src/**"]),
-    visibility = ["PUBLIC"],
     features = [
         "clone-impls",
         "derive",
@@ -82,6 +81,7 @@ rust_library(
         "printing",
         "proc-macro",
     ],
+    visibility = ["PUBLIC"],
     deps = [
         ":proc-macro2",
         ":quote",
