@@ -7,7 +7,7 @@ load(
 
 rust_library(
     name = "bitflags",
-    srcs = glob(["vendor/bitflags-1.3.1/src/**"]),
+    srcs = glob(["vendor/bitflags-1.3.2/src/**"]),
 )
 
 rust_library(
@@ -85,7 +85,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.74/src/**"]),
+    srcs = glob(["vendor/syn-1.0.75/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
