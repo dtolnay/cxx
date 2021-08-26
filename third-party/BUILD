@@ -98,8 +98,23 @@ rust_library(
     deps = [
         ":proc-macro2",
         ":quote",
+        ":syn@build",
         ":unicode-xid",
     ],
+)
+
+cargo_build_script(
+    name = "syn@build",
+    srcs = ["vendor/syn-1.0.75/build.rs"],
+    crate_features = [
+        "clone-impls",
+        "derive",
+        "full",
+        "parsing",
+        "printing",
+        "proc-macro",
+    ],
+    crate_name = "build",
 )
 
 rust_library(

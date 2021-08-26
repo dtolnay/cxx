@@ -71,6 +71,7 @@ rust_library(
 rust_library(
     name = "syn",
     srcs = glob(["vendor/syn-1.0.75/src/**"]),
+    build_script = "vendor/syn-1.0.75/build.rs",
     features = [
         "clone-impls",
         "derive",
