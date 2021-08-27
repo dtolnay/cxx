@@ -216,7 +216,7 @@ macro_rules! impl_shared_ptr_target {
                         fn __null(new: *mut c_void);
                     }
                 }
-                __null(new);
+                unsafe { __null(new) }
             }
             #[doc(hidden)]
             unsafe fn __new(value: Self, new: *mut c_void) {
@@ -226,7 +226,7 @@ macro_rules! impl_shared_ptr_target {
                         fn __uninit(new: *mut c_void) -> *mut c_void;
                     }
                 }
-                __uninit(new).cast::<$ty>().write(value);
+                unsafe { __uninit(new).cast::<$ty>().write(value) }
             }
             #[doc(hidden)]
             unsafe fn __clone(this: *const c_void, new: *mut c_void) {
@@ -236,7 +236,7 @@ macro_rules! impl_shared_ptr_target {
                         fn __clone(this: *const c_void, new: *mut c_void);
                     }
                 }
-                __clone(this, new);
+                unsafe { __clone(this, new) }
             }
             #[doc(hidden)]
             unsafe fn __get(this: *const c_void) -> *const Self {
@@ -246,7 +246,7 @@ macro_rules! impl_shared_ptr_target {
                         fn __get(this: *const c_void) -> *const c_void;
                     }
                 }
-                __get(this).cast()
+                unsafe { __get(this) }.cast()
             }
             #[doc(hidden)]
             unsafe fn __drop(this: *mut c_void) {
@@ -256,7 +256,7 @@ macro_rules! impl_shared_ptr_target {
                         fn __drop(this: *mut c_void);
                     }
                 }
-                __drop(this);
+                unsafe { __drop(this) }
             }
         }
     };

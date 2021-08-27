@@ -26,13 +26,13 @@ impl RustSlice {
     pub unsafe fn as_slice<'a, T>(self) -> &'a [T] {
         let ptr = self.as_non_null_ptr().as_ptr();
         let len = self.len();
-        slice::from_raw_parts(ptr, len)
+        unsafe { slice::from_raw_parts(ptr, len) }
     }
 
     pub unsafe fn as_mut_slice<'a, T>(self) -> &'a mut [T] {
         let ptr = self.as_non_null_ptr().as_ptr();
         let len = self.len();
-        slice::from_raw_parts_mut(ptr, len)
+        unsafe { slice::from_raw_parts_mut(ptr, len) }
     }
 
     pub(crate) fn from_raw_parts<T>(ptr: NonNull<T>, len: usize) -> Self {
