@@ -56,11 +56,11 @@ impl<T> RustVec<T> {
         self.as_vec().as_ptr()
     }
 
-    pub fn reserve_total(&mut self, cap: usize) {
+    pub fn reserve_total(&mut self, new_cap: usize) {
         let vec = self.as_mut_vec();
         let len = vec.len();
-        if cap > len {
-            vec.reserve(cap - len);
+        if new_cap > len {
+            vec.reserve(new_cap - len);
         }
     }
 

@@ -338,7 +338,7 @@ public:
   Vec(unsafe_bitcopy_t, const Vec &) noexcept;
 
 private:
-  void reserve_total(std::size_t cap) noexcept;
+  void reserve_total(std::size_t new_cap) noexcept;
   void set_len(std::size_t len) noexcept;
   void drop() noexcept;
 

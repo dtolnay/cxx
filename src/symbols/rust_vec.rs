@@ -44,8 +44,8 @@ macro_rules! rust_vec_shims {
             }
             attr! {
                 #[export_name = concat!("cxxbridge1$rust_vec$", $segment, "$reserve_total")]
-                unsafe extern "C" fn __reserve_total(this: *mut RustVec<$ty>, cap: usize) {
-                    (*this).reserve_total(cap);
+                unsafe extern "C" fn __reserve_total(this: *mut RustVec<$ty>, new_cap: usize) {
+                    (*this).reserve_total(new_cap);
                 }
             }
             attr! {
