@@ -14,7 +14,7 @@ http_archive(
 
 load("@rules_rust//rust:repositories.bzl", "rust_repositories")
 
-RUST_VERSION = "1.51.0"
+RUST_VERSION = "1.54.0"
 
 rust_repositories(
     edition = "2018",
