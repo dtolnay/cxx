@@ -835,6 +835,12 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(cstring == "foo");
   ASSERT(other_cstring == "test");
 
+  ASSERT(cstring.capacity() == 3);
+  cstring.reserve(2);
+  ASSERT(cstring.capacity() == 3);
+  cstring.reserve(5);
+  ASSERT(cstring.capacity() >= 5);
+
   rust::Str cstr = "test";
   rust::Str other_cstr = "foo";
   swap(cstr, other_cstr);

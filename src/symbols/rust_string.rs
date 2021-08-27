@@ -69,7 +69,20 @@ unsafe extern "C" fn string_len(this: &String) -> usize {
     this.len()
 }
 
+#[export_name = "cxxbridge1$string$capacity"]
+unsafe extern "C" fn string_capacity(this: &String) -> usize {
+    this.capacity()
+}
+
 #[export_name = "cxxbridge1$string$reserve_additional"]
 unsafe extern "C" fn string_reserve_additional(this: &mut String, additional: usize) {
     this.reserve(additional);
+}
+
+#[export_name = "cxxbridge1$string$reserve_total"]
+unsafe extern "C" fn string_reserve_total(this: &mut String, new_cap: usize) {
+    if new_cap > this.capacity() {
+        let additional = new_cap - this.len();
+        this.reserve(additional);
+    }
 }
