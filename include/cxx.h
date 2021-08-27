@@ -59,6 +59,9 @@ public:
 
   const char *c_str() noexcept;
 
+  std::size_t capacity() const noexcept;
+  void reserve(size_t new_cap) noexcept;
+
   using iterator = char *;
   iterator begin() noexcept;
   iterator end() noexcept;
