@@ -10,7 +10,7 @@ unsafe extern "C" fn slice_new(this: &mut MaybeUninit<RustSlice>, ptr: NonNull<(
 
 #[export_name = "cxxbridge1$slice$ptr"]
 unsafe extern "C" fn slice_ptr(this: &RustSlice) -> NonNull<()> {
-    this.as_ptr()
+    this.as_non_null_ptr()
 }
 
 #[export_name = "cxxbridge1$slice$len"]
