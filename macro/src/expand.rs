@@ -1301,8 +1301,8 @@ fn expand_rust_vec(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
         }
         #[doc(hidden)]
         #[export_name = #link_reserve_total]
-        unsafe extern "C" fn #local_reserve_total #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>, cap: usize) {
-            (*this).reserve_total(cap);
+        unsafe extern "C" fn #local_reserve_total #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>, new_cap: usize) {
+            (*this).reserve_total(new_cap);
         }
         #[doc(hidden)]
         #[export_name = #link_set_len]
