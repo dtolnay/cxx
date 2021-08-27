@@ -58,9 +58,9 @@ impl<T> RustVec<T> {
 
     pub fn reserve_total(&mut self, new_cap: usize) {
         let vec = self.as_mut_vec();
-        let len = vec.len();
-        if new_cap > len {
-            vec.reserve(new_cap - len);
+        if new_cap > vec.capacity() {
+            let additional = new_cap - vec.len();
+            vec.reserve(additional);
         }
     }
 
