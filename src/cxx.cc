@@ -40,7 +40,8 @@ bool cxxbridge1$string$from_utf16(rust::String *self, const char16_t *ptr,
 void cxxbridge1$string$drop(rust::String *self) noexcept;
 const char *cxxbridge1$string$ptr(const rust::String *self) noexcept;
 std::size_t cxxbridge1$string$len(const rust::String *self) noexcept;
-void cxxbridge1$string$reserve_total(rust::String *self, size_t cap) noexcept;
+void cxxbridge1$string$reserve_additional(rust::String *self,
+                                          size_t additional) noexcept;
 
 // rust::Str
 void cxxbridge1$str$new(rust::Str *self) noexcept;
@@ -158,7 +159,7 @@ bool String::empty() const noexcept { return this->size() == 0; }
 
 const char *String::c_str() noexcept {
   auto len = this->length();
-  cxxbridge1$string$reserve_total(this, len + 1);
+  cxxbridge1$string$reserve_additional(this, 1);
   auto ptr = this->data();
   const_cast<char *>(ptr)[len] = '\0';
   return ptr;
