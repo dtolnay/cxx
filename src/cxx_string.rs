@@ -240,9 +240,11 @@ impl StackString {
 
     pub unsafe fn init(&mut self, value: impl AsRef<[u8]>) -> Pin<&mut CxxString> {
         let value = value.as_ref();
-        let this = &mut *self.space.as_mut_ptr().cast::<MaybeUninit<CxxString>>();
-        string_init(this, value.as_ptr(), value.len());
-        Pin::new_unchecked(&mut *this.as_mut_ptr())
+        unsafe {
+            let this = &mut *self.space.as_mut_ptr().cast::<MaybeUninit<CxxString>>();
+            string_init(this, value.as_ptr(), value.len());
+            Pin::new_unchecked(&mut *this.as_mut_ptr())
+        }
     }
 }
 
