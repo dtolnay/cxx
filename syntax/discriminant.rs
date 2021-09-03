@@ -208,7 +208,7 @@ impl Display for Discriminant {
         if self.sign == Sign::Negative {
             f.write_str("-")?;
         }
-        Display::fmt(&self.magnitude, f)
+        write!(f, "{}", self.magnitude)
     }
 }
 

@@ -1,7 +1,0 @@
-error[E0277]: the trait bound `ffi::Other: Clone` is not satisfied
- --> $DIR/derive_nonclone.rs:5:9
-  |
-5 |         other: Other,
-  |         ^^^^^^^^^^^^ the trait `Clone` is not implemented for `ffi::Other`
-  |
-  = note: required by `clone`

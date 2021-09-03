@@ -11,6 +11,7 @@ pub enum TrivialReason<'a> {
     FunctionReturn(&'a ExternFn),
     BoxTarget,
     VecElement,
+    SliceElement { mutable: bool },
     UnpinnedMut(&'a ExternFn),
 }
 
@@ -105,6 +106,14 @@ pub fn required_trivial_reasons<'a>(
                     insist_extern_types_are_trivial(ident, reason);
                 }
             }
+            Type::SliceRef(ty) => {
+                if let Type::Ident(ident) = &ty.inner {
+                    let reason = TrivialReason::SliceElement {
+                        mutable: ty.mutable,
+                    };
+                    insist_extern_types_are_trivial(ident, reason);
+                }
+            }
             _ => {}
         }
     }
@@ -128,6 +137,8 @@ pub fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl Display
             let mut return_of = Set::new();
             let mut box_target = false;
             let mut vec_element = false;
+            let mut slice_shared_element = false;
+            let mut slice_mut_element = false;
             let mut unpinned_mut = Set::new();
 
             for reason in self.reasons {
@@ -143,6 +154,13 @@ pub fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl Display
                     }
                     TrivialReason::BoxTarget => box_target = true,
                     TrivialReason::VecElement => vec_element = true,
+                    TrivialReason::SliceElement { mutable } => {
+                        if *mutable {
+                            slice_mut_element = true;
+                        } else {
+                            slice_shared_element = true;
+                        }
+                    }
                     TrivialReason::UnpinnedMut(efn) => {
                         unpinned_mut.insert(&efn.name.rust);
                     }
@@ -185,6 +203,15 @@ pub fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl Display
                     param: self.name,
                 });
             }
+            if slice_shared_element || slice_mut_element {
+                clauses.push(Clause::Slice {
+                    article: "a",
+                    desc: "slice element in",
+                    shared: slice_shared_element,
+                    mutable: slice_mut_element,
+                    param: self.name,
+                });
+            }
             if !unpinned_mut.is_empty() {
                 clauses.push(Clause::Set {
                     article: "a",
@@ -219,12 +246,21 @@ pub fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl Display
             desc: &'a str,
             param: &'a Pair,
         },
+        Slice {
+            article: &'a str,
+            desc: &'a str,
+            shared: bool,
+            mutable: bool,
+            param: &'a Pair,
+        },
     }
 
     impl<'a> Clause<'a> {
         fn article(&self) -> &'a str {
             match self {
-                Clause::Set { article, .. } | Clause::Ty1 { article, .. } => article,
+                Clause::Set { article, .. }
+                | Clause::Ty1 { article, .. }
+                | Clause::Slice { article, .. } => article,
             }
         }
 
@@ -249,6 +285,25 @@ pub fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl Display
                     desc,
                     param,
                 } => write!(f, "{}<{}>", desc, param.rust),
+                Clause::Slice {
+                    article: _,
+                    desc,
+                    shared,
+                    mutable,
+                    param,
+                } => {
+                    write!(f, "{} ", desc)?;
+                    if *shared {
+                        write!(f, "&[{}]", param.rust)?;
+                    }
+                    if *shared && *mutable {
+                        write!(f, " and ")?;
+                    }
+                    if *mutable {
+                        write!(f, "&mut [{}]", param.rust)?;
+                    }
+                    Ok(())
+                }
             }
         }
     }

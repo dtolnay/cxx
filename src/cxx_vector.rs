@@ -86,8 +86,10 @@ where
     /// [operator_at]: https://en.cppreference.com/w/cpp/container/vector/operator_at
     pub unsafe fn get_unchecked(&self, pos: usize) -> &T {
         let this = self as *const CxxVector<T> as *mut CxxVector<T>;
-        let ptr = T::__get_unchecked(this, pos) as *const T;
-        &*ptr
+        unsafe {
+            let ptr = T::__get_unchecked(this, pos) as *const T;
+            &*ptr
+        }
     }
 
     /// Returns a pinned mutable reference to an element without doing bounds
@@ -102,8 +104,10 @@ where
     ///
     /// [operator_at]: https://en.cppreference.com/w/cpp/container/vector/operator_at
     pub unsafe fn index_unchecked_mut(self: Pin<&mut Self>, pos: usize) -> Pin<&mut T> {
-        let ptr = T::__get_unchecked(self.get_unchecked_mut(), pos);
-        Pin::new_unchecked(&mut *ptr)
+        unsafe {
+            let ptr = T::__get_unchecked(self.get_unchecked_mut(), pos);
+            Pin::new_unchecked(&mut *ptr)
+        }
     }
 
     /// Returns a slice to the underlying contiguous array of elements.
@@ -372,7 +376,7 @@ macro_rules! vector_element_by_value_methods {
                     fn __push_back(_: Pin<&mut CxxVector<$ty>>, _: &mut ManuallyDrop<$ty>);
                 }
             }
-            __push_back(v, value);
+            unsafe { __push_back(v, value) }
         }
         #[doc(hidden)]
         unsafe fn __pop_back(v: Pin<&mut CxxVector<$ty>>, out: &mut MaybeUninit<$ty>) {
@@ -382,7 +386,7 @@ macro_rules! vector_element_by_value_methods {
                     fn __pop_back(_: Pin<&mut CxxVector<$ty>>, _: &mut MaybeUninit<$ty>);
                 }
             }
-            __pop_back(v, out);
+            unsafe { __pop_back(v, out) }
         }
     };
 }
@@ -415,7 +419,7 @@ macro_rules! impl_vector_element {
                         fn __get_unchecked(_: *mut CxxVector<$ty>, _: usize) -> *mut $ty;
                     }
                 }
-                __get_unchecked(v, pos)
+                unsafe { __get_unchecked(v, pos) }
             }
             vector_element_by_value_methods!($kind, $segment, $ty);
             #[doc(hidden)]
@@ -439,7 +443,7 @@ macro_rules! impl_vector_element {
                     }
                 }
                 let mut repr = MaybeUninit::uninit();
-                __unique_ptr_raw(&mut repr, raw);
+                unsafe { __unique_ptr_raw(&mut repr, raw) }
                 repr
             }
             #[doc(hidden)]
@@ -450,7 +454,7 @@ macro_rules! impl_vector_element {
                         fn __unique_ptr_get(this: *const MaybeUninit<*mut c_void>) -> *const CxxVector<$ty>;
                     }
                 }
-                __unique_ptr_get(&repr)
+                unsafe { __unique_ptr_get(&repr) }
             }
             #[doc(hidden)]
             unsafe fn __unique_ptr_release(mut repr: MaybeUninit<*mut c_void>) -> *mut CxxVector<Self> {
@@ -460,7 +464,7 @@ macro_rules! impl_vector_element {
                         fn __unique_ptr_release(this: *mut MaybeUninit<*mut c_void>) -> *mut CxxVector<$ty>;
                     }
                 }
-                __unique_ptr_release(&mut repr)
+                unsafe { __unique_ptr_release(&mut repr) }
             }
             #[doc(hidden)]
             unsafe fn __unique_ptr_drop(mut repr: MaybeUninit<*mut c_void>) {
@@ -470,7 +474,7 @@ macro_rules! impl_vector_element {
                         fn __unique_ptr_drop(this: *mut MaybeUninit<*mut c_void>);
                     }
                 }
-                __unique_ptr_drop(&mut repr);
+                unsafe { __unique_ptr_drop(&mut repr) }
             }
         }
     };

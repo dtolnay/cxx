@@ -23,6 +23,10 @@ public:
   String(const char *);
   String(const char *, size_t);
 
+  // Throws std::invalid_argument if not utf-16.
+  String(const char16_t *);
+  String(const char16_t *, size_t);
+
   String &operator=(const String &) noexcept;
   String &operator=(String &&) noexcept;
 
@@ -35,6 +39,9 @@ public:
   bool empty() const noexcept;
 
   const char *c_str() noexcept;
+
+  size_t capacity() const noexcept;
+  void reserve(size_t new_cap) noexcept;
 
   using iterator = char *;
   iterator begin() noexcept;

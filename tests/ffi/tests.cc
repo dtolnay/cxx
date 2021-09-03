@@ -835,11 +835,23 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(cstring == "foo");
   ASSERT(other_cstring == "test");
 
+  ASSERT(cstring.capacity() == 3);
+  cstring.reserve(2);
+  ASSERT(cstring.capacity() == 3);
+  cstring.reserve(5);
+  ASSERT(cstring.capacity() >= 5);
+
   rust::Str cstr = "test";
   rust::Str other_cstr = "foo";
   swap(cstr, other_cstr);
   ASSERT(cstr == "foo");
   ASSERT(other_cstr == "test");
+
+  const char *utf8_literal = u8"Test string";
+  const char16_t *utf16_literal = u"Test string";
+  rust::String utf8_rstring = utf8_literal;
+  rust::String utf16_rstring = utf16_literal;
+  ASSERT(utf8_rstring == utf16_rstring);
 
   rust::Vec<int> vec1{1, 2};
   rust::Vec<int> vec2{3, 4};

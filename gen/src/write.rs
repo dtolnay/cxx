@@ -1467,7 +1467,7 @@ fn write_rust_vec_extern(out: &mut OutFile, key: NamedImplKey) {
     );
     writeln!(
         out,
-        "void cxxbridge1$rust_vec${}$reserve_total(::rust::Vec<{}> *ptr, ::std::size_t cap) noexcept;",
+        "void cxxbridge1$rust_vec${}$reserve_total(::rust::Vec<{}> *ptr, ::std::size_t new_cap) noexcept;",
         instance, inner,
     );
     writeln!(
@@ -1562,12 +1562,12 @@ fn write_rust_vec_impl(out: &mut OutFile, key: NamedImplKey) {
     begin_function_definition(out);
     writeln!(
         out,
-        "void Vec<{}>::reserve_total(::std::size_t cap) noexcept {{",
+        "void Vec<{}>::reserve_total(::std::size_t new_cap) noexcept {{",
         inner,
     );
     writeln!(
         out,
-        "  return cxxbridge1$rust_vec${}$reserve_total(this, cap);",
+        "  return cxxbridge1$rust_vec${}$reserve_total(this, new_cap);",
         instance,
     );
     writeln!(out, "}}");

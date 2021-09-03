@@ -28,6 +28,12 @@ fn main() {
                 rustc.version,
             );
         }
+
+        if rustc.minor < 52 {
+            // #![deny(unsafe_op_in_unsafe_fn)].
+            // https://github.com/rust-lang/rust/issues/71668
+            println!("cargo:rustc-cfg=no_unsafe_op_in_unsafe_fn_lint");
+        }
     }
 }
 
