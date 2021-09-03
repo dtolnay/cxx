@@ -126,7 +126,7 @@ macro_rules! impl_weak_ptr_target {
                         fn __null(new: *mut c_void);
                     }
                 }
-                __null(new);
+                unsafe { __null(new) }
             }
             #[doc(hidden)]
             unsafe fn __clone(this: *const c_void, new: *mut c_void) {
@@ -136,7 +136,7 @@ macro_rules! impl_weak_ptr_target {
                         fn __clone(this: *const c_void, new: *mut c_void);
                     }
                 }
-                __clone(this, new);
+                unsafe { __clone(this, new) }
             }
             #[doc(hidden)]
             unsafe fn __downgrade(shared: *const c_void, weak: *mut c_void) {
@@ -146,7 +146,7 @@ macro_rules! impl_weak_ptr_target {
                         fn __downgrade(shared: *const c_void, weak: *mut c_void);
                     }
                 }
-                __downgrade(shared, weak);
+                unsafe { __downgrade(shared, weak) }
             }
             #[doc(hidden)]
             unsafe fn __upgrade(weak: *const c_void, shared: *mut c_void) {
@@ -156,7 +156,7 @@ macro_rules! impl_weak_ptr_target {
                         fn __upgrade(weak: *const c_void, shared: *mut c_void);
                     }
                 }
-                __upgrade(weak, shared);
+                unsafe { __upgrade(weak, shared) }
             }
             #[doc(hidden)]
             unsafe fn __drop(this: *mut c_void) {
@@ -166,7 +166,7 @@ macro_rules! impl_weak_ptr_target {
                         fn __drop(this: *mut c_void);
                     }
                 }
-                __drop(this);
+                unsafe { __drop(this) }
             }
         }
     };

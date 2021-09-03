@@ -1127,9 +1127,11 @@ fn expand_rust_function_shim_super(
             Some(ret) => quote!(#ret),
             None => quote!(()),
         };
-        let impl_trait = quote_spanned!(result.span=> impl);
-        let display = quote_spanned!(rangle.span=> ::std::fmt::Display);
-        quote!(-> ::std::result::Result<#ok, #impl_trait #display>)
+        // Set spans that result in the `Result<...>` written by the user being
+        // highlighted as the cause if their error type has no Display impl.
+        let result_begin = quote_spanned!(result.span=> ::std::result::Result<#ok, impl);
+        let result_end = quote_spanned!(rangle.span=> ::std::fmt::Display>);
+        quote!(-> #result_begin #result_end)
     } else {
         expand_return_type(&sig.ret)
     };
@@ -1299,8 +1301,8 @@ fn expand_rust_vec(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
         }
         #[doc(hidden)]
         #[export_name = #link_reserve_total]
-        unsafe extern "C" fn #local_reserve_total #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>, cap: usize) {
-            (*this).reserve_total(cap);
+        unsafe extern "C" fn #local_reserve_total #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>, new_cap: usize) {
+            (*this).reserve_total(new_cap);
         }
         #[doc(hidden)]
         #[export_name = #link_set_len]

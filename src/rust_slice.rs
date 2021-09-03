@@ -24,15 +24,15 @@ impl RustSlice {
     }
 
     pub unsafe fn as_slice<'a, T>(self) -> &'a [T] {
-        let ptr = self.as_ptr();
+        let ptr = self.as_non_null_ptr().as_ptr();
         let len = self.len();
-        slice::from_raw_parts(ptr.as_ptr(), len)
+        unsafe { slice::from_raw_parts(ptr, len) }
     }
 
     pub unsafe fn as_mut_slice<'a, T>(self) -> &'a mut [T] {
-        let ptr = self.as_ptr();
+        let ptr = self.as_non_null_ptr().as_ptr();
         let len = self.len();
-        slice::from_raw_parts_mut(ptr.as_ptr(), len)
+        unsafe { slice::from_raw_parts_mut(ptr, len) }
     }
 
     pub(crate) fn from_raw_parts<T>(ptr: NonNull<T>, len: usize) -> Self {
@@ -43,7 +43,7 @@ impl RustSlice {
         unsafe { mem::transmute::<NonNull<[()]>, RustSlice>(NonNull::new_unchecked(ptr)) }
     }
 
-    pub(crate) fn as_ptr<T>(&self) -> NonNull<T> {
+    pub(crate) fn as_non_null_ptr<T>(&self) -> NonNull<T> {
         let rust_slice = RustSlice { repr: self.repr };
         let repr = unsafe { mem::transmute::<RustSlice, NonNull<[()]>>(rust_slice) };
         repr.cast()

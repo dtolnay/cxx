@@ -43,6 +43,8 @@ public:
   String(const std::string &);
   String(const char *);
   String(const char *, std::size_t);
+  String(const char16_t *);
+  String(const char16_t *, std::size_t);
 
   String &operator=(const String &) &noexcept;
   String &operator=(String &&) &noexcept;
@@ -56,6 +58,9 @@ public:
   bool empty() const noexcept;
 
   const char *c_str() noexcept;
+
+  std::size_t capacity() const noexcept;
+  void reserve(size_t new_cap) noexcept;
 
   using iterator = char *;
   iterator begin() noexcept;
@@ -336,7 +341,7 @@ public:
   Vec(unsafe_bitcopy_t, const Vec &) noexcept;
 
 private:
-  void reserve_total(std::size_t cap) noexcept;
+  void reserve_total(std::size_t new_cap) noexcept;
   void set_len(std::size_t len) noexcept;
   void drop() noexcept;
 
@@ -538,8 +543,8 @@ bool Slice<T>::empty() const noexcept {
 template <typename T>
 T &Slice<T>::operator[](std::size_t n) const noexcept {
   assert(n < this->size());
-  auto pos = static_cast<char *>(slicePtr(this)) + size_of<T>() * n;
-  return *reinterpret_cast<T *>(pos);
+  auto ptr = static_cast<char *>(slicePtr(this)) + size_of<T>() * n;
+  return *reinterpret_cast<T *>(ptr);
 }
 
 template <typename T>
@@ -577,8 +582,8 @@ Slice<T>::iterator::operator->() const noexcept {
 template <typename T>
 typename Slice<T>::iterator::reference Slice<T>::iterator::operator[](
     typename Slice<T>::iterator::difference_type n) const noexcept {
-  auto pos = static_cast<char *>(this->pos) + this->stride * n;
-  return *reinterpret_cast<T *>(pos);
+  auto ptr = static_cast<char *>(this->pos) + this->stride * n;
+  return *reinterpret_cast<T *>(ptr);
 }
 
 template <typename T>

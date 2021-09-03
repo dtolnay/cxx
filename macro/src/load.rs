@@ -308,9 +308,8 @@ struct CxxName<'a>(&'a Pair);
 impl<'a> Display for CxxName<'a> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         for namespace in &self.0.namespace {
-            Display::fmt(namespace, formatter)?;
-            formatter.write_str("::")?;
+            write!(formatter, "{}::", namespace)?;
         }
-        Display::fmt(&self.0.cxx, formatter)
+        write!(formatter, "{}", self.0.cxx)
     }
 }

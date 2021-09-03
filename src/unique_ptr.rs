@@ -103,7 +103,7 @@ where
     /// twice on the same raw pointer.
     pub unsafe fn from_raw(raw: *mut T) -> Self {
         UniquePtr {
-            repr: T::__raw(raw),
+            repr: unsafe { T::__raw(raw) },
             ty: PhantomData,
         }
     }
@@ -256,20 +256,20 @@ unsafe impl UniquePtrTarget for CxxString {
     #[doc(hidden)]
     unsafe fn __raw(raw: *mut Self) -> MaybeUninit<*mut c_void> {
         let mut repr = MaybeUninit::uninit();
-        unique_ptr_std_string_raw(&mut repr, raw);
+        unsafe { unique_ptr_std_string_raw(&mut repr, raw) }
         repr
     }
     #[doc(hidden)]
     unsafe fn __get(repr: MaybeUninit<*mut c_void>) -> *const Self {
-        unique_ptr_std_string_get(&repr)
+        unsafe { unique_ptr_std_string_get(&repr) }
     }
     #[doc(hidden)]
     unsafe fn __release(mut repr: MaybeUninit<*mut c_void>) -> *mut Self {
-        unique_ptr_std_string_release(&mut repr)
+        unsafe { unique_ptr_std_string_release(&mut repr) }
     }
     #[doc(hidden)]
     unsafe fn __drop(mut repr: MaybeUninit<*mut c_void>) {
-        unique_ptr_std_string_drop(&mut repr);
+        unsafe { unique_ptr_std_string_drop(&mut repr) }
     }
 }
 
@@ -287,18 +287,18 @@ where
     }
     #[doc(hidden)]
     unsafe fn __raw(raw: *mut Self) -> MaybeUninit<*mut c_void> {
-        T::__unique_ptr_raw(raw)
+        unsafe { T::__unique_ptr_raw(raw) }
     }
     #[doc(hidden)]
     unsafe fn __get(repr: MaybeUninit<*mut c_void>) -> *const Self {
-        T::__unique_ptr_get(repr)
+        unsafe { T::__unique_ptr_get(repr) }
     }
     #[doc(hidden)]
     unsafe fn __release(repr: MaybeUninit<*mut c_void>) -> *mut Self {
-        T::__unique_ptr_release(repr)
+        unsafe { T::__unique_ptr_release(repr) }
     }
     #[doc(hidden)]
     unsafe fn __drop(repr: MaybeUninit<*mut c_void>) {
-        T::__unique_ptr_drop(repr);
+        unsafe { T::__unique_ptr_drop(repr) }
     }
 }

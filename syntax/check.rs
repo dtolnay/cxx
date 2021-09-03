@@ -266,7 +266,9 @@ fn check_type_ptr(cx: &mut Check, ty: &Ptr) {
 fn check_type_slice_ref(cx: &mut Check, ty: &SliceRef) {
     let supported = !is_unsized(cx, &ty.inner)
         || match &ty.inner {
-            Type::Ident(ident) => cx.types.rust.contains(&ident.rust),
+            Type::Ident(ident) => {
+                cx.types.rust.contains(&ident.rust) || cx.types.aliases.contains_key(&ident.rust)
+            }
             _ => false,
         };
 

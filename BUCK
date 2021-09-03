@@ -25,19 +25,19 @@ rust_binary(
 cxx_library(
     name = "core",
     srcs = ["src/cxx.cc"],
-    visibility = ["PUBLIC"],
-    header_namespace = "rust",
     exported_headers = {
         "cxx.h": "include/cxx.h",
     },
     exported_linker_flags = ["-lstdc++"],
+    header_namespace = "rust",
+    visibility = ["PUBLIC"],
 )
 
 rust_library(
     name = "macro",
     srcs = glob(["macro/src/**"]),
-    proc_macro = True,
     crate = "cxxbridge_macro",
+    proc_macro = True,
     deps = [
         "//third-party:proc-macro2",
         "//third-party:quote",

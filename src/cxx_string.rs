@@ -19,6 +19,10 @@ extern "C" {
     fn string_data(this: &CxxString) -> *const u8;
     #[link_name = "cxxbridge1$cxx_string$length"]
     fn string_length(this: &CxxString) -> usize;
+    #[link_name = "cxxbridge1$cxx_string$clear"]
+    fn string_clear(this: Pin<&mut CxxString>);
+    #[link_name = "cxxbridge1$cxx_string$reserve_total"]
+    fn string_reserve_total(this: Pin<&mut CxxString>, new_cap: usize);
     #[link_name = "cxxbridge1$cxx_string$push"]
     fn string_push(this: Pin<&mut CxxString>, ptr: *const u8, len: usize);
 }
@@ -144,6 +148,49 @@ impl CxxString {
         String::from_utf8_lossy(self.as_bytes())
     }
 
+    /// Removes all characters from the string.
+    ///
+    /// Matches the behavior of C++ [std::string::clear][clear].
+    ///
+    /// Note: **unlike** the guarantee of Rust's `std::string::String::clear`,
+    /// the C++ standard does not require that capacity is unchanged by this
+    /// operation. In practice existing implementations do not change the
+    /// capacity but all pointers, references, and iterators into the string
+    /// contents are nevertheless invalidated.
+    ///
+    /// [clear]: https://en.cppreference.com/w/cpp/string/basic_string/clear
+    pub fn clear(self: Pin<&mut Self>) {
+        unsafe { string_clear(self) }
+    }
+
+    /// Ensures that this string's capacity is at least `additional` bytes
+    /// larger than its length.
+    ///
+    /// The capacity may be increased by more than `additional` bytes if it
+    /// chooses, to amortize the cost of frequent reallocations.
+    ///
+    /// **The meaning of the argument is not the same as
+    /// [std::string::reserve][reserve] in C++.** The C++ standard library and
+    /// Rust standard library both have a `reserve` method on strings, but in
+    /// C++ code the argument always refers to total capacity, whereas in Rust
+    /// code it always refers to additional capacity. This API on `CxxString`
+    /// follows the Rust convention, the same way that for the length accessor
+    /// we use the Rust conventional `len()` naming and not C++ `size()` or
+    /// `length()`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the new capacity overflows usize.
+    ///
+    /// [reserve]: https://en.cppreference.com/w/cpp/string/basic_string/reserve
+    pub fn reserve(self: Pin<&mut Self>, additional: usize) {
+        let new_cap = self
+            .len()
+            .checked_add(additional)
+            .expect("CxxString capacity overflow");
+        unsafe { string_reserve_total(self, new_cap) }
+    }
+
     /// Appends a given string slice onto the end of this C++ string.
     pub fn push_str(self: Pin<&mut Self>, s: &str) {
         self.push_bytes(s.as_bytes());
@@ -223,9 +270,11 @@ impl StackString {
 
     pub unsafe fn init(&mut self, value: impl AsRef<[u8]>) -> Pin<&mut CxxString> {
         let value = value.as_ref();
-        let this = &mut *self.space.as_mut_ptr().cast::<MaybeUninit<CxxString>>();
-        string_init(this, value.as_ptr(), value.len());
-        Pin::new_unchecked(&mut *this.as_mut_ptr())
+        unsafe {
+            let this = &mut *self.space.as_mut_ptr().cast::<MaybeUninit<CxxString>>();
+            string_init(this, value.as_ptr(), value.len());
+            Pin::new_unchecked(&mut *this.as_mut_ptr())
+        }
     }
 }
 
