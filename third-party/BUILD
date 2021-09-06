@@ -46,7 +46,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.28/src/**"]),
+    srcs = glob(["vendor/proc-macro2-1.0.26/src/**"]),
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -60,7 +60,7 @@ rust_library(
 
 cargo_build_script(
     name = "proc-macro2@build",
-    srcs = ["vendor/proc-macro2-1.0.28/build.rs"],
+    srcs = ["vendor/proc-macro2-1.0.26/build.rs"],
     crate_features = [
         "proc-macro",
         "span-locations",
