@@ -19,7 +19,7 @@ experimental = ["clang-ast", "flate2", "memmap", "serde", "serde_json"]
 "serde-derive" = ["serde"]
 
 [dependencies]
-proc-macro2 = "1.0"
+proc-macro2 = "1.0.26"
 quote = "1.0.4"
 syn = { version = "1.0.70", features = ["full"] }
 

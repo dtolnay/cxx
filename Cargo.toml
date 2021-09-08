@@ -24,6 +24,7 @@ default = ["cxxbridge-flags/default"] # c++11
 [dependencies]
 cxxbridge-macro = { version = "=1.0.54", path = "macro" }
 link-cplusplus = "1.0"
+proc-macro2 = "1.0.16"
 
 [build-dependencies]
 cc = "1.0.49"
