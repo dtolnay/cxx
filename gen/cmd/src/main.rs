@@ -3,6 +3,7 @@
     clippy::cognitive_complexity,
     clippy::default_trait_access,
     clippy::enum_glob_use,
+    clippy::if_same_then_else,
     clippy::inherent_to_string,
     clippy::items_after_statements,
     clippy::large_enum_variant,
