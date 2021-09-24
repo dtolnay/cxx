@@ -688,7 +688,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     let mangled = mangle::extern_fn(efn, out.types);
     write!(out, "{}(", mangled);
     if let Some(receiver) = &efn.receiver {
-        if !receiver.mutable {
+        if !receiver.mutable && !receiver.force_const {
             write!(out, "const ");
         }
         write!(
@@ -736,7 +736,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     }
     write!(out, ")");
     if let Some(receiver) = &efn.receiver {
-        if !receiver.mutable {
+        if !receiver.mutable && !receiver.force_const {
             write!(out, " const");
         }
     }

@@ -189,6 +189,7 @@ pub struct Receiver {
     pub ampersand: Token![&],
     pub lifetime: Option<Lifetime>,
     pub mutable: bool,
+    pub force_const: bool,
     pub var: Token![self],
     pub ty: NamedType,
     pub colon_token: Token![:],

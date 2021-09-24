@@ -395,6 +395,7 @@ impl PartialEq for Receiver {
             ampersand: _,
             lifetime,
             mutable,
+            force_const,
             var: _,
             colon_token: _,
             ty,
@@ -407,6 +408,7 @@ impl PartialEq for Receiver {
             ampersand: _,
             lifetime: lifetime2,
             mutable: mutable2,
+            force_const: force_const2,
             var: _,
             colon_token: _,
             ty: ty2,
@@ -414,7 +416,7 @@ impl PartialEq for Receiver {
             pin_tokens: _,
             mutability: _,
         } = other;
-        pinned == pinned2 && lifetime == lifetime2 && mutable == mutable2 && ty == ty2
+        pinned == pinned2 && lifetime == lifetime2 && mutable == mutable2 && force_const == force_const2 && ty == ty2
     }
 }
 
@@ -425,6 +427,7 @@ impl Hash for Receiver {
             ampersand: _,
             lifetime,
             mutable,
+            force_const,
             var: _,
             colon_token: _,
             ty,
@@ -435,6 +438,7 @@ impl Hash for Receiver {
         pinned.hash(state);
         lifetime.hash(state);
         mutable.hash(state);
+        force_const.hash(state);
         ty.hash(state);
     }
 }

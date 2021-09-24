@@ -33,6 +33,7 @@ pub struct Parser<'a> {
     pub namespace: Option<&'a mut Namespace>,
     pub cxx_name: Option<&'a mut Option<ForeignName>>,
     pub rust_name: Option<&'a mut Option<Ident>>,
+    pub allow_unsafe_const: Option<&'a mut bool>,
     pub variants_from_header: Option<&'a mut Option<Attribute>>,
 
     // Suppress clippy needless_update lint ("struct update has no effect, all
@@ -121,6 +122,11 @@ pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> Othe
                     cx.push(err);
                     break;
                 }
+            }
+        } else if attr.path.is_ident("unsafe_const") {
+            if let Some(allow_unsafe_const) = &mut parser.allow_unsafe_const {
+                **allow_unsafe_const = true;
+                continue;
             }
         } else if attr.path.is_ident("variants_from_header") && cfg!(feature = "experimental") {
             if let Err(err) = Nothing::parse.parse2(attr.tokens.clone()) {

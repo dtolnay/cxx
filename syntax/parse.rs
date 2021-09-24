@@ -505,6 +505,7 @@ fn parse_extern_fn(
     let mut namespace = namespace.clone();
     let mut cxx_name = None;
     let mut rust_name = None;
+    let mut allow_unsafe_const = false;
     let attrs = attrs::parse(
         cx,
         mem::take(&mut foreign_fn.attrs),
@@ -513,6 +514,7 @@ fn parse_extern_fn(
             namespace: Some(&mut namespace),
             cxx_name: Some(&mut cxx_name),
             rust_name: Some(&mut rust_name),
+            allow_unsafe_const: Some(&mut allow_unsafe_const),
             ..Default::default()
         },
     );
@@ -570,6 +572,7 @@ fn parse_extern_fn(
                         ampersand: *ampersand,
                         lifetime: lifetime.clone(),
                         mutable: arg.mutability.is_some(),
+                        force_const: !arg.mutability.is_some() && allow_unsafe_const,
                         var: arg.self_token,
                         colon_token: Token![:](arg.self_token.span),
                         ty: NamedType::new(Ident::new("Self", arg.self_token.span)),
@@ -616,6 +619,7 @@ fn parse_extern_fn(
                             ampersand: reference.ampersand,
                             lifetime: reference.lifetime,
                             mutable: reference.mutable,
+                            force_const: !reference.mutable && allow_unsafe_const,
                             var: Token![self](ident.rust.span()),
                             colon_token: arg.colon_token,
                             ty: ident,
