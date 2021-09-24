@@ -13,6 +13,15 @@ pub(crate) struct Error {
     message: String,
 }
 
+impl Error {
+    pub fn kind(&self) -> io::ErrorKind {
+        match &self.source {
+            Some(io_error) => io_error.kind(),
+            None => io::ErrorKind::Other,
+        }
+    }
+}
+
 impl Display for Error {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         formatter.write_str(&self.message)
