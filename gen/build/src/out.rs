@@ -1,6 +1,7 @@
 use crate::error::{Error, Result};
 use crate::gen::fs;
 use crate::paths;
+use std::io;
 use std::path::Path;
 
 pub(crate) fn write(path: impl AsRef<Path>, content: &[u8]) -> Result<()> {
@@ -43,8 +44,22 @@ pub(crate) fn symlink_file(original: impl AsRef<Path>, link: impl AsRef<Path>) -
     match paths::symlink_or_copy(original, link) {
         // As long as symlink_or_copy succeeded, ignore any create_dir_all error.
         Ok(()) => Ok(()),
-        // If create_dir_all and symlink_or_copy both failed, prefer the first error.
-        Err(err) => Err(Error::Fs(create_dir_error.unwrap_or(err))),
+        Err(err) => {
+            if err.kind() == io::ErrorKind::AlreadyExists {
+                // This is fine, a different simultaneous build script already
+                // created the same link or copy. The cxx_build target directory
+                // is laid out such that the same path never refers to two
+                // different targets during the same multi-crate build, so if
+                // some other build script already created the same path then we
+                // know it refers to the identical target that the current build
+                // script was trying to create.
+                Ok(())
+            } else {
+                // If create_dir_all and symlink_or_copy both failed, prefer the
+                // first error.
+                Err(Error::Fs(create_dir_error.unwrap_or(err)))
+            }
+        }
     }
 }
 
