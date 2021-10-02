@@ -3,6 +3,7 @@ name = "cxx-gen"
 version = "0.7.55"
 authors = ["Adrian Taylor <adetaylor@chromium.org>"]
 edition = "2018"
+rust-version = "1.48"
 license = "MIT OR Apache-2.0"
 description = "C++ code generator for integrating `cxx` crate into higher level tools."
 repository = "https://github.com/dtolnay/cxx"

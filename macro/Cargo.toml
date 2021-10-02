@@ -3,6 +3,7 @@ name = "cxxbridge-macro"
 version = "1.0.55"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 edition = "2018"
+rust-version = "1.48"
 license = "MIT OR Apache-2.0"
 description = "Implementation detail of the `cxx` crate."
 repository = "https://github.com/dtolnay/cxx"
