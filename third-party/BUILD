@@ -70,7 +70,7 @@ cargo_build_script(
 
 rust_library(
     name = "quote",
-    srcs = glob(["vendor/quote-1.0.9/src/**"]),
+    srcs = glob(["vendor/quote-1.0.10/src/**"]),
     crate_features = ["proc-macro"],
     visibility = ["//visibility:public"],
     deps = [":proc-macro2"],
@@ -85,7 +85,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.77/src/**"]),
+    srcs = glob(["vendor/syn-1.0.78/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
@@ -105,7 +105,7 @@ rust_library(
 
 cargo_build_script(
     name = "syn@build",
-    srcs = ["vendor/syn-1.0.77/build.rs"],
+    srcs = ["vendor/syn-1.0.78/build.rs"],
     crate_features = [
         "clone-impls",
         "derive",
