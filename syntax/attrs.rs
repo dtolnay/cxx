@@ -5,7 +5,7 @@ use crate::syntax::{Derive, Doc, ForeignName};
 use proc_macro2::{Ident, TokenStream};
 use quote::ToTokens;
 use syn::parse::{Nothing, Parse, ParseStream, Parser as _};
-use syn::{Attribute, Error, LitStr, Path, Result, Token};
+use syn::{parenthesized, token, Attribute, Error, LitStr, Path, Result, Token};
 
 // Intended usage:
 //
@@ -46,9 +46,12 @@ pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> Othe
     for attr in attrs {
         if attr.path.is_ident("doc") {
             match parse_doc_attribute.parse2(attr.tokens.clone()) {
-                Ok(lit) => {
+                Ok(attr) => {
                     if let Some(doc) = &mut parser.doc {
-                        doc.push(lit);
+                        match attr {
+                            DocAttribute::Doc(lit) => doc.push(lit),
+                            DocAttribute::Hidden => doc.hidden = true,
+                        }
                         continue;
                     }
                 }
@@ -156,10 +159,29 @@ pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> Othe
     OtherAttrs(passthrough_attrs)
 }
 
-fn parse_doc_attribute(input: ParseStream) -> Result<LitStr> {
-    input.parse::<Token![=]>()?;
-    let lit: LitStr = input.parse()?;
-    Ok(lit)
+enum DocAttribute {
+    Doc(LitStr),
+    Hidden,
+}
+
+mod kw {
+    syn::custom_keyword!(hidden);
+}
+
+fn parse_doc_attribute(input: ParseStream) -> Result<DocAttribute> {
+    let lookahead = input.lookahead1();
+    if lookahead.peek(Token![=]) {
+        input.parse::<Token![=]>()?;
+        let lit: LitStr = input.parse()?;
+        Ok(DocAttribute::Doc(lit))
+    } else if lookahead.peek(token::Paren) {
+        let content;
+        parenthesized!(content in input);
+        content.parse::<kw::hidden>()?;
+        Ok(DocAttribute::Hidden)
+    } else {
+        Err(lookahead.error())
+    }
 }
 
 fn parse_derive_attribute(cx: &mut Errors, input: ParseStream) -> Result<Vec<Derive>> {
