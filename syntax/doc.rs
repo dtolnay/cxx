@@ -3,12 +3,14 @@ use quote::{quote, ToTokens};
 use syn::LitStr;
 
 pub struct Doc {
+    pub(crate) hidden: bool,
     fragments: Vec<LitStr>,
 }
 
 impl Doc {
     pub fn new() -> Self {
         Doc {
+            hidden: false,
             fragments: Vec::new(),
         }
     }
@@ -34,8 +36,9 @@ impl Doc {
 impl ToTokens for Doc {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let fragments = &self.fragments;
-        tokens.extend(quote! {
-            #(#[doc = #fragments])*
-        });
+        tokens.extend(quote! { #(#[doc = #fragments])* });
+        if self.hidden {
+            tokens.extend(quote! { #[doc(hidden)] });
+        }
     }
 }
