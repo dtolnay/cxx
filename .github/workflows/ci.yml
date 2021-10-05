@@ -90,6 +90,8 @@ jobs:
           chmod +x install.sh
           ./install.sh --user
           echo $HOME/bin >> $GITHUB_PATH
+      - name: Install lld
+        run: sudo apt-get install lld
       - run: bazel run demo --verbose_failures --noshow_progress
       - run: bazel test ... --verbose_failures --noshow_progress
 
