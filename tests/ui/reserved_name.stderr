@@ -5,13 +5,7 @@ error: reserved name
   |            ^^^^^^^^^
 
 error: reserved name
- --> $DIR/reserved_name.rs:8:14
+ --> $DIR/reserved_name.rs:9:14
   |
-8 |         type Box;
+9 |         type Box; // invalid; `Box` is a builtin
   |              ^^^
-
-error: reserved name
-  --> $DIR/reserved_name.rs:12:14
-   |
-12 |         type String;
-   |              ^^^^^^

@@ -1,4 +1,4 @@
-use crate::syntax::atom::Atom::{self, *};
+use crate::syntax::atom::Atom::*;
 use crate::syntax::report::Errors;
 use crate::syntax::visit::{self, Visit};
 use crate::syntax::{
@@ -81,7 +81,7 @@ impl Check<'_> {
 
 fn check_type_ident(cx: &mut Check, name: &NamedType) {
     let ident = &name.rust;
-    if Atom::from(ident).is_none()
+    if cx.types.builtins.get(ident).is_none()
         && !cx.types.structs.contains_key(ident)
         && !cx.types.enums.contains_key(ident)
         && !cx.types.cxx.contains(ident)
@@ -102,7 +102,7 @@ fn check_type_box(cx: &mut Check, ptr: &Ty1) {
             cx.error(ptr, error::BOX_CXX_TYPE.msg);
         }
 
-        if Atom::from(&ident.rust).is_none() {
+        if cx.types.builtins.get(&ident.rust).is_none() {
             return;
         }
     }
@@ -122,7 +122,7 @@ fn check_type_rust_vec(cx: &mut Check, ty: &Ty1) {
                 return;
             }
 
-            match Atom::from(&ident.rust) {
+            match cx.types.builtins.get(&ident.rust) {
                 None | Some(Char) | Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize)
                 | Some(I8) | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32)
                 | Some(F64) | Some(RustString) => return,
@@ -144,7 +144,7 @@ fn check_type_unique_ptr(cx: &mut Check, ptr: &Ty1) {
             return;
         }
 
-        match Atom::from(&ident.rust) {
+        match cx.types.builtins.get(&ident.rust) {
             None | Some(CxxString) => return,
             _ => {}
         }
@@ -162,7 +162,7 @@ fn check_type_shared_ptr(cx: &mut Check, ptr: &Ty1) {
             return;
         }
 
-        match Atom::from(&ident.rust) {
+        match cx.types.builtins.get(&ident.rust) {
             None | Some(Bool) | Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize)
             | Some(I8) | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32)
             | Some(F64) | Some(CxxString) => return,
@@ -183,7 +183,7 @@ fn check_type_weak_ptr(cx: &mut Check, ptr: &Ty1) {
             return;
         }
 
-        match Atom::from(&ident.rust) {
+        match cx.types.builtins.get(&ident.rust) {
             None | Some(Bool) | Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize)
             | Some(I8) | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32)
             | Some(F64) | Some(CxxString) => return,
@@ -207,7 +207,7 @@ fn check_type_cxx_vector(cx: &mut Check, ptr: &Ty1) {
             return;
         }
 
-        match Atom::from(&ident.rust) {
+        match cx.types.builtins.get(&ident.rust) {
             None | Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize) | Some(I8)
             | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32) | Some(F64)
             | Some(CxxString) => return,
@@ -522,7 +522,7 @@ fn check_api_impl(cx: &mut Check, imp: &Impl) {
         | Type::WeakPtr(ty)
         | Type::CxxVector(ty) => {
             if let Type::Ident(inner) = &ty.inner {
-                if Atom::from(&inner.rust).is_none() {
+                if cx.types.builtins.get(&inner.rust).is_none() {
                     return;
                 }
             }
@@ -568,7 +568,7 @@ fn check_mut_return_restriction(cx: &mut Check, efn: &ExternFn) {
             self.found |= match ty {
                 Type::Ref(ty) => ty.mutable,
                 Type::SliceRef(slice) => slice.mutable,
-                Type::Ident(ident) if Atom::from(&ident.rust).is_none() => {
+                Type::Ident(ident) if self.cx.types.builtins.get(&ident.rust).is_none() => {
                     match self.cx.types.try_resolve(ident) {
                         Some(resolve) => !resolve.generics.lifetimes.is_empty(),
                         None => true,
@@ -604,7 +604,7 @@ fn check_reserved_name(cx: &mut Check, ident: &Ident) {
         || ident == "Vec"
         || ident == "CxxVector"
         || ident == "str"
-        || Atom::from(ident).is_some()
+        || cx.types.builtins.get(ident).is_some()
     {
         cx.error(ident, "reserved name");
     }
@@ -709,9 +709,9 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
                 "opaque C++ type".to_owned()
             } else if cx.types.rust.contains(&ident.rust) {
                 "opaque Rust type".to_owned()
-            } else if Atom::from(&ident.rust) == Some(CxxString) {
+            } else if cx.types.builtins.get(&ident.rust) == Some(&CxxString) {
                 "C++ string".to_owned()
-            } else if Atom::from(&ident.rust) == Some(Char) {
+            } else if cx.types.builtins.get(&ident.rust) == Some(&Char) {
                 "C char".to_owned()
             } else {
                 ident.rust.to_string()

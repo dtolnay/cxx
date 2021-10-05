@@ -14,6 +14,7 @@ use quote::ToTokens;
 
 pub struct Types<'a> {
     pub all: OrderedSet<&'a Type>,
+    pub builtins: UnorderedMap<&'a Ident, Atom>,
     pub structs: UnorderedMap<&'a Ident, &'a Struct>,
     pub enums: UnorderedMap<&'a Ident, &'a Enum>,
     pub cxx: UnorderedSet<&'a Ident>,
@@ -38,6 +39,7 @@ impl<'a> Types<'a> {
         let mut untrusted = UnorderedMap::new();
         let mut impls = OrderedMap::new();
         let mut resolutions = UnorderedMap::new();
+        let builtins = UnorderedMap::new();
         let struct_improper_ctypes = UnorderedSet::new();
         let toposorted_structs = Vec::new();
 
@@ -198,6 +200,7 @@ impl<'a> Types<'a> {
 
         let mut types = Types {
             all,
+            builtins,
             structs,
             enums,
             cxx,
@@ -210,6 +213,16 @@ impl<'a> Types<'a> {
             struct_improper_ctypes,
             toposorted_structs,
         };
+
+        for ty in &types.all {
+            if let Type::Ident(name) = ty {
+                if types.resolutions.get(&name.rust).is_none() {
+                    if let Some(atom) = Atom::from(&name.rust) {
+                        types.builtins.insert(&name.rust, atom);
+                    }
+                }
+            }
+        }
 
         types.toposorted_structs = toposort::sort(cx, apis, &types);
 

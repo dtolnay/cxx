@@ -1,4 +1,4 @@
-use crate::syntax::atom::Atom::{self, *};
+use crate::syntax::atom::Atom::*;
 use crate::syntax::{derive, Trait, Type, Types};
 
 impl<'a> Types<'a> {
@@ -6,7 +6,7 @@ impl<'a> Types<'a> {
         match ty {
             Type::Ident(ident) => {
                 let ident = &ident.rust;
-                if let Some(atom) = Atom::from(ident) {
+                if let Some(&atom) = self.builtins.get(ident) {
                     match atom {
                         Bool | Char | U8 | U16 | U32 | U64 | Usize | I8 | I16 | I32 | I64
                         | Isize | F32 | F64 => true,

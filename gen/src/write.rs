@@ -204,7 +204,7 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
 
     for ty in out.types {
         match ty {
-            Type::Ident(ident) => match Atom::from(&ident.rust) {
+            Type::Ident(ident) => match out.types.builtins.get(&ident.rust) {
                 Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(I8) | Some(I16) | Some(I32)
                 | Some(I64) => out.include.cstdint = true,
                 Some(Usize) => out.include.cstddef = true,
@@ -1191,8 +1191,8 @@ fn write_extern_arg(out: &mut OutFile, arg: &Var) {
 
 fn write_type(out: &mut OutFile, ty: &Type) {
     match ty {
-        Type::Ident(ident) => match Atom::from(&ident.rust) {
-            Some(atom) => write_atom(out, atom),
+        Type::Ident(ident) => match out.types.builtins.get(&ident.rust) {
+            Some(&atom) => write_atom(out, atom),
             None => write!(
                 out,
                 "{}",
