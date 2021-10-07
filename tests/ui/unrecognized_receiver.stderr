@@ -1,5 +1,5 @@
 error: unrecognized receiver type
- --> $DIR/unrecognized_receiver.rs:4:20
+ --> $DIR/tests/ui/unrecognized_receiver.rs:4:20
   |
 4 |         fn f(self: &Unrecognized);
   |                    ^^^^^^^^^^^^^
