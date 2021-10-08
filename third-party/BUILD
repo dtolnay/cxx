@@ -12,7 +12,7 @@ rust_library(
 
 rust_library(
     name = "cc",
-    srcs = glob(["vendor/cc-1.0.70/src/**"]),
+    srcs = glob(["vendor/cc-1.0.71/src/**"]),
     visibility = ["//visibility:public"],
 )
 
@@ -85,7 +85,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.78/src/**"]),
+    srcs = glob(["vendor/syn-1.0.80/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
@@ -105,7 +105,7 @@ rust_library(
 
 cargo_build_script(
     name = "syn@build",
-    srcs = ["vendor/syn-1.0.78/build.rs"],
+    srcs = ["vendor/syn-1.0.80/build.rs"],
     crate_features = [
         "clone-impls",
         "derive",
