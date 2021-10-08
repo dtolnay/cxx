@@ -114,3 +114,11 @@ jobs:
         run: sudo apt-get install clang-tidy-11
       - name: Run clang-tidy
         run: clang-tidy-11 src/cxx.cc --warnings-as-errors=*
+
+  outdated:
+    name: Outdated
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    steps:
+      - uses: actions/checkout@v2
+      - run: cargo outdated --exit-code 1
