@@ -167,6 +167,7 @@ fn test_c_take() {
     check!(ffi::c_take_rust_vec_shared(shared_test_vec.clone()));
     check!(ffi::c_take_rust_vec_shared_index(shared_test_vec.clone()));
     check!(ffi::c_take_rust_vec_shared_push(shared_test_vec.clone()));
+    check!(ffi::c_take_rust_vec_shared_clear(shared_test_vec.clone()));
     check!(ffi::c_take_rust_vec_shared_forward_iterator(
         shared_test_vec,
     ));
