@@ -5,9 +5,9 @@ error[E0271]: type mismatch resolving `<outside::C as ExternType>::Kind == Trivi
    |     ^^^^^^^^^^^^^^^^^^^ expected enum `Trivial`, found enum `cxx::kind::Opaque`
    |
 note: required by `UniquePtr::<T>::new`
-  --> src/unique_ptr.rs:38:5
+  --> src/unique_ptr.rs
    |
-38 | /     pub fn new(value: T) -> Self
-39 | |     where
-40 | |         T: ExternType<Kind = Trivial>,
+   | /     pub fn new(value: T) -> Self
+   | |     where
+   | |         T: ExternType<Kind = Trivial>,
    | |______________________________________^
