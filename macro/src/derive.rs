@@ -21,8 +21,8 @@ pub fn expand_struct(strct: &Struct, actual_derives: &mut Option<TokenStream>) -
             Trait::Ord => expanded.extend(struct_ord(strct, span)),
             Trait::PartialEq => traits.push(quote_spanned!(span=> ::std::cmp::PartialEq)),
             Trait::PartialOrd => expanded.extend(struct_partial_ord(strct, span)),
-            Trait::Serialize => traits.push(quote_spanned!(span=> serde::Serialize)),
-            Trait::Deserialize => traits.push(quote_spanned!(span=> serde::Deserialize)),
+            Trait::Serialize => traits.push(quote_spanned!(span=> ::serde::Serialize)),
+            Trait::Deserialize => traits.push(quote_spanned!(span=> ::serde::Deserialize)),
         }
     }
 
@@ -68,8 +68,8 @@ pub fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) -> Toke
                 has_partial_eq = true;
             }
             Trait::PartialOrd => expanded.extend(enum_partial_ord(enm, span)),
-            Trait::Serialize => traits.push(quote_spanned!(span=> serde::Serialize)),
-            Trait::Deserialize => traits.push(quote_spanned!(span=> serde::Deserialize)),
+            Trait::Serialize => traits.push(quote_spanned!(span=> ::serde::Serialize)),
+            Trait::Deserialize => traits.push(quote_spanned!(span=> ::serde::Deserialize)),
         }
     }
 
