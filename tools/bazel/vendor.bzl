@@ -3,7 +3,7 @@ of a crate in the current workspace.
 """
 
 load("@rules_rust//rust:repositories.bzl", "load_arbitrary_tool")
-load("@rules_rust//rust:rust.bzl", "rust_common")
+load("@rules_rust//rust:defs.bzl", "rust_common")
 
 def _impl(repository_ctx):
     # Link cxx repository into @third-party.
