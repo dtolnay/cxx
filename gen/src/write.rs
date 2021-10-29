@@ -1590,6 +1590,7 @@ fn write_rust_vec_impl(out: &mut OutFile, key: NamedImplKey) {
         instance,
     );
     writeln!(out, "}}");
+    writeln!(out, "template <>");
     begin_function_definition(out);
     writeln!(
         out,
