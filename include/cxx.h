@@ -318,11 +318,11 @@ public:
   T &at(std::size_t n);
   T &front() noexcept;
   T &back() noexcept;
+  void clear() noexcept;
 
   void reserve(std::size_t new_cap);
   void push_back(const T &value);
   void push_back(T &&value);
-  void clear();
   template <typename... Args>
   void emplace_back(Args &&...args);
 
@@ -932,11 +932,6 @@ void Vec<T>::push_back(const T &value) {
 template <typename T>
 void Vec<T>::push_back(T &&value) {
   this->emplace_back(std::move(value));
-}
-
-template <typename T>
-void Vec<T>::clear() {
-  this->set_len(0);
 }
 
 template <typename T>
