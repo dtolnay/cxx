@@ -121,4 +121,5 @@ jobs:
     if: github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v2
+      - uses: dtolnay/install@cargo-outdated
       - run: cargo outdated --exit-code 1
