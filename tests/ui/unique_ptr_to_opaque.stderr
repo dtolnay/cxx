@@ -4,10 +4,8 @@ error[E0271]: type mismatch resolving `<outside::C as ExternType>::Kind == Trivi
 22 |     cxx::UniquePtr::new(outside::C { a: 4 });
    |     ^^^^^^^^^^^^^^^^^^^ expected enum `Trivial`, found enum `cxx::kind::Opaque`
    |
-note: required by `UniquePtr::<T>::new`
+note: required by a bound in `UniquePtr::<T>::new`
   --> src/unique_ptr.rs
    |
-   | /     pub fn new(value: T) -> Self
-   | |     where
-   | |         T: ExternType<Kind = Trivial>,
-   | |______________________________________^
+   |         T: ExternType<Kind = Trivial>,
+   |                       ^^^^^^^^^^^^^^ required by this bound in `UniquePtr::<T>::new`
