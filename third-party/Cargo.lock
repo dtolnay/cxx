@@ -132,7 +132,6 @@ dependencies = [
 name = "cxx-gen"
 version = "0.7.56"
 dependencies = [
- "cc",
  "codespan-reporting",
  "proc-macro2",
  "quote",
