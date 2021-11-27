@@ -104,3 +104,10 @@ cc_library(
     deps = ["//:core"],
 )
 ```
+
+Make sure to include the following line in your `.bazelrc` so rustc can link the C++ shared lib into your rust crate:
+
+```
+build --@rules_rust//:extra_rustc_flags=-Clink-arg=-fuse-ld=lld
+```
+
