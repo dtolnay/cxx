@@ -12,14 +12,13 @@ rust_library(
 
 rust_library(
     name = "cc",
-    srcs = glob(["vendor/cc-1.0.71/src/**"]),
+    srcs = glob(["vendor/cc-1.0.72/src/**"]),
     visibility = ["//visibility:public"],
 )
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-2.33.3/src/**"]),
-    edition = "2015",
+    srcs = glob(["vendor/clap-2.34.0/src/**"]),
     visibility = ["//visibility:public"],
     deps = [
         ":bitflags",
@@ -85,7 +84,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.81/src/**"]),
+    srcs = glob(["vendor/syn-1.0.82/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
@@ -105,7 +104,7 @@ rust_library(
 
 cargo_build_script(
     name = "syn@build",
-    srcs = ["vendor/syn-1.0.81/build.rs"],
+    srcs = ["vendor/syn-1.0.82/build.rs"],
     crate_features = [
         "clone-impls",
         "derive",
