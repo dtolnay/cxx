@@ -143,6 +143,9 @@ pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> Othe
             // https://doc.rust-lang.org/reference/attributes/diagnostics.html
             passthrough_attrs.push(attr);
             continue;
+        } else if attr.path.is_ident("serde") {
+            passthrough_attrs.push(attr);
+            continue;
         } else if attr.path.segments.len() > 1 {
             let tool = &attr.path.segments.first().unwrap().ident;
             if tool == "rustfmt" {
