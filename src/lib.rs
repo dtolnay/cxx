@@ -397,7 +397,14 @@ extern crate link_cplusplus;
 
 extern crate alloc;
 extern crate self as cxx;
+
+#[cfg(feature = "std")]
 extern crate std;
+
+// Block inadvertent use of items from libstd, which does not otherwise produce
+// a compile-time error on edition 2018+.
+#[cfg(not(feature = "std"))]
+extern crate core as std;
 
 #[macro_use]
 mod macros;
