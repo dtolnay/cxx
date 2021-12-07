@@ -421,6 +421,16 @@ compile_error! {
     r#"cxx support for no_alloc is incomplete and semver exempt; you must build with at least one of feature="std", feature="alloc", or RUSTFLAGS='--cfg cxx_experimental_no_alloc'"#
 }
 
+#[cfg(all(compile_error_if_alloc, feature = "alloc"))]
+compile_error! {
+    r#"feature="alloc" is unexpectedly enabled"#
+}
+
+#[cfg(all(compile_error_if_std, feature = "std"))]
+compile_error! {
+    r#"feature="std" is unexpectedly enabled"#
+}
+
 #[macro_use]
 mod macros;
 
