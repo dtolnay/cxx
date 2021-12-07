@@ -1,3 +1,5 @@
+#![cfg(feature = "alloc")]
+
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use core::mem::{ManuallyDrop, MaybeUninit};

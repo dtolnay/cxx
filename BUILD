@@ -4,6 +4,10 @@ load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_proc_mac
 rust_library(
     name = "cxx",
     srcs = glob(["src/**/*.rs"]),
+    crate_features = [
+        "alloc",
+        "std",
+    ],
     proc_macro_deps = [
         ":cxxbridge-macro",
     ],

@@ -1,6 +1,10 @@
 rust_library(
     name = "cxx",
     srcs = glob(["src/**"]),
+    features = [
+        "alloc",
+        "std",
+    ],
     visibility = ["PUBLIC"],
     deps = [
         ":core",

@@ -395,8 +395,13 @@
 #[cfg(built_with_cargo)]
 extern crate link_cplusplus;
 
-extern crate alloc;
 extern crate self as cxx;
+
+#[cfg(feature = "alloc")]
+extern crate alloc;
+
+#[cfg(not(feature = "alloc"))]
+extern crate core as alloc;
 
 #[cfg(feature = "std")]
 extern crate std;
@@ -405,6 +410,11 @@ extern crate std;
 // a compile-time error on edition 2018+.
 #[cfg(not(feature = "std"))]
 extern crate core as std;
+
+#[cfg(not(any(feature = "alloc", cxx_experimental_no_alloc)))]
+compile_error! {
+    r#"cxx support for no_alloc is incomplete and semver exempt; you must build with at least one of feature="std", feature="alloc", or RUSTFLAGS='--cfg cxx_experimental_no_alloc'"#
+}
 
 #[macro_use]
 mod macros;
@@ -434,6 +444,7 @@ pub mod vector;
 mod weak_ptr;
 
 pub use crate::cxx_vector::CxxVector;
+#[cfg(feature = "alloc")]
 pub use crate::exception::Exception;
 pub use crate::extern_type::{kind, ExternType};
 pub use crate::shared_ptr::SharedPtr;
@@ -463,11 +474,14 @@ pub mod private {
     pub use crate::extern_type::{verify_extern_kind, verify_extern_type};
     pub use crate::function::FatFunction;
     pub use crate::opaque::Opaque;
+    #[cfg(feature = "alloc")]
     pub use crate::result::{r#try, Result};
     pub use crate::rust_slice::RustSlice;
     pub use crate::rust_str::RustStr;
+    #[cfg(feature = "alloc")]
     pub use crate::rust_string::RustString;
     pub use crate::rust_type::{ImplBox, ImplVec, RustType};
+    #[cfg(feature = "alloc")]
     pub use crate::rust_vec::RustVec;
     pub use crate::shared_ptr::SharedPtrTarget;
     pub use crate::string::StackString;

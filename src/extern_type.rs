@@ -1,5 +1,6 @@
 use self::kind::{Kind, Opaque, Trivial};
 use crate::CxxString;
+#[cfg(feature = "alloc")]
 use alloc::string::String;
 
 /// A type for which the layout is determined by its C++ definition.
@@ -212,8 +213,13 @@ impl_extern_type! {
     isize = "rust::isize"
     f32 = "float"
     f64 = "double"
-    String = "rust::String"
 
     [Opaque]
     CxxString = "std::string"
+}
+
+#[cfg(feature = "alloc")]
+impl_extern_type! {
+    [Trivial]
+    String = "rust::String"
 }

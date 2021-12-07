@@ -1,3 +1,5 @@
+#![cfg(feature = "alloc")]
+
 pub type c_char = c_char_definition::c_char;
 
 // Validate that our definition is consistent with libstd's definition, without
