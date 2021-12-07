@@ -4,7 +4,7 @@ pub type c_char = c_char_definition::c_char;
 
 // Validate that our definition is consistent with libstd's definition, without
 // introducing a dependency on libstd in ordinary builds.
-#[cfg(test)]
+#[cfg(all(test, feature = "std"))]
 const _: self::c_char = 0 as std::os::raw::c_char;
 
 #[allow(dead_code)]

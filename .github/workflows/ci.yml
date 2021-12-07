@@ -50,6 +50,12 @@ jobs:
         shell: bash
       - run: cargo run --manifest-path demo/Cargo.toml
       - run: cargo test --workspace --exclude cxx-test-suite
+      - run: cargo check --no-default-features --features alloc
+        env:
+          RUSTFLAGS: --cfg compile_error_if_std --cfg deny_warnings
+      - run: cargo check --no-default-features
+        env:
+          RUSTFLAGS: --cfg compile_error_if_alloc --cfg deny_warnings --cfg cxx_experimental_no_alloc
 
   buck:
     name: Buck
