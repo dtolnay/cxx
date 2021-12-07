@@ -1,9 +1,9 @@
+use crate::c_char::c_char;
 use crate::rust_string::RustString;
 use crate::rust_vec::RustVec;
 use alloc::vec::Vec;
 use core::mem;
 use core::ptr;
-use std::os::raw::c_char;
 
 macro_rules! rust_vec_shims {
     ($segment:expr, $ty:ty) => {

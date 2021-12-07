@@ -402,6 +402,7 @@ extern crate std;
 #[macro_use]
 mod macros;
 
+mod c_char;
 mod cxx_vector;
 mod exception;
 mod extern_type;
