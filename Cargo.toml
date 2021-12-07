@@ -20,7 +20,8 @@ default = ["std", "cxxbridge-flags/default"] # c++11
 "c++14" = ["cxxbridge-flags/c++14"]
 "c++17" = ["cxxbridge-flags/c++17"]
 "c++20" = ["cxxbridge-flags/c++20"]
-std = []
+alloc = []
+std = ["alloc"]
 
 [dependencies]
 cxxbridge-macro = { version = "=1.0.57", path = "macro" }
