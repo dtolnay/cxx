@@ -397,14 +397,19 @@ extern crate link_cplusplus;
 
 extern crate self as cxx;
 
+#[doc(hidden)]
+pub extern crate core;
+
 #[cfg(feature = "alloc")]
-extern crate alloc;
+#[doc(hidden)]
+pub extern crate alloc;
 
 #[cfg(not(feature = "alloc"))]
 extern crate core as alloc;
 
 #[cfg(feature = "std")]
-extern crate std;
+#[doc(hidden)]
+pub extern crate std;
 
 // Block inadvertent use of items from libstd, which does not otherwise produce
 // a compile-time error on edition 2018+.
