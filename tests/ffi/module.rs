@@ -35,6 +35,10 @@ pub mod ffi2 {
         fn c_take_trivial_mut_ref(d: &mut D);
         fn c_take_trivial_pin_ref(d: Pin<&D>);
         fn c_take_trivial_pin_mut_ref(d: Pin<&mut D>);
+        fn c_take_trivial_opt_ref(d: Option<&D>);
+        fn c_take_trivial_opt_mut_ref(d: Option<&mut D>);
+        fn c_take_trivial_opt_pin_ref(d: Option<Pin<&D>>);
+        fn c_take_trivial_opt_pin_mut_ref(d: Option<Pin<&mut D>>);
         fn c_take_trivial_ref_method(self: &D);
         fn c_take_trivial_mut_ref_method(self: &mut D);
         fn c_take_trivial(d: D);
@@ -56,6 +60,7 @@ pub mod ffi2 {
         fn c_return_ns_opaque_ptr() -> UniquePtr<F>;
         fn c_return_ns_unique_ptr() -> UniquePtr<H>;
         fn c_take_ref_ns_c(h: &H);
+        fn c_roundtrip_opaque_opt_mut_pin_ref(e: Option<Pin<&mut E>>) -> Option<Pin<&mut E>>;
 
         #[namespace = "other"]
         fn ns_c_take_trivial(d: D);

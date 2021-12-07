@@ -1,8 +1,8 @@
-use crate::syntax::attrs::OtherAttrs;
 use crate::syntax::discriminant::DiscriminantSet;
 use crate::syntax::file::{Item, ItemForeignMod};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
+use crate::syntax::OtherAttrs;
 use crate::syntax::{
     attrs, error, Api, Array, Derive, Doc, Enum, EnumRepr, ExternFn, ExternType, ForeignName, Impl,
     Include, IncludeKind, Lang, Lifetimes, NamedType, Namespace, Pair, Ptr, Receiver, Ref,
@@ -22,6 +22,7 @@ use syn::{
 };
 
 pub mod kw {
+    syn::custom_keyword!(Option);
     syn::custom_keyword!(Pin);
     syn::custom_keyword!(Result);
 }
@@ -1080,7 +1081,9 @@ fn parse_type_reference(ty: &TypeReference) -> Result<Type> {
 
     let inner = parse_type(&ty.elem)?;
     let pinned = false;
+    let option = false;
     let pin_tokens = None;
+    let option_tokens = None;
 
     Ok(match &inner {
         Type::Ident(ident) if ident.rust == "str" => {
@@ -1093,11 +1096,13 @@ fn parse_type_reference(ty: &TypeReference) -> Result<Type> {
         _ => Type::Ref,
     }(Box::new(Ref {
         pinned,
+        option,
         ampersand,
         lifetime,
         mutable,
         inner,
         pin_tokens,
+        option_tokens,
         mutability,
     })))
 }
@@ -1195,6 +1200,17 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
                             inner.pinned = true;
                             inner.pin_tokens =
                                 Some((pin_token, generic.lt_token, generic.gt_token));
+                            return Ok(Type::Ref(inner));
+                        }
+                    }
+                } else if ident == "Option" && generic.args.len() == 1 {
+                    if let GenericArgument::Type(arg) = &generic.args[0] {
+                        let inner = parse_type(arg)?;
+                        let option_token = kw::Option(ident.span());
+                        if let Type::Ref(mut inner) = inner {
+                            inner.option = true;
+                            inner.option_tokens =
+                                Some((option_token, generic.lt_token, generic.gt_token));
                             return Ok(Type::Ref(inner));
                         }
                     }

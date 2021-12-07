@@ -152,23 +152,31 @@ impl PartialEq for Ref {
     fn eq(&self, other: &Self) -> bool {
         let Ref {
             pinned,
+            option,
             ampersand: _,
             lifetime,
             mutable,
             inner,
             pin_tokens: _,
+            option_tokens: _,
             mutability: _,
         } = self;
         let Ref {
             pinned: pinned2,
+            option: option2,
             ampersand: _,
             lifetime: lifetime2,
             mutable: mutable2,
             inner: inner2,
             pin_tokens: _,
+            option_tokens: _,
             mutability: _,
         } = other;
-        pinned == pinned2 && lifetime == lifetime2 && mutable == mutable2 && inner == inner2
+        pinned == pinned2
+            && option == option2
+            && lifetime == lifetime2
+            && mutable == mutable2
+            && inner == inner2
     }
 }
 
@@ -176,14 +184,17 @@ impl Hash for Ref {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let Ref {
             pinned,
+            option,
             ampersand: _,
             lifetime,
             mutable,
             inner,
             pin_tokens: _,
+            option_tokens: _,
             mutability: _,
         } = self;
         pinned.hash(state);
+        option.hash(state);
         lifetime.hash(state);
         mutable.hash(state);
         inner.hash(state);

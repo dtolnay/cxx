@@ -231,11 +231,13 @@ pub struct Ty1 {
 
 pub struct Ref {
     pub pinned: bool,
+    pub option: bool,
     pub ampersand: Token![&],
     pub lifetime: Option<Lifetime>,
     pub mutable: bool,
     pub inner: Type,
     pub pin_tokens: Option<(kw::Pin, Token![<], Token![>])>,
+    pub option_tokens: Option<(kw::Option, Token![<], Token![>])>,
     pub mutability: Option<Token![mut]>,
 }
 
