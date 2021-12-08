@@ -1,6 +1,6 @@
 [package]
 name = "cxx-gen"
-version = "0.7.57"
+version = "0.7.58"
 authors = ["Adrian Taylor <adetaylor@chromium.org>"]
 edition = "2018"
 rust-version = "1.48"

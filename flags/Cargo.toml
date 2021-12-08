@@ -1,6 +1,6 @@
 [package]
 name = "cxxbridge-flags"
-version = "1.0.57"
+version = "1.0.58"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 edition = "2018"
 rust-version = "1.48"
