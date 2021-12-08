@@ -440,6 +440,7 @@ mod exception;
 mod extern_type;
 mod fmt;
 mod function;
+mod hash;
 pub mod memory;
 mod opaque;
 mod result;
@@ -449,6 +450,7 @@ mod rust_string;
 mod rust_type;
 mod rust_vec;
 mod shared_ptr;
+mod sip;
 #[path = "cxx_string.rs"]
 mod string;
 mod symbols;
@@ -488,6 +490,7 @@ pub mod private {
     pub use crate::cxx_vector::VectorElement;
     pub use crate::extern_type::{verify_extern_kind, verify_extern_type};
     pub use crate::function::FatFunction;
+    pub use crate::hash::hash;
     pub use crate::opaque::Opaque;
     #[cfg(feature = "alloc")]
     pub use crate::result::{r#try, Result};

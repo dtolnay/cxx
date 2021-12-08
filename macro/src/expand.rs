@@ -265,9 +265,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                     #[export_name = #link_name]
                     #[allow(clippy::cast_possible_truncation)]
                     extern "C" fn #local_name(this: &#ident) -> usize {
-                        let mut hasher = ::cxx::std::collections::hash_map::DefaultHasher::new();
-                        ::cxx::core::hash::Hash::hash(this, &mut hasher);
-                        ::cxx::core::hash::Hasher::finish(&hasher) as usize
+                        ::cxx::private::hash(this)
                     }
                 });
             }
