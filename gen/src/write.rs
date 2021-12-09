@@ -1590,13 +1590,10 @@ fn write_rust_vec_impl(out: &mut OutFile, key: NamedImplKey) {
         instance,
     );
     writeln!(out, "}}");
+
     writeln!(out, "template <>");
     begin_function_definition(out);
-    writeln!(
-        out,
-        "void Vec<{}>::clear() noexcept {{",
-        inner,
-    );
+    writeln!(out, "void Vec<{}>::clear() {{", inner);
     writeln!(
         out,
         "  return cxxbridge1$rust_vec${}$clear(this);",

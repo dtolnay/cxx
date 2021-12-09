@@ -45,9 +45,9 @@ public:
   void reserve(size_t new_cap);
   void push_back(const T &value);
   void push_back(T &&value);
-  void clear();
   template <typename... Args>
   void emplace_back(Args &&...args);
+  void clear();
 
   class iterator;
   iterator begin() noexcept;

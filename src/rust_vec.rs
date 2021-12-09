@@ -70,7 +70,7 @@ impl<T> RustVec<T> {
     }
 
     pub fn clear(&mut self) {
-        self.as_mut_vec().clear()
+        self.as_mut_vec().clear();
     }
 }
 
