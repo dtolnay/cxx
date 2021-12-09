@@ -1,10 +1,10 @@
 use crate::actually_private::Private;
+use crate::lossy::Utf8Lossy;
 #[cfg(feature = "alloc")]
 use alloc::borrow::Cow;
 #[cfg(feature = "alloc")]
 use alloc::string::String;
 use core::cmp::Ordering;
-#[cfg(feature = "alloc")]
 use core::fmt::{self, Debug, Display};
 use core::hash::{Hash, Hasher};
 use core::marker::{PhantomData, PhantomPinned};
@@ -207,19 +207,17 @@ impl CxxString {
     }
 }
 
-#[cfg(feature = "alloc")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "alloc")))]
 impl Display for CxxString {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        Display::fmt(self.to_string_lossy().as_ref(), f)
+        let lossy = Utf8Lossy::from_bytes(self.as_bytes());
+        Display::fmt(&lossy, f)
     }
 }
 
-#[cfg(feature = "alloc")]
-#[cfg_attr(doc_cfg, doc(cfg(feature = "alloc")))]
 impl Debug for CxxString {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        Debug::fmt(self.to_string_lossy().as_ref(), f)
+        let lossy = Utf8Lossy::from_bytes(self.as_bytes());
+        Debug::fmt(&lossy, f)
     }
 }
 
