@@ -442,6 +442,7 @@ mod extern_type;
 mod fmt;
 mod function;
 mod hash;
+mod lossy;
 pub mod memory;
 mod opaque;
 mod result;
