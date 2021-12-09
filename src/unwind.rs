@@ -2,7 +2,7 @@
 
 use core::mem;
 
-pub fn catch_unwind<F, R>(label: &'static str, foreign_call: F) -> R
+pub fn prevent_unwind<F, R>(label: &'static str, foreign_call: F) -> R
 where
     F: FnOnce() -> R,
 {
