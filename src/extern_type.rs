@@ -187,8 +187,9 @@ pub fn verify_extern_type<T: ExternType<Id = Id>, Id>() {}
 pub fn verify_extern_kind<T: ExternType<Kind = Kind>, Kind: self::Kind>() {}
 
 macro_rules! impl_extern_type {
-    ($([$kind:ident] $($ty:path = $cxxpath:literal)*)*) => {
+    ($([$kind:ident] $($(#[$($attr:tt)*])* $ty:path = $cxxpath:literal)*)*) => {
         $($(
+            $(#[$($attr)*])*
             unsafe impl ExternType for $ty {
                 #[doc(hidden)]
                 type Id = crate::type_id!($cxxpath);
@@ -214,12 +215,10 @@ impl_extern_type! {
     f32 = "float"
     f64 = "double"
 
+    #[cfg(feature = "alloc")]
+    #[cfg_attr(doc_cfg, doc(cfg(feature = "alloc")))]
+    String = "rust::String"
+
     [Opaque]
     CxxString = "std::string"
-}
-
-#[cfg(feature = "alloc")]
-impl_extern_type! {
-    [Trivial]
-    String = "rust::String"
 }
