@@ -68,6 +68,10 @@ impl<T> RustVec<T> {
     pub unsafe fn set_len(&mut self, len: usize) {
         unsafe { self.as_mut_vec().set_len(len) }
     }
+
+    pub fn clear(&mut self) {
+        self.as_mut_vec().clear()
+    }
 }
 
 impl RustVec<RustString> {

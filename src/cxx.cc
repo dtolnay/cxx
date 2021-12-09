@@ -567,6 +567,8 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
       const rust::Vec<CXX_TYPE> *ptr) noexcept;                                \
   void cxxbridge1$rust_vec$##RUST_TYPE##$reserve_total(                        \
       rust::Vec<CXX_TYPE> *ptr, std::size_t new_cap) noexcept;                 \
+  void cxxbridge1$rust_vec$##RUST_TYPE##$clear(                                \
+      rust::Vec<CXX_TYPE> *ptr) noexcept;                                      \
   void cxxbridge1$rust_vec$##RUST_TYPE##$set_len(rust::Vec<CXX_TYPE> *ptr,     \
                                                  std::size_t len) noexcept;
 
@@ -598,7 +600,11 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
   template <>                                                                  \
   void Vec<CXX_TYPE>::set_len(std::size_t len) noexcept {                      \
     cxxbridge1$rust_vec$##RUST_TYPE##$set_len(this, len);                      \
-  }
+  }                                                                            \
+  template <>                                                                  \
+  void Vec<CXX_TYPE>::clear() noexcept {                                       \
+    cxxbridge1$rust_vec$##RUST_TYPE##$clear(this);                             \
+  }   
 
 #define SHARED_PTR_OPS(RUST_TYPE, CXX_TYPE)                                    \
   static_assert(sizeof(std::shared_ptr<CXX_TYPE>) == 2 * sizeof(void *), "");  \

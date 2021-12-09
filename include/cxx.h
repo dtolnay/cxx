@@ -318,6 +318,7 @@ public:
   T &at(std::size_t n);
   T &front() noexcept;
   T &back() noexcept;
+  void clear() noexcept;
 
   void reserve(std::size_t new_cap);
   void push_back(const T &value);
