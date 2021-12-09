@@ -1,5 +1,5 @@
 use crate::actually_private::Private;
-use crate::lossy::Utf8Lossy;
+use crate::lossy;
 #[cfg(feature = "alloc")]
 use alloc::borrow::Cow;
 #[cfg(feature = "alloc")]
@@ -209,15 +209,13 @@ impl CxxString {
 
 impl Display for CxxString {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let lossy = Utf8Lossy::from_bytes(self.as_bytes());
-        Display::fmt(&lossy, f)
+        lossy::display(self.as_bytes(), f)
     }
 }
 
 impl Debug for CxxString {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let lossy = Utf8Lossy::from_bytes(self.as_bytes());
-        Debug::fmt(&lossy, f)
+        lossy::debug(self.as_bytes(), f)
     }
 }
 
