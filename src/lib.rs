@@ -504,7 +504,7 @@ pub mod private {
     pub use crate::shared_ptr::SharedPtrTarget;
     pub use crate::string::StackString;
     pub use crate::unique_ptr::UniquePtrTarget;
-    pub use crate::unwind::catch_unwind;
+    pub use crate::unwind::prevent_unwind;
     pub use crate::weak_ptr::WeakPtrTarget;
     pub use cxxbridge_macro::type_id;
 }
