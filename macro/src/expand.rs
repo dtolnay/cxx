@@ -53,7 +53,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
     for api in apis {
         if let Api::RustType(ety) = api {
             expanded.extend(expand_rust_type_import(ety));
-            hidden.extend(expand_rust_type_assert_unpin(ety));
+            hidden.extend(expand_rust_type_assert_unpin(ety, types));
         }
     }
 
@@ -70,7 +70,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
                 let ident = &ety.name.rust;
                 if !types.structs.contains_key(ident) && !types.enums.contains_key(ident) {
                     expanded.extend(expand_cxx_type(ety));
-                    hidden.extend(expand_cxx_type_assert_pinned(ety));
+                    hidden.extend(expand_cxx_type_assert_pinned(ety, types));
                 }
             }
             Api::CxxFunction(efn) => {
@@ -78,7 +78,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
             }
             Api::RustType(ety) => {
                 expanded.extend(expand_rust_type_impl(ety));
-                hidden.extend(expand_rust_type_layout(ety));
+                hidden.extend(expand_rust_type_layout(ety, types));
             }
             Api::RustFunction(efn) => hidden.extend(expand_rust_function_shim(efn, types)),
             Api::TypeAlias(alias) => {
@@ -396,9 +396,12 @@ fn expand_cxx_type(ety: &ExternType) -> TokenStream {
     }
 }
 
-fn expand_cxx_type_assert_pinned(ety: &ExternType) -> TokenStream {
+fn expand_cxx_type_assert_pinned(ety: &ExternType, types: &Types) -> TokenStream {
     let ident = &ety.name.rust;
     let infer = Token![_](ident.span());
+
+    let resolve = types.resolve(ident);
+    let lifetimes = resolve.generics.to_underscore_lifetimes();
 
     quote! {
         let _: fn() = {
@@ -424,7 +427,7 @@ fn expand_cxx_type_assert_pinned(ety: &ExternType) -> TokenStream {
             // `_` can be resolved and this can compile. Fails to compile if
             // user has added a manual Unpin impl for their opaque C++ type as
             // then `__AmbiguousIfImpl<__Invalid>` also exists.
-            <#ident as __AmbiguousIfImpl<#infer>>::infer
+            <#ident #lifetimes as __AmbiguousIfImpl<#infer>>::infer
         };
     }
 }
@@ -833,21 +836,25 @@ fn expand_rust_type_impl(ety: &ExternType) -> TokenStream {
     impls
 }
 
-fn expand_rust_type_assert_unpin(ety: &ExternType) -> TokenStream {
+fn expand_rust_type_assert_unpin(ety: &ExternType, types: &Types) -> TokenStream {
     let ident = &ety.name.rust;
     let begin_span = Token![::](ety.type_token.span);
     let unpin = quote_spanned! {ety.semi_token.span=>
         #begin_span cxx::core::marker::Unpin
     };
+
+    let resolve = types.resolve(ident);
+    let lifetimes = resolve.generics.to_underscore_lifetimes();
+
     quote_spanned! {ident.span()=>
         let _ = {
             fn __AssertUnpin<T: ?::cxx::core::marker::Sized + #unpin>() {}
-            __AssertUnpin::<#ident>
+            __AssertUnpin::<#ident #lifetimes>
         };
     }
 }
 
-fn expand_rust_type_layout(ety: &ExternType) -> TokenStream {
+fn expand_rust_type_layout(ety: &ExternType, types: &Types) -> TokenStream {
     // Rustc will render as follows if not sized:
     //
     //     type TheirType;
@@ -868,6 +875,9 @@ fn expand_rust_type_layout(ety: &ExternType) -> TokenStream {
     let local_sizeof = format_ident!("__sizeof_{}", ety.name.rust);
     let local_alignof = format_ident!("__alignof_{}", ety.name.rust);
 
+    let resolve = types.resolve(ident);
+    let lifetimes = resolve.generics.to_underscore_lifetimes();
+
     quote_spanned! {ident.span()=>
         {
             #[doc(hidden)]
@@ -877,12 +887,12 @@ fn expand_rust_type_layout(ety: &ExternType) -> TokenStream {
             #[doc(hidden)]
             #[export_name = #link_sizeof]
             extern "C" fn #local_sizeof() -> usize {
-                __AssertSized::<#ident>().size()
+                __AssertSized::<#ident #lifetimes>().size()
             }
             #[doc(hidden)]
             #[export_name = #link_alignof]
             extern "C" fn #local_alignof() -> usize {
-                __AssertSized::<#ident>().align()
+                __AssertSized::<#ident #lifetimes>().align()
             }
         }
     }
