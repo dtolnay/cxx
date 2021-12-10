@@ -1393,7 +1393,7 @@ fn expand_unique_ptr(
     quote_spanned! {end_span=>
         #unsafe_token impl #impl_generics ::cxx::private::UniquePtrTarget for #ident #ty_generics {
             #[doc(hidden)]
-            fn __typename(f: &mut ::cxx::core::fmt::Formatter) -> ::cxx::core::fmt::Result {
+            fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
                 f.write_str(#name)
             }
             #[doc(hidden)]
@@ -1485,7 +1485,7 @@ fn expand_shared_ptr(
     quote_spanned! {end_span=>
         #unsafe_token impl #impl_generics ::cxx::private::SharedPtrTarget for #ident #ty_generics {
             #[doc(hidden)]
-            fn __typename(f: &mut ::cxx::core::fmt::Formatter) -> ::cxx::core::fmt::Result {
+            fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
                 f.write_str(#name)
             }
             #[doc(hidden)]
@@ -1545,7 +1545,7 @@ fn expand_weak_ptr(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
     quote_spanned! {end_span=>
         #unsafe_token impl #impl_generics ::cxx::private::WeakPtrTarget for #ident #ty_generics {
             #[doc(hidden)]
-            fn __typename(f: &mut ::cxx::core::fmt::Formatter) -> ::cxx::core::fmt::Result {
+            fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
                 f.write_str(#name)
             }
             #[doc(hidden)]
@@ -1660,7 +1660,7 @@ fn expand_cxx_vector(
     quote_spanned! {end_span=>
         #unsafe_token impl #impl_generics ::cxx::private::VectorElement for #elem #ty_generics {
             #[doc(hidden)]
-            fn __typename(f: &mut ::cxx::core::fmt::Formatter) -> ::cxx::core::fmt::Result {
+            fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
                 f.write_str(#name)
             }
             #[doc(hidden)]

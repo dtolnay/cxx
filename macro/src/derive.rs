@@ -140,7 +140,7 @@ fn struct_debug(strct: &Struct, span: Span) -> TokenStream {
 
     quote_spanned! {span=>
         impl #generics ::cxx::core::fmt::Debug for #ident #generics {
-            fn fmt(&self, formatter: &mut ::cxx::core::fmt::Formatter) -> ::cxx::core::fmt::Result {
+            fn fmt(&self, formatter: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
                 formatter.debug_struct(#struct_name)
                     #(.field(#field_names, &self.#fields))*
                     .finish()
@@ -251,7 +251,7 @@ fn enum_debug(enm: &Enum, span: Span) -> TokenStream {
 
     quote_spanned! {span=>
         impl ::cxx::core::fmt::Debug for #ident {
-            fn fmt(&self, formatter: &mut ::cxx::core::fmt::Formatter) -> ::cxx::core::fmt::Result {
+            fn fmt(&self, formatter: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
                 match *self {
                     #(#variants)*
                     _ => ::cxx::core::write!(formatter, #fallback, self.repr),
