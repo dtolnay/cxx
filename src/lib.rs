@@ -508,6 +508,7 @@ pub mod private {
     pub use crate::unique_ptr::UniquePtrTarget;
     pub use crate::unwind::prevent_unwind;
     pub use crate::weak_ptr::WeakPtrTarget;
+    pub use core::{concat, module_path};
     pub use cxxbridge_macro::type_id;
 }
 

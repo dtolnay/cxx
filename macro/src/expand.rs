@@ -1094,7 +1094,7 @@ fn expand_rust_function_shim_impl(
         #[doc(hidden)]
         #[export_name = #link_name]
         unsafe extern "C" fn #local_name #generics(#(#all_args,)* #outparam #pointer) #ret {
-            let __fn = concat!(module_path!(), #prevent_unwind_label);
+            let __fn = ::cxx::private::concat!(::cxx::private::module_path!(), #prevent_unwind_label);
             #wrap_super
             #expr
         }
