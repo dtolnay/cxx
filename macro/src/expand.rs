@@ -186,6 +186,7 @@ fn expand_struct(strct: &Struct) -> TokenStream {
 
 fn expand_struct_operators(strct: &Struct) -> TokenStream {
     let ident = &strct.name.rust;
+    let generics = &strct.generics;
     let mut operators = TokenStream::new();
 
     for derive in &strct.derives {
@@ -198,7 +199,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                 operators.extend(quote_spanned! {span=>
                     #[doc(hidden)]
                     #[export_name = #link_name]
-                    extern "C" fn #local_name(lhs: &#ident, rhs: &#ident) -> bool {
+                    extern "C" fn #local_name #generics(lhs: &#ident #generics, rhs: &#ident #generics) -> bool {
                         let __fn = concat!("<", module_path!(), #prevent_unwind_label);
                         ::cxx::private::prevent_unwind(__fn, || *lhs == *rhs)
                     }
@@ -211,7 +212,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                     operators.extend(quote_spanned! {span=>
                         #[doc(hidden)]
                         #[export_name = #link_name]
-                        extern "C" fn #local_name(lhs: &#ident, rhs: &#ident) -> bool {
+                        extern "C" fn #local_name #generics(lhs: &#ident #generics, rhs: &#ident #generics) -> bool {
                             let __fn = concat!("<", module_path!(), #prevent_unwind_label);
                             ::cxx::private::prevent_unwind(__fn, || *lhs != *rhs)
                         }
@@ -225,7 +226,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                 operators.extend(quote_spanned! {span=>
                     #[doc(hidden)]
                     #[export_name = #link_name]
-                    extern "C" fn #local_name(lhs: &#ident, rhs: &#ident) -> bool {
+                    extern "C" fn #local_name #generics(lhs: &#ident #generics, rhs: &#ident #generics) -> bool {
                         let __fn = concat!("<", module_path!(), #prevent_unwind_label);
                         ::cxx::private::prevent_unwind(__fn, || *lhs < *rhs)
                     }
@@ -237,7 +238,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                 operators.extend(quote_spanned! {span=>
                     #[doc(hidden)]
                     #[export_name = #link_name]
-                    extern "C" fn #local_name(lhs: &#ident, rhs: &#ident) -> bool {
+                    extern "C" fn #local_name #generics(lhs: &#ident #generics, rhs: &#ident #generics) -> bool {
                         let __fn = concat!("<", module_path!(), #prevent_unwind_label);
                         ::cxx::private::prevent_unwind(__fn, || *lhs <= *rhs)
                     }
@@ -250,7 +251,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                     operators.extend(quote_spanned! {span=>
                         #[doc(hidden)]
                         #[export_name = #link_name]
-                        extern "C" fn #local_name(lhs: &#ident, rhs: &#ident) -> bool {
+                        extern "C" fn #local_name #generics(lhs: &#ident #generics, rhs: &#ident #generics) -> bool {
                             let __fn = concat!("<", module_path!(), #prevent_unwind_label);
                             ::cxx::private::prevent_unwind(__fn, || *lhs > *rhs)
                         }
@@ -262,7 +263,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                     operators.extend(quote_spanned! {span=>
                         #[doc(hidden)]
                         #[export_name = #link_name]
-                        extern "C" fn #local_name(lhs: &#ident, rhs: &#ident) -> bool {
+                        extern "C" fn #local_name #generics(lhs: &#ident #generics, rhs: &#ident #generics) -> bool {
                             let __fn = concat!("<", module_path!(), #prevent_unwind_label);
                             ::cxx::private::prevent_unwind(__fn, || *lhs >= *rhs)
                         }
@@ -277,7 +278,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                     #[doc(hidden)]
                     #[export_name = #link_name]
                     #[allow(clippy::cast_possible_truncation)]
-                    extern "C" fn #local_name(this: &#ident) -> usize {
+                    extern "C" fn #local_name #generics(this: &#ident #generics) -> usize {
                         let __fn = concat!("<", module_path!(), #prevent_unwind_label);
                         ::cxx::private::prevent_unwind(__fn, || ::cxx::private::hash(this))
                     }
