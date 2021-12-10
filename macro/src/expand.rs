@@ -53,7 +53,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
     for api in apis {
         if let Api::RustType(ety) = api {
             expanded.extend(expand_rust_type_import(ety));
-            hidden.extend(expand_rust_type_assert_sized(ety));
+            hidden.extend(expand_rust_type_assert_unpin(ety));
         }
     }
 
@@ -833,15 +833,7 @@ fn expand_rust_type_impl(ety: &ExternType) -> TokenStream {
     impls
 }
 
-fn expand_rust_type_assert_sized(ety: &ExternType) -> TokenStream {
-    // Rustc will render as follows if not sized:
-    //
-    //     type TheirType;
-    //     -----^^^^^^^^^-
-    //     |    |
-    //     |    doesn't have a size known at compile-time
-    //     required by this bound in `ffi::_::__AssertSized`
-
+fn expand_rust_type_assert_unpin(ety: &ExternType) -> TokenStream {
     let ident = &ety.name.rust;
     let begin_span = Token![::](ety.type_token.span);
     let unpin = quote_spanned! {ety.semi_token.span=>
@@ -856,6 +848,14 @@ fn expand_rust_type_assert_sized(ety: &ExternType) -> TokenStream {
 }
 
 fn expand_rust_type_layout(ety: &ExternType) -> TokenStream {
+    // Rustc will render as follows if not sized:
+    //
+    //     type TheirType;
+    //     -----^^^^^^^^^-
+    //     |    |
+    //     |    doesn't have a size known at compile-time
+    //     required by this bound in `__AssertSized`
+
     let ident = &ety.name.rust;
     let begin_span = Token![::](ety.type_token.span);
     let sized = quote_spanned! {ety.semi_token.span=>
