@@ -1229,6 +1229,9 @@ fn expand_rust_box(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
         #[doc(hidden)]
         #[export_name = #link_alloc]
         unsafe extern "C" fn #local_alloc #impl_generics() -> *mut ::cxx::core::mem::MaybeUninit<#ident #ty_generics> {
+            // TODO: replace with Box::new_uninit when stable.
+            // https://doc.rust-lang.org/std/boxed/struct.Box.html#method.new_uninit
+            // https://github.com/rust-lang/rust/issues/63291
             ::cxx::alloc::boxed::Box::into_raw(::cxx::alloc::boxed::Box::new(::cxx::core::mem::MaybeUninit::uninit()))
         }
         #[doc(hidden)]
