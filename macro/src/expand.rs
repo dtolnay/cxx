@@ -194,22 +194,26 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
             Trait::PartialEq => {
                 let link_name = mangle::operator(&strct.name, "eq");
                 let local_name = format_ident!("__operator_eq_{}", strct.name.rust);
+                let prevent_unwind_label = format!("::{} as PartialEq>::eq", strct.name.rust);
                 operators.extend(quote_spanned! {span=>
                     #[doc(hidden)]
                     #[export_name = #link_name]
                     extern "C" fn #local_name(lhs: &#ident, rhs: &#ident) -> bool {
-                        *lhs == *rhs
+                        let __fn = concat!("<", module_path!(), #prevent_unwind_label);
+                        ::cxx::private::prevent_unwind(__fn, || *lhs == *rhs)
                     }
                 });
 
                 if !derive::contains(&strct.derives, Trait::Eq) {
                     let link_name = mangle::operator(&strct.name, "ne");
                     let local_name = format_ident!("__operator_ne_{}", strct.name.rust);
+                    let prevent_unwind_label = format!("::{} as PartialEq>::ne", strct.name.rust);
                     operators.extend(quote_spanned! {span=>
                         #[doc(hidden)]
                         #[export_name = #link_name]
                         extern "C" fn #local_name(lhs: &#ident, rhs: &#ident) -> bool {
-                            *lhs != *rhs
+                            let __fn = concat!("<", module_path!(), #prevent_unwind_label);
+                            ::cxx::private::prevent_unwind(__fn, || *lhs != *rhs)
                         }
                     });
                 }
@@ -217,42 +221,50 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
             Trait::PartialOrd => {
                 let link_name = mangle::operator(&strct.name, "lt");
                 let local_name = format_ident!("__operator_lt_{}", strct.name.rust);
+                let prevent_unwind_label = format!("::{} as PartialOrd>::lt", strct.name.rust);
                 operators.extend(quote_spanned! {span=>
                     #[doc(hidden)]
                     #[export_name = #link_name]
                     extern "C" fn #local_name(lhs: &#ident, rhs: &#ident) -> bool {
-                        *lhs < *rhs
+                        let __fn = concat!("<", module_path!(), #prevent_unwind_label);
+                        ::cxx::private::prevent_unwind(__fn, || *lhs < *rhs)
                     }
                 });
 
                 let link_name = mangle::operator(&strct.name, "le");
                 let local_name = format_ident!("__operator_le_{}", strct.name.rust);
+                let prevent_unwind_label = format!("::{} as PartialOrd>::le", strct.name.rust);
                 operators.extend(quote_spanned! {span=>
                     #[doc(hidden)]
                     #[export_name = #link_name]
                     extern "C" fn #local_name(lhs: &#ident, rhs: &#ident) -> bool {
-                        *lhs <= *rhs
+                        let __fn = concat!("<", module_path!(), #prevent_unwind_label);
+                        ::cxx::private::prevent_unwind(__fn, || *lhs <= *rhs)
                     }
                 });
 
                 if !derive::contains(&strct.derives, Trait::Ord) {
                     let link_name = mangle::operator(&strct.name, "gt");
                     let local_name = format_ident!("__operator_gt_{}", strct.name.rust);
+                    let prevent_unwind_label = format!("::{} as PartialOrd>::gt", strct.name.rust);
                     operators.extend(quote_spanned! {span=>
                         #[doc(hidden)]
                         #[export_name = #link_name]
                         extern "C" fn #local_name(lhs: &#ident, rhs: &#ident) -> bool {
-                            *lhs > *rhs
+                            let __fn = concat!("<", module_path!(), #prevent_unwind_label);
+                            ::cxx::private::prevent_unwind(__fn, || *lhs > *rhs)
                         }
                     });
 
                     let link_name = mangle::operator(&strct.name, "ge");
                     let local_name = format_ident!("__operator_ge_{}", strct.name.rust);
+                    let prevent_unwind_label = format!("::{} as PartialOrd>::ge", strct.name.rust);
                     operators.extend(quote_spanned! {span=>
                         #[doc(hidden)]
                         #[export_name = #link_name]
                         extern "C" fn #local_name(lhs: &#ident, rhs: &#ident) -> bool {
-                            *lhs >= *rhs
+                            let __fn = concat!("<", module_path!(), #prevent_unwind_label);
+                            ::cxx::private::prevent_unwind(__fn, || *lhs >= *rhs)
                         }
                     });
                 }
@@ -260,12 +272,14 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
             Trait::Hash => {
                 let link_name = mangle::operator(&strct.name, "hash");
                 let local_name = format_ident!("__operator_hash_{}", strct.name.rust);
+                let prevent_unwind_label = format!("::{} as Hash>::hash", strct.name.rust);
                 operators.extend(quote_spanned! {span=>
                     #[doc(hidden)]
                     #[export_name = #link_name]
                     #[allow(clippy::cast_possible_truncation)]
                     extern "C" fn #local_name(this: &#ident) -> usize {
-                        ::cxx::private::hash(this)
+                        let __fn = concat!("<", module_path!(), #prevent_unwind_label);
+                        ::cxx::private::prevent_unwind(__fn, || ::cxx::private::hash(this))
                     }
                 });
             }
@@ -1222,6 +1236,7 @@ fn expand_rust_box(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
     let begin_span = explicit_impl.map_or(key.begin_span, |explicit| explicit.impl_token.span);
     let end_span = explicit_impl.map_or(key.end_span, |explicit| explicit.brace_token.span);
     let unsafe_token = format_ident!("unsafe", span = begin_span);
+    let prevent_unwind_drop_label = format!("::{} as Drop>::drop", ident);
 
     quote_spanned! {end_span=>
         #[doc(hidden)]
@@ -1229,6 +1244,8 @@ fn expand_rust_box(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
         #[doc(hidden)]
         #[export_name = #link_alloc]
         unsafe extern "C" fn #local_alloc #impl_generics() -> *mut ::cxx::core::mem::MaybeUninit<#ident #ty_generics> {
+            // No prevent_unwind: the global allocator is not allowed to panic.
+            //
             // TODO: replace with Box::new_uninit when stable.
             // https://doc.rust-lang.org/std/boxed/struct.Box.html#method.new_uninit
             // https://github.com/rust-lang/rust/issues/63291
@@ -1237,12 +1254,14 @@ fn expand_rust_box(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
         #[doc(hidden)]
         #[export_name = #link_dealloc]
         unsafe extern "C" fn #local_dealloc #impl_generics(ptr: *mut ::cxx::core::mem::MaybeUninit<#ident #ty_generics>) {
+            // No prevent_unwind: the global allocator is not allowed to panic.
             ::cxx::alloc::boxed::Box::from_raw(ptr);
         }
         #[doc(hidden)]
         #[export_name = #link_drop]
         unsafe extern "C" fn #local_drop #impl_generics(this: *mut ::cxx::alloc::boxed::Box<#ident #ty_generics>) {
-            ::cxx::core::ptr::drop_in_place(this);
+            let __fn = concat!("<", module_path!(), #prevent_unwind_drop_label);
+            ::cxx::private::prevent_unwind(__fn, || ::cxx::core::ptr::drop_in_place(this));
         }
     }
 }
@@ -1275,6 +1294,7 @@ fn expand_rust_vec(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
     let begin_span = explicit_impl.map_or(key.begin_span, |explicit| explicit.impl_token.span);
     let end_span = explicit_impl.map_or(key.end_span, |explicit| explicit.brace_token.span);
     let unsafe_token = format_ident!("unsafe", span = begin_span);
+    let prevent_unwind_drop_label = format!("::{} as Drop>::drop", elem);
 
     quote_spanned! {end_span=>
         #[doc(hidden)]
@@ -1282,42 +1302,50 @@ fn expand_rust_vec(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
         #[doc(hidden)]
         #[export_name = #link_new]
         unsafe extern "C" fn #local_new #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>) {
+            // No prevent_unwind: cannot panic.
             ::cxx::core::ptr::write(this, ::cxx::private::RustVec::new());
         }
         #[doc(hidden)]
         #[export_name = #link_drop]
         unsafe extern "C" fn #local_drop #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>) {
-            ::cxx::core::ptr::drop_in_place(this);
+            let __fn = concat!("<", module_path!(), #prevent_unwind_drop_label);
+            ::cxx::private::prevent_unwind(__fn, || ::cxx::core::ptr::drop_in_place(this));
         }
         #[doc(hidden)]
         #[export_name = #link_len]
         unsafe extern "C" fn #local_len #impl_generics(this: *const ::cxx::private::RustVec<#elem #ty_generics>) -> usize {
+            // No prevent_unwind: cannot panic.
             (*this).len()
         }
         #[doc(hidden)]
         #[export_name = #link_capacity]
         unsafe extern "C" fn #local_capacity #impl_generics(this: *const ::cxx::private::RustVec<#elem #ty_generics>) -> usize {
+            // No prevent_unwind: cannot panic.
             (*this).capacity()
         }
         #[doc(hidden)]
         #[export_name = #link_data]
         unsafe extern "C" fn #local_data #impl_generics(this: *const ::cxx::private::RustVec<#elem #ty_generics>) -> *const #elem #ty_generics {
+            // No prevent_unwind: cannot panic.
             (*this).as_ptr()
         }
         #[doc(hidden)]
         #[export_name = #link_reserve_total]
         unsafe extern "C" fn #local_reserve_total #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>, new_cap: usize) {
+            // No prevent_unwind: the global allocator is not allowed to panic.
             (*this).reserve_total(new_cap);
         }
         #[doc(hidden)]
         #[export_name = #link_set_len]
         unsafe extern "C" fn #local_set_len #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>, len: usize) {
+            // No prevent_unwind: cannot panic.
             (*this).set_len(len);
         }
         #[doc(hidden)]
         #[export_name = #link_clear]
         unsafe extern "C" fn #local_clear #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>) {
-            (*this).clear();
+            let __fn = concat!("<", module_path!(), #prevent_unwind_drop_label);
+            ::cxx::private::prevent_unwind(__fn, || (*this).clear());
         }
     }
 }
