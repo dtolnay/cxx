@@ -3,3 +3,9 @@ error: async function is not directly supported yet, but see https://cxx.rs/asyn
   |
 4 |         async fn f();
   |         ^^^^^^^^^^^^^
+
+error: async function is not directly supported yet, but see https://cxx.rs/async.html for a working approach
+ --> tests/ui/async_fn.rs:8:9
+  |
+8 |         async fn g();
+  |         ^^^^^^^^^^^^^
