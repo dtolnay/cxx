@@ -540,7 +540,7 @@ fn parse_extern_fn(
     if foreign_fn.sig.asyncness.is_some() {
         return Err(Error::new_spanned(
             foreign_fn,
-            "async function is not directly supported yet, but see https://cxx.rs/async.html for a working approach",
+            "async function is not directly supported yet, but see https://cxx.rs/async.html for a working approach, and https://github.com/pcwalton/cxx-async for some helpers; eventually what you wrote will work but it isn't integrated into the cxx::bridge macro yet",
         ));
     }
 
