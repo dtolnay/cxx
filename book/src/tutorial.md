@@ -332,6 +332,7 @@ pub fn next_chunk(buf: &mut MultiBuf) -> &[u8] {
 // include/blobstore.h
 
 # #pragma once
+#include "rust/cxx.h"
 # #include <memory>
 #
 struct MultiBuf;
