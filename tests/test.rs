@@ -51,6 +51,7 @@ fn test_c_return() {
         cast::c_char_to_unsigned(ffi::c_return_slice_char(&shared)),
     );
     assert_eq!("2020", ffi::c_return_rust_string());
+    assert_eq!("Hello �World", ffi::c_return_rust_string_lossy());
     assert_eq!("2020", ffi::c_return_unique_ptr_string().to_str().unwrap());
     assert_eq!(4, ffi::c_return_unique_ptr_vector_u8().len());
     assert_eq!(

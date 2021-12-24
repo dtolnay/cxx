@@ -100,6 +100,7 @@ rust::Str c_return_str(const Shared &shared);
 rust::Slice<const char> c_return_slice_char(const Shared &shared);
 rust::Slice<uint8_t> c_return_mutsliceu8(rust::Slice<uint8_t> slice);
 rust::String c_return_rust_string();
+rust::String c_return_rust_string_lossy();
 std::unique_ptr<std::string> c_return_unique_ptr_string();
 std::unique_ptr<std::vector<uint8_t>> c_return_unique_ptr_vector_u8();
 std::unique_ptr<std::vector<double>> c_return_unique_ptr_vector_f64();

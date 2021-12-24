@@ -40,8 +40,12 @@ void cxxbridge1$string$clone(rust::String *self,
                              const rust::String &other) noexcept;
 bool cxxbridge1$string$from_utf8(rust::String *self, const char *ptr,
                                  std::size_t len) noexcept;
+void cxxbridge1$string$from_utf8_lossy(rust::String *self, const char *ptr,
+                                       std::size_t len) noexcept;
 bool cxxbridge1$string$from_utf16(rust::String *self, const char16_t *ptr,
                                   std::size_t len) noexcept;
+void cxxbridge1$string$from_utf16_lossy(rust::String *self, const char16_t *ptr,
+                                        std::size_t len) noexcept;
 void cxxbridge1$string$drop(rust::String *self) noexcept;
 const char *cxxbridge1$string$ptr(const rust::String *self) noexcept;
 std::size_t cxxbridge1$string$len(const rust::String *self) noexcept;
@@ -68,6 +72,8 @@ std::size_t cxxbridge1$slice$len(const void *self) noexcept;
 
 namespace rust {
 inline namespace cxxbridge1 {
+
+struct lossy_t {};
 
 template <typename Exception>
 void panic [[noreturn]] (const char *msg) {
@@ -130,6 +136,43 @@ String::String(const char16_t *s, std::size_t len) {
              s == nullptr && len == 0 ? reinterpret_cast<const char16_t *>(2)
                                       : s,
              len);
+}
+
+String::String(lossy_t, const char *s, std::size_t len) noexcept {
+  cxxbridge1$string$from_utf8_lossy(
+      this, s == nullptr && len == 0 ? reinterpret_cast<const char *>(1) : s,
+      len);
+}
+
+String::String(lossy_t, const char16_t *s, std::size_t len) noexcept {
+  cxxbridge1$string$from_utf16_lossy(
+      this,
+      s == nullptr && len == 0 ? reinterpret_cast<const char16_t *>(2) : s,
+      len);
+}
+
+String String::lossy(const std::string &s) noexcept {
+  return String::lossy(s.data(), s.length());
+}
+
+String String::lossy(const char *s) noexcept {
+  assert(s != nullptr);
+  return String::lossy(s, std::strlen(s));
+}
+
+String String::lossy(const char *s, std::size_t len) noexcept {
+  assert(s != nullptr || len == 0);
+  return String(lossy_t{}, s, len);
+}
+
+String String::lossy(const char16_t *s) noexcept {
+  assert(s != nullptr);
+  return String::lossy(s, std::char_traits<char16_t>::length(s));
+}
+
+String String::lossy(const char16_t *s, std::size_t len) noexcept {
+  assert(s != nullptr || len == 0);
+  return String(lossy_t{}, s, len);
 }
 
 String &String::operator=(const String &other) &noexcept {
