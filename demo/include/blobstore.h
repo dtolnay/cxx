@@ -8,6 +8,7 @@ namespace blobstore {
 struct MultiBuf;
 struct BlobMetadata;
 
+#if FOO
 class BlobstoreClient {
 public:
   BlobstoreClient();
@@ -21,6 +22,7 @@ private:
 };
 
 std::unique_ptr<BlobstoreClient> new_blobstore_client();
+#endif
 
 } // namespace blobstore
 } // namespace org
