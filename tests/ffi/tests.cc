@@ -452,6 +452,16 @@ void c_take_rust_vec_shared_push(rust::Vec<Shared> v) {
   }
 }
 
+void c_take_rust_vec_shared_truncate(rust::Vec<Shared> v) {
+  v.truncate(1);
+  if (v.size() == 1) {
+    v.truncate(0);
+    if (v.size() == 0) {
+      cxx_test_suite_set_correct();
+    }
+  }
+}
+
 void c_take_rust_vec_shared_clear(rust::Vec<Shared> v) {
   v.clear();
   if (v.size() == 0) {
