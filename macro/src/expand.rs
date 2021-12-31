@@ -1289,7 +1289,6 @@ fn expand_rust_vec(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
     let link_reserve_total = format!("{}reserve_total", link_prefix);
     let link_set_len = format!("{}set_len", link_prefix);
     let link_truncate = format!("{}truncate", link_prefix);
-    let link_clear = format!("{}clear", link_prefix);
 
     let local_prefix = format_ident!("{}__vec_", elem);
     let local_new = format_ident!("{}new", local_prefix);
@@ -1300,7 +1299,6 @@ fn expand_rust_vec(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
     let local_reserve_total = format_ident!("{}reserve_total", local_prefix);
     let local_set_len = format_ident!("{}set_len", local_prefix);
     let local_truncate = format_ident!("{}truncate", local_prefix);
-    let local_clear = format_ident!("{}clear", local_prefix);
 
     let (impl_generics, ty_generics) = generics::split_for_impl(key, explicit_impl, resolve);
 
@@ -1359,12 +1357,6 @@ fn expand_rust_vec(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
         unsafe extern "C" fn #local_truncate #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>, len: usize) {
             let __fn = concat!("<", module_path!(), #prevent_unwind_drop_label);
             ::cxx::private::prevent_unwind(__fn, || (*this).truncate(len));
-        }
-        #[doc(hidden)]
-        #[export_name = #link_clear]
-        unsafe extern "C" fn #local_clear #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>) {
-            let __fn = concat!("<", module_path!(), #prevent_unwind_drop_label);
-            ::cxx::private::prevent_unwind(__fn, || (*this).clear());
         }
     }
 }

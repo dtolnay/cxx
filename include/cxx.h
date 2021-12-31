@@ -957,6 +957,11 @@ void Vec<T>::emplace_back(Args &&...args) {
 }
 
 template <typename T>
+void Vec<T>::clear() {
+  this->truncate(0);
+}
+
+template <typename T>
 typename Vec<T>::iterator Vec<T>::begin() noexcept {
   return Slice<T>(this->data(), this->size()).begin();
 }

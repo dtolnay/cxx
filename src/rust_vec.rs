@@ -70,11 +70,7 @@ impl<T> RustVec<T> {
     }
 
     pub fn truncate(&mut self, len: usize) {
-        self.as_mut_vec().truncate(len)
-    }
-
-    pub fn clear(&mut self) {
-        self.as_mut_vec().clear();
+        self.as_mut_vec().truncate(len);
     }
 }
 

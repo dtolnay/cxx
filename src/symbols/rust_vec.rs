@@ -62,12 +62,6 @@ macro_rules! rust_vec_shims {
                     unsafe { (*this).truncate(len) }
                 }
             }
-            attr! {
-                #[export_name = concat!("cxxbridge1$rust_vec$", $segment, "$clear")]
-                unsafe extern "C" fn __clear(this: *mut RustVec<$ty>) {
-                    unsafe { (*this).clear() }
-                }
-            }
         };
     };
 }
