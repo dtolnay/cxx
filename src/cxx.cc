@@ -85,6 +85,12 @@ void panic [[noreturn]] (const char *msg) {
 
 template void panic<std::out_of_range> [[noreturn]] (const char *msg);
 
+template <typename T>
+static bool is_aligned(const void *ptr) noexcept {
+  auto iptr = reinterpret_cast<std::uintptr_t>(ptr);
+  return !(iptr % alignof(T));
+}
+
 String::String() noexcept { cxxbridge1$string$new(this); }
 
 String::String(const String &other) noexcept {
@@ -125,11 +131,13 @@ String::String(const char *s, std::size_t len) {
 
 String::String(const char16_t *s) {
   assert(s != nullptr);
+  assert(is_aligned<char16_t>(s));
   initString(this, s, std::char_traits<char16_t>::length(s));
 }
 
 String::String(const char16_t *s, std::size_t len) {
   assert(s != nullptr || len == 0);
+  assert(is_aligned<char16_t>(s));
   initString(this,
              s == nullptr && len == 0 ? reinterpret_cast<const char16_t *>(2)
                                       : s,
@@ -167,11 +175,13 @@ String String::lossy(const char *s, std::size_t len) noexcept {
 
 String String::lossy(const char16_t *s) noexcept {
   assert(s != nullptr);
-  return String::lossy(s, std::char_traits<char16_t>::length(s));
+  assert(is_aligned<char16_t>(s));
+  return String(lossy_t{}, s, std::char_traits<char16_t>::length(s));
 }
 
 String String::lossy(const char16_t *s, std::size_t len) noexcept {
   assert(s != nullptr || len == 0);
+  assert(is_aligned<char16_t>(s));
   return String(lossy_t{}, s, len);
 }
 
