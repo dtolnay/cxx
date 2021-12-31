@@ -1,6 +1,6 @@
 [package]
 name = "cxx"
-version = "1.0.60" # remember to update html_root_url
+version = "1.0.61" # remember to update html_root_url
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 edition = "2018"
 rust-version = "1.48"
@@ -24,15 +24,15 @@ alloc = []
 std = ["alloc"]
 
 [dependencies]
-cxxbridge-macro = { version = "=1.0.60", path = "macro" }
+cxxbridge-macro = { version = "=1.0.61", path = "macro" }
 link-cplusplus = "1.0"
 
 [build-dependencies]
 cc = "1.0.49"
-cxxbridge-flags = { version = "=1.0.60", path = "flags", default-features = false }
+cxxbridge-flags = { version = "=1.0.61", path = "flags", default-features = false }
 
 [dev-dependencies]
-cxx-build = { version = "=1.0.60", path = "gen/build" }
+cxx-build = { version = "=1.0.61", path = "gen/build" }
 cxx-gen = { version = "0.7", path = "gen/lib" }
 cxx-test-suite = { version = "0", path = "tests/ffi" }
 rustversion = "1.0"
