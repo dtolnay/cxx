@@ -110,6 +110,10 @@ rust::Slice<uint8_t> c_return_mutsliceu8(rust::Slice<uint8_t> slice) {
 
 rust::String c_return_rust_string() { return "2020"; }
 
+rust::String c_return_rust_string_lossy() {
+  return rust::String::lossy("Hello \xf0\x90\x80World");
+}
+
 std::unique_ptr<std::string> c_return_unique_ptr_string() {
   return std::unique_ptr<std::string>(new std::string("2020"));
 }
@@ -869,6 +873,12 @@ extern "C" const char *cxx_run_test() noexcept {
   rust::String utf8_rstring = utf8_literal;
   rust::String utf16_rstring = utf16_literal;
   ASSERT(utf8_rstring == utf16_rstring);
+
+  const char *bad_utf8_literal = "test\x80";
+  const char16_t *bad_utf16_literal = u"test\xDD1E";
+  rust::String bad_utf8_rstring = rust::String::lossy(bad_utf8_literal);
+  rust::String bad_utf16_rstring = rust::String::lossy(bad_utf16_literal);
+  ASSERT(bad_utf8_rstring == bad_utf16_rstring);
 
   rust::Vec<int> vec1{1, 2};
   rust::Vec<int> vec2{3, 4};

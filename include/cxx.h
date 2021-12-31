@@ -24,6 +24,7 @@ namespace rust {
 inline namespace cxxbridge1 {
 
 struct unsafe_bitcopy_t;
+struct lossy_t;
 
 namespace {
 template <typename T>
@@ -45,6 +46,13 @@ public:
   String(const char *, std::size_t);
   String(const char16_t *);
   String(const char16_t *, std::size_t);
+
+  // Replace invalid Unicode data with the replacement character (U+FFFD).
+  static String lossy(const std::string &) noexcept;
+  static String lossy(const char *) noexcept;
+  static String lossy(const char *, std::size_t) noexcept;
+  static String lossy(const char16_t *) noexcept;
+  static String lossy(const char16_t *, std::size_t) noexcept;
 
   String &operator=(const String &) &noexcept;
   String &operator=(String &&) &noexcept;
@@ -85,6 +93,8 @@ public:
   String(unsafe_bitcopy_t, const String &) noexcept;
 
 private:
+  String(lossy_t, const char *, std::size_t) noexcept;
+  String(lossy_t, const char16_t *, std::size_t) noexcept;
   friend void swap(String &lhs, String &rhs) noexcept { lhs.swap(rhs); }
 
   // Size and alignment statically verified by rust_string.rs.
