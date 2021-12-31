@@ -73,8 +73,6 @@ std::size_t cxxbridge1$slice$len(const void *self) noexcept;
 namespace rust {
 inline namespace cxxbridge1 {
 
-struct lossy_t {};
-
 template <typename Exception>
 void panic [[noreturn]] (const char *msg) {
 #if defined(RUST_CXX_NO_EXCEPTIONS)
@@ -137,6 +135,8 @@ String::String(const char16_t *s, std::size_t len) {
                                       : s,
              len);
 }
+
+struct String::lossy_t {};
 
 String::String(lossy_t, const char *s, std::size_t len) noexcept {
   cxxbridge1$string$from_utf8_lossy(

@@ -24,7 +24,6 @@ namespace rust {
 inline namespace cxxbridge1 {
 
 struct unsafe_bitcopy_t;
-struct lossy_t;
 
 namespace {
 template <typename T>
@@ -93,6 +92,7 @@ public:
   String(unsafe_bitcopy_t, const String &) noexcept;
 
 private:
+  struct lossy_t;
   String(lossy_t, const char *, std::size_t) noexcept;
   String(lossy_t, const char16_t *, std::size_t) noexcept;
   friend void swap(String &lhs, String &rhs) noexcept { lhs.swap(rhs); }

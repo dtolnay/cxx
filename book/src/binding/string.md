@@ -26,7 +26,7 @@ public:
   // Replaces invalid UTF-8 data with the replacement character (U+FFFD).
   static String lossy(const std::string &) noexcept;
   static String lossy(const char *) noexcept;
-  static String lossy(const char *, std::size_t) noexcept;
+  static String lossy(const char *, size_t) noexcept;
 
   // Throws std::invalid_argument if not UTF-16.
   String(const char16_t *);
@@ -34,7 +34,7 @@ public:
 
   // Replaces invalid UTF-16 data with the replacement character (U+FFFD).
   static String lossy(const char16_t *) noexcept;
-  static String lossy(const char16_t *, std::size_t) noexcept;
+  static String lossy(const char16_t *, size_t) noexcept;
 
   String &operator=(const String &) noexcept;
   String &operator=(String &&) noexcept;
