@@ -45,7 +45,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.33/src/**"]),
+    srcs = glob(["vendor/proc-macro2-1.0.36/src/**"]),
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -59,7 +59,7 @@ rust_library(
 
 cargo_build_script(
     name = "proc-macro2@build",
-    srcs = ["vendor/proc-macro2-1.0.33/build.rs"],
+    srcs = ["vendor/proc-macro2-1.0.36/build.rs"],
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -69,7 +69,7 @@ cargo_build_script(
 
 rust_library(
     name = "quote",
-    srcs = glob(["vendor/quote-1.0.10/src/**"]),
+    srcs = glob(["vendor/quote-1.0.14/src/**"]),
     crate_features = ["proc-macro"],
     visibility = ["//visibility:public"],
     deps = [":proc-macro2"],
@@ -77,14 +77,14 @@ rust_library(
 
 rust_library(
     name = "scratch",
-    srcs = glob(["vendor/scratch-1.0.0/src/**"]),
+    srcs = glob(["vendor/scratch-1.0.1/src/**"]),
     rustc_env = {"OUT_DIR": ""},
     visibility = ["//visibility:public"],
 )
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.82/src/**"]),
+    srcs = glob(["vendor/syn-1.0.84/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
@@ -104,7 +104,7 @@ rust_library(
 
 cargo_build_script(
     name = "syn@build",
-    srcs = ["vendor/syn-1.0.82/build.rs"],
+    srcs = ["vendor/syn-1.0.84/build.rs"],
     crate_features = [
         "clone-impls",
         "derive",
