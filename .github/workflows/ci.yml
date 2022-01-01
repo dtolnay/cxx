@@ -46,16 +46,18 @@ jobs:
         # still ensure the test is kept passing on the basis of the scheduled
         # builds.
         if: matrix.os && github.event_name != 'schedule'
-        run: echo "RUSTFLAGS=--cfg skip_ui_tests $RUSTFLAGS" >> $GITHUB_ENV
+        run: echo RUSTFLAGS=$RUSTFLAGS >> $GITHUB_ENV
+        env:
+          RUSTFLAGS: --cfg skip_ui_tests ${{env.RUSTFLAGS}}
         shell: bash
       - run: cargo run --manifest-path demo/Cargo.toml
       - run: cargo test --workspace --exclude cxx-test-suite
       - run: cargo check --no-default-features --features alloc
         env:
-          RUSTFLAGS: --cfg compile_error_if_std --cfg deny_warnings -Dwarnings
+          RUSTFLAGS: --cfg compile_error_if_std ${{env.RUSTFLAGS}}
       - run: cargo check --no-default-features
         env:
-          RUSTFLAGS: --cfg compile_error_if_alloc --cfg deny_warnings --cfg cxx_experimental_no_alloc -Dwarnings
+          RUSTFLAGS: --cfg compile_error_if_alloc --cfg cxx_experimental_no_alloc ${{env.RUSTFLAGS}}
 
   buck:
     name: Buck
