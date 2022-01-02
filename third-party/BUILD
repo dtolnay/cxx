@@ -18,12 +18,14 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-2.34.0/src/**"]),
+    srcs = glob(["vendor/clap-3.0.0/src/**"]),
+    crate_features = ["std"],
     visibility = ["//visibility:public"],
     deps = [
         ":bitflags",
+        ":indexmap",
+        ":os_str_bytes",
         ":textwrap",
-        ":unicode-width",
     ],
 )
 
@@ -38,9 +40,39 @@ rust_library(
 )
 
 rust_library(
+    name = "hashbrown",
+    srcs = glob(["vendor/hashbrown-0.11.2/src/**"]),
+    crate_features = ["raw"],
+)
+
+rust_library(
+    name = "indexmap",
+    srcs = glob(["vendor/indexmap-1.7.0/src/**"]),
+    crate_features = ["std"],
+    rustc_flags = ["--cfg=has_std"],
+    deps = [":hashbrown"],
+)
+
+rust_library(
     name = "lazy_static",
     srcs = glob(["vendor/lazy_static-1.4.0/src/**"]),
     visibility = ["//visibility:public"],
+)
+
+rust_library(
+    name = "memchr",
+    srcs = glob(["vendor/memchr-2.4.1/src/**/*.rs"]),
+    crate_features = ["std"],
+)
+
+rust_library(
+    name = "os_str_bytes",
+    srcs = glob(["vendor/os_str_bytes-6.0.0/src/**"]),
+    crate_features = [
+        "memchr",
+        "raw_os_str",
+    ],
+    deps = [":memchr"],
 )
 
 rust_library(
@@ -123,7 +155,7 @@ rust_library(
 
 rust_library(
     name = "textwrap",
-    srcs = glob(["vendor/textwrap-0.11.0/src/**"]),
+    srcs = glob(["vendor/textwrap-0.14.2/src/**"]),
     deps = [":unicode-width"],
 )
 

@@ -3,7 +3,7 @@ name = "cxxbridge-cmd"
 version = "1.0.61"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 edition = "2018"
-rust-version = "1.48"
+rust-version = "1.54"
 license = "MIT OR Apache-2.0"
 description = "C++ code generator for integrating `cxx` crate into a non-Cargo build."
 repository = "https://github.com/dtolnay/cxx"
@@ -17,7 +17,7 @@ name = "cxxbridge"
 path = "src/main.rs"
 
 [dependencies]
-clap = "2.33"
+clap = { version = "3.0", default-features = false, features = ["std", "suggestions"] }
 codespan-reporting = "0.11"
 proc-macro2 = { version = "1.0.26", default-features = false, features = ["span-locations"] }
 quote = { version = "1.0", default-features = false }
