@@ -45,13 +45,15 @@ jobs:
         # build. The extra coverage is not particularly valuable and we can
         # still ensure the test is kept passing on the basis of the scheduled
         # builds.
-        if: matrix.os && github.event_name != 'schedule'
-        run: echo RUSTFLAGS=$RUSTFLAGS >> $GITHUB_ENV
+        run: |
+          echo RUSTFLAGS=$RUSTFLAGS >> $GITHUB_ENV
+          echo ::set-output name=exclude::--exclude cxx-test-suite
         env:
-          RUSTFLAGS: --cfg skip_ui_tests ${{env.RUSTFLAGS}}
+          RUSTFLAGS: ${{env.RUSTFLAGS}} ${{matrix.os && github.event_name != 'schedule' && '--cfg skip_ui_tests' || ''}}
+        id: testsuite
         shell: bash
       - run: cargo run --manifest-path demo/Cargo.toml
-      - run: cargo test --workspace --exclude cxx-test-suite
+      - run: cargo test --workspace ${{steps.testsuite.outputs.exclude}}
       - run: cargo check --no-default-features --features alloc
         env:
           RUSTFLAGS: --cfg compile_error_if_std ${{env.RUSTFLAGS}}
