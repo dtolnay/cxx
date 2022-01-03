@@ -54,15 +54,19 @@ rust_library(
 )
 
 rust_library(
-    name = "lazy_static",
-    srcs = glob(["vendor/lazy_static-1.4.0/src/**"]),
-    visibility = ["//visibility:public"],
-)
-
-rust_library(
     name = "memchr",
     srcs = glob(["vendor/memchr-2.4.1/src/**/*.rs"]),
     crate_features = ["std"],
+)
+
+rust_library(
+    name = "once_cell",
+    srcs = glob(["vendor/once_cell-1.9.0/src/**"]),
+    crate_features = [
+        "alloc",
+        "std",
+    ],
+    visibility = ["//visibility:public"],
 )
 
 rust_library(
