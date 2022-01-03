@@ -18,7 +18,7 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-3.0.0/src/**"]),
+    srcs = glob(["vendor/clap-3.0.1/src/**"]),
     crate_features = ["std"],
     visibility = ["//visibility:public"],
     deps = [
