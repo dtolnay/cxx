@@ -268,7 +268,7 @@ mod r#impl {
     use crate::intern::{intern, InternedString};
     use crate::syntax::map::UnorderedMap as Map;
     use crate::vec::{self, InternedVec as _};
-    use lazy_static::lazy_static;
+    use once_cell::sync::Lazy;
     use std::cell::RefCell;
     use std::fmt::{self, Debug};
     use std::marker::PhantomData;
@@ -299,9 +299,7 @@ mod r#impl {
         }
     }
 
-    lazy_static! {
-        static ref CURRENT: RwLock<CurrentCfg> = RwLock::new(CurrentCfg::default());
-    }
+    static CURRENT: Lazy<RwLock<CurrentCfg>> = Lazy::new(|| RwLock::new(CurrentCfg::default()));
 
     thread_local! {
         // FIXME: If https://github.com/rust-lang/rust/issues/77425 is resolved,

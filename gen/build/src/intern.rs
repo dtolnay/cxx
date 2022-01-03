@@ -1,5 +1,5 @@
 use crate::syntax::set::UnorderedSet as Set;
-use lazy_static::lazy_static;
+use once_cell::sync::OnceCell;
 use std::sync::{Mutex, PoisonError};
 
 #[derive(Copy, Clone, Default)]
@@ -12,11 +12,13 @@ impl InternedString {
 }
 
 pub fn intern(s: &str) -> InternedString {
-    lazy_static! {
-        static ref INTERN: Mutex<Set<&'static str>> = Mutex::new(Set::new());
-    }
+    static INTERN: OnceCell<Mutex<Set<&'static str>>> = OnceCell::new();
 
-    let mut set = INTERN.lock().unwrap_or_else(PoisonError::into_inner);
+    let mut set = INTERN
+        .get_or_init(|| Mutex::new(Set::new()))
+        .lock()
+        .unwrap_or_else(PoisonError::into_inner);
+
     InternedString(match set.get(s) {
         Some(interned) => *interned,
         None => {
