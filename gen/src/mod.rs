@@ -3,6 +3,7 @@
 
 mod block;
 mod builtin;
+mod cfg;
 mod check;
 pub(super) mod error;
 mod file;
@@ -15,13 +16,15 @@ mod nested;
 pub(super) mod out;
 mod write;
 
-pub(super) use self::error::Error;
+use self::cfg::UnsupportedCfgEvaluator;
 use self::error::{format_err, Result};
 use self::file::File;
 use self::include::Include;
 use crate::syntax::report::Errors;
 use crate::syntax::{self, Types};
 use std::path::Path;
+
+pub(super) use self::error::Error;
 
 /// Options for C++ code generation.
 ///
@@ -53,6 +56,19 @@ pub struct Opt {
     pub(super) gen_header: bool,
     pub(super) gen_implementation: bool,
     pub(super) allow_dot_includes: bool,
+    #[allow(dead_code)]
+    pub(super) cfg_evaluator: Box<dyn CfgEvaluator>,
+}
+
+pub(super) trait CfgEvaluator {
+    fn eval(&self, name: &str, value: Option<&str>) -> CfgResult;
+}
+
+#[allow(dead_code)]
+pub(super) enum CfgResult {
+    True,
+    False,
+    Undetermined { msg: String },
 }
 
 /// Results of code generation.
@@ -72,6 +88,7 @@ impl Default for Opt {
             gen_header: true,
             gen_implementation: true,
             allow_dot_includes: true,
+            cfg_evaluator: Box::new(UnsupportedCfgEvaluator),
         }
     }
 }
