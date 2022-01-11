@@ -36,7 +36,7 @@ use self::symbol::Symbol;
 use proc_macro2::{Ident, Span};
 use syn::punctuated::Punctuated;
 use syn::token::{Brace, Bracket, Paren};
-use syn::{Attribute, Expr, Generics, Lifetime, LitInt, Path, Token, Type as RustType};
+use syn::{Attribute, Expr, Generics, Lifetime, LitInt, Token, Type as RustType};
 
 pub use self::atom::Atom;
 pub use self::derive::{Derive, Trait};
@@ -119,7 +119,8 @@ pub struct Enum {
 
 pub enum EnumRepr {
     Native { atom: Atom, repr_type: Type },
-    Foreign { rust_type: Path },
+    #[cfg(feature = "experimental")]
+    Foreign { rust_type: syn::Path },
 }
 
 pub struct ExternFn {

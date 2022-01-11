@@ -9,6 +9,7 @@ mod file;
 pub(super) mod fs;
 mod ifndef;
 pub(super) mod include;
+mod names;
 mod namespace;
 mod nested;
 pub(super) mod out;

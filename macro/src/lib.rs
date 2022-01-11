@@ -34,6 +34,7 @@ mod derive;
 mod expand;
 mod generics;
 mod syntax;
+mod tokens;
 mod type_id;
 
 #[cfg(feature = "experimental")]
