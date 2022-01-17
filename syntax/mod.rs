@@ -2,6 +2,7 @@
 
 pub mod atom;
 pub mod attrs;
+mod cfg;
 pub mod check;
 pub mod derive;
 mod discriminant;
