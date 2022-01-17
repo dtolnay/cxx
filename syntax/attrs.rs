@@ -1,7 +1,7 @@
 use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::{self, *};
-use crate::syntax::{Derive, Doc, ForeignName};
+use crate::syntax::{cfg, Derive, Doc, ForeignName};
 use proc_macro2::{Ident, TokenStream};
 use quote::ToTokens;
 use syn::parse::{Nothing, Parse, ParseStream, Parser as _};
@@ -119,6 +119,20 @@ pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> Othe
                         **rust_name = Some(attr);
                         continue;
                     }
+                }
+                Err(err) => {
+                    cx.push(err);
+                    break;
+                }
+            }
+        } else if attr.path.is_ident("cfg") {
+            match cfg::parse_attribute.parse2(attr.tokens.clone()) {
+                Ok(cfg_expr) => {
+                    // TODO
+                    let _ = cfg_expr;
+                    cx.error(&attr, "support for cfg attribute is not implemented yet");
+                    passthrough_attrs.push(attr);
+                    continue;
                 }
                 Err(err) => {
                     cx.push(err);
