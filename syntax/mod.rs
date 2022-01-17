@@ -118,9 +118,14 @@ pub struct Enum {
 }
 
 pub enum EnumRepr {
-    Native { atom: Atom, repr_type: Type },
+    Native {
+        atom: Atom,
+        repr_type: Type,
+    },
     #[cfg(feature = "experimental")]
-    Foreign { rust_type: syn::Path },
+    Foreign {
+        rust_type: syn::Path,
+    },
 }
 
 pub struct ExternFn {
