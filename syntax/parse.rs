@@ -44,7 +44,7 @@ pub fn parse_items(
             Item::ForeignMod(foreign_mod) => {
                 parse_foreign_mod(cx, foreign_mod, &mut apis, trusted, namespace)
             }
-            Item::Impl(item) => match parse_impl(item) {
+            Item::Impl(item) => match parse_impl(cx, item) {
                 Ok(imp) => apis.push(imp),
                 Err(err) => cx.push(err),
             },
@@ -971,8 +971,18 @@ fn parse_extern_type_bounded(
     }))
 }
 
-fn parse_impl(imp: ItemImpl) -> Result<Api> {
+fn parse_impl(cx: &mut Errors, imp: ItemImpl) -> Result<Api> {
     let impl_token = imp.impl_token;
+
+    let mut cfg = CfgExpr::Unconditional;
+    attrs::parse(
+        cx,
+        imp.attrs,
+        attrs::Parser {
+            cfg: Some(&mut cfg),
+            ..Default::default()
+        },
+    );
 
     if !imp.items.is_empty() {
         let mut span = Group::new(Delimiter::Brace, TokenStream::new());
@@ -1059,6 +1069,7 @@ fn parse_impl(imp: ItemImpl) -> Result<Api> {
     let brace_token = imp.brace_token;
 
     Ok(Api::Impl(Impl {
+        cfg,
         impl_token,
         impl_generics,
         negative,

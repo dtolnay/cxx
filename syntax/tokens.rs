@@ -215,6 +215,7 @@ impl ToTokens for ExternFn {
 impl ToTokens for Impl {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let Impl {
+            cfg: _,
             impl_token,
             impl_generics,
             negative: _,

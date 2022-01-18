@@ -161,6 +161,7 @@ pub struct TypeAlias {
 }
 
 pub struct Impl {
+    pub cfg: CfgExpr,
     pub impl_token: Token![impl],
     pub impl_generics: Lifetimes,
     pub negative: bool,
