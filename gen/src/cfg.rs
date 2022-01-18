@@ -4,6 +4,7 @@ use crate::syntax::report::Errors;
 use crate::syntax::Api;
 use quote::quote;
 use std::collections::BTreeSet as Set;
+use syn::Error;
 
 pub(super) struct UnsupportedCfgEvaluator;
 
@@ -42,30 +43,68 @@ pub(super) fn eval(
     cfg_evaluator: &dyn CfgEvaluator,
     expr: &CfgExpr,
 ) -> bool {
+    match try_eval(cfg_evaluator, expr) {
+        Ok(value) => value,
+        Err(errors) => {
+            for error in errors {
+                if cfg_errors.insert(error.to_string()) {
+                    cx.push(error);
+                }
+            }
+            false
+        }
+    }
+}
+
+fn try_eval(cfg_evaluator: &dyn CfgEvaluator, expr: &CfgExpr) -> Result<bool, Vec<Error>> {
     match expr {
-        CfgExpr::Unconditional => true,
+        CfgExpr::Unconditional => Ok(true),
         CfgExpr::Eq(ident, string) => {
             let key = ident.to_string();
             let value = string.as_ref().map(|string| string.value());
             match cfg_evaluator.eval(&key, value.as_deref()) {
-                CfgResult::True => true,
-                CfgResult::False => false,
+                CfgResult::True => Ok(true),
+                CfgResult::False => Ok(false),
                 CfgResult::Undetermined { msg } => {
-                    if cfg_errors.insert(msg.clone()) {
-                        let span = quote!(#ident #string);
-                        cx.error(span, msg);
-                    }
-                    false
+                    let span = quote!(#ident #string);
+                    Err(vec![Error::new_spanned(span, msg)])
                 }
             }
         }
-        CfgExpr::All(list) => list
-            .iter()
-            .all(|expr| eval(cx, cfg_errors, cfg_evaluator, expr)),
-        CfgExpr::Any(list) => list
-            .iter()
-            .any(|expr| eval(cx, cfg_errors, cfg_evaluator, expr)),
-        CfgExpr::Not(expr) => !eval(cx, cfg_errors, cfg_evaluator, expr),
+        CfgExpr::All(list) => {
+            let mut all_errors = Vec::new();
+            for subexpr in list {
+                match try_eval(cfg_evaluator, subexpr) {
+                    Ok(true) => {}
+                    Ok(false) => return Ok(false),
+                    Err(errors) => all_errors.extend(errors),
+                }
+            }
+            if all_errors.is_empty() {
+                Ok(true)
+            } else {
+                Err(all_errors)
+            }
+        }
+        CfgExpr::Any(list) => {
+            let mut all_errors = Vec::new();
+            for subexpr in list {
+                match try_eval(cfg_evaluator, subexpr) {
+                    Ok(true) => return Ok(true),
+                    Ok(false) => {}
+                    Err(errors) => all_errors.extend(errors),
+                }
+            }
+            if all_errors.is_empty() {
+                Ok(false)
+            } else {
+                Err(all_errors)
+            }
+        }
+        CfgExpr::Not(subexpr) => match try_eval(cfg_evaluator, subexpr) {
+            Ok(value) => Ok(!value),
+            Err(errors) => Err(errors),
+        },
     }
 }
 
