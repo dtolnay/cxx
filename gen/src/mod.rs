@@ -20,8 +20,10 @@ use self::cfg::UnsupportedCfgEvaluator;
 use self::error::{format_err, Result};
 use self::file::File;
 use self::include::Include;
+use crate::syntax::cfg::CfgExpr;
 use crate::syntax::report::Errors;
-use crate::syntax::{self, Types};
+use crate::syntax::{self, attrs, Types};
+use std::collections::BTreeSet as Set;
 use std::path::Path;
 
 pub(super) use self::error::Error;
@@ -132,18 +134,31 @@ pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
 
     let ref mut apis = Vec::new();
     let ref mut errors = Errors::new();
+    let ref mut cfg_errors = Set::new();
     for bridge in syntax.modules {
-        let ref namespace = bridge.namespace;
-        let trusted = bridge.unsafety.is_some();
-        apis.extend(syntax::parse_items(
+        let mut cfg = CfgExpr::Unconditional;
+        attrs::parse(
             errors,
-            bridge.content,
-            trusted,
-            namespace,
-        ));
+            bridge.attrs,
+            attrs::Parser {
+                cfg: Some(&mut cfg),
+                ignore_unrecognized: true,
+                ..Default::default()
+            },
+        );
+        if cfg::eval(errors, cfg_errors, opt.cfg_evaluator.as_ref(), &cfg) {
+            let ref namespace = bridge.namespace;
+            let trusted = bridge.unsafety.is_some();
+            apis.extend(syntax::parse_items(
+                errors,
+                bridge.content,
+                trusted,
+                namespace,
+            ));
+        }
     }
 
-    cfg::strip(errors, opt.cfg_evaluator.as_ref(), apis);
+    cfg::strip(errors, cfg_errors, opt.cfg_evaluator.as_ref(), apis);
     errors.propagate()?;
 
     let ref types = Types::collect(errors, apis);

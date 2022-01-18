@@ -36,6 +36,7 @@ pub struct Parser<'a> {
     pub cxx_name: Option<&'a mut Option<ForeignName>>,
     pub rust_name: Option<&'a mut Option<Ident>>,
     pub variants_from_header: Option<&'a mut Option<Attribute>>,
+    pub ignore_unrecognized: bool,
 
     // Suppress clippy needless_update lint ("struct update has no effect, all
     // the fields in the struct have already been specified") when preemptively
@@ -172,8 +173,10 @@ pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> Othe
                 continue;
             }
         }
-        cx.error(attr, "unsupported attribute");
-        break;
+        if !parser.ignore_unrecognized {
+            cx.error(attr, "unsupported attribute");
+            break;
+        }
     }
     OtherAttrs(passthrough_attrs)
 }

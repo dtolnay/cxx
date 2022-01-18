@@ -16,25 +16,29 @@ impl CfgEvaluator for UnsupportedCfgEvaluator {
     }
 }
 
-pub(super) fn strip(cx: &mut Errors, cfg_evaluator: &dyn CfgEvaluator, apis: &mut Vec<Api>) {
-    let mut already_errors = Set::new();
-    apis.retain(|api| eval(cx, &mut already_errors, cfg_evaluator, api.cfg()));
+pub(super) fn strip(
+    cx: &mut Errors,
+    cfg_errors: &mut Set<String>,
+    cfg_evaluator: &dyn CfgEvaluator,
+    apis: &mut Vec<Api>,
+) {
+    apis.retain(|api| eval(cx, cfg_errors, cfg_evaluator, api.cfg()));
     for api in apis {
         match api {
             Api::Struct(strct) => strct
                 .fields
-                .retain(|field| eval(cx, &mut already_errors, cfg_evaluator, &field.cfg)),
+                .retain(|field| eval(cx, cfg_errors, cfg_evaluator, &field.cfg)),
             Api::Enum(enm) => enm
                 .variants
-                .retain(|variant| eval(cx, &mut already_errors, cfg_evaluator, &variant.cfg)),
+                .retain(|variant| eval(cx, cfg_errors, cfg_evaluator, &variant.cfg)),
             _ => {}
         }
     }
 }
 
-fn eval(
+pub(super) fn eval(
     cx: &mut Errors,
-    already_errors: &mut Set<String>,
+    cfg_errors: &mut Set<String>,
     cfg_evaluator: &dyn CfgEvaluator,
     expr: &CfgExpr,
 ) -> bool {
@@ -47,7 +51,7 @@ fn eval(
                 CfgResult::True => true,
                 CfgResult::False => false,
                 CfgResult::Undetermined { msg } => {
-                    if already_errors.insert(msg.clone()) {
+                    if cfg_errors.insert(msg.clone()) {
                         let span = quote!(#ident #string);
                         cx.error(span, msg);
                     }
@@ -57,11 +61,11 @@ fn eval(
         }
         CfgExpr::All(list) => list
             .iter()
-            .all(|expr| eval(cx, already_errors, cfg_evaluator, expr)),
+            .all(|expr| eval(cx, cfg_errors, cfg_evaluator, expr)),
         CfgExpr::Any(list) => list
             .iter()
-            .any(|expr| eval(cx, already_errors, cfg_evaluator, expr)),
-        CfgExpr::Not(expr) => !eval(cx, already_errors, cfg_evaluator, expr),
+            .any(|expr| eval(cx, cfg_errors, cfg_evaluator, expr)),
+        CfgExpr::Not(expr) => !eval(cx, cfg_errors, cfg_evaluator, expr),
     }
 }
 
