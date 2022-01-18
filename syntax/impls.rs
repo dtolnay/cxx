@@ -8,12 +8,14 @@ use std::ops::{Deref, DerefMut};
 impl PartialEq for Include {
     fn eq(&self, other: &Self) -> bool {
         let Include {
+            cfg: _,
             path,
             kind,
             begin_span: _,
             end_span: _,
         } = self;
         let Include {
+            cfg: _,
             path: path2,
             kind: kind2,
             begin_span: _,
@@ -335,6 +337,7 @@ impl PartialEq for Signature {
             && args.len() == args2.len()
             && args.iter().zip(args2).all(|(arg, arg2)| {
                 let Var {
+                    cfg: _,
                     doc: _,
                     attrs: _,
                     visibility: _,
@@ -343,6 +346,7 @@ impl PartialEq for Signature {
                     ty,
                 } = arg;
                 let Var {
+                    cfg: _,
                     doc: _,
                     attrs: _,
                     visibility: _,
@@ -372,6 +376,7 @@ impl Hash for Signature {
         receiver.hash(state);
         for arg in args {
             let Var {
+                cfg: _,
                 doc: _,
                 attrs: _,
                 visibility: _,

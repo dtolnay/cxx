@@ -2,7 +2,7 @@
 
 pub mod atom;
 pub mod attrs;
-mod cfg;
+pub mod cfg;
 pub mod check;
 pub mod derive;
 mod discriminant;
@@ -31,6 +31,7 @@ pub mod types;
 mod visit;
 
 use self::attrs::OtherAttrs;
+use self::cfg::CfgExpr;
 use self::namespace::Namespace;
 use self::parse::kw;
 use self::symbol::Symbol;
@@ -60,6 +61,7 @@ pub enum Api {
 }
 
 pub struct Include {
+    pub cfg: CfgExpr,
     pub path: String,
     pub kind: IncludeKind,
     pub begin_span: Span,
@@ -76,6 +78,7 @@ pub enum IncludeKind {
 }
 
 pub struct ExternType {
+    pub cfg: CfgExpr,
     pub lang: Lang,
     pub doc: Doc,
     pub derives: Vec<Derive>,
@@ -91,6 +94,7 @@ pub struct ExternType {
 }
 
 pub struct Struct {
+    pub cfg: CfgExpr,
     pub doc: Doc,
     pub derives: Vec<Derive>,
     pub attrs: OtherAttrs,
@@ -103,6 +107,7 @@ pub struct Struct {
 }
 
 pub struct Enum {
+    pub cfg: CfgExpr,
     pub doc: Doc,
     pub derives: Vec<Derive>,
     pub attrs: OtherAttrs,
@@ -130,6 +135,7 @@ pub enum EnumRepr {
 }
 
 pub struct ExternFn {
+    pub cfg: CfgExpr,
     pub lang: Lang,
     pub doc: Doc,
     pub attrs: OtherAttrs,
@@ -141,6 +147,7 @@ pub struct ExternFn {
 }
 
 pub struct TypeAlias {
+    pub cfg: CfgExpr,
     pub doc: Doc,
     pub derives: Vec<Derive>,
     pub attrs: OtherAttrs,
@@ -183,6 +190,7 @@ pub struct Signature {
 }
 
 pub struct Var {
+    pub cfg: CfgExpr,
     pub doc: Doc,
     pub attrs: OtherAttrs,
     pub visibility: Token![pub],
@@ -205,6 +213,7 @@ pub struct Receiver {
 }
 
 pub struct Variant {
+    pub cfg: CfgExpr,
     pub doc: Doc,
     pub attrs: OtherAttrs,
     pub name: Pair,
