@@ -132,7 +132,6 @@ pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> Othe
                 Ok(cfg_expr) => {
                     if let Some(cfg) = &mut parser.cfg {
                         cfg.merge(cfg_expr);
-                        cx.error(&attr, "support for cfg attribute is not implemented yet");
                         passthrough_attrs.push(attr);
                         continue;
                     }
