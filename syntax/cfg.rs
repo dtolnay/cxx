@@ -6,7 +6,7 @@ use syn::{parenthesized, token, LitStr, Token};
 #[derive(Clone)]
 pub enum CfgExpr {
     Unconditional,
-    Eq(Ident, Option<String>),
+    Eq(Ident, Option<LitStr>),
     All(Vec<CfgExpr>),
     Any(Vec<CfgExpr>),
     Not(Box<CfgExpr>),
@@ -55,7 +55,7 @@ fn parse_single(input: ParseStream) -> Result<CfgExpr> {
     } else if lookahead.peek(Token![=]) {
         input.parse::<Token![=]>()?;
         let string: LitStr = input.parse()?;
-        Ok(CfgExpr::Eq(ident, Some(string.value())))
+        Ok(CfgExpr::Eq(ident, Some(string)))
     } else if lookahead.peek(Token![,]) || input.is_empty() {
         Ok(CfgExpr::Eq(ident, None))
     } else {

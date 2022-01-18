@@ -56,7 +56,6 @@ pub struct Opt {
     pub(super) gen_header: bool,
     pub(super) gen_implementation: bool,
     pub(super) allow_dot_includes: bool,
-    #[allow(dead_code)]
     pub(super) cfg_evaluator: Box<dyn CfgEvaluator>,
 }
 
@@ -64,11 +63,14 @@ pub(super) trait CfgEvaluator {
     fn eval(&self, name: &str, value: Option<&str>) -> CfgResult;
 }
 
-#[allow(dead_code)]
 pub(super) enum CfgResult {
+    #[allow(dead_code)]
     True,
+    #[allow(dead_code)]
     False,
-    Undetermined { msg: String },
+    Undetermined {
+        msg: String,
+    },
 }
 
 /// Results of code generation.
@@ -145,9 +147,13 @@ pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
         ));
     }
 
+    cfg::strip(errors, opt.cfg_evaluator.as_ref(), apis);
+    errors.propagate()?;
+
     let ref types = Types::collect(errors, apis);
     check::precheck(errors, apis, opt);
     errors.propagate()?;
+
     let generator = check::Generator::Build;
     check::typecheck(errors, apis, types, generator);
     errors.propagate()?;
