@@ -15,7 +15,7 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-3.0.1/src/**"]),
+    srcs = glob(["vendor/clap-3.0.10/src/**"]),
     features = ["std"],
     visibility = ["PUBLIC"],
     deps = [
@@ -44,7 +44,7 @@ rust_library(
 
 rust_library(
     name = "indexmap",
-    srcs = glob(["vendor/indexmap-1.7.0/src/**"]),
+    srcs = glob(["vendor/indexmap-1.8.0/src/**"]),
     features = ["std"],
     rustc_flags = ["--cfg=has_std"],
     deps = [":hashbrown"],
@@ -106,8 +106,8 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.84/src/**"]),
-    build_script = "vendor/syn-1.0.84/build.rs",
+    srcs = glob(["vendor/syn-1.0.85/src/**"]),
+    build_script = "vendor/syn-1.0.85/build.rs",
     features = [
         "clone-impls",
         "derive",

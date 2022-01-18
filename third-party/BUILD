@@ -18,7 +18,7 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-3.0.1/src/**"]),
+    srcs = glob(["vendor/clap-3.0.10/src/**"]),
     crate_features = ["std"],
     visibility = ["//visibility:public"],
     deps = [
@@ -47,7 +47,7 @@ rust_library(
 
 rust_library(
     name = "indexmap",
-    srcs = glob(["vendor/indexmap-1.7.0/src/**"]),
+    srcs = glob(["vendor/indexmap-1.8.0/src/**"]),
     crate_features = ["std"],
     rustc_flags = ["--cfg=has_std"],
     deps = [":hashbrown"],
@@ -120,7 +120,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.84/src/**"]),
+    srcs = glob(["vendor/syn-1.0.85/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
@@ -140,7 +140,7 @@ rust_library(
 
 cargo_build_script(
     name = "syn@build",
-    srcs = ["vendor/syn-1.0.84/build.rs"],
+    srcs = ["vendor/syn-1.0.85/build.rs"],
     crate_features = [
         "clone-impls",
         "derive",
