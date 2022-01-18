@@ -1,12 +1,28 @@
 use proc_macro2::Ident;
+use std::mem;
 use syn::parse::{Error, ParseStream, Result};
 use syn::{parenthesized, token, LitStr, Token};
 
+#[derive(Clone)]
 pub enum CfgExpr {
+    Unconditional,
     Eq(Ident, Option<String>),
     All(Vec<CfgExpr>),
     Any(Vec<CfgExpr>),
     Not(Box<CfgExpr>),
+}
+
+impl CfgExpr {
+    pub fn merge(&mut self, expr: CfgExpr) {
+        if let CfgExpr::Unconditional = self {
+            *self = expr;
+        } else if let CfgExpr::All(list) = self {
+            list.push(expr);
+        } else {
+            let prev = mem::replace(self, CfgExpr::Unconditional);
+            *self = CfgExpr::All(vec![prev, expr]);
+        }
+    }
 }
 
 pub fn parse_attribute(input: ParseStream) -> Result<CfgExpr> {

@@ -39,6 +39,7 @@ impl ToTokens for Type {
 impl ToTokens for Var {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let Var {
+            cfg: _,
             doc: _,
             attrs: _,
             visibility: _,

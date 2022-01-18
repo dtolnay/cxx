@@ -1,3 +1,4 @@
+use crate::syntax::cfg::CfgExpr;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::{self, *};
@@ -27,6 +28,7 @@ use syn::{parenthesized, token, Attribute, Error, LitStr, Path, Result, Token};
 //
 #[derive(Default)]
 pub struct Parser<'a> {
+    pub cfg: Option<&'a mut CfgExpr>,
     pub doc: Option<&'a mut Doc>,
     pub derives: Option<&'a mut Vec<Derive>>,
     pub repr: Option<&'a mut Option<Atom>>,
@@ -128,11 +130,12 @@ pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> Othe
         } else if attr.path.is_ident("cfg") {
             match cfg::parse_attribute.parse2(attr.tokens.clone()) {
                 Ok(cfg_expr) => {
-                    // TODO
-                    let _ = cfg_expr;
-                    cx.error(&attr, "support for cfg attribute is not implemented yet");
-                    passthrough_attrs.push(attr);
-                    continue;
+                    if let Some(cfg) = &mut parser.cfg {
+                        cfg.merge(cfg_expr);
+                        cx.error(&attr, "support for cfg attribute is not implemented yet");
+                        passthrough_attrs.push(attr);
+                        continue;
+                    }
                 }
                 Err(err) => {
                     cx.push(err);
