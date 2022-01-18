@@ -13,6 +13,10 @@ ARGS:
             Input Rust source file containing #[cxx::bridge].
 
 OPTIONS:
+        --cfg <name=\"value\" | name[=true] | name=false>
+            Compilation configuration matching what will be used to build
+            the Rust side of the bridge.
+
         --cxx-impl-annotations <annotation>
             Optional annotation for implementations of C++ function wrappers
             that may be exposed to Rust. You may for example need to provide
