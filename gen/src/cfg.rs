@@ -78,3 +78,13 @@ impl Api {
         }
     }
 }
+
+impl From<bool> for CfgResult {
+    fn from(value: bool) -> Self {
+        if value {
+            CfgResult::True
+        } else {
+            CfgResult::False
+        }
+    }
+}

@@ -64,13 +64,9 @@ pub(super) trait CfgEvaluator {
 }
 
 pub(super) enum CfgResult {
-    #[allow(dead_code)]
     True,
-    #[allow(dead_code)]
     False,
-    Undetermined {
-        msg: String,
-    },
+    Undetermined { msg: String },
 }
 
 /// Results of code generation.
