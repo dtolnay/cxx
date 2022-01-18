@@ -3,11 +3,14 @@
 mod test;
 
 use super::{Opt, Output};
+use crate::cfg::{self, CfgValue};
 use crate::gen::include::Include;
 use crate::syntax::IncludeKind;
 use clap::{App, AppSettings, Arg};
+use std::collections::{BTreeMap as Map, BTreeSet as Set};
 use std::ffi::OsStr;
 use std::path::PathBuf;
+use syn::parse::Parser;
 
 const USAGE: &str = "\
     cxxbridge <input>.rs              Emit .cc file for bridge to stdout
@@ -40,6 +43,7 @@ fn app() -> App<'static> {
         .arg(arg_header())
         .arg(arg_include())
         .arg(arg_output())
+        .arg(arg_cfg())
         .mut_arg("help", |a| a.help("Print help information."));
     if let Some(version) = option_env!("CARGO_PKG_VERSION") {
         app = app
@@ -54,6 +58,7 @@ const CXX_IMPL_ANNOTATIONS: &str = "cxx-impl-annotations";
 const HEADER: &str = "header";
 const INCLUDE: &str = "include";
 const OUTPUT: &str = "output";
+const CFG: &str = "cfg";
 
 pub(super) fn from_args() -> Opt {
     let matches = app().get_matches();
@@ -91,12 +96,19 @@ pub(super) fn from_args() -> Opt {
         outputs.push(Output::Stdout);
     }
 
+    let mut cfg = Map::new();
+    for arg in matches.values_of(CFG).unwrap_or_default() {
+        let (name, value) = cfg::parse.parse_str(arg).unwrap();
+        cfg.entry(name).or_insert_with(Set::new).insert(value);
+    }
+
     Opt {
         input,
         header,
         cxx_impl_annotations,
         include,
         outputs,
+        cfg,
     }
 }
 
@@ -164,5 +176,31 @@ not specified.";
         .multiple_occurrences(true)
         .allow_invalid_utf8(true)
         .validator_os(validate_utf8)
+        .help(HELP)
+}
+
+fn arg_cfg() -> Arg<'static> {
+    const HELP: &str = "\
+Compilation configuration matching what will be used to build
+the Rust side of the bridge.";
+    let mut bool_cfgs = Map::<String, bool>::new();
+    Arg::new(CFG)
+        .long(CFG)
+        .takes_value(true)
+        .value_name("name=\"value\" | name[=true] | name=false")
+        .multiple_occurrences(true)
+        .validator(move |arg| match cfg::parse.parse_str(arg) {
+            Ok((_, CfgValue::Str(_))) => Ok(()),
+            Ok((name, CfgValue::Bool(value))) => {
+                if let Some(&prev) = bool_cfgs.get(&name) {
+                    if prev != value {
+                        return Err(format!("cannot have both {0}=false and {0}=true", name));
+                    }
+                }
+                bool_cfgs.insert(name, value);
+                Ok(())
+            }
+            Err(_) => Err("expected name=\"value\", name=true, or name=false".to_owned()),
+        })
         .help(HELP)
 }
