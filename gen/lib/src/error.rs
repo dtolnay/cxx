@@ -4,6 +4,7 @@
 use std::error::Error as StdError;
 use std::fmt::{self, Debug, Display};
 
+#[allow(missing_docs)]
 pub struct Error {
     pub(crate) err: crate::gen::Error,
 }
