@@ -24,6 +24,9 @@ impl CfgEvaluator for CargoEnvCfgEvaluator {
                 let msg = "expected `feature = \"...\"`".to_owned();
                 CfgResult::Undetermined { msg }
             }
+        } else if name == "test" && query_value.is_none() {
+            let msg = "cfg(test) is not supported because Cargo runs your build script only once across the lib and test build of the same crate".to_owned();
+            CfgResult::Undetermined { msg }
         } else {
             match env.cfgs.get(Lookup::new(name)) {
                 Some(cargo_value) => {
