@@ -142,7 +142,9 @@ pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> Othe
                     break;
                 }
             }
-        } else if attr.path.is_ident("variants_from_header") && cfg!(feature = "experimental") {
+        } else if attr.path.is_ident("variants_from_header")
+            && cfg!(feature = "experimental-enum-variants-from-header")
+        {
             if let Err(err) = Nothing::parse.parse2(attr.tokens.clone()) {
                 cx.push(err);
             }

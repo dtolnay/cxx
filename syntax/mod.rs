@@ -128,7 +128,7 @@ pub enum EnumRepr {
         atom: Atom,
         repr_type: Type,
     },
-    #[cfg(feature = "experimental")]
+    #[cfg(feature = "experimental-enum-variants-from-header")]
     Foreign {
         rust_type: syn::Path,
     },

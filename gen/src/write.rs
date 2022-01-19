@@ -318,7 +318,7 @@ fn write_struct_decl(out: &mut OutFile, ident: &Pair) {
 
 fn write_enum_decl(out: &mut OutFile, enm: &Enum) {
     let repr = match &enm.repr {
-        #[cfg(feature = "experimental")]
+        #[cfg(feature = "experimental-enum-variants-from-header")]
         EnumRepr::Foreign { .. } => return,
         EnumRepr::Native { atom, .. } => *atom,
     };
@@ -382,7 +382,7 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
 
 fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
     let repr = match &enm.repr {
-        #[cfg(feature = "experimental")]
+        #[cfg(feature = "experimental-enum-variants-from-header")]
         EnumRepr::Foreign { .. } => return,
         EnumRepr::Native { atom, .. } => *atom,
     };
@@ -408,7 +408,7 @@ fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
 
 fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
     let repr = match &enm.repr {
-        #[cfg(feature = "experimental")]
+        #[cfg(feature = "experimental-enum-variants-from-header")]
         EnumRepr::Foreign { .. } => return,
         EnumRepr::Native { atom, .. } => *atom,
     };

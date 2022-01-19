@@ -16,7 +16,7 @@ categories = ["development-tools::ffi"]
 proc-macro = true
 
 [features]
-experimental = ["clang-ast", "flate2", "memmap", "serde", "serde_json"]
+experimental-enum-variants-from-header = ["clang-ast", "flate2", "memmap", "serde", "serde_json"]
 
 [dependencies]
 proc-macro2 = "1.0"
