@@ -1,5 +1,6 @@
 use crate::clang::{Clang, Node};
 use crate::syntax::attrs::OtherAttrs;
+use crate::syntax::cfg::CfgExpr;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::report::Errors;
 use crate::syntax::{Api, Discriminant, Doc, Enum, EnumRepr, ForeignName, Pair, Variant};
@@ -207,6 +208,7 @@ fn traverse<'a>(
                     }
                 };
                 enm.variants.push(Variant {
+                    cfg: CfgExpr::Unconditional,
                     doc: Doc::new(),
                     attrs: OtherAttrs::none(),
                     name: Pair {
