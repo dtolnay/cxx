@@ -562,7 +562,7 @@ fn parse_extern_fn(
         ));
     }
 
-    if foreign_fn.sig.asyncness.is_some() {
+    if foreign_fn.sig.asyncness.is_some() && !cfg!(feature = "experimental-async-fn") {
         return Err(Error::new_spanned(
             foreign_fn,
             "async function is not directly supported yet, but see https://cxx.rs/async.html \
@@ -664,6 +664,7 @@ fn parse_extern_fn(
     let mut throws_tokens = None;
     let ret = parse_return_type(&foreign_fn.sig.output, &mut throws_tokens)?;
     let throws = throws_tokens.is_some();
+    let asyncness = foreign_fn.sig.asyncness;
     let unsafety = foreign_fn.sig.unsafety;
     let fn_token = foreign_fn.sig.fn_token;
     let inherited_span = unsafety.map_or(fn_token.span, |unsafety| unsafety.span);
@@ -684,6 +685,7 @@ fn parse_extern_fn(
         visibility,
         name,
         sig: Signature {
+            asyncness,
             unsafety,
             fn_token,
             generics,
@@ -1400,6 +1402,7 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
     let ret = parse_return_type(&ty.output, &mut throws_tokens)?;
     let throws = throws_tokens.is_some();
 
+    let asyncness = None;
     let unsafety = ty.unsafety;
     let fn_token = ty.fn_token;
     let generics = Generics::default();
@@ -1407,6 +1410,7 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
     let paren_token = ty.paren_token;
 
     Ok(Type::Fn(Box::new(Signature {
+        asyncness,
         unsafety,
         fn_token,
         generics,

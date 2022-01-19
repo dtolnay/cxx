@@ -16,6 +16,10 @@ categories = ["development-tools::ffi"]
 name = "cxxbridge"
 path = "src/main.rs"
 
+[features]
+# incomplete features that are not covered by a compatibility guarantee:
+experimental-async-fn = []
+
 [dependencies]
 clap = { version = "3.0", default-features = false, features = ["std", "suggestions"] }
 codespan-reporting = "0.11"

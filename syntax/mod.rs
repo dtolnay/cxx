@@ -179,6 +179,7 @@ pub struct Lifetimes {
 }
 
 pub struct Signature {
+    pub asyncness: Option<Token![async]>,
     pub unsafety: Option<Token![unsafe]>,
     pub fn_token: Token![fn],
     pub generics: Generics,

@@ -248,6 +248,7 @@ impl ToTokens for Lifetimes {
 impl ToTokens for Signature {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let Signature {
+            asyncness: _,
             unsafety: _,
             fn_token,
             generics: _,

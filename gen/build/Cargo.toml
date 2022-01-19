@@ -14,6 +14,8 @@ categories = ["development-tools::ffi"]
 
 [features]
 parallel = ["cc/parallel"]
+# incomplete features that are not covered by a compatibility guarantee:
+experimental-async-fn = []
 
 [dependencies]
 cc = "1.0.49"
