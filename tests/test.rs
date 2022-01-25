@@ -287,6 +287,14 @@ fn test_shared_ptr_weak_ptr() {
 }
 
 #[test]
+fn test_unique_to_shared_ptr() {
+    let unique = ffi::c_return_unique_ptr_string();
+    let ptr = &*unique as *const _;
+    let shared = unique.to_shared();
+    assert_eq!(&*shared as *const _, ptr);
+}
+
+#[test]
 fn test_c_ns_method_calls() {
     let unique_ptr = ffi2::ns_c_return_unique_ptr_ns();
 
