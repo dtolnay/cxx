@@ -1801,6 +1801,18 @@ fn write_shared_ptr(out: &mut OutFile, key: NamedImplKey) {
     begin_function_definition(out);
     writeln!(
         out,
+        "void cxxbridge1$shared_ptr${}$from_unmanaged(::std::shared_ptr<{}>* ptr, void* data) noexcept {{",
+        instance, inner,
+    );
+    writeln!(
+        out,
+        "new (ptr) std::shared_ptr<{}>(static_cast<{}*>(data));",
+        inner, inner
+    );
+    writeln!(out, "}}");
+    begin_function_definition(out);
+    writeln!(
+        out,
         "void cxxbridge1$shared_ptr${}$clone(::std::shared_ptr<{}> const &self, ::std::shared_ptr<{}> *ptr) noexcept {{",
         instance, inner, inner,
     );
