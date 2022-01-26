@@ -304,6 +304,14 @@ fn test_unique_to_shared_ptr_cpp_type() {
 }
 
 #[test]
+fn test_unique_to_shared_ptr_null() {
+    let unique = cxx::UniquePtr::<ffi::C>::null();
+    assert!(unique.is_null());
+    let shared = unique.to_shared();
+    assert!(shared.is_null());
+}
+
+#[test]
 fn test_c_ns_method_calls() {
     let unique_ptr = ffi2::ns_c_return_unique_ptr_ns();
 
