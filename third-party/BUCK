@@ -15,7 +15,7 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-3.0.10/src/**"]),
+    srcs = glob(["vendor/clap-3.0.13/src/**"]),
     features = ["std"],
     visibility = ["PUBLIC"],
     deps = [
@@ -91,7 +91,7 @@ rust_library(
 
 rust_library(
     name = "quote",
-    srcs = glob(["vendor/quote-1.0.14/src/**"]),
+    srcs = glob(["vendor/quote-1.0.15/src/**"]),
     features = ["proc-macro"],
     visibility = ["PUBLIC"],
     deps = [":proc-macro2"],
@@ -106,8 +106,8 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.85/src/**"]),
-    build_script = "vendor/syn-1.0.85/build.rs",
+    srcs = glob(["vendor/syn-1.0.86/src/**"]),
+    build_script = "vendor/syn-1.0.86/build.rs",
     features = [
         "clone-impls",
         "derive",
