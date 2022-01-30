@@ -18,27 +18,25 @@ impl CfgEvaluator for CargoEnvCfgEvaluator {
     fn eval(&self, name: &str, query_value: Option<&str>) -> CfgResult {
         let env = ENV.get_or_init(CargoEnv::load);
         if name == "feature" {
-            if let Some(query_value) = query_value {
+            return if let Some(query_value) = query_value {
                 CfgResult::from(env.features.contains(Lookup::new(query_value)))
             } else {
                 let msg = "expected `feature = \"...\"`".to_owned();
                 CfgResult::Undetermined { msg }
-            }
-        } else if name == "test" && query_value.is_none() {
-            let msg = "cfg(test) is not supported because Cargo runs your build script only once across the lib and test build of the same crate".to_owned();
-            CfgResult::Undetermined { msg }
-        } else {
-            match env.cfgs.get(Lookup::new(name)) {
-                Some(cargo_value) => {
-                    if let Some(query_value) = query_value {
-                        CfgResult::from(cargo_value.split(',').any(|value| value == query_value))
-                    } else {
-                        CfgResult::True
-                    }
-                }
-                None => CfgResult::False,
-            }
+            };
         }
+        if name == "test" && query_value.is_none() {
+            let msg = "cfg(test) is not supported because Cargo runs your build script only once across the lib and test build of the same crate".to_owned();
+            return CfgResult::Undetermined { msg };
+        }
+        if let Some(cargo_value) = env.cfgs.get(Lookup::new(name)) {
+            return if let Some(query_value) = query_value {
+                CfgResult::from(cargo_value.split(',').any(|value| value == query_value))
+            } else {
+                CfgResult::True
+            };
+        }
+        CfgResult::False
     }
 }
 
