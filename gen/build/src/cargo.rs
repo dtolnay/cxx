@@ -36,6 +36,9 @@ impl CfgEvaluator for CargoEnvCfgEvaluator {
                 CfgResult::True
             };
         }
+        if name == "debug_assertions" && query_value.is_none() {
+            return CfgResult::from(cfg!(debug_assertions));
+        }
         CfgResult::False
     }
 }
