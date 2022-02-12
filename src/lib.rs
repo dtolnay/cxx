@@ -389,6 +389,7 @@
     clippy::or_fun_call,
     clippy::ptr_arg,
     clippy::toplevel_ref_arg,
+    clippy::transmute_undefined_repr, // clippy bug: https://github.com/rust-lang/rust-clippy/issues/8417
     clippy::useless_let_if_seq,
     clippy::wrong_self_convention
 )]
