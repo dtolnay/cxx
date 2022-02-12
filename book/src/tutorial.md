@@ -203,7 +203,7 @@ build.
 fn main() {
     cxx_build::bridge("src/main.rs")
         .file("src/blobstore.cc")
-        .compile("cxx-demo");
+        .compile("blobstore");  // base name for object file for blobstore.cc
 }
 ```
 
