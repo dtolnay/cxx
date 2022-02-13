@@ -59,10 +59,10 @@ pub fn load(cx: &mut Errors, apis: &mut [Api]) {
             let is_gzipped = memmap.get(..2) == Some(b"\x1f\x8b");
             if is_gzipped {
                 gunzipped = Vec::new();
-                let decode_result = GzDecoder::new(&mut gunzipped).write_all(&memmap);
+                let decode_result = GzDecoder::new(&mut gunzipped).write_all(memmap);
                 decode_result.map(|_| gunzipped.as_slice())
             } else {
-                Ok(&memmap as &[u8])
+                Ok(memmap as &[u8])
             }
         }
         Err(error) => Err(error),
@@ -143,7 +143,7 @@ fn traverse<'a>(
                     };
                     let repr = translate_qual_type(
                         cx,
-                        &enm,
+                        enm,
                         fixed_underlying_type
                             .desugared_qual_type
                             .as_ref()
