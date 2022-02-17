@@ -12,13 +12,13 @@ rust_library(
 
 rust_library(
     name = "cc",
-    srcs = glob(["vendor/cc-1.0.72/src/**"]),
+    srcs = glob(["vendor/cc-1.0.73/src/**"]),
     visibility = ["//visibility:public"],
 )
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-3.0.13/src/**"]),
+    srcs = glob(["vendor/clap-3.0.14/src/**"]),
     crate_features = ["std"],
     visibility = ["//visibility:public"],
     deps = [
