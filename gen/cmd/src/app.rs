@@ -6,7 +6,7 @@ use super::{Opt, Output};
 use crate::cfg::{self, CfgValue};
 use crate::gen::include::Include;
 use crate::syntax::IncludeKind;
-use clap::{App, AppSettings, Arg};
+use clap::{Arg, Command};
 use std::collections::{BTreeMap as Map, BTreeSet as Set};
 use std::ffi::OsStr;
 use std::path::PathBuf;
@@ -33,11 +33,11 @@ OPTIONS:
 {options}\
 ";
 
-fn app() -> App<'static> {
-    let mut app = App::new("cxxbridge")
+fn app() -> Command<'static> {
+    let mut app = Command::new("cxxbridge")
         .override_usage(USAGE)
         .help_template(TEMPLATE)
-        .setting(AppSettings::NextLineHelp)
+        .next_line_help(true)
         .arg(arg_input())
         .arg(arg_cxx_impl_annotations())
         .arg(arg_header())
