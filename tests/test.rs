@@ -261,7 +261,10 @@ fn test_c_method_calls() {
     assert_eq!(2023, *ffi::Shared { z: 2023 }.c_method_mut_on_shared());
 
     let val = 42;
-    let mut array = ffi::Array { a: [0, 0, 0, 0] };
+    let mut array = ffi::Array {
+        a: [0, 0, 0, 0],
+        b: ffi::Buffer::default(),
+    };
     array.c_set_array(val);
     assert_eq!(array.a.len() as i32 * val, array.r_get_array_sum());
 }
