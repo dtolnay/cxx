@@ -18,7 +18,7 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-3.1.0/src/**"]),
+    srcs = glob(["vendor/clap-3.1.6/src/**"]),
     crate_features = ["std"],
     visibility = ["//visibility:public"],
     deps = [
@@ -61,7 +61,7 @@ rust_library(
 
 rust_library(
     name = "once_cell",
-    srcs = glob(["vendor/once_cell-1.9.0/src/**"]),
+    srcs = glob(["vendor/once_cell-1.10.0/src/**"]),
     crate_features = [
         "alloc",
         "std",
@@ -154,12 +154,12 @@ cargo_build_script(
 
 rust_library(
     name = "termcolor",
-    srcs = glob(["vendor/termcolor-1.1.2/src/**"]),
+    srcs = glob(["vendor/termcolor-1.1.3/src/**"]),
 )
 
 rust_library(
     name = "textwrap",
-    srcs = glob(["vendor/textwrap-0.14.2/src/**"]),
+    srcs = glob(["vendor/textwrap-0.15.0/src/**"]),
     deps = [":unicode-width"],
 )
 
