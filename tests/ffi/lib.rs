@@ -15,7 +15,7 @@
 pub mod cast;
 pub mod module;
 
-use cxx::{CxxString, CxxVector, SharedPtr, UniquePtr};
+use cxx::{type_id, CxxString, CxxVector, ExternType, SharedPtr, UniquePtr};
 use std::fmt::{self, Display};
 use std::mem::MaybeUninit;
 use std::os::raw::c_char;
@@ -80,6 +80,7 @@ pub mod ffi {
 
     pub struct Array {
         a: [i32; 4],
+        b: Buffer,
     }
 
     #[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -248,6 +249,10 @@ pub mod ffi {
         CVal2,
     }
 
+    extern "C++" {
+        type Buffer = crate::Buffer;
+    }
+
     extern "Rust" {
         type R;
 
@@ -410,6 +415,15 @@ impl ffi::Array {
     pub fn r_get_array_sum(&self) -> i32 {
         self.a.iter().sum()
     }
+}
+
+#[derive(Default)]
+#[repr(C)]
+pub struct Buffer([c_char; 12]);
+
+unsafe impl ExternType for Buffer {
+    type Id = type_id!("tests::Buffer");
+    type Kind = cxx::kind::Trivial;
 }
 
 #[derive(Debug)]

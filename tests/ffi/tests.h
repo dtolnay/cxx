@@ -84,6 +84,8 @@ struct Borrow {
   const std::string &s;
 };
 
+typedef char Buffer[12];
+
 size_t c_return_primitive();
 Shared c_return_shared();
 ::A::AShared c_return_ns_shared();
