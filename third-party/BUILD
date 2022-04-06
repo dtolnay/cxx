@@ -86,6 +86,7 @@ rust_library(
         "proc-macro",
         "span-locations",
     ],
+    edition = "2018",
     visibility = ["//visibility:public"],
     deps = [
         ":proc-macro2@build",
