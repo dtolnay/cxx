@@ -4,11 +4,11 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "rules_rust",
-    sha256 = "29fee78077bd8c6477bc895a47e6c759f92df0735ed60587e1da7b51f53d26eb",
-    strip_prefix = "rules_rust-23a4631cad819003642b1a148e458fe4ed2c54e1",
+    sha256 = "3cf493f845837b9c0c44311992a8e387b508a267cb8f261ef97b94c915f292cc",
+    strip_prefix = "rules_rust-55790492aca01b389d208cd1335b9d8c05e28329",
     urls = [
-        # Main branch as of 2021-12-07
-        "https://github.com/bazelbuild/rules_rust/archive/23a4631cad819003642b1a148e458fe4ed2c54e1.tar.gz",
+        # Main branch as of 2022-04-10
+        "https://github.com/bazelbuild/rules_rust/archive/55790492aca01b389d208cd1335b9d8c05e28329.tar.gz",
     ],
 )
 
