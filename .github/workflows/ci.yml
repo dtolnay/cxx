@@ -97,7 +97,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Install Bazel
         run: |
-          wget -q -O install.sh https://github.com/bazelbuild/bazel/releases/download/4.2.2/bazel-4.2.2-installer-linux-x86_64.sh
+          wget -q -O install.sh https://github.com/bazelbuild/bazel/releases/download/5.1.1/bazel-5.1.1-installer-linux-x86_64.sh
           chmod +x install.sh
           ./install.sh --user
           echo $HOME/bin >> $GITHUB_PATH
