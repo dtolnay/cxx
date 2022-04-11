@@ -8,11 +8,13 @@ load(
 rust_library(
     name = "bitflags",
     srcs = glob(["vendor/bitflags-1.3.2/src/**"]),
+    edition = "2018",
 )
 
 rust_library(
     name = "cc",
     srcs = glob(["vendor/cc-1.0.73/src/**"]),
+    edition = "2018",
     visibility = ["//visibility:public"],
 )
 
@@ -20,6 +22,7 @@ rust_library(
     name = "clap",
     srcs = glob(["vendor/clap-3.1.6/src/**"]),
     crate_features = ["std"],
+    edition = "2018",
     visibility = ["//visibility:public"],
     deps = [
         ":bitflags",
@@ -32,6 +35,7 @@ rust_library(
 rust_library(
     name = "codespan-reporting",
     srcs = glob(["vendor/codespan-reporting-0.11.1/src/**"]),
+    edition = "2018",
     visibility = ["//visibility:public"],
     deps = [
         ":termcolor",
@@ -43,12 +47,14 @@ rust_library(
     name = "hashbrown",
     srcs = glob(["vendor/hashbrown-0.11.2/src/**"]),
     crate_features = ["raw"],
+    edition = "2018",
 )
 
 rust_library(
     name = "indexmap",
     srcs = glob(["vendor/indexmap-1.8.0/src/**"]),
     crate_features = ["std"],
+    edition = "2018",
     rustc_flags = ["--cfg=has_std"],
     deps = [":hashbrown"],
 )
@@ -57,6 +63,7 @@ rust_library(
     name = "memchr",
     srcs = glob(["vendor/memchr-2.4.1/src/**/*.rs"]),
     crate_features = ["std"],
+    edition = "2018",
 )
 
 rust_library(
@@ -66,6 +73,7 @@ rust_library(
         "alloc",
         "std",
     ],
+    edition = "2018",
     visibility = ["//visibility:public"],
 )
 
@@ -76,6 +84,7 @@ rust_library(
         "memchr",
         "raw_os_str",
     ],
+    edition = "2018",
     deps = [":memchr"],
 )
 
@@ -86,6 +95,7 @@ rust_library(
         "proc-macro",
         "span-locations",
     ],
+    edition = "2018",
     visibility = ["//visibility:public"],
     deps = [
         ":proc-macro2@build",
@@ -101,12 +111,14 @@ cargo_build_script(
         "span-locations",
     ],
     crate_name = "build",
+    edition = "2018",
 )
 
 rust_library(
     name = "quote",
     srcs = glob(["vendor/quote-1.0.15/src/**"]),
     crate_features = ["proc-macro"],
+    edition = "2018",
     visibility = ["//visibility:public"],
     deps = [":proc-macro2"],
 )
@@ -114,6 +126,7 @@ rust_library(
 rust_library(
     name = "scratch",
     srcs = glob(["vendor/scratch-1.0.1/src/**"]),
+    edition = "2018",
     rustc_env = {"OUT_DIR": ""},
     visibility = ["//visibility:public"],
 )
@@ -129,6 +142,7 @@ rust_library(
         "printing",
         "proc-macro",
     ],
+    edition = "2018",
     visibility = ["//visibility:public"],
     deps = [
         ":proc-macro2",
@@ -150,25 +164,30 @@ cargo_build_script(
         "proc-macro",
     ],
     crate_name = "build",
+    edition = "2018",
 )
 
 rust_library(
     name = "termcolor",
     srcs = glob(["vendor/termcolor-1.1.3/src/**"]),
+    edition = "2018",
 )
 
 rust_library(
     name = "textwrap",
     srcs = glob(["vendor/textwrap-0.15.0/src/**"]),
+    edition = "2018",
     deps = [":unicode-width"],
 )
 
 rust_library(
     name = "unicode-width",
     srcs = glob(["vendor/unicode-width-0.1.9/src/**"]),
+    edition = "2018",
 )
 
 rust_library(
     name = "unicode-xid",
     srcs = glob(["vendor/unicode-xid-0.2.2/src/**"]),
+    edition = "2018",
 )

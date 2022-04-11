@@ -16,10 +16,7 @@ load("@rules_rust//rust:repositories.bzl", "rust_repositories")
 
 RUST_VERSION = "1.57.0"
 
-rust_repositories(
-    edition = "2018",
-    version = RUST_VERSION,
-)
+rust_repositories(version = RUST_VERSION)
 
 load("//tools/bazel:vendor.bzl", "vendor")
 
