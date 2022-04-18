@@ -2,14 +2,14 @@ error: hidden lifetime parameters in types are deprecated
   --> tests/ui/deny_elided_lifetimes.rs:21:50
    |
 21 |         fn lifetime_elided(s: &i32) -> UniquePtr<Cpp>;
-   |                                                  ^^^ expected named lifetime parameter
+   |                                                  ^^^ expected lifetime parameter
    |
 note: the lint level is defined here
   --> tests/ui/deny_elided_lifetimes.rs:1:9
    |
 1  | #![deny(elided_lifetimes_in_paths)]
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^
-help: consider using the `'_` lifetime
+help: indicate the anonymous lifetime
    |
 21 |         fn lifetime_elided(s: &i32) -> UniquePtr<Cpp<'_>>;
-   |                                                  ~~~~~~~
+   |                                                     ++++
