@@ -21,9 +21,14 @@ def _impl(repository_ctx):
     if repository_ctx.attr.target_triple:
         target_triple = repository_ctx.attr.target_triple
     elif "mac" in repository_ctx.os.name:
-        target_triple = "x86_64-apple-darwin"
+        if "arm" in getattr(repository_ctx.os, "arch", ""):
+            target_triple = "aarch64-apple-darwin"
+        else:
+            target_triple = "x86_64-apple-darwin"
     elif "windows" in repository_ctx.os.name:
         target_triple = "x86_64-pc-windows-msvc"
+    elif "arm" in getattr(repository_ctx.os, "arch", ""):
+        target_triple = "aarch64-unknown-linux-gnu"
     else:
         target_triple = "x86_64-unknown-linux-gnu"
 
