@@ -87,7 +87,6 @@ vendor = repository_rule(
     attrs = {
         "cargo_version": attr.string(
             doc = "The version of cargo to use",
-            default = rust_common.default_version,
         ),
         "cargo_iso_date": attr.string(
             doc = "The date of the tool (or None, if the version is a specific version)",
