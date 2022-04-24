@@ -20,15 +20,24 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-3.1.6/src/**"]),
+    srcs = glob(["vendor/clap-3.1.12/src/**"]),
     crate_features = ["std"],
     edition = "2018",
     visibility = ["//visibility:public"],
     deps = [
         ":bitflags",
+        ":clap_lex",
         ":indexmap",
-        ":os_str_bytes",
         ":textwrap",
+    ],
+)
+
+rust_library(
+    name = "clap_lex",
+    srcs = glob(["vendor/clap_lex-0.1.1/src/**"]),
+    edition = "2018",
+    deps = [
+        ":os_str_bytes",
     ],
 )
 
@@ -52,18 +61,11 @@ rust_library(
 
 rust_library(
     name = "indexmap",
-    srcs = glob(["vendor/indexmap-1.8.0/src/**"]),
+    srcs = glob(["vendor/indexmap-1.8.1/src/**"]),
     crate_features = ["std"],
     edition = "2018",
     rustc_flags = ["--cfg=has_std"],
     deps = [":hashbrown"],
-)
-
-rust_library(
-    name = "memchr",
-    srcs = glob(["vendor/memchr-2.4.1/src/**/*.rs"]),
-    crate_features = ["std"],
-    edition = "2018",
 )
 
 rust_library(
@@ -81,16 +83,14 @@ rust_library(
     name = "os_str_bytes",
     srcs = glob(["vendor/os_str_bytes-6.0.0/src/**"]),
     crate_features = [
-        "memchr",
         "raw_os_str",
     ],
     edition = "2018",
-    deps = [":memchr"],
 )
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.36/src/**"]),
+    srcs = glob(["vendor/proc-macro2-1.0.37/src/**"]),
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -105,7 +105,7 @@ rust_library(
 
 cargo_build_script(
     name = "proc-macro2@build",
-    srcs = ["vendor/proc-macro2-1.0.36/build.rs"],
+    srcs = ["vendor/proc-macro2-1.0.37/build.rs"],
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -116,7 +116,7 @@ cargo_build_script(
 
 rust_library(
     name = "quote",
-    srcs = glob(["vendor/quote-1.0.15/src/**"]),
+    srcs = glob(["vendor/quote-1.0.18/src/**"]),
     crate_features = ["proc-macro"],
     edition = "2018",
     visibility = ["//visibility:public"],
@@ -133,7 +133,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.86/src/**"]),
+    srcs = glob(["vendor/syn-1.0.91/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
@@ -154,7 +154,7 @@ rust_library(
 
 cargo_build_script(
     name = "syn@build",
-    srcs = ["vendor/syn-1.0.86/build.rs"],
+    srcs = ["vendor/syn-1.0.91/build.rs"],
     crate_features = [
         "clone-impls",
         "derive",

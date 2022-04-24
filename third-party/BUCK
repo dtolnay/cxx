@@ -15,14 +15,22 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-3.1.6/src/**"]),
+    srcs = glob(["vendor/clap-3.1.12/src/**"]),
     features = ["std"],
     visibility = ["PUBLIC"],
     deps = [
         ":bitflags",
+        ":clap_lex",
         ":indexmap",
-        ":os_str_bytes",
         ":textwrap",
+    ],
+)
+
+rust_library(
+    name = "clap_lex",
+    srcs = glob(["vendor/clap_lex-0.1.1/src/**"]),
+    deps = [
+        ":os_str_bytes",
     ],
 )
 
@@ -44,17 +52,10 @@ rust_library(
 
 rust_library(
     name = "indexmap",
-    srcs = glob(["vendor/indexmap-1.8.0/src/**"]),
+    srcs = glob(["vendor/indexmap-1.8.1/src/**"]),
     features = ["std"],
     rustc_flags = ["--cfg=has_std"],
     deps = [":hashbrown"],
-)
-
-rust_library(
-    name = "memchr",
-    srcs = glob(["vendor/memchr-2.4.1/src/**"]),
-    crate_root = "vendor/memchr-2.4.1/src/lib.rs",
-    features = ["std"],
 )
 
 rust_library(
@@ -71,16 +72,14 @@ rust_library(
     name = "os_str_bytes",
     srcs = glob(["vendor/os_str_bytes-6.0.0/src/**"]),
     features = [
-        "memchr",
         "raw_os_str",
     ],
-    deps = [":memchr"],
 )
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.36/src/**"]),
-    build_script = "vendor/proc-macro2-1.0.36/build.rs",
+    srcs = glob(["vendor/proc-macro2-1.0.37/src/**"]),
+    build_script = "vendor/proc-macro2-1.0.37/build.rs",
     features = [
         "proc-macro",
         "span-locations",
@@ -91,7 +90,7 @@ rust_library(
 
 rust_library(
     name = "quote",
-    srcs = glob(["vendor/quote-1.0.15/src/**"]),
+    srcs = glob(["vendor/quote-1.0.18/src/**"]),
     features = ["proc-macro"],
     visibility = ["PUBLIC"],
     deps = [":proc-macro2"],
@@ -106,8 +105,8 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.86/src/**"]),
-    build_script = "vendor/syn-1.0.86/build.rs",
+    srcs = glob(["vendor/syn-1.0.91/src/**"]),
+    build_script = "vendor/syn-1.0.91/build.rs",
     features = [
         "clone-impls",
         "derive",
