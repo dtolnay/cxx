@@ -17,22 +17,23 @@ def _impl(repository_ctx):
     root_lockfile = repository_ctx.path("workspace/Cargo.lock")
     _copy_file(repository_ctx, src = vendor_lockfile, dst = root_lockfile)
 
-    is_mac = "mac" in repository_ctx.os.name
     is_aarch64 = "aarch64" in getattr(repository_ctx.os, "arch", "")
 
     # Figure out which version of cargo to use.
     if repository_ctx.attr.target_triple:
         target_triple = repository_ctx.attr.target_triple
-    elif is_mac and is_aarch64:
-        target_triple = "aarch64-apple-darwin"
-    elif is_mac:
-        target_triple = "x86_64-apple-darwin"
+    elif "mac" in repository_ctx.os.name:
+        if is_aarch64:
+            target_triple = "aarch64-apple-darwin"
+        else:
+            target_triple = "x86_64-apple-darwin"
     elif "windows" in repository_ctx.os.name:
         target_triple = "x86_64-pc-windows-msvc"
-    elif is_aarch64:
-        target_triple = "aarch64-unknown-linux-gnu"
     else:
-        target_triple = "x86_64-unknown-linux-gnu"
+        if is_aarch64:
+            target_triple = "aarch64-unknown-linux-gnu"
+        else:
+            target_triple = "x86_64-unknown-linux-gnu"
 
     # Download cargo.
     load_arbitrary_tool(
