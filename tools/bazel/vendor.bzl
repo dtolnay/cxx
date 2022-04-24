@@ -18,7 +18,7 @@ def _impl(repository_ctx):
     _copy_file(repository_ctx, src = vendor_lockfile, dst = root_lockfile)
 
     is_mac = "mac" in repository_ctx.os.name
-    is_arm = "arm" in getattr(repository_ctx.os, "arch", "")
+    is_arm = "aarch64" in getattr(repository_ctx.os, "arch", "")
     # Figure out which version of cargo to use.
     if repository_ctx.attr.target_triple:
         target_triple = repository_ctx.attr.target_triple
