@@ -18,17 +18,17 @@ def _impl(repository_ctx):
     _copy_file(repository_ctx, src = vendor_lockfile, dst = root_lockfile)
 
     is_mac = "mac" in repository_ctx.os.name
-    is_arm = "aarch64" in getattr(repository_ctx.os, "arch", "")
+    is_aarch64 = "aarch64" in getattr(repository_ctx.os, "arch", "")
     # Figure out which version of cargo to use.
     if repository_ctx.attr.target_triple:
         target_triple = repository_ctx.attr.target_triple
-    elif is_mac and is_arm:
+    elif is_mac and is_aarch64:
          target_triple = "aarch64-apple-darwin"
     elif is_mac:
          target_triple = "x86_64-apple-darwin"
     elif "windows" in repository_ctx.os.name:
         target_triple = "x86_64-pc-windows-msvc"
-    elif is_arm:
+    elif is_aarch64:
         target_triple = "aarch64-unknown-linux-gnu"
     else:
         target_triple = "x86_64-unknown-linux-gnu"
