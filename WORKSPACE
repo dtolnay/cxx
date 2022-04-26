@@ -12,11 +12,13 @@ http_archive(
     ],
 )
 
-load("@rules_rust//rust:repositories.bzl", "rust_repositories")
+load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
 
 RUST_VERSION = "1.60.0"
 
-rust_repositories(
+rules_rust_dependencies()
+
+rust_register_toolchains(
     version = RUST_VERSION,
 )
 
