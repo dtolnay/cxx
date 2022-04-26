@@ -87,7 +87,7 @@ dependencies = [
 
 [[package]]
 name = "cxx"
-version = "1.0.66"
+version = "1.0.67"
 dependencies = [
  "cc",
  "cxx-build",
@@ -102,7 +102,7 @@ dependencies = [
 
 [[package]]
 name = "cxx-build"
-version = "1.0.66"
+version = "1.0.67"
 dependencies = [
  "cc",
  "codespan-reporting",
@@ -117,7 +117,7 @@ dependencies = [
 
 [[package]]
 name = "cxx-gen"
-version = "0.7.66"
+version = "0.7.67"
 dependencies = [
  "codespan-reporting",
  "proc-macro2",
@@ -136,7 +136,7 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-cmd"
-version = "1.0.66"
+version = "1.0.67"
 dependencies = [
  "clap",
  "codespan-reporting",
@@ -147,11 +147,11 @@ dependencies = [
 
 [[package]]
 name = "cxxbridge-flags"
-version = "1.0.66"
+version = "1.0.67"
 
 [[package]]
 name = "cxxbridge-macro"
-version = "1.0.66"
+version = "1.0.67"
 dependencies = [
  "clang-ast",
  "cxx",
