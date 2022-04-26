@@ -26,6 +26,6 @@ load("//tools/bazel:vendor.bzl", "vendor")
 
 vendor(
     name = "third-party",
-    lockfile = "//third-party:Cargo.lock",
     cargo_version = RUST_VERSION,
+    lockfile = "//third-party:Cargo.lock",
 )
