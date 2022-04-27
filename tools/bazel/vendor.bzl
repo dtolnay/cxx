@@ -2,8 +2,9 @@
 of a crate in the current workspace.
 """
 
-load("@rules_rust//rust:repositories.bzl", "load_arbitrary_tool")
 load("@rules_rust//rust:defs.bzl", "rust_common")
+load("@rules_rust//rust:repositories.bzl", "load_arbitrary_tool")
+load("@rules_rust//rust/platform:triple.bzl", "get_host_triple")
 
 def _impl(repository_ctx):
     # Link cxx repository into @third-party.
@@ -21,20 +22,7 @@ def _impl(repository_ctx):
     if repository_ctx.attr.target_triple:
         target_triple = repository_ctx.attr.target_triple
     else:
-        if "mac" in repository_ctx.os.name:
-            triple_os = "apple-darwin"
-        elif "windows" in repository_ctx.os.name:
-            triple_os = "pc-windows-msvc"
-        else:
-            triple_os = "unknown-linux-gnu"
-
-        # FIXME can we just use `triple_arch = repository_ctx.os.arch`?
-        if "aarch64" in getattr(repository_ctx.os, "arch", ""):
-            triple_arch = "aarch64"
-        else:
-            triple_arch = "x86_64"
-
-        target_triple = "{}-{}".format(triple_arch, triple_os)
+        target_triple = get_host_triple(repository_ctx).str
 
     # Download cargo.
     load_arbitrary_tool(
