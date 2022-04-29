@@ -16,6 +16,7 @@ rust-version = "1.48"
 parallel = ["cc/parallel"]
 # incomplete features that are not covered by a compatibility guarantee:
 experimental-async-fn = []
+doxygen = []
 
 [dependencies]
 cc = "1.0.49"

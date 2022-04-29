@@ -236,13 +236,21 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     for line in strct.doc.to_string().lines() {
-        writeln!(out, "//{}", line);
+        if cfg!(feature = "doxygen") {
+            writeln!(out, "  ///{}", line);
+        } else {
+            writeln!(out, "  //{}", line);
+        }
     }
     writeln!(out, "struct {} final {{", strct.name.cxx);
 
     for field in &strct.fields {
         for line in field.doc.to_string().lines() {
-            writeln!(out, "  //{}", line);
+            if cfg!(feature = "doxygen") {
+                writeln!(out, "  ///{}", line);
+            } else {
+                writeln!(out, "  //{}", line);
+            }
         }
         write!(out, "  ");
         write_type_space(out, &field.ty);
@@ -256,7 +264,11 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
             out.next_section();
         }
         for line in method.doc.to_string().lines() {
-            writeln!(out, "  //{}", line);
+            if cfg!(feature = "doxygen") {
+                writeln!(out, "  ///{}", line);
+            } else {
+                writeln!(out, "  //{}", line);
+            }
         }
         write!(out, "  ");
         let sig = &method.sig;
@@ -337,7 +349,11 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     for line in ety.doc.to_string().lines() {
-        writeln!(out, "//{}", line);
+        if cfg!(feature = "doxygen") {
+            writeln!(out, "  ///{}", line);
+        } else {
+            writeln!(out, "  //{}", line);
+        }
     }
 
     out.builtin.opaque = true;
@@ -352,7 +368,11 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
             out.next_section();
         }
         for line in method.doc.to_string().lines() {
-            writeln!(out, "  //{}", line);
+            if cfg!(feature = "doxygen") {
+                writeln!(out, "  ///{}", line);
+            } else {
+                writeln!(out, "  //{}", line);
+            }
         }
         write!(out, "  ");
         let sig = &method.sig;
@@ -391,14 +411,18 @@ fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     for line in enm.doc.to_string().lines() {
-        writeln!(out, "//{}", line);
+        if cfg!(feature = "doxygen") {
+            writeln!(out, "  ///{}", line);
+        } else {
+            writeln!(out, "  //{}", line);
+        }
     }
     write!(out, "enum class {} : ", enm.name.cxx);
     write_atom(out, repr);
     writeln!(out, " {{");
     for variant in &enm.variants {
         for line in variant.doc.to_string().lines() {
-            writeln!(out, "  //{}", line);
+            writeln!(out, "  ///{}", line);
         }
         writeln!(out, "  {} = {},", variant.name.cxx, variant.discriminant);
     }
@@ -1002,7 +1026,11 @@ fn write_rust_function_shim_impl(
     if sig.receiver.is_none() {
         // Member functions already documented at their declaration.
         for line in doc.to_string().lines() {
-            writeln!(out, "//{}", line);
+            if cfg!(feature = "doxygen") {
+                writeln!(out, "  ///{}", line);
+            } else {
+                writeln!(out, "  //{}", line);
+            }
         }
     }
     write_rust_function_shim_decl(out, local_name, sig, indirect_call);
