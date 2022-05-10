@@ -178,6 +178,7 @@ fn expand_struct(strct: &Struct) -> TokenStream {
         #struct_def
 
         unsafe impl #generics ::cxx::ExternType for #ident #generics {
+            #[allow(unused_attributes)] // incorrect lint
             #[doc(hidden)]
             type Id = #type_id;
             type Kind = ::cxx::kind::Trivial;
@@ -352,6 +353,7 @@ fn expand_enum(enm: &Enum) -> TokenStream {
         }
 
         unsafe impl ::cxx::ExternType for #ident {
+            #[allow(unused_attributes)] // incorrect lint
             #[doc(hidden)]
             type Id = #type_id;
             type Kind = ::cxx::kind::Trivial;
@@ -393,6 +395,7 @@ fn expand_cxx_type(ety: &ExternType) -> TokenStream {
         #extern_type_def
 
         unsafe impl #generics ::cxx::ExternType for #ident #generics {
+            #[allow(unused_attributes)] // incorrect lint
             #[doc(hidden)]
             type Id = #type_id;
             type Kind = ::cxx::kind::Opaque;
@@ -829,6 +832,7 @@ fn expand_rust_type_impl(ety: &ExternType) -> TokenStream {
             let span = derive.span;
             impls.extend(quote_spanned! {span=>
                 unsafe impl #generics ::cxx::ExternType for #ident #generics {
+                    #[allow(unused_attributes)] // incorrect lint
                     #[doc(hidden)]
                     type Id = #type_id;
                     type Kind = ::cxx::kind::Opaque;
@@ -1385,7 +1389,6 @@ fn expand_unique_ptr(
     let can_construct_from_value = types.is_maybe_trivial(ident);
     let new_method = if can_construct_from_value {
         Some(quote! {
-            #[doc(hidden)]
             fn __new(value: Self) -> ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void> {
                 extern "C" {
                     #[link_name = #link_uninit]
@@ -1406,11 +1409,9 @@ fn expand_unique_ptr(
 
     quote_spanned! {end_span=>
         #unsafe_token impl #impl_generics ::cxx::private::UniquePtrTarget for #ident #ty_generics {
-            #[doc(hidden)]
             fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
                 f.write_str(#name)
             }
-            #[doc(hidden)]
             fn __null() -> ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void> {
                 extern "C" {
                     #[link_name = #link_null]
@@ -1421,7 +1422,6 @@ fn expand_unique_ptr(
                 repr
             }
             #new_method
-            #[doc(hidden)]
             unsafe fn __raw(raw: *mut Self) -> ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void> {
                 extern "C" {
                     #[link_name = #link_raw]
@@ -1431,7 +1431,6 @@ fn expand_unique_ptr(
                 __raw(&mut repr, raw.cast());
                 repr
             }
-            #[doc(hidden)]
             unsafe fn __get(repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *const Self {
                 extern "C" {
                     #[link_name = #link_get]
@@ -1439,7 +1438,6 @@ fn expand_unique_ptr(
                 }
                 __get(&repr).cast()
             }
-            #[doc(hidden)]
             unsafe fn __release(mut repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *mut Self {
                 extern "C" {
                     #[link_name = #link_release]
@@ -1447,7 +1445,6 @@ fn expand_unique_ptr(
                 }
                 __release(&mut repr).cast()
             }
-            #[doc(hidden)]
             unsafe fn __drop(mut repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) {
                 extern "C" {
                     #[link_name = #link_drop]
@@ -1479,7 +1476,6 @@ fn expand_shared_ptr(
     let can_construct_from_value = types.is_maybe_trivial(ident);
     let new_method = if can_construct_from_value {
         Some(quote! {
-            #[doc(hidden)]
             unsafe fn __new(value: Self, new: *mut ::cxx::core::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_uninit]
@@ -1498,11 +1494,9 @@ fn expand_shared_ptr(
 
     quote_spanned! {end_span=>
         #unsafe_token impl #impl_generics ::cxx::private::SharedPtrTarget for #ident #ty_generics {
-            #[doc(hidden)]
             fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
                 f.write_str(#name)
             }
-            #[doc(hidden)]
             unsafe fn __null(new: *mut ::cxx::core::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_null]
@@ -1511,7 +1505,6 @@ fn expand_shared_ptr(
                 __null(new);
             }
             #new_method
-            #[doc(hidden)]
             unsafe fn __clone(this: *const ::cxx::core::ffi::c_void, new: *mut ::cxx::core::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_clone]
@@ -1519,7 +1512,6 @@ fn expand_shared_ptr(
                 }
                 __clone(this, new);
             }
-            #[doc(hidden)]
             unsafe fn __get(this: *const ::cxx::core::ffi::c_void) -> *const Self {
                 extern "C" {
                     #[link_name = #link_get]
@@ -1527,7 +1519,6 @@ fn expand_shared_ptr(
                 }
                 __get(this).cast()
             }
-            #[doc(hidden)]
             unsafe fn __drop(this: *mut ::cxx::core::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_drop]
@@ -1558,11 +1549,9 @@ fn expand_weak_ptr(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
 
     quote_spanned! {end_span=>
         #unsafe_token impl #impl_generics ::cxx::private::WeakPtrTarget for #ident #ty_generics {
-            #[doc(hidden)]
             fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
                 f.write_str(#name)
             }
-            #[doc(hidden)]
             unsafe fn __null(new: *mut ::cxx::core::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_null]
@@ -1570,7 +1559,6 @@ fn expand_weak_ptr(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
                 }
                 __null(new);
             }
-            #[doc(hidden)]
             unsafe fn __clone(this: *const ::cxx::core::ffi::c_void, new: *mut ::cxx::core::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_clone]
@@ -1578,7 +1566,6 @@ fn expand_weak_ptr(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
                 }
                 __clone(this, new);
             }
-            #[doc(hidden)]
             unsafe fn __downgrade(shared: *const ::cxx::core::ffi::c_void, weak: *mut ::cxx::core::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_downgrade]
@@ -1586,7 +1573,6 @@ fn expand_weak_ptr(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
                 }
                 __downgrade(shared, weak);
             }
-            #[doc(hidden)]
             unsafe fn __upgrade(weak: *const ::cxx::core::ffi::c_void, shared: *mut ::cxx::core::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_upgrade]
@@ -1594,7 +1580,6 @@ fn expand_weak_ptr(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
                 }
                 __upgrade(weak, shared);
             }
-            #[doc(hidden)]
             unsafe fn __drop(this: *mut ::cxx::core::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_drop]
@@ -1638,7 +1623,6 @@ fn expand_cxx_vector(
     let can_pass_element_by_value = types.is_maybe_trivial(elem);
     let by_value_methods = if can_pass_element_by_value {
         Some(quote_spanned! {end_span=>
-            #[doc(hidden)]
             unsafe fn __push_back(
                 this: ::cxx::core::pin::Pin<&mut ::cxx::CxxVector<Self>>,
                 value: &mut ::cxx::core::mem::ManuallyDrop<Self>,
@@ -1652,7 +1636,6 @@ fn expand_cxx_vector(
                 }
                 __push_back(this, value as *mut ::cxx::core::mem::ManuallyDrop<Self> as *mut ::cxx::core::ffi::c_void);
             }
-            #[doc(hidden)]
             unsafe fn __pop_back(
                 this: ::cxx::core::pin::Pin<&mut ::cxx::CxxVector<Self>>,
                 out: &mut ::cxx::core::mem::MaybeUninit<Self>,
@@ -1673,11 +1656,9 @@ fn expand_cxx_vector(
 
     quote_spanned! {end_span=>
         #unsafe_token impl #impl_generics ::cxx::private::VectorElement for #elem #ty_generics {
-            #[doc(hidden)]
             fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
                 f.write_str(#name)
             }
-            #[doc(hidden)]
             fn __vector_size(v: &::cxx::CxxVector<Self>) -> usize {
                 extern "C" {
                     #[link_name = #link_size]
@@ -1685,7 +1666,6 @@ fn expand_cxx_vector(
                 }
                 unsafe { __vector_size(v) }
             }
-            #[doc(hidden)]
             unsafe fn __get_unchecked(v: *mut ::cxx::CxxVector<Self>, pos: usize) -> *mut Self {
                 extern "C" {
                     #[link_name = #link_get_unchecked]
@@ -1697,7 +1677,6 @@ fn expand_cxx_vector(
                 __get_unchecked(v, pos) as *mut Self
             }
             #by_value_methods
-            #[doc(hidden)]
             fn __unique_ptr_null() -> ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void> {
                 extern "C" {
                     #[link_name = #link_unique_ptr_null]
@@ -1707,7 +1686,6 @@ fn expand_cxx_vector(
                 unsafe { __unique_ptr_null(&mut repr) }
                 repr
             }
-            #[doc(hidden)]
             unsafe fn __unique_ptr_raw(raw: *mut ::cxx::CxxVector<Self>) -> ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void> {
                 extern "C" {
                     #[link_name = #link_unique_ptr_raw]
@@ -1717,7 +1695,6 @@ fn expand_cxx_vector(
                 __unique_ptr_raw(&mut repr, raw);
                 repr
             }
-            #[doc(hidden)]
             unsafe fn __unique_ptr_get(repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *const ::cxx::CxxVector<Self> {
                 extern "C" {
                     #[link_name = #link_unique_ptr_get]
@@ -1725,7 +1702,6 @@ fn expand_cxx_vector(
                 }
                 __unique_ptr_get(&repr)
             }
-            #[doc(hidden)]
             unsafe fn __unique_ptr_release(mut repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *mut ::cxx::CxxVector<Self> {
                 extern "C" {
                     #[link_name = #link_unique_ptr_release]
@@ -1733,7 +1709,6 @@ fn expand_cxx_vector(
                 }
                 __unique_ptr_release(&mut repr)
             }
-            #[doc(hidden)]
             unsafe fn __unique_ptr_drop(mut repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) {
                 extern "C" {
                     #[link_name = #link_unique_ptr_drop]
