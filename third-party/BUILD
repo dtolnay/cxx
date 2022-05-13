@@ -20,7 +20,7 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-3.1.12/src/**"]),
+    srcs = glob(["vendor/clap-3.1.18/src/**"]),
     crate_features = ["std"],
     edition = "2018",
     visibility = ["//visibility:public"],
@@ -34,7 +34,7 @@ rust_library(
 
 rust_library(
     name = "clap_lex",
-    srcs = glob(["vendor/clap_lex-0.1.1/src/**"]),
+    srcs = glob(["vendor/clap_lex-0.2.0/src/**"]),
     edition = "2018",
     deps = [
         ":os_str_bytes",
@@ -90,7 +90,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.37/src/**"]),
+    srcs = glob(["vendor/proc-macro2-1.0.38/src/**"]),
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -105,7 +105,7 @@ rust_library(
 
 cargo_build_script(
     name = "proc-macro2@build",
-    srcs = ["vendor/proc-macro2-1.0.37/build.rs"],
+    srcs = ["vendor/proc-macro2-1.0.38/build.rs"],
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -133,7 +133,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.91/src/**"]),
+    srcs = glob(["vendor/syn-1.0.94/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
@@ -154,7 +154,7 @@ rust_library(
 
 cargo_build_script(
     name = "syn@build",
-    srcs = ["vendor/syn-1.0.91/build.rs"],
+    srcs = ["vendor/syn-1.0.94/build.rs"],
     crate_features = [
         "clone-impls",
         "derive",
@@ -188,6 +188,6 @@ rust_library(
 
 rust_library(
     name = "unicode-xid",
-    srcs = glob(["vendor/unicode-xid-0.2.2/src/**"]),
+    srcs = glob(["vendor/unicode-xid-0.2.3/src/**"]),
     edition = "2018",
 )

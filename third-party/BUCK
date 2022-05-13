@@ -15,7 +15,7 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-3.1.12/src/**"]),
+    srcs = glob(["vendor/clap-3.1.18/src/**"]),
     features = ["std"],
     visibility = ["PUBLIC"],
     deps = [
@@ -28,7 +28,7 @@ rust_library(
 
 rust_library(
     name = "clap_lex",
-    srcs = glob(["vendor/clap_lex-0.1.1/src/**"]),
+    srcs = glob(["vendor/clap_lex-0.2.0/src/**"]),
     deps = [
         ":os_str_bytes",
     ],
@@ -78,8 +78,8 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.37/src/**"]),
-    build_script = "vendor/proc-macro2-1.0.37/build.rs",
+    srcs = glob(["vendor/proc-macro2-1.0.38/src/**"]),
+    build_script = "vendor/proc-macro2-1.0.38/build.rs",
     features = [
         "proc-macro",
         "span-locations",
@@ -105,8 +105,8 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.91/src/**"]),
-    build_script = "vendor/syn-1.0.91/build.rs",
+    srcs = glob(["vendor/syn-1.0.94/src/**"]),
+    build_script = "vendor/syn-1.0.94/build.rs",
     features = [
         "clone-impls",
         "derive",
@@ -141,5 +141,5 @@ rust_library(
 
 rust_library(
     name = "unicode-xid",
-    srcs = glob(["vendor/unicode-xid-0.2.2/src/**"]),
+    srcs = glob(["vendor/unicode-xid-0.2.3/src/**"]),
 )
