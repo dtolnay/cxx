@@ -21,9 +21,9 @@ experimental-async-fn = []
 experimental-enum-variants-from-header = ["clang-ast", "flate2", "memmap", "serde", "serde_json"]
 
 [dependencies]
-proc-macro2 = "1.0"
+proc-macro2 = "1.0.39"
 quote = "1.0.4"
-syn = { version = "1.0.70", features = ["full"] }
+syn = { version = "1.0.95", features = ["full"] }
 
 # optional dependencies:
 clang-ast = { version = "0.1", optional = true }

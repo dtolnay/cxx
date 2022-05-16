@@ -90,7 +90,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.38/src/**"]),
+    srcs = glob(["vendor/proc-macro2-1.0.39/src/**"]),
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -99,13 +99,13 @@ rust_library(
     visibility = ["//visibility:public"],
     deps = [
         ":proc-macro2@build",
-        ":unicode-xid",
+        ":unicode-ident",
     ],
 )
 
 cargo_build_script(
     name = "proc-macro2@build",
-    srcs = ["vendor/proc-macro2-1.0.38/build.rs"],
+    srcs = ["vendor/proc-macro2-1.0.39/build.rs"],
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -133,7 +133,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.94/src/**"]),
+    srcs = glob(["vendor/syn-1.0.95/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
@@ -148,13 +148,13 @@ rust_library(
         ":proc-macro2",
         ":quote",
         ":syn@build",
-        ":unicode-xid",
+        ":unicode-ident",
     ],
 )
 
 cargo_build_script(
     name = "syn@build",
-    srcs = ["vendor/syn-1.0.94/build.rs"],
+    srcs = ["vendor/syn-1.0.95/build.rs"],
     crate_features = [
         "clone-impls",
         "derive",
@@ -181,13 +181,13 @@ rust_library(
 )
 
 rust_library(
-    name = "unicode-width",
-    srcs = glob(["vendor/unicode-width-0.1.9/src/**"]),
+    name = "unicode-ident",
+    srcs = glob(["vendor/unicode-ident-1.0.0/src/**"]),
     edition = "2018",
 )
 
 rust_library(
-    name = "unicode-xid",
-    srcs = glob(["vendor/unicode-xid-0.2.3/src/**"]),
+    name = "unicode-width",
+    srcs = glob(["vendor/unicode-width-0.1.9/src/**"]),
     edition = "2018",
 )

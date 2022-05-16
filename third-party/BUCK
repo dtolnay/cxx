@@ -78,14 +78,14 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.38/src/**"]),
-    build_script = "vendor/proc-macro2-1.0.38/build.rs",
+    srcs = glob(["vendor/proc-macro2-1.0.39/src/**"]),
+    build_script = "vendor/proc-macro2-1.0.39/build.rs",
     features = [
         "proc-macro",
         "span-locations",
     ],
     visibility = ["PUBLIC"],
-    deps = [":unicode-xid"],
+    deps = [":unicode-ident"],
 )
 
 rust_library(
@@ -105,8 +105,8 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.94/src/**"]),
-    build_script = "vendor/syn-1.0.94/build.rs",
+    srcs = glob(["vendor/syn-1.0.95/src/**"]),
+    build_script = "vendor/syn-1.0.95/build.rs",
     features = [
         "clone-impls",
         "derive",
@@ -119,7 +119,7 @@ rust_library(
     deps = [
         ":proc-macro2",
         ":quote",
-        ":unicode-xid",
+        ":unicode-ident",
     ],
 )
 
@@ -135,11 +135,11 @@ rust_library(
 )
 
 rust_library(
-    name = "unicode-width",
-    srcs = glob(["vendor/unicode-width-0.1.9/src/**"]),
+    name = "unicode-ident",
+    srcs = glob(["vendor/unicode-ident-1.0.0/src/**"]),
 )
 
 rust_library(
-    name = "unicode-xid",
-    srcs = glob(["vendor/unicode-xid-0.2.3/src/**"]),
+    name = "unicode-width",
+    srcs = glob(["vendor/unicode-width-0.1.9/src/**"]),
 )
