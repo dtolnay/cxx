@@ -81,7 +81,7 @@ rust_library(
 
 rust_library(
     name = "os_str_bytes",
-    srcs = glob(["vendor/os_str_bytes-6.0.0/src/**"]),
+    srcs = glob(["vendor/os_str_bytes-6.0.1/src/**"]),
     crate_features = [
         "raw_os_str",
     ],
