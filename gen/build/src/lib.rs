@@ -48,6 +48,7 @@
 #![allow(
     clippy::cast_sign_loss,
     clippy::default_trait_access,
+    clippy::derive_partial_eq_without_eq,
     clippy::doc_markdown,
     clippy::drop_copy,
     clippy::enum_glob_use,
