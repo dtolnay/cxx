@@ -68,6 +68,7 @@
     clippy::or_fun_call,
     clippy::redundant_else,
     clippy::shadow_unrelated,
+    clippy::significant_drop_in_scrutinee,
     clippy::similar_names,
     clippy::single_match_else,
     clippy::struct_excessive_bools,
