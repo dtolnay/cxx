@@ -67,9 +67,10 @@ pub(super) fn from_args() -> Opt {
     let cxx_impl_annotations = matches.value_of(CXX_IMPL_ANNOTATIONS).map(str::to_owned);
     let header = matches.is_present(HEADER);
     let include = matches
-        .values_of(INCLUDE)
+        .values_of_os(INCLUDE)
         .unwrap_or_default()
         .map(|include| {
+            let include = include.to_str().expect("Invalid UTF-8 in include");
             if include.starts_with('<') && include.ends_with('>') {
                 Include {
                     path: include[1..include.len() - 1].to_owned(),
