@@ -21,7 +21,12 @@ path = "src/main.rs"
 experimental-async-fn = []
 
 [dependencies]
-clap = { version = "3.1", default-features = false, features = ["std", "suggestions"] }
+# clap 3.2+ has some incompatible changes; see https://github.com/dtolnay/cxx/pull/1057
+# These might arguably be bugs - still to be determined.
+# But it also indirectly requires a newer Rust than our MSRV at the moment so we're pinning to 3.1.
+clap = { version = ">= 3.1.18, < 3.2.0", default-features = false, features = ["std", "suggestions"] }
+# Newer versions use the 2021 edition, see above
+clap_lex = "=0.2.0"
 codespan-reporting = "0.11"
 proc-macro2 = { version = "1.0.39", default-features = false, features = ["span-locations"] }
 quote = { version = "1.0", default-features = false }
