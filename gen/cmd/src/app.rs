@@ -60,6 +60,7 @@ const INCLUDE: &str = "include";
 const OUTPUT: &str = "output";
 const CFG: &str = "cfg";
 
+#[allow(deprecated)]
 pub(super) fn from_args() -> Opt {
     let matches = app().get_matches();
 
@@ -121,6 +122,7 @@ fn validate_utf8(arg: &OsStr) -> Result<(), &'static str> {
     }
 }
 
+#[allow(deprecated)]
 fn arg_input() -> Arg<'static> {
     Arg::new(INPUT)
         .help("Input Rust source file containing #[cxx::bridge].")
@@ -128,6 +130,7 @@ fn arg_input() -> Arg<'static> {
         .allow_invalid_utf8(true)
 }
 
+#[allow(deprecated)]
 fn arg_cxx_impl_annotations() -> Arg<'static> {
     const HELP: &str = "\
 Optional annotation for implementations of C++ function wrappers
@@ -151,6 +154,7 @@ a path ending in `.h`.";
     Arg::new(HEADER).long(HEADER).help(HELP)
 }
 
+#[allow(deprecated)]
 fn arg_include() -> Arg<'static> {
     const HELP: &str = "\
 Any additional headers to #include. The cxxbridge tool does not
@@ -166,6 +170,7 @@ into the generated C++ code as #include lines.";
         .help(HELP)
 }
 
+#[allow(deprecated)]
 fn arg_output() -> Arg<'static> {
     const HELP: &str = "\
 Path of file to write as output. Output goes to stdout if -o is
@@ -180,6 +185,7 @@ not specified.";
         .help(HELP)
 }
 
+#[allow(deprecated)]
 fn arg_cfg() -> Arg<'static> {
     const HELP: &str = "\
 Compilation configuration matching what will be used to build
