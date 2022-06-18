@@ -21,7 +21,7 @@ path = "src/main.rs"
 experimental-async-fn = []
 
 [dependencies]
-clap = { version = "3.1", default-features = false, features = ["std", "suggestions"] }
+clap = { version = "3.2", default-features = false, features = ["std", "suggestions"] }
 codespan-reporting = "0.11"
 proc-macro2 = { version = "1.0.39", default-features = false, features = ["span-locations"] }
 quote = { version = "1.0", default-features = false }

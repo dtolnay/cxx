@@ -20,9 +20,9 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-3.1.18/src/**"]),
+    srcs = glob(["vendor/clap-3.2.1/src/**"]),
     crate_features = ["std"],
-    edition = "2018",
+    edition = "2021",
     visibility = ["//visibility:public"],
     deps = [
         ":bitflags",
@@ -34,8 +34,8 @@ rust_library(
 
 rust_library(
     name = "clap_lex",
-    srcs = glob(["vendor/clap_lex-0.2.0/src/**"]),
-    edition = "2018",
+    srcs = glob(["vendor/clap_lex-0.2.2/src/**"]),
+    edition = "2021",
     deps = [
         ":os_str_bytes",
     ],

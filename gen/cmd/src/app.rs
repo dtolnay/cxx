@@ -6,10 +6,11 @@ use super::{Opt, Output};
 use crate::cfg::{self, CfgValue};
 use crate::gen::include::Include;
 use crate::syntax::IncludeKind;
+use clap::builder::{ArgAction, ValueParser};
 use clap::{Arg, Command};
 use std::collections::{BTreeMap as Map, BTreeSet as Set};
-use std::ffi::OsStr;
 use std::path::PathBuf;
+use std::sync::{Arc, Mutex, PoisonError};
 use syn::parse::Parser;
 
 const USAGE: &str = "\
@@ -63,11 +64,13 @@ const CFG: &str = "cfg";
 pub(super) fn from_args() -> Opt {
     let matches = app().get_matches();
 
-    let input = matches.value_of_os(INPUT).map(PathBuf::from);
-    let cxx_impl_annotations = matches.value_of(CXX_IMPL_ANNOTATIONS).map(str::to_owned);
-    let header = matches.is_present(HEADER);
+    let input = matches.get_one::<PathBuf>(INPUT).cloned();
+    let cxx_impl_annotations = matches
+        .get_one::<String>(CXX_IMPL_ANNOTATIONS)
+        .map(String::clone);
+    let header = matches.contains_id(HEADER);
     let include = matches
-        .values_of(INCLUDE)
+        .get_many::<String>(INCLUDE)
         .unwrap_or_default()
         .map(|include| {
             if include.starts_with('<') && include.ends_with('>') {
@@ -85,11 +88,11 @@ pub(super) fn from_args() -> Opt {
         .collect();
 
     let mut outputs = Vec::new();
-    for path in matches.values_of_os(OUTPUT).unwrap_or_default() {
-        outputs.push(if path == "-" {
+    for path in matches.get_many::<PathBuf>(OUTPUT).unwrap_or_default() {
+        outputs.push(if path.as_os_str() == "-" {
             Output::Stdout
         } else {
-            Output::File(PathBuf::from(path))
+            Output::File(path.clone())
         });
     }
     if outputs.is_empty() {
@@ -97,7 +100,7 @@ pub(super) fn from_args() -> Opt {
     }
 
     let mut cfg = Map::new();
-    for arg in matches.values_of(CFG).unwrap_or_default() {
+    for arg in matches.get_many::<String>(CFG).unwrap_or_default() {
         let (name, value) = cfg::parse.parse_str(arg).unwrap();
         cfg.entry(name).or_insert_with(Set::new).insert(value);
     }
@@ -112,19 +115,11 @@ pub(super) fn from_args() -> Opt {
     }
 }
 
-fn validate_utf8(arg: &OsStr) -> Result<(), &'static str> {
-    if arg.to_str().is_some() {
-        Ok(())
-    } else {
-        Err("invalid utf-8 sequence")
-    }
-}
-
 fn arg_input() -> Arg<'static> {
     Arg::new(INPUT)
         .help("Input Rust source file containing #[cxx::bridge].")
         .required_unless_present(HEADER)
-        .allow_invalid_utf8(true)
+        .value_parser(ValueParser::path_buf())
 }
 
 fn arg_cxx_impl_annotations() -> Arg<'static> {
@@ -138,8 +133,7 @@ these C++ functions in another.";
         .long(CXX_IMPL_ANNOTATIONS)
         .takes_value(true)
         .value_name("annotation")
-        .allow_invalid_utf8(true)
-        .validator_os(validate_utf8)
+        .value_parser(ValueParser::string())
         .help(HELP)
 }
 
@@ -159,9 +153,8 @@ into the generated C++ code as #include lines.";
         .long(INCLUDE)
         .short('i')
         .takes_value(true)
-        .multiple_occurrences(true)
-        .allow_invalid_utf8(true)
-        .validator_os(validate_utf8)
+        .action(ArgAction::Append)
+        .value_parser(ValueParser::string())
         .help(HELP)
 }
 
@@ -173,9 +166,8 @@ not specified.";
         .long(OUTPUT)
         .short('o')
         .takes_value(true)
-        .multiple_occurrences(true)
-        .allow_invalid_utf8(true)
-        .validator_os(validate_utf8)
+        .action(ArgAction::Append)
+        .value_parser(ValueParser::path_buf())
         .help(HELP)
 }
 
@@ -183,22 +175,23 @@ fn arg_cfg() -> Arg<'static> {
     const HELP: &str = "\
 Compilation configuration matching what will be used to build
 the Rust side of the bridge.";
-    let mut bool_cfgs = Map::<String, bool>::new();
+    let bool_cfgs = Arc::new(Mutex::new(Map::<String, bool>::new()));
     Arg::new(CFG)
         .long(CFG)
         .takes_value(true)
         .value_name("name=\"value\" | name[=true] | name=false")
-        .multiple_occurrences(true)
-        .validator(move |arg| match cfg::parse.parse_str(arg) {
-            Ok((_, CfgValue::Str(_))) => Ok(()),
+        .action(ArgAction::Append)
+        .value_parser(move |arg: &str| match cfg::parse.parse_str(arg) {
+            Ok((_, CfgValue::Str(_))) => Ok(arg.to_owned()),
             Ok((name, CfgValue::Bool(value))) => {
+                let mut bool_cfgs = bool_cfgs.lock().unwrap_or_else(PoisonError::into_inner);
                 if let Some(&prev) = bool_cfgs.get(&name) {
                     if prev != value {
                         return Err(format!("cannot have both {0}=false and {0}=true", name));
                     }
                 }
                 bool_cfgs.insert(name, value);
-                Ok(())
+                Ok(arg.to_owned())
             }
             Err(_) => Err("expected name=\"value\", name=true, or name=false".to_owned()),
         })
