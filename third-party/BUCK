@@ -17,7 +17,7 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-3.2.1/src/**"]),
+    srcs = glob(["vendor/clap-3.2.5/src/**"]),
     edition = "2021",
     features = ["std"],
     visibility = ["PUBLIC"],
@@ -51,15 +51,15 @@ rust_library(
 
 rust_library(
     name = "hashbrown",
-    srcs = glob(["vendor/hashbrown-0.11.2/src/**"]),
-    edition = "2018",
+    srcs = glob(["vendor/hashbrown-0.12.1/src/**"]),
+    edition = "2021",
     features = ["raw"],
 )
 
 rust_library(
     name = "indexmap",
-    srcs = glob(["vendor/indexmap-1.8.1/src/**"]),
-    edition = "2018",
+    srcs = glob(["vendor/indexmap-1.9.0/src/**"]),
+    edition = "2021",
     features = ["std"],
     rustc_flags = ["--cfg=has_std"],
     deps = [":hashbrown"],
@@ -67,7 +67,7 @@ rust_library(
 
 rust_library(
     name = "once_cell",
-    srcs = glob(["vendor/once_cell-1.10.0/src/**"]),
+    srcs = glob(["vendor/once_cell-1.12.0/src/**"]),
     edition = "2018",
     features = [
         "alloc",
@@ -78,7 +78,7 @@ rust_library(
 
 rust_library(
     name = "os_str_bytes",
-    srcs = glob(["vendor/os_str_bytes-6.0.1/src/**"]),
+    srcs = glob(["vendor/os_str_bytes-6.1.0/src/**"]),
     edition = "2018",
     features = [
         "raw_os_str",
@@ -117,8 +117,8 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.95/src/**"]),
-    build_script = "vendor/syn-1.0.95/build.rs",
+    srcs = glob(["vendor/syn-1.0.96/src/**"]),
+    build_script = "vendor/syn-1.0.96/build.rs",
     edition = "2018",
     features = [
         "clone-impls",
@@ -151,7 +151,7 @@ rust_library(
 
 rust_library(
     name = "unicode-ident",
-    srcs = glob(["vendor/unicode-ident-1.0.0/src/**"]),
+    srcs = glob(["vendor/unicode-ident-1.0.1/src/**"]),
     edition = "2018",
 )
 
