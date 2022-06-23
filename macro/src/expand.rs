@@ -1517,6 +1517,7 @@ fn expand_shared_ptr(
                 }
                 __null(new);
             }
+            #new_method
             unsafe fn __from_unmanaged(value: *mut Self, new: *mut ::cxx::core::ffi::c_void) {
                 extern "C" {
                     #[link_name = #link_from_unmanaged]
