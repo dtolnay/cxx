@@ -52,6 +52,7 @@
     clippy::doc_markdown,
     clippy::drop_copy,
     clippy::enum_glob_use,
+    clippy::explicit_auto_deref,
     clippy::if_same_then_else,
     clippy::inherent_to_string,
     clippy::items_after_statements,
