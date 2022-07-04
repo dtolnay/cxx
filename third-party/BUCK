@@ -101,6 +101,7 @@ rust_library(
 rust_library(
     name = "quote",
     srcs = glob(["vendor/quote-1.0.20/src/**"]),
+    build_script = "vendor/quote-1.0.20/build.rs",
     edition = "2018",
     features = ["proc-macro"],
     visibility = ["PUBLIC"],

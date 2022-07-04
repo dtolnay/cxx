@@ -120,7 +120,18 @@ rust_library(
     crate_features = ["proc-macro"],
     edition = "2018",
     visibility = ["//visibility:public"],
-    deps = [":proc-macro2"],
+    deps = [
+        ":proc-macro2",
+        ":quote@build",
+    ],
+)
+
+cargo_build_script(
+    name = "quote@build",
+    srcs = ["vendor/quote-1.0.20/build.rs"],
+    crate_features = ["proc-macro"],
+    crate_name = "build",
+    edition = "2018",
 )
 
 rust_library(
