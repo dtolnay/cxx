@@ -20,7 +20,7 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-3.2.5/src/**"]),
+    srcs = glob(["vendor/clap-3.2.8/src/**"]),
     crate_features = ["std"],
     edition = "2021",
     visibility = ["//visibility:public"],
@@ -34,7 +34,7 @@ rust_library(
 
 rust_library(
     name = "clap_lex",
-    srcs = glob(["vendor/clap_lex-0.2.2/src/**"]),
+    srcs = glob(["vendor/clap_lex-0.2.4/src/**"]),
     edition = "2021",
     deps = [
         ":os_str_bytes",
@@ -61,7 +61,7 @@ rust_library(
 
 rust_library(
     name = "indexmap",
-    srcs = glob(["vendor/indexmap-1.9.0/src/**"]),
+    srcs = glob(["vendor/indexmap-1.9.1/src/**"]),
     crate_features = ["std"],
     edition = "2021",
     rustc_flags = ["--cfg=has_std"],
@@ -70,7 +70,7 @@ rust_library(
 
 rust_library(
     name = "once_cell",
-    srcs = glob(["vendor/once_cell-1.12.0/src/**"]),
+    srcs = glob(["vendor/once_cell-1.12.1/src/**"]),
     crate_features = [
         "alloc",
         "std",
@@ -90,7 +90,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.39/src/**"]),
+    srcs = glob(["vendor/proc-macro2-1.0.40/src/**"]),
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -105,7 +105,7 @@ rust_library(
 
 cargo_build_script(
     name = "proc-macro2@build",
-    srcs = ["vendor/proc-macro2-1.0.39/build.rs"],
+    srcs = ["vendor/proc-macro2-1.0.40/build.rs"],
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -116,7 +116,7 @@ cargo_build_script(
 
 rust_library(
     name = "quote",
-    srcs = glob(["vendor/quote-1.0.18/src/**"]),
+    srcs = glob(["vendor/quote-1.0.20/src/**"]),
     crate_features = ["proc-macro"],
     edition = "2018",
     visibility = ["//visibility:public"],
@@ -133,7 +133,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.96/src/**"]),
+    srcs = glob(["vendor/syn-1.0.98/src/**"]),
     crate_features = [
         "clone-impls",
         "derive",
@@ -154,7 +154,7 @@ rust_library(
 
 cargo_build_script(
     name = "syn@build",
-    srcs = ["vendor/syn-1.0.96/build.rs"],
+    srcs = ["vendor/syn-1.0.98/build.rs"],
     crate_features = [
         "clone-impls",
         "derive",
