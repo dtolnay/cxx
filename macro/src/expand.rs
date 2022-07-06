@@ -172,8 +172,8 @@ fn expand_struct(strct: &Struct) -> TokenStream {
 
     quote! {
         #doc
-        #attrs
         #derives
+        #attrs
         #[repr(C)]
         #struct_def
 
@@ -342,8 +342,8 @@ fn expand_enum(enm: &Enum) -> TokenStream {
 
     quote! {
         #doc
-        #attrs
         #derives
+        #attrs
         #[repr(transparent)]
         #enum_def
 
