@@ -70,7 +70,7 @@ rust_library(
 
 rust_library(
     name = "once_cell",
-    srcs = glob(["vendor/once_cell-1.12.1/src/**"]),
+    srcs = glob(["vendor/once_cell-1.13.0/src/**"]),
     crate_features = [
         "alloc",
         "std",
