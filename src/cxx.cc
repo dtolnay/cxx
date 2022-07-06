@@ -471,13 +471,18 @@ Error::Error(Error &&other) noexcept
   other.len = 0;
 }
 
-Error::~Error() noexcept { delete[] this->msg; }
+Error::~Error() noexcept {
+  delete[] this->msg;
+  this->inner_destructor(this->inner);
+}
 
 Error &Error::operator=(const Error &other) & {
   if (this != &other) {
     std::exception::operator=(other);
     delete[] this->msg;
     this->msg = nullptr;
+    this->inner_destructor(this->inner);
+    this->inner = nullptr;
     if (other.msg) {
       this->msg = errorCopy(other.msg, other.len);
       this->len = other.len;
@@ -490,8 +495,11 @@ Error &Error::operator=(Error &&other) &noexcept {
   std::exception::operator=(std::move(other));
   this->msg = other.msg;
   this->len = other.len;
+  this->inner = other.inner;
+  this->inner_destructor = other.inner_destructor;
   other.msg = nullptr;
   other.len = 0;
+  other.inner = nullptr;
   return *this;
 }
 

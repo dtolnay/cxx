@@ -395,11 +395,22 @@ public:
 
   const char *what() const noexcept override;
 
+  template<class T>
+  const T* inner_error() const {
+    if (this->inner) {
+      return reinterpret_cast<const T*>(this->inner);
+    } else {
+      return nullptr;
+    }
+  }
+
 private:
   Error() noexcept = default;
   friend impl<Error>;
   const char *msg;
   std::size_t len;
+  void* inner;
+  void (*inner_destructor)(void*);
 };
 #endif // CXXBRIDGE1_RUST_ERROR
 

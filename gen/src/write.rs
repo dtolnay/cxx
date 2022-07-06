@@ -197,8 +197,16 @@ fn write_std_specializations(out: &mut OutFile, apis: &[Api]) {
 
 fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
     for api in apis {
-        if let Api::Include(include) = api {
-            out.include.insert(include);
+        match api {
+            Api::Include(include) => {
+                out.include.insert(include);
+            }
+            Api::RustFunction(function) => {
+                if function.sig.throws {
+                    out.builtin.rust_error = true;
+                }
+            }
+            _ => {}
         }
     }
 

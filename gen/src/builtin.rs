@@ -42,13 +42,13 @@ impl<'a> Builtins<'a> {
     }
 }
 
-pub(super) fn write(out: &mut OutFile) {
-    if out.builtin == Default::default() {
+pub(super) fn write(out_file: &mut OutFile) {
+    if out_file.builtin == Default::default() {
         return;
     }
 
-    let include = &mut out.include;
-    let builtin = &mut out.builtin;
+    let include = &mut out_file.include;
+    let builtin = &mut out_file.builtin;
     let out = &mut builtin.content;
 
     if builtin.rust_string {
@@ -280,6 +280,8 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "struct PtrLen final {{");
         writeln!(out, "  void *ptr;");
         writeln!(out, "  ::std::size_t len;");
+        writeln!(out, "  void* inner;");
+        writeln!(out, "  void (*inner_destructor)(void*);");
         writeln!(out, "}};");
         out.end_block(Block::Namespace("repr"));
     }
@@ -327,7 +329,7 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "}};");
     }
 
-    if builtin.rust_error {
+    if builtin.rust_error && !out_file.header {
         out.next_section();
         writeln!(out, "template <>");
         writeln!(out, "class impl<Error> final {{");
@@ -336,6 +338,8 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "    Error error;");
         writeln!(out, "    error.msg = static_cast<const char *>(repr.ptr);");
         writeln!(out, "    error.len = repr.len;");
+        writeln!(out, "    error.inner = repr.inner;");
+        writeln!(out, "    error.inner_destructor = repr.inner_destructor;");
         writeln!(out, "    return error;");
         writeln!(out, "  }}");
         writeln!(out, "}};");
