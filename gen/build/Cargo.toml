@@ -1,6 +1,6 @@
 [package]
 name = "cxx-build"
-version = "1.0.71"
+version = "1.0.72"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 edition = "2018"
 rust-version = "1.48"
