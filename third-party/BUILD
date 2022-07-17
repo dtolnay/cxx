@@ -20,7 +20,7 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-3.2.8/src/**"]),
+    srcs = glob(["vendor/clap-3.2.12/src/**"]),
     crate_features = ["std"],
     edition = "2021",
     visibility = ["//visibility:public"],
@@ -54,7 +54,7 @@ rust_library(
 
 rust_library(
     name = "hashbrown",
-    srcs = glob(["vendor/hashbrown-0.12.1/src/**"]),
+    srcs = glob(["vendor/hashbrown-0.12.2/src/**"]),
     crate_features = ["raw"],
     edition = "2021",
 )
@@ -81,11 +81,11 @@ rust_library(
 
 rust_library(
     name = "os_str_bytes",
-    srcs = glob(["vendor/os_str_bytes-6.1.0/src/**"]),
+    srcs = glob(["vendor/os_str_bytes-6.2.0/src/**"]),
     crate_features = [
         "raw_os_str",
     ],
-    edition = "2018",
+    edition = "2021",
 )
 
 rust_library(
@@ -193,7 +193,7 @@ rust_library(
 
 rust_library(
     name = "unicode-ident",
-    srcs = glob(["vendor/unicode-ident-1.0.1/src/**"]),
+    srcs = glob(["vendor/unicode-ident-1.0.2/src/**"]),
     edition = "2018",
 )
 
