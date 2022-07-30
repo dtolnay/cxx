@@ -1,5 +1,6 @@
 #![allow(
     clippy::assertions_on_constants,
+    clippy::assertions_on_result_states,
     clippy::cast_possible_truncation,
     clippy::cast_possible_wrap,
     clippy::float_cmp,
