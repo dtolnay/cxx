@@ -17,7 +17,10 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-3.2.12/src/**/*.rs"]),
+    srcs = glob(["vendor/clap-3.2.16/src/**/*.rs"]) + [
+        "vendor/clap-3.2.16/examples/demo.md",
+        "vendor/clap-3.2.16/examples/demo.rs",
+    ],
     edition = "2021",
     features = ["std"],
     visibility = ["PUBLIC"],
@@ -51,7 +54,7 @@ rust_library(
 
 rust_library(
     name = "hashbrown",
-    srcs = glob(["vendor/hashbrown-0.12.2/src/**/*.rs"]),
+    srcs = glob(["vendor/hashbrown-0.12.3/src/**/*.rs"]),
     edition = "2021",
     features = ["raw"],
 )
@@ -87,8 +90,8 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.40/src/**/*.rs"]),
-    build_script = "vendor/proc-macro2-1.0.40/build.rs",
+    srcs = glob(["vendor/proc-macro2-1.0.42/src/**/*.rs"]),
+    build_script = "vendor/proc-macro2-1.0.42/build.rs",
     edition = "2018",
     features = [
         "proc-macro",
