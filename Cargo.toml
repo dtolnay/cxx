@@ -2,18 +2,18 @@
 name = "cxx"
 version = "1.0.72" # remember to update html_root_url
 authors = ["David Tolnay <dtolnay@gmail.com>"]
-edition = "2018"
-rust-version = "1.48"
-links = "cxxbridge1"
-license = "MIT OR Apache-2.0"
-description = "Safe interop between Rust and C++"
-repository = "https://github.com/dtolnay/cxx"
-documentation = "https://docs.rs/cxx"
-homepage = "https://cxx.rs"
-readme = "README.md"
-exclude = ["/demo", "/gen", "/syntax", "/third-party"]
-keywords = ["ffi"]
 categories = ["development-tools::ffi", "api-bindings"]
+description = "Safe interop between Rust and C++"
+documentation = "https://docs.rs/cxx"
+edition = "2018"
+exclude = ["/demo", "/gen", "/syntax", "/third-party"]
+homepage = "https://cxx.rs"
+keywords = ["ffi"]
+license = "MIT OR Apache-2.0"
+links = "cxxbridge1"
+readme = "README.md"
+repository = "https://github.com/dtolnay/cxx"
+rust-version = "1.48"
 
 [features]
 default = ["std", "cxxbridge-flags/default"] # c++11
