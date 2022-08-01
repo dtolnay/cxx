@@ -1,6 +1,6 @@
 rust_library(
     name = "cxx",
-    srcs = glob(["src/**"]),
+    srcs = glob(["src/**/*.rs"]),
     edition = "2018",
     features = [
         "alloc",
@@ -15,7 +15,7 @@ rust_library(
 
 rust_binary(
     name = "codegen",
-    srcs = glob(["gen/cmd/src/**"]),
+    srcs = glob(["gen/cmd/src/**/*.rs"]) + ["gen/cmd/src/gen/include/cxx.h"],
     crate = "cxxbridge",
     edition = "2018",
     visibility = ["PUBLIC"],
@@ -41,7 +41,7 @@ cxx_library(
 
 rust_library(
     name = "macro",
-    srcs = glob(["macro/src/**"]),
+    srcs = glob(["macro/src/**/*.rs"]),
     crate = "cxxbridge_macro",
     edition = "2018",
     proc_macro = True,
@@ -54,7 +54,7 @@ rust_library(
 
 rust_library(
     name = "build",
-    srcs = glob(["gen/build/src/**"]),
+    srcs = glob(["gen/build/src/**/*.rs"]),
     edition = "2018",
     visibility = ["PUBLIC"],
     deps = [
@@ -70,7 +70,7 @@ rust_library(
 
 rust_library(
     name = "lib",
-    srcs = glob(["gen/lib/src/**"]),
+    srcs = glob(["gen/lib/src/**/*.rs"]),
     edition = "2018",
     visibility = ["PUBLIC"],
     deps = [
