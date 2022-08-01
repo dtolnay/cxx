@@ -2,7 +2,7 @@
 name = "cxx-build"
 version = "1.0.72"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
-categories = ["development-tools::ffi"]
+categories = ["development-tools::build-utils", "development-tools::ffi"]
 description = "C++ code generator for integrating `cxx` crate into a Cargo build."
 edition = "2018"
 exclude = ["build.rs"]

@@ -2,6 +2,7 @@
 name = "cxxbridge-flags"
 version = "1.0.72"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
+categories = ["development-tools::ffi", "compilers"]
 description = "Compiler configuration of the `cxx` crate (implementation detail)"
 edition = "2018"
 license = "MIT OR Apache-2.0"
