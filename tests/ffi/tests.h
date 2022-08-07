@@ -72,6 +72,12 @@ struct E {
   void c_take_opaque_mut_ref_method();
 };
 
+struct L {
+  void impl_method() const;
+};
+
+std::unique_ptr<L> build_l();
+
 enum COwnedEnum {
   CVAL1,
   CVAL2,

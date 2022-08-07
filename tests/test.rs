@@ -376,3 +376,9 @@ fn test_raw_ptr() {
     assert_eq!(2025, unsafe { ffi::c_take_const_ptr(c3) });
     assert_eq!(2025, unsafe { ffi::c_take_mut_ptr(c3 as *mut ffi::C) }); // deletes c3
 }
+
+#[test]
+fn test_impl_methods() {
+    let l = ffi::build_l();
+    check!(l.impl_method());
+}

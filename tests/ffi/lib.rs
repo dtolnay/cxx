@@ -91,6 +91,14 @@ pub mod ffi {
 
     unsafe extern "C++" {
         include!("tests/ffi/tests.h");
+        type L;
+        impl L {
+            fn impl_method(&self);
+        }
+    }
+
+    unsafe extern "C++" {
+        include!("tests/ffi/tests.h");
 
         type C;
 
@@ -215,6 +223,8 @@ pub mod ffi {
 
         #[namespace = "other"]
         fn ns_c_take_ns_shared(shared: AShared);
+
+        fn build_l() -> UniquePtr<L>;
     }
 
     extern "C++" {
@@ -311,6 +321,10 @@ pub mod ffi {
 
         #[cxx_name = "rAliasedFunction"]
         fn r_aliased_function(x: i32) -> String;
+
+        impl R {
+            fn get2(&self) -> usize;
+        }
     }
 
     struct Dag0 {
@@ -401,6 +415,10 @@ impl R {
     fn set(&mut self, n: usize) -> usize {
         self.0 = n;
         n
+    }
+
+    fn get2(&self) -> usize {
+        self.0
     }
 }
 

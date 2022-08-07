@@ -1,7 +1,7 @@
 use crate::syntax::attrs::OtherAttrs;
 use crate::syntax::cfg::CfgExpr;
 use crate::syntax::discriminant::DiscriminantSet;
-use crate::syntax::file::{Item, ItemForeignMod};
+use crate::syntax::file::{ForeignImplItem, ForeignItem, ForeignItemImpl, Item, ItemForeignMod};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
@@ -15,11 +15,11 @@ use std::mem;
 use syn::parse::{ParseStream, Parser};
 use syn::punctuated::Punctuated;
 use syn::{
-    Abi, Attribute, Error, Expr, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
-    GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lit, LitStr,
-    Pat, PathArguments, Result, ReturnType, Signature as RustSignature, Token, TraitBound,
-    TraitBoundModifier, Type as RustType, TypeArray, TypeBareFn, TypeParamBound, TypePath, TypePtr,
-    TypeReference, Variant as RustVariant, Visibility,
+    Abi, Attribute, Error, Expr, Fields, FnArg, ForeignItemFn, ForeignItemType, GenericArgument,
+    GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lit, LitStr, Pat, PathArguments,
+    Result, ReturnType, Signature as RustSignature, Token, TraitBound, TraitBoundModifier,
+    Type as RustType, TypeArray, TypeBareFn, TypeParamBound, TypePath, TypePtr, TypeReference,
+    Variant as RustVariant, Visibility,
 };
 
 pub mod kw {
@@ -392,13 +392,20 @@ fn parse_foreign_mod(
                     Err(err) => cx.push(err),
                 }
             }
+            ForeignItem::Macro(foreign) => cx.error(foreign, "macro invocation is not supported"),
             ForeignItem::Verbatim(tokens) => {
                 match parse_extern_verbatim(cx, tokens, lang, trusted, &cfg, &namespace, &attrs) {
                     Ok(api) => items.push(api),
                     Err(err) => cx.push(err),
                 }
             }
-            _ => cx.error(foreign, "unsupported foreign item"),
+            ForeignItem::Impl(foreign) => {
+                match parse_extern_impl(cx, foreign, lang, trusted, &cfg, &namespace, &attrs) {
+                    Ok(apis) => items.extend(apis),
+                    Err(err) => cx.push(err),
+                }
+            }
+            ForeignItem::Other(foreign) => cx.error(foreign, "unsupported foreign item"),
         }
     }
 
@@ -703,6 +710,61 @@ fn parse_extern_fn(
         semi_token,
         trusted,
     }))
+}
+
+fn parse_extern_impl(
+    cx: &mut Errors,
+    foreign_impl: ForeignItemImpl,
+    lang: Lang,
+    trusted: bool,
+    extern_block_cfg: &CfgExpr,
+    namespace: &Namespace,
+    attrs: &OtherAttrs,
+) -> Result<Vec<Api>> {
+    if foreign_impl.self_ty.qself.is_some() {
+        cx.error(
+            foreign_impl.self_ty,
+            "explicit self types not supported in foreign impl blocks",
+        );
+        return Ok(Vec::new());
+    }
+    let self_ty_ident = if let Some(ident) = foreign_impl.self_ty.path.get_ident() {
+        ident
+    } else {
+        cx.error(
+            foreign_impl.self_ty,
+            "foreign impl blocks must be over a type convertible to an identifier",
+        );
+        return Ok(Vec::new());
+    };
+    let mut apis = Vec::new();
+    for ForeignImplItem::Fn(f) in foreign_impl.items {
+        let mut api = parse_extern_fn(cx, f, lang, trusted, extern_block_cfg, namespace, attrs)?;
+        let f = match api {
+            Api::CxxFunction(ref mut f) | Api::RustFunction(ref mut f) => f,
+            _ => panic!("parse_extern_fn yielded non-method API"),
+        };
+        if let Some(ref unsafety) = foreign_impl.unsafety {
+            // If the impl is marked unsafe, mark the api unsafe
+            f.unsafety = Some(*unsafety);
+        }
+        // Right now, we only support functions which have a receiver matching the impl type,
+        // either via Self or an explicit name.
+        if let Some(ref mut receiver) = f.receiver {
+            if receiver.ty.rust == "Self" {
+                receiver.ty.rust.clone_from(self_ty_ident);
+            }
+            if &receiver.ty.rust != self_ty_ident {
+                cx.error(&receiver.ty, "functions in foreign impl blocks must have their receiver type equal to the impl block");
+                continue;
+            }
+        } else {
+            cx.error(f, "all functions must have a receiver");
+            continue;
+        }
+        apis.push(api);
+    }
+    Ok(apis)
 }
 
 fn parse_extern_verbatim(
