@@ -34,5 +34,6 @@ what is available in these links, feel free to make a PR adding it to this list.
 
   - Same blobstore example as the official demo, but inverted languages
   - Minimal CMake configuration
-  - Tested on Linux, Mac, and on Windows
+  - Tested on Linux, macOS, and Windows
+
 ---
