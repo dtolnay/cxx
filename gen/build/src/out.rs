@@ -8,7 +8,7 @@ pub(crate) fn write(path: impl AsRef<Path>, content: &[u8]) -> Result<()> {
     let path = path.as_ref();
 
     let mut create_dir_error = None;
-    if path.exists() {
+    if fs::exists(path) {
         if let Ok(existing) = fs::read(path) {
             if existing == content {
                 // Avoid bumping modified time with unchanged contents.
@@ -34,7 +34,7 @@ pub(crate) fn symlink_file(original: impl AsRef<Path>, link: impl AsRef<Path>) -
     let link = link.as_ref();
 
     let mut create_dir_error = None;
-    if link.exists() {
+    if fs::exists(link) {
         best_effort_remove(link);
     } else {
         let parent = link.parent().unwrap();
@@ -68,7 +68,7 @@ pub(crate) fn symlink_dir(original: impl AsRef<Path>, link: impl AsRef<Path>) ->
     let link = link.as_ref();
 
     let mut create_dir_error = None;
-    if link.exists() {
+    if fs::exists(link) {
         best_effort_remove(link);
     } else {
         let parent = link.parent().unwrap();
@@ -86,24 +86,34 @@ pub(crate) fn symlink_dir(original: impl AsRef<Path>, link: impl AsRef<Path>) ->
 fn best_effort_remove(path: &Path) {
     use std::fs;
 
-    let file_type = match if cfg!(windows) {
+    if cfg!(windows) {
         // On Windows, the correct choice of remove_file vs remove_dir needs to
         // be used according to what the symlink *points to*. Trying to use
         // remove_file to remove a symlink which points to a directory fails
         // with "Access is denied".
-        fs::metadata(path)
+        if let Ok(metadata) = fs::metadata(path) {
+            if metadata.is_dir() {
+                let _ = fs::remove_dir_all(path);
+            } else {
+                let _ = fs::remove_file(path);
+            }
+        } else if fs::symlink_metadata(path).is_ok() {
+            // The symlink might exist but be dangling, in which case there is
+            // no standard way to determine what "kind" of symlink it is. Try
+            // deleting both ways.
+            if fs::remove_dir_all(path).is_err() {
+                let _ = fs::remove_file(path);
+            }
+        }
     } else {
         // On non-Windows, we check metadata not following symlinks. All
         // symlinks are removed using remove_file.
-        fs::symlink_metadata(path)
-    } {
-        Ok(metadata) => metadata.file_type(),
-        Err(_) => return,
-    };
-
-    if file_type.is_dir() {
-        let _ = fs::remove_dir_all(path);
-    } else {
-        let _ = fs::remove_file(path);
+        if let Ok(metadata) = fs::symlink_metadata(path) {
+            if metadata.is_dir() {
+                let _ = fs::remove_dir_all(path);
+            } else {
+                let _ = fs::remove_file(path);
+            }
+        }
     }
 }
