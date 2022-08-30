@@ -8,7 +8,7 @@ pub(crate) fn write(path: impl AsRef<Path>, content: &[u8]) -> Result<()> {
     let path = path.as_ref();
 
     let mut create_dir_error = None;
-    if path.exists() {
+    if fs::exists(path) {
         if let Ok(existing) = fs::read(path) {
             if existing == content {
                 // Avoid bumping modified time with unchanged contents.
@@ -34,7 +34,7 @@ pub(crate) fn symlink_file(original: impl AsRef<Path>, link: impl AsRef<Path>) -
     let link = link.as_ref();
 
     let mut create_dir_error = None;
-    if link.exists() {
+    if fs::exists(link) {
         best_effort_remove(link);
     } else {
         let parent = link.parent().unwrap();
@@ -68,7 +68,7 @@ pub(crate) fn symlink_dir(original: impl AsRef<Path>, link: impl AsRef<Path>) ->
     let link = link.as_ref();
 
     let mut create_dir_error = None;
-    if link.exists() {
+    if fs::exists(link) {
         best_effort_remove(link);
     } else {
         let parent = link.parent().unwrap();
@@ -91,7 +91,7 @@ fn best_effort_remove(path: &Path) {
         // be used according to what the symlink *points to*. Trying to use
         // remove_file to remove a symlink which points to a directory fails
         // with "Access is denied".
-        fs::metadata(path)
+        fs::metadata(path).or_else(|_| fs::symlink_metadata(path))
     } else {
         // On non-Windows, we check metadata not following symlinks. All
         // symlinks are removed using remove_file.
