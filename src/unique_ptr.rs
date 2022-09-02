@@ -177,8 +177,8 @@ where
     }
 }
 
-/// UniquePtr is not a self-referential type and can be moved around freely.
-/// Therefore it can be Unpin, even if its target is not Unpin.
+// UniquePtr is not a self-referential type and is safe to move out of a Pin,
+// regardless whether the pointer's target is Unpin.
 impl<T> Unpin for UniquePtr<T> where T: UniquePtrTarget {}
 
 /// Trait bound for types which may be used as the `T` inside of a
