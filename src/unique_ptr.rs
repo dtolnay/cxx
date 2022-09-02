@@ -112,6 +112,10 @@ where
 unsafe impl<T> Send for UniquePtr<T> where T: Send + UniquePtrTarget {}
 unsafe impl<T> Sync for UniquePtr<T> where T: Sync + UniquePtrTarget {}
 
+// UniquePtr is not a self-referential type and is safe to move out of a Pin,
+// regardless whether the pointer's target is Unpin.
+impl<T> Unpin for UniquePtr<T> where T: UniquePtrTarget {}
+
 impl<T> Drop for UniquePtr<T>
 where
     T: UniquePtrTarget,
@@ -176,10 +180,6 @@ where
         }
     }
 }
-
-// UniquePtr is not a self-referential type and is safe to move out of a Pin,
-// regardless whether the pointer's target is Unpin.
-impl<T> Unpin for UniquePtr<T> where T: UniquePtrTarget {}
 
 /// Trait bound for types which may be used as the `T` inside of a
 /// `UniquePtr<T>` in generic code.
