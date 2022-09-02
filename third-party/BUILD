@@ -20,9 +20,9 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-3.2.19/src/**/*.rs"]) + ["vendor/clap-3.2.19/examples/demo.rs"],
+    srcs = glob(["vendor/clap-3.2.20/src/**/*.rs"]) + ["vendor/clap-3.2.20/examples/demo.rs"],
     crate_features = ["std"],
-    data = ["vendor/clap-3.2.19/examples/demo.md"],
+    data = ["vendor/clap-3.2.20/examples/demo.md"],
     edition = "2021",
     visibility = ["//visibility:public"],
     deps = [
@@ -71,7 +71,7 @@ rust_library(
 
 rust_library(
     name = "once_cell",
-    srcs = glob(["vendor/once_cell-1.13.1/src/**/*.rs"]),
+    srcs = glob(["vendor/once_cell-1.14.0/src/**/*.rs"]),
     crate_features = [
         "alloc",
         "std",
