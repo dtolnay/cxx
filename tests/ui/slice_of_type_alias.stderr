@@ -1,8 +1,8 @@
 error[E0271]: type mismatch resolving `<ElementOpaque as ExternType>::Kind == Trivial`
-   --> tests/ui/slice_of_type_alias.rs:13:9
+   --> tests/ui/slice_of_type_alias.rs:13:14
     |
 13  |         type ElementOpaque = crate::ElementOpaque;
-    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type mismatch resolving `<ElementOpaque as ExternType>::Kind == Trivial`
+    |              ^^^^^^^^^^^^^ type mismatch resolving `<ElementOpaque as ExternType>::Kind == Trivial`
     |
 note: expected this to be `Trivial`
    --> tests/ui/slice_of_type_alias.rs:27:17
