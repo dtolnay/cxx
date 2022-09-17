@@ -74,9 +74,9 @@ struct E {
 
 struct L {
   void impl_method() const;
+  static uint32_t static_method(uint32_t arg);
+  static std::unique_ptr<L> build();
 };
-
-std::unique_ptr<L> build_l();
 
 enum COwnedEnum {
   CVAL1,

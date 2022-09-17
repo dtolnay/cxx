@@ -93,7 +93,9 @@ pub mod ffi {
         include!("tests/ffi/tests.h");
         type L;
         impl L {
+            fn build() -> UniquePtr<L>;
             fn impl_method(&self);
+            fn static_method(x: u32) -> u32;
         }
     }
 
@@ -223,8 +225,6 @@ pub mod ffi {
 
         #[namespace = "other"]
         fn ns_c_take_ns_shared(shared: AShared);
-
-        fn build_l() -> UniquePtr<L>;
     }
 
     extern "C++" {
@@ -324,6 +324,7 @@ pub mod ffi {
 
         impl R {
             fn get2(&self) -> usize;
+            fn assoc() -> usize;
         }
     }
 
@@ -419,6 +420,10 @@ impl R {
 
     fn get2(&self) -> usize {
         self.0
+    }
+
+    fn assoc() -> usize {
+        42
     }
 }
 

@@ -379,6 +379,11 @@ fn test_raw_ptr() {
 
 #[test]
 fn test_impl_methods() {
-    let l = ffi::build_l();
+    let l = ffi::L::build();
     check!(l.impl_method());
+}
+
+#[test]
+fn test_static_methods() {
+    check!(ffi::L::static_method(7));
 }

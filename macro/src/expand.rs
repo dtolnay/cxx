@@ -726,7 +726,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         #trampolines
         #dispatch
     });
-    match &efn.receiver {
+    match &efn.class {
         None => {
             quote! {
                 #doc
@@ -734,12 +734,12 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                 #visibility #unsafety #fn_token #ident #generics #arg_list #ret #fn_body
             }
         }
-        Some(receiver) => {
+        Some(class) => {
             let elided_generics;
-            let receiver_ident = &receiver.ty.rust;
-            let resolve = types.resolve(&receiver.ty);
-            let receiver_generics = if receiver.ty.generics.lt_token.is_some() {
-                &receiver.ty.generics
+            let class_ident = &class.rust;
+            let resolve = types.resolve(class);
+            let class_generics = if class.generics.lt_token.is_some() {
+                &class.generics
             } else {
                 elided_generics = Lifetimes {
                     lt_token: resolve.generics.lt_token,
@@ -758,7 +758,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                 &elided_generics
             };
             quote_spanned! {ident.span()=>
-                impl #generics #receiver_ident #receiver_generics {
+                impl #generics #class_ident #class_generics {
                     #doc
                     #attrs
                     #visibility #unsafety #fn_token #ident #arg_list #ret #fn_body
@@ -1176,10 +1176,10 @@ fn expand_rust_function_shim_super(
     let vars = receiver_var.iter().chain(arg_vars);
 
     let span = invoke.span();
-    let call = match &sig.receiver {
+    let call = match &sig.class {
         None => quote_spanned!(span=> super::#invoke),
-        Some(receiver) => {
-            let receiver_type = &receiver.ty.rust;
+        Some(class) => {
+            let receiver_type = &class.rust;
             quote_spanned!(span=> #receiver_type::#invoke)
         }
     };

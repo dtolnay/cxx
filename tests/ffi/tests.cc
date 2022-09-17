@@ -711,7 +711,12 @@ void L::impl_method() const {
   cxx_test_suite_set_correct();
 }
 
-std::unique_ptr<L> build_l() {
+uint32_t L::static_method(uint32_t arg) {
+  cxx_test_suite_set_correct();
+  return arg + 1;
+}
+
+std::unique_ptr<L> L::build() {
   return std::unique_ptr<L>(new L());
 }
 
@@ -903,6 +908,7 @@ extern "C" const char *cxx_run_test() noexcept {
   (void)rust::Vec<rust::isize>();
 
   // Test impl-based methods and functions
+  ASSERT(R::assoc() == 42);
   ASSERT(r->get() == r->get2());
 
   cxx_test_suite_set_correct();

@@ -85,13 +85,13 @@ macro_rules! join {
 }
 
 pub fn extern_fn(efn: &ExternFn, types: &Types) -> Symbol {
-    match &efn.receiver {
-        Some(receiver) => {
-            let receiver_ident = types.resolve(&receiver.ty);
+    match &efn.class {
+        Some(class) => {
+            let class_ident = types.resolve(class);
             join!(
                 efn.name.namespace,
                 CXXBRIDGE,
-                receiver_ident.name.cxx,
+                class_ident.name.cxx,
                 efn.name.rust,
             )
         }

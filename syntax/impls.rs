@@ -319,6 +319,7 @@ impl PartialEq for Signature {
             throws,
             paren_token: _,
             throws_tokens: _,
+            class,
         } = self;
         let Signature {
             asyncness: asyncness2,
@@ -331,10 +332,12 @@ impl PartialEq for Signature {
             throws: throws2,
             paren_token: _,
             throws_tokens: _,
+            class: class2,
         } = other;
         asyncness.is_some() == asyncness2.is_some()
             && unsafety.is_some() == unsafety2.is_some()
             && receiver == receiver2
+            && class == class2
             && ret == ret2
             && throws == throws2
             && args.len() == args2.len()
@@ -375,6 +378,7 @@ impl Hash for Signature {
             throws,
             paren_token: _,
             throws_tokens: _,
+            class,
         } = self;
         asyncness.is_some().hash(state);
         unsafety.is_some().hash(state);
@@ -393,6 +397,7 @@ impl Hash for Signature {
         }
         ret.hash(state);
         throws.hash(state);
+        class.hash(state);
     }
 }
 

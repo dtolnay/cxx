@@ -378,7 +378,7 @@ fn parse_foreign_mod(
                 items.push(ety);
             }
             ForeignItem::Fn(foreign) => {
-                match parse_extern_fn(cx, foreign, lang, trusted, &cfg, &namespace, &attrs) {
+                match parse_extern_fn(cx, foreign, lang, trusted, &cfg, &namespace, &attrs, None) {
                     Ok(efn) => items.push(efn),
                     Err(err) => cx.push(err),
                 }
@@ -434,6 +434,9 @@ fn parse_foreign_mod(
                     if receiver.ty.rust == "Self" {
                         receiver.ty.rust = single_type.rust.clone();
                     }
+                }
+                if efn.class.is_none() && efn.receiver.is_some() {
+                    efn.class = Some(efn.receiver.as_ref().unwrap().ty.clone());
                 }
             }
         }
@@ -533,6 +536,7 @@ fn parse_extern_fn(
     extern_block_cfg: &CfgExpr,
     namespace: &Namespace,
     attrs: &OtherAttrs,
+    mut class: Option<NamedType>,
 ) -> Result<Api> {
     let mut cfg = extern_block_cfg.clone();
     let mut doc = Doc::new();
@@ -652,6 +656,7 @@ fn parse_extern_fn(
                 }
                 if let Type::Ref(reference) = ty {
                     if let Type::Ident(ident) = reference.inner {
+                        class = Some(ident.clone());
                         receiver = Some(Receiver {
                             pinned: reference.pinned,
                             ampersand: reference.ampersand,
@@ -706,6 +711,7 @@ fn parse_extern_fn(
             throws,
             paren_token,
             throws_tokens,
+            class,
         },
         semi_token,
         trusted,
@@ -738,8 +744,21 @@ fn parse_extern_impl(
         return Ok(Vec::new());
     };
     let mut apis = Vec::new();
+    let self_ty = NamedType {
+        rust: self_ty_ident.clone(),
+        generics: Default::default(),
+    };
     for ForeignImplItem::Fn(f) in foreign_impl.items {
-        let mut api = parse_extern_fn(cx, f, lang, trusted, extern_block_cfg, namespace, attrs)?;
+        let mut api = parse_extern_fn(
+            cx,
+            f,
+            lang,
+            trusted,
+            extern_block_cfg,
+            namespace,
+            attrs,
+            Some(self_ty.clone()),
+        )?;
         let f = match api {
             Api::CxxFunction(ref mut f) | Api::RustFunction(ref mut f) => f,
             _ => panic!("parse_extern_fn yielded non-method API"),
@@ -748,8 +767,7 @@ fn parse_extern_impl(
             // If the impl is marked unsafe, mark the api unsafe
             f.unsafety = Some(*unsafety);
         }
-        // Right now, we only support functions which have a receiver matching the impl type,
-        // either via Self or an explicit name.
+
         if let Some(ref mut receiver) = f.receiver {
             if receiver.ty.rust == "Self" {
                 receiver.ty.rust.clone_from(self_ty_ident);
@@ -758,9 +776,6 @@ fn parse_extern_impl(
                 cx.error(&receiver.ty, "functions in foreign impl blocks must have their receiver type equal to the impl block");
                 continue;
             }
-        } else {
-            cx.error(f, "all functions must have a receiver");
-            continue;
         }
         apis.push(api);
     }
@@ -1483,6 +1498,7 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
     let generics = Generics::default();
     let receiver = None;
     let paren_token = ty.paren_token;
+    let class = None;
 
     Ok(Type::Fn(Box::new(Signature {
         asyncness,
@@ -1495,6 +1511,7 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
         throws,
         paren_token,
         throws_tokens,
+        class,
     })))
 }
 

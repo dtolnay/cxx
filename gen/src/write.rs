@@ -70,9 +70,9 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
     let mut methods_for_type = Map::new();
     for api in apis {
         if let Api::CxxFunction(efn) | Api::RustFunction(efn) = api {
-            if let Some(receiver) = &efn.sig.receiver {
+            if let Some(class) = &efn.sig.class {
                 methods_for_type
-                    .entry(&receiver.ty.rust)
+                    .entry(&class.rust)
                     .or_insert_with(Vec::new)
                     .push(efn);
             }
@@ -762,12 +762,12 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         }
     }
     write!(out, " = ");
-    match &efn.receiver {
+    match &efn.class {
         None => write!(out, "{}", efn.name.to_fully_qualified()),
-        Some(receiver) => write!(
+        Some(class) => write!(
             out,
             "&{}::{}",
-            out.types.resolve(&receiver.ty).name.to_fully_qualified(),
+            out.types.resolve(class).name.to_fully_qualified(),
             efn.name.cxx,
         ),
     }
@@ -948,13 +948,9 @@ fn write_rust_function_decl_impl(
 
 fn write_rust_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     out.set_namespace(&efn.name.namespace);
-    let local_name = match &efn.sig.receiver {
+    let local_name = match &efn.sig.class {
         None => efn.name.cxx.to_string(),
-        Some(receiver) => format!(
-            "{}::{}",
-            out.types.resolve(&receiver.ty).name.cxx,
-            efn.name.cxx,
-        ),
+        Some(class) => format!("{}::{}", out.types.resolve(class).name.cxx, efn.name.cxx,),
     };
     let doc = &efn.doc;
     let invoke = mangle::extern_fn(efn, out.types);
@@ -969,6 +965,9 @@ fn write_rust_function_shim_decl(
     indirect_call: bool,
 ) {
     begin_function_definition(out);
+    if sig.receiver.is_none() && sig.class.is_some() && out.header {
+        write!(out, "static ");
+    }
     write_return_type(out, &sig.ret);
     write!(out, "{}(", local_name);
     for (i, arg) in sig.args.iter().enumerate() {
@@ -1003,11 +1002,11 @@ fn write_rust_function_shim_impl(
     invoke: &Symbol,
     indirect_call: bool,
 ) {
-    if out.header && sig.receiver.is_some() {
+    if out.header && sig.class.is_some() {
         // We've already defined this inside the struct.
         return;
     }
-    if sig.receiver.is_none() {
+    if sig.class.is_none() {
         // Member functions already documented at their declaration.
         for line in doc.to_string().lines() {
             writeln!(out, "//{}", line);
