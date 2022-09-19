@@ -270,6 +270,7 @@ pub mod ffi {
         fn r_return_rust_string() -> String;
         fn r_return_unique_ptr_string() -> UniquePtr<CxxString>;
         fn r_return_rust_vec() -> Vec<u8>;
+        fn r_return_rust_vec_trivial() -> Vec<Buffer>;
         fn r_return_rust_vec_string() -> Vec<String>;
         fn r_return_rust_vec_extern_struct() -> Vec<Job>;
         fn r_return_ref_rust_vec(shared: &Shared) -> &Vec<u8>;
@@ -503,6 +504,10 @@ fn r_return_unique_ptr_string() -> UniquePtr<CxxString> {
 }
 
 fn r_return_rust_vec() -> Vec<u8> {
+    Vec::new()
+}
+
+fn r_return_rust_vec_trivial() -> Vec<Buffer> {
     Vec::new()
 }
 
