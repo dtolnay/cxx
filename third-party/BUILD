@@ -20,9 +20,9 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-3.2.20/src/**/*.rs"]) + ["vendor/clap-3.2.20/examples/demo.rs"],
+    srcs = glob(["vendor/clap-3.2.22/src/**/*.rs"]) + ["vendor/clap-3.2.22/examples/demo.rs"],
     crate_features = ["std"],
-    data = ["vendor/clap-3.2.20/examples/demo.md"],
+    data = ["vendor/clap-3.2.22/examples/demo.md"],
     edition = "2021",
     visibility = ["//visibility:public"],
     deps = [
@@ -145,7 +145,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.99/src/**/*.rs"]),
+    srcs = glob(["vendor/syn-1.0.100/src/**/*.rs"]),
     crate_features = [
         "clone-impls",
         "derive",
@@ -166,7 +166,7 @@ rust_library(
 
 cargo_build_script(
     name = "syn@build",
-    srcs = ["vendor/syn-1.0.99/build.rs"],
+    srcs = ["vendor/syn-1.0.100/build.rs"],
     crate_features = [
         "clone-impls",
         "derive",
@@ -187,19 +187,19 @@ rust_library(
 
 rust_library(
     name = "textwrap",
-    srcs = glob(["vendor/textwrap-0.15.0/src/**/*.rs"]),
+    srcs = glob(["vendor/textwrap-0.15.1/src/**/*.rs"]),
     edition = "2018",
     deps = [":unicode-width"],
 )
 
 rust_library(
     name = "unicode-ident",
-    srcs = glob(["vendor/unicode-ident-1.0.3/src/**/*.rs"]),
+    srcs = glob(["vendor/unicode-ident-1.0.4/src/**/*.rs"]),
     edition = "2018",
 )
 
 rust_library(
     name = "unicode-width",
-    srcs = glob(["vendor/unicode-width-0.1.9/src/**/*.rs"]),
+    srcs = glob(["vendor/unicode-width-0.1.10/src/**/*.rs"]),
     edition = "2018",
 )
