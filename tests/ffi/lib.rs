@@ -421,7 +421,9 @@ impl ffi::Array {
 
 #[derive(Default)]
 #[repr(C)]
-pub struct Buffer([c_char; 12]);
+pub struct Buffer {
+    buf: [c_char; 12],
+}
 
 unsafe impl ExternType for Buffer {
     type Id = type_id!("tests::Buffer");
