@@ -794,6 +794,63 @@ extern "C" const char *cxx_run_test() noexcept {
   r_take_unique_ptr_string(
       std::unique_ptr<std::string>(new std::string("2020")));
   r_take_ref_vector(std::vector<uint8_t>{20, 2, 0});
+
+  uint8_t capture_val1;
+  size_t capture_val2;
+  uint8_t capture_vec_elem;
+  uint8_t capture_vec_ref_elem;
+  std::string capture_string;
+  std::string capture_string_ref;
+  SharedString capture_shared;
+  SharedString capture_shared_ref;
+  size_t capture_box_value;
+  auto fn = [&](
+    uint8_t arg,
+    const tests::R& arg2,
+    rust::Vec<uint8_t> vec,
+    const rust::Vec<uint8_t>& vec_ref,
+    rust::String str,
+    const rust::String& str_ref,
+    SharedString shared_str,
+    const SharedString& shared_str_ref,
+    rust::Box<tests::R> box
+  ) {
+    capture_val1 = arg;
+    capture_val2 = arg2.get();
+    capture_vec_elem = vec.at(0);
+    capture_vec_ref_elem = vec_ref.at(0);
+    capture_string = static_cast<std::string>(str);
+    capture_string_ref = static_cast<std::string>(str_ref);
+    capture_shared = shared_str;
+    capture_shared_ref = shared_str_ref;
+    capture_box_value = box->get();
+    return (uint8_t)200;
+  };
+  r_take_ref_func_tuple_args(fn);
+  ASSERT(capture_val1 == 2);
+  ASSERT(capture_val2 == 911);
+  ASSERT(capture_vec_elem == 42);
+  ASSERT(capture_vec_ref_elem == 64);
+  ASSERT(capture_string == "malin");
+  ASSERT(capture_string_ref == "iladalen");
+  ASSERT(capture_shared.msg == "sagene");
+  ASSERT(capture_shared_ref.msg == "torshov");
+  ASSERT(capture_box_value == 777);
+
+  uint8_t capture_from_noarg_lambda;
+  auto noarg_fn = [&]() {
+    capture_from_noarg_lambda = 66;
+  };
+  r_take_ref_func_no_args(noarg_fn);
+  ASSERT(capture_from_noarg_lambda == 66);
+
+
+  uint8_t capture_from_struct;
+  r_take_ref_func_single_arg_opaque([&](const tests::R& arg) {
+    capture_from_struct = arg.get();
+  });
+  ASSERT(capture_from_struct == 128);
+
   std::vector<uint64_t> empty_vector;
   r_take_ref_empty_vector(empty_vector);
   empty_vector.reserve(10);

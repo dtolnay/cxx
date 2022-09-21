@@ -51,6 +51,7 @@ pub use self::types::Types;
 pub enum Api {
     Include(Include),
     Struct(Struct),
+    TupleStruct(TupleStruct),
     Enum(Enum),
     CxxType(ExternType),
     CxxFunction(ExternFn),
@@ -191,6 +192,13 @@ pub struct Signature {
     pub throws_tokens: Option<(kw::Result, Token![<], Token![>])>,
 }
 
+pub struct TupleStruct {
+    pub name: Pair,
+    pub types: Punctuated<Type, Token![,]>,
+    pub paren_token: Paren,
+    pub generics: Lifetimes,
+}
+
 pub struct Var {
     pub cfg: CfgExpr,
     pub doc: Doc,
@@ -234,6 +242,7 @@ pub enum Type {
     Ptr(Box<Ptr>),
     Str(Box<Ref>),
     CxxVector(Box<Ty1>),
+    CxxFunction(Box<Ty2>),
     Fn(Box<Signature>),
     Void(Span),
     SliceRef(Box<SliceRef>),
@@ -244,6 +253,15 @@ pub struct Ty1 {
     pub name: Ident,
     pub langle: Token![<],
     pub inner: Type,
+    pub rangle: Token![>],
+}
+
+pub struct Ty2 {
+    pub name: Ident,
+    pub langle: Token![<],
+    pub first: Type,
+    pub comma: Token![,],
+    pub second: Type,
     pub rangle: Token![>],
 }
 

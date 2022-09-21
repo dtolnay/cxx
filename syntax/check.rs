@@ -1,10 +1,7 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::visit::{self, Visit};
-use crate::syntax::{
-    error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Lifetimes,
-    NamedType, Ptr, Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
-};
+use crate::syntax::{error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Lifetimes, NamedType, Ptr, Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Ty2, Type, TypeAlias, Types, TupleStruct};
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
 use std::fmt::Display;
@@ -51,6 +48,7 @@ fn do_typecheck(cx: &mut Check) {
             Type::SharedPtr(ptr) => check_type_shared_ptr(cx, ptr),
             Type::WeakPtr(ptr) => check_type_weak_ptr(cx, ptr),
             Type::CxxVector(ptr) => check_type_cxx_vector(cx, ptr),
+            Type::CxxFunction(ptr) => check_type_cxx_func(cx, ptr),
             Type::Ref(ty) => check_type_ref(cx, ty),
             Type::Ptr(ty) => check_type_ptr(cx, ty),
             Type::Array(array) => check_type_array(cx, array),
@@ -64,6 +62,7 @@ fn do_typecheck(cx: &mut Check) {
         match api {
             Api::Include(_) => {}
             Api::Struct(strct) => check_api_struct(cx, strct),
+            Api::TupleStruct(tstrct) => check_api_tuple_struct(cx, tstrct),
             Api::Enum(enm) => check_api_enum(cx, enm),
             Api::CxxType(ety) | Api::RustType(ety) => check_api_type(cx, ety),
             Api::CxxFunction(efn) | Api::RustFunction(efn) => check_api_fn(cx, efn),
@@ -83,6 +82,7 @@ fn check_type_ident(cx: &mut Check, name: &NamedType) {
     let ident = &name.rust;
     if Atom::from(ident).is_none()
         && !cx.types.structs.contains_key(ident)
+        && !cx.types.tuple_structs.contains_key(ident)
         && !cx.types.enums.contains_key(ident)
         && !cx.types.cxx.contains(ident)
         && !cx.types.rust.contains(ident)
@@ -149,6 +149,8 @@ fn check_type_unique_ptr(cx: &mut Check, ptr: &Ty1) {
             _ => {}
         }
     } else if let Type::CxxVector(_) = &ptr.inner {
+        return;
+    } else if let Type::CxxFunction(_) = &ptr.inner {
         return;
     }
 
@@ -217,6 +219,10 @@ fn check_type_cxx_vector(cx: &mut Check, ptr: &Ty1) {
     }
 
     cx.error(ptr, "unsupported vector element type");
+}
+
+fn check_type_cxx_func(_: &mut Check, _: &Ty2) {
+    // TODO: write type checks
 }
 
 fn check_type_ref(cx: &mut Check, ty: &Ref) {
@@ -345,6 +351,10 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
             cx.error(field, msg);
         }
     }
+}
+
+fn check_api_tuple_struct(_: &mut Check, _: &TupleStruct) {
+    // TODO: implement chech logic for TupleStruct
 }
 
 fn check_api_enum(cx: &mut Check, enm: &Enum) {
@@ -527,6 +537,15 @@ fn check_api_impl(cx: &mut Check, imp: &Impl) {
                 }
             }
         }
+        Type::CxxFunction(ty) => {
+            if let Type::Ident(first) = &ty.first {
+                if let Type::Ident(second) = &ty.second {
+                    if Atom::from(&first.rust).is_none() && Atom::from(&second.rust).is_none() {
+                        return;
+                    }
+                }
+            }
+        }
         _ => {}
     }
 
@@ -603,6 +622,7 @@ fn check_reserved_name(cx: &mut Check, ident: &Ident) {
         || ident == "WeakPtr"
         || ident == "Vec"
         || ident == "CxxVector"
+        || ident == "CxxFunction"
         || ident == "str"
         || Atom::from(ident).is_some()
     {
@@ -648,6 +668,7 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
         | Type::UniquePtr(_)
         | Type::SharedPtr(_)
         | Type::WeakPtr(_)
+        | Type::CxxFunction(_)
         | Type::Ref(_)
         | Type::Ptr(_)
         | Type::Str(_)
@@ -726,6 +747,7 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         Type::Ptr(_) => "raw pointer".to_owned(),
         Type::Str(_) => "&str".to_owned(),
         Type::CxxVector(_) => "C++ vector".to_owned(),
+        Type::CxxFunction(_) => "C++ function".to_owned(),
         Type::SliceRef(_) => "slice".to_owned(),
         Type::Fn(_) => "function pointer".to_owned(),
         Type::Void(_) => "()".to_owned(),

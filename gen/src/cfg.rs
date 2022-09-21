@@ -113,6 +113,7 @@ impl Api {
         match self {
             Api::Include(include) => &include.cfg,
             Api::Struct(strct) => &strct.cfg,
+            Api::TupleStruct(_) => &CfgExpr::Unconditional,
             Api::Enum(enm) => &enm.cfg,
             Api::CxxType(ety) | Api::RustType(ety) => &ety.cfg,
             Api::CxxFunction(efn) | Api::RustFunction(efn) => &efn.cfg,

@@ -7,7 +7,7 @@ use crate::syntax::Atom::*;
 use crate::syntax::{
     attrs, error, Api, Array, Derive, Doc, Enum, EnumRepr, ExternFn, ExternType, ForeignName, Impl,
     Include, IncludeKind, Lang, Lifetimes, NamedType, Namespace, Pair, Ptr, Receiver, Ref,
-    Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var, Variant,
+    Signature, SliceRef, Struct, TupleStruct, Ty1, Ty2, Type, TypeAlias, Var, Variant,
 };
 use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
@@ -19,7 +19,7 @@ use syn::{
     GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lit, LitStr,
     Pat, PathArguments, Result, ReturnType, Signature as RustSignature, Token, TraitBound,
     TraitBoundModifier, Type as RustType, TypeArray, TypeBareFn, TypeParamBound, TypePath, TypePtr,
-    TypeReference, Variant as RustVariant, Visibility,
+    TypeReference, Variant as RustVariant, Visibility, FieldsUnnamed,
 };
 
 pub mod kw {
@@ -76,14 +76,6 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
         },
     );
 
-    let named_fields = match item.fields {
-        Fields::Named(fields) => fields,
-        Fields::Unit => return Err(Error::new_spanned(item, "unit structs are not supported")),
-        Fields::Unnamed(_) => {
-            return Err(Error::new_spanned(item, "tuple structs are not supported"));
-        }
-    };
-
     let mut lifetimes = Punctuated::new();
     let mut has_unsupported_generic_param = false;
     for pair in item.generics.params.into_pairs() {
@@ -124,6 +116,24 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
         );
     }
 
+    let struct_token = item.struct_token;
+    let visibility = visibility_pub(&item.vis, struct_token.span);
+    let name = pair(namespace, &item.ident, cxx_name, rust_name);
+
+    let generics = Lifetimes {
+        lt_token: item.generics.lt_token,
+        lifetimes,
+        gt_token: item.generics.gt_token,
+    };
+
+    let named_fields = match item.fields {
+        Fields::Named(fields) => fields,
+        Fields::Unit => return Err(Error::new_spanned(item.ident, "unit structs are not supported")),
+        Fields::Unnamed(u) => {
+            return Ok(Api::TupleStruct(parse_tuple_from_unnamed_struct(name, generics, &u)?));
+        }
+    };
+
     let mut fields = Vec::new();
     for field in named_fields.named {
         let ident = field.ident.unwrap();
@@ -163,14 +173,6 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
         });
     }
 
-    let struct_token = item.struct_token;
-    let visibility = visibility_pub(&item.vis, struct_token.span);
-    let name = pair(namespace, &item.ident, cxx_name, rust_name);
-    let generics = Lifetimes {
-        lt_token: item.generics.lt_token,
-        lifetimes,
-        gt_token: item.generics.gt_token,
-    };
     let brace_token = named_fields.brace_token;
 
     Ok(Api::Struct(Struct {
@@ -1073,6 +1075,10 @@ fn parse_impl(cx: &mut Errors, imp: ItemImpl) -> Result<Api> {
             Type::Ident(ident) => ident.generics.clone(),
             _ => Lifetimes::default(),
         },
+        Type::CxxFunction(ty) => match &ty.first {
+            Type::Ident(ident) => ident.generics.clone(),
+            _ => Lifetimes::default(),
+        },
         Type::Ident(_)
         | Type::Ref(_)
         | Type::Ptr(_)
@@ -1264,6 +1270,21 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
                             rangle: generic.gt_token,
                         })));
                     }
+                } else if ident == "CxxFunction" && generic.args.len() == 2 {
+                    if let GenericArgument::Type(arg) = &generic.args[0] {
+                        if let GenericArgument::Type(ret) = &generic.args[1] {
+                            let first = parse_type(arg)?;
+                            let second = parse_type(ret)?;
+                            return Ok(Type::CxxFunction(Box::new(Ty2 {
+                                name: ident,
+                                langle: generic.lt_token,
+                                first,
+                                comma: **generic.args.pairs().next().unwrap().punct().unwrap(),
+                                second,
+                                rangle: generic.gt_token,
+                            })));
+                        }
+                    }
                 } else if ident == "Box" && generic.args.len() == 1 {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
                         let inner = parse_type(arg)?;
@@ -1434,6 +1455,18 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
         paren_token,
         throws_tokens,
     })))
+}
+
+fn parse_tuple_from_unnamed_struct(name: Pair, generics: Lifetimes, unnamed_fields: &FieldsUnnamed) -> Result<TupleStruct> {
+    let types: Punctuated<Type, Token![,]> = unnamed_fields.unnamed
+        .iter()
+        .map(|field| {
+            Ok(parse_type(&field.ty)?)
+        })
+        .collect::<Result<_>>()?;
+    let paren_token = unnamed_fields.paren_token;
+
+    Ok(TupleStruct { name, types, paren_token, generics })
 }
 
 fn parse_return_type(

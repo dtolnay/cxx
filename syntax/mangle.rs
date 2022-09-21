@@ -73,8 +73,9 @@
 //             - CXXBRIDGE1_STRUCT_org$rust$Struct
 //             - CXXBRIDGE1_ENUM_Enabled
 
+use proc_macro2::Ident;
 use crate::syntax::symbol::{self, Symbol};
-use crate::syntax::{ExternFn, Pair, Types};
+use crate::syntax::{Atom, ExternFn, Pair, Types};
 
 const CXXBRIDGE: &str = "cxxbridge1";
 
@@ -117,4 +118,16 @@ pub fn c_trampoline(efn: &ExternFn, var: &Pair, types: &Types) -> Symbol {
 // The Rust half of a function pointer trampoline.
 pub fn r_trampoline(efn: &ExternFn, var: &Pair, types: &Types) -> Symbol {
     join!(extern_fn(efn, types), var.rust, 1)
+}
+
+pub fn mangle_ident(ident: Option<&Ident>, types: &Types) -> Symbol {
+    if let Some(some) = ident {
+        if let Some(_) = Atom::from(&some) {
+            symbol::join(&[&&some.to_string()[..]])
+        } else {
+            types.resolve(some).name.to_symbol()
+        }
+    } else {
+        symbol::join(&[&"void"])
+    }
 }

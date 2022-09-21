@@ -33,7 +33,10 @@ pub(crate) fn check_all(cx: &mut Check, apis: &[Api]) {
                 for field in &strct.fields {
                     check(cx, &field.name);
                 }
-            }
+            },
+            Api::TupleStruct(tstrct) => {
+                check(cx, &tstrct.name);
+            },
             Api::Enum(enm) => {
                 check(cx, &enm.name);
                 for variant in &enm.variants {

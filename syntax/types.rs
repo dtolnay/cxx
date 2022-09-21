@@ -7,7 +7,7 @@ use crate::syntax::set::{OrderedSet, UnorderedSet};
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::visit::{self, Visit};
 use crate::syntax::{
-    toposort, Api, Atom, Enum, EnumRepr, ExternType, Impl, Lifetimes, Pair, Struct, Type, TypeAlias,
+    toposort, Api, Atom, Enum, EnumRepr, ExternType, Impl, Lifetimes, Pair, Struct, TupleStruct, Type, TypeAlias,
 };
 use proc_macro2::Ident;
 use quote::ToTokens;
@@ -15,6 +15,7 @@ use quote::ToTokens;
 pub struct Types<'a> {
     pub all: OrderedSet<&'a Type>,
     pub structs: UnorderedMap<&'a Ident, &'a Struct>,
+    pub tuple_structs: OrderedMap<&'a Ident, &'a TupleStruct>,
     pub enums: UnorderedMap<&'a Ident, &'a Enum>,
     pub cxx: UnorderedSet<&'a Ident>,
     pub rust: UnorderedSet<&'a Ident>,
@@ -31,6 +32,7 @@ impl<'a> Types<'a> {
     pub fn collect(cx: &mut Errors, apis: &'a [Api]) -> Self {
         let mut all = OrderedSet::new();
         let mut structs = UnorderedMap::new();
+        let mut tuple_structs = OrderedMap::new();
         let mut enums = UnorderedMap::new();
         let mut cxx = UnorderedSet::new();
         let mut rust = UnorderedSet::new();
@@ -86,6 +88,13 @@ impl<'a> Types<'a> {
                         visit(&mut all, &field.ty);
                     }
                     add_resolution(&strct.name, &strct.generics);
+                }
+                Api::TupleStruct(tstrct) => {
+                    tuple_structs.insert(&tstrct.name.rust, tstrct);
+                    for ty in &tstrct.types {
+                        visit(&mut all, &ty);
+                    }
+                    add_resolution(&tstrct.name, &tstrct.generics);
                 }
                 Api::Enum(enm) => {
                     match &enm.repr {
@@ -183,7 +192,8 @@ impl<'a> Types<'a> {
                 | ImplKey::WeakPtr(ident)
                 | ImplKey::CxxVector(ident) => {
                     Atom::from(ident.rust).is_none() && !aliases.contains_key(ident.rust)
-                }
+                },
+                ImplKey::CxxFunction(_) => true,
             };
             if implicit_impl && !impls.contains_key(&impl_key) {
                 impls.insert(impl_key, None);
@@ -200,6 +210,7 @@ impl<'a> Types<'a> {
         let mut types = Types {
             all,
             structs,
+            tuple_structs,
             enums,
             cxx,
             rust,
