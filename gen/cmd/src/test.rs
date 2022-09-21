@@ -23,6 +23,13 @@ OPTIONS:
             __declspec(dllexport) or __attribute__((visibility(\"default\")))
             if Rust code from one shared object or executable depends on
             these C++ functions in another.
+            
+            If you need to use this option, you might also consider similarly
+            defining either or both of the preprocessor symbols CXX_RS_EXPORT
+            and CXX_CPP_EXPORT when compiling cxx.cc. CXX_RS_EXPORT
+            attaches to symbols exported from cxx.cc which are typically used
+            by Rust code; CXX_CPP_EXPORT attaches to symbols which are used
+            by C++ code.
 
     -h, --help
             Print help information.
