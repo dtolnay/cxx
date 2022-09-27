@@ -9,7 +9,8 @@ impl<'a> Types<'a> {
                 if let Some(atom) = Atom::from(ident) {
                     match atom {
                         Bool | Char | U8 | U16 | U32 | U64 | Usize | I8 | I16 | I32 | I64
-                        | Isize | F32 | F64 => true,
+                        | Isize | F32 | F64 | CInt | CLong | CLongLong | CSChar | CShort
+                        | CUChar | CUInt | CULong | CULongLong | CUShort => true,
                         CxxString | RustString => false,
                     }
                 } else if let Some(strct) = self.structs.get(ident) {

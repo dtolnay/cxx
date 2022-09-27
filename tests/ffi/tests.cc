@@ -215,6 +215,27 @@ const C *c_return_const_ptr(size_t c) { return new C(c); }
 
 C *c_return_mut_ptr(size_t c) { return new C(c); }
 
+char c_return_char() { return 'a'; }
+
+int c_return_cint() { return 7; }
+
+long c_return_clong() { return 10; }
+long long c_return_clonglong() { return 11; }
+signed char c_return_cschar() { return 12; }
+short c_return_cshort() { return 13; }
+unsigned char c_return_cuchar() { return 14; }
+unsigned int c_return_cuint() { return 15; }
+unsigned long c_return_culong() { return 16; }
+unsigned long long c_return_culonglong() { return 17; }
+unsigned short c_return_cushort() { return 18; }
+
+std::unique_ptr<std::vector<unsigned long long>> c_return_unique_ptr_vector_ulonglong() {
+  auto vec = std::unique_ptr<std::vector<unsigned long long>>(new std::vector<unsigned long long>());
+  vec->push_back(19);
+  vec->push_back(20);
+  return vec;
+}
+
 Borrow::Borrow(const std::string &s) : s(s) {}
 
 void Borrow::const_member() const {}
