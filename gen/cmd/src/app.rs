@@ -40,11 +40,11 @@ fn app() -> Command<'static> {
         .help_template(TEMPLATE)
         .next_line_help(true)
         .arg(arg_input())
+        .arg(arg_cfg())
         .arg(arg_cxx_impl_annotations())
         .arg(arg_header())
         .arg(arg_include())
         .arg(arg_output())
-        .arg(arg_cfg())
         .mut_arg("help", |a| a.help("Print help information."));
     if let Some(version) = option_env!("CARGO_PKG_VERSION") {
         app = app
@@ -55,11 +55,11 @@ fn app() -> Command<'static> {
 }
 
 const INPUT: &str = "input";
+const CFG: &str = "cfg";
 const CXX_IMPL_ANNOTATIONS: &str = "cxx-impl-annotations";
 const HEADER: &str = "header";
 const INCLUDE: &str = "include";
 const OUTPUT: &str = "output";
-const CFG: &str = "cfg";
 
 pub(super) fn from_args() -> Opt {
     let matches = app().get_matches();
@@ -122,6 +122,33 @@ fn arg_input() -> Arg<'static> {
         .value_parser(ValueParser::path_buf())
 }
 
+fn arg_cfg() -> Arg<'static> {
+    const HELP: &str = "\
+Compilation configuration matching what will be used to build
+the Rust side of the bridge.";
+    let bool_cfgs = Arc::new(Mutex::new(Map::<String, bool>::new()));
+    Arg::new(CFG)
+        .long(CFG)
+        .takes_value(true)
+        .value_name("name=\"value\" | name[=true] | name=false")
+        .action(ArgAction::Append)
+        .value_parser(move |arg: &str| match cfg::parse.parse_str(arg) {
+            Ok((_, CfgValue::Str(_))) => Ok(arg.to_owned()),
+            Ok((name, CfgValue::Bool(value))) => {
+                let mut bool_cfgs = bool_cfgs.lock().unwrap_or_else(PoisonError::into_inner);
+                if let Some(&prev) = bool_cfgs.get(&name) {
+                    if prev != value {
+                        return Err(format!("cannot have both {0}=false and {0}=true", name));
+                    }
+                }
+                bool_cfgs.insert(name, value);
+                Ok(arg.to_owned())
+            }
+            Err(_) => Err("expected name=\"value\", name=true, or name=false".to_owned()),
+        })
+        .help(HELP)
+}
+
 fn arg_cxx_impl_annotations() -> Arg<'static> {
     const HELP: &str = "\
 Optional annotation for implementations of C++ function wrappers
@@ -168,32 +195,5 @@ not specified.";
         .takes_value(true)
         .action(ArgAction::Append)
         .value_parser(ValueParser::path_buf())
-        .help(HELP)
-}
-
-fn arg_cfg() -> Arg<'static> {
-    const HELP: &str = "\
-Compilation configuration matching what will be used to build
-the Rust side of the bridge.";
-    let bool_cfgs = Arc::new(Mutex::new(Map::<String, bool>::new()));
-    Arg::new(CFG)
-        .long(CFG)
-        .takes_value(true)
-        .value_name("name=\"value\" | name[=true] | name=false")
-        .action(ArgAction::Append)
-        .value_parser(move |arg: &str| match cfg::parse.parse_str(arg) {
-            Ok((_, CfgValue::Str(_))) => Ok(arg.to_owned()),
-            Ok((name, CfgValue::Bool(value))) => {
-                let mut bool_cfgs = bool_cfgs.lock().unwrap_or_else(PoisonError::into_inner);
-                if let Some(&prev) = bool_cfgs.get(&name) {
-                    if prev != value {
-                        return Err(format!("cannot have both {0}=false and {0}=true", name));
-                    }
-                }
-                bool_cfgs.insert(name, value);
-                Ok(arg.to_owned())
-            }
-            Err(_) => Err("expected name=\"value\", name=true, or name=false".to_owned()),
-        })
         .help(HELP)
 }
