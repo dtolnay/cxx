@@ -20,22 +20,25 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-3.2.22/src/**/*.rs"]) + ["vendor/clap-3.2.22/examples/demo.rs"],
-    crate_features = ["std"],
-    data = ["vendor/clap-3.2.22/examples/demo.md"],
+    srcs = glob(["vendor/clap-4.0.2/src/**/*.rs"]) + ["vendor/clap-4.0.2/examples/demo.rs"],
+    crate_features = [
+        "error-context",
+        "help",
+        "std",
+        "usage",
+    ],
+    data = ["vendor/clap-4.0.2/examples/demo.md"],
     edition = "2021",
     visibility = ["//visibility:public"],
     deps = [
         ":bitflags",
         ":clap_lex",
-        ":indexmap",
-        ":textwrap",
     ],
 )
 
 rust_library(
     name = "clap_lex",
-    srcs = glob(["vendor/clap_lex-0.2.4/src/**/*.rs"]),
+    srcs = glob(["vendor/clap_lex-0.3.0/src/**/*.rs"]),
     edition = "2021",
     deps = [
         ":os_str_bytes",
@@ -51,22 +54,6 @@ rust_library(
         ":termcolor",
         ":unicode-width",
     ],
-)
-
-rust_library(
-    name = "hashbrown",
-    srcs = glob(["vendor/hashbrown-0.12.3/src/**/*.rs"]),
-    crate_features = ["raw"],
-    edition = "2021",
-)
-
-rust_library(
-    name = "indexmap",
-    srcs = glob(["vendor/indexmap-1.9.1/src/**/*.rs"]),
-    crate_features = ["std"],
-    edition = "2021",
-    rustc_flags = ["--cfg=has_std"],
-    deps = [":hashbrown"],
 )
 
 rust_library(
@@ -183,13 +170,6 @@ rust_library(
     name = "termcolor",
     srcs = glob(["vendor/termcolor-1.1.3/src/**/*.rs"]),
     edition = "2018",
-)
-
-rust_library(
-    name = "textwrap",
-    srcs = glob(["vendor/textwrap-0.15.1/src/**/*.rs"]),
-    edition = "2018",
-    deps = [":unicode-width"],
 )
 
 rust_library(
