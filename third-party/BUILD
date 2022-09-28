@@ -71,7 +71,7 @@ rust_library(
 
 rust_library(
     name = "once_cell",
-    srcs = glob(["vendor/once_cell-1.14.0/src/**/*.rs"]),
+    srcs = glob(["vendor/once_cell-1.15.0/src/**/*.rs"]),
     crate_features = [
         "alloc",
         "std",
@@ -91,7 +91,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.43/src/**/*.rs"]),
+    srcs = glob(["vendor/proc-macro2-1.0.44/src/**/*.rs"]),
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -106,7 +106,7 @@ rust_library(
 
 cargo_build_script(
     name = "proc-macro2@build",
-    srcs = ["vendor/proc-macro2-1.0.43/build.rs"],
+    srcs = ["vendor/proc-macro2-1.0.44/build.rs"],
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -145,7 +145,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.100/src/**/*.rs"]),
+    srcs = glob(["vendor/syn-1.0.101/src/**/*.rs"]),
     crate_features = [
         "clone-impls",
         "derive",
@@ -166,7 +166,7 @@ rust_library(
 
 cargo_build_script(
     name = "syn@build",
-    srcs = ["vendor/syn-1.0.100/build.rs"],
+    srcs = ["vendor/syn-1.0.101/build.rs"],
     crate_features = [
         "clone-impls",
         "derive",

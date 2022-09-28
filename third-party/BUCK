@@ -70,7 +70,7 @@ rust_library(
 
 rust_library(
     name = "once_cell",
-    srcs = glob(["vendor/once_cell-1.14.0/src/**/*.rs"]),
+    srcs = glob(["vendor/once_cell-1.15.0/src/**/*.rs"]),
     edition = "2018",
     features = [
         "alloc",
@@ -90,8 +90,8 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.43/src/**/*.rs"]),
-    build_script = "vendor/proc-macro2-1.0.43/build.rs",
+    srcs = glob(["vendor/proc-macro2-1.0.44/src/**/*.rs"]),
+    build_script = "vendor/proc-macro2-1.0.44/build.rs",
     edition = "2018",
     features = [
         "proc-macro",
@@ -121,8 +121,8 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.100/src/**/*.rs"]),
-    build_script = "vendor/syn-1.0.100/build.rs",
+    srcs = glob(["vendor/syn-1.0.101/src/**/*.rs"]),
+    build_script = "vendor/syn-1.0.101/build.rs",
     edition = "2018",
     features = [
         "clone-impls",
