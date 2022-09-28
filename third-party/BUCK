@@ -90,8 +90,8 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.44/src/**/*.rs"]),
-    build_script = "vendor/proc-macro2-1.0.44/build.rs",
+    srcs = glob(["vendor/proc-macro2-1.0.45/src/**/*.rs"]),
+    build_script = "vendor/proc-macro2-1.0.45/build.rs",
     edition = "2018",
     features = [
         "proc-macro",
