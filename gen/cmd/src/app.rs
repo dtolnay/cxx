@@ -10,6 +10,7 @@ use clap::builder::{ArgAction, ValueParser};
 use clap::{Arg, Command};
 use std::collections::{BTreeMap as Map, BTreeSet as Set};
 use std::path::PathBuf;
+use std::process;
 use std::sync::{Arc, Mutex, PoisonError};
 use syn::parse::Parser;
 
@@ -24,32 +25,28 @@ const TEMPLATE: &str = "\
 David Tolnay <dtolnay@gmail.com>
 https://github.com/dtolnay/cxx
 
-USAGE:
+{usage-heading}
     {usage}
 
-ARGS:
-{positionals}
-
-OPTIONS:
-{options}\
+{all-args}\
 ";
 
-fn app() -> Command<'static> {
+fn app() -> Command {
     let mut app = Command::new("cxxbridge")
         .override_usage(USAGE)
         .help_template(TEMPLATE)
         .next_line_help(true)
+        .disable_help_flag(true)
+        .disable_version_flag(true)
         .arg(arg_input())
         .arg(arg_cfg())
         .arg(arg_cxx_impl_annotations())
         .arg(arg_header())
+        .arg(arg_help())
         .arg(arg_include())
-        .arg(arg_output())
-        .mut_arg("help", |a| a.help("Print help information."));
+        .arg(arg_output());
     if let Some(version) = option_env!("CARGO_PKG_VERSION") {
-        app = app
-            .version(version)
-            .mut_arg("version", |a| a.help("Print version information."));
+        app = app.arg(arg_version()).version(version);
     }
     app
 }
@@ -57,18 +54,25 @@ fn app() -> Command<'static> {
 const INPUT: &str = "input";
 const CFG: &str = "cfg";
 const CXX_IMPL_ANNOTATIONS: &str = "cxx-impl-annotations";
+const HELP: &str = "help";
 const HEADER: &str = "header";
 const INCLUDE: &str = "include";
 const OUTPUT: &str = "output";
+const VERSION: &str = "version";
 
 pub(super) fn from_args() -> Opt {
     let matches = app().get_matches();
+
+    if matches.get_flag(HELP) {
+        let _ = app().print_long_help();
+        process::exit(0);
+    }
 
     let input = matches.get_one::<PathBuf>(INPUT).cloned();
     let cxx_impl_annotations = matches
         .get_one::<String>(CXX_IMPL_ANNOTATIONS)
         .map(String::clone);
-    let header = matches.contains_id(HEADER);
+    let header = matches.get_flag(HEADER);
     let include = matches
         .get_many::<String>(INCLUDE)
         .unwrap_or_default()
@@ -115,21 +119,21 @@ pub(super) fn from_args() -> Opt {
     }
 }
 
-fn arg_input() -> Arg<'static> {
+fn arg_input() -> Arg {
     Arg::new(INPUT)
         .help("Input Rust source file containing #[cxx::bridge].")
-        .required_unless_present(HEADER)
+        .required_unless_present_any(&[HEADER, HELP])
         .value_parser(ValueParser::path_buf())
 }
 
-fn arg_cfg() -> Arg<'static> {
+fn arg_cfg() -> Arg {
     const HELP: &str = "\
 Compilation configuration matching what will be used to build
 the Rust side of the bridge.";
     let bool_cfgs = Arc::new(Mutex::new(Map::<String, bool>::new()));
     Arg::new(CFG)
         .long(CFG)
-        .takes_value(true)
+        .num_args(1)
         .value_name("name=\"value\" | name[=true] | name=false")
         .action(ArgAction::Append)
         .value_parser(move |arg: &str| match cfg::parse.parse_str(arg) {
@@ -149,7 +153,7 @@ the Rust side of the bridge.";
         .help(HELP)
 }
 
-fn arg_cxx_impl_annotations() -> Arg<'static> {
+fn arg_cxx_impl_annotations() -> Arg {
     const HELP: &str = "\
 Optional annotation for implementations of C++ function wrappers
 that may be exposed to Rust. You may for example need to provide
@@ -158,20 +162,27 @@ if Rust code from one shared object or executable depends on
 these C++ functions in another.";
     Arg::new(CXX_IMPL_ANNOTATIONS)
         .long(CXX_IMPL_ANNOTATIONS)
-        .takes_value(true)
+        .num_args(1)
         .value_name("annotation")
         .value_parser(ValueParser::string())
         .help(HELP)
 }
 
-fn arg_header() -> Arg<'static> {
+fn arg_header() -> Arg {
     const HELP: &str = "\
 Emit header with declarations only. Optional if using `-o` with
 a path ending in `.h`.";
-    Arg::new(HEADER).long(HEADER).help(HELP)
+    Arg::new(HEADER).long(HEADER).num_args(0).help(HELP)
 }
 
-fn arg_include() -> Arg<'static> {
+fn arg_help() -> Arg {
+    Arg::new(HELP)
+        .long(HELP)
+        .help("Print help information.")
+        .num_args(0)
+}
+
+fn arg_include() -> Arg {
     const HELP: &str = "\
 Any additional headers to #include. The cxxbridge tool does not
 parse or even require the given paths to exist; they simply go
@@ -179,21 +190,28 @@ into the generated C++ code as #include lines.";
     Arg::new(INCLUDE)
         .long(INCLUDE)
         .short('i')
-        .takes_value(true)
+        .num_args(1)
         .action(ArgAction::Append)
         .value_parser(ValueParser::string())
         .help(HELP)
 }
 
-fn arg_output() -> Arg<'static> {
+fn arg_output() -> Arg {
     const HELP: &str = "\
 Path of file to write as output. Output goes to stdout if -o is
 not specified.";
     Arg::new(OUTPUT)
         .long(OUTPUT)
         .short('o')
-        .takes_value(true)
+        .num_args(1)
         .action(ArgAction::Append)
         .value_parser(ValueParser::path_buf())
         .help(HELP)
+}
+
+fn arg_version() -> Arg {
+    Arg::new(VERSION)
+        .long(VERSION)
+        .help("Print version information.")
+        .action(ArgAction::Version)
 }
