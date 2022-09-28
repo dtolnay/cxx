@@ -158,7 +158,7 @@ const std::vector<uint8_t> &c_return_ref_vector(const C &c) {
 
 std::vector<uint8_t> &c_return_mut_vector(C &c) { return c.get_v(); }
 
-rust::Vec<uint8_t> c_return_rust_vec() {
+rust::Vec<uint8_t> c_return_rust_vec_u8() {
   rust::Vec<uint8_t> vec{2, 0, 2, 0};
   return vec;
 }
@@ -175,6 +175,10 @@ rust::Vec<uint8_t> &c_return_mut_rust_vec(C &c) {
 
 rust::Vec<rust::String> c_return_rust_vec_string() {
   return {"2", "0", "2", "0"};
+}
+
+rust::Vec<bool> c_return_rust_vec_bool() {
+  return {true, true, false};
 }
 
 size_t c_return_identity(size_t n) { return n; }

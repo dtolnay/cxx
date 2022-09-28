@@ -114,10 +114,11 @@ pub mod ffi {
         fn c_return_unique_ptr_vector_opaque() -> UniquePtr<CxxVector<C>>;
         fn c_return_ref_vector(c: &C) -> &CxxVector<u8>;
         fn c_return_mut_vector(c: Pin<&mut C>) -> Pin<&mut CxxVector<u8>>;
-        fn c_return_rust_vec() -> Vec<u8>;
+        fn c_return_rust_vec_u8() -> Vec<u8>;
         fn c_return_ref_rust_vec(c: &C) -> &Vec<u8>;
         fn c_return_mut_rust_vec(c: Pin<&mut C>) -> &mut Vec<u8>;
         fn c_return_rust_vec_string() -> Vec<String>;
+        fn c_return_rust_vec_bool() -> Vec<bool>;
         fn c_return_identity(_: usize) -> usize;
         fn c_return_sum(_: usize, _: usize) -> usize;
         fn c_return_enum(n: u16) -> Enum;
