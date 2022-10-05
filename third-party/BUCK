@@ -17,9 +17,9 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-4.0.2/src/**/*.rs"]) + [
-        "vendor/clap-4.0.2/examples/demo.md",
-        "vendor/clap-4.0.2/examples/demo.rs",
+    srcs = glob(["vendor/clap-4.0.9/src/**/*.rs"]) + [
+        "vendor/clap-4.0.9/examples/demo.md",
+        "vendor/clap-4.0.9/examples/demo.rs",
     ],
     edition = "2021",
     features = [
@@ -77,8 +77,8 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.45/src/**/*.rs"]),
-    build_script = "vendor/proc-macro2-1.0.45/build.rs",
+    srcs = glob(["vendor/proc-macro2-1.0.46/src/**/*.rs"]),
+    build_script = "vendor/proc-macro2-1.0.46/build.rs",
     edition = "2018",
     features = [
         "proc-macro",

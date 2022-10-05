@@ -20,14 +20,14 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-4.0.2/src/**/*.rs"]) + ["vendor/clap-4.0.2/examples/demo.rs"],
+    srcs = glob(["vendor/clap-4.0.9/src/**/*.rs"]) + ["vendor/clap-4.0.9/examples/demo.rs"],
     crate_features = [
         "error-context",
         "help",
         "std",
         "usage",
     ],
-    data = ["vendor/clap-4.0.2/examples/demo.md"],
+    data = ["vendor/clap-4.0.9/examples/demo.md"],
     edition = "2021",
     visibility = ["//visibility:public"],
     deps = [
@@ -78,7 +78,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.45/src/**/*.rs"]),
+    srcs = glob(["vendor/proc-macro2-1.0.46/src/**/*.rs"]),
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -93,7 +93,7 @@ rust_library(
 
 cargo_build_script(
     name = "proc-macro2@build",
-    srcs = ["vendor/proc-macro2-1.0.45/build.rs"],
+    srcs = ["vendor/proc-macro2-1.0.46/build.rs"],
     crate_features = [
         "proc-macro",
         "span-locations",
