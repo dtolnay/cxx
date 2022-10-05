@@ -35,7 +35,7 @@ cxx-build = { version = "=1.0.78", path = "gen/build" }
 cxx-gen = { version = "0.7", path = "gen/lib" }
 cxx-test-suite = { version = "0", path = "tests/ffi" }
 rustversion = "1.0"
-trybuild = { version = "1.0.52", features = ["diff"] }
+trybuild = { version = "1.0.66", features = ["diff"] }
 
 [workspace]
 members = ["demo", "flags", "gen/build", "gen/cmd", "gen/lib", "macro", "tests/ffi"]
