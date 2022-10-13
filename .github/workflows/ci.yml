@@ -47,7 +47,7 @@ jobs:
         # builds.
         run: |
           echo RUSTFLAGS=$RUSTFLAGS >> $GITHUB_ENV
-          echo ::set-output name=exclude::--exclude cxx-test-suite
+          echo exclude=--exclude cxx-test-suite >> $GITHUB_OUTPUT
         env:
           RUSTFLAGS: ${{env.RUSTFLAGS}} ${{matrix.os && github.event_name != 'schedule' && '--cfg skip_ui_tests' || ''}}
         id: testsuite
