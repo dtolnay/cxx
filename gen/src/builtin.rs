@@ -407,7 +407,7 @@ pub(super) fn write(out: &mut OutFile) {
         out.begin_block(Block::ExternC);
         writeln!(
             out,
-            "const char *cxxbridge1$exception(const char *, ::std::size_t);",
+            "const char *cxxbridge1$exception(const char *, ::std::size_t) noexcept;",
         );
         out.end_block(Block::ExternC);
     }
