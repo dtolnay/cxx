@@ -177,9 +177,7 @@ rust::Vec<rust::String> c_return_rust_vec_string() {
   return {"2", "0", "2", "0"};
 }
 
-rust::Vec<bool> c_return_rust_vec_bool() {
-  return {true, true, false};
-}
+rust::Vec<bool> c_return_rust_vec_bool() { return {true, true, false}; }
 
 size_t c_return_identity(size_t n) { return n; }
 
