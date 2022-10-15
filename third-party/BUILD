@@ -20,14 +20,14 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-4.0.9/src/**/*.rs"]) + ["vendor/clap-4.0.9/examples/demo.rs"],
+    srcs = glob(["vendor/clap-4.0.15/src/**/*.rs"]) + ["vendor/clap-4.0.15/examples/demo.rs"],
     crate_features = [
         "error-context",
         "help",
         "std",
         "usage",
     ],
-    data = ["vendor/clap-4.0.9/examples/demo.md"],
+    data = ["vendor/clap-4.0.15/examples/demo.md"],
     edition = "2021",
     visibility = ["//visibility:public"],
     deps = [
@@ -78,7 +78,7 @@ rust_library(
 
 rust_library(
     name = "proc-macro2",
-    srcs = glob(["vendor/proc-macro2-1.0.46/src/**/*.rs"]),
+    srcs = glob(["vendor/proc-macro2-1.0.47/src/**/*.rs"]),
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -93,7 +93,7 @@ rust_library(
 
 cargo_build_script(
     name = "proc-macro2@build",
-    srcs = ["vendor/proc-macro2-1.0.46/build.rs"],
+    srcs = ["vendor/proc-macro2-1.0.47/build.rs"],
     crate_features = [
         "proc-macro",
         "span-locations",
@@ -132,7 +132,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.101/src/**/*.rs"]),
+    srcs = glob(["vendor/syn-1.0.102/src/**/*.rs"]),
     crate_features = [
         "clone-impls",
         "derive",
@@ -153,7 +153,7 @@ rust_library(
 
 cargo_build_script(
     name = "syn@build",
-    srcs = ["vendor/syn-1.0.101/build.rs"],
+    srcs = ["vendor/syn-1.0.102/build.rs"],
     crate_features = [
         "clone-impls",
         "derive",
@@ -174,7 +174,7 @@ rust_library(
 
 rust_library(
     name = "unicode-ident",
-    srcs = glob(["vendor/unicode-ident-1.0.4/src/**/*.rs"]),
+    srcs = glob(["vendor/unicode-ident-1.0.5/src/**/*.rs"]),
     edition = "2018",
 )
 
