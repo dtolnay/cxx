@@ -255,6 +255,7 @@ pub(super) fn write(out: &mut OutFile) {
     }
 
     if builtin.trycatch {
+        include.string = true;
         out.next_section();
         writeln!(out, "class Fail final {{");
         writeln!(out, "  ::rust::repr::PtrLen &throw$;");
@@ -264,6 +265,7 @@ pub(super) fn write(out: &mut OutFile) {
             "  Fail(::rust::repr::PtrLen &throw$) : throw$(throw$) {{}}"
         );
         writeln!(out, "  void operator()(const char *) noexcept;");
+        writeln!(out, "  void operator()(const std::string &) noexcept;");
         writeln!(out, "}};");
     }
 
