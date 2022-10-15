@@ -262,25 +262,25 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "}};");
     }
 
+    out.begin_block(Block::Namespace("repr"));
+
     if builtin.repr_fat {
         include.array = true;
         include.cstdint = true;
         out.next_section();
-        out.begin_block(Block::Namespace("repr"));
         writeln!(out, "using Fat = ::std::array<::std::uintptr_t, 2>;");
-        out.end_block(Block::Namespace("repr"));
     }
 
     if builtin.ptr_len {
         include.cstddef = true;
         out.next_section();
-        out.begin_block(Block::Namespace("repr"));
         writeln!(out, "struct PtrLen final {{");
         writeln!(out, "  void *ptr;");
         writeln!(out, "  ::std::size_t len;");
         writeln!(out, "}};");
-        out.end_block(Block::Namespace("repr"));
     }
+
+    out.end_block(Block::Namespace("repr"));
 
     out.begin_block(Block::AnonymousNamespace);
 
