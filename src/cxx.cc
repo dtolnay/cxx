@@ -537,10 +537,15 @@ class Fail final {
 public:
   Fail(repr::PtrLen &throw$) : throw$(throw$) {}
   void operator()(const char *) noexcept;
+  void operator()(const std::string &) noexcept;
 };
 
 void Fail::operator()(const char *catch$) noexcept {
   throw$ = cxxbridge1$exception(catch$, std::strlen(catch$));
+}
+
+void Fail::operator()(const std::string &catch$) noexcept {
+  throw$ = cxxbridge1$exception(catch$.data(), catch$.length());
 }
 } // namespace detail
 
