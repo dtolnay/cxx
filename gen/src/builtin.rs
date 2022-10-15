@@ -262,7 +262,7 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "public:");
         writeln!(
             out,
-            "  Fail(::rust::repr::PtrLen &throw$) : throw$(throw$) {{}}"
+            "  Fail(::rust::repr::PtrLen &throw$) noexcept : throw$(throw$) {{}}",
         );
         writeln!(out, "  void operator()(const char *) noexcept;");
         writeln!(out, "  void operator()(const std::string &) noexcept;");

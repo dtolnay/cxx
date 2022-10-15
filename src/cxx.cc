@@ -535,7 +535,7 @@ class Fail final {
   repr::PtrLen &throw$;
 
 public:
-  Fail(repr::PtrLen &throw$) : throw$(throw$) {}
+  Fail(repr::PtrLen &throw$) noexcept : throw$(throw$) {}
   void operator()(const char *) noexcept;
   void operator()(const std::string &) noexcept;
 };
