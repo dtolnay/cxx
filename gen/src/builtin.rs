@@ -262,8 +262,6 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "}};");
     }
 
-    out.begin_block(Block::AnonymousNamespace);
-
     if builtin.repr_fat {
         include.array = true;
         include.cstdint = true;
@@ -283,6 +281,8 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "}};");
         out.end_block(Block::Namespace("repr"));
     }
+
+    out.begin_block(Block::AnonymousNamespace);
 
     if builtin.rust_str_new_unchecked || builtin.rust_str_repr {
         out.next_section();
