@@ -68,9 +68,6 @@ void cxxbridge1$slice$new(void *self, const void *ptr,
                           std::size_t len) noexcept;
 void *cxxbridge1$slice$ptr(const void *self) noexcept;
 std::size_t cxxbridge1$slice$len(const void *self) noexcept;
-
-// try/catch
-const char *cxxbridge1$exception(const char *, std::size_t len) noexcept;
 } // extern "C"
 
 namespace rust {
@@ -516,6 +513,10 @@ struct PtrLen final {
 };
 } // namespace repr
 
+extern "C" {
+repr::PtrLen cxxbridge1$exception(const char *, std::size_t len) noexcept;
+}
+
 namespace detail {
 // On some platforms size_t is the same C++ type as one of the sized integer
 // types; on others it is a distinct type. Only in the latter case do we need to
@@ -539,8 +540,7 @@ public:
 };
 
 void Fail::operator()(const char *catch$) noexcept {
-  throw$.len = std::strlen(catch$);
-  throw$.ptr = const_cast<char *>(cxxbridge1$exception(catch$, throw$.len));
+  throw$ = cxxbridge1$exception(catch$, std::strlen(catch$));
 }
 } // namespace detail
 
