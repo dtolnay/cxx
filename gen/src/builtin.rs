@@ -205,6 +205,26 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "inline Slice<T>::Slice(uninit) noexcept {{}}");
     }
 
+    out.begin_block(Block::Namespace("repr"));
+
+    if builtin.repr_fat {
+        include.array = true;
+        include.cstdint = true;
+        out.next_section();
+        writeln!(out, "using Fat = ::std::array<::std::uintptr_t, 2>;");
+    }
+
+    if builtin.ptr_len {
+        include.cstddef = true;
+        out.next_section();
+        writeln!(out, "struct PtrLen final {{");
+        writeln!(out, "  void *ptr;");
+        writeln!(out, "  ::std::size_t len;");
+        writeln!(out, "}};");
+    }
+
+    out.end_block(Block::Namespace("repr"));
+
     out.begin_block(Block::Namespace("detail"));
 
     if builtin.maybe_uninit {
@@ -261,26 +281,6 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "  ~MaybeUninit() {{}}");
         writeln!(out, "}};");
     }
-
-    out.begin_block(Block::Namespace("repr"));
-
-    if builtin.repr_fat {
-        include.array = true;
-        include.cstdint = true;
-        out.next_section();
-        writeln!(out, "using Fat = ::std::array<::std::uintptr_t, 2>;");
-    }
-
-    if builtin.ptr_len {
-        include.cstddef = true;
-        out.next_section();
-        writeln!(out, "struct PtrLen final {{");
-        writeln!(out, "  void *ptr;");
-        writeln!(out, "  ::std::size_t len;");
-        writeln!(out, "}};");
-    }
-
-    out.end_block(Block::Namespace("repr"));
 
     out.begin_block(Block::AnonymousNamespace);
 
