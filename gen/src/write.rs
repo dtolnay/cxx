@@ -847,17 +847,9 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     }
     writeln!(out, ";");
     if efn.throws {
-        out.include.cstring = true;
-        out.builtin.exception = true;
         writeln!(out, "        throw$.ptr = nullptr;");
         writeln!(out, "      }},");
-        writeln!(out, "      [&](const char *catch$) noexcept {{");
-        writeln!(out, "        throw$.len = ::std::strlen(catch$);");
-        writeln!(
-            out,
-            "        throw$.ptr = const_cast<char *>(::cxxbridge1$exception(catch$, throw$.len));",
-        );
-        writeln!(out, "      }});");
+        writeln!(out, "      ::rust::detail::Fail(throw$));");
         writeln!(out, "  return throw$;");
     }
     writeln!(out, "}}");

@@ -68,6 +68,9 @@ void cxxbridge1$slice$new(void *self, const void *ptr,
                           std::size_t len) noexcept;
 void *cxxbridge1$slice$ptr(const void *self) noexcept;
 std::size_t cxxbridge1$slice$len(const void *self) noexcept;
+
+// try/catch
+const char *cxxbridge1$exception(const char *, std::size_t len) noexcept;
 } // extern "C"
 
 namespace rust {
@@ -506,6 +509,13 @@ union MaybeUninit {
 };
 } // namespace
 
+namespace repr {
+struct PtrLen final {
+  void *ptr;
+  std::size_t len;
+};
+} // namespace repr
+
 namespace detail {
 // On some platforms size_t is the same C++ type as one of the sized integer
 // types; on others it is a distinct type. Only in the latter case do we need to
@@ -519,6 +529,19 @@ using isize_if_unique =
     typename std::conditional<std::is_same<rust::isize, int64_t>::value ||
                                   std::is_same<rust::isize, int32_t>::value,
                               struct isize_ignore, rust::isize>::type;
+
+class Fail final {
+  repr::PtrLen &throw$;
+
+public:
+  Fail(repr::PtrLen &throw$) : throw$(throw$) {}
+  void operator()(const char *) noexcept;
+};
+
+void Fail::operator()(const char *catch$) noexcept {
+  throw$.len = std::strlen(catch$);
+  throw$.ptr = const_cast<char *>(cxxbridge1$exception(catch$, throw$.len));
+}
 } // namespace detail
 
 } // namespace cxxbridge1
