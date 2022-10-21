@@ -20,14 +20,14 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-4.0.15/src/**/*.rs"]) + ["vendor/clap-4.0.15/examples/demo.rs"],
+    srcs = glob(["vendor/clap-4.0.18/src/**/*.rs"]) + ["vendor/clap-4.0.18/examples/demo.rs"],
     crate_features = [
         "error-context",
         "help",
         "std",
         "usage",
     ],
-    data = ["vendor/clap-4.0.15/examples/demo.md"],
+    data = ["vendor/clap-4.0.18/examples/demo.md"],
     edition = "2021",
     visibility = ["//visibility:public"],
     deps = [
@@ -132,7 +132,7 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.102/src/**/*.rs"]),
+    srcs = glob(["vendor/syn-1.0.103/src/**/*.rs"]),
     crate_features = [
         "clone-impls",
         "derive",
@@ -153,7 +153,7 @@ rust_library(
 
 cargo_build_script(
     name = "syn@build",
-    srcs = ["vendor/syn-1.0.102/build.rs"],
+    srcs = ["vendor/syn-1.0.103/build.rs"],
     crate_features = [
         "clone-impls",
         "derive",

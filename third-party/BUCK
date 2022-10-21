@@ -17,9 +17,9 @@ rust_library(
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-4.0.15/src/**/*.rs"]) + [
-        "vendor/clap-4.0.15/examples/demo.md",
-        "vendor/clap-4.0.15/examples/demo.rs",
+    srcs = glob(["vendor/clap-4.0.18/src/**/*.rs"]) + [
+        "vendor/clap-4.0.18/examples/demo.md",
+        "vendor/clap-4.0.18/examples/demo.rs",
     ],
     edition = "2021",
     features = [
@@ -108,8 +108,8 @@ rust_library(
 
 rust_library(
     name = "syn",
-    srcs = glob(["vendor/syn-1.0.102/src/**/*.rs"]),
-    build_script = "vendor/syn-1.0.102/build.rs",
+    srcs = glob(["vendor/syn-1.0.103/src/**/*.rs"]),
+    build_script = "vendor/syn-1.0.103/build.rs",
     edition = "2018",
     features = [
         "clone-impls",
