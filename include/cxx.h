@@ -1,19 +1,22 @@
 #pragma once
-#include <algorithm>
 #include <array>
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <exception>
 #include <initializer_list>
+#include <stdexcept>
+#include <string>
+
+#ifndef CXXBRIDGE1_RUST_STD
+#include <algorithm>
+#include <cassert>
+#include <exception>
 #include <iosfwd>
 #include <iterator>
 #include <new>
-#include <stdexcept>
-#include <string>
 #include <type_traits>
 #include <utility>
 #include <vector>
+#endif // CXXBRIDGE1_RUST_STD
 #if defined(_WIN32)
 #include <basetsd.h>
 #else
@@ -30,6 +33,7 @@ template <typename T>
 class impl;
 }
 
+#ifndef CXXBRIDGE1_RUST_STD
 #ifndef CXXBRIDGE1_RUST_STRING
 #define CXXBRIDGE1_RUST_STRING
 // https://cxx.rs/binding/string.html
@@ -151,6 +155,7 @@ private:
   std::array<std::uintptr_t, 2> repr;
 };
 #endif // CXXBRIDGE1_RUST_STR
+#endif
 
 #ifndef CXXBRIDGE1_RUST_SLICE
 namespace detail {
@@ -412,8 +417,10 @@ using isize = ssize_t;
 #endif
 #endif // CXXBRIDGE1_RUST_ISIZE
 
+#ifndef CXXBRIDGE1_RUST_STD
 std::ostream &operator<<(std::ostream &, const String &);
 std::ostream &operator<<(std::ostream &, const Str &);
+#endif
 
 #ifndef CXXBRIDGE1_RUST_OPAQUE
 #define CXXBRIDGE1_RUST_OPAQUE
@@ -465,14 +472,17 @@ using f32 = float;
 using f64 = double;
 
 // Snake case aliases for use in code that uses this style for type names.
-using string = String;
-using str = Str;
 template <typename T>
 using slice = Slice<T>;
+#ifndef CXXBRIDGE1_RUST_STD
+using string = String;
+using str = Str;
 template <typename T>
 using box = Box<T>;
 template <typename T>
 using vec = Vec<T>;
+#endif
+
 using error = Error;
 template <typename Signature>
 using fn = Fn<Signature>;

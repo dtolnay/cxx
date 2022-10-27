@@ -3,13 +3,26 @@ use std::path::Path;
 use std::process::Command;
 
 fn main() {
-    cc::Build::new()
-        .file("src/cxx.cc")
-        .cpp(true)
-        .cpp_link_stdlib(None) // linked via link-cplusplus crate
-        .flag_if_supported(cxxbridge_flags::STD)
-        .warnings_into_errors(cfg!(deny_warnings))
-        .compile("cxxbridge1");
+    // Building without alloc, for a nostd target.
+    if !cfg!(feature = "alloc") {
+        cc::Build::new()
+            .file("src/cxx.cc")
+            .cpp(true)
+            .cpp_link_stdlib(None) // linked via link-cplusplus crate
+            .flag_if_supported(cxxbridge_flags::STD)
+            .warnings_into_errors(cfg!(deny_warnings))
+            .define("CXXBRIDGE1_RUST_STD", None) // Exclude all dependencies on std
+            .compile("cxxbridge1");
+    } else {
+        // Building for STD with all features
+        cc::Build::new()
+            .file("src/cxx.cc")
+            .cpp(true)
+            .cpp_link_stdlib(None) // linked via link-cplusplus crate
+            .flag_if_supported(cxxbridge_flags::STD)
+            .warnings_into_errors(cfg!(deny_warnings))
+            .compile("cxxbridge1");
+    }
 
     println!("cargo:rerun-if-changed=src/cxx.cc");
     println!("cargo:rerun-if-changed=include/cxx.h");

@@ -385,12 +385,29 @@ fn make_include_dir(prj: &Project) -> Result<PathBuf> {
     let include_dir = prj.out_dir.join("cxxbridge").join("include");
     let cxx_h = include_dir.join("rust").join("cxx.h");
     let ref shared_cxx_h = prj.shared_dir.join("rust").join("cxx.h");
-    if let Some(ref original) = env::var_os("DEP_CXXBRIDGE1_HEADER") {
-        out::symlink_file(original, cxx_h)?;
-        out::symlink_file(original, shared_cxx_h)?;
-    } else {
-        out::write(shared_cxx_h, gen::include::HEADER.as_bytes())?;
+
+    if !cfg!(feature = "std") {
+        // For a nonstd target, specify `#define CXXBRIDGE1_RUST_STD` to a copy of "include/cxx.h" and
+        // don't create a symlink to the original header (which has all std features enabled).
+        // This copy can now be included by a C++ file
+        // compiled/linked with `-nostdlib`
+        let mut new = "// Allow building for a nostd target by excluding std dependencies\n#define CXXBRIDGE1_RUST_STD\n"
+            .to_string()
+            .as_bytes()
+            .to_vec();
+        let mut byte_vec = gen::include::HEADER.as_bytes().to_vec();
+        new.append(&mut byte_vec);
+        let slice: &[u8] = &new;
+        out::write(shared_cxx_h, slice)?;
         out::symlink_file(shared_cxx_h, cxx_h)?;
+    } else {
+        if let Some(ref original) = env::var_os("DEP_CXXBRIDGE1_HEADER") {
+            out::symlink_file(original, cxx_h)?;
+            out::symlink_file(original, shared_cxx_h)?;
+        } else {
+            out::write(shared_cxx_h, gen::include::HEADER.as_bytes())?;
+            out::symlink_file(shared_cxx_h, cxx_h)?;
+        }
     }
     Ok(include_dir)
 }

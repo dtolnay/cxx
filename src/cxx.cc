@@ -1,9 +1,12 @@
 #include "../include/cxx.h"
 #include <cstring>
+#ifndef CXXBRIDGE1_RUST_STD
 #include <iostream>
 #include <memory>
+#endif
 
 extern "C" {
+#ifndef CXXBRIDGE1_RUST_STD
 void cxxbridge1$cxx_string$init(std::string *s, const std::uint8_t *ptr,
                                 std::size_t len) noexcept {
   new (s) std::string(reinterpret_cast<const char *>(ptr), len);
@@ -62,6 +65,7 @@ bool cxxbridge1$str$from(rust::Str *self, const char *ptr,
                          std::size_t len) noexcept;
 const char *cxxbridge1$str$ptr(const rust::Str *self) noexcept;
 std::size_t cxxbridge1$str$len(const rust::Str *self) noexcept;
+#endif
 
 // rust::Slice
 void cxxbridge1$slice$new(void *self, const void *ptr,
@@ -73,6 +77,13 @@ std::size_t cxxbridge1$slice$len(const void *self) noexcept;
 namespace rust {
 inline namespace cxxbridge1 {
 
+template <typename T>
+static bool is_aligned(const void *ptr) noexcept {
+  auto iptr = reinterpret_cast<std::uintptr_t>(ptr);
+  return !(iptr % alignof(T));
+}
+
+#ifndef CXXBRIDGE1_RUST_STD
 template <typename Exception>
 void panic [[noreturn]] (const char *msg) {
 #if defined(RUST_CXX_NO_EXCEPTIONS)
@@ -84,12 +95,6 @@ void panic [[noreturn]] (const char *msg) {
 }
 
 template void panic<std::out_of_range> [[noreturn]] (const char *msg);
-
-template <typename T>
-static bool is_aligned(const void *ptr) noexcept {
-  auto iptr = reinterpret_cast<std::uintptr_t>(ptr);
-  return !(iptr % alignof(T));
-}
 
 String::String() noexcept { cxxbridge1$string$new(this); }
 
@@ -377,6 +382,7 @@ std::ostream &operator<<(std::ostream &os, const Str &s) {
   os.write(s.data(), s.size());
   return os;
 }
+#endif
 
 void sliceInit(void *self, const void *ptr, std::size_t len) noexcept {
   cxxbridge1$slice$new(self, ptr, len);
@@ -406,11 +412,13 @@ static_assert(sizeof(rust::isize) == sizeof(std::intptr_t),
 static_assert(alignof(rust::isize) == alignof(std::intptr_t),
               "unsupported ssize_t alignment");
 
+#ifndef CXXBRIDGE1_RUST_STD
 static_assert(std::is_trivially_copy_constructible<Str>::value,
               "trivial Str(const Str &)");
 static_assert(std::is_trivially_copy_assignable<Str>::value,
               "trivial operator=(const Str &)");
 static_assert(std::is_trivially_destructible<Str>::value, "trivial ~Str()");
+#endif
 
 static_assert(
     std::is_trivially_copy_constructible<Slice<const std::uint8_t>>::value,
@@ -448,6 +456,7 @@ static_assert(!std::is_same<Vec<std::uint8_t>::const_iterator,
                             Vec<std::uint8_t>::iterator>::value,
               "Vec<T>::const_iterator != Vec<T>::iterator");
 
+#ifndef CXXBRIDGE1_RUST_STD
 static const char *errorCopy(const char *ptr, std::size_t len) {
   char *copy = new char[len];
   std::memcpy(copy, ptr, len);
@@ -494,6 +503,7 @@ Error &Error::operator=(Error &&other) &noexcept {
   other.len = 0;
   return *this;
 }
+#endif
 
 const char *Error::what() const noexcept { return this->msg; }
 
@@ -513,9 +523,11 @@ struct PtrLen final {
 };
 } // namespace repr
 
+#ifndef CXXBRIDGE1_RUST_STD
 extern "C" {
 repr::PtrLen cxxbridge1$exception(const char *, std::size_t len) noexcept;
 }
+#endif
 
 namespace detail {
 // On some platforms size_t is the same C++ type as one of the sized integer
@@ -530,7 +542,7 @@ using isize_if_unique =
     typename std::conditional<std::is_same<rust::isize, int64_t>::value ||
                                   std::is_same<rust::isize, int32_t>::value,
                               struct isize_ignore, rust::isize>::type;
-
+#ifndef CXXBRIDGE1_RUST_STD
 class Fail final {
   repr::PtrLen &throw$;
 
@@ -547,6 +559,7 @@ void Fail::operator()(const char *catch$) noexcept {
 void Fail::operator()(const std::string &catch$) noexcept {
   throw$ = cxxbridge1$exception(catch$.data(), catch$.length());
 }
+#endif
 } // namespace detail
 
 } // namespace cxxbridge1
@@ -559,6 +572,7 @@ void destroy(T *ptr) {
 }
 } // namespace
 
+#ifndef CXXBRIDGE1_RUST_STD
 extern "C" {
 void cxxbridge1$unique_ptr$std$string$null(
     std::unique_ptr<std::string> *ptr) noexcept {
@@ -790,3 +804,4 @@ inline namespace cxxbridge1 {
 FOR_EACH_RUST_VEC(RUST_VEC_OPS)
 } // namespace cxxbridge1
 } // namespace rust
+#endif // CXXBRIDGE1_RUST_STD
