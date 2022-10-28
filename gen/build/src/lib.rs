@@ -424,6 +424,16 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
     let shared_cc = prj.shared_dir.join(&prj.include_prefix).join(rel_path_cc);
     let _ = out::symlink_file(header_path, shared_h);
     let _ = out::symlink_file(implementation_path, shared_cc);
+
+    if let Ok(export_path) = env::var("GENERATED_HEADER_DIR") {
+        out::symlink_file(
+            header_path,
+            PathBuf::from(export_path)
+                .join(&prj.include_prefix)
+                .join(rel_path_h),
+        )?;
+    }
+
     Ok(())
 }
 
