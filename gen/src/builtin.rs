@@ -279,7 +279,7 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "  T value;");
         writeln!(
             out,
-            "  ManuallyDrop(T &&value) : value(::std::move(value)) {{}}",
+            "  ManuallyDrop(T &&value_) : value(::std::move(value_)) {{}}",
         );
         writeln!(out, "  ~ManuallyDrop() {{}}");
         writeln!(out, "}};");
