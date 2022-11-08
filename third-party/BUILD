@@ -13,21 +13,21 @@ rust_library(
 
 rust_library(
     name = "cc",
-    srcs = glob(["vendor/cc-1.0.73/src/**/*.rs"]),
+    srcs = glob(["vendor/cc-1.0.74/src/**/*.rs"]),
     edition = "2018",
     visibility = ["//visibility:public"],
 )
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-4.0.18/src/**/*.rs"]) + ["vendor/clap-4.0.18/examples/demo.rs"],
+    srcs = glob(["vendor/clap-4.0.22/src/**/*.rs"]) + ["vendor/clap-4.0.22/examples/demo.rs"],
     crate_features = [
         "error-context",
         "help",
         "std",
         "usage",
     ],
-    data = ["vendor/clap-4.0.18/examples/demo.md"],
+    data = ["vendor/clap-4.0.22/examples/demo.md"],
     edition = "2021",
     visibility = ["//visibility:public"],
     deps = [
@@ -58,7 +58,7 @@ rust_library(
 
 rust_library(
     name = "once_cell",
-    srcs = glob(["vendor/once_cell-1.15.0/src/**/*.rs"]),
+    srcs = glob(["vendor/once_cell-1.16.0/src/**/*.rs"]),
     crate_features = [
         "alloc",
         "std",
@@ -69,7 +69,7 @@ rust_library(
 
 rust_library(
     name = "os_str_bytes",
-    srcs = glob(["vendor/os_str_bytes-6.3.0/src/**/*.rs"]),
+    srcs = glob(["vendor/os_str_bytes-6.3.1/src/**/*.rs"]),
     crate_features = [
         "raw_os_str",
     ],
