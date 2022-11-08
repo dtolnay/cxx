@@ -13,7 +13,7 @@ impl QualifiedName {
         let leading_colons: Option<Token![::]> = input.parse()?;
         while trailing_punct && input.peek(Ident::peek_any) {
             let ident = Ident::parse_any(input)?;
-            segments.push(ident);
+            segments.push(ident.unraw());
             let colons: Option<Token![::]> = input.parse()?;
             trailing_punct = colons.is_some();
         }
