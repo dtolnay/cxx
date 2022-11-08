@@ -1,14 +1,20 @@
 error[E0282]: type annotations needed
- --> tests/ui/unpin_impl.rs:4:14
+ --> tests/ui/unpin_impl.rs:1:1
   |
-4 |         type Opaque;
-  |              ^^^^^^ cannot infer type
+1 | #[cxx::bridge]
+  | ^^^^^^^^^^^^^^ cannot infer type of the type parameter `Self` declared on the trait `__AmbiguousIfImpl`
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider specifying the generic argument
+  |
+1 | #[cxx::bridge]::<_>
+  |               +++++
 
 error[E0283]: type annotations needed
  --> tests/ui/unpin_impl.rs:1:1
   |
 1 | #[cxx::bridge]
-  | ^^^^^^^^^^^^^^ cannot infer type
+  | ^^^^^^^^^^^^^^ cannot infer type of the type parameter `Self` declared on the trait `__AmbiguousIfImpl`
   |
 note: multiple `impl`s satisfying `ffi::Opaque: __AmbiguousIfImpl<_>` found
  --> tests/ui/unpin_impl.rs:1:1
@@ -16,3 +22,7 @@ note: multiple `impl`s satisfying `ffi::Opaque: __AmbiguousIfImpl<_>` found
 1 | #[cxx::bridge]
   | ^^^^^^^^^^^^^^
   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider specifying the generic argument
+  |
+1 | #[cxx::bridge]::<_>
+  |               +++++
