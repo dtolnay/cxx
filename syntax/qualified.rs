@@ -36,15 +36,15 @@ fn parse_unquoted(input: ParseStream, allow_raw: bool) -> Result<QualifiedName> 
     let leading_colons: Option<Token![::]> = input.parse()?;
     while trailing_punct && input.peek(Ident::peek_any) {
         let mut ident = Ident::parse_any(input)?;
-        if ident.to_string().starts_with("r#") {
+        if let Some(unraw) = ident.to_string().strip_prefix("r#") {
             if !allow_raw {
                 let msg = format!(
-                    "raw identifier `{}` is not allowed in a quoted namespace",
-                    ident,
+                    "raw identifier `{}` is not allowed in a quoted namespace; use `{}`, or remove quotes",
+                    ident, unraw,
                 );
                 return Err(Error::new(ident.span(), msg));
             }
-            ident = ident.unraw();
+            ident = Ident::new(unraw, ident.span());
         }
         segments.push(ident);
         let colons: Option<Token![::]> = input.parse()?;
