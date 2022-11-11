@@ -422,7 +422,11 @@ fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
     writeln!(out, " {{");
     for variant in &enm.variants {
         for line in variant.doc.to_string().lines() {
-            writeln!(out, "  ///{}", line);
+            if cfg!(feature = "doxygen") {
+                writeln!(out, "  ///{}", line);
+            } else {
+                writeln!(out, "  //{}", line);
+            }
         }
         writeln!(out, "  {} = {},", variant.name.cxx, variant.discriminant);
     }
