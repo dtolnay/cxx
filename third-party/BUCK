@@ -10,16 +10,16 @@ rust_library(
 
 rust_library(
     name = "cc",
-    srcs = glob(["vendor/cc-1.0.74/src/**/*.rs"]),
+    srcs = glob(["vendor/cc-1.0.76/src/**/*.rs"]),
     edition = "2018",
     visibility = ["PUBLIC"],
 )
 
 rust_library(
     name = "clap",
-    srcs = glob(["vendor/clap-4.0.22/src/**/*.rs"]) + [
-        "vendor/clap-4.0.22/examples/demo.md",
-        "vendor/clap-4.0.22/examples/demo.rs",
+    srcs = glob(["vendor/clap-4.0.26/src/**/*.rs"]) + [
+        "vendor/clap-4.0.26/examples/demo.md",
+        "vendor/clap-4.0.26/examples/demo.rs",
     ],
     edition = "2021",
     features = [
@@ -68,7 +68,7 @@ rust_library(
 
 rust_library(
     name = "os_str_bytes",
-    srcs = glob(["vendor/os_str_bytes-6.3.1/src/**/*.rs"]),
+    srcs = glob(["vendor/os_str_bytes-6.4.0/src/**/*.rs"]),
     edition = "2021",
     features = [
         "raw_os_str",
