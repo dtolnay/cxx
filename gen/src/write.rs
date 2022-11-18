@@ -228,12 +228,21 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
 }
 
 fn write_doc(out: &mut OutFile, indent: &str, doc: &Doc) {
+    let mut lines = 0;
     for line in doc.to_string().lines() {
         if out.opt.doxygen {
             writeln!(out, "{}///{}", indent, line);
         } else {
             writeln!(out, "{}//{}", indent, line);
         }
+        lines += 1;
+    }
+    // According to https://www.doxygen.nl/manual/docblocks.html, Doxygen only
+    // interprets `///` as a Doxygen comment block if there are at least 2 of
+    // them. In Rust, a single `///` is definitely still documentation so we
+    // make sure to propagate that as a Doxygen comment.
+    if out.opt.doxygen && lines == 1 {
+        writeln!(out, "{}///", indent);
     }
 }
 
