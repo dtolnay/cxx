@@ -19,7 +19,7 @@ pub struct Cfg<'a> {
 ///
 /// <br>
 ///
-/// <div style="float:right;margin:22px 50px 0;font-size:1.15em;color:#444"><strong>&amp;str</strong></div>
+/// <div style="float:right;margin:22px 50px 0;font-size:1.15em;opacity:.73"><strong>&amp;str</strong></div>
 ///
 /// ## **`CFG.include_prefix`**
 ///
@@ -71,7 +71,7 @@ pub struct Cfg<'a> {
 ///
 /// <br>
 ///
-/// <div style="float:right;margin:22px 50px 0;font-size:1.15em;color:#444"><strong>Vec&lt;&amp;Path&gt;</strong></div>
+/// <div style="float:right;margin:22px 50px 0;font-size:1.15em;opacity:.73"><strong>Vec&lt;&amp;Path&gt;</strong></div>
 ///
 /// ## **`CFG.exported_header_dirs`**
 ///
@@ -146,7 +146,7 @@ pub struct Cfg<'a> {
 ///
 /// <p style="margin:0"><br><br></p>
 ///
-/// <div style="float:right;margin:22px 50px 0;font-size:1.15em;color:#444"><strong>Vec&lt;&amp;str&gt;</strong></div>
+/// <div style="float:right;margin:22px 50px 0;font-size:1.15em;opacity:.73"><strong>Vec&lt;&amp;str&gt;</strong></div>
 ///
 /// ## **`CFG.exported_header_prefixes`**
 ///
@@ -203,7 +203,7 @@ pub struct Cfg<'a> {
 ///
 /// <p style="margin:0"><br><br></p>
 ///
-/// <div style="float:right;margin:22px 50px 0;font-size:1.15em;color:#444"><strong>Vec&lt;&amp;str&gt;</strong></div>
+/// <div style="float:right;margin:22px 50px 0;font-size:1.15em;opacity:.73"><strong>Vec&lt;&amp;str&gt;</strong></div>
 ///
 /// ## **`CFG.exported_header_links`**
 ///
