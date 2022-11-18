@@ -98,6 +98,7 @@ version = "1.0.81"
 dependencies = [
  "cc",
  "codespan-reporting",
+ "cxx",
  "cxx-gen",
  "once_cell",
  "pkg-config",

@@ -12,6 +12,8 @@ pub struct Cfg<'a> {
     pub exported_header_prefixes: Vec<&'a str>,
     /// See [`CFG.exported_header_links`][CFG#cfgexported_header_links].
     pub exported_header_links: Vec<&'a str>,
+    /// See [`CFG.doxygen`][CFG#cfgdoxygen].
+    pub doxygen: bool,
     marker: PhantomData<*const ()>, // !Send + !Sync
 }
 
@@ -232,12 +234,84 @@ pub struct Cfg<'a> {
 ///     cxx_build::bridge("src/bridge.rs").compile("demo");
 /// }
 /// ```
+///
+/// <p style="margin:0"><br><br></p>
+///
+/// <div style="float:right;margin:22px 50px 0;font-size:1.15em;opacity:.73"><strong>bool</strong></div>
+///
+/// ## **`CFG.doxygen`**
+///
+/// Boolean. Whether to propagate Rust documentation from inside the cxx::bridge
+/// module as Doxygen-style comments in the generated C++ header.
+///
+/// Documentation on the following are supported:
+///
+/// - shared structs, and fields of shared structs
+/// - shared enums, and their variants
+/// - extern "Rust" opaque types
+/// - extern "Rust" functions, including methods/member functions
+///
+/// ### Example
+///
+/// ```no_run
+/// // build.rs
+///
+/// use cxx_build::CFG;
+///
+/// fn main() {
+///     CFG.doxygen = true;
+///
+///     cxx_build::bridge("src/bridge.rs").compile("demo");
+/// }
+/// ```
+///
+/// ```rust
+/// // src/bridge.rs
+///
+/// #[cxx::bridge]
+/// mod ffi {
+///     /// documentation of MyStruct
+///     pub struct MyStruct {
+///         /// documentation of the struct field
+///         lol: String,
+///     }
+///
+///     extern "Rust" {
+///         /// documentation of MyType
+///         type MyType;
+///
+///         /// function documentation
+///         fn asdf() -> bool;
+///     }
+/// }
+/// #
+/// # pub struct MyType;
+/// # fn asdf() -> bool { true }
+/// # fn main() {}
+/// ```
+///
+/// With `CFG.doxygen` enabled, the generated C++ header through which
+/// downstream C++ code will be able to access these shared structs and extern
+/// "Rust" signatures will have the Rust documentation comments propagated as
+/// Doxygen-style comments:
+///
+/// ```cpp
+/// /// documentation of MyStruct
+/// struct MyStruct final {
+///   /// documentation of the struct field
+///   ::rust::String lol;
+///   …
+/// };
+/// ```
+///
+/// Otherwise by default (without `CFG.doxygen`) they'll just be `//` comments.
 #[cfg(doc)]
 pub static mut CFG: Cfg = Cfg {
     include_prefix: "",
     exported_header_dirs: Vec::new(),
     exported_header_prefixes: Vec::new(),
     exported_header_links: Vec::new(),
+    doxygen: false,
     marker: PhantomData,
 };
 
@@ -248,6 +322,7 @@ impl<'a> Debug for Cfg<'a> {
             exported_header_dirs,
             exported_header_prefixes,
             exported_header_links,
+            doxygen,
             marker: _,
         } = self;
         formatter
@@ -256,6 +331,7 @@ impl<'a> Debug for Cfg<'a> {
             .field("exported_header_dirs", exported_header_dirs)
             .field("exported_header_prefixes", exported_header_prefixes)
             .field("exported_header_links", exported_header_links)
+            .field("doxygen", doxygen)
             .finish()
     }
 }
@@ -280,6 +356,7 @@ mod r#impl {
         exported_header_dirs: Vec<InternedString>,
         exported_header_prefixes: Vec<InternedString>,
         exported_header_links: Vec<InternedString>,
+        doxygen: bool,
     }
 
     impl CurrentCfg {
@@ -290,11 +367,13 @@ mod r#impl {
             let exported_header_dirs = Vec::new();
             let exported_header_prefixes = Vec::new();
             let exported_header_links = Vec::new();
+            let doxygen = false;
             CurrentCfg {
                 include_prefix,
                 exported_header_dirs,
                 exported_header_prefixes,
                 exported_header_links,
+                doxygen,
             }
         }
     }
@@ -327,11 +406,13 @@ mod r#impl {
             let exported_header_dirs = current.exported_header_dirs.vec();
             let exported_header_prefixes = current.exported_header_prefixes.vec();
             let exported_header_links = current.exported_header_links.vec();
+            let doxygen = current.doxygen;
             super::Cfg {
                 include_prefix,
                 exported_header_dirs,
                 exported_header_prefixes,
                 exported_header_links,
+                doxygen,
                 marker: PhantomData,
             }
         }
@@ -397,6 +478,7 @@ mod r#impl {
                     exported_header_dirs,
                     exported_header_prefixes,
                     exported_header_links,
+                    doxygen,
                     marker: _,
                 } = cfg;
                 let mut current = CURRENT.write().unwrap_or_else(PoisonError::into_inner);
@@ -404,6 +486,7 @@ mod r#impl {
                 current.exported_header_dirs = vec::intern(exported_header_dirs);
                 current.exported_header_prefixes = vec::intern(exported_header_prefixes);
                 current.exported_header_links = vec::intern(exported_header_links);
+                current.doxygen = *doxygen;
             } else {
                 CONST_DEREFS.with(|derefs| derefs.borrow_mut().remove(&self.handle()));
             }
