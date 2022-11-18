@@ -229,7 +229,11 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
 
 fn write_doc(out: &mut OutFile, indent: &str, doc: &Doc) {
     for line in doc.to_string().lines() {
-        writeln!(out, "{}//{}", indent, line);
+        if out.opt.doxygen {
+            writeln!(out, "{}///{}", indent, line);
+        } else {
+            writeln!(out, "{}//{}", indent, line);
+        }
     }
 }
 
