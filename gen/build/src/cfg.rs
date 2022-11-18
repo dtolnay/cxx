@@ -391,14 +391,14 @@ mod r#impl {
 
     impl<'a> Drop for Cfg<'a> {
         fn drop(&mut self) {
-            if let Cfg::Mut(super::Cfg {
-                include_prefix,
-                exported_header_dirs,
-                exported_header_prefixes,
-                exported_header_links,
-                marker: _,
-            }) = self
-            {
+            if let Cfg::Mut(cfg) = self {
+                let super::Cfg {
+                    include_prefix,
+                    exported_header_dirs,
+                    exported_header_prefixes,
+                    exported_header_links,
+                    marker: _,
+                } = cfg;
                 let mut current = CURRENT.write().unwrap_or_else(PoisonError::into_inner);
                 current.include_prefix = intern(include_prefix);
                 current.exported_header_dirs = vec::intern(exported_header_dirs);
