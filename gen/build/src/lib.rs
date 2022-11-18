@@ -399,6 +399,7 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
     let opt = Opt {
         allow_dot_includes: false,
         cfg_evaluator: Box::new(CargoEnvCfgEvaluator),
+        doxygen: CFG.doxygen,
         ..Opt::default()
     };
     let generated = gen::generate_from_path(rust_source_file, &opt);

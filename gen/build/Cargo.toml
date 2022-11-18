@@ -27,6 +27,7 @@ scratch = "1.0"
 syn = { version = "1.0.95", default-features = false, features = ["parsing", "printing", "clone-impls", "full"] }
 
 [dev-dependencies]
+cxx = { version = "1.0", path = "../.." }
 cxx-gen = { version = "0.7", path = "../lib" }
 pkg-config = "0.3"
 
