@@ -1,7 +1,7 @@
 use crate::syntax::atom::Atom::*;
 use crate::syntax::{
     Array, Atom, Derive, Enum, EnumRepr, ExternFn, ExternType, Impl, Lifetimes, NamedType, Ptr,
-    Ref, Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var,
+    Ref, Signature, SliceRef, Struct, Ty1, Ty2, Type, TypeAlias, Var,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote_spanned, ToTokens};
@@ -29,6 +29,7 @@ impl ToTokens for Type {
             | Type::WeakPtr(ty)
             | Type::CxxVector(ty)
             | Type::RustVec(ty) => ty.to_tokens(tokens),
+            Type::CxxFunction(ty) => ty.to_tokens(tokens),
             Type::Ref(r) | Type::Str(r) => r.to_tokens(tokens),
             Type::Ptr(p) => p.to_tokens(tokens),
             Type::Array(a) => a.to_tokens(tokens),
@@ -66,7 +67,7 @@ impl ToTokens for Ty1 {
         } = self;
         let span = name.span();
         match name.to_string().as_str() {
-            "UniquePtr" | "SharedPtr" | "WeakPtr" | "CxxVector" => {
+            "UniquePtr" | "SharedPtr" | "WeakPtr" | "CxxVector" | "CxxFunction" => {
                 tokens.extend(quote_spanned!(span=> ::cxx::));
             }
             "Box" => {
@@ -80,6 +81,32 @@ impl ToTokens for Ty1 {
         name.to_tokens(tokens);
         langle.to_tokens(tokens);
         inner.to_tokens(tokens);
+        rangle.to_tokens(tokens);
+    }
+}
+
+impl ToTokens for Ty2 {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let Ty2 {
+            name,
+            langle,
+            first,
+            comma,
+            second,
+            rangle,
+        } = self;
+        let span = name.span();
+        match name.to_string().as_str() {
+            "CxxFunction" => {
+                tokens.extend(quote_spanned!(span=> ::cxx::));
+            }
+            _ => {}
+        }
+        name.to_tokens(tokens);
+        langle.to_tokens(tokens);
+        first.to_tokens(tokens);
+        comma.to_tokens(tokens);
+        second.to_tokens(tokens);
         rangle.to_tokens(tokens);
     }
 }

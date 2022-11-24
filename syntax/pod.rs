@@ -28,6 +28,7 @@ impl<'a> Types<'a> {
             | Type::SharedPtr(_)
             | Type::WeakPtr(_)
             | Type::CxxVector(_)
+            | Type::CxxFunction(_)
             | Type::Void(_) => false,
             Type::Ref(_) | Type::Str(_) | Type::Fn(_) | Type::SliceRef(_) | Type::Ptr(_) => true,
             Type::Array(array) => self.is_guaranteed_pod(&array.inner),

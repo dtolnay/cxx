@@ -1,5 +1,5 @@
 use crate::syntax::{
-    Array, ExternFn, Include, Lifetimes, Ptr, Receiver, Ref, Signature, SliceRef, Ty1, Type, Var,
+    Array, ExternFn, Include, Lifetimes, Ptr, Receiver, Ref, Signature, TupleStruct, SliceRef, Ty1, Ty2, Type, Var,
 };
 use std::hash::{Hash, Hasher};
 use std::mem;
@@ -53,6 +53,7 @@ impl Hash for Type {
             Type::Str(t) => t.hash(state),
             Type::RustVec(t) => t.hash(state),
             Type::CxxVector(t) => t.hash(state),
+            Type::CxxFunction(t) => t.hash(state),
             Type::Fn(t) => t.hash(state),
             Type::SliceRef(t) => t.hash(state),
             Type::Array(t) => t.hash(state),
@@ -75,6 +76,7 @@ impl PartialEq for Type {
             (Type::Str(lhs), Type::Str(rhs)) => lhs == rhs,
             (Type::RustVec(lhs), Type::RustVec(rhs)) => lhs == rhs,
             (Type::CxxVector(lhs), Type::CxxVector(rhs)) => lhs == rhs,
+            (Type::CxxFunction(lhs), Type::CxxFunction(rhs)) => lhs == rhs,
             (Type::Fn(lhs), Type::Fn(rhs)) => lhs == rhs,
             (Type::SliceRef(lhs), Type::SliceRef(rhs)) => lhs == rhs,
             (Type::Void(_), Type::Void(_)) => true,
@@ -145,6 +147,46 @@ impl Hash for Ty1 {
         } = self;
         name.hash(state);
         inner.hash(state);
+    }
+}
+
+impl Eq for Ty2 {}
+
+impl PartialEq for Ty2 {
+    fn eq(&self, other: &Self) -> bool {
+        let Ty2 {
+            name,
+            langle: _,
+            first,
+            comma: _,
+            second,
+            rangle: _,
+        } = self;
+        let Ty2 {
+            name: name2,
+            langle: _,
+            first: first2,
+            comma: _,
+            second: second2,
+            rangle: _,
+        } = other;
+        name == name2 && first == first2 && second == second2
+    }
+}
+
+impl Hash for Ty2 {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let Ty2 {
+            name,
+            langle: _,
+            first,
+            comma: _,
+            second,
+            rangle: _,
+        } = self;
+        name.hash(state);
+        first.hash(state);
+        second.hash(state);
     }
 }
 
@@ -393,6 +435,43 @@ impl Hash for Signature {
         }
         ret.hash(state);
         throws.hash(state);
+    }
+}
+
+impl Eq for TupleStruct {}
+
+impl PartialEq for TupleStruct {
+    fn eq(&self, other: &Self) -> bool {
+        let TupleStruct {
+            types,
+            name: _,
+            paren_token: _,
+            generics: _,
+        } = self;
+        let TupleStruct {
+            types: types2,
+            name: _,
+            paren_token: _,
+            generics: _,
+        } = other;
+        types.len() == types2.len()
+            && types.iter().zip(types2).all(|(ty, ty2)| {
+                ty == ty2
+            })
+    }
+}
+
+impl Hash for TupleStruct {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        let TupleStruct {
+            types,
+            name: _,
+            paren_token: _,
+            generics: _,
+        } = self;
+        for ty in types {
+            ty.hash(state);
+        }
     }
 }
 

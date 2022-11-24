@@ -437,6 +437,7 @@ compile_error! {
 mod macros;
 
 mod c_char;
+mod cxx_function;
 mod cxx_vector;
 mod exception;
 mod extern_type;
@@ -464,6 +465,7 @@ pub mod vector;
 mod weak_ptr;
 
 pub use crate::cxx_vector::CxxVector;
+pub use crate::cxx_function::CxxFunction;
 #[cfg(feature = "alloc")]
 pub use crate::exception::Exception;
 pub use crate::extern_type::{kind, ExternType};
@@ -492,6 +494,7 @@ pub type Vector<T> = CxxVector<T>;
 pub mod private {
     pub use crate::c_char::c_char;
     pub use crate::cxx_vector::VectorElement;
+    pub use crate::cxx_function::CxxFunctionArguments;
     pub use crate::extern_type::{verify_extern_kind, verify_extern_type};
     pub use crate::function::FatFunction;
     pub use crate::hash::hash;

@@ -2,13 +2,14 @@ use crate::cxx_vector::{CxxVector, VectorElement};
 use crate::fmt::display;
 use crate::kind::Trivial;
 use crate::string::CxxString;
-use crate::ExternType;
+use crate::{CxxFunction, ExternType};
 use core::ffi::c_void;
 use core::fmt::{self, Debug, Display};
 use core::marker::PhantomData;
 use core::mem::{self, MaybeUninit};
 use core::ops::{Deref, DerefMut};
 use core::pin::Pin;
+use cxx::private::CxxFunctionArguments;
 
 /// Binding to C++ `std::unique_ptr<T, std::default_delete<T>>`.
 #[repr(C)]
@@ -277,6 +278,30 @@ where
 {
     fn __typename(f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "CxxVector<{}>", display(T::__typename))
+    }
+    fn __null() -> MaybeUninit<*mut c_void> {
+        T::__unique_ptr_null()
+    }
+    unsafe fn __raw(raw: *mut Self) -> MaybeUninit<*mut c_void> {
+        unsafe { T::__unique_ptr_raw(raw) }
+    }
+    unsafe fn __get(repr: MaybeUninit<*mut c_void>) -> *const Self {
+        unsafe { T::__unique_ptr_get(repr) }
+    }
+    unsafe fn __release(repr: MaybeUninit<*mut c_void>) -> *mut Self {
+        unsafe { T::__unique_ptr_release(repr) }
+    }
+    unsafe fn __drop(repr: MaybeUninit<*mut c_void>) {
+        unsafe { T::__unique_ptr_drop(repr) }
+    }
+}
+
+unsafe impl<T, U> UniquePtrTarget for CxxFunction<T, U>
+    where
+        T: CxxFunctionArguments<U>,
+{
+    fn __typename(f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "CxxFunction<{}>", display(T::__typename))
     }
     fn __null() -> MaybeUninit<*mut c_void> {
         T::__unique_ptr_null()

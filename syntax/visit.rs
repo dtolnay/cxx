@@ -18,6 +18,10 @@ where
         | Type::WeakPtr(ty)
         | Type::CxxVector(ty)
         | Type::RustVec(ty) => visitor.visit_type(&ty.inner),
+        | Type::CxxFunction(ty) => {
+            visitor.visit_type(&ty.first);
+            visitor.visit_type(&ty.second);
+        }
         Type::Ref(r) => visitor.visit_type(&r.inner),
         Type::Ptr(p) => visitor.visit_type(&p.inner),
         Type::Array(a) => visitor.visit_type(&a.inner),

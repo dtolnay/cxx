@@ -16,7 +16,7 @@
 pub mod cast;
 pub mod module;
 
-use cxx::{type_id, CxxString, CxxVector, ExternType, SharedPtr, UniquePtr};
+use cxx::{type_id, CxxFunction, CxxString, CxxVector, ExternType, SharedPtr, UniquePtr};
 use std::fmt::{self, Display};
 use std::mem::MaybeUninit;
 use std::os::raw::c_char;
@@ -255,6 +255,19 @@ pub mod ffi {
         type Buffer = crate::Buffer;
     }
 
+    pub struct TestArgs<'a>(
+        u8,
+        &'a R,
+        Vec<u8>,
+        &'a Vec<u8>,
+        String,
+        &'a String,
+        SharedString,
+        &'a SharedString,
+        Box<R>,
+    );
+    pub struct NoArgs();
+
     extern "Rust" {
         type R;
 
@@ -291,6 +304,10 @@ pub mod ffi {
         fn r_take_rust_string(s: String);
         fn r_take_unique_ptr_string(s: UniquePtr<CxxString>);
         fn r_take_ref_vector(v: &CxxVector<u8>);
+        fn r_take_ref_func_tuple_args(v: &CxxFunction<TestArgs, u8>);
+        unsafe fn r_take_ref_func_single_arg_opaque<'a>(f: &CxxFunction<&'a R, ()>);
+        fn r_take_unique_ptr_func(v: UniquePtr<CxxFunction<NoArgs, ()>>);
+        fn r_take_ref_func_no_args(v: &'static CxxFunction<NoArgs, ()>);
         fn r_take_ref_empty_vector(v: &CxxVector<u64>);
         fn r_take_rust_vec(v: Vec<u8>);
         fn r_take_rust_vec_string(v: Vec<String>);
@@ -592,6 +609,35 @@ fn r_take_unique_ptr_string(s: UniquePtr<CxxString>) {
 fn r_take_ref_vector(v: &CxxVector<u8>) {
     let slice = v.as_slice();
     assert_eq!(slice, [20, 2, 0]);
+}
+
+fn r_take_ref_func_tuple_args(f: &CxxFunction<ffi::TestArgs, u8>) {
+    let retval = f.call(
+        ffi::TestArgs(
+            2,
+            &R(911),
+            vec![42],
+            &vec![64],
+            "malin".to_owned(),
+            &"iladalen".to_string(),
+            ffi::SharedString { msg: "sagene".to_owned() },
+            &ffi::SharedString { msg: "torshov".to_owned() },
+            Box::new(R(777)),
+        )
+    );
+    assert_eq!(200, retval);
+}
+
+unsafe fn r_take_ref_func_single_arg_opaque<'a>(f: &CxxFunction<&'a R, ()>) {
+    f.call(&R(128));
+}
+
+fn r_take_unique_ptr_func(f: UniquePtr<CxxFunction<ffi::NoArgs, ()>>) {
+    f.call(ffi::NoArgs());
+}
+
+fn r_take_ref_func_no_args(f: &'static CxxFunction<ffi::NoArgs, ()>) {
+    f.call(ffi::NoArgs());
 }
 
 fn r_take_ref_empty_vector(v: &CxxVector<u64>) {
