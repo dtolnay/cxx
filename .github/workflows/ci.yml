@@ -62,34 +62,6 @@ jobs:
         env:
           RUSTFLAGS: --cfg compile_error_if_alloc --cfg cxx_experimental_no_alloc ${{env.RUSTFLAGS}}
 
-  buck:
-    name: Buck
-    runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: actions/setup-java@v1
-        with:
-          java-version: 11
-          java-package: jre
-      - name: Install Buck
-        run: |
-          mkdir bin
-          wget -q -O bin/buck https://jitpack.io/com/github/facebook/buck/a5f0342ae3/buck-a5f0342ae3-java11.pex # dev branch from 2020.10.11
-          chmod +x bin/buck
-          echo bin >> $GITHUB_PATH
-      - name: Install lld
-        run: sudo apt-get install lld
-      - name: Vendor dependencies
-        run: |
-          cp third-party/Cargo.lock .
-          cargo vendor --versioned-dirs --locked third-party/vendor
-      - run: buck build :cxx#check --verbose=0
-      - run: buck run demo --verbose=0
-      - run: buck test ... --verbose=0
-
   bazel:
     name: Bazel
     runs-on: ubuntu-latest
