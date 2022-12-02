@@ -62,6 +62,26 @@ jobs:
         env:
           RUSTFLAGS: --cfg compile_error_if_alloc --cfg cxx_experimental_no_alloc ${{env.RUSTFLAGS}}
 
+  buck:
+    name: Buck
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/install@buck2
+      - name: Install lld
+        run: sudo apt-get install lld
+      - name: Vendor dependencies
+        run: |
+          cp third-party/Cargo.lock .
+          cargo vendor --versioned-dirs --locked third-party/vendor
+      - run: buck2 run demo
+      - run: buck2 build ...
+
   bazel:
     name: Bazel
     runs-on: ubuntu-latest

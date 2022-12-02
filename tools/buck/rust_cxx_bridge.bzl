@@ -1,19 +1,17 @@
-load("//tools/buck:genrule.bzl", "genrule")
-
 def rust_cxx_bridge(name, src, deps = []):
-    genrule(
+    native.genrule(
         name = "%s/header" % name,
         out = src + ".h",
         cmd = "cp $(location :%s/generated)/generated.h ${OUT}" % name,
     )
 
-    genrule(
+    native.genrule(
         name = "%s/source" % name,
         out = src + ".cc",
         cmd = "cp $(location :%s/generated)/generated.cc ${OUT}" % name,
     )
 
-    genrule(
+    native.genrule(
         name = "%s/generated" % name,
         srcs = [src],
         out = ".",
@@ -21,14 +19,14 @@ def rust_cxx_bridge(name, src, deps = []):
         type = "cxxbridge",
     )
 
-    cxx_library(
+    native.cxx_library(
         name = name,
         srcs = [":%s/source" % name],
         preferred_linkage = "static",
-        deps = deps + [":%s/include" % name],
+        exported_deps = deps + [":%s/include" % name],
     )
 
-    cxx_library(
+    native.cxx_library(
         name = "%s/include" % name,
         exported_headers = [":%s/header" % name],
     )
