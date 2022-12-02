@@ -1,0 +1,16 @@
+load(":toolchain.bzl", "cxx_toolchain", "python_bootstrap_toolchain", "rust_toolchain")
+
+cxx_toolchain(
+    name = "cxx",
+    visibility = ["PUBLIC"],
+)
+
+python_bootstrap_toolchain(
+    name = "python_bootstrap",
+    visibility = ["PUBLIC"],
+)
+
+rust_toolchain(
+    name = "rust",
+    visibility = ["PUBLIC"],
+)

@@ -1,5 +1,3 @@
-load("//tools/buck:genrule.bzl", "genrule")
-
 def rust_library(
         name,
         srcs,
@@ -9,7 +7,7 @@ def rust_library(
         build_script = None,
         **kwargs):
     if build_script:
-        rust_binary(
+        native.rust_binary(
             name = "%s@build" % name,
             srcs = srcs + [build_script],
             crate = "build",
@@ -19,7 +17,7 @@ def rust_library(
             rustc_flags = rustc_flags,
         )
 
-        genrule(
+        native.genrule(
             name = "%s@cfg" % name,
             out = "output",
             cmd = "env RUSTC=rustc TARGET= $(exe :%s@build) | sed -n s/^cargo:rustc-cfg=/--cfg=/p > ${OUT}" % name,

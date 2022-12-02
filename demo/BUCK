@@ -29,6 +29,6 @@ cxx_library(
 
 cxx_library(
     name = "blobstore-include",
+    exported_deps = ["//:core"],
     exported_headers = ["include/blobstore.h"],
-    deps = ["//:core"],
 )
