@@ -1706,7 +1706,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     begin_function_definition(out);
     writeln!(
         out,
-        "const {} *cxxbridge1$unique_ptr${}$get(const ::std::unique_ptr<{}>& ptr) noexcept {{",
+        "const {} *cxxbridge1$unique_ptr${}$get(const ::std::unique_ptr<{}> &ptr) noexcept {{",
         inner, instance, inner,
     );
     writeln!(out, "  return ptr.get();");
@@ -1714,7 +1714,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     begin_function_definition(out);
     writeln!(
         out,
-        "{} *cxxbridge1$unique_ptr${}$release(::std::unique_ptr<{}>& ptr) noexcept {{",
+        "{} *cxxbridge1$unique_ptr${}$release(::std::unique_ptr<{}> &ptr) noexcept {{",
         inner, instance, inner,
     );
     writeln!(out, "  return ptr.release();");
@@ -1791,7 +1791,7 @@ fn write_shared_ptr(out: &mut OutFile, key: NamedImplKey) {
     begin_function_definition(out);
     writeln!(
         out,
-        "void cxxbridge1$shared_ptr${}$clone(const ::std::shared_ptr<{}>& self, ::std::shared_ptr<{}> *ptr) noexcept {{",
+        "void cxxbridge1$shared_ptr${}$clone(const ::std::shared_ptr<{}> &self, ::std::shared_ptr<{}> *ptr) noexcept {{",
         instance, inner, inner,
     );
     writeln!(out, "  ::new (ptr) ::std::shared_ptr<{}>(self);", inner);
@@ -1799,7 +1799,7 @@ fn write_shared_ptr(out: &mut OutFile, key: NamedImplKey) {
     begin_function_definition(out);
     writeln!(
         out,
-        "const {} *cxxbridge1$shared_ptr${}$get(const ::std::shared_ptr<{}>& self) noexcept {{",
+        "const {} *cxxbridge1$shared_ptr${}$get(const ::std::shared_ptr<{}> &self) noexcept {{",
         inner, instance, inner,
     );
     writeln!(out, "  return self.get();");
@@ -1842,7 +1842,7 @@ fn write_weak_ptr(out: &mut OutFile, key: NamedImplKey) {
     begin_function_definition(out);
     writeln!(
         out,
-        "void cxxbridge1$weak_ptr${}$clone(const ::std::weak_ptr<{}>& self, ::std::weak_ptr<{}> *ptr) noexcept {{",
+        "void cxxbridge1$weak_ptr${}$clone(const ::std::weak_ptr<{}> &self, ::std::weak_ptr<{}> *ptr) noexcept {{",
         instance, inner, inner,
     );
     writeln!(out, "  ::new (ptr) ::std::weak_ptr<{}>(self);", inner);
@@ -1850,7 +1850,7 @@ fn write_weak_ptr(out: &mut OutFile, key: NamedImplKey) {
     begin_function_definition(out);
     writeln!(
         out,
-        "void cxxbridge1$weak_ptr${}$downgrade(const ::std::shared_ptr<{}>& shared, ::std::weak_ptr<{}> *weak) noexcept {{",
+        "void cxxbridge1$weak_ptr${}$downgrade(const ::std::shared_ptr<{}> &shared, ::std::weak_ptr<{}> *weak) noexcept {{",
         instance, inner, inner,
     );
     writeln!(out, "  ::new (weak) ::std::weak_ptr<{}>(shared);", inner);
@@ -1858,7 +1858,7 @@ fn write_weak_ptr(out: &mut OutFile, key: NamedImplKey) {
     begin_function_definition(out);
     writeln!(
         out,
-        "void cxxbridge1$weak_ptr${}$upgrade(const ::std::weak_ptr<{}>& weak, ::std::shared_ptr<{}> *shared) noexcept {{",
+        "void cxxbridge1$weak_ptr${}$upgrade(const ::std::weak_ptr<{}> &weak, ::std::shared_ptr<{}> *shared) noexcept {{",
         instance, inner, inner,
     );
     writeln!(
