@@ -1,0 +1,18 @@
+[workspace]
+[package]
+name = "third-party"
+version = "0.0.0"
+publish = false
+
+[lib]
+path = "/dev/null"
+
+[dependencies]
+cc = "1.0.49"
+clap = { version = "4", default-features = false, features = ["error-context", "help", "std", "usage"] }
+codespan-reporting = "0.11.1"
+once_cell = "1.9"
+proc-macro2 = { version = "1.0.39", features = ["span-locations"] }
+quote = "1.0.4"
+scratch = "1"
+syn = { version = "1.0.95", features = ["full"] }
