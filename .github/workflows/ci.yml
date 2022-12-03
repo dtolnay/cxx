@@ -79,6 +79,7 @@ jobs:
         working-directory: third-party
       - run: buck2 run demo
       - run: buck2 build ...
+      - run: buck2 run tests:test
 
   bazel:
     name: Bazel
