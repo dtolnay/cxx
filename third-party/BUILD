@@ -61,6 +61,8 @@ rust_library(
     srcs = glob(["vendor/once_cell-1.16.0/src/**/*.rs"]),
     crate_features = [
         "alloc",
+        "default",
+        "race",
         "std",
     ],
     edition = "2021",
@@ -80,6 +82,7 @@ rust_library(
     name = "proc-macro2",
     srcs = glob(["vendor/proc-macro2-1.0.47/src/**/*.rs"]),
     crate_features = [
+        "default",
         "proc-macro",
         "span-locations",
     ],
@@ -95,6 +98,7 @@ cargo_build_script(
     name = "proc-macro2@build",
     srcs = ["vendor/proc-macro2-1.0.47/build.rs"],
     crate_features = [
+        "default",
         "proc-macro",
         "span-locations",
     ],
@@ -105,7 +109,10 @@ cargo_build_script(
 rust_library(
     name = "quote",
     srcs = glob(["vendor/quote-1.0.21/src/**/*.rs"]),
-    crate_features = ["proc-macro"],
+    crate_features = [
+        "default",
+        "proc-macro",
+    ],
     edition = "2018",
     visibility = ["//visibility:public"],
     deps = [
@@ -117,7 +124,10 @@ rust_library(
 cargo_build_script(
     name = "quote@build",
     srcs = ["vendor/quote-1.0.21/build.rs"],
-    crate_features = ["proc-macro"],
+    crate_features = [
+        "default",
+        "proc-macro",
+    ],
     crate_name = "build",
     edition = "2018",
 )
@@ -135,11 +145,13 @@ rust_library(
     srcs = glob(["vendor/syn-1.0.105/src/**/*.rs"]),
     crate_features = [
         "clone-impls",
+        "default",
         "derive",
         "full",
         "parsing",
         "printing",
         "proc-macro",
+        "quote",
     ],
     edition = "2018",
     visibility = ["//visibility:public"],
@@ -156,11 +168,13 @@ cargo_build_script(
     srcs = ["vendor/syn-1.0.105/build.rs"],
     crate_features = [
         "clone-impls",
+        "default",
         "derive",
         "full",
         "parsing",
         "printing",
         "proc-macro",
+        "quote",
     ],
     crate_name = "build",
     edition = "2018",
@@ -181,5 +195,8 @@ rust_library(
 rust_library(
     name = "unicode-width",
     srcs = glob(["vendor/unicode-width-0.1.10/src/**/*.rs"]),
+    crate_features = [
+        "default",
+    ],
     edition = "2015",
 )
