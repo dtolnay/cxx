@@ -63,7 +63,7 @@ rust_library(
         "alloc",
         "std",
     ],
-    edition = "2018",
+    edition = "2021",
     visibility = ["//visibility:public"],
 )
 
@@ -125,7 +125,7 @@ cargo_build_script(
 rust_library(
     name = "scratch",
     srcs = glob(["vendor/scratch-1.0.2/src/**/*.rs"]),
-    edition = "2018",
+    edition = "2015",
     rustc_env = {"OUT_DIR": ""},
     visibility = ["//visibility:public"],
 )
@@ -181,5 +181,5 @@ rust_library(
 rust_library(
     name = "unicode-width",
     srcs = glob(["vendor/unicode-width-0.1.10/src/**/*.rs"]),
-    edition = "2018",
+    edition = "2015",
 )
