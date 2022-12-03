@@ -1,0 +1,4 @@
+buildscript = []
+
+[env]
+OUT_DIR = "generated"

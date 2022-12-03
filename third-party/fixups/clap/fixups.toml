@@ -1,0 +1,2 @@
+extra_srcs = ["examples/demo.md", "examples/demo.rs"]
+omit_targets = ["stdio-fixture"]
