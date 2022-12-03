@@ -1,4 +1,5 @@
 precise_srcs = true
+rustc_flags = ["--cap-lints=allow"]
 
 [cargo]
 versioned_dirs = true
