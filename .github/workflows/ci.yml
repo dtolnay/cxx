@@ -75,10 +75,8 @@ jobs:
       - uses: dtolnay/install@buck2
       - name: Install lld
         run: sudo apt-get install lld
-      - name: Vendor dependencies
-        run: |
-          cp third-party/Cargo.lock .
-          cargo vendor --versioned-dirs --locked third-party/vendor
+      - run: cargo vendor --versioned-dirs --locked
+        working-directory: third-party
       - run: buck2 run demo
       - run: buck2 build ...
 

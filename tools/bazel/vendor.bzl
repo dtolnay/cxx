@@ -12,12 +12,6 @@ def _impl(repository_ctx):
     workspace = lockfile.dirname.dirname
     repository_ctx.symlink(workspace, "workspace")
 
-    # Copy third-party/Cargo.lock since those are the crate versions that the
-    # BUILD file is written against.
-    vendor_lockfile = repository_ctx.path("workspace/third-party/Cargo.lock")
-    root_lockfile = repository_ctx.path("workspace/Cargo.lock")
-    _copy_file(repository_ctx, src = vendor_lockfile, dst = root_lockfile)
-
     # Figure out which version of cargo to use.
     if repository_ctx.attr.target_triple:
         target_triple = repository_ctx.attr.target_triple
@@ -34,19 +28,15 @@ def _impl(repository_ctx):
         target_triple = target_triple,
     )
 
-    cmd = ["{}/bin/cargo".format(repository_ctx.path(".")), "vendor", "--versioned-dirs", "third-party/vendor"]
+    cmd = ["{}/bin/cargo".format(repository_ctx.path(".")), "vendor", "--versioned-dirs"]
     result = repository_ctx.execute(
         cmd,
         quiet = True,
-        working_directory = "workspace",
+        working_directory = "workspace/third-party",
     )
     _log_cargo_vendor(repository_ctx, result)
     if result.return_code != 0:
         fail("failed to execute `{}`".format(" ".join(cmd)))
-
-    # Copy lockfile back to third-party/Cargo.lock to reflect any modification
-    # performed by Cargo.
-    _copy_file(repository_ctx, src = root_lockfile, dst = vendor_lockfile)
 
     # Produce a token for third_party_glob to depend on so that the necessary
     # sequencing is visible to Bazel.
