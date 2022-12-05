@@ -84,6 +84,8 @@ def _rust_toolchain(ctx):
         RustToolchainInfo(
             clippy_driver = "clippy-driver",
             compiler = "rustc",
+            failure_filter = False,
+            failure_filter_action = ctx.attrs.failure_filter_action[RunInfo],
             rustc_action = ctx.attrs.rustc_action[RunInfo],
             rustc_flags = ["-Clink-arg=-fuse-ld=lld"],
             rustc_target_triple = "x86_64-unknown-linux-gnu",
@@ -97,6 +99,7 @@ def _rust_toolchain(ctx):
 rust_toolchain = rule(
     impl = _rust_toolchain,
     attrs = {
+        "failure_filter_action": attrs.dep(providers = [RunInfo], default = "prelude//rust/tools:failure_filter_action"),
         "rustc_action": attrs.dep(providers = [RunInfo], default = "prelude//rust/tools:rustc_action"),
     },
     is_toolchain_rule = True,
