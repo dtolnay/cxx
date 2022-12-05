@@ -12,7 +12,7 @@ load("@prelude//linking:link_info.bzl", "LinkStyle")
 load("@prelude//python_bootstrap:python_bootstrap.bzl", "PythonBootstrapToolchainInfo")
 load("@prelude//rust:rust_toolchain.bzl", "RustPlatformInfo", "RustToolchainInfo")
 
-DEFAULT_MAKE_COMP_DB = "@prelude//cxx/tools:make_comp_db"
+DEFAULT_MAKE_COMP_DB = "prelude//cxx/tools:make_comp_db"
 
 def _cxx_toolchain(ctx):
     """
@@ -67,9 +67,7 @@ cxx_toolchain = rule(
 def _python_bootstrap_toolchain(_ctx):
     return [
         DefaultInfo(),
-        PythonBootstrapToolchainInfo(
-            interpreter = "python3",
-        ),
+        PythonBootstrapToolchainInfo(interpreter = "python3"),
     ]
 
 python_bootstrap_toolchain = rule(
@@ -91,9 +89,7 @@ def _rust_toolchain(ctx):
             rustc_target_triple = "x86_64-unknown-linux-gnu",
             rustdoc = "rustdoc",
         ),
-        RustPlatformInfo(
-            name = "x86_64",
-        ),
+        RustPlatformInfo(name = "x86_64"),
     ]
 
 rust_toolchain = rule(
