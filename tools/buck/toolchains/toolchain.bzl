@@ -88,6 +88,7 @@ def _rust_toolchain(ctx):
             rustc_flags = ["-Clink-arg=-fuse-ld=lld"],
             rustc_target_triple = "x86_64-unknown-linux-gnu",
             rustdoc = "rustdoc",
+            rustdoc_flags = ["-Zunstable-options"], # doc builds use unstable '--extern-html-root-url'
         ),
         RustPlatformInfo(name = "x86_64"),
     ]
