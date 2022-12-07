@@ -82,6 +82,7 @@ def _rust_toolchain(ctx):
         RustToolchainInfo(
             clippy_driver = RunInfo(args = ["clippy-driver"]),
             compiler = RunInfo(args = ["rustc"]),
+            default_edition = None,
             failure_filter = False,
             failure_filter_action = ctx.attrs.failure_filter_action[RunInfo],
             rustc_action = ctx.attrs.rustc_action[RunInfo],
