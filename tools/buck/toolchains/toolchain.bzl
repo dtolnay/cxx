@@ -80,14 +80,14 @@ def _rust_toolchain(ctx):
     return [
         DefaultInfo(),
         RustToolchainInfo(
-            clippy_driver = "clippy-driver",
-            compiler = "rustc",
+            clippy_driver = RunInfo(args = ["clippy-driver"]),
+            compiler = RunInfo(args = ["rustc"]),
             failure_filter = False,
             failure_filter_action = ctx.attrs.failure_filter_action[RunInfo],
             rustc_action = ctx.attrs.rustc_action[RunInfo],
             rustc_flags = ["-Clink-arg=-fuse-ld=lld"],
             rustc_target_triple = "x86_64-unknown-linux-gnu",
-            rustdoc = "rustdoc",
+            rustdoc = RunInfo(args = ["rustdoc"]),
             rustdoc_flags = ["-Zunstable-options"], # doc builds use unstable '--extern-html-root-url'
         ),
         RustPlatformInfo(name = "x86_64"),
