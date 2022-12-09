@@ -35,6 +35,7 @@ def _cxx_toolchain(ctx):
             linker_info = LinkerInfo(
                 archive_objects_locally = True,
                 archiver = RunInfo(args = ["ar", "rcs"]),
+                archiver_type = "gnu",
                 binary_extension = "",
                 link_binaries_locally = True,
                 link_style = LinkStyle(ctx.attrs.link_style),
