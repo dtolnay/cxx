@@ -1,3 +1,3 @@
-[submodule "tools/buck/buck2"]
-	path = tools/buck/buck2
-	url = https://github.com/facebookincubator/buck2
+[submodule "tools/buck/prelude"]
+	path = tools/buck/prelude
+	url = https://github.com/facebookincubator/buck2-prelude

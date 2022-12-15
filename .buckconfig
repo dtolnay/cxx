@@ -1,8 +1,8 @@
 [repositories]
 repo = .
-prelude = tools/buck/buck2/prelude
+prelude = tools/buck/prelude
 toolchains = tools/buck/toolchains
-ovr_config = tools/buck/buck2/prelude
+ovr_config = tools/buck/prelude
 buck = none
 fbcode = none
 fbsource = none
