@@ -1,16 +1,20 @@
-load(":toolchain.bzl", "cxx_toolchain", "python_bootstrap_toolchain", "rust_toolchain")
+load("@prelude//toolchains:cxx.bzl", "system_cxx_toolchain")
+load("@prelude//toolchains:python.bzl", "system_python_bootstrap_toolchain")
+load("@prelude//toolchains:rust.bzl", "system_rust_toolchain")
 
-cxx_toolchain(
+system_cxx_toolchain(
     name = "cxx",
     visibility = ["PUBLIC"],
 )
 
-python_bootstrap_toolchain(
+system_python_bootstrap_toolchain(
     name = "python_bootstrap",
     visibility = ["PUBLIC"],
 )
 
-rust_toolchain(
+system_rust_toolchain(
     name = "rust",
+    rustc_flags = ["-Clink-arg=-fuse-ld=lld"],
+    rustdoc_flags = ["-Zunstable-options"],  # doc builds use unstable '--extern-html-root-url'
     visibility = ["PUBLIC"],
 )
