@@ -17,5 +17,8 @@ proc-macro2 = { version = "1.0.39", default-features = false, features = ["span-
 quote = { version = "1.0", default-features = false }
 syn = { version = "1.0.95", default-features = false, features = ["parsing", "printing", "clone-impls", "full"] }
 
+[lib]
+doc-scrape-examples = false
+
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]

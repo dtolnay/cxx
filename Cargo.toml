@@ -37,6 +37,9 @@ cxx-test-suite = { version = "0", path = "tests/ffi" }
 rustversion = "1.0"
 trybuild = { version = "1.0.66", features = ["diff"] }
 
+[lib]
+doc-scrape-examples = false
+
 [workspace]
 members = ["demo", "flags", "gen/build", "gen/cmd", "gen/lib", "macro", "tests/ffi"]
 
