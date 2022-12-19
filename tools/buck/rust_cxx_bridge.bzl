@@ -1,4 +1,7 @@
-def rust_cxx_bridge(name, src, deps = []):
+def rust_cxx_bridge(
+        name: str.type,
+        src: str.type,
+        deps: [str.type] = []):
     native.genrule(
         name = "%s/header" % name,
         out = src + ".h",

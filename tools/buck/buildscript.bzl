@@ -1,11 +1,11 @@
 def buildscript_args(
-        name,
-        package_name,
-        buildscript_rule,
-        cfgs,
-        features,
-        outfile,
-        version):
+        name: str.type,
+        package_name: str.type,
+        buildscript_rule: str.type,
+        cfgs: [str.type],
+        features: [str.type],
+        outfile: str.type,
+        version: str.type):
     native.genrule(
         name = name,
         out = outfile,
