@@ -15,6 +15,5 @@ system_python_bootstrap_toolchain(
 system_rust_toolchain(
     name = "rust",
     default_edition = None,
-    rustdoc_flags = ["-Zunstable-options"],  # doc builds use unstable '--extern-html-root-url'
     visibility = ["PUBLIC"],
 )
