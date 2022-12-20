@@ -287,7 +287,6 @@ buildscript_args(
     name = "proc-macro2-1.0.47-build-script-build-args",
     package_name = "proc-macro2",
     buildscript_rule = ":proc-macro2-1.0.47-build-script-build",
-    cfgs = [],
     features = [
         "default",
         "proc-macro",
@@ -347,7 +346,6 @@ buildscript_args(
     name = "quote-1.0.21-build-script-build-args",
     package_name = "quote",
     buildscript_rule = ":quote-1.0.21-build-script-build",
-    cfgs = [],
     features = [
         "default",
         "proc-macro",
@@ -486,7 +484,6 @@ buildscript_args(
     name = "syn-1.0.105-build-script-build-args",
     package_name = "syn",
     buildscript_rule = ":syn-1.0.105-build-script-build",
-    cfgs = [],
     features = [
         "clone-impls",
         "default",
