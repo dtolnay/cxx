@@ -6,11 +6,15 @@
 #     bazel run @//third-party:vendor
 ###############################################################################
 
+load(
+    "@rules_rust//cargo:defs.bzl",
+    "cargo_build_script",
+)
+
 # buildifier: disable=bzl-visibility
 load("@rules_rust//crate_universe/private:selects.bzl", "select_with_or")
 load(
     "@rules_rust//rust:defs.bzl",
-    "rust_binary",
     "rust_library",
 )
 
@@ -21,7 +25,7 @@ package(default_visibility = ["//visibility:public"])
 # ])
 
 rust_library(
-    name = "clap",
+    name = "scratch",
     srcs = glob(
         include = [
             "**/*.rs",
@@ -47,17 +51,13 @@ rust_library(
         ],
     }),
     crate_features = [
-        "error-context",
-        "help",
-        "std",
-        "usage",
     ],
     crate_root = "src/lib.rs",
     data = select_with_or({
         "//conditions:default": [
         ],
     }),
-    edition = "2021",
+    edition = "2015",
     proc_macro_deps = [
     ] + select({
         "//conditions:default": [
@@ -82,18 +82,18 @@ rust_library(
         "noclippy",
         "norustfmt",
     ],
-    version = "4.0.29",
+    version = "1.0.3",
     deps = [
     ] + select({
         "//conditions:default": [
-            "@vendor__bitflags-1.3.2//:bitflags",
-            "@vendor__clap_lex-0.3.0//:clap_lex",
+            "@vendor__scratch-1.0.3//:build_script_build",
         ],
     }),
 )
 
-rust_binary(
-    name = "stdio-fixture__bin",
+cargo_build_script(
+    # See comment associated with alias. Do not change this name
+    name = "scratch_build_script",
     srcs = glob(
         include = [
             "**/*.rs",
@@ -105,7 +105,17 @@ rust_binary(
         "//conditions:default": {
         },
     }),
-    compile_data = glob(
+    build_script_env = {
+    },
+    compile_data = select_with_or({
+        "//conditions:default": [
+        ],
+    }),
+    crate_features = [
+    ],
+    crate_name = "build_script_build",
+    crate_root = "build.rs",
+    data = glob(
         include = ["**"],
         exclude = [
             "**/* *",
@@ -118,18 +128,7 @@ rust_binary(
         "//conditions:default": [
         ],
     }),
-    crate_features = [
-        "error-context",
-        "help",
-        "std",
-        "usage",
-    ],
-    crate_root = "src/bin/stdio-fixture.rs",
-    data = select_with_or({
-        "//conditions:default": [
-        ],
-    }),
-    edition = "2021",
+    edition = "2015",
     proc_macro_deps = [
     ] + select({
         "//conditions:default": [
@@ -154,13 +153,28 @@ rust_binary(
         "noclippy",
         "norustfmt",
     ],
-    version = "4.0.29",
-    deps = [
-        ":clap",
-    ] + select({
+    tools = select_with_or({
         "//conditions:default": [
-            "@vendor__bitflags-1.3.2//:bitflags",
-            "@vendor__clap_lex-0.3.0//:clap_lex",
         ],
     }),
+    version = "1.0.3",
+    visibility = ["//visibility:private"],
+    deps = [
+    ] + select({
+        "//conditions:default": [
+        ],
+    }),
+)
+
+alias(
+    # Because `cargo_build_script` does some invisible target name mutating to
+    # determine the package and crate name for a build script, the Bazel
+    # target name of any build script cannot be the Cargo canonical name
+    # of `cargo_build_script` (rule) without losing out on having certain
+    # Cargo environment variables set.
+    name = "build_script_build",
+    actual = "scratch_build_script",
+    tags = [
+        "manual",
+    ],
 )

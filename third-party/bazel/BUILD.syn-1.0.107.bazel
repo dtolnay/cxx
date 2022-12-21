@@ -25,7 +25,7 @@ package(default_visibility = ["//visibility:public"])
 # ])
 
 rust_library(
-    name = "scratch",
+    name = "syn",
     srcs = glob(
         include = [
             "**/*.rs",
@@ -51,13 +51,21 @@ rust_library(
         ],
     }),
     crate_features = [
+        "clone-impls",
+        "default",
+        "derive",
+        "full",
+        "parsing",
+        "printing",
+        "proc-macro",
+        "quote",
     ],
     crate_root = "src/lib.rs",
     data = select_with_or({
         "//conditions:default": [
         ],
     }),
-    edition = "2015",
+    edition = "2018",
     proc_macro_deps = [
     ] + select({
         "//conditions:default": [
@@ -82,18 +90,21 @@ rust_library(
         "noclippy",
         "norustfmt",
     ],
-    version = "1.0.2",
+    version = "1.0.107",
     deps = [
     ] + select({
         "//conditions:default": [
-            "@vendor__scratch-1.0.2//:build_script_build",
+            "@vendor__proc-macro2-1.0.49//:proc_macro2",
+            "@vendor__quote-1.0.23//:quote",
+            "@vendor__syn-1.0.107//:build_script_build",
+            "@vendor__unicode-ident-1.0.6//:unicode_ident",
         ],
     }),
 )
 
 cargo_build_script(
     # See comment associated with alias. Do not change this name
-    name = "scratch_build_script",
+    name = "syn_build_script",
     srcs = glob(
         include = [
             "**/*.rs",
@@ -112,6 +123,14 @@ cargo_build_script(
         ],
     }),
     crate_features = [
+        "clone-impls",
+        "default",
+        "derive",
+        "full",
+        "parsing",
+        "printing",
+        "proc-macro",
+        "quote",
     ],
     crate_name = "build_script_build",
     crate_root = "build.rs",
@@ -128,7 +147,7 @@ cargo_build_script(
         "//conditions:default": [
         ],
     }),
-    edition = "2015",
+    edition = "2018",
     proc_macro_deps = [
     ] + select({
         "//conditions:default": [
@@ -157,7 +176,7 @@ cargo_build_script(
         "//conditions:default": [
         ],
     }),
-    version = "1.0.2",
+    version = "1.0.107",
     visibility = ["//visibility:private"],
     deps = [
     ] + select({
@@ -173,7 +192,7 @@ alias(
     # of `cargo_build_script` (rule) without losing out on having certain
     # Cargo environment variables set.
     name = "build_script_build",
-    actual = "scratch_build_script",
+    actual = "syn_build_script",
     tags = [
         "manual",
     ],

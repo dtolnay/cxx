@@ -29,13 +29,13 @@ filegroup(
 # Workspace Member Dependencies
 alias(
     name = "cc",
-    actual = "@vendor__cc-1.0.77//:cc",
+    actual = "@vendor__cc-1.0.78//:cc",
     tags = ["manual"],
 )
 
 alias(
     name = "clap",
-    actual = "@vendor__clap-4.0.29//:clap",
+    actual = "@vendor__clap-4.0.30//:clap",
     tags = ["manual"],
 )
 
@@ -53,37 +53,37 @@ alias(
 
 alias(
     name = "proc-macro2",
-    actual = "@vendor__proc-macro2-1.0.47//:proc_macro2",
+    actual = "@vendor__proc-macro2-1.0.49//:proc_macro2",
     tags = ["manual"],
 )
 
 alias(
     name = "quote",
-    actual = "@vendor__quote-1.0.21//:quote",
+    actual = "@vendor__quote-1.0.23//:quote",
     tags = ["manual"],
 )
 
 alias(
     name = "scratch",
-    actual = "@vendor__scratch-1.0.2//:scratch",
+    actual = "@vendor__scratch-1.0.3//:scratch",
     tags = ["manual"],
 )
 
 alias(
     name = "syn",
-    actual = "@vendor__syn-1.0.105//:syn",
+    actual = "@vendor__syn-1.0.107//:syn",
     tags = ["manual"],
 )
 
 # Binaries
 alias(
     name = "cc__gcc-shim",
-    actual = "@vendor__cc-1.0.77//:gcc-shim__bin",
+    actual = "@vendor__cc-1.0.78//:gcc-shim__bin",
     tags = ["manual"],
 )
 
 alias(
     name = "clap__stdio-fixture",
-    actual = "@vendor__clap-4.0.29//:stdio-fixture__bin",
+    actual = "@vendor__clap-4.0.30//:stdio-fixture__bin",
     tags = ["manual"],
 )

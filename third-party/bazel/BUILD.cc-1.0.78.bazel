@@ -6,15 +6,11 @@
 #     bazel run @//third-party:vendor
 ###############################################################################
 
-load(
-    "@rules_rust//cargo:defs.bzl",
-    "cargo_build_script",
-)
-
 # buildifier: disable=bzl-visibility
 load("@rules_rust//crate_universe/private:selects.bzl", "select_with_or")
 load(
     "@rules_rust//rust:defs.bzl",
+    "rust_binary",
     "rust_library",
 )
 
@@ -25,7 +21,7 @@ package(default_visibility = ["//visibility:public"])
 # ])
 
 rust_library(
-    name = "quote",
+    name = "cc",
     srcs = glob(
         include = [
             "**/*.rs",
@@ -51,8 +47,6 @@ rust_library(
         ],
     }),
     crate_features = [
-        "default",
-        "proc-macro",
     ],
     crate_root = "src/lib.rs",
     data = select_with_or({
@@ -84,19 +78,16 @@ rust_library(
         "noclippy",
         "norustfmt",
     ],
-    version = "1.0.21",
+    version = "1.0.78",
     deps = [
     ] + select({
         "//conditions:default": [
-            "@vendor__proc-macro2-1.0.47//:proc_macro2",
-            "@vendor__quote-1.0.21//:build_script_build",
         ],
     }),
 )
 
-cargo_build_script(
-    # See comment associated with alias. Do not change this name
-    name = "quote_build_script",
+rust_binary(
+    name = "gcc-shim__bin",
     srcs = glob(
         include = [
             "**/*.rs",
@@ -108,19 +99,7 @@ cargo_build_script(
         "//conditions:default": {
         },
     }),
-    build_script_env = {
-    },
-    compile_data = select_with_or({
-        "//conditions:default": [
-        ],
-    }),
-    crate_features = [
-        "default",
-        "proc-macro",
-    ],
-    crate_name = "build_script_build",
-    crate_root = "build.rs",
-    data = glob(
+    compile_data = glob(
         include = ["**"],
         exclude = [
             "**/* *",
@@ -130,6 +109,13 @@ cargo_build_script(
             "WORKSPACE",
         ],
     ) + select_with_or({
+        "//conditions:default": [
+        ],
+    }),
+    crate_features = [
+    ],
+    crate_root = "src/bin/gcc-shim.rs",
+    data = select_with_or({
         "//conditions:default": [
         ],
     }),
@@ -158,28 +144,11 @@ cargo_build_script(
         "noclippy",
         "norustfmt",
     ],
-    tools = select_with_or({
-        "//conditions:default": [
-        ],
-    }),
-    version = "1.0.21",
-    visibility = ["//visibility:private"],
+    version = "1.0.78",
     deps = [
+        ":cc",
     ] + select({
         "//conditions:default": [
         ],
     }),
-)
-
-alias(
-    # Because `cargo_build_script` does some invisible target name mutating to
-    # determine the package and crate name for a build script, the Bazel
-    # target name of any build script cannot be the Cargo canonical name
-    # of `cargo_build_script` (rule) without losing out on having certain
-    # Cargo environment variables set.
-    name = "build_script_build",
-    actual = "quote_build_script",
-    tags = [
-        "manual",
-    ],
 )

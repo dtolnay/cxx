@@ -6,15 +6,11 @@
 #     bazel run @//third-party:vendor
 ###############################################################################
 
-load(
-    "@rules_rust//cargo:defs.bzl",
-    "cargo_build_script",
-)
-
 # buildifier: disable=bzl-visibility
 load("@rules_rust//crate_universe/private:selects.bzl", "select_with_or")
 load(
     "@rules_rust//rust:defs.bzl",
+    "rust_binary",
     "rust_library",
 )
 
@@ -25,7 +21,7 @@ package(default_visibility = ["//visibility:public"])
 # ])
 
 rust_library(
-    name = "proc_macro2",
+    name = "clap",
     srcs = glob(
         include = [
             "**/*.rs",
@@ -51,16 +47,17 @@ rust_library(
         ],
     }),
     crate_features = [
-        "default",
-        "proc-macro",
-        "span-locations",
+        "error-context",
+        "help",
+        "std",
+        "usage",
     ],
     crate_root = "src/lib.rs",
     data = select_with_or({
         "//conditions:default": [
         ],
     }),
-    edition = "2018",
+    edition = "2021",
     proc_macro_deps = [
     ] + select({
         "//conditions:default": [
@@ -85,19 +82,18 @@ rust_library(
         "noclippy",
         "norustfmt",
     ],
-    version = "1.0.47",
+    version = "4.0.30",
     deps = [
     ] + select({
         "//conditions:default": [
-            "@vendor__proc-macro2-1.0.47//:build_script_build",
-            "@vendor__unicode-ident-1.0.5//:unicode_ident",
+            "@vendor__bitflags-1.3.2//:bitflags",
+            "@vendor__clap_lex-0.3.0//:clap_lex",
         ],
     }),
 )
 
-cargo_build_script(
-    # See comment associated with alias. Do not change this name
-    name = "proc-macro2_build_script",
+rust_binary(
+    name = "stdio-fixture__bin",
     srcs = glob(
         include = [
             "**/*.rs",
@@ -109,20 +105,7 @@ cargo_build_script(
         "//conditions:default": {
         },
     }),
-    build_script_env = {
-    },
-    compile_data = select_with_or({
-        "//conditions:default": [
-        ],
-    }),
-    crate_features = [
-        "default",
-        "proc-macro",
-        "span-locations",
-    ],
-    crate_name = "build_script_build",
-    crate_root = "build.rs",
-    data = glob(
+    compile_data = glob(
         include = ["**"],
         exclude = [
             "**/* *",
@@ -135,7 +118,18 @@ cargo_build_script(
         "//conditions:default": [
         ],
     }),
-    edition = "2018",
+    crate_features = [
+        "error-context",
+        "help",
+        "std",
+        "usage",
+    ],
+    crate_root = "src/bin/stdio-fixture.rs",
+    data = select_with_or({
+        "//conditions:default": [
+        ],
+    }),
+    edition = "2021",
     proc_macro_deps = [
     ] + select({
         "//conditions:default": [
@@ -160,28 +154,13 @@ cargo_build_script(
         "noclippy",
         "norustfmt",
     ],
-    tools = select_with_or({
-        "//conditions:default": [
-        ],
-    }),
-    version = "1.0.47",
-    visibility = ["//visibility:private"],
+    version = "4.0.30",
     deps = [
+        ":clap",
     ] + select({
         "//conditions:default": [
+            "@vendor__bitflags-1.3.2//:bitflags",
+            "@vendor__clap_lex-0.3.0//:clap_lex",
         ],
     }),
-)
-
-alias(
-    # Because `cargo_build_script` does some invisible target name mutating to
-    # determine the package and crate name for a build script, the Bazel
-    # target name of any build script cannot be the Cargo canonical name
-    # of `cargo_build_script` (rule) without losing out on having certain
-    # Cargo environment variables set.
-    name = "build_script_build",
-    actual = "proc-macro2_build_script",
-    tags = [
-        "manual",
-    ],
 )
