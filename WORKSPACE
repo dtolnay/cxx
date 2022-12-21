@@ -20,6 +20,6 @@ load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencie
 
 crate_universe_dependencies()
 
-load("//third-party/bazel:crates.bzl", "crate_repositories")
+load("//third-party/bazel:defs.bzl", "crate_repositories")
 
 crate_repositories()
