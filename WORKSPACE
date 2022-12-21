@@ -10,18 +10,16 @@ http_archive(
 
 load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
 
-RUST_VERSION = "1.66.0"
-
 rules_rust_dependencies()
 
 rust_register_toolchains(
-    version = RUST_VERSION,
+    version = "1.66.0",
 )
 
-load("//tools/bazel:vendor.bzl", "vendor")
+load("@rules_rust//crate_universe:repositories.bzl", "crate_universe_dependencies")
 
-vendor(
-    name = "third-party",
-    cargo_version = RUST_VERSION,
-    lockfile = "//third-party:Cargo.lock",
-)
+crate_universe_dependencies()
+
+load("//third-party/bazel:crates.bzl", "crate_repositories")
+
+crate_repositories()
