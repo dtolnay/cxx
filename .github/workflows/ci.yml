@@ -78,7 +78,7 @@ jobs:
         run: sudo apt-get install lld
       - run: cargo vendor --versioned-dirs --locked
         working-directory: third-party
-      - run: reindeer vendor
+      - run: reindeer buckify
         working-directory: third-party
       - name: Check reindeer-generated BUCK file up to date
         run: git diff --exit-code
