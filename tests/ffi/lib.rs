@@ -2,7 +2,6 @@
     clippy::boxed_local,
     clippy::derive_partial_eq_without_eq,
     clippy::just_underscores_and_digits,
-    clippy::let_underscore_drop,
     clippy::missing_safety_doc,
     clippy::must_use_candidate,
     clippy::needless_lifetimes,

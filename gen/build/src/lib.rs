@@ -56,7 +56,6 @@
     clippy::if_same_then_else,
     clippy::inherent_to_string,
     clippy::items_after_statements,
-    clippy::let_underscore_drop,
     clippy::match_bool,
     clippy::match_on_vec_items,
     clippy::match_same_arms,
