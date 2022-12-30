@@ -88,7 +88,7 @@ fn check_type_ident(cx: &mut Check, name: &NamedType) {
         && !cx.types.rust.contains(ident)
     {
         let msg = format!("unsupported type: {}", ident);
-        cx.error(ident, &msg);
+        cx.error(ident, msg);
     }
 }
 
