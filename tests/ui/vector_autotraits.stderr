@@ -5,8 +5,8 @@ error[E0277]: `*const cxx::void` cannot be sent between threads safely
    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `*const cxx::void` cannot be sent between threads safely
    |
    = help: within `CxxVector<NotThreadSafe>`, the trait `Send` is not implemented for `*const cxx::void`
-   = note: required because it appears within the type `[*const cxx::void; 0]`
-   = note: required because it appears within the type `cxx::private::Opaque`
+   = note: required because it appears within the type `[*const void; 0]`
+   = note: required because it appears within the type `Opaque`
 note: required because it appears within the type `NotThreadSafe`
   --> tests/ui/vector_autotraits.rs:7:14
    |
