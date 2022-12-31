@@ -9,8 +9,13 @@ permissions:
   contents: read
 
 jobs:
+  pre_ci:
+    uses: dtolnay/.github/.github/workflows/pre_ci.yml@master
+
   test:
     name: ${{matrix.name || format('Rust {0}', matrix.rust)}}
+    needs: pre_ci
+    if: needs.pre_ci.outputs.continue
     runs-on: ${{matrix.os || 'ubuntu'}}-latest
     strategy:
       fail-fast: false
