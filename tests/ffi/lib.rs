@@ -103,6 +103,7 @@ pub mod ffi {
         fn c_return_str(shared: &Shared) -> &str;
         fn c_return_slice_char(shared: &Shared) -> &[c_char];
         fn c_return_mutsliceu8(slice: &mut [u8]) -> &mut [u8];
+        fn c_return_rust_char() -> char;
         fn c_return_rust_string() -> String;
         fn c_return_rust_string_lossy() -> String;
         fn c_return_unique_ptr_string() -> UniquePtr<CxxString>;
@@ -129,6 +130,7 @@ pub mod ffi {
         fn c_return_mut_ptr(n: usize) -> *mut C;
 
         fn c_take_primitive(n: usize);
+        fn c_take_rust_char(c: char);
         fn c_take_shared(shared: Shared);
         fn c_take_box(r: Box<R>);
         fn c_take_ref_r(r: &R);
@@ -258,6 +260,7 @@ pub mod ffi {
         type R;
 
         fn r_return_primitive() -> usize;
+        fn r_return_rust_char() -> char;
         fn r_return_shared() -> Shared;
         fn r_return_box() -> Box<R>;
         fn r_return_unique_ptr() -> UniquePtr<C>;
@@ -279,6 +282,7 @@ pub mod ffi {
         fn r_return_enum(n: u32) -> Enum;
 
         fn r_take_primitive(n: usize);
+        fn r_take_rust_char(c: char);
         fn r_take_shared(shared: Shared);
         fn r_take_box(r: Box<R>);
         fn r_take_unique_ptr(c: UniquePtr<C>);
@@ -442,6 +446,10 @@ fn r_return_primitive() -> usize {
     2020
 }
 
+fn r_return_rust_char() -> char {
+    '🙃'
+}
+
 fn r_return_shared() -> ffi::Shared {
     ffi::Shared { z: 2020 }
 }
@@ -517,6 +525,10 @@ fn r_return_rust_vec_extern_struct() -> Vec<ffi::Job> {
 fn r_return_ref_rust_vec(shared: &ffi::Shared) -> &Vec<u8> {
     let _ = shared;
     unimplemented!()
+}
+
+fn r_take_rust_char(c: char) {
+    assert_eq!('🙃', c);
 }
 
 fn r_return_mut_rust_vec(shared: &mut ffi::Shared) -> &mut Vec<u8> {

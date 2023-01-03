@@ -54,6 +54,8 @@ std::vector<uint8_t> &C::get_v() { return this->v; }
 
 size_t c_return_primitive() { return 2020; }
 
+rust::Char c_return_rust_char() { return rust::Char{U'\U0001f643'}; }
+
 Shared c_return_shared() { return Shared{2020}; }
 
 ::A::AShared c_return_ns_shared() { return ::A::AShared{2020}; }
@@ -222,6 +224,12 @@ Borrow::Borrow(const std::string &s) : s(s) {}
 void Borrow::const_member() const {}
 
 void Borrow::nonconst_member() {}
+
+void c_take_rust_char(rust::Char c) {
+   if (c.get() == U'\U0001f643') {
+     cxx_test_suite_set_correct();
+   }
+ }
 
 std::unique_ptr<Borrow> c_return_borrow(const std::string &s) {
   return std::unique_ptr<Borrow>(new Borrow(s));
@@ -770,6 +778,7 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(rust::size_of<size_t>() == sizeof(size_t));
   ASSERT(rust::align_of<size_t>() == alignof(size_t));
 
+  ASSERT(r_return_rust_char().get() == U'\U0001f643');
   ASSERT(r_return_primitive() == 2020);
   ASSERT(r_return_shared().z == 2020);
   ASSERT(cxx_test_suite_r_is_correct(&*r_return_box()));
@@ -786,6 +795,7 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(r_return_enum(2021) == Enum::CVal);
 
   r_take_primitive(2020);
+  r_take_rust_char(rust::Char(U'\U0001f643'));
   r_take_shared(Shared{2020});
   r_take_unique_ptr(std::unique_ptr<C>(new C{2020}));
   r_take_shared_ptr(std::shared_ptr<C>(new C{2020}));
