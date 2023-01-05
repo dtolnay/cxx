@@ -11,11 +11,9 @@ package(default_visibility = ["//visibility:public"])
 exports_files(
     [
         "cargo-bazel.json",
-        "defs.bzl",
         "crates.bzl",
-    ] + glob([
-        "*.bazel",
-    ]),
+        "defs.bzl",
+    ] + glob(["*.bazel"]),
 )
 
 filegroup(
@@ -72,18 +70,5 @@ alias(
 alias(
     name = "syn",
     actual = "@vendor__syn-1.0.107//:syn",
-    tags = ["manual"],
-)
-
-# Binaries
-alias(
-    name = "cc__gcc-shim",
-    actual = "@vendor__cc-1.0.78//:gcc-shim__bin",
-    tags = ["manual"],
-)
-
-alias(
-    name = "clap__stdio-fixture",
-    actual = "@vendor__clap-4.0.30//:stdio-fixture__bin",
     tags = ["manual"],
 )

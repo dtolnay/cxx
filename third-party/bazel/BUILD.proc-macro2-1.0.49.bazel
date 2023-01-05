@@ -6,17 +6,8 @@
 #     bazel run @//third-party:vendor
 ###############################################################################
 
-load(
-    "@rules_rust//cargo:defs.bzl",
-    "cargo_build_script",
-)
-
-# buildifier: disable=bzl-visibility
-load("@rules_rust//crate_universe/private:selects.bzl", "select_with_or")
-load(
-    "@rules_rust//rust:defs.bzl",
-    "rust_library",
-)
+load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
+load("@rules_rust//rust:defs.bzl", "rust_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -26,59 +17,25 @@ package(default_visibility = ["//visibility:public"])
 
 rust_library(
     name = "proc_macro2",
-    srcs = glob(
-        include = [
-            "**/*.rs",
-        ],
-        exclude = [
-        ],
-    ),
-    aliases = select({
-        "//conditions:default": {
-        },
-    }),
+    srcs = glob(["**/*.rs"]),
     compile_data = glob(
         include = ["**"],
         exclude = [
             "**/* *",
-            "BUILD.bazel",
             "BUILD",
-            "WORKSPACE.bazel",
+            "BUILD.bazel",
             "WORKSPACE",
+            "WORKSPACE.bazel",
         ],
-    ) + select_with_or({
-        "//conditions:default": [
-        ],
-    }),
+    ),
     crate_features = [
         "default",
         "proc-macro",
         "span-locations",
     ],
     crate_root = "src/lib.rs",
-    data = select_with_or({
-        "//conditions:default": [
-        ],
-    }),
     edition = "2018",
-    proc_macro_deps = [
-    ] + select({
-        "//conditions:default": [
-        ],
-    }),
-    rustc_env = {
-    },
-    rustc_env_files = select_with_or({
-        "//conditions:default": [
-        ],
-    }),
-    rustc_flags = [
-        # In most cases, warnings in 3rd party crates are not interesting as
-        # they're out of the control of consumers. The flag here silences
-        # warnings. For more details see:
-        # https://doc.rust-lang.org/rustc/lints/levels.html
-        "--cap-lints=allow",
-    ],
+    rustc_flags = ["--cap-lints=allow"],
     tags = [
         "cargo-bazel",
         "manual",
@@ -87,34 +44,14 @@ rust_library(
     ],
     version = "1.0.49",
     deps = [
-    ] + select({
-        "//conditions:default": [
-            "@vendor__proc-macro2-1.0.49//:build_script_build",
-            "@vendor__unicode-ident-1.0.6//:unicode_ident",
-        ],
-    }),
+        "@vendor__proc-macro2-1.0.49//:build_script_build",
+        "@vendor__unicode-ident-1.0.6//:unicode_ident",
+    ],
 )
 
 cargo_build_script(
-    # See comment associated with alias. Do not change this name
     name = "proc-macro2_build_script",
-    srcs = glob(
-        include = [
-            "**/*.rs",
-        ],
-        exclude = [
-        ],
-    ),
-    aliases = select({
-        "//conditions:default": {
-        },
-    }),
-    build_script_env = {
-    },
-    compile_data = select_with_or({
-        "//conditions:default": [
-        ],
-    }),
+    srcs = glob(["**/*.rs"]),
     crate_features = [
         "default",
         "proc-macro",
@@ -126,32 +63,14 @@ cargo_build_script(
         include = ["**"],
         exclude = [
             "**/* *",
-            "BUILD.bazel",
             "BUILD",
-            "WORKSPACE.bazel",
+            "BUILD.bazel",
             "WORKSPACE",
+            "WORKSPACE.bazel",
         ],
-    ) + select_with_or({
-        "//conditions:default": [
-        ],
-    }),
+    ),
     edition = "2018",
-    proc_macro_deps = [
-    ] + select({
-        "//conditions:default": [
-        ],
-    }),
-    rustc_env = {
-    },
-    rustc_env_files = select_with_or({
-        "//conditions:default": [
-        ],
-    }),
     rustc_flags = [
-        # In most cases, warnings in 3rd party crates are not interesting as
-        # they're out of the control of consumers. The flag here silences
-        # warnings. For more details see:
-        # https://doc.rust-lang.org/rustc/lints/levels.html
         "--cap-lints=allow",
     ],
     tags = [
@@ -160,28 +79,12 @@ cargo_build_script(
         "noclippy",
         "norustfmt",
     ],
-    tools = select_with_or({
-        "//conditions:default": [
-        ],
-    }),
     version = "1.0.49",
     visibility = ["//visibility:private"],
-    deps = [
-    ] + select({
-        "//conditions:default": [
-        ],
-    }),
 )
 
 alias(
-    # Because `cargo_build_script` does some invisible target name mutating to
-    # determine the package and crate name for a build script, the Bazel
-    # target name of any build script cannot be the Cargo canonical name
-    # of `cargo_build_script` (rule) without losing out on having certain
-    # Cargo environment variables set.
     name = "build_script_build",
     actual = "proc-macro2_build_script",
-    tags = [
-        "manual",
-    ],
+    tags = ["manual"],
 )
