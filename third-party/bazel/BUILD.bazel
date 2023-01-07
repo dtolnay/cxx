@@ -33,7 +33,7 @@ alias(
 
 alias(
     name = "clap",
-    actual = "@vendor__clap-4.0.30//:clap",
+    actual = "@vendor__clap-4.0.32//:clap",
     tags = ["manual"],
 )
 
@@ -45,7 +45,7 @@ alias(
 
 alias(
     name = "once_cell",
-    actual = "@vendor__once_cell-1.16.0//:once_cell",
+    actual = "@vendor__once_cell-1.17.0//:once_cell",
     tags = ["manual"],
 )
 

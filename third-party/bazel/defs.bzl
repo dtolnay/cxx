@@ -292,9 +292,9 @@ _NORMAL_DEPENDENCIES = {
     "third-party": {
         _COMMON_CONDITION: {
             "cc": "@vendor__cc-1.0.78//:cc",
-            "clap": "@vendor__clap-4.0.30//:clap",
+            "clap": "@vendor__clap-4.0.32//:clap",
             "codespan-reporting": "@vendor__codespan-reporting-0.11.1//:codespan_reporting",
-            "once_cell": "@vendor__once_cell-1.16.0//:once_cell",
+            "once_cell": "@vendor__once_cell-1.17.0//:once_cell",
             "proc-macro2": "@vendor__proc-macro2-1.0.49//:proc_macro2",
             "quote": "@vendor__quote-1.0.23//:quote",
             "scratch": "@vendor__scratch-1.0.3//:scratch",
@@ -392,12 +392,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__clap-4.0.30",
-        sha256 = "656ad1e55e23d287773f7d8192c300dc715c3eeded93b3da651d11c42cfd74d2",
+        name = "vendor__clap-4.0.32",
+        sha256 = "a7db700bc935f9e43e88d00b0850dae18a63773cfbec6d8e070fccf7fef89a39",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/clap/4.0.30/download"],
-        strip_prefix = "clap-4.0.30",
-        build_file = Label("@cxx.rs//third-party/bazel:BUILD.clap-4.0.30.bazel"),
+        urls = ["https://crates.io/api/v1/crates/clap/4.0.32/download"],
+        strip_prefix = "clap-4.0.32",
+        build_file = Label("@cxx.rs//third-party/bazel:BUILD.clap-4.0.32.bazel"),
     )
 
     maybe(
@@ -422,12 +422,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__once_cell-1.16.0",
-        sha256 = "86f0b0d4bf799edbc74508c1e8bf170ff5f41238e5f8225603ca7caaae2b7860",
+        name = "vendor__once_cell-1.17.0",
+        sha256 = "6f61fba1741ea2b3d6a1e3178721804bb716a68a6aeba1149b5d52e3d464ea66",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/once_cell/1.16.0/download"],
-        strip_prefix = "once_cell-1.16.0",
-        build_file = Label("@cxx.rs//third-party/bazel:BUILD.once_cell-1.16.0.bazel"),
+        urls = ["https://crates.io/api/v1/crates/once_cell/1.17.0/download"],
+        strip_prefix = "once_cell-1.17.0",
+        build_file = Label("@cxx.rs//third-party/bazel:BUILD.once_cell-1.17.0.bazel"),
     )
 
     maybe(
