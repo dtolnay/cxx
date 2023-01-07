@@ -43,6 +43,7 @@ pub mod ffi {
     #[namespace = "A"]
     #[derive(Copy, Clone, Default)]
     struct AShared {
+        #[cxx_name = "type"]
         z: usize,
     }
 
