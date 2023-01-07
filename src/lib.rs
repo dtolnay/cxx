@@ -18,7 +18,7 @@
 //!
 //! <br>
 //!
-//! *Compiler support: requires rustc 1.48+ and c++11 or newer*<br>
+//! *Compiler support: requires rustc 1.60+ and c++11 or newer*<br>
 //! *[Release notes](https://github.com/dtolnay/cxx/releases)*
 //!
 //! <br>
@@ -365,9 +365,12 @@
 
 #![no_std]
 #![doc(html_root_url = "https://docs.rs/cxx/1.0.86")]
-#![deny(improper_ctypes, improper_ctypes_definitions, missing_docs)]
-#![cfg_attr(not(no_unsafe_op_in_unsafe_fn_lint), deny(unsafe_op_in_unsafe_fn))]
-#![cfg_attr(no_unsafe_op_in_unsafe_fn_lint, allow(unused_unsafe))]
+#![deny(
+    improper_ctypes,
+    improper_ctypes_definitions,
+    missing_docs,
+    unsafe_op_in_unsafe_fn
+)]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![allow(non_camel_case_types)]
 #![allow(
