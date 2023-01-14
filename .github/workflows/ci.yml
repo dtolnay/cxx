@@ -25,6 +25,7 @@ jobs:
           - rust: beta
           - rust: stable
           - rust: 1.60.0
+          - rust: 1.64.0
           - name: macOS
             rust: nightly
             os: macos
@@ -53,7 +54,7 @@ jobs:
         # builds.
         run: |
           echo RUSTFLAGS=$RUSTFLAGS >> $GITHUB_ENV
-          echo exclude=--exclude cxx-test-suite >> $GITHUB_OUTPUT
+          echo exclude=--exclude cxx-test-suite ${{matrix.rust == '1.60.0' && '--exclude cxxbridge-cmd' || ''}} >> $GITHUB_OUTPUT
         env:
           RUSTFLAGS: ${{env.RUSTFLAGS}} ${{matrix.os && github.event_name != 'schedule' && '--cfg skip_ui_tests' || ''}}
         id: testsuite
