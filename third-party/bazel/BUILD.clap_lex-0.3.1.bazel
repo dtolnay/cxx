@@ -36,7 +36,7 @@ rust_library(
         "noclippy",
         "norustfmt",
     ],
-    version = "0.3.0",
+    version = "0.3.1",
     deps = [
         "@vendor__os_str_bytes-6.4.1//:os_str_bytes",
     ],
