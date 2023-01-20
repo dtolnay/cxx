@@ -13,3 +13,10 @@ fn test_async_cxx_string() {
     fn assert_send(_: impl Send) {}
     assert_send(f());
 }
+
+#[test]
+fn test_debug() {
+    let_cxx_string!(s = "x\"y\'z");
+
+    assert_eq!(format!("{:?}", s), r#""x\"y'z""#);
+}
