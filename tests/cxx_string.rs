@@ -18,5 +18,5 @@ fn test_async_cxx_string() {
 fn test_debug() {
     let_cxx_string!(s = "x\"y\'z");
 
-    assert_eq!(format!("{:?}", s), r#""x\"y\'z""#);
+    assert_eq!(format!("{:?}", s), r#""x\"y'z""#);
 }
