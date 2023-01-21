@@ -6,6 +6,10 @@ def buildscript_args(
         version: str.type,
         cfgs: [str.type] = [],
         features: [str.type] = []):
+    _ = package_name
+    _ = version
+    _ = cfgs
+    _ = features
     native.genrule(
         name = name,
         out = outfile,
