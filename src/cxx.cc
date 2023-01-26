@@ -488,6 +488,7 @@ Error &Error::operator=(const Error &other) & {
 
 Error &Error::operator=(Error &&other) &noexcept {
   std::exception::operator=(std::move(other));
+  delete[] this->msg;
   this->msg = other.msg;
   this->len = other.len;
   other.msg = nullptr;
