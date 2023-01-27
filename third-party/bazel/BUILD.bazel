@@ -33,7 +33,7 @@ alias(
 
 alias(
     name = "clap",
-    actual = "@vendor__clap-4.1.1//:clap",
+    actual = "@vendor__clap-4.1.4//:clap",
     tags = ["manual"],
 )
 

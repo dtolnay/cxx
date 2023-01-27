@@ -292,7 +292,7 @@ _NORMAL_DEPENDENCIES = {
     "third-party": {
         _COMMON_CONDITION: {
             "cc": "@vendor__cc-1.0.78//:cc",
-            "clap": "@vendor__clap-4.1.1//:clap",
+            "clap": "@vendor__clap-4.1.4//:clap",
             "codespan-reporting": "@vendor__codespan-reporting-0.11.1//:codespan_reporting",
             "once_cell": "@vendor__once_cell-1.17.0//:once_cell",
             "proc-macro2": "@vendor__proc-macro2-1.0.50//:proc_macro2",
@@ -392,12 +392,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__clap-4.1.1",
-        sha256 = "4ec7a4128863c188deefe750ac1d1dfe66c236909f845af04beed823638dc1b2",
+        name = "vendor__clap-4.1.4",
+        sha256 = "f13b9c79b5d1dd500d20ef541215a6423c75829ef43117e1b4d17fd8af0b5d76",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/clap/4.1.1/download"],
-        strip_prefix = "clap-4.1.1",
-        build_file = Label("@cxx.rs//third-party/bazel:BUILD.clap-4.1.1.bazel"),
+        urls = ["https://crates.io/api/v1/crates/clap/4.1.4/download"],
+        strip_prefix = "clap-4.1.4",
+        build_file = Label("@cxx.rs//third-party/bazel:BUILD.clap-4.1.4.bazel"),
     )
 
     maybe(
