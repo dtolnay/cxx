@@ -32,6 +32,7 @@ rust_library(
     rustc_flags = ["--cap-lints=allow"],
     tags = [
         "cargo-bazel",
+        "crate-name=cc",
         "manual",
         "noclippy",
         "norustfmt",
