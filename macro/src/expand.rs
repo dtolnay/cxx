@@ -321,6 +321,7 @@ fn expand_enum(enm: &Enum) -> TokenStream {
         Some(quote_spanned! {span=>
             #doc
             #attrs
+            #[allow(dead_code)]
             pub const #variant_ident: Self = #ident { repr: #discriminant };
         })
     });
