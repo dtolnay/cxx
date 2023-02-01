@@ -18,23 +18,23 @@ rust_library(
 
 alias(
     name = "cc",
-    actual = ":cc-1.0.78",
+    actual = ":cc-1.0.79",
     visibility = ["PUBLIC"],
 )
 
 rust_library(
-    name = "cc-1.0.78",
+    name = "cc-1.0.79",
     srcs = [
-        "vendor/cc-1.0.78/src/com.rs",
-        "vendor/cc-1.0.78/src/lib.rs",
-        "vendor/cc-1.0.78/src/registry.rs",
-        "vendor/cc-1.0.78/src/setup_config.rs",
-        "vendor/cc-1.0.78/src/vs_instances.rs",
-        "vendor/cc-1.0.78/src/winapi.rs",
-        "vendor/cc-1.0.78/src/windows_registry.rs",
+        "vendor/cc-1.0.79/src/com.rs",
+        "vendor/cc-1.0.79/src/lib.rs",
+        "vendor/cc-1.0.79/src/registry.rs",
+        "vendor/cc-1.0.79/src/setup_config.rs",
+        "vendor/cc-1.0.79/src/vs_instances.rs",
+        "vendor/cc-1.0.79/src/winapi.rs",
+        "vendor/cc-1.0.79/src/windows_registry.rs",
     ],
     crate = "cc",
-    crate_root = "vendor/cc-1.0.78/src/lib.rs",
+    crate_root = "vendor/cc-1.0.79/src/lib.rs",
     edition = "2018",
     rustc_flags = ["--cap-lints=allow"],
     visibility = [],
