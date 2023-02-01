@@ -123,6 +123,7 @@ fn struct_clone(strct: &Struct, span: Span) -> TokenStream {
     };
 
     quote_spanned! {span=>
+        #[allow(clippy::expl_impl_clone_on_copy)]
         impl #generics ::cxx::core::clone::Clone for #ident #generics {
             fn clone(&self) -> Self {
                 #body
@@ -230,6 +231,7 @@ fn enum_clone(enm: &Enum, span: Span) -> TokenStream {
     let ident = &enm.name.rust;
 
     quote_spanned! {span=>
+        #[allow(clippy::expl_impl_clone_on_copy)]
         impl ::cxx::core::clone::Clone for #ident {
             fn clone(&self) -> Self {
                 *self
