@@ -237,24 +237,24 @@ rust_library(
 
 alias(
     name = "proc-macro2",
-    actual = ":proc-macro2-1.0.50",
+    actual = ":proc-macro2-1.0.51",
     visibility = ["PUBLIC"],
 )
 
 rust_library(
-    name = "proc-macro2-1.0.50",
+    name = "proc-macro2-1.0.51",
     srcs = [
-        "vendor/proc-macro2-1.0.50/src/detection.rs",
-        "vendor/proc-macro2-1.0.50/src/fallback.rs",
-        "vendor/proc-macro2-1.0.50/src/lib.rs",
-        "vendor/proc-macro2-1.0.50/src/location.rs",
-        "vendor/proc-macro2-1.0.50/src/marker.rs",
-        "vendor/proc-macro2-1.0.50/src/parse.rs",
-        "vendor/proc-macro2-1.0.50/src/rcvec.rs",
-        "vendor/proc-macro2-1.0.50/src/wrapper.rs",
+        "vendor/proc-macro2-1.0.51/src/detection.rs",
+        "vendor/proc-macro2-1.0.51/src/fallback.rs",
+        "vendor/proc-macro2-1.0.51/src/lib.rs",
+        "vendor/proc-macro2-1.0.51/src/location.rs",
+        "vendor/proc-macro2-1.0.51/src/marker.rs",
+        "vendor/proc-macro2-1.0.51/src/parse.rs",
+        "vendor/proc-macro2-1.0.51/src/rcvec.rs",
+        "vendor/proc-macro2-1.0.51/src/wrapper.rs",
     ],
     crate = "proc_macro2",
-    crate_root = "vendor/proc-macro2-1.0.50/src/lib.rs",
+    crate_root = "vendor/proc-macro2-1.0.51/src/lib.rs",
     edition = "2018",
     features = [
         "default",
@@ -263,17 +263,17 @@ rust_library(
     ],
     rustc_flags = [
         "--cap-lints=allow",
-        "@$(location :proc-macro2-1.0.50-build-script-build-args)",
+        "@$(location :proc-macro2-1.0.51-build-script-build-args)",
     ],
     visibility = [],
     deps = [":unicode-ident-1.0.6"],
 )
 
 rust_binary(
-    name = "proc-macro2-1.0.50-build-script-build",
-    srcs = ["vendor/proc-macro2-1.0.50/build.rs"],
+    name = "proc-macro2-1.0.51-build-script-build",
+    srcs = ["vendor/proc-macro2-1.0.51/build.rs"],
     crate = "build_script_build",
-    crate_root = "vendor/proc-macro2-1.0.50/build.rs",
+    crate_root = "vendor/proc-macro2-1.0.51/build.rs",
     edition = "2018",
     features = [
         "default",
@@ -285,16 +285,16 @@ rust_binary(
 )
 
 buildscript_args(
-    name = "proc-macro2-1.0.50-build-script-build-args",
+    name = "proc-macro2-1.0.51-build-script-build-args",
     package_name = "proc-macro2",
-    buildscript_rule = ":proc-macro2-1.0.50-build-script-build",
+    buildscript_rule = ":proc-macro2-1.0.51-build-script-build",
     features = [
         "default",
         "proc-macro",
         "span-locations",
     ],
     outfile = "args.txt",
-    version = "1.0.50",
+    version = "1.0.51",
 )
 
 alias(
@@ -326,7 +326,7 @@ rust_library(
         "@$(location :quote-1.0.23-build-script-build-args)",
     ],
     visibility = [],
-    deps = [":proc-macro2-1.0.50"],
+    deps = [":proc-macro2-1.0.51"],
 )
 
 rust_binary(
@@ -455,7 +455,7 @@ rust_library(
     ],
     visibility = [],
     deps = [
-        ":proc-macro2-1.0.50",
+        ":proc-macro2-1.0.51",
         ":quote-1.0.23",
         ":unicode-ident-1.0.6",
     ],

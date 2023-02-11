@@ -50,7 +50,7 @@ rust_library(
     ],
     version = "1.0.107",
     deps = [
-        "@vendor__proc-macro2-1.0.50//:proc_macro2",
+        "@vendor__proc-macro2-1.0.51//:proc_macro2",
         "@vendor__quote-1.0.23//:quote",
         "@vendor__syn-1.0.107//:build_script_build",
         "@vendor__unicode-ident-1.0.6//:unicode_ident",
