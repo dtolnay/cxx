@@ -378,6 +378,7 @@
     clippy::declare_interior_mutable_const,
     clippy::doc_markdown,
     clippy::empty_enum,
+    clippy::extra_unused_type_parameters,
     clippy::inherent_to_string,
     clippy::items_after_statements,
     clippy::large_enum_variant,

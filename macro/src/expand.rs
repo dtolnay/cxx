@@ -142,6 +142,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
         #[allow(
             non_camel_case_types,
             non_snake_case,
+            clippy::extra_unused_type_parameters,
             clippy::ptr_as_ptr,
             clippy::upper_case_acronyms,
             clippy::use_self,
