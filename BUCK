@@ -1,6 +1,9 @@
 rust_library(
     name = "cxx",
     srcs = glob(["src/**/*.rs"]),
+    doc_deps = [
+        ":cxx-build",
+    ],
     edition = "2018",
     features = [
         "alloc",
@@ -49,6 +52,7 @@ cxx_library(
 rust_library(
     name = "cxxbridge-macro",
     srcs = glob(["macro/src/**/*.rs"]) + ["macro/src/syntax"],
+    doctests = False,
     edition = "2018",
     proc_macro = True,
     deps = [
@@ -64,6 +68,7 @@ rust_library(
         "gen/build/src/gen",
         "gen/build/src/syntax",
     ],
+    doctests = False,
     edition = "2018",
     deps = [
         "//third-party:cc",
