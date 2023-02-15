@@ -62,7 +62,6 @@ rust_library(
         "gen/build/src/syntax",
     ],
     edition = "2018",
-    visibility = ["PUBLIC"],
     deps = [
         "//third-party:cc",
         "//third-party:codespan-reporting",

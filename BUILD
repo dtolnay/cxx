@@ -61,7 +61,6 @@ rust_library(
     srcs = glob(["gen/build/src/**/*.rs"]),
     data = ["gen/build/src/gen/include/cxx.h"],
     edition = "2018",
-    visibility = ["//visibility:public"],
     deps = [
         "//third-party:cc",
         "//third-party:codespan-reporting",
