@@ -90,7 +90,7 @@ jobs:
         run: git diff --exit-code
       - run: buck2 run demo
       - run: buck2 build ...
-      - run: buck2 run tests:test
+      - run: buck2 test ...
 
   bazel:
     name: Bazel
