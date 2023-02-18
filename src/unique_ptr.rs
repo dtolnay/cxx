@@ -108,15 +108,16 @@ where
             ty: PhantomData,
         }
     }
-
-    /// Convert this UniquePtr to a SharedPtr, analogous to constructor (13) for [std::shared\_ptr](https://en.cppreference.com/w/cpp/memory/shared_ptr/shared_ptr)
-    pub fn to_shared(self) -> SharedPtr<T> where T: SharedPtrTarget {
-        unsafe { SharedPtr::from_unmanaged(self.into_raw()) }
-    }
 }
 
 impl<T> UniquePtr<T>
-where T: UniquePtrTarget + SharedPtrTarget {
+where
+    T: UniquePtrTarget + SharedPtrTarget,
+{
+    /// Convert this UniquePtr to a SharedPtr, analogous to constructor (13) for [std::shared\_ptr](https://en.cppreference.com/w/cpp/memory/shared_ptr/shared_ptr)
+    pub fn to_shared(self) -> SharedPtr<T> {
+        unsafe { SharedPtr::from_unmanaged(self.into_raw()) }
+    }
 }
 
 unsafe impl<T> Send for UniquePtr<T> where T: Send + UniquePtrTarget {}
@@ -239,7 +240,6 @@ pub unsafe trait UniquePtrTarget {
     unsafe fn __release(repr: MaybeUninit<*mut c_void>) -> *mut Self;
     #[doc(hidden)]
     unsafe fn __drop(repr: MaybeUninit<*mut c_void>);
-    
 }
 
 extern "C" {

@@ -50,12 +50,12 @@ where
 
     /// Create a shared pointer from an already-allocated object
     /// Corresponds to constructor (3) of [std::shared\_ptr](https://en.cppreference.com/w/cpp/memory/shared_ptr/shared_ptr)
-    /// 
+    ///
     /// The SharedPtr gains ownership of the pointer and will call std::default_delete on it when the refcount goes to zero.
     /// The data will not be moved, so any pointers to this data elsewhere in the program continue to be valid
-    /// 
+    ///
     /// # Safety
-    /// 
+    ///
     /// Value must either be null or point to a valid instance of T
     pub unsafe fn from_unmanaged(value: *mut T) -> Self {
         let mut shared_ptr = MaybeUninit::<SharedPtr<T>>::uninit();
