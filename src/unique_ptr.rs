@@ -114,7 +114,7 @@ impl<T> UniquePtr<T>
 where
     T: UniquePtrTarget + SharedPtrTarget,
 {
-    /// Convert this UniquePtr to a SharedPtr, analogous to constructor (13) for [std::shared\_ptr](https://en.cppreference.com/w/cpp/memory/shared_ptr/shared_ptr)
+    /// Convert this UniquePtr to a SharedPtr, analogous to constructor (13) for [`std::shared_ptr`](https://en.cppreference.com/w/cpp/memory/shared_ptr/shared_ptr)
     pub fn to_shared(self) -> SharedPtr<T> {
         unsafe { SharedPtr::from_unmanaged(self.into_raw()) }
     }
