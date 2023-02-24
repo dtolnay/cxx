@@ -1751,6 +1751,10 @@ fn expand_extern_type(ty: &Type, types: &Types, proper: bool) -> TokenStream {
             let span = ident.rust.span();
             quote_spanned!(span=> ::cxx::private::RustString)
         }
+        Type::Ident(ident) if ident.rust == CxxExceptionPtr => {
+            let span = ident.rust.span();
+            quote_spanned!(span=> ::cxx::CxxException)
+        }
         Type::RustBox(ty) | Type::UniquePtr(ty) => {
             let span = ty.name.span();
             if proper && types.is_considered_improper_ctype(&ty.inner) {
