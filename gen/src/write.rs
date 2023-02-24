@@ -706,8 +706,8 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     out.begin_block(Block::ExternC);
     begin_function_definition(out);
     if efn.throws {
-        out.builtin.ptr_len = true;
-        write!(out, "::rust::repr::PtrLen ");
+        out.builtin.repr_cxxresult = true;
+        write!(out, "::rust::repr::Exception ");
     } else {
         write_extern_return_type_space(out, &efn.ret);
     }
@@ -783,9 +783,9 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     writeln!(out, ";");
     write!(out, "  ");
     if efn.throws {
-        out.builtin.ptr_len = true;
+        out.builtin.repr_cxxresult = true;
         out.builtin.trycatch = true;
-        writeln!(out, "::rust::repr::PtrLen throw$;");
+        writeln!(out, "::rust::repr::Exception throw$;");
         writeln!(out, "  ::rust::behavior::trycatch(");
         writeln!(out, "      [&] {{");
         write!(out, "        ");
@@ -856,7 +856,8 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     }
     writeln!(out, ";");
     if efn.throws {
-        writeln!(out, "        throw$.ptr = nullptr;");
+        writeln!(out, "        throw$.exc.ptr = nullptr;");
+        writeln!(out, "        throw$.msg.ptr = nullptr;");
         writeln!(out, "      }},");
         writeln!(out, "      ::rust::detail::Fail(throw$));");
         writeln!(out, "  return throw$;");
@@ -899,8 +900,8 @@ fn write_rust_function_decl_impl(
 ) {
     out.next_section();
     if sig.throws {
-        out.builtin.ptr_len = true;
-        write!(out, "::rust::repr::PtrLen ");
+        out.builtin.repr_cxxresult = true;
+        write!(out, "::rust::repr::CxxResult ");
     } else {
         write_extern_return_type_space(out, &sig.ret);
     }
@@ -1074,8 +1075,8 @@ fn write_rust_function_shim_impl(
         }
     }
     if sig.throws {
-        out.builtin.ptr_len = true;
-        write!(out, "::rust::repr::PtrLen error$ = ");
+        out.builtin.repr_cxxresult = true;
+        write!(out, "::rust::repr::CxxResult error$ = ");
     }
     write!(out, "{}(", invoke);
     let mut needs_comma = false;
@@ -1124,7 +1125,8 @@ fn write_rust_function_shim_impl(
     if sig.throws {
         out.builtin.rust_error = true;
         writeln!(out, "  if (error$.ptr) {{");
-        writeln!(out, "    throw ::rust::impl<::rust::Error>::error(error$);");
+        writeln!(out, "    void *ppexc = &error$.ptr;");
+        writeln!(out, "    std::rethrow_exception(std::move(*static_cast<std::exception_ptr*>(ppexc)));");
         writeln!(out, "  }}");
     }
     if indirect_return {

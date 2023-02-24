@@ -474,10 +474,6 @@ static_assert(alignof(std::exception_ptr) == alignof(void *),
               "Unsupported std::exception_ptr alignment");
 
 extern "C" {
-const char *cxxbridge1$error(const char *ptr, std::size_t len) noexcept {
-  return errorCopy(ptr, len);
-}
-
 void *cxxbridge1$default_exception(const char *ptr, std::size_t len) noexcept {
   // Construct an `std::exception_ptr` for the default `rust::Error` in the
   // space provided by the pointer itself (placement new).
@@ -501,8 +497,9 @@ void *cxxbridge1$clone_exception(const char *ptr) noexcept {
   // Implement the `clone` for `CxxException` on the Rust side, which is just a
   // pointer to the exception stored in `std::exception_ptr`.
   void *eptr;
-  new (&eptr) std::exception_ptr(
-      *reinterpret_cast<const std::exception_ptr *const>(&ptr));
+  const void *pptr = &ptr;
+  new (&eptr)
+      std::exception_ptr(*static_cast<const std::exception_ptr *>(pptr));
   return eptr;
 }
 } // extern "C"
@@ -559,6 +556,13 @@ struct PtrLen final {
   void *ptr;
   std::size_t len;
 };
+struct CxxResult final {
+  void *ptr;
+};
+struct Exception final {
+  CxxResult exc;
+  PtrLen msg;
+};
 } // namespace repr
 
 extern "C" {
@@ -580,20 +584,26 @@ using isize_if_unique =
                               struct isize_ignore, rust::isize>::type;
 
 class Fail final {
-  repr::PtrLen &throw$;
+  repr::Exception &throw$;
 
 public:
-  Fail(repr::PtrLen &throw$) noexcept : throw$(throw$) {}
+  Fail(repr::Exception &throw$) noexcept : throw$(throw$) {}
   void operator()(const char *) noexcept;
   void operator()(const std::string &) noexcept;
 };
 
 void Fail::operator()(const char *catch$) noexcept {
-  throw$ = cxxbridge1$exception(catch$, std::strlen(catch$));
+  void *eptr;
+  new (&eptr)::std::exception_ptr(::std::current_exception());
+  throw$.exc.ptr = eptr;
+  throw$.msg = cxxbridge1$exception(catch$, std::strlen(catch$));
 }
 
 void Fail::operator()(const std::string &catch$) noexcept {
-  throw$ = cxxbridge1$exception(catch$.data(), catch$.length());
+  void *eptr;
+  new (&eptr)::std::exception_ptr(::std::current_exception());
+  throw$.exc.ptr = eptr;
+  throw$.msg = cxxbridge1$exception(catch$.data(), catch$.length());
 }
 } // namespace detail
 
