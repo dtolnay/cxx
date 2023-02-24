@@ -449,8 +449,9 @@ static_assert(!std::is_same<Vec<std::uint8_t>::const_iterator,
               "Vec<T>::const_iterator != Vec<T>::iterator");
 
 static const char *errorCopy(const char *ptr, std::size_t len) {
-  char *copy = new char[len];
+  char *copy = new char[len + 1];
   std::memcpy(copy, ptr, len);
+  copy[len] = 0;
   return copy;
 }
 
