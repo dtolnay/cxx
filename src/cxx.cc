@@ -454,9 +454,56 @@ static const char *errorCopy(const char *ptr, std::size_t len) {
   return copy;
 }
 
+namespace {
+template <>
+class impl<Error> final {
+public:
+  static Error error_copy(const char *ptr, std::size_t len) noexcept {
+    Error error;
+    error.msg = errorCopy(ptr, len);
+    error.len = len;
+    return error;
+  }
+};
+} // namespace
+
+// Ensure statically that `std::exception_ptr` is really a pointer.
+static_assert(sizeof(std::exception_ptr) == sizeof(void *),
+              "Unsupported std::exception_ptr size");
+static_assert(alignof(std::exception_ptr) == alignof(void *),
+              "Unsupported std::exception_ptr alignment");
+
 extern "C" {
 const char *cxxbridge1$error(const char *ptr, std::size_t len) noexcept {
   return errorCopy(ptr, len);
+}
+
+void *cxxbridge1$default_exception(const char *ptr, std::size_t len) noexcept {
+  // Construct an `std::exception_ptr` for the default `rust::Error` in the
+  // space provided by the pointer itself (placement new).
+  //
+  // The `std::exception_ptr` itself is just a pointer, so this effectively
+  // converts it to the pointer.
+  void *eptr;
+  new (&eptr) std::exception_ptr(
+      std::make_exception_ptr(impl<Error>::error_copy(ptr, len)));
+  return eptr;
+}
+
+void cxxbridge1$drop_exception(char *ptr) noexcept {
+  // Implement the `drop` for `CxxException` on the Rust side, which is just a
+  // pointer to the exception stored in `std::exception_ptr`.
+  auto eptr = std::move(*reinterpret_cast<std::exception_ptr *>(&ptr));
+  // eptr goes out of scope and deallocates `std::exception_ptr`.
+}
+
+void *cxxbridge1$clone_exception(const char *ptr) noexcept {
+  // Implement the `clone` for `CxxException` on the Rust side, which is just a
+  // pointer to the exception stored in `std::exception_ptr`.
+  void *eptr;
+  new (&eptr) std::exception_ptr(
+      *reinterpret_cast<const std::exception_ptr *const>(&ptr));
+  return eptr;
 }
 } // extern "C"
 
