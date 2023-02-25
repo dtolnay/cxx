@@ -378,3 +378,19 @@ fn test_raw_ptr() {
     assert_eq!(2025, unsafe { ffi::c_take_const_ptr(c3) });
     assert_eq!(2025, unsafe { ffi::c_take_mut_ptr(c3 as *mut ffi::C) }); // deletes c3
 }
+
+/// Test throwing a custom exception from a Rust call via `ToCxxException`
+/// trait.
+#[test]
+fn test_custom_exception() {
+    let err = ffi::catch_custom_exception().expect_err("Error expected");
+    assert_eq!(err.what(), "custom 4711");
+}
+
+/// Test forwarding the exception from the inner C++ function via a middle Rust
+/// function into the outer C++ function unmodified.
+#[test]
+fn test_forward_exception() {
+    let err = ffi::forward_exception_outer().expect_err("Error expected");
+    assert_eq!(err.what(), "forward test exc");
+}
