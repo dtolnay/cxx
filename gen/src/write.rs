@@ -856,7 +856,9 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     }
     writeln!(out, ";");
     if efn.throws {
-        writeln!(out, "        throw$.exc.ptr = nullptr;");
+        writeln!(out, "        throw$.res.exc.repr_ptr = nullptr;");
+        #[cfg(target_env = "msvc")]
+        writeln!(out, "        throw$.res.exc.repr_ptr_2 = nullptr;");
         writeln!(out, "        throw$.msg.ptr = nullptr;");
         writeln!(out, "      }},");
         writeln!(out, "      ::rust::detail::Fail(throw$));");
@@ -1124,9 +1126,12 @@ fn write_rust_function_shim_impl(
     writeln!(out, ";");
     if sig.throws {
         out.builtin.rust_error = true;
-        writeln!(out, "  if (error$.ptr) {{");
-        writeln!(out, "    void *ppexc = &error$.ptr;");
-        writeln!(out, "    std::rethrow_exception(std::move(*static_cast<std::exception_ptr*>(ppexc)));");
+        writeln!(out, "  if (error$.exc.repr_ptr) {{");
+        writeln!(out, "    void *ppexc = &error$.exc;");
+        writeln!(
+            out,
+            "    std::rethrow_exception(std::move(*static_cast<std::exception_ptr*>(ppexc)));"
+        );
         writeln!(out, "  }}");
     }
     if indirect_return {

@@ -225,11 +225,17 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "  void *ptr;");
         writeln!(out, "  ::std::size_t len;");
         writeln!(out, "}};");
+        writeln!(out, "struct CxxException final {{");
+        writeln!(out, "  void *repr_ptr;");
+        writeln!(out, "#if _MSC_VER >= 1700");
+        writeln!(out, "  void *repr_ptr_2;");
+        writeln!(out, "#endif");
+        writeln!(out, "}};");
         writeln!(out, "struct CxxResult final {{");
-        writeln!(out, "  void *ptr;");
+        writeln!(out, "  CxxException exc;");
         writeln!(out, "}};");
         writeln!(out, "struct Exception final {{");
-        writeln!(out, "  CxxResult exc;");
+        writeln!(out, "  CxxResult res;");
         writeln!(out, "  PtrLen msg;");
         writeln!(out, "}};");
     }

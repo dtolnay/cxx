@@ -19,47 +19,61 @@ pub(crate) struct PtrLen {
     pub len: usize,
 }
 
+/// Representation of C++ `std::exception_ptr` for all targets except MSVC.
+///
+/// This is a single pointer.
+#[repr(C)]
+#[derive(Copy, Clone)]
+#[cfg(not(target_env = "msvc"))]
+struct CxxExceptionRepr {
+    ptr: NonNull<u8>,
+}
+
+/// Representation of C++ `std::exception_ptr` for MSVC.
+///
+/// Unfortunately, MSVC uses two pointers for `std::exception_ptr`, so we have
+/// to account for that.
+#[repr(C)]
+#[derive(Copy, Clone)]
+#[cfg(target_env = "msvc")]
+struct CxxExceptionRepr {
+    ptr: NonNull<u8>,
+    _ptr2: *mut u8,
+}
+
 extern "C" {
     /// Helper to construct the default exception from the error message.
     #[link_name = "cxxbridge1$default_exception"]
-    fn default_exception(ptr: *const u8, len: usize) -> *mut u8;
+    fn default_exception(ptr: *const u8, len: usize) -> CxxExceptionRepr;
     /// Helper to clone the instance of `std::exception_ptr` on the C++ side.
     #[link_name = "cxxbridge1$clone_exception"]
-    fn clone_exception(ptr: *const u8) -> *mut u8;
+    fn clone_exception(ptr: &CxxExceptionRepr) -> CxxExceptionRepr;
     /// Helper to drop the instance of `std::exception_ptr` on the C++ side.
     #[link_name = "cxxbridge1$drop_exception"]
-    fn drop_exception(ptr: *mut u8);
+    fn drop_exception(ptr: CxxExceptionRepr);
 }
 
-/// C++ exception containing `std::exception_ptr`.
+/// C++ exception containing an `std::exception_ptr`.
 ///
 /// This object is the Rust wrapper over `std::exception_ptr`, so it owns the exception pointer.
 /// I.e., the exception is either referenced by a `std::exception_ptr` on the C++ side or the
 /// reference is moved to this object on the Rust side.
 #[repr(C)]
 #[must_use]
-pub struct CxxException(NonNull<u8>);
+pub struct CxxException(CxxExceptionRepr);
 
 impl CxxException {
     /// Construct the default `rust::Error` exception from the specified `exc_text`.
     fn new_default(exc_text: &str) -> Self {
-        let exception_ptr = unsafe {
-            default_exception(exc_text.as_ptr(), exc_text.len())
-        };
-        CxxException(
-            NonNull::new(exception_ptr)
-            .expect("Exception conversion returned a null pointer")
-        )
+        let exception_repr = unsafe { default_exception(exc_text.as_ptr(), exc_text.len()) };
+        CxxException(exception_repr)
     }
 }
 
 impl Clone for CxxException {
     fn clone(&self) -> Self {
-        let clone_ptr = unsafe { clone_exception(self.0.as_ptr()) };
-        Self(
-            NonNull::new(clone_ptr)
-            .expect("Exception cloning returned a null pointer")
-        )
+        let exception_repr = unsafe { clone_exception(&self.0) };
+        Self(exception_repr)
     }
 }
 
@@ -71,7 +85,7 @@ impl From<Exception> for CxxException {
 
 impl Drop for CxxException {
     fn drop(&mut self) {
-        unsafe { drop_exception(self.0.as_ptr()) };
+        unsafe { drop_exception(self.0) };
     }
 }
 
@@ -84,48 +98,33 @@ unsafe impl Sync for CxxException {}
 
 /// C++ "result" containing `std::exception_ptr` or a `null`.
 #[repr(C)]
-pub struct CxxResult(*mut u8);
+pub struct CxxResult(Option<CxxException>);
 
 impl From<CxxException> for CxxResult {
     fn from(value: CxxException) -> Self {
-        let res = Self(value.0.as_ptr());
-        // NOTE: we are copying the pointer, so we need to forget it here,
-        // otherwise we'd double-free the `std::exception_ptr`.
-        core::mem::forget(value);
-        res
-    }
-}
-
-impl Drop for CxxResult {
-    fn drop(&mut self) {
-        if !self.0.is_null() {
-            unsafe { drop_exception(self.0) };
-        }
+        Self(Some(value))
     }
 }
 
 impl CxxResult {
     /// Construct an empty `Ok` result.
     pub fn new() -> Self {
-        Self(core::ptr::null_mut())
+        Self(None)
     }
 }
 
 impl CxxResult {
     unsafe fn exception(self) -> Result<(), CxxException> {
         // SAFETY: We know that the `Result` can only contain a valid `std::exception_ptr` or null.
-        match unsafe { self.0.as_mut() } {
+        match self.0 {
             None => Ok(()),
-            Some(ptr) => {
-                let res = CxxException(NonNull::from(ptr));
-                // NOTE: we are copying the pointer, so we need to forget this
-                // object, otherwise we'd double-free the `std::exception_ptr`.
-                core::mem::forget(self);
-                Err(res)
-            }
+            Some(ptr) => Err(ptr),
         }
     }
 }
+
+// Assert that the result is not larger than the exception (`Option` will use the niche).
+const _: () = assert!(core::mem::size_of::<CxxResult>() == core::mem::size_of::<CxxException>());
 
 #[repr(C)]
 pub struct CxxResultWithMessage {
@@ -142,18 +141,19 @@ impl CxxResultWithMessage {
                 // SAFETY: The message is always given for the exception and we constructed it in
                 // a `Box` in `cxxbridge1$exception()`. We just reconstruct it here.
                 let what = unsafe {
-                    str::from_utf8_unchecked_mut(
-                        slice::from_raw_parts_mut(self.msg.ptr.as_ptr(), self.msg.len))
+                    str::from_utf8_unchecked_mut(slice::from_raw_parts_mut(
+                        self.msg.ptr.as_ptr(),
+                        self.msg.len,
+                    ))
                 };
                 Err(Exception {
                     src,
-                    what: unsafe { Box::from_raw(what) }
+                    what: unsafe { Box::from_raw(what) },
                 })
             }
         }
     }
 }
-
 
 /// Trait to convert an arbitrary Rust error into a C++ exception.
 ///
@@ -211,9 +211,8 @@ impl<T: Display> ToCxxExceptionDefault for &T {
             };
             // we have sufficient buffer size, just construct from the inplace
             // buffer
-            let exc_text = unsafe {
-                std::str::from_utf8_unchecked(&buffer.assume_init_ref()[0..size])
-            };
+            let exc_text =
+                unsafe { std::str::from_utf8_unchecked(&buffer.assume_init_ref()[0..size]) };
             CxxException::new_default(exc_text)
         }
         #[cfg(not(feature = "std"))]
@@ -234,8 +233,8 @@ macro_rules! map_rust_error_to_cxx_exception {
             // the need for `specialization` feature. Namely, `ToCxxException` for `T` has higher
             // weight and is selected before `ToCxxExceptionDefault`, which is defined on `&T` (and
             // requires auto-deref). If it's not defined, then the default is used.
-            use $crate::ToCxxExceptionDefault;
             use $crate::ToCxxException;
+            use $crate::ToCxxExceptionDefault;
             (&$err).to_cxx_exception()
         };
         exc
@@ -250,7 +249,7 @@ macro_rules! map_rust_result_to_cxx_result {
                 unsafe { ::core::ptr::write($ret_ptr, ok) };
                 $crate::private::CxxResult::new()
             }
-            Err(err) => $crate::private::CxxResult::from(err)
+            Err(err) => $crate::private::CxxResult::from(err),
         }
     };
 }
