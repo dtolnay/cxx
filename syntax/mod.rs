@@ -154,6 +154,7 @@ pub struct TypeAlias {
     pub visibility: Token![pub],
     pub type_token: Token![type],
     pub name: Pair,
+    pub lang: Lang,
     pub generics: Lifetimes,
     pub eq_token: Token![=],
     pub ty: RustType,
