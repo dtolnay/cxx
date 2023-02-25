@@ -4,6 +4,7 @@
 use alloc::boxed::Box;
 use alloc::string::ToString;
 use core::fmt::Display;
+#[cfg(feature = "std")]
 use core::mem::MaybeUninit;
 use core::ptr::NonNull;
 use core::slice;
