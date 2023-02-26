@@ -448,10 +448,14 @@ static_assert(!std::is_same<Vec<std::uint8_t>::const_iterator,
                             Vec<std::uint8_t>::iterator>::value,
               "Vec<T>::const_iterator != Vec<T>::iterator");
 
-static const char *errorCopy(const char *ptr, std::size_t len) {
-  char *copy = new char[len + 1];
-  std::memcpy(copy, ptr, len);
-  copy[len] = 0;
+// Copy the error message into a private buffer and return it.
+// If the allocation fails, nullptr is returned.
+static const char *errorCopy(const char *ptr, std::size_t len) noexcept {
+  char *copy = new (std::nothrow) char[len + 1];
+  if (copy) {
+    std::memcpy(copy, ptr, len);
+    copy[len] = 0;
+  }
   return copy;
 }
 
@@ -497,7 +501,12 @@ Error &Error::operator=(Error &&other) &noexcept {
   return *this;
 }
 
-const char *Error::what() const noexcept { return this->msg; }
+const char *Error::what() const noexcept {
+  if (this->msg)
+    return this->msg;
+  else
+    return "<message not allocated>";
+}
 
 namespace {
 template <typename T>
