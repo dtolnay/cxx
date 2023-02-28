@@ -1109,7 +1109,15 @@ fn expand_rust_function_shim_impl(
             None => quote_spanned!(span=> &mut ()),
         };
         requires_closure = true;
-        expr = quote_spanned!(span=> ::cxx::map_rust_result_to_cxx_result!(#out, #expr));
+        expr = quote_spanned!(span=>
+            match #expr {
+                Ok(ok) => {
+                    ::core::ptr::write(#out, ok);
+                    ::cxx::private::CxxResult::new()
+                }
+                Err(err) => ::cxx::private::CxxResult::from(err),
+            }
+        );
     } else if indirect_return {
         requires_closure = true;
         expr = quote_spanned!(span=> ::cxx::core::ptr::write(__return, #expr));
@@ -1193,10 +1201,10 @@ fn expand_rust_function_shim_super(
         // Set spans that result in the `Result<...>` written by the user being
         // highlighted as the cause if their error type is not convertible to
         // CxxException (i.e., no `Display` trait by default).
-        let result_begin = quote_spanned!{ result.span=>
+        let result_begin = quote_spanned! { result.span=>
             |e| ::cxx::map_rust_error_to_cxx_exception!
         };
-        let result_end = quote_spanned!{ rangle.span=> (e) };
+        let result_end = quote_spanned! { rangle.span=> (e) };
         quote_spanned! {span=>
             #call(#(#vars,)*).map_err( #result_begin #result_end )
         }

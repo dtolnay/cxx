@@ -240,16 +240,3 @@ macro_rules! map_rust_error_to_cxx_exception {
         exc
     }};
 }
-
-#[macro_export]
-macro_rules! map_rust_result_to_cxx_result {
-    ($ret_ptr:expr, $result:expr) => {
-        match $result {
-            Ok(ok) => {
-                unsafe { ::core::ptr::write($ret_ptr, ok) };
-                $crate::private::CxxResult::new()
-            }
-            Err(err) => $crate::private::CxxResult::from(err),
-        }
-    };
-}
