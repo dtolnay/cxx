@@ -10,4 +10,6 @@ generated_file_header = """
 """
 buckfile_imports = """
 load("//tools/buck:buildscript.bzl", "buildscript_args")
+load("//tools/buck:third_party.bzl", "third_party_rust_library")
 """
+rust_library = "third_party_rust_library"
