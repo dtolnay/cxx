@@ -33,7 +33,7 @@ alias(
 
 alias(
     name = "clap",
-    actual = "@vendor__clap-4.1.4//:clap",
+    actual = "@vendor__clap-4.1.8//:clap",
     tags = ["manual"],
 )
 
@@ -45,7 +45,7 @@ alias(
 
 alias(
     name = "once_cell",
-    actual = "@vendor__once_cell-1.17.0//:once_cell",
+    actual = "@vendor__once_cell-1.17.1//:once_cell",
     tags = ["manual"],
 )
 
@@ -63,12 +63,12 @@ alias(
 
 alias(
     name = "scratch",
-    actual = "@vendor__scratch-1.0.3//:scratch",
+    actual = "@vendor__scratch-1.0.5//:scratch",
     tags = ["manual"],
 )
 
 alias(
     name = "syn",
-    actual = "@vendor__syn-1.0.107//:syn",
+    actual = "@vendor__syn-1.0.109//:syn",
     tags = ["manual"],
 )
