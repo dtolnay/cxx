@@ -2,7 +2,7 @@
 repo = .
 prelude = tools/buck/prelude
 toolchains = tools/buck/toolchains
-ovr_config = tools/buck/prelude
+config = tools/buck/prelude
 buck = none
 fbcode = none
 fbsource = none
@@ -14,4 +14,4 @@ fbsource = none
 ignore = target
 
 [parser]
-target_platform_detector_spec = target://...->ovr_config//platforms:default
+target_platform_detector_spec = target://...->config//platforms:default
