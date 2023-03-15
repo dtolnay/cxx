@@ -69,6 +69,6 @@ alias(
 
 alias(
     name = "syn",
-    actual = "@vendor__syn-1.0.109//:syn",
+    actual = "@vendor__syn-2.0.0//:syn",
     tags = ["manual"],
 )
