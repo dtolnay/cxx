@@ -711,6 +711,19 @@ void E::c_take_opaque_mut_ref_method() {
   }
 }
 
+void L::impl_method() const {
+  cxx_test_suite_set_correct();
+}
+
+uint32_t L::static_method(uint32_t arg) {
+  cxx_test_suite_set_correct();
+  return arg + 1;
+}
+
+std::unique_ptr<L> L::build() {
+  return std::unique_ptr<L>(new L());
+}
+
 void c_take_opaque_ns_ref(const ::F::F &f) {
   if (f.f == 40 && f.f_str == "hello") {
     cxx_test_suite_set_correct();
@@ -897,6 +910,10 @@ extern "C" const char *cxx_run_test() noexcept {
   // https://github.com/dtolnay/cxx/issues/705
   (void)rust::Vec<size_t>();
   (void)rust::Vec<rust::isize>();
+
+  // Test impl-based methods and functions
+  ASSERT(R::assoc() == 42);
+  ASSERT(r->get() == r->get2());
 
   cxx_test_suite_set_correct();
   return nullptr;

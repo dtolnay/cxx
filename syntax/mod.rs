@@ -184,6 +184,7 @@ pub struct Signature {
     pub fn_token: Token![fn],
     pub generics: Generics,
     pub receiver: Option<Receiver>,
+    pub class: Option<NamedType>,
     pub args: Punctuated<Var, Token![,]>,
     pub ret: Option<Type>,
     pub throws: bool,
@@ -299,7 +300,7 @@ pub struct Pair {
 
 // Wrapper for a type which needs to be resolved before it can be printed in
 // C++.
-#[derive(PartialEq, Eq, Hash)]
+#[derive(Clone, PartialEq, Eq, Hash)]
 pub struct NamedType {
     pub rust: Ident,
     pub generics: Lifetimes,
