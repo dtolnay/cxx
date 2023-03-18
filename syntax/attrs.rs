@@ -146,7 +146,7 @@ pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> Othe
         } else if attr_path.is_ident("variants_from_header")
             && cfg!(feature = "experimental-enum-variants-from-header")
         {
-            if let Err(err) = require_empty_attribute(&attr.meta) {
+            if let Err(err) = attr.meta.require_path_only() {
                 cx.push(err);
             }
             if let Some(variants_from_header) = &mut parser.variants_from_header {
@@ -309,13 +309,4 @@ impl ToTokens for OtherAttrs {
             bracket_token.surround(tokens, |tokens| meta.to_tokens(tokens));
         }
     }
-}
-
-fn require_empty_attribute(meta: &Meta) -> Result<()> {
-    let error_span = match meta {
-        Meta::Path(_) => return Ok(()),
-        Meta::List(meta) => meta.delimiter.span().open(),
-        Meta::NameValue(meta) => meta.eq_token.span,
-    };
-    Err(Error::new(error_span, "unexpected token in cxx attribute"))
 }

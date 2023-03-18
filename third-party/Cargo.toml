@@ -15,4 +15,4 @@ once_cell = "1.9"
 proc-macro2 = { version = "1.0.39", features = ["span-locations"] }
 quote = "1.0.4"
 scratch = "1"
-syn = { version = "2.0.0", features = ["full"] }
+syn = { version = "2.0.1", features = ["full"] }

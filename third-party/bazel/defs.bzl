@@ -298,7 +298,7 @@ _NORMAL_DEPENDENCIES = {
             "proc-macro2": "@vendor__proc-macro2-1.0.52//:proc_macro2",
             "quote": "@vendor__quote-1.0.26//:quote",
             "scratch": "@vendor__scratch-1.0.5//:scratch",
-            "syn": "@vendor__syn-2.0.0//:syn",
+            "syn": "@vendor__syn-2.0.1//:syn",
         },
     },
 }
@@ -472,12 +472,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__syn-2.0.0",
-        sha256 = "4cff13bb1732bccfe3b246f3fdb09edfd51c01d6f5299b7ccd9457c2e4e37774",
+        name = "vendor__syn-2.0.1",
+        sha256 = "55ee2415bee46ba26eac9cd8e52966995c46bf0e842b6304eb8fcf99826548ed",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/syn/2.0.0/download"],
-        strip_prefix = "syn-2.0.0",
-        build_file = Label("@cxx.rs//third-party/bazel:BUILD.syn-2.0.0.bazel"),
+        urls = ["https://crates.io/api/v1/crates/syn/2.0.1/download"],
+        strip_prefix = "syn-2.0.1",
+        build_file = Label("@cxx.rs//third-party/bazel:BUILD.syn-2.0.1.bazel"),
     )
 
     maybe(

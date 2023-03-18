@@ -47,7 +47,7 @@ rust_library(
         "noclippy",
         "norustfmt",
     ],
-    version = "2.0.0",
+    version = "2.0.1",
     deps = [
         "@vendor__proc-macro2-1.0.52//:proc_macro2",
         "@vendor__quote-1.0.26//:quote",
