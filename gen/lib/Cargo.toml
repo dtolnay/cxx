@@ -15,7 +15,7 @@ rust-version = "1.60"
 codespan-reporting = "0.11"
 proc-macro2 = { version = "1.0.39", default-features = false, features = ["span-locations"] }
 quote = { version = "1.0", default-features = false }
-syn = { version = "1.0.95", default-features = false, features = ["parsing", "printing", "clone-impls", "full"] }
+syn = { version = "2.0.0", default-features = false, features = ["parsing", "printing", "clone-impls", "full"] }
 
 [lib]
 doc-scrape-examples = false
