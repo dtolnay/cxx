@@ -1223,11 +1223,18 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
     let type_id = type_id(&alias.name);
     let begin_span = alias.type_token.span;
     let end_span = alias.semi_token.span;
-    let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_type::<);
     let end = quote_spanned!(end_span=> >);
 
-    let mut verify = quote! {
-        const _: fn() = #begin #ident, #type_id #end;
+    let mut verify = if alias.is_renamed {
+        let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_type_renamed::<);
+        quote! {
+            const _: fn() = #begin #ident #end;
+        }
+    } else {
+        let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_type::<);
+        quote! {
+            const _: fn() = #begin #ident, #type_id #end;
+        }
     };
 
     if types.required_trivial.contains_key(&alias.name.rust) {

@@ -349,6 +349,7 @@ mod other {
     pub struct D {
         pub d: u64,
     }
+    pub type DRenamed = D;
 
     #[repr(C)]
     pub struct E {

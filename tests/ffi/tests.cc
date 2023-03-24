@@ -717,6 +717,12 @@ void c_take_opaque_ns_ref(const ::F::F &f) {
   }
 }
 
+void c_take_renamed(DRenamed d, Int64Alias val) {
+  if (d.d == val) {
+    cxx_test_suite_set_correct();
+  }
+}
+
 std::unique_ptr<D> c_return_trivial_ptr() {
   auto d = std::unique_ptr<D>(new D());
   d->d = 30;

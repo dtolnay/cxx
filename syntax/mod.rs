@@ -158,6 +158,7 @@ pub struct TypeAlias {
     pub eq_token: Token![=],
     pub ty: RustType,
     pub semi_token: Token![;],
+    pub is_renamed: bool,
 }
 
 pub struct Impl {
