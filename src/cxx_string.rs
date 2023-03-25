@@ -5,7 +5,7 @@ use alloc::borrow::Cow;
 #[cfg(feature = "alloc")]
 use alloc::string::String;
 use core::cmp::Ordering;
-use core::fmt::{self, Debug, Display, Write};
+use core::fmt::{self, Debug, Display};
 use core::hash::{Hash, Hasher};
 use core::marker::{PhantomData, PhantomPinned};
 use core::mem::MaybeUninit;
@@ -257,7 +257,7 @@ impl Hash for CxxString {
     }
 }
 
-impl Write for Pin<&mut CxxString> {
+impl fmt::Write for Pin<&mut CxxString> {
     fn write_str(&mut self, s: &str) -> fmt::Result {
         self.as_mut().push_str(s);
         Ok(())
