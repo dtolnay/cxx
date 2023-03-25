@@ -39,6 +39,6 @@ rust_library(
     ],
     version = "0.3.3",
     deps = [
-        "@vendor__os_str_bytes-6.4.1//:os_str_bytes",
+        "@vendor__os_str_bytes-6.5.0//:os_str_bytes",
     ],
 )

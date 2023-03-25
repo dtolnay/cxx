@@ -292,13 +292,13 @@ _NORMAL_DEPENDENCIES = {
     "third-party": {
         _COMMON_CONDITION: {
             "cc": "@vendor__cc-1.0.79//:cc",
-            "clap": "@vendor__clap-4.1.10//:clap",
+            "clap": "@vendor__clap-4.1.13//:clap",
             "codespan-reporting": "@vendor__codespan-reporting-0.11.1//:codespan_reporting",
             "once_cell": "@vendor__once_cell-1.17.1//:once_cell",
-            "proc-macro2": "@vendor__proc-macro2-1.0.52//:proc_macro2",
+            "proc-macro2": "@vendor__proc-macro2-1.0.53//:proc_macro2",
             "quote": "@vendor__quote-1.0.26//:quote",
             "scratch": "@vendor__scratch-1.0.5//:scratch",
-            "syn": "@vendor__syn-2.0.1//:syn",
+            "syn": "@vendor__syn-2.0.10//:syn",
         },
     },
 }
@@ -392,12 +392,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__clap-4.1.10",
-        sha256 = "ce38afc168d8665cfc75c7b1dd9672e50716a137f433f070991619744a67342a",
+        name = "vendor__clap-4.1.13",
+        sha256 = "3c911b090850d79fc64fe9ea01e28e465f65e821e08813ced95bced72f7a8a9b",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/clap/4.1.10/download"],
-        strip_prefix = "clap-4.1.10",
-        build_file = Label("@cxx.rs//third-party/bazel:BUILD.clap-4.1.10.bazel"),
+        urls = ["https://crates.io/api/v1/crates/clap/4.1.13/download"],
+        strip_prefix = "clap-4.1.13",
+        build_file = Label("@cxx.rs//third-party/bazel:BUILD.clap-4.1.13.bazel"),
     )
 
     maybe(
@@ -432,22 +432,22 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__os_str_bytes-6.4.1",
-        sha256 = "9b7820b9daea5457c9f21c69448905d723fbd21136ccf521748f23fd49e723ee",
+        name = "vendor__os_str_bytes-6.5.0",
+        sha256 = "ceedf44fb00f2d1984b0bc98102627ce622e083e49a5bacdb3e514fa4238e267",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/os_str_bytes/6.4.1/download"],
-        strip_prefix = "os_str_bytes-6.4.1",
-        build_file = Label("@cxx.rs//third-party/bazel:BUILD.os_str_bytes-6.4.1.bazel"),
+        urls = ["https://crates.io/api/v1/crates/os_str_bytes/6.5.0/download"],
+        strip_prefix = "os_str_bytes-6.5.0",
+        build_file = Label("@cxx.rs//third-party/bazel:BUILD.os_str_bytes-6.5.0.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__proc-macro2-1.0.52",
-        sha256 = "1d0e1ae9e836cc3beddd63db0df682593d7e2d3d891ae8c9083d2113e1744224",
+        name = "vendor__proc-macro2-1.0.53",
+        sha256 = "ba466839c78239c09faf015484e5cc04860f88242cff4d03eb038f04b4699b73",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/proc-macro2/1.0.52/download"],
-        strip_prefix = "proc-macro2-1.0.52",
-        build_file = Label("@cxx.rs//third-party/bazel:BUILD.proc-macro2-1.0.52.bazel"),
+        urls = ["https://crates.io/api/v1/crates/proc-macro2/1.0.53/download"],
+        strip_prefix = "proc-macro2-1.0.53",
+        build_file = Label("@cxx.rs//third-party/bazel:BUILD.proc-macro2-1.0.53.bazel"),
     )
 
     maybe(
@@ -472,12 +472,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__syn-2.0.1",
-        sha256 = "55ee2415bee46ba26eac9cd8e52966995c46bf0e842b6304eb8fcf99826548ed",
+        name = "vendor__syn-2.0.10",
+        sha256 = "5aad1363ed6d37b84299588d62d3a7d95b5a5c2d9aad5c85609fda12afaa1f40",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/syn/2.0.1/download"],
-        strip_prefix = "syn-2.0.1",
-        build_file = Label("@cxx.rs//third-party/bazel:BUILD.syn-2.0.1.bazel"),
+        urls = ["https://crates.io/api/v1/crates/syn/2.0.10/download"],
+        strip_prefix = "syn-2.0.10",
+        build_file = Label("@cxx.rs//third-party/bazel:BUILD.syn-2.0.10.bazel"),
     )
 
     maybe(
