@@ -5,7 +5,7 @@ use alloc::borrow::Cow;
 #[cfg(feature = "alloc")]
 use alloc::string::String;
 use core::cmp::Ordering;
-use core::fmt::{self, Debug, Display};
+use core::fmt::{self, Debug, Display, Write};
 use core::hash::{Hash, Hasher};
 use core::marker::{PhantomData, PhantomPinned};
 use core::mem::MaybeUninit;
@@ -254,6 +254,25 @@ impl Ord for CxxString {
 impl Hash for CxxString {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.as_bytes().hash(state);
+    }
+}
+
+impl Write for Pin<&mut CxxString> {
+    fn write_str(&mut self, s: &str) -> fmt::Result {
+        self.as_mut().push_str(s);
+        Ok(())
+    }
+}
+
+#[cfg(feature = "std")]
+impl std::io::Write for Pin<&mut CxxString> {
+    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+        self.as_mut().push_bytes(buf);
+        Ok(buf.len())
+    }
+
+    fn flush(&mut self) -> std::io::Result<()> {
+        Ok(())
     }
 }
 
