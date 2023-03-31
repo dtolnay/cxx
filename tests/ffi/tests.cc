@@ -598,6 +598,12 @@ size_t c_get_use_count(const std::weak_ptr<C> &weak) noexcept {
   return weak.use_count();
 }
 
+void c_takes_void_star(const void *value) noexcept {
+  if (value == nullptr) {
+    cxx_test_suite_set_correct();
+  }
+}
+
 extern "C" C *cxx_test_suite_get_unique_ptr() noexcept {
   return std::unique_ptr<C>(new C{2020}).release();
 }

@@ -362,6 +362,8 @@ fn test_extern_opaque() {
     let f = ffi2::c_return_ns_opaque_ptr();
     check!(ffi2::c_take_opaque_ns_ref(f.as_ref().unwrap()));
     check!(ffi2::c_take_opaque_ns_ptr(f));
+
+    check!(unsafe { ffi::c_takes_void_star(core::ptr::null()) });
 }
 
 #[test]

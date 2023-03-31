@@ -2,6 +2,7 @@ use self::kind::{Kind, Opaque, Trivial};
 use crate::CxxString;
 #[cfg(feature = "alloc")]
 use alloc::string::String;
+use core::ffi::c_void;
 
 /// A type for which the layout is determined by its C++ definition.
 ///
@@ -222,4 +223,5 @@ impl_extern_type! {
 
     [Opaque]
     CxxString = "std::string"
+    c_void = "void"
 }
