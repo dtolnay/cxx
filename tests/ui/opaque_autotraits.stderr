@@ -44,7 +44,8 @@ error[E0277]: `PhantomPinned` cannot be unpinned
 15 |     assert_unpin::<ffi::Opaque>();
    |                    ^^^^^^^^^^^ within `ffi::Opaque`, the trait `Unpin` is not implemented for `PhantomPinned`
    |
-   = note: consider using `Box::pin`
+   = note: consider using the `pin!` macro
+           consider using `Box::pin` if you need to access the pinned value outside of the current scope
    = note: required because it appears within the type `PhantomData<PhantomPinned>`
    = note: required because it appears within the type `Opaque`
 note: required because it appears within the type `Opaque`
