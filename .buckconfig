@@ -1,8 +1,11 @@
 [repositories]
-repo = .
+root = .
 prelude = tools/buck/prelude
 toolchains = tools/buck/toolchains
-config = tools/buck/prelude
+none = none
+
+[repository_aliases]
+config = prelude
 buck = none
 fbcode = none
 fbsource = none
@@ -14,4 +17,4 @@ fbsource = none
 ignore = target
 
 [parser]
-target_platform_detector_spec = target://...->config//platforms:default
+target_platform_detector_spec = target:root//...->prelude//platforms:default
