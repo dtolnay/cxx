@@ -20,6 +20,7 @@ system_python_bootstrap_toolchain(
 
 system_rust_toolchain(
     name = "rust",
+    clippy_toml = "root//:.clippy.toml",
     default_edition = None,
     visibility = ["PUBLIC"],
 )
