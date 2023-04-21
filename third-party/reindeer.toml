@@ -1,4 +1,3 @@
-precise_srcs = true
 rustc_flags = ["--cap-lints=allow"]
 vendor = false
 
