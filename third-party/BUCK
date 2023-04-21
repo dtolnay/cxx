@@ -3,14 +3,19 @@
 load("//tools/buck:buildscript.bzl", "buildscript_args")
 load("//tools/buck:third_party.bzl", "third_party_rust_library")
 
+http_archive(
+    name = "bitflags-1.3.2.crate",
+    sha256 = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a",
+    strip_prefix = "bitflags-1.3.2",
+    urls = ["https://crates.io/api/v1/crates/bitflags/1.3.2/download"],
+    visibility = [],
+)
+
 third_party_rust_library(
     name = "bitflags-1.3.2",
-    srcs = [
-        "vendor/bitflags-1.3.2/src/example_generated.rs",
-        "vendor/bitflags-1.3.2/src/lib.rs",
-    ],
+    srcs = [":bitflags-1.3.2.crate"],
     crate = "bitflags",
-    crate_root = "vendor/bitflags-1.3.2/src/lib.rs",
+    crate_root = "bitflags-1.3.2.crate/src/lib.rs",
     edition = "2018",
     features = ["default"],
     rustc_flags = ["--cap-lints=allow"],
@@ -23,19 +28,19 @@ alias(
     visibility = ["PUBLIC"],
 )
 
+http_archive(
+    name = "cc-1.0.79.crate",
+    sha256 = "50d30906286121d95be3d479533b458f87493b30a4b5f79a607db8f5d11aa91f",
+    strip_prefix = "cc-1.0.79",
+    urls = ["https://crates.io/api/v1/crates/cc/1.0.79/download"],
+    visibility = [],
+)
+
 third_party_rust_library(
     name = "cc-1.0.79",
-    srcs = [
-        "vendor/cc-1.0.79/src/com.rs",
-        "vendor/cc-1.0.79/src/lib.rs",
-        "vendor/cc-1.0.79/src/registry.rs",
-        "vendor/cc-1.0.79/src/setup_config.rs",
-        "vendor/cc-1.0.79/src/vs_instances.rs",
-        "vendor/cc-1.0.79/src/winapi.rs",
-        "vendor/cc-1.0.79/src/windows_registry.rs",
-    ],
+    srcs = [":cc-1.0.79.crate"],
     crate = "cc",
-    crate_root = "vendor/cc-1.0.79/src/lib.rs",
+    crate_root = "cc-1.0.79.crate/src/lib.rs",
     edition = "2018",
     rustc_flags = ["--cap-lints=allow"],
     visibility = [],
@@ -47,86 +52,19 @@ alias(
     visibility = ["PUBLIC"],
 )
 
+http_archive(
+    name = "clap-4.1.13.crate",
+    sha256 = "3c911b090850d79fc64fe9ea01e28e465f65e821e08813ced95bced72f7a8a9b",
+    strip_prefix = "clap-4.1.13",
+    urls = ["https://crates.io/api/v1/crates/clap/4.1.13/download"],
+    visibility = [],
+)
+
 third_party_rust_library(
     name = "clap-4.1.13",
-    srcs = [
-        "vendor/clap-4.1.13/examples/demo.md",
-        "vendor/clap-4.1.13/examples/demo.rs",
-        "vendor/clap-4.1.13/src/_cookbook/cargo_example.rs",
-        "vendor/clap-4.1.13/src/_cookbook/cargo_example_derive.rs",
-        "vendor/clap-4.1.13/src/_cookbook/escaped_positional.rs",
-        "vendor/clap-4.1.13/src/_cookbook/escaped_positional_derive.rs",
-        "vendor/clap-4.1.13/src/_cookbook/find.rs",
-        "vendor/clap-4.1.13/src/_cookbook/git.rs",
-        "vendor/clap-4.1.13/src/_cookbook/git_derive.rs",
-        "vendor/clap-4.1.13/src/_cookbook/mod.rs",
-        "vendor/clap-4.1.13/src/_cookbook/multicall_busybox.rs",
-        "vendor/clap-4.1.13/src/_cookbook/multicall_hostname.rs",
-        "vendor/clap-4.1.13/src/_cookbook/pacman.rs",
-        "vendor/clap-4.1.13/src/_cookbook/repl.rs",
-        "vendor/clap-4.1.13/src/_cookbook/typed_derive.rs",
-        "vendor/clap-4.1.13/src/_derive/_tutorial.rs",
-        "vendor/clap-4.1.13/src/_derive/mod.rs",
-        "vendor/clap-4.1.13/src/_faq.rs",
-        "vendor/clap-4.1.13/src/_features.rs",
-        "vendor/clap-4.1.13/src/_tutorial.rs",
-        "vendor/clap-4.1.13/src/builder/action.rs",
-        "vendor/clap-4.1.13/src/builder/app_settings.rs",
-        "vendor/clap-4.1.13/src/builder/arg.rs",
-        "vendor/clap-4.1.13/src/builder/arg_group.rs",
-        "vendor/clap-4.1.13/src/builder/arg_predicate.rs",
-        "vendor/clap-4.1.13/src/builder/arg_settings.rs",
-        "vendor/clap-4.1.13/src/builder/command.rs",
-        "vendor/clap-4.1.13/src/builder/debug_asserts.rs",
-        "vendor/clap-4.1.13/src/builder/mod.rs",
-        "vendor/clap-4.1.13/src/builder/os_str.rs",
-        "vendor/clap-4.1.13/src/builder/possible_value.rs",
-        "vendor/clap-4.1.13/src/builder/range.rs",
-        "vendor/clap-4.1.13/src/builder/resettable.rs",
-        "vendor/clap-4.1.13/src/builder/str.rs",
-        "vendor/clap-4.1.13/src/builder/styled_str.rs",
-        "vendor/clap-4.1.13/src/builder/tests.rs",
-        "vendor/clap-4.1.13/src/builder/value_hint.rs",
-        "vendor/clap-4.1.13/src/builder/value_parser.rs",
-        "vendor/clap-4.1.13/src/derive.rs",
-        "vendor/clap-4.1.13/src/error/context.rs",
-        "vendor/clap-4.1.13/src/error/format.rs",
-        "vendor/clap-4.1.13/src/error/kind.rs",
-        "vendor/clap-4.1.13/src/error/mod.rs",
-        "vendor/clap-4.1.13/src/lib.rs",
-        "vendor/clap-4.1.13/src/macros.rs",
-        "vendor/clap-4.1.13/src/mkeymap.rs",
-        "vendor/clap-4.1.13/src/output/fmt.rs",
-        "vendor/clap-4.1.13/src/output/help.rs",
-        "vendor/clap-4.1.13/src/output/help_template.rs",
-        "vendor/clap-4.1.13/src/output/mod.rs",
-        "vendor/clap-4.1.13/src/output/textwrap/core.rs",
-        "vendor/clap-4.1.13/src/output/textwrap/mod.rs",
-        "vendor/clap-4.1.13/src/output/textwrap/word_separators.rs",
-        "vendor/clap-4.1.13/src/output/textwrap/wrap_algorithms.rs",
-        "vendor/clap-4.1.13/src/output/usage.rs",
-        "vendor/clap-4.1.13/src/parser/arg_matcher.rs",
-        "vendor/clap-4.1.13/src/parser/error.rs",
-        "vendor/clap-4.1.13/src/parser/features/mod.rs",
-        "vendor/clap-4.1.13/src/parser/features/suggestions.rs",
-        "vendor/clap-4.1.13/src/parser/matches/any_value.rs",
-        "vendor/clap-4.1.13/src/parser/matches/arg_matches.rs",
-        "vendor/clap-4.1.13/src/parser/matches/matched_arg.rs",
-        "vendor/clap-4.1.13/src/parser/matches/mod.rs",
-        "vendor/clap-4.1.13/src/parser/matches/value_source.rs",
-        "vendor/clap-4.1.13/src/parser/mod.rs",
-        "vendor/clap-4.1.13/src/parser/parser.rs",
-        "vendor/clap-4.1.13/src/parser/validator.rs",
-        "vendor/clap-4.1.13/src/util/color.rs",
-        "vendor/clap-4.1.13/src/util/flat_map.rs",
-        "vendor/clap-4.1.13/src/util/flat_set.rs",
-        "vendor/clap-4.1.13/src/util/graph.rs",
-        "vendor/clap-4.1.13/src/util/id.rs",
-        "vendor/clap-4.1.13/src/util/mod.rs",
-        "vendor/clap-4.1.13/src/util/str_to_bool.rs",
-    ],
+    srcs = [":clap-4.1.13.crate"],
     crate = "clap",
-    crate_root = "vendor/clap-4.1.13/src/lib.rs",
+    crate_root = "clap-4.1.13.crate/src/lib.rs",
     edition = "2021",
     features = [
         "error-context",
@@ -142,11 +80,19 @@ third_party_rust_library(
     ],
 )
 
+http_archive(
+    name = "clap_lex-0.3.3.crate",
+    sha256 = "033f6b7a4acb1f358c742aaca805c939ee73b4c6209ae4318ec7aca81c42e646",
+    strip_prefix = "clap_lex-0.3.3",
+    urls = ["https://crates.io/api/v1/crates/clap_lex/0.3.3/download"],
+    visibility = [],
+)
+
 third_party_rust_library(
     name = "clap_lex-0.3.3",
-    srcs = ["vendor/clap_lex-0.3.3/src/lib.rs"],
+    srcs = [":clap_lex-0.3.3.crate"],
     crate = "clap_lex",
-    crate_root = "vendor/clap_lex-0.3.3/src/lib.rs",
+    crate_root = "clap_lex-0.3.3.crate/src/lib.rs",
     edition = "2021",
     rustc_flags = ["--cap-lints=allow"],
     visibility = [],
@@ -159,19 +105,19 @@ alias(
     visibility = ["PUBLIC"],
 )
 
+http_archive(
+    name = "codespan-reporting-0.11.1.crate",
+    sha256 = "3538270d33cc669650c4b093848450d380def10c331d38c768e34cac80576e6e",
+    strip_prefix = "codespan-reporting-0.11.1",
+    urls = ["https://crates.io/api/v1/crates/codespan-reporting/0.11.1/download"],
+    visibility = [],
+)
+
 third_party_rust_library(
     name = "codespan-reporting-0.11.1",
-    srcs = [
-        "vendor/codespan-reporting-0.11.1/src/diagnostic.rs",
-        "vendor/codespan-reporting-0.11.1/src/files.rs",
-        "vendor/codespan-reporting-0.11.1/src/lib.rs",
-        "vendor/codespan-reporting-0.11.1/src/term.rs",
-        "vendor/codespan-reporting-0.11.1/src/term/config.rs",
-        "vendor/codespan-reporting-0.11.1/src/term/renderer.rs",
-        "vendor/codespan-reporting-0.11.1/src/term/views.rs",
-    ],
+    srcs = [":codespan-reporting-0.11.1.crate"],
     crate = "codespan_reporting",
-    crate_root = "vendor/codespan-reporting-0.11.1/src/lib.rs",
+    crate_root = "codespan-reporting-0.11.1.crate/src/lib.rs",
     edition = "2018",
     rustc_flags = ["--cap-lints=allow"],
     visibility = [],
@@ -187,17 +133,19 @@ alias(
     visibility = ["PUBLIC"],
 )
 
+http_archive(
+    name = "once_cell-1.17.1.crate",
+    sha256 = "b7e5500299e16ebb147ae15a00a942af264cf3688f47923b8fc2cd5858f23ad3",
+    strip_prefix = "once_cell-1.17.1",
+    urls = ["https://crates.io/api/v1/crates/once_cell/1.17.1/download"],
+    visibility = [],
+)
+
 third_party_rust_library(
     name = "once_cell-1.17.1",
-    srcs = [
-        "vendor/once_cell-1.17.1/src/imp_cs.rs",
-        "vendor/once_cell-1.17.1/src/imp_pl.rs",
-        "vendor/once_cell-1.17.1/src/imp_std.rs",
-        "vendor/once_cell-1.17.1/src/lib.rs",
-        "vendor/once_cell-1.17.1/src/race.rs",
-    ],
+    srcs = [":once_cell-1.17.1.crate"],
     crate = "once_cell",
-    crate_root = "vendor/once_cell-1.17.1/src/lib.rs",
+    crate_root = "once_cell-1.17.1.crate/src/lib.rs",
     edition = "2021",
     features = [
         "alloc",
@@ -209,27 +157,19 @@ third_party_rust_library(
     visibility = [],
 )
 
+http_archive(
+    name = "os_str_bytes-6.5.0.crate",
+    sha256 = "ceedf44fb00f2d1984b0bc98102627ce622e083e49a5bacdb3e514fa4238e267",
+    strip_prefix = "os_str_bytes-6.5.0",
+    urls = ["https://crates.io/api/v1/crates/os_str_bytes/6.5.0/download"],
+    visibility = [],
+)
+
 third_party_rust_library(
     name = "os_str_bytes-6.5.0",
-    srcs = [
-        "vendor/os_str_bytes-6.5.0/src/common/mod.rs",
-        "vendor/os_str_bytes-6.5.0/src/common/raw.rs",
-        "vendor/os_str_bytes-6.5.0/src/iter.rs",
-        "vendor/os_str_bytes-6.5.0/src/lib.rs",
-        "vendor/os_str_bytes-6.5.0/src/pattern.rs",
-        "vendor/os_str_bytes-6.5.0/src/raw_str.rs",
-        "vendor/os_str_bytes-6.5.0/src/util.rs",
-        "vendor/os_str_bytes-6.5.0/src/wasm/mod.rs",
-        "vendor/os_str_bytes-6.5.0/src/wasm/raw.rs",
-        "vendor/os_str_bytes-6.5.0/src/windows/mod.rs",
-        "vendor/os_str_bytes-6.5.0/src/windows/raw.rs",
-        "vendor/os_str_bytes-6.5.0/src/windows/wtf8/code_points.rs",
-        "vendor/os_str_bytes-6.5.0/src/windows/wtf8/convert.rs",
-        "vendor/os_str_bytes-6.5.0/src/windows/wtf8/mod.rs",
-        "vendor/os_str_bytes-6.5.0/src/windows/wtf8/string.rs",
-    ],
+    srcs = [":os_str_bytes-6.5.0.crate"],
     crate = "os_str_bytes",
-    crate_root = "vendor/os_str_bytes-6.5.0/src/lib.rs",
+    crate_root = "os_str_bytes-6.5.0.crate/src/lib.rs",
     edition = "2021",
     features = ["raw_os_str"],
     rustc_flags = ["--cap-lints=allow"],
@@ -242,21 +182,19 @@ alias(
     visibility = ["PUBLIC"],
 )
 
+http_archive(
+    name = "proc-macro2-1.0.53.crate",
+    sha256 = "ba466839c78239c09faf015484e5cc04860f88242cff4d03eb038f04b4699b73",
+    strip_prefix = "proc-macro2-1.0.53",
+    urls = ["https://crates.io/api/v1/crates/proc-macro2/1.0.53/download"],
+    visibility = [],
+)
+
 third_party_rust_library(
     name = "proc-macro2-1.0.53",
-    srcs = [
-        "vendor/proc-macro2-1.0.53/src/detection.rs",
-        "vendor/proc-macro2-1.0.53/src/extra.rs",
-        "vendor/proc-macro2-1.0.53/src/fallback.rs",
-        "vendor/proc-macro2-1.0.53/src/lib.rs",
-        "vendor/proc-macro2-1.0.53/src/location.rs",
-        "vendor/proc-macro2-1.0.53/src/marker.rs",
-        "vendor/proc-macro2-1.0.53/src/parse.rs",
-        "vendor/proc-macro2-1.0.53/src/rcvec.rs",
-        "vendor/proc-macro2-1.0.53/src/wrapper.rs",
-    ],
+    srcs = [":proc-macro2-1.0.53.crate"],
     crate = "proc_macro2",
-    crate_root = "vendor/proc-macro2-1.0.53/src/lib.rs",
+    crate_root = "proc-macro2-1.0.53.crate/src/lib.rs",
     edition = "2018",
     features = [
         "default",
@@ -273,9 +211,9 @@ third_party_rust_library(
 
 rust_binary(
     name = "proc-macro2-1.0.53-build-script-build",
-    srcs = ["vendor/proc-macro2-1.0.53/build.rs"],
+    srcs = [":proc-macro2-1.0.53.crate"],
     crate = "build_script_build",
-    crate_root = "vendor/proc-macro2-1.0.53/build.rs",
+    crate_root = "proc-macro2-1.0.53.crate/build.rs",
     edition = "2018",
     features = [
         "default",
@@ -305,19 +243,19 @@ alias(
     visibility = ["PUBLIC"],
 )
 
+http_archive(
+    name = "quote-1.0.26.crate",
+    sha256 = "4424af4bf778aae2051a77b60283332f386554255d722233d09fbfc7e30da2fc",
+    strip_prefix = "quote-1.0.26",
+    urls = ["https://crates.io/api/v1/crates/quote/1.0.26/download"],
+    visibility = [],
+)
+
 third_party_rust_library(
     name = "quote-1.0.26",
-    srcs = [
-        "vendor/quote-1.0.26/src/ext.rs",
-        "vendor/quote-1.0.26/src/format.rs",
-        "vendor/quote-1.0.26/src/ident_fragment.rs",
-        "vendor/quote-1.0.26/src/lib.rs",
-        "vendor/quote-1.0.26/src/runtime.rs",
-        "vendor/quote-1.0.26/src/spanned.rs",
-        "vendor/quote-1.0.26/src/to_tokens.rs",
-    ],
+    srcs = [":quote-1.0.26.crate"],
     crate = "quote",
-    crate_root = "vendor/quote-1.0.26/src/lib.rs",
+    crate_root = "quote-1.0.26.crate/src/lib.rs",
     edition = "2018",
     features = [
         "default",
@@ -333,9 +271,9 @@ third_party_rust_library(
 
 rust_binary(
     name = "quote-1.0.26-build-script-build",
-    srcs = ["vendor/quote-1.0.26/build.rs"],
+    srcs = [":quote-1.0.26.crate"],
     crate = "build_script_build",
-    crate_root = "vendor/quote-1.0.26/build.rs",
+    crate_root = "quote-1.0.26.crate/build.rs",
     edition = "2018",
     features = [
         "default",
@@ -363,11 +301,19 @@ alias(
     visibility = ["PUBLIC"],
 )
 
+http_archive(
+    name = "scratch-1.0.5.crate",
+    sha256 = "1792db035ce95be60c3f8853017b3999209281c24e2ba5bc8e59bf97a0c590c1",
+    strip_prefix = "scratch-1.0.5",
+    urls = ["https://crates.io/api/v1/crates/scratch/1.0.5/download"],
+    visibility = [],
+)
+
 third_party_rust_library(
     name = "scratch-1.0.5",
-    srcs = ["vendor/scratch-1.0.5/src/lib.rs"],
+    srcs = [":scratch-1.0.5.crate"],
     crate = "scratch",
-    crate_root = "vendor/scratch-1.0.5/src/lib.rs",
+    crate_root = "scratch-1.0.5.crate/src/lib.rs",
     edition = "2015",
     env = {
         "OUT_DIR": "generated",
@@ -382,64 +328,19 @@ alias(
     visibility = ["PUBLIC"],
 )
 
+http_archive(
+    name = "syn-2.0.10.crate",
+    sha256 = "5aad1363ed6d37b84299588d62d3a7d95b5a5c2d9aad5c85609fda12afaa1f40",
+    strip_prefix = "syn-2.0.10",
+    urls = ["https://crates.io/api/v1/crates/syn/2.0.10/download"],
+    visibility = [],
+)
+
 third_party_rust_library(
     name = "syn-2.0.10",
-    srcs = [
-        "vendor/syn-2.0.10/src/attr.rs",
-        "vendor/syn-2.0.10/src/bigint.rs",
-        "vendor/syn-2.0.10/src/buffer.rs",
-        "vendor/syn-2.0.10/src/custom_keyword.rs",
-        "vendor/syn-2.0.10/src/custom_punctuation.rs",
-        "vendor/syn-2.0.10/src/data.rs",
-        "vendor/syn-2.0.10/src/derive.rs",
-        "vendor/syn-2.0.10/src/discouraged.rs",
-        "vendor/syn-2.0.10/src/drops.rs",
-        "vendor/syn-2.0.10/src/error.rs",
-        "vendor/syn-2.0.10/src/export.rs",
-        "vendor/syn-2.0.10/src/expr.rs",
-        "vendor/syn-2.0.10/src/ext.rs",
-        "vendor/syn-2.0.10/src/file.rs",
-        "vendor/syn-2.0.10/src/gen/clone.rs",
-        "vendor/syn-2.0.10/src/gen/debug.rs",
-        "vendor/syn-2.0.10/src/gen/eq.rs",
-        "vendor/syn-2.0.10/src/gen/fold.rs",
-        "vendor/syn-2.0.10/src/gen/hash.rs",
-        "vendor/syn-2.0.10/src/gen/visit.rs",
-        "vendor/syn-2.0.10/src/gen/visit_mut.rs",
-        "vendor/syn-2.0.10/src/gen_helper.rs",
-        "vendor/syn-2.0.10/src/generics.rs",
-        "vendor/syn-2.0.10/src/group.rs",
-        "vendor/syn-2.0.10/src/ident.rs",
-        "vendor/syn-2.0.10/src/item.rs",
-        "vendor/syn-2.0.10/src/lib.rs",
-        "vendor/syn-2.0.10/src/lifetime.rs",
-        "vendor/syn-2.0.10/src/lit.rs",
-        "vendor/syn-2.0.10/src/lookahead.rs",
-        "vendor/syn-2.0.10/src/mac.rs",
-        "vendor/syn-2.0.10/src/macros.rs",
-        "vendor/syn-2.0.10/src/meta.rs",
-        "vendor/syn-2.0.10/src/op.rs",
-        "vendor/syn-2.0.10/src/parse.rs",
-        "vendor/syn-2.0.10/src/parse_macro_input.rs",
-        "vendor/syn-2.0.10/src/parse_quote.rs",
-        "vendor/syn-2.0.10/src/pat.rs",
-        "vendor/syn-2.0.10/src/path.rs",
-        "vendor/syn-2.0.10/src/print.rs",
-        "vendor/syn-2.0.10/src/punctuated.rs",
-        "vendor/syn-2.0.10/src/restriction.rs",
-        "vendor/syn-2.0.10/src/sealed.rs",
-        "vendor/syn-2.0.10/src/span.rs",
-        "vendor/syn-2.0.10/src/spanned.rs",
-        "vendor/syn-2.0.10/src/stmt.rs",
-        "vendor/syn-2.0.10/src/thread.rs",
-        "vendor/syn-2.0.10/src/token.rs",
-        "vendor/syn-2.0.10/src/tt.rs",
-        "vendor/syn-2.0.10/src/ty.rs",
-        "vendor/syn-2.0.10/src/verbatim.rs",
-        "vendor/syn-2.0.10/src/whitespace.rs",
-    ],
+    srcs = [":syn-2.0.10.crate"],
     crate = "syn",
-    crate_root = "vendor/syn-2.0.10/src/lib.rs",
+    crate_root = "syn-2.0.10.crate/src/lib.rs",
     edition = "2021",
     features = [
         "clone-impls",
@@ -460,38 +361,55 @@ third_party_rust_library(
     ],
 )
 
+http_archive(
+    name = "termcolor-1.2.0.crate",
+    sha256 = "be55cf8942feac5c765c2c993422806843c9a9a45d4d5c407ad6dd2ea95eb9b6",
+    strip_prefix = "termcolor-1.2.0",
+    urls = ["https://crates.io/api/v1/crates/termcolor/1.2.0/download"],
+    visibility = [],
+)
+
 third_party_rust_library(
     name = "termcolor-1.2.0",
-    srcs = ["vendor/termcolor-1.2.0/src/lib.rs"],
+    srcs = [":termcolor-1.2.0.crate"],
     crate = "termcolor",
-    crate_root = "vendor/termcolor-1.2.0/src/lib.rs",
+    crate_root = "termcolor-1.2.0.crate/src/lib.rs",
     edition = "2018",
     rustc_flags = ["--cap-lints=allow"],
+    visibility = [],
+)
+
+http_archive(
+    name = "unicode-ident-1.0.8.crate",
+    sha256 = "e5464a87b239f13a63a501f2701565754bae92d243d4bb7eb12f6d57d2269bf4",
+    strip_prefix = "unicode-ident-1.0.8",
+    urls = ["https://crates.io/api/v1/crates/unicode-ident/1.0.8/download"],
     visibility = [],
 )
 
 third_party_rust_library(
     name = "unicode-ident-1.0.8",
-    srcs = [
-        "vendor/unicode-ident-1.0.8/src/lib.rs",
-        "vendor/unicode-ident-1.0.8/src/tables.rs",
-    ],
+    srcs = [":unicode-ident-1.0.8.crate"],
     crate = "unicode_ident",
-    crate_root = "vendor/unicode-ident-1.0.8/src/lib.rs",
+    crate_root = "unicode-ident-1.0.8.crate/src/lib.rs",
     edition = "2018",
     rustc_flags = ["--cap-lints=allow"],
     visibility = [],
 )
 
+http_archive(
+    name = "unicode-width-0.1.10.crate",
+    sha256 = "c0edd1e5b14653f783770bce4a4dabb4a5108a5370a5f5d8cfe8710c361f6c8b",
+    strip_prefix = "unicode-width-0.1.10",
+    urls = ["https://crates.io/api/v1/crates/unicode-width/0.1.10/download"],
+    visibility = [],
+)
+
 third_party_rust_library(
     name = "unicode-width-0.1.10",
-    srcs = [
-        "vendor/unicode-width-0.1.10/src/lib.rs",
-        "vendor/unicode-width-0.1.10/src/tables.rs",
-        "vendor/unicode-width-0.1.10/src/tests.rs",
-    ],
+    srcs = [":unicode-width-0.1.10.crate"],
     crate = "unicode_width",
-    crate_root = "vendor/unicode-width-0.1.10/src/lib.rs",
+    crate_root = "unicode-width-0.1.10.crate/src/lib.rs",
     edition = "2015",
     features = ["default"],
     rustc_flags = ["--cap-lints=allow"],
