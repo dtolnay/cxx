@@ -1,5 +1,5 @@
-{{#title Bazel, Buck — Rust ♡ C++}}
-## Bazel, Buck, potentially other similar environments
+{{#title Bazel, Buck2 — Rust ♡ C++}}
+## Bazel, Buck2, potentially other similar environments
 
 Starlark-based build systems with the ability to compile a code generator and
 invoke it as a `genrule` will run CXX's C++ code generator via its `cxxbridge`
