@@ -86,8 +86,6 @@ jobs:
       - run: buck2 build ...
       - run: buck2 test ...
       - uses: dtolnay/install@reindeer
-      - run: cargo vendor --versioned-dirs --locked
-        working-directory: third-party
       - run: reindeer buckify
         working-directory: third-party
       - name: Check reindeer-generated BUCK file up to date
