@@ -1,4 +1,2 @@
-buildscript = []
-
-[env]
-OUT_DIR = "generated"
+[[buildscript]]
+[buildscript.gen_srcs]
