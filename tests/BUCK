@@ -38,6 +38,7 @@ cxx_library(
         "ffi/module.rs.h": ":module/header",
         "ffi/tests.h": "ffi/tests.h",
     },
+    preferred_linkage = "static",
 )
 
 rust_cxx_bridge(
