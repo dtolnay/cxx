@@ -70,9 +70,13 @@ jobs:
           RUSTFLAGS: --cfg compile_error_if_alloc --cfg cxx_experimental_no_alloc ${{env.RUSTFLAGS}}
 
   buck:
-    name: Buck
-    runs-on: ubuntu-latest
+    name: Buck2 on ${{matrix.os == 'ubuntu' && 'Linux' || matrix.os == 'macos' && 'macOS' || '???'}}
+    runs-on: ${{matrix.os}}-latest
     if: github.event_name != 'pull_request'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu, macos]
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v3
@@ -82,14 +86,18 @@ jobs:
       - uses: dtolnay/install-buck2@latest
       - name: Install lld
         run: sudo apt-get install lld
+        if: matrix.os == 'ubuntu'
       - run: buck2 run demo
       - run: buck2 build ...
       - run: buck2 test ...
       - uses: dtolnay/install@reindeer
+        if: matrix.os == 'ubuntu'
       - run: reindeer buckify
+        if: matrix.os == 'ubuntu'
         working-directory: third-party
       - name: Check reindeer-generated BUCK file up to date
         run: git diff --exit-code
+        if: matrix.os == 'ubuntu'
 
   bazel:
     name: Bazel
