@@ -79,7 +79,7 @@ jobs:
         with:
           submodules: true
       - uses: dtolnay/rust-toolchain@stable
-      - uses: dtolnay/install@buck2
+      - uses: dtolnay/install-buck2@latest
       - name: Install lld
         run: sudo apt-get install lld
       - run: buck2 run demo
