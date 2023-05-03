@@ -5,10 +5,15 @@ load("@prelude//toolchains:rust.bzl", "system_rust_toolchain")
 
 system_cxx_toolchain(
     name = "cxx",
-    cxx_flags = ["-std=c++17"],
+    cxx_flags = select({
+        "config//os:linux": ["-std=c++17"],
+        "config//os:macos": ["-std=c++17"],
+        "config//os:windows": [],
+    }),
     link_flags = select({
-        "DEFAULT": ["-lstdc++"],
+        "config//os:linux": ["-lstdc++"],
         "config//os:macos": ["-lc++"],
+        "config//os:windows": [],
     }),
     visibility = ["PUBLIC"],
 )
