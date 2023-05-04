@@ -33,11 +33,11 @@ cxx_library(
         ":module/source",
     ],
     exported_deps = ["//:core"],
-    exported_headers = {
-        "ffi/lib.rs.h": ":bridge/header",
-        "ffi/module.rs.h": ":module/header",
-        "ffi/tests.h": "ffi/tests.h",
-    },
+    exported_headers = [
+        ":bridge/header",
+        ":module/header",
+        "ffi/tests.h",
+    ],
     preferred_linkage = "static",
 )
 
