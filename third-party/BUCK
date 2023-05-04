@@ -465,8 +465,52 @@ cargo.rust_library(
         "winerror",
         "winnt",
     ],
+    rustc_flags = [
+        "--cap-lints=allow",
+        "@$(location :winapi-0.3.9-build-script-run[rustc_flags])",
+    ],
+    visibility = [],
+)
+
+cargo.rust_binary(
+    name = "winapi-0.3.9-build-script-build",
+    srcs = [":winapi-0.3.9.crate"],
+    crate = "build_script_build",
+    crate_root = "winapi-0.3.9.crate/build.rs",
+    edition = "2015",
+    features = [
+        "consoleapi",
+        "errhandlingapi",
+        "fileapi",
+        "minwindef",
+        "processenv",
+        "std",
+        "winbase",
+        "wincon",
+        "winerror",
+        "winnt",
+    ],
     rustc_flags = ["--cap-lints=allow"],
     visibility = [],
+)
+
+buildscript_run(
+    name = "winapi-0.3.9-build-script-run",
+    package_name = "winapi",
+    buildscript_rule = ":winapi-0.3.9-build-script-build",
+    features = [
+        "consoleapi",
+        "errhandlingapi",
+        "fileapi",
+        "minwindef",
+        "processenv",
+        "std",
+        "winbase",
+        "wincon",
+        "winerror",
+        "winnt",
+    ],
+    version = "0.3.9",
 )
 
 http_archive(
