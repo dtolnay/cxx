@@ -46,6 +46,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{matrix.rust}}
+          components: rust-src
       - name: Determine test suite subset
         # Our Windows and macOS jobs are the longest running, so exclude the
         # relatively slow compiletest from them to speed up end-to-end CI time,
@@ -83,6 +84,8 @@ jobs:
         with:
           submodules: true
       - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rust-src
       - uses: dtolnay/install-buck2@latest
       - name: Install lld
         run: sudo apt-get install lld
@@ -124,7 +127,9 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@clippy
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: clippy, rust-src
       - run: cargo clippy --workspace --tests -- -Dclippy::all
 
   clang-tidy:
