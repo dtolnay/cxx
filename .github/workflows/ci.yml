@@ -27,10 +27,10 @@ jobs:
           - rust: stable
           - rust: 1.60.0
           - rust: 1.64.0
-          - name: macOS
+          - name: Cargo on macOS
             rust: nightly
             os: macos
-          - name: Windows (msvc)
+          - name: Cargo on Windows (msvc)
             rust: nightly-x86_64-pc-windows-msvc
             os: windows
             flags: /EHsc
@@ -103,7 +103,7 @@ jobs:
         if: matrix.os == 'ubuntu'
 
   bazel:
-    name: Bazel
+    name: Bazel on Linux
     runs-on: ubuntu-latest
     if: github.event_name != 'pull_request'
     timeout-minutes: 45
