@@ -13,7 +13,7 @@ rust-version = "1.60"
 
 [dependencies]
 codespan-reporting = "0.11"
-proc-macro2 = { version = "1.0.39", default-features = false, features = ["span-locations"] }
+proc-macro2 = { version = "1.0.58", default-features = false, features = ["span-locations"] }
 quote = { version = "1.0", default-features = false }
 syn = { version = "2.0.1", default-features = false, features = ["parsing", "printing", "clone-impls", "full"] }
 
