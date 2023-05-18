@@ -9,6 +9,16 @@ pub struct Error {
     pub(crate) err: crate::gen::Error,
 }
 
+impl Error {
+    /// Returns the span of the error, if available.
+    pub fn span(&self) -> Option<proc_macro2::Span> {
+        match &self.err {
+            crate::gen::Error::Syn(err) => Some(err.span()),
+            _ => None,
+        }
+    }
+}
+
 impl From<crate::gen::Error> for Error {
     fn from(err: crate::gen::Error) -> Self {
         Error { err }
