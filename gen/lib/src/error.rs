@@ -42,3 +42,33 @@ impl StdError for Error {
         self.err.source()
     }
 }
+
+impl IntoIterator for Error {
+    type Item = Error;
+    type IntoIter = IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        match self.err {
+            crate::gen::Error::Syn(err) => IntoIter::Syn(err.into_iter()),
+            _ => IntoIter::Other(std::iter::once(self)),
+        }
+    }
+}
+
+pub enum IntoIter {
+    Syn(<syn::Error as IntoIterator>::IntoIter),
+    Other(std::iter::Once<Error>),
+}
+
+impl Iterator for IntoIter {
+    type Item = Error;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self {
+            IntoIter::Syn(ref mut iter) => iter
+                .next()
+                .map(|syn_err| Error::from(crate::gen::Error::Syn(syn_err))),
+            IntoIter::Other(ref mut iter) => iter.next(),
+        }
+    }
+}
