@@ -3,6 +3,7 @@
 
 use std::error::Error as StdError;
 use std::fmt::{self, Debug, Display};
+use std::iter;
 
 #[allow(missing_docs)]
 pub struct Error {
@@ -50,14 +51,14 @@ impl IntoIterator for Error {
     fn into_iter(self) -> Self::IntoIter {
         match self.err {
             crate::gen::Error::Syn(err) => IntoIter::Syn(err.into_iter()),
-            _ => IntoIter::Other(std::iter::once(self)),
+            _ => IntoIter::Other(iter::once(self)),
         }
     }
 }
 
 pub enum IntoIter {
     Syn(<syn::Error as IntoIterator>::IntoIter),
-    Other(std::iter::Once<Error>),
+    Other(iter::Once<Error>),
 }
 
 impl Iterator for IntoIter {
@@ -65,10 +66,10 @@ impl Iterator for IntoIter {
 
     fn next(&mut self) -> Option<Self::Item> {
         match self {
-            IntoIter::Syn(ref mut iter) => iter
+            IntoIter::Syn(iter) => iter
                 .next()
                 .map(|syn_err| Error::from(crate::gen::Error::Syn(syn_err))),
-            IntoIter::Other(ref mut iter) => iter.next(),
+            IntoIter::Other(iter) => iter.next(),
         }
     }
 }
