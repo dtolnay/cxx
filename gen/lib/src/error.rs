@@ -9,6 +9,16 @@ pub struct Error {
     pub(crate) err: crate::gen::Error,
 }
 
+impl Error {
+    /// Returns the span of the error, if available.
+    pub fn span(&self) -> Option<proc_macro2::Span> {
+        match &self.err {
+            crate::gen::Error::Syn(err) => Some(err.span()),
+            _ => None,
+        }
+    }
+}
+
 impl From<crate::gen::Error> for Error {
     fn from(err: crate::gen::Error) -> Self {
         Error { err }
@@ -30,5 +40,35 @@ impl Debug for Error {
 impl StdError for Error {
     fn source(&self) -> Option<&(dyn StdError + 'static)> {
         self.err.source()
+    }
+}
+
+impl IntoIterator for Error {
+    type Item = Error;
+    type IntoIter = IntoIter;
+
+    fn into_iter(self) -> Self::IntoIter {
+        match self.err {
+            crate::gen::Error::Syn(err) => IntoIter::Syn(err.into_iter()),
+            _ => IntoIter::Other(std::iter::once(self)),
+        }
+    }
+}
+
+pub enum IntoIter {
+    Syn(<syn::Error as IntoIterator>::IntoIter),
+    Other(std::iter::Once<Error>),
+}
+
+impl Iterator for IntoIter {
+    type Item = Error;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self {
+            IntoIter::Syn(ref mut iter) => iter
+                .next()
+                .map(|syn_err| Error::from(crate::gen::Error::Syn(syn_err))),
+            IntoIter::Other(ref mut iter) => iter.next(),
+        }
     }
 }
