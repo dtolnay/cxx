@@ -62,7 +62,7 @@ enum class Suit : uint8_t {
 ```
 
 Because it is not UB in C++ for an `enum class` to hold a value different from
-all of the listed variants, we use a Rust representation for shared enums that
+all the listed variants, we use a Rust representation for shared enums that
 is compatible with this. The API you'll get is something like:
 
 ```rust,noplayground
@@ -142,7 +142,7 @@ Variants without an explicit discriminant are assigned the previous discriminant
 plus 1. If the first variant has not been given an explicit discriminant, it is
 assigned discriminant 0.
 
-By default CXX represents your enum using the smallest integer type capable of
+By default, CXX represents your enum using the smallest integer type capable of
 fitting all the discriminants (whether explicit or implicit). If you need a
 different representation for reasons, provide a `repr` attribute.
 

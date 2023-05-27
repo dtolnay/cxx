@@ -26,14 +26,14 @@ copying, no serialization, no memory allocation, no runtime checks needed.
 
 The FFI signatures are able to use native data structures from whichever side
 they please. In addition, CXX provides builtin bindings for key standard library
-types like strings, vectors, Box, unique\_ptr, etc to expose an idiomatic API on
+types like strings, vectors, Box, unique\_ptr, etc. to expose an idiomatic API on
 those types to the other language.
 
 ## Example
 
 In this example we are writing a Rust application that calls a C++ client of a
 large-file blobstore service. The blobstore supports a `put` operation for a
-discontiguous buffer upload. For example we might be uploading snapshots of a
+discontiguous buffer upload. For example, we might be uploading snapshots of a
 circular buffer which would tend to consist of 2 pieces, or fragments of a file
 spread across memory for some other reason (like a rope data structure).
 
@@ -62,8 +62,7 @@ block and C++ definitions of all the things in the `extern "C++"` block, and get
 to call back and forth safely.
 
 The [***Tutorial***](tutorial.md) chapter walks through a fleshed out version of
-this blobstore example in full detail, including all of the Rust code and all of
-the C++ code. The code is also provided in runnable form in the *demo* directory
+this blobstore example in full detail, including all the Rust code and all the C++ code. The code is also provided in runnable form in the *demo* directory
 of <https://github.com/dtolnay/cxx>. To try it out, run `cargo run` from that
 directory.
 
@@ -80,4 +79,4 @@ feels like C++, not like C-style "FFI glue".
 <br>
 
 ***Chapter outline:** See the hamburger menu in the top left if you are on a
-small screen and it didn't open with a sidebar by default.*
+small screen, and it didn't open with a sidebar by default.*

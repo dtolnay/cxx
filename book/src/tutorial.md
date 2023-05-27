@@ -2,11 +2,11 @@
 # Tutorial: CXX blobstore client
 
 This example walks through a Rust application that calls into a C++ client of a
-blobstore service. In fact we'll see calls going in both directions: Rust to C++
-as well as C++ to Rust. For your own use case it may be that you need just one
+blobstore service. In fact, we'll see calls going in both directions: Rust to C++
+and C++ to Rust. For your own use case it may be that you need just one
 of these directions.
 
-All of the code involved in the example is shown on this page, but it's also
+All the code involved in the example is shown on this page, but it's also
 provided in runnable form in the *demo* directory of
 <https://github.com/dtolnay/cxx>. To try it out directly, run `cargo run` from
 that directory.
@@ -104,7 +104,7 @@ what is declared in C++. Rather, the programmer is only on the hook for things
 that C++'s semantics are not precise enough to capture, i.e. things that would
 only be represented at most by comments in the C++ code. In this case, it's
 whether `new_blobstore_client` is safe or unsafe to call. If that function said
-something like "must be called at most once or we'll stomp yer memery", Rust
+something like "must be called at most once, or we'll stomp yer memery", Rust
 would instead want to expose it as `unsafe fn new_blobstore_client`, this time
 inside a safe `extern "C++"` block because the programmer is no longer on the
 hook for any safety claim about the signature.
@@ -240,7 +240,7 @@ cxx-demo$
 ## Calling a Rust function from C++
 
 Our C++ blobstore supports a `put` operation for a discontiguous buffer upload.
-For example we might be uploading snapshots of a circular buffer which would
+For example, we might be uploading snapshots of a circular buffer which would
 tend to consist of 2 pieces, or fragments of a file spread across memory for
 some other reason (like a rope data structure).
 
@@ -668,7 +668,7 @@ through the steps above by running `cargo run` from that directory.*
 # Takeaways
 
 The key contribution of CXX is it gives you Rust&ndash;C++ interop in which
-*all* of the Rust side of the code you write *really* looks like you are just
+*all* the Rust side of the code you write *really* looks like you are just
 writing normal Rust, and the C++ side *really* looks like you are just writing
 normal C++.
 

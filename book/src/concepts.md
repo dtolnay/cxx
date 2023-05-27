@@ -76,7 +76,7 @@ that they are accurate.
 
 Be aware that the design of this library is intentionally restrictive and
 opinionated! It isn't a goal to be flexible enough to handle an arbitrary
-signature in either language. Instead this project is about carving out a highly
+signature in either language. Instead, this project is about carving out a highly
 expressive set of functionality about which we can make powerful safety
 guarantees today and extend over time. You may find that it takes some practice
 to use CXX bridge effectively as it won't work in all the ways that you may be

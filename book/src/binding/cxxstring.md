@@ -10,7 +10,7 @@ documentation of the Rust API.
 
 Rust code can never obtain a CxxString by value. C++'s string requires a move
 constructor and may hold internal pointers, which is not compatible with Rust's
-move behavior. Instead in Rust code we will only ever look at a CxxString
+move behavior. Instead, in Rust code we will only ever look at a CxxString
 through a reference or smart pointer, as in &CxxString or Pin\<&mut CxxString\>
 or UniquePtr\<CxxString\>.
 

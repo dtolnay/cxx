@@ -37,7 +37,7 @@ def _flatten_dependency_maps(all_dependency_maps):
         # name of the workspace this file is defined in.
         "workspace_member_package": {
 
-            # Not all dependnecies are supported for all platforms.
+            # Not all dependencies are supported for all platforms.
             # the condition key is the condition required to be true
             # on the host platform.
             "condition": {

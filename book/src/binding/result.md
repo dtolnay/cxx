@@ -22,9 +22,9 @@ calls Rust's `std::process::abort`.
 An `extern "Rust"` function returning a Result turns into a `throw` in C++ if
 the Rust side produces an error.
 
-Note that the return type written inside of cxx::bridge must be written without
+Note that the return type written inside cxx::bridge must be written without
 a second type parameter. Only the Ok type is specified for the purpose of the
-FFI. The Rust *implementation* (outside of the bridge module) may pick any error
+FFI. The Rust *implementation* (outside the bridge module) may pick any error
 type as long as it has a std::fmt::Display impl.
 
 ```rust,noplayground
@@ -80,7 +80,7 @@ public:
 An `extern "C++"` function returning a Result turns into a `catch` in C++ that
 converts the exception into an Err for Rust.
 
-Note that the return type written inside of cxx::bridge must be written without
+Note that the return type written inside cxx::bridge must be written without
 a second type parameter. Only the Ok type is specified for the purpose of the
 FFI. The resulting error type created by CXX when an `extern "C++"` function
 throws will always be of type **[`cxx::Exception`]**.

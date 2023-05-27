@@ -8,7 +8,7 @@ link for documentation of the Rust API.
 
 ### Restrictions:
 
-Rust code can never obtain a CxxVector by value. Instead in Rust code we will
+Rust code can never obtain a CxxVector by value. Instead, in Rust code we will
 only ever look at a vector behind a reference or smart pointer, as in
 &CxxVector\<T\> or UniquePtr\<CxxVector\<T\>\>.
 

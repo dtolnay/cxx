@@ -58,7 +58,7 @@ copying, no serialization, no memory allocation, no runtime checks needed.
 
 The FFI signatures are able to use native types from whichever side they please,
 such as Rust's `String` or C++'s `std::string`, Rust's `Box` or C++'s
-`std::unique_ptr`, Rust's `Vec` or C++'s `std::vector`, etc in any combination.
+`std::unique_ptr`, Rust's `Vec` or C++'s `std::vector`, etc. in any combination.
 CXX guarantees an ABI-compatible signature that both sides understand, based on
 builtin bindings for key standard library types to expose an idiomatic API on
 those types to the other language. For example when manipulating a C++ string
@@ -72,7 +72,7 @@ function calls Rust's `len()`.
 
 In this example we are writing a Rust application that wishes to take advantage
 of an existing C++ client for a large-file blobstore service. The blobstore
-supports a `put` operation for a discontiguous buffer upload. For example we
+supports a `put` operation for a discontiguous buffer upload. For example, we
 might be uploading snapshots of a circular buffer which would tend to consist of
 2 chunks, or fragments of a file spread across memory for some other reason.
 
@@ -212,7 +212,7 @@ cases become expressible using 100% safe code.
 
 It would also be reasonable to mix and match, using CXX bridge for the 95% of
 your FFI that is straightforward and doing the remaining few oddball signatures
-the old fashioned way with bindgen and cbindgen, if for some reason CXX's static
+the old-fashioned way with bindgen and cbindgen, if for some reason CXX's static
 restrictions get in the way. Please file an issue if you end up taking this
 approach so that we know what ways it would be worthwhile to make the tool more
 expressive.
@@ -275,7 +275,7 @@ $ cxxbridge src/main.rs > path/to/mybridge.cc
 
 Be aware that the design of this library is intentionally restrictive and
 opinionated! It isn't a goal to be powerful enough to handle arbitrary
-signatures in either language. Instead this project is about carving out a
+signatures in either language. Instead, this project is about carving out a
 reasonably expressive set of functionality about which we can make useful safety
 guarantees today and maybe extend over time. You may find that it takes some
 practice to use CXX bridge effectively as it won't work in all the ways that you
@@ -341,7 +341,7 @@ this repo. You will need to include this header in your C++ code when working
 with those types.
 
 The following types are intended to be supported "soon" but are just not
-implemented yet. I don't expect any of these to be hard to make work but it's a
+implemented yet. I don't expect any of these to be hard to make work, but it's a
 matter of designing a nice API for each in its non-native language.
 
 <table>
@@ -366,7 +366,7 @@ Especially please report issues if you run into trouble building or linking any
 of this stuff. I'm sure there are ways to make the build aspects friendlier or
 more robust.
 
-Finally, I know more about Rust library design than C++ library design so I
+Finally, I know more about Rust library design than C++ library design, so I
 would appreciate help making the C++ APIs in this project more idiomatic where
 anyone has suggestions.
 

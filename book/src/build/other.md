@@ -40,7 +40,7 @@ But the C++ side of the bindings needs to be generated. Your options are:
 
 ### Compiling C++
 
-However you like. We can provide no guidance.
+Anyway you like. We can provide no guidance.
 
 ### Linking the C++ and Rust together
 
@@ -49,7 +49,7 @@ choose between using the Rust toolchain (`rustc`) or the C++ toolchain which you
 may already have extensively tuned.
 
 Rust does not generate simple standalone `.o` files, so you can't just throw the
-Rust-generated code into your existing C++ toolchain linker. Instead you need to
+Rust-generated code into your existing C++ toolchain linker. Instead, you need to
 choose one of these options:
 
 * Use `rustc` as the final linker. Pass any non-Rust libraries using `-L

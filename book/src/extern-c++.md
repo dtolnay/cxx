@@ -49,7 +49,7 @@ of the underlying object and couldn't invoke an appropriate C++ move constructor
 anyway.
 
 **Thread safety:** Be aware that CXX does not assume anything about the thread
-safety of your extern C++ types. In other words the `MyType` etc bindings which
+safety of your extern C++ types. In other words the `MyType` bindings which
 CXX produces for you in Rust *do not* come with `Send` and `Sync` impls. If you
 are sure that your C++ type satisfies the requirements of `Send` and/or `Sync`
 and need to leverage that fact from Rust, you must provide your own unsafe
@@ -153,7 +153,7 @@ mod ffi {
 ## Reusing existing binding types
 
 Extern C++ types support a syntax for declaring that a Rust binding of the
-correct C++ type already exists outside of the current bridge module. This
+correct C++ type already exists outside the current bridge module. This
 avoids generating a fresh new binding which Rust's type system would consider
 non-interchangeable with the first.
 

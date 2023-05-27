@@ -44,7 +44,7 @@ Another example is the one on the ***[Box\<T\>](binding/box.md)*** page, which
 exposes the Rust standard library's `std::fs::File` to C++ as an opaque type in
 a similar way but with Box as the indirection rather than &mut.
 
-The types named as opaque types (`MyType` etc) refer to types in the `super`
+The types named as opaque types (`MyType` etc.) refer to types in the `super`
 module, the parent module of the CXX bridge. You can think of an opaque type `T`
 as being like a re-export `use super::T` made available to C++ via the generated
 header.

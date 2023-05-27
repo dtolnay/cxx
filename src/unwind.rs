@@ -8,7 +8,7 @@ where
 {
     // Goal is to make it impossible to propagate a panic across the C interface
     // of an extern "Rust" function, which would be Undefined Behavior. We
-    // transform such panicks into a deterministic abort instead. When cxx is
+    // transform such panics into a deterministic abort instead. When cxx is
     // built in an application using panic=abort, this guard object is compiled
     // out because its destructor is statically unreachable. When built with
     // panic=unwind, an unwind from the foreign call will attempt to drop the

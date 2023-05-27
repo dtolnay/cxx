@@ -277,7 +277,7 @@ enum ParsedDiscriminant {
 fn discriminant_value(mut clang: &[Node]) -> ParsedDiscriminant {
     if clang.is_empty() {
         // No discriminant expression provided; use successor of previous
-        // descriminant.
+        // discriminant.
         return ParsedDiscriminant::Successor;
     }
 

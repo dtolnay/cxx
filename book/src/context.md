@@ -2,7 +2,7 @@
 # Context: other Rust&ndash;C++ interop tools
 
 When it comes to interacting with an idiomatic Rust API or idiomatic C++ API
-from the other language, the generally applicable approaches outside of the CXX
+from the other language, the generally applicable approaches outside the CXX
 crate are:
 
 - Build a C-compatible wrapper around the code (expressed using `extern "C"`
@@ -51,7 +51,7 @@ discover that their program sometimes segfaults if they call a function that
 returns std::unique\_ptr\<T\> through bindgen. Why? Because unique\_ptr, despite
 being "just a pointer", has a different ABI than a pointer or a C struct
 containing a pointer ([bindgen#778]) and is not directly expressible in Rust.
-Bindgen emitted something that *looks* reasonable and you will have a hell of a
+Bindgen emitted something that *looks* reasonable, and you will have a hell of a
 time in gdb working out what went wrong. Eventually people learn to avoid
 anything involving a non-trivial copy constructor, destructor, or inheritance,
 and instead stick to raw pointers and primitives and trivial structs only
@@ -67,7 +67,7 @@ library design.
 
 The most similar pair (the shortest edge) is Rust&ndash;C++. These languages
 have largely compatible concepts of things like ownership, vectors, strings,
-fallibility, etc that translate clearly from signatures in either language to
+fallibility, etc. that translate clearly from signatures in either language to
 signatures in the other language.
 
 When we make a binding for an idiomatic C++ API using bindgen, and we fall down
@@ -109,7 +109,7 @@ header and/or Rust module (and/or IDL like Thrift) and emit the corresponding
 safe cxx::bridge language boundary, leveraging CXX's static analysis and
 underlying implementation of that boundary. We are beginning to see this space
 explored by the [autocxx] tool, though nothing yet ready for broad use in the
-way that CXX on its own is.
+way that CXX can do on its own.
 
 [autocxx]: https://github.com/google/autocxx
 
