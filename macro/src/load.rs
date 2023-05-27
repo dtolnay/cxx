@@ -227,7 +227,7 @@ fn traverse<'a>(
         traverse(cx, inner, namespace, variants_from_header, idx);
     }
     if let Clang::NamespaceDecl(_) = &node.kind {
-        let _ = namespace.pop().unwrap();
+        _ = namespace.pop().unwrap();
     }
 }
 

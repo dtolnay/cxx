@@ -91,7 +91,7 @@ fn main() {
     let out = std::fs::File::create("example.log").unwrap();
 
     ffi::f(
-        |mut out, fst, snd| { let _ = write!(out.0, "{}{}\n", fst, snd); },
+        |mut out, fst, snd| { _ = write!(out.0, "{}{}\n", fst, snd); },
         Box::new(File(out)),
     );
 }

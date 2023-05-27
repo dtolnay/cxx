@@ -68,6 +68,6 @@ fn main() {
         }
     }
 
-    let _ = io::stderr().write_all(message.as_bytes());
+    _ = io::stderr().write_all(message.as_bytes());
     process::exit(1);
 }

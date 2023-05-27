@@ -64,7 +64,7 @@ pub(super) fn from_args() -> Opt {
     let matches = app().get_matches();
 
     if matches.get_flag(HELP) {
-        let _ = app().print_long_help();
+        _ = app().print_long_help();
         process::exit(0);
     }
 

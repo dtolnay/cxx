@@ -93,16 +93,16 @@ fn best_effort_remove(path: &Path) {
         // with "Access is denied".
         if let Ok(metadata) = fs::metadata(path) {
             if metadata.is_dir() {
-                let _ = fs::remove_dir_all(path);
+                _ = fs::remove_dir_all(path);
             } else {
-                let _ = fs::remove_file(path);
+                _ = fs::remove_file(path);
             }
         } else if fs::symlink_metadata(path).is_ok() {
             // The symlink might exist but be dangling, in which case there is
             // no standard way to determine what "kind" of symlink it is. Try
             // deleting both ways.
             if fs::remove_dir_all(path).is_err() {
-                let _ = fs::remove_file(path);
+                _ = fs::remove_file(path);
             }
         }
     } else {
@@ -110,9 +110,9 @@ fn best_effort_remove(path: &Path) {
         // symlinks are removed using remove_file.
         if let Ok(metadata) = fs::symlink_metadata(path) {
             if metadata.is_dir() {
-                let _ = fs::remove_dir_all(path);
+                _ = fs::remove_dir_all(path);
             } else {
-                let _ = fs::remove_file(path);
+                _ = fs::remove_file(path);
             }
         }
     }

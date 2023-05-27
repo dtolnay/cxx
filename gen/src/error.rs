@@ -64,19 +64,19 @@ pub(super) fn format_err(path: &Path, source: &str, error: Error) -> ! {
             let writer = StandardStream::stderr(ColorChoice::Auto);
             let ref mut stderr = writer.lock();
             for error in syn_error {
-                let _ = writeln!(stderr);
+                _ = writeln!(stderr);
                 display_syn_error(stderr, path, source, error);
             }
         }
         Error::NoBridgeMod => {
-            let _ = writeln!(
+            _ = writeln!(
                 io::stderr(),
                 "cxxbridge: no #[cxx::bridge] module found in {}",
                 path.display(),
             );
         }
         _ => {
-            let _ = writeln!(io::stderr(), "cxxbridge: {}", report(error));
+            _ = writeln!(io::stderr(), "cxxbridge: {}", report(error));
         }
     }
     process::exit(1);
@@ -152,7 +152,7 @@ fn display_syn_error(stderr: &mut dyn WriteColor, path: &Path, source: &str, err
     let diagnostic = diagnose(file, start_offset..end_offset, error);
 
     let config = Config::default();
-    let _ = term::emit(stderr, &config, &files, &diagnostic);
+    _ = term::emit(stderr, &config, &files, &diagnostic);
 }
 
 fn diagnose(file: usize, range: Range<usize>, error: syn::Error) -> Diagnostic<usize> {

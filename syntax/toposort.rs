@@ -12,7 +12,7 @@ pub fn sort<'a>(cx: &mut Errors, apis: &'a [Api], types: &Types<'a>) -> Vec<&'a 
     let ref mut marks = Map::new();
     for api in apis {
         if let Api::Struct(strct) = api {
-            let _ = visit(cx, strct, &mut sorted, marks, types);
+            _ = visit(cx, strct, &mut sorted, marks, types);
         }
     }
     sorted

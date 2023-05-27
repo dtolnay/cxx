@@ -864,7 +864,7 @@ fn expand_rust_type_assert_unpin(ety: &ExternType, types: &Types) -> TokenStream
     let lifetimes = resolve.generics.to_underscore_lifetimes();
 
     quote_spanned! {ident.span()=>
-        let _ = {
+        _ = {
             fn __AssertUnpin<T: ?::cxx::core::marker::Sized + #unpin>() {}
             __AssertUnpin::<#ident #lifetimes>
         };
@@ -1285,7 +1285,7 @@ fn expand_rust_box(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
         #[export_name = #link_dealloc]
         unsafe extern "C" fn #local_dealloc #impl_generics(ptr: *mut ::cxx::core::mem::MaybeUninit<#ident #ty_generics>) {
             // No prevent_unwind: the global allocator is not allowed to panic.
-            let _ = ::cxx::alloc::boxed::Box::from_raw(ptr);
+            _ = ::cxx::alloc::boxed::Box::from_raw(ptr);
         }
         #[doc(hidden)]
         #[export_name = #link_drop]

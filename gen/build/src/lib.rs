@@ -136,7 +136,7 @@ pub fn bridge(rust_source_file: impl AsRef<Path>) -> Build {
 pub fn bridges(rust_source_files: impl IntoIterator<Item = impl AsRef<Path>>) -> Build {
     let ref mut rust_source_files = rust_source_files.into_iter();
     build(rust_source_files).unwrap_or_else(|err| {
-        let _ = writeln!(io::stderr(), "\n\ncxxbridge error: {}\n\n", report(err));
+        _ = writeln!(io::stderr(), "\n\ncxxbridge error: {}\n\n", report(err));
         process::exit(1);
     })
 }
@@ -374,7 +374,7 @@ fn make_crate_dir(prj: &Project) -> PathBuf {
         Signature: 8a477f597d28d172789f06886806bc55\n\
         # This file is a cache directory tag created by cxx.\n\
         # For information about cache directory tags see https://bford.info/cachedir/\n";
-        let _ = out::write(crate_dir.join("CACHEDIR.TAG"), cachedir_tag.as_bytes());
+        _ = out::write(crate_dir.join("CACHEDIR.TAG"), cachedir_tag.as_bytes());
         let max_depth = 6;
         best_effort_copy_headers(manifest_dir, link, max_depth);
     }
@@ -414,7 +414,7 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
     out::write(header_path, &generated.header)?;
 
     let ref link_path = include_dir.join(rel_path);
-    let _ = out::symlink_file(header_path, link_path);
+    _ = out::symlink_file(header_path, link_path);
 
     let ref rel_path_cc = rel_path.with_appended_extension(".cc");
     let ref implementation_path = sources_dir.join(rel_path_cc);
@@ -423,8 +423,8 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
 
     let shared_h = prj.shared_dir.join(&prj.include_prefix).join(rel_path_h);
     let shared_cc = prj.shared_dir.join(&prj.include_prefix).join(rel_path_cc);
-    let _ = out::symlink_file(header_path, shared_h);
-    let _ = out::symlink_file(implementation_path, shared_cc);
+    _ = out::symlink_file(header_path, shared_h);
+    _ = out::symlink_file(implementation_path, shared_cc);
     Ok(())
 }
 
@@ -463,8 +463,8 @@ fn best_effort_copy_headers(src: &Path, dst: &Path, max_depth: usize) {
                 }
                 dst_created = true;
                 let dst = dst.join(file_name);
-                let _ = fs::remove_file(&dst);
-                let _ = fs::copy(src, dst);
+                _ = fs::remove_file(&dst);
+                _ = fs::copy(src, dst);
             }
             _ => {}
         }

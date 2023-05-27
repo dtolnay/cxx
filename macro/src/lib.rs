@@ -68,7 +68,7 @@ use syn::parse_macro_input;
 /// placed into that same namespace in the generated C++ code.
 #[proc_macro_attribute]
 pub fn bridge(args: TokenStream, input: TokenStream) -> TokenStream {
-    let _ = syntax::error::ERRORS;
+    _ = syntax::error::ERRORS;
 
     let namespace = match Namespace::parse_bridge_attr_namespace.parse(args) {
         Ok(namespace) => namespace,

@@ -341,16 +341,16 @@ pub unsafe trait VectorElement: Sized {
     unsafe fn __push_back(v: Pin<&mut CxxVector<Self>>, value: &mut ManuallyDrop<Self>) {
         // Opaque C type vector elements do not get this method because they can
         // never exist by value on the Rust side of the bridge.
-        let _ = v;
-        let _ = value;
+        _ = v;
+        _ = value;
         unreachable!()
     }
     #[doc(hidden)]
     unsafe fn __pop_back(v: Pin<&mut CxxVector<Self>>, out: &mut MaybeUninit<Self>) {
         // Opaque C type vector elements do not get this method because they can
         // never exist by value on the Rust side of the bridge.
-        let _ = v;
-        let _ = out;
+        _ = v;
+        _ = out;
         unreachable!()
     }
     #[doc(hidden)]

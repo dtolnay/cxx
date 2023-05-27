@@ -305,7 +305,7 @@ impl ToTokens for OtherAttrs {
                 meta,
             } = attr;
             pound_token.to_tokens(tokens);
-            let _ = style; // ignore; render outer and inner attrs both as outer
+            _ = style; // ignore; render outer and inner attrs both as outer
             bracket_token.surround(tokens, |tokens| meta.to_tokens(tokens));
         }
     }

@@ -57,7 +57,7 @@ struct Opt {
 
 fn main() {
     if let Err(err) = try_main() {
-        let _ = writeln!(io::stderr(), "cxxbridge: {}", report(err));
+        _ = writeln!(io::stderr(), "cxxbridge: {}", report(err));
         process::exit(1);
     }
 }

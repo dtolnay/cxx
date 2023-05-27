@@ -191,10 +191,10 @@ pub unsafe trait SharedPtrTarget {
     where
         Self: Sized,
     {
-        // Opoaque C types do not get this method because they can never exist
+        // Opaque C types do not get this method because they can never exist
         // by value on the Rust side of the bridge.
-        let _ = value;
-        let _ = new;
+        _ = value;
+        _ = new;
         unreachable!()
     }
     #[doc(hidden)]

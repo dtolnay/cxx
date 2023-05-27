@@ -479,12 +479,12 @@ fn r_return_mut(shared: &mut ffi::Shared) -> &mut usize {
 }
 
 fn r_return_str(shared: &ffi::Shared) -> &str {
-    let _ = shared;
+    _ = shared;
     "2020"
 }
 
 fn r_return_sliceu8(shared: &ffi::Shared) -> &[u8] {
-    let _ = shared;
+    _ = shared;
     b"2020"
 }
 
@@ -516,12 +516,12 @@ fn r_return_rust_vec_extern_struct() -> Vec<ffi::Job> {
 }
 
 fn r_return_ref_rust_vec(shared: &ffi::Shared) -> &Vec<u8> {
-    let _ = shared;
+    _ = shared;
     unimplemented!()
 }
 
 fn r_return_mut_rust_vec(shared: &mut ffi::Shared) -> &mut Vec<u8> {
-    let _ = shared;
+    _ = shared;
     unimplemented!()
 }
 
@@ -552,23 +552,23 @@ fn r_take_shared(shared: ffi::Shared) {
 }
 
 fn r_take_box(r: Box<R>) {
-    let _ = r;
+    _ = r;
 }
 
 fn r_take_unique_ptr(c: UniquePtr<ffi::C>) {
-    let _ = c;
+    _ = c;
 }
 
 fn r_take_shared_ptr(c: SharedPtr<ffi::C>) {
-    let _ = c;
+    _ = c;
 }
 
 fn r_take_ref_r(r: &R) {
-    let _ = r;
+    _ = r;
 }
 
 fn r_take_ref_c(c: &ffi::C) {
-    let _ = c;
+    _ = c;
 }
 
 fn r_take_str(s: &str) {
@@ -600,23 +600,23 @@ fn r_take_ref_empty_vector(v: &CxxVector<u64>) {
 }
 
 fn r_take_rust_vec(v: Vec<u8>) {
-    let _ = v;
+    _ = v;
 }
 
 fn r_take_rust_vec_string(v: Vec<String>) {
-    let _ = v;
+    _ = v;
 }
 
 fn r_take_ref_rust_vec(v: &Vec<u8>) {
-    let _ = v;
+    _ = v;
 }
 
 fn r_take_ref_rust_vec_string(v: &Vec<String>) {
-    let _ = v;
+    _ = v;
 }
 
 fn r_take_enum(e: ffi::Enum) {
-    let _ = e;
+    _ = e;
 }
 
 fn r_try_return_void() -> Result<(), Error> {

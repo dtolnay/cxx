@@ -218,7 +218,7 @@ pub unsafe trait UniquePtrTarget {
     {
         // Opaque C types do not get this method because they can never exist by
         // value on the Rust side of the bridge.
-        let _ = value;
+        _ = value;
         unreachable!()
     }
     #[doc(hidden)]

@@ -22,7 +22,7 @@ pub(super) enum Error {
 
 macro_rules! expr {
     ($expr:expr) => {{
-        let _ = $expr; // ensure it doesn't fall out of sync with CFG definition
+        _ = $expr; // ensure it doesn't fall out of sync with CFG definition
         stringify!($expr)
     }};
 }
