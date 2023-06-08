@@ -3,16 +3,9 @@ error: raw identifier `r#box` is not allowed in a quoted namespace; use `box`, o
   |
 7 |     type Id = type_id!("org::r#box::implementation::QuotedRaw");
   |                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  |
-  = note: this error originates in the macro `$crate::private::type_id` which comes from the expansion of the macro `type_id` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: raw identifier `r#box` is not allowed in a quoted namespace; use `box`, or remove quotes
   --> tests/ui/raw_ident_namespace.rs:38:23
    |
-35 | #[cxx::bridge]
-   | -------------- in this procedural macro expansion
-...
 38 |         #[namespace = "org::r#box::implementation"]
    |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

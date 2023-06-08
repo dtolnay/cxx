@@ -1,10 +1,5 @@
 error: extern C++ function with lifetimes must be declared in `unsafe extern "C++"` block
  --> tests/ui/lifetime_extern_cxx.rs:5:9
   |
-1 | #[cxx::bridge]
-  | -------------- in this procedural macro expansion
-...
 5 |         unsafe fn f<'a>(&'a self, arg: &str) -> &'a str;
   |         ^^^^^^^^^^^^^^^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

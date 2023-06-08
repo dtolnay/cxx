@@ -1,21 +1,11 @@
 error: unit structs are not supported
  --> tests/ui/multiple_parse_error.rs:3:5
   |
-1 | #[cxx::bridge]
-  | -------------- in this procedural macro expansion
-2 | mod ffi {
 3 |     struct Monad<T>;
   |     ^^^^^^^^^^^^^^^^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: unrecognized ABI, requires either "C++" or "Rust"
  --> tests/ui/multiple_parse_error.rs:5:5
   |
-1 | #[cxx::bridge]
-  | -------------- in this procedural macro expansion
-...
 5 |     extern "Haskell" {}
   |     ^^^^^^^^^^^^^^^^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

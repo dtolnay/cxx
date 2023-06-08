@@ -1,65 +1,35 @@
 error: mutable reference to C++ type requires a pin -- use Pin<&mut Opaque>
  --> tests/ui/pin_mut_opaque.rs:5:19
   |
-1 | #[cxx::bridge]
-  | -------------- in this procedural macro expansion
-...
 5 |         fn f(arg: &mut Opaque);
   |                   ^^^^^^^^^^^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: mutable reference to C++ type requires a pin -- use Pin<&mut CxxString>
  --> tests/ui/pin_mut_opaque.rs:8:17
   |
-1 | #[cxx::bridge]
-  | -------------- in this procedural macro expansion
-...
 8 |         fn s(s: &mut CxxString);
   |                 ^^^^^^^^^^^^^^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: mutable reference to C++ type requires a pin -- use Pin<&mut CxxVector<...>>
  --> tests/ui/pin_mut_opaque.rs:9:17
   |
-1 | #[cxx::bridge]
-  | -------------- in this procedural macro expansion
-...
 9 |         fn v(v: &mut CxxVector<u8>);
   |                 ^^^^^^^^^^^^^^^^^^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: needs a cxx::ExternType impl in order to be used as a non-pinned mutable reference in signature of `f`, `g`, `h`
  --> tests/ui/pin_mut_opaque.rs:4:9
   |
-1 | #[cxx::bridge]
-  | -------------- in this procedural macro expansion
-...
 4 |         type Opaque;
   |         ^^^^^^^^^^^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: mutable reference to opaque C++ type requires a pin -- use `self: Pin<&mut Opaque>`
  --> tests/ui/pin_mut_opaque.rs:6:14
   |
-1 | #[cxx::bridge]
-  | -------------- in this procedural macro expansion
-...
 6 |         fn g(&mut self);
   |              ^^^^^^^^^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: mutable reference to opaque C++ type requires a pin -- use `self: Pin<&mut Opaque>`
  --> tests/ui/pin_mut_opaque.rs:7:20
   |
-1 | #[cxx::bridge]
-  | -------------- in this procedural macro expansion
-...
 7 |         fn h(self: &mut Opaque);
   |                    ^^^^^^^^^^^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

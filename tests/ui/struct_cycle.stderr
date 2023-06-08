@@ -1,43 +1,23 @@
 error: unsupported cyclic data structure
   --> tests/ui/struct_cycle.rs:26:9
    |
-1  | #[cxx::bridge]
-   | -------------- in this procedural macro expansion
-...
 26 |         node2: Node2,
    |         ^^^^^^^^^^^^
-   |
-   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: unsupported cyclic data structure
   --> tests/ui/struct_cycle.rs:22:9
    |
-1  | #[cxx::bridge]
-   | -------------- in this procedural macro expansion
-...
 22 |         node5: Node5,
    |         ^^^^^^^^^^^^
-   |
-   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: unsupported cyclic data structure
   --> tests/ui/struct_cycle.rs:13:9
    |
-1  | #[cxx::bridge]
-   | -------------- in this procedural macro expansion
-...
 13 |         node4: Node4,
    |         ^^^^^^^^^^^^
-   |
-   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: unsupported cyclic data structure
  --> tests/ui/struct_cycle.rs:8:9
   |
-1 | #[cxx::bridge]
-  | -------------- in this procedural macro expansion
-...
 8 |         node2: Node2,
   |         ^^^^^^^^^^^^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

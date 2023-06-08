@@ -1,32 +1,17 @@
 error: array length must be an integer literal
  --> tests/ui/array_len_expr.rs:4:28
   |
-1 | #[cxx::bridge]
-  | -------------- in this procedural macro expansion
-...
 4 |         arraystr: [String; "13"],
   |                            ^^^^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: unsupported expression, array length must be an integer literal
  --> tests/ui/array_len_expr.rs:5:28
   |
-1 | #[cxx::bridge]
-  | -------------- in this procedural macro expansion
-...
 5 |         arraysub: [String; 15 - 1],
   |                            ^^^^^^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: array with zero size is not supported
  --> tests/ui/array_len_expr.rs:6:20
   |
-1 | #[cxx::bridge]
-  | -------------- in this procedural macro expansion
-...
 6 |         arrayzero: [String; 0],
   |                    ^^^^^^^^^^^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

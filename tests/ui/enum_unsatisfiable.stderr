@@ -1,13 +1,8 @@
 error: these discriminant values do not fit in any supported enum repr type
  --> tests/ui/enum_unsatisfiable.rs:3:5
   |
-1 |   #[cxx::bridge]
-  |   -------------- in this procedural macro expansion
-2 |   mod ffi {
 3 | /     enum Bad {
 4 | |         A = -0xFFFF_FFFF_FFFF_FFFF,
 5 | |         B = 0xFFFF_FFFF_FFFF_FFFF,
 6 | |     }
   | |_____^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

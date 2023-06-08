@@ -1,21 +1,11 @@
 error: &mut return type is not allowed unless there is a &mut argument
   --> tests/ui/mut_return.rs:10:9
    |
-1  | #[cxx::bridge]
-   | -------------- in this procedural macro expansion
-...
 10 |         fn f(t: &Thing) -> Pin<&mut CxxString>;
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: &mut return type is not allowed unless there is a &mut argument
   --> tests/ui/mut_return.rs:14:9
    |
-1  | #[cxx::bridge]
-   | -------------- in this procedural macro expansion
-...
 14 |         fn j(t: &Thing) -> &mut [u8];
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

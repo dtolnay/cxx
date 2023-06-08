@@ -1,54 +1,29 @@
 error: unexpected token
  --> tests/ui/include.rs:4:28
   |
-1 | #[cxx::bridge]
-  | -------------- in this procedural macro expansion
-...
 4 |         include!("path/to" what);
   |                            ^^^^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: unexpected token
  --> tests/ui/include.rs:5:28
   |
-1 | #[cxx::bridge]
-  | -------------- in this procedural macro expansion
-...
 5 |         include!(<path/to> what);
   |                            ^^^^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected `>`
  --> tests/ui/include.rs:6:26
   |
-1 | #[cxx::bridge]
-  | -------------- in this procedural macro expansion
-...
 6 |         include!(<path/to);
   |                          ^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: unexpected token in include path
  --> tests/ui/include.rs:7:23
   |
-1 | #[cxx::bridge]
-  | -------------- in this procedural macro expansion
-...
 7 |         include!(<path[to]>);
   |                       ^^^^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected "quoted/path/to" or <bracketed/path/to>
  --> tests/ui/include.rs:8:18
   |
-1 | #[cxx::bridge]
-  | -------------- in this procedural macro expansion
-...
 8 |         include!(...);
   |                  ^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
