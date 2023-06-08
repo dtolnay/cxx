@@ -1,5 +1,10 @@
 error: function pointer returning Result is not supported yet
  --> tests/ui/fallible_fnptr.rs:4:24
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+...
 4 |         fn f(callback: fn() -> Result<()>);
   |                        ^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

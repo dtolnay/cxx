@@ -1,17 +1,32 @@
 error: reserved name
  --> tests/ui/reserved_name.rs:3:12
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+2 | mod ffi {
 3 |     struct UniquePtr {
   |            ^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: reserved name
  --> tests/ui/reserved_name.rs:8:14
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+...
 8 |         type Box;
   |              ^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: reserved name
   --> tests/ui/reserved_name.rs:12:14
    |
+1  | #[cxx::bridge]
+   | -------------- in this procedural macro expansion
+...
 12 |         type String;
    |              ^^^^^^
+   |
+   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

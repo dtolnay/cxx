@@ -1,14 +1,24 @@
 error: Rust Vec containing C++ type is not supported yet
   --> tests/ui/vec_opaque.rs:15:19
    |
+8  | #[cxx::bridge]
+   | -------------- in this procedural macro expansion
+...
 15 |         fn f() -> Vec<Job>;
    |                   ^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: needs a cxx::ExternType impl in order to be used as a vector element in Vec<Job>
   --> tests/ui/vec_opaque.rs:11:9
    |
+8  | #[cxx::bridge]
+   | -------------- in this procedural macro expansion
+...
 11 |         type Job;
    |         ^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0271]: type mismatch resolving `<Job as ExternType>::Kind == Trivial`
   --> tests/ui/vec_opaque.rs:22:14

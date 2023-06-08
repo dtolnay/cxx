@@ -1,5 +1,10 @@
 error: unsupported Self type of explicit impl
  --> tests/ui/bad_explicit_impl.rs:7:5
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+...
 7 |     impl fn() -> &S {}
   |     ^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -14,5 +14,10 @@ help: add `mut` or `const` here
 error: expected `const` or `mut`
  --> tests/ui/ptr_no_const_mut.rs:6:44
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+...
 6 |         fn get_neither_const_nor_mut() -> *C;
   |                                            ^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

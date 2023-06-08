@@ -1,17 +1,32 @@
 error: C++ does not allow pointer to reference as a type
  --> tests/ui/ptr_unsupported.rs:6:38
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+...
 6 |         fn get_ptr_to_reference() -> *mut &C;
   |                                      ^^^^^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: unsupported unique_ptr target type
  --> tests/ui/ptr_unsupported.rs:7:38
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+...
 7 |         fn get_uniqueptr_to_ptr() -> UniquePtr<*mut C>;
   |                                      ^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: unsupported vector element type
  --> tests/ui/ptr_unsupported.rs:8:45
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+...
 8 |         fn get_vector_of_ptr() -> UniquePtr<CxxVector<*mut C>>;
   |                                             ^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -1,5 +1,10 @@
 error: unsupported receiver type; C++ does not allow member functions on enums
  --> tests/ui/enum_receiver.rs:7:20
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+...
 7 |         fn f(self: &Enum);
   |                    ^^^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

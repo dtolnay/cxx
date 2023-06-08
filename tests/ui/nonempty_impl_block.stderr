@@ -1,8 +1,13 @@
 error: expected an empty impl block
  --> tests/ui/nonempty_impl_block.rs:7:23
   |
+1 |   #[cxx::bridge]
+  |   -------------- in this procedural macro expansion
+...
 7 |       impl UniquePtr<S> {
   |  _______________________^
 8 | |         fn new() -> Self;
 9 | |     }
   | |_____^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

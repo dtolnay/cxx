@@ -1,5 +1,10 @@
 error: const extern function is not supported
  --> tests/ui/const_fn.rs:4:9
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+...
 4 |         const fn f();
   |         ^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

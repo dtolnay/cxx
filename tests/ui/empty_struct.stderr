@@ -1,5 +1,10 @@
 error: structs without any fields are not supported
  --> tests/ui/empty_struct.rs:3:5
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+2 | mod ffi {
 3 |     struct Empty {}
   |     ^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

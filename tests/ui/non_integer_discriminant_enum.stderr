@@ -1,5 +1,10 @@
 error: enums with non-integer literal discriminants are not supported yet
  --> tests/ui/non_integer_discriminant_enum.rs:4:9
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+...
 4 |         Field = 2020 + 1,
   |         ^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -1,17 +1,32 @@
 error: enum with generic parameters is not supported
  --> tests/ui/generic_enum.rs:3:5
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+2 | mod ffi {
 3 |     enum A<T> {
   |     ^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: enum with generic parameters is not supported
  --> tests/ui/generic_enum.rs:7:5
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+...
 7 |     enum B<T> where T: Copy {
   |     ^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: enum with where-clause is not supported
   --> tests/ui/generic_enum.rs:11:12
    |
+1  | #[cxx::bridge]
+   | -------------- in this procedural macro expansion
+...
 11 |     enum C where void: Copy {
    |            ^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -1,59 +1,109 @@
 error: using opaque C++ type by value is not supported
  --> tests/ui/by_value_not_supported.rs:4:9
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+...
 4 |         c: C,
   |         ^^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: using opaque Rust type by value is not supported
  --> tests/ui/by_value_not_supported.rs:5:9
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+...
 5 |         r: R,
   |         ^^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: using C++ string by value is not supported
  --> tests/ui/by_value_not_supported.rs:6:9
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+...
 6 |         s: CxxString,
   |         ^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: needs a cxx::ExternType impl in order to be used as a field of `S`, argument of `f` or return value of `f`
   --> tests/ui/by_value_not_supported.rs:10:9
    |
+1  | #[cxx::bridge]
+   | -------------- in this procedural macro expansion
+...
 10 |         type C;
    |         ^^^^^^
+   |
+   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: passing opaque C++ type by value is not supported
   --> tests/ui/by_value_not_supported.rs:16:14
    |
+1  | #[cxx::bridge]
+   | -------------- in this procedural macro expansion
+...
 16 |         fn f(c: C) -> C;
    |              ^^^^
+   |
+   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: returning opaque C++ type by value is not supported
   --> tests/ui/by_value_not_supported.rs:16:23
    |
+1  | #[cxx::bridge]
+   | -------------- in this procedural macro expansion
+...
 16 |         fn f(c: C) -> C;
    |                       ^
+   |
+   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: passing opaque Rust type by value is not supported
   --> tests/ui/by_value_not_supported.rs:17:14
    |
+1  | #[cxx::bridge]
+   | -------------- in this procedural macro expansion
+...
 17 |         fn g(r: R) -> R;
    |              ^^^^
+   |
+   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: returning opaque Rust type by value is not supported
   --> tests/ui/by_value_not_supported.rs:17:23
    |
+1  | #[cxx::bridge]
+   | -------------- in this procedural macro expansion
+...
 17 |         fn g(r: R) -> R;
    |                       ^
+   |
+   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: passing C++ string by value is not supported
   --> tests/ui/by_value_not_supported.rs:18:14
    |
+1  | #[cxx::bridge]
+   | -------------- in this procedural macro expansion
+...
 18 |         fn h(s: CxxString) -> CxxString;
    |              ^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: returning C++ string by value is not supported
   --> tests/ui/by_value_not_supported.rs:18:31
    |
+1  | #[cxx::bridge]
+   | -------------- in this procedural macro expansion
+...
 18 |         fn h(s: CxxString) -> CxxString;
    |                               ^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

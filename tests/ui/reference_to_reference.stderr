@@ -1,11 +1,21 @@
 error: C++ does not allow references to references
  --> tests/ui/reference_to_reference.rs:5:23
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+...
 5 |         fn repro_c(t: &&ThingC);
   |                       ^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: C++ does not allow references to references
  --> tests/ui/reference_to_reference.rs:9:23
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+...
 9 |         fn repro_r(t: &&ThingR);
   |                       ^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -1,11 +1,21 @@
 error: discriminant value `18446744073709551615` is outside the limits of u32
  --> tests/ui/enum_out_of_bounds.rs:5:9
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+...
 5 |         A = 0xFFFF_FFFF_FFFF_FFFF,
   |         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: discriminant value `2000` is outside the limits of u8
  --> tests/ui/enum_out_of_bounds.rs:9:9
   |
+1 | #[cxx::bridge]
+  | -------------- in this procedural macro expansion
+...
 9 |         B = 1u8,
   |         ^^^^^^^
+  |
+  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
