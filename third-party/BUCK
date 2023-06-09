@@ -21,7 +21,6 @@ cargo.rust_library(
         "default",
         "std",
     ],
-    rustc_flags = ["--cap-lints=allow"],
     visibility = [],
 )
 
@@ -40,7 +39,6 @@ cargo.rust_library(
     crate_root = "bitflags-1.3.2.crate/src/lib.rs",
     edition = "2018",
     features = ["default"],
-    rustc_flags = ["--cap-lints=allow"],
     visibility = [],
 )
 
@@ -64,7 +62,6 @@ cargo.rust_library(
     crate = "cc",
     crate_root = "cc-1.0.79.crate/src/lib.rs",
     edition = "2018",
-    rustc_flags = ["--cap-lints=allow"],
     visibility = [],
 )
 
@@ -94,7 +91,6 @@ cargo.rust_library(
         "std",
         "usage",
     ],
-    rustc_flags = ["--cap-lints=allow"],
     visibility = [],
     deps = [":clap_builder-4.3.0"],
 )
@@ -119,7 +115,6 @@ cargo.rust_library(
         "std",
         "usage",
     ],
-    rustc_flags = ["--cap-lints=allow"],
     visibility = [],
     deps = [
         ":anstyle-1.0.0",
@@ -142,7 +137,6 @@ cargo.rust_library(
     crate = "clap_lex",
     crate_root = "clap_lex-0.5.0.crate/src/lib.rs",
     edition = "2021",
-    rustc_flags = ["--cap-lints=allow"],
     visibility = [],
 )
 
@@ -166,7 +160,6 @@ cargo.rust_library(
     crate = "codespan_reporting",
     crate_root = "codespan-reporting-0.11.1.crate/src/lib.rs",
     edition = "2018",
-    rustc_flags = ["--cap-lints=allow"],
     visibility = [],
     deps = [
         ":termcolor-1.2.0",
@@ -200,7 +193,6 @@ cargo.rust_library(
         "race",
         "std",
     ],
-    rustc_flags = ["--cap-lints=allow"],
     visibility = [],
 )
 
@@ -229,10 +221,7 @@ cargo.rust_library(
         "proc-macro",
         "span-locations",
     ],
-    rustc_flags = [
-        "--cap-lints=allow",
-        "@$(location :proc-macro2-1.0.59-build-script-run[rustc_flags])",
-    ],
+    rustc_flags = ["@$(location :proc-macro2-1.0.59-build-script-run[rustc_flags])"],
     visibility = [],
     deps = [":unicode-ident-1.0.9"],
 )
@@ -248,7 +237,6 @@ cargo.rust_binary(
         "proc-macro",
         "span-locations",
     ],
-    rustc_flags = ["--cap-lints=allow"],
     visibility = [],
 )
 
@@ -288,10 +276,7 @@ cargo.rust_library(
         "default",
         "proc-macro",
     ],
-    rustc_flags = [
-        "--cap-lints=allow",
-        "@$(location :quote-1.0.28-build-script-run[rustc_flags])",
-    ],
+    rustc_flags = ["@$(location :quote-1.0.28-build-script-run[rustc_flags])"],
     visibility = [],
     deps = [":proc-macro2-1.0.59"],
 )
@@ -306,7 +291,6 @@ cargo.rust_binary(
         "default",
         "proc-macro",
     ],
-    rustc_flags = ["--cap-lints=allow"],
     visibility = [],
 )
 
@@ -344,7 +328,6 @@ cargo.rust_library(
     env = {
         "OUT_DIR": "$(location :scratch-1.0.5-build-script-run[out_dir])",
     },
-    rustc_flags = ["--cap-lints=allow"],
     visibility = [],
 )
 
@@ -354,7 +337,6 @@ cargo.rust_binary(
     crate = "build_script_build",
     crate_root = "scratch-1.0.5.crate/build.rs",
     edition = "2015",
-    rustc_flags = ["--cap-lints=allow"],
     visibility = [],
 )
 
@@ -395,7 +377,6 @@ cargo.rust_library(
         "proc-macro",
         "quote",
     ],
-    rustc_flags = ["--cap-lints=allow"],
     visibility = [],
     deps = [
         ":proc-macro2-1.0.59",
@@ -426,7 +407,6 @@ cargo.rust_library(
             deps = [":winapi-util-0.1.5"],
         ),
     },
-    rustc_flags = ["--cap-lints=allow"],
     visibility = [],
 )
 
@@ -444,7 +424,6 @@ cargo.rust_library(
     crate = "unicode_ident",
     crate_root = "unicode-ident-1.0.9.crate/src/lib.rs",
     edition = "2018",
-    rustc_flags = ["--cap-lints=allow"],
     visibility = [],
 )
 
@@ -463,7 +442,6 @@ cargo.rust_library(
     crate_root = "unicode-width-0.1.10.crate/src/lib.rs",
     edition = "2015",
     features = ["default"],
-    rustc_flags = ["--cap-lints=allow"],
     visibility = [],
 )
 
@@ -493,10 +471,7 @@ cargo.rust_library(
         "winerror",
         "winnt",
     ],
-    rustc_flags = [
-        "--cap-lints=allow",
-        "@$(location :winapi-0.3.9-build-script-run[rustc_flags])",
-    ],
+    rustc_flags = ["@$(location :winapi-0.3.9-build-script-run[rustc_flags])"],
     visibility = [],
 )
 
@@ -518,7 +493,6 @@ cargo.rust_binary(
         "winerror",
         "winnt",
     ],
-    rustc_flags = ["--cap-lints=allow"],
     visibility = [],
 )
 
@@ -563,6 +537,5 @@ cargo.rust_library(
             deps = [":winapi-0.3.9"],
         ),
     },
-    rustc_flags = ["--cap-lints=allow"],
     visibility = [],
 )
