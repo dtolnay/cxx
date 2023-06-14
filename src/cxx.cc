@@ -285,7 +285,7 @@ String::String(unsafe_bitcopy_t, const String &bits) noexcept
     : repr(bits.repr) {}
 
 std::ostream &operator<<(std::ostream &os, const String &s) {
-  os.write(s.data(), s.size());
+  os.write(s.data(), static_cast<std::streamsize>(s.size()));
   return os;
 }
 
@@ -374,7 +374,7 @@ void Str::swap(Str &rhs) noexcept {
 }
 
 std::ostream &operator<<(std::ostream &os, const Str &s) {
-  os.write(s.data(), s.size());
+  os.write(s.data(), static_cast<std::streamsize>(s.size()));
   return os;
 }
 
