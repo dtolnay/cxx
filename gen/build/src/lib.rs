@@ -51,7 +51,6 @@
     clippy::default_trait_access,
     clippy::derive_partial_eq_without_eq,
     clippy::doc_markdown,
-    clippy::drop_copy,
     clippy::enum_glob_use,
     clippy::explicit_auto_deref,
     clippy::if_same_then_else,
