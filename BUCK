@@ -1,8 +1,3 @@
-export_file(
-    name = ".clippy.toml",
-    visibility = ["toolchains//:rust"],
-)
-
 rust_library(
     name = "cxx",
     srcs = glob(["src/**/*.rs"]),
