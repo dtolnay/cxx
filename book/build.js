@@ -99,5 +99,7 @@ fs.copyFileSync('build/highlight.css', 'build/tomorrow-night.css');
 fs.copyFileSync('build/highlight.css', 'build/ayu-highlight.css');
 
 var bookjs = fs.readFileSync('build/book.js', 'utf8');
-bookjs = bookjs.replace('set_theme(theme, false);', '');
+bookjs = bookjs
+  .replace('set_theme(theme, false);', '')
+  .replace('document.querySelectorAll("code.hljs")', 'document.querySelectorAll("code.hidelines")');
 fs.writeFileSync('build/book.js', bookjs);
