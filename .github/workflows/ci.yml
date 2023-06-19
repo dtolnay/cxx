@@ -113,12 +113,6 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v3
-      - name: Install Bazel
-        run: |
-          curl https://github.com/bazelbuild/bazel/releases/download/6.0.0/bazel-6.0.0-installer-${{matrix.os == 'ubuntu' && 'linux' || matrix.os == 'macos' && 'darwin' || '???'}}-x86_64.sh --location --output install.sh --silent --show-error --fail --retry 2
-          chmod +x install.sh
-          ./install.sh --user
-          echo $HOME/bin >> $GITHUB_PATH
       - name: Install lld
         run: sudo apt-get install lld
         if: matrix.os == 'ubuntu'
