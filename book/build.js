@@ -2,9 +2,8 @@
 
 const fs = require('fs');
 const cheerio = require('cheerio');
+const entities = require('html-entities');
 const hljs = require('./build/highlight.js');
-const Entities = require('html-entities').AllHtmlEntities;
-const entities = new Entities();
 
 const githublink = `\
 <li class="part-title">\
