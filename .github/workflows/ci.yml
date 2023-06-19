@@ -115,7 +115,9 @@ jobs:
         if: matrix.os == 'ubuntu'
       - run: bazel --version
       - run: bazel run demo --verbose_failures --noshow_progress
+        continue-on-error: matrix.os == 'windows' # https://github.com/bazelbuild/bazel/issues/18592
       - run: bazel test ... --verbose_failures --noshow_progress
+        continue-on-error: matrix.os == 'windows' # https://github.com/bazelbuild/bazel/issues/18592
 
   clippy:
     name: Clippy
