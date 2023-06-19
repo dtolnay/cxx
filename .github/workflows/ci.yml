@@ -103,20 +103,25 @@ jobs:
         if: matrix.os == 'ubuntu'
 
   bazel:
-    name: Bazel on Linux
-    runs-on: ubuntu-latest
+    name: Bazel on ${{matrix.os == 'ubuntu' && 'Linux' || matrix.os == 'macos' && 'macOS' || '???'}}
+    runs-on: ${{matrix.os}}-latest
     if: github.event_name != 'pull_request'
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu, macos]
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v3
       - name: Install Bazel
         run: |
-          curl https://github.com/bazelbuild/bazel/releases/download/6.0.0/bazel-6.0.0-installer-linux-x86_64.sh --location --output install.sh --silent --show-error --fail --retry 2
+          curl https://github.com/bazelbuild/bazel/releases/download/6.0.0/bazel-6.0.0-installer-${{matrix.os == 'ubuntu' && 'linux' || matrix.os == 'macos' && 'darwin' || '???'}}-x86_64.sh --location --output install.sh --silent --show-error --fail --retry 2
           chmod +x install.sh
           ./install.sh --user
           echo $HOME/bin >> $GITHUB_PATH
       - name: Install lld
         run: sudo apt-get install lld
+        if: matrix.os == 'ubuntu'
       - run: bazel run demo --verbose_failures --noshow_progress
       - run: bazel test ... --verbose_failures --noshow_progress
 
