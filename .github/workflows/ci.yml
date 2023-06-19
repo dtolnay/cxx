@@ -113,6 +113,7 @@ jobs:
       - name: Install lld
         run: sudo apt-get install lld
         if: matrix.os == 'ubuntu'
+      - run: bazel --version
       - run: bazel run demo --verbose_failures --noshow_progress
       - run: bazel test ... --verbose_failures --noshow_progress
 
