@@ -87,9 +87,6 @@ jobs:
         with:
           components: rust-src
       - uses: dtolnay/install-buck2@latest
-      - name: Install lld
-        run: sudo apt-get install lld
-        if: matrix.os == 'ubuntu'
       - run: buck2 run demo
       - run: buck2 build ...
       - run: buck2 test ...
