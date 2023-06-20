@@ -17,7 +17,7 @@ CXX's integration with Cargo is handled through the [cxx-build] crate.
 ...[package]
 ...name = "..."
 ...version = "..."
-...edition = "2018"
+...edition = "2021"
 
 [dependencies]
 cxx = "1.0"
