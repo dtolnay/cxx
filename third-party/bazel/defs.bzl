@@ -299,7 +299,7 @@ _NORMAL_DEPENDENCIES = {
             "clap": "@vendor__clap-4.3.0//:clap",
             "codespan-reporting": "@vendor__codespan-reporting-0.11.1//:codespan_reporting",
             "once_cell": "@vendor__once_cell-1.17.1//:once_cell",
-            "proc-macro2": "@vendor__proc-macro2-1.0.59//:proc_macro2",
+            "proc-macro2": "@vendor__proc-macro2-1.0.63//:proc_macro2",
             "quote": "@vendor__quote-1.0.28//:quote",
             "scratch": "@vendor__scratch-1.0.5//:scratch",
             "syn": "@vendor__syn-2.0.17//:syn",
@@ -456,12 +456,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__proc-macro2-1.0.59",
-        sha256 = "6aeca18b86b413c660b781aa319e4e2648a3e6f9eadc9b47e9038e6fe9f3451b",
+        name = "vendor__proc-macro2-1.0.63",
+        sha256 = "7b368fba921b0dce7e60f5e04ec15e565b3303972b42bcfde1d0713b881959eb",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/proc-macro2/1.0.59/download"],
-        strip_prefix = "proc-macro2-1.0.59",
-        build_file = Label("@cxx.rs//third-party/bazel:BUILD.proc-macro2-1.0.59.bazel"),
+        urls = ["https://crates.io/api/v1/crates/proc-macro2/1.0.63/download"],
+        strip_prefix = "proc-macro2-1.0.63",
+        build_file = Label("@cxx.rs//third-party/bazel:BUILD.proc-macro2-1.0.63.bazel"),
     )
 
     maybe(
