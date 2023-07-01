@@ -20,6 +20,7 @@ pub enum Atom {
     F64,
     CxxString,
     RustString,
+    CxxExceptionPtr,
 }
 
 impl Atom {
@@ -46,6 +47,7 @@ impl Atom {
             "f64" => Some(F64),
             "CxxString" => Some(CxxString),
             "String" => Some(RustString),
+            "CxxException" => Some(CxxExceptionPtr),
             _ => None,
         }
     }
@@ -77,6 +79,7 @@ impl AsRef<str> for Atom {
             F64 => "f64",
             CxxString => "CxxString",
             RustString => "String",
+            CxxExceptionPtr => "CxxException",
         }
     }
 }

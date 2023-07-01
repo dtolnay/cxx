@@ -146,6 +146,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
             clippy::ptr_as_ptr,
             clippy::upper_case_acronyms,
             clippy::use_self,
+            clippy::items_after_statements,
         )]
         #vis #mod_token #ident #expanded
     }
@@ -471,7 +472,7 @@ fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
     });
     let all_args = receiver.chain(args);
     let ret = if efn.throws {
-        quote!(-> ::cxx::private::Result)
+        quote!(-> ::cxx::private::CxxResultWithMessage)
     } else {
         expand_extern_return_type(&efn.ret, types, true)
     };
@@ -1108,7 +1109,15 @@ fn expand_rust_function_shim_impl(
             None => quote_spanned!(span=> &mut ()),
         };
         requires_closure = true;
-        expr = quote_spanned!(span=> ::cxx::private::r#try(#out, #expr));
+        expr = quote_spanned!(span=>
+            match #expr {
+                Ok(ok) => {
+                    ::core::ptr::write(#out, ok);
+                    ::cxx::private::CxxResult::new()
+                }
+                Err(err) => ::cxx::private::CxxResult::from(err),
+            }
+        );
     } else if indirect_return {
         requires_closure = true;
         expr = quote_spanned!(span=> ::cxx::core::ptr::write(__return, #expr));
@@ -1123,7 +1132,7 @@ fn expand_rust_function_shim_impl(
     expr = quote_spanned!(span=> ::cxx::private::prevent_unwind(__fn, #closure));
 
     let ret = if sig.throws {
-        quote!(-> ::cxx::private::Result)
+        quote!(-> ::cxx::private::CxxResult)
     } else {
         expand_extern_return_type(&sig.ret, types, false)
     };
@@ -1166,16 +1175,12 @@ fn expand_rust_function_shim_super(
     let args = sig.args.iter().map(|arg| quote!(#arg));
     let all_args = receiver.chain(args);
 
-    let ret = if let Some((result, _langle, rangle)) = sig.throws_tokens {
+    let ret = if let Some((result, _langle, _rangle)) = &sig.throws_tokens {
         let ok = match &sig.ret {
             Some(ret) => quote!(#ret),
             None => quote!(()),
         };
-        // Set spans that result in the `Result<...>` written by the user being
-        // highlighted as the cause if their error type has no Display impl.
-        let result_begin = quote_spanned!(result.span=> ::cxx::core::result::Result<#ok, impl);
-        let result_end = quote_spanned!(rangle.span=> ::cxx::core::fmt::Display>);
-        quote!(-> #result_begin #result_end)
+        quote_spanned!(result.span=> -> ::cxx::core::result::Result<#ok, ::cxx::CxxException>)
     } else {
         expand_return_type(&sig.ret)
     };
@@ -1192,9 +1197,23 @@ fn expand_rust_function_shim_super(
         }
     };
 
+    let call = if let Some((result, _langle, rangle)) = &sig.throws_tokens {
+        // Set spans that result in the `Result<...>` written by the user being
+        // highlighted as the cause if their error type is not convertible to
+        // CxxException (i.e., no `Display` trait by default).
+        let result_begin = quote_spanned! { result.span=>
+            |e| ::cxx::map_rust_error_to_cxx_exception!
+        };
+        let result_end = quote_spanned! { rangle.span=> (e) };
+        quote_spanned! {span=>
+            #call(#(#vars,)*).map_err( #result_begin #result_end )
+        }
+    } else {
+        quote_spanned! {span=> #call(#(#vars,)*) }
+    };
     quote_spanned! {span=>
         #unsafety fn #local_name #generics(#(#all_args,)*) #ret {
-            #call(#(#vars,)*)
+            #call
         }
     }
 }
@@ -1750,6 +1769,10 @@ fn expand_extern_type(ty: &Type, types: &Types, proper: bool) -> TokenStream {
         Type::Ident(ident) if ident.rust == RustString => {
             let span = ident.rust.span();
             quote_spanned!(span=> ::cxx::private::RustString)
+        }
+        Type::Ident(ident) if ident.rust == CxxExceptionPtr => {
+            let span = ident.rust.span();
+            quote_spanned!(span=> ::cxx::CxxException)
         }
         Type::RustBox(ty) | Type::UniquePtr(ty) => {
             let span = ty.name.span();

@@ -476,6 +476,8 @@ pub use crate::string::CxxString;
 pub use crate::unique_ptr::UniquePtr;
 pub use crate::weak_ptr::WeakPtr;
 pub use cxxbridge_macro::bridge;
+#[cfg(feature = "alloc")]
+pub use crate::result::{CxxException, ToCxxException, ToCxxExceptionDefault};
 
 /// Synonym for `CxxString`.
 ///
@@ -501,7 +503,7 @@ pub mod private {
     pub use crate::hash::hash;
     pub use crate::opaque::Opaque;
     #[cfg(feature = "alloc")]
-    pub use crate::result::{r#try, Result};
+    pub use crate::result::{CxxResult, CxxResultWithMessage};
     pub use crate::rust_slice::RustSlice;
     pub use crate::rust_str::RustStr;
     #[cfg(feature = "alloc")]

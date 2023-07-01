@@ -449,16 +449,24 @@ static_assert(!std::is_same<Vec<std::uint8_t>::const_iterator,
               "Vec<T>::const_iterator != Vec<T>::iterator");
 
 static const char *errorCopy(const char *ptr, std::size_t len) {
-  char *copy = new char[len];
+  char *copy = new char[len + 1];
   std::memcpy(copy, ptr, len);
+  copy[len] = 0;
   return copy;
 }
 
-extern "C" {
-const char *cxxbridge1$error(const char *ptr, std::size_t len) noexcept {
-  return errorCopy(ptr, len);
-}
-} // extern "C"
+namespace {
+template <>
+class impl<Error> final {
+public:
+  static Error error_copy(const char *ptr, std::size_t len) noexcept {
+    Error error;
+    error.msg = errorCopy(ptr, len);
+    error.len = len;
+    return error;
+  }
+};
+} // namespace
 
 Error::Error(const Error &other)
     : std::exception(other),
@@ -512,11 +520,63 @@ struct PtrLen final {
   void *ptr;
   std::size_t len;
 };
+struct CxxException final {
+  void *repr_ptr;
+#if _MSC_VER >= 1700
+  // NOTE: MSVC uses two pointers to store `std::exception_ptr`
+  void *repr_ptr_2;
+#endif
+};
+struct CxxResult final {
+  CxxException exc;
+};
+struct Exception final {
+  CxxResult res;
+  PtrLen msg;
+};
 } // namespace repr
+
+// Ensure statically that `std::exception_ptr` is really a pointer.
+static_assert(sizeof(std::exception_ptr) == sizeof(repr::CxxException),
+              "Unsupported std::exception_ptr size");
+static_assert(alignof(std::exception_ptr) == alignof(repr::CxxException),
+              "Unsupported std::exception_ptr alignment");
 
 extern "C" {
 repr::PtrLen cxxbridge1$exception(const char *, std::size_t len) noexcept;
+
+repr::CxxException cxxbridge1$default_exception(const char *ptr,
+                                                std::size_t len) noexcept {
+  // Construct an `std::exception_ptr` for the default `rust::Error` in the
+  // space provided by the pointer itself (placement new).
+  //
+  // The `std::exception_ptr` itself is just a pointer, so this effectively
+  // converts it to the pointer.
+  repr::CxxException eptr;
+  new (&eptr) std::exception_ptr(
+      std::make_exception_ptr(impl<Error>::error_copy(ptr, len)));
+  return eptr;
 }
+
+void cxxbridge1$drop_exception(repr::CxxException ptr) noexcept {
+  // Implement the `drop` for `CxxException` on the Rust side, which is just a
+  // pointer to the exception stored in `std::exception_ptr`.
+  void *pptr = &ptr;
+  std::exception_ptr eptr = std::move(*static_cast<std::exception_ptr *>(pptr));
+  // eptr goes out of scope and deallocates `std::exception_ptr`.
+}
+
+repr::CxxException
+cxxbridge1$clone_exception(repr::CxxException &ptr) noexcept {
+  // Implement the `clone` for `CxxException` on the Rust side, which is just a
+  // pointer to the exception stored in `std::exception_ptr`.
+  repr::CxxException eptr;
+  const void *pptr = &ptr;
+  new (&eptr)
+      std::exception_ptr(*static_cast<const std::exception_ptr *>(pptr));
+  return eptr;
+}
+} // extern "C"
 
 namespace detail {
 // On some platforms size_t is the same C++ type as one of the sized integer
@@ -533,20 +593,26 @@ using isize_if_unique =
                               struct isize_ignore, rust::isize>::type;
 
 class Fail final {
-  repr::PtrLen &throw$;
+  repr::Exception &throw$;
 
 public:
-  Fail(repr::PtrLen &throw$) noexcept : throw$(throw$) {}
+  Fail(repr::Exception &throw$) noexcept : throw$(throw$) {}
   void operator()(const char *) noexcept;
   void operator()(const std::string &) noexcept;
 };
 
 void Fail::operator()(const char *catch$) noexcept {
-  throw$ = cxxbridge1$exception(catch$, std::strlen(catch$));
+  repr::CxxException eptr;
+  new (&eptr)::std::exception_ptr(::std::current_exception());
+  throw$.res.exc = eptr;
+  throw$.msg = cxxbridge1$exception(catch$, std::strlen(catch$));
 }
 
 void Fail::operator()(const std::string &catch$) noexcept {
-  throw$ = cxxbridge1$exception(catch$.data(), catch$.length());
+  repr::CxxException eptr;
+  new (&eptr)::std::exception_ptr(::std::current_exception());
+  throw$.res.exc = eptr;
+  throw$.msg = cxxbridge1$exception(catch$.data(), catch$.length());
 }
 } // namespace detail
 

@@ -215,6 +215,13 @@ std::unique_ptr<::F::F> c_return_ns_opaque_ptr();
 rust::String cOverloadedFunction(int32_t x);
 rust::String cOverloadedFunction(rust::Str x);
 
+struct CustomError;
+std::exception_ptr make_custom_exception(const CustomError &error);
+void catch_custom_exception();
+
+void forward_exception_inner();
+void forward_exception_outer();
+
 } // namespace tests
 
 namespace other {

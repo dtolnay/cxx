@@ -1,8 +1,15 @@
-error[E0277]: `NonError` doesn't implement `std::fmt::Display`
+error[E0599]: the method `to_cxx_exception` exists for reference `&NonError`, but its trait bounds were not satisfied
  --> tests/ui/result_no_display.rs:4:19
   |
 4 |         fn f() -> Result<()>;
-  |                   ^^^^^^^^^^ `NonError` cannot be formatted with the default formatter
+  |                   ^^^^^^^^^^ method cannot be called on `&NonError` due to unsatisfied trait bounds
+...
+8 | pub struct NonError;
+  | ------------------- doesn't satisfy `NonError: std::fmt::Display`
   |
-  = help: the trait `std::fmt::Display` is not implemented for `NonError`
-  = note: in format strings you may be able to use `{:?}` (or {:#?} for pretty-print) instead
+  = note: the following trait bounds were not satisfied:
+          `NonError: std::fmt::Display`
+          which is required by `&NonError: ToCxxExceptionDefault`
+note: the trait `std::fmt::Display` must be implemented
+ --> $RUST/core/src/fmt/mod.rs
+  = note: this error originates in the macro `::cxx::map_rust_error_to_cxx_exception` (in Nightly builds, run with -Z macro-backtrace for more info)

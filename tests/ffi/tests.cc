@@ -902,6 +902,49 @@ extern "C" const char *cxx_run_test() noexcept {
   return nullptr;
 }
 
+std::exception_ptr make_custom_exception(const CustomError &error) {
+  auto data = error.get_data();
+  std::string msg("custom ");
+  msg += std::to_string(data);
+  return std::make_exception_ptr(std::logic_error(msg));
+}
+
+void catch_custom_exception() {
+  // call a Rust function throwing a custom error
+  try {
+    throw_custom_exception();
+  } catch (std::logic_error &ex) {
+    // yes, we caught the expected exception, just rethrow it to the outer
+    // call from Rust to evaluate
+    throw;
+  } catch (...) {
+    // something wrong, throw an exception with a different message, so the
+    // test will fail
+    throw std::logic_error("unexpected exception caught in the outer layer");
+  }
+}
+
+void forward_exception_inner() {
+  // throw a special exception in the inner call
+  throw std::logic_error("forward test exc");
+}
+
+void forward_exception_outer() {
+  try {
+    // call Rust function, which calls `forward_exception_inner()` to generate
+    // the exception, which is passed 1:1 through the Rust layer
+    forward_exception_middle();
+  } catch (std::logic_error &) {
+    // yes, we caught the expected exception, just rethrow it to the outer
+    // call from Rust to evaluate
+    throw;
+  } catch (...) {
+    // something wrong, throw an exception with a different message, so the
+    // test will fail
+    throw std::logic_error("unexpected exception caught in the outer layer");
+  }
+}
+
 } // namespace tests
 
 namespace other {

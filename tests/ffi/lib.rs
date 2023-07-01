@@ -15,10 +15,29 @@
 pub mod cast;
 pub mod module;
 
-use cxx::{type_id, CxxString, CxxVector, ExternType, SharedPtr, UniquePtr};
+use cxx::{
+    type_id, CxxException, CxxString, CxxVector, ExternType, SharedPtr, ToCxxException, UniquePtr,
+};
 use std::fmt::{self, Display};
 use std::mem::MaybeUninit;
 use std::os::raw::c_char;
+
+/// A custom error with special exception handling.
+pub struct CustomError {
+    pub data: i32,
+}
+
+impl CustomError {
+    pub fn get_data(&self) -> i32 {
+        self.data
+    }
+}
+
+impl ToCxxException for CustomError {
+    fn to_cxx_exception(&self) -> CxxException {
+        ffi::make_custom_exception(self)
+    }
+}
 
 #[cxx::bridge(namespace = "tests")]
 pub mod ffi {
@@ -218,6 +237,21 @@ pub mod ffi {
         fn ns_c_take_ns_shared(shared: AShared);
     }
 
+    extern "Rust" {
+        type CustomError;
+        fn get_data(&self) -> i32;
+    }
+
+    unsafe extern "C++" {
+        include!("tests/ffi/tests.h");
+
+        fn make_custom_exception(error: &CustomError) -> CxxException;
+        fn catch_custom_exception() -> Result<()>;
+
+        fn forward_exception_inner() -> Result<()>;
+        fn forward_exception_outer() -> Result<()>;
+    }
+
     extern "C++" {
         include!("tests/ffi/module.rs.h");
 
@@ -312,6 +346,9 @@ pub mod ffi {
 
         #[cxx_name = "rAliasedFunction"]
         fn r_aliased_function(x: i32) -> String;
+
+        fn throw_custom_exception() -> Result<()>;
+        fn forward_exception_middle() -> Result<()>;
     }
 
     struct Dag0 {
@@ -645,4 +682,15 @@ fn r_try_return_mutsliceu8(slice: &mut [u8]) -> Result<&mut [u8], Error> {
 
 fn r_aliased_function(x: i32) -> String {
     x.to_string()
+}
+
+fn throw_custom_exception() -> Result<(), CustomError> {
+    Err(CustomError { data: 4711 })
+}
+
+fn forward_exception_middle() -> Result<(), CxxException> {
+    ffi::forward_exception_inner().map_err(|e| {
+        assert_eq!(e.what(), "forward test exc");
+        e.into()
+    })
 }

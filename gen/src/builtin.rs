@@ -20,7 +20,7 @@ pub struct Builtins<'a> {
     pub manually_drop: bool,
     pub maybe_uninit: bool,
     pub trycatch: bool,
-    pub ptr_len: bool,
+    pub repr_cxxresult: bool,
     pub repr_fat: bool,
     pub rust_str_new_unchecked: bool,
     pub rust_str_repr: bool,
@@ -138,7 +138,7 @@ pub(super) fn write(out: &mut OutFile) {
     }
 
     if builtin.trycatch {
-        builtin.ptr_len = true;
+        builtin.repr_cxxresult = true;
     }
 
     out.begin_block(Block::Namespace("rust"));
@@ -217,12 +217,26 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "using Fat = ::std::array<::std::uintptr_t, 2>;");
     }
 
-    if builtin.ptr_len {
+    if builtin.repr_cxxresult {
+        include.exception = true;
         include.cstddef = true;
         out.next_section();
         writeln!(out, "struct PtrLen final {{");
         writeln!(out, "  void *ptr;");
         writeln!(out, "  ::std::size_t len;");
+        writeln!(out, "}};");
+        writeln!(out, "struct CxxException final {{");
+        writeln!(out, "  void *repr_ptr;");
+        writeln!(out, "#if _MSC_VER >= 1700");
+        writeln!(out, "  void *repr_ptr_2;");
+        writeln!(out, "#endif");
+        writeln!(out, "}};");
+        writeln!(out, "struct CxxResult final {{");
+        writeln!(out, "  CxxException exc;");
+        writeln!(out, "}};");
+        writeln!(out, "struct Exception final {{");
+        writeln!(out, "  CxxResult res;");
+        writeln!(out, "  PtrLen msg;");
         writeln!(out, "}};");
     }
 
@@ -258,11 +272,11 @@ pub(super) fn write(out: &mut OutFile) {
         include.string = true;
         out.next_section();
         writeln!(out, "class Fail final {{");
-        writeln!(out, "  ::rust::repr::PtrLen &throw$;");
+        writeln!(out, "  ::rust::repr::Exception &throw$;");
         writeln!(out, "public:");
         writeln!(
             out,
-            "  Fail(::rust::repr::PtrLen &throw$) noexcept : throw$(throw$) {{}}",
+            "  Fail(::rust::repr::Exception &throw$) noexcept : throw$(throw$) {{}}",
         );
         writeln!(out, "  void operator()(char const *) noexcept;");
         writeln!(out, "  void operator()(std::string const &) noexcept;");
@@ -345,20 +359,6 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "}};");
     }
 
-    if builtin.rust_error {
-        out.next_section();
-        writeln!(out, "template <>");
-        writeln!(out, "class impl<Error> final {{");
-        writeln!(out, "public:");
-        writeln!(out, "  static Error error(repr::PtrLen repr) noexcept {{");
-        writeln!(out, "    Error error;");
-        writeln!(out, "    error.msg = static_cast<char const *>(repr.ptr);");
-        writeln!(out, "    error.len = repr.len;");
-        writeln!(out, "    return error;");
-        writeln!(out, "  }}");
-        writeln!(out, "}};");
-    }
-
     if builtin.destroy {
         out.next_section();
         writeln!(out, "template <typename T>");
@@ -414,6 +414,8 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "  func();");
         writeln!(out, "}} catch (::std::exception const &e) {{");
         writeln!(out, "  fail(e.what());");
+        writeln!(out, "}} catch (...) {{");
+        writeln!(out, "  fail(\"<no message>\");");
         writeln!(out, "}}");
         out.end_block(Block::Namespace("behavior"));
     }

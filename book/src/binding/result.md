@@ -25,7 +25,19 @@ the Rust side produces an error.
 Note that the return type written inside of cxx::bridge must be written without
 a second type parameter. Only the Ok type is specified for the purpose of the
 FFI. The Rust *implementation* (outside of the bridge module) may pick any error
-type as long as it has a std::fmt::Display impl.
+type as long as it has a `std::fmt::Display` or `cxx:ToCxxException`
+implementation.
+
+Exception is built from the actual error type via `cxx::ToCxxException` trait
+which converts the error type into a custom exception by the user code, if such
+an implementation exists, else using `cxx::ToCxxExceptionDefault`, which only
+requires the type to implement `std::fmt::Display` trait. The sole trait method
+of both traits returns a `cxx::CxxException`, which wraps a `std::exception_ptr`
+on the C++ side. An implementation of `cxx::ToCxxException` will call the
+appropriate C++ function (again, via the bridge) to construct the
+`std::exception_ptr`, likely using standard C++ function
+`std::make_exception_ptr()` to wrap an exception. The signature on the C++ side
+expects `std::exception_ptr` for `cxx::CxxException` on the Rust side.
 
 ```rust,noplayground
 # use std::io;
@@ -51,9 +63,10 @@ fn fallible2() -> Result<(), io::Error> {
 }
 ```
 
-The exception that gets thrown by CXX on the C++ side is always of type
-`rust::Error` and has the following C++ public API. The `what()` member function
-gives the error message according to the Rust error's std::fmt::Display impl.
+The exception that gets thrown by CXX on the C++ side is of type `rust::Error`
+(unless otherwise specified by `cxx::ToCxxException` trait for a custom error
+type) and has the following C++ public API. The `what()` member function gives
+the error message according to the Rust error's `std::fmt::Display` implementation.
 
 ```cpp,hidelines=...
 // rust/cxx.h
@@ -84,6 +97,12 @@ Note that the return type written inside of cxx::bridge must be written without
 a second type parameter. Only the Ok type is specified for the purpose of the
 FFI. The resulting error type created by CXX when an `extern "C++"` function
 throws will always be of type **[`cxx::Exception`]**.
+
+Note that this exception can be converted to [`cxx::CxxException`] using its
+`Into` trait implementation and returned back to C++ later, as a `Result` with
+error type `CxxException`, providing a transparent bridge from the original C++
+exception thrown in a C++ callback through Rust API back to the C++ code calling
+the Rust API without loss of information.
 
 [`cxx::Exception`]: https://docs.rs/cxx/*/cxx/struct.Exception.html
 
@@ -141,6 +160,8 @@ static void trycatch(Try &&func, Fail &&fail) noexcept try {
   func();
 } catch (const std::exception &e) {
   fail(e.what());
+} catch (...) {
+  fail("<no message>");
 }
 ...
 ...} // namespace behavior
