@@ -22,6 +22,7 @@ rust_library(
         include = ["**"],
         exclude = [
             "**/* *",
+            ".tmp_git_root/**/*",
             "BUILD",
             "BUILD.bazel",
             "WORKSPACE",
@@ -111,6 +112,7 @@ cargo_build_script(
         include = ["**"],
         exclude = [
             "**/* *",
+            ".tmp_git_root/**/*",
             "BUILD",
             "BUILD.bazel",
             "WORKSPACE",
