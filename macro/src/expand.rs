@@ -15,6 +15,7 @@ use crate::{derive, generics};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
 use std::mem;
+use syn::spanned::Spanned;
 use syn::{parse_quote, punctuated, Generics, Lifetime, Result, Token};
 
 pub fn bridge(mut ffi: Module) -> Result<TokenStream> {
@@ -84,10 +85,16 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
                 hidden.extend(expand_rust_type_layout(ety, types));
             }
             Api::RustFunction(efn) => hidden.extend(expand_rust_function_shim(efn, types)),
-            Api::TypeAlias(alias) => {
-                expanded.extend(expand_type_alias(alias));
-                hidden.extend(expand_type_alias_verify(alias, types));
-            }
+            Api::TypeAlias(alias) => match alias.lang {
+                syntax::Lang::Cxx => {
+                    expanded.extend(expand_type_alias(alias));
+                    hidden.extend(expand_type_alias_verify(alias, types));
+                }
+                syntax::Lang::Rust => {
+                    expanded.extend(expand_type_alias_rust(alias));
+                    hidden.extend(expand_type_alias_verify_rust(alias));
+                }
+            },
         }
     }
 
@@ -1217,6 +1224,24 @@ fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
     }
 }
 
+fn expand_type_alias_rust(alias: &TypeAlias) -> TokenStream {
+    let doc = &alias.doc;
+    let attrs = &alias.attrs;
+    let visibility = alias.visibility;
+    let _type_token = alias.type_token;
+    let ident = &alias.name.rust;
+    let _generics = &alias.generics;
+    let _eq_token = alias.eq_token;
+    let ty = &alias.ty;
+    let semi_token = alias.semi_token;
+
+    quote! {
+        #doc
+        #attrs
+        #visibility use #ty as #ident #semi_token
+    }
+}
+
 fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
     let ident = &alias.name.rust;
     let type_id = type_id(&alias.name);
@@ -1237,6 +1262,15 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
     }
 
     verify
+}
+
+fn expand_type_alias_verify_rust(alias: &TypeAlias) -> TokenStream {
+    let mut ident = alias.name.rust.clone();
+    let span = alias.ty.span();
+    ident.set_span(span);
+    quote_spanned! {span=>
+        const _: fn() = ::cxx::private::verify_rust_type::< #ident >;
+    }
 }
 
 fn type_id(name: &Pair) -> TokenStream {

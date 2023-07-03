@@ -72,6 +72,8 @@ rust::Box<R> c_return_box() {
   return rust::Box<R>::from_raw(cxx_test_suite_get_box());
 }
 
+rust::Box<R> c_return_box_from_aliased_rust_type() { return r_return_box(); }
+
 std::unique_ptr<C> c_return_unique_ptr() {
   return std::unique_ptr<C>(new C{2020});
 }

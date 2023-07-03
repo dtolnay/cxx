@@ -1,0 +1,11 @@
+error[E0277]: the trait bound `other_module::Source: RustType` is not satisfied
+  --> tests/ui/type_alias_rust2.rs:11:23
+   |
+11 |         type Source = crate::other_module::Source;
+   |                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `RustType` is not implemented for `other_module::Source`
+   |
+note: required by a bound in `verify_rust_type`
+  --> src/rust_type.rs
+   |
+   | pub fn verify_rust_type<T: RustType>() {}
+   |                            ^^^^^^^^ required by this bound in `verify_rust_type`

@@ -9,8 +9,8 @@ use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::{self, Symbol};
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::{
-    derive, mangle, Api, Doc, Enum, EnumRepr, ExternFn, ExternType, Pair, Signature, Struct, Trait,
-    Type, TypeAlias, Types, Var,
+    derive, mangle, Api, Doc, Enum, EnumRepr, ExternFn, ExternType, Lang, Pair, Signature, Struct,
+    Trait, Type, TypeAlias, Types, Var,
 };
 use proc_macro2::Ident;
 
@@ -35,6 +35,7 @@ pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u
 fn write_forward_declarations(out: &mut OutFile, apis: &[Api]) {
     let needs_forward_declaration = |api: &&Api| match api {
         Api::Struct(_) | Api::CxxType(_) | Api::RustType(_) => true,
+        Api::TypeAlias(ety) => ety.lang == Lang::Rust,
         Api::Enum(enm) => !out.types.cxx.contains(&enm.name.rust),
         _ => false,
     };
@@ -54,6 +55,7 @@ fn write_forward_declarations(out: &mut OutFile, apis: &[Api]) {
                 Api::Enum(enm) => write_enum_decl(out, enm),
                 Api::CxxType(ety) => write_struct_using(out, &ety.name),
                 Api::RustType(ety) => write_struct_decl(out, &ety.name),
+                Api::TypeAlias(ety) => write_struct_decl(out, &ety.name),
                 _ => unreachable!(),
             }
         }
@@ -128,8 +130,17 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
     out.next_section();
     for api in apis {
         if let Api::TypeAlias(ety) = api {
-            if let Some(reasons) = out.types.required_trivial.get(&ety.name.rust) {
-                check_trivial_extern_type(out, ety, reasons)
+            match ety.lang {
+                Lang::Cxx => {
+                    if let Some(reasons) = out.types.required_trivial.get(&ety.name.rust) {
+                        check_trivial_extern_type(out, ety, reasons)
+                    }
+                }
+                Lang::Rust => {
+                    // nothing to write here, the alias is only used to generate
+                    // forward declaration in C++ (so C++ shims for Rust functions
+                    // using the type compile correctly).
+                }
             }
         }
     }

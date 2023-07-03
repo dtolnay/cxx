@@ -506,7 +506,7 @@ pub mod private {
     pub use crate::rust_str::RustStr;
     #[cfg(feature = "alloc")]
     pub use crate::rust_string::RustString;
-    pub use crate::rust_type::{ImplBox, ImplVec, RustType};
+    pub use crate::rust_type::{ImplBox, ImplVec, RustType, verify_rust_type};
     #[cfg(feature = "alloc")]
     pub use crate::rust_vec::RustVec;
     pub use crate::shared_ptr::SharedPtrTarget;

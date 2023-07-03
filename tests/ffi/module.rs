@@ -17,6 +17,10 @@ pub mod ffi {
 
 #[cxx::bridge(namespace = "tests")]
 pub mod ffi2 {
+    extern "Rust" {
+        type R = crate::R;
+    }
+
     unsafe extern "C++" {
         include!("tests/ffi/tests.h");
 
@@ -69,6 +73,8 @@ pub mod ffi2 {
 
         #[namespace = "I"]
         fn ns_c_return_unique_ptr_ns() -> UniquePtr<I>;
+
+        fn c_return_box_from_aliased_rust_type() -> Box<R>;
     }
 
     impl UniquePtr<D> {}
