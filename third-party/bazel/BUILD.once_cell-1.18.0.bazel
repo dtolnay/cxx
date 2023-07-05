@@ -15,7 +15,7 @@ package(default_visibility = ["//visibility:public"])
 # ])
 
 rust_library(
-    name = "clap",
+    name = "once_cell",
     srcs = glob(["**/*.rs"]),
     compile_data = glob(
         include = ["**"],
@@ -29,17 +29,17 @@ rust_library(
         ],
     ),
     crate_features = [
-        "error-context",
-        "help",
+        "alloc",
+        "default",
+        "race",
         "std",
-        "usage",
     ],
     crate_root = "src/lib.rs",
     edition = "2021",
     rustc_flags = ["--cap-lints=allow"],
     tags = [
         "cargo-bazel",
-        "crate-name=clap",
+        "crate-name=once_cell",
         "manual",
         "noclippy",
         "norustfmt",
@@ -78,8 +78,5 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-none": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "4.3.0",
-    deps = [
-        "@vendor__clap_builder-4.3.0//:clap_builder",
-    ],
+    version = "1.18.0",
 )

@@ -81,7 +81,7 @@ rust_library(
     version = "1.0.63",
     deps = [
         "@vendor__proc-macro2-1.0.63//:build_script_build",
-        "@vendor__unicode-ident-1.0.9//:unicode_ident",
+        "@vendor__unicode-ident-1.0.10//:unicode_ident",
     ],
 )
 
