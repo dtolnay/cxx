@@ -19,18 +19,18 @@ parallel = ["cc/parallel"]
 experimental-async-fn = []
 
 [dependencies]
-cc = "1.0.49"
+cc = "1.0.79"
 codespan-reporting = "0.11.1"
-once_cell = "1.9"
-proc-macro2 = { version = "1.0.58", default-features = false, features = ["span-locations"] }
-quote = { version = "1.0", default-features = false }
-scratch = "1.0"
-syn = { version = "2.0.1", default-features = false, features = ["clone-impls", "full", "parsing", "printing"] }
+once_cell = "1.18"
+proc-macro2 = { version = "1.0.63", default-features = false, features = ["span-locations"] }
+quote = { version = "1.0.29", default-features = false }
+scratch = "1.0.5"
+syn = { version = "2.0.23", default-features = false, features = ["clone-impls", "full", "parsing", "printing"] }
 
 [dev-dependencies]
 cxx = { version = "1.0", path = "../.." }
 cxx-gen = { version = "0.7", path = "../lib" }
-pkg-config = "0.3"
+pkg-config = "0.3.27"
 
 [lib]
 doc-scrape-examples = false
