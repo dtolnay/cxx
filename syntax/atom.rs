@@ -5,7 +5,7 @@ use std::fmt::{self, Display};
 #[derive(Copy, Clone, PartialEq)]
 pub enum Atom {
     Bool,
-    Char, // C char, not Rust char
+    Char, // C char, not Rust char, see `RustChar`
     U8,
     U16,
     U32,
@@ -19,6 +19,7 @@ pub enum Atom {
     F32,
     F64,
     CxxString,
+    RustChar,
     RustString,
 }
 
@@ -31,6 +32,7 @@ impl Atom {
         use self::Atom::*;
         match s {
             "bool" => Some(Bool),
+            "char" => Some(RustChar),
             "c_char" => Some(Char),
             "u8" => Some(U8),
             "u16" => Some(U16),
@@ -76,6 +78,7 @@ impl AsRef<str> for Atom {
             F32 => "f32",
             F64 => "f64",
             CxxString => "CxxString",
+            RustChar => "char",
             RustString => "String",
         }
     }

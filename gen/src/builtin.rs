@@ -9,6 +9,7 @@ pub struct Builtins<'a> {
     pub rust_str: bool,
     pub rust_slice: bool,
     pub rust_box: bool,
+    pub rust_char: bool,
     pub rust_vec: bool,
     pub rust_fn: bool,
     pub rust_isize: bool,
@@ -179,6 +180,7 @@ pub(super) fn write(out: &mut OutFile) {
         }
 
         ifndef::write(out, builtin.rust_string, "CXXBRIDGE1_RUST_STRING");
+        ifndef::write(out, builtin.rust_char, "CXXBRIDGE1_RUST_CHAR");
         ifndef::write(out, builtin.rust_str, "CXXBRIDGE1_RUST_STR");
         ifndef::write(out, builtin.rust_slice, "CXXBRIDGE1_RUST_SLICE");
         ifndef::write(out, builtin.rust_box, "CXXBRIDGE1_RUST_BOX");

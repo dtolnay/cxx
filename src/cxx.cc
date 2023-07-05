@@ -388,6 +388,21 @@ std::size_t sliceLen(const void *self) noexcept {
   return cxxbridge1$slice$len(self);
 }
 
+// copied from rust code source: char::from_u32
+inline bool is_invalid_unicode(char32_t c) {
+    return c >= 0x110000 || (c >= 0xD800 && c < 0xE000);
+}
+
+// Throws std::invalid_argument if not valid Unicode value
+Char::Char(char32_t c): inner(c) {
+  if (is_invalid_unicode(c)) {
+    panic<std::invalid_argument>("data for rust::Char is not unicode value");
+  } 
+}
+
+char32_t Char::get() const noexcept { return this->inner; }
+
+
 // Rust specifies that usize is ABI compatible with C's uintptr_t.
 // https://rust-lang.github.io/unsafe-code-guidelines/layout/scalars.html#isize-and-usize
 // However there is no direct Rust equivalent for size_t. C does not guarantee

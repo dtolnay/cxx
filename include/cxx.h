@@ -152,6 +152,22 @@ private:
 };
 #endif // CXXBRIDGE1_RUST_STR
 
+#ifndef CXXBRIDGE1_RUST_CHAR
+#define CXXBRIDGE1_RUST_CHAR
+// TODO https://cxx.rs/binding/char.html
+class Char final {
+public:
+  // Throws std::invalid_argument if not valid Unicode value
+  Char(char32_t);
+
+  char32_t get() const noexcept;
+
+private:
+  char32_t inner;
+
+};
+#endif // CXXBRIDGE1_RUST_CHAR
+
 #ifndef CXXBRIDGE1_RUST_SLICE
 namespace detail {
 template <bool>
