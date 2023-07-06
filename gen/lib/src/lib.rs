@@ -23,6 +23,7 @@
     clippy::match_same_arms,
     clippy::missing_errors_doc,
     clippy::module_name_repetitions,
+    clippy::must_use_candidate,
     clippy::needless_pass_by_value,
     clippy::new_without_default,
     clippy::nonminimal_bool,
@@ -36,6 +37,7 @@
     clippy::too_many_arguments,
     clippy::too_many_lines,
     clippy::toplevel_ref_arg,
+    clippy::uninlined_format_args,
     // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6983
     clippy::wrong_self_convention
 )]

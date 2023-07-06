@@ -75,6 +75,7 @@
     clippy::too_many_arguments,
     clippy::too_many_lines,
     clippy::toplevel_ref_arg,
+    clippy::uninlined_format_args,
     clippy::upper_case_acronyms,
     // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6983
     clippy::wrong_self_convention
@@ -454,7 +455,7 @@ fn best_effort_copy_headers(src: &Path, dst: &Path, max_depth: usize) {
             Ok(file_type) if file_type.is_file() => {
                 let src = entry.path();
                 match src.extension().and_then(OsStr::to_str) {
-                    Some("h") | Some("hh") | Some("hpp") => {}
+                    Some("h" | "hh" | "hpp") => {}
                     _ => continue,
                 }
                 if !dst_created && fs::create_dir_all(dst).is_err() {

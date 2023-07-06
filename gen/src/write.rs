@@ -129,7 +129,7 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
     for api in apis {
         if let Api::TypeAlias(ety) = api {
             if let Some(reasons) = out.types.required_trivial.get(&ety.name.rust) {
-                check_trivial_extern_type(out, ety, reasons)
+                check_trivial_extern_type(out, ety, reasons);
             }
         }
     }
@@ -205,13 +205,12 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
     for ty in out.types {
         match ty {
             Type::Ident(ident) => match Atom::from(&ident.rust) {
-                Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(I8) | Some(I16) | Some(I32)
-                | Some(I64) => out.include.cstdint = true,
+                Some(U8 | U16 | U32 | U64 | I8 | I16 | I32 | I64) => out.include.cstdint = true,
                 Some(Usize) => out.include.cstddef = true,
                 Some(Isize) => out.builtin.rust_isize = true,
                 Some(CxxString) => out.include.string = true,
                 Some(RustString) => out.builtin.rust_string = true,
-                Some(Bool) | Some(Char) | Some(F32) | Some(F64) | None => {}
+                Some(Bool | Char | F32 | F64) | None => {}
             },
             Type::RustBox(_) => out.builtin.rust_box = true,
             Type::RustVec(_) => out.builtin.rust_vec = true,
@@ -848,7 +847,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     match &efn.ret {
         Some(Type::RustBox(_)) => write!(out, ".into_raw()"),
         Some(Type::UniquePtr(_)) => write!(out, ".release()"),
-        Some(Type::Str(_)) | Some(Type::SliceRef(_)) if !indirect_return => write!(out, ")"),
+        Some(Type::Str(_) | Type::SliceRef(_)) if !indirect_return => write!(out, ")"),
         _ => {}
     }
     if indirect_return {
@@ -1182,7 +1181,7 @@ fn write_indirect_return_type_space(out: &mut OutFile, ty: &Type) {
 
 fn write_extern_return_type_space(out: &mut OutFile, ty: &Option<Type>) {
     match ty {
-        Some(Type::RustBox(ty)) | Some(Type::UniquePtr(ty)) => {
+        Some(Type::RustBox(ty) | Type::UniquePtr(ty)) => {
             write_type_space(out, &ty.inner);
             write!(out, "*");
         }
@@ -1193,7 +1192,7 @@ fn write_extern_return_type_space(out: &mut OutFile, ty: &Option<Type>) {
             }
             write!(out, "*");
         }
-        Some(Type::Str(_)) | Some(Type::SliceRef(_)) => {
+        Some(Type::Str(_) | Type::SliceRef(_)) => {
             out.builtin.repr_fat = true;
             write!(out, "::rust::repr::Fat ");
         }

@@ -141,7 +141,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@nightly
         with:
           components: clippy, rust-src
-      - run: cargo clippy --workspace --tests -- -Dclippy::all
+      - run: cargo clippy --workspace --tests --exclude demo -- -Dclippy::all -Dclippy::pedantic
+      - run: cargo clippy --manifest-path demo/Cargo.toml -- -Dclippy::all
 
   clang-tidy:
     name: Clang Tidy
