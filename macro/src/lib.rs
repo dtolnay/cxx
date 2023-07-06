@@ -25,7 +25,6 @@
     clippy::too_many_lines,
     clippy::toplevel_ref_arg,
     clippy::uninlined_format_args,
-    clippy::unnested_or_patterns,
     clippy::useless_let_if_seq,
     // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6983
     clippy::wrong_self_convention
