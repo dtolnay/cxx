@@ -1,5 +1,3 @@
-#![allow(clippy::uninlined_format_args)]
-
 #[cxx::bridge(namespace = "org::blobstore")]
 mod ffi {
     // Shared structs with fields visible to both languages.
