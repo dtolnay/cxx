@@ -1,4 +1,4 @@
-#![allow(clippy::items_after_statements, clippy::uninlined_format_args)]
+#![allow(clippy::uninlined_format_args)]
 
 #[cxx::bridge(namespace = "org::blobstore")]
 mod ffi {
