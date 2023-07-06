@@ -59,6 +59,7 @@
     clippy::match_bool,
     clippy::match_on_vec_items,
     clippy::match_same_arms,
+    clippy::match_wildcard_for_single_variants,
     clippy::module_name_repetitions,
     clippy::needless_doctest_main,
     clippy::needless_pass_by_value,
@@ -66,7 +67,9 @@
     clippy::nonminimal_bool,
     clippy::option_if_let_else,
     clippy::or_fun_call,
+    clippy::redundant_closure_for_method_calls,
     clippy::redundant_else,
+    clippy::semicolon_if_nothing_returned,
     clippy::shadow_unrelated,
     clippy::significant_drop_in_scrutinee,
     clippy::similar_names,
@@ -75,6 +78,8 @@
     clippy::too_many_arguments,
     clippy::too_many_lines,
     clippy::toplevel_ref_arg,
+    clippy::uninlined_format_args,
+    clippy::unnested_or_patterns,
     clippy::upper_case_acronyms,
     // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6983
     clippy::wrong_self_convention

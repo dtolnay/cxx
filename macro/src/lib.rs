@@ -17,6 +17,7 @@
     clippy::option_if_let_else,
     clippy::or_fun_call,
     clippy::redundant_else,
+    clippy::semicolon_if_nothing_returned,
     clippy::shadow_unrelated,
     clippy::similar_names,
     clippy::single_match,
@@ -24,6 +25,8 @@
     clippy::too_many_arguments,
     clippy::too_many_lines,
     clippy::toplevel_ref_arg,
+    clippy::uninlined_format_args,
+    clippy::unnested_or_patterns,
     clippy::useless_let_if_seq,
     // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6983
     clippy::wrong_self_convention

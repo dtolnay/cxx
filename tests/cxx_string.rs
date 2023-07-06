@@ -1,3 +1,9 @@
+#![allow(
+    clippy::items_after_statements,
+    clippy::uninlined_format_args,
+    clippy::unused_async
+)]
+
 use cxx::{let_cxx_string, CxxString};
 use std::fmt::Write as _;
 

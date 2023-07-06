@@ -1,3 +1,5 @@
+#![allow(clippy::semicolon_if_nothing_returned)]
+
 use cxx_gen::Opt;
 use quote::quote;
 

@@ -1,7 +1,9 @@
 #![allow(
     clippy::boxed_local,
     clippy::derive_partial_eq_without_eq,
+    clippy::items_after_statements,
     clippy::just_underscores_and_digits,
+    clippy::missing_errors_doc,
     clippy::missing_safety_doc,
     clippy::must_use_candidate,
     clippy::needless_lifetimes,
