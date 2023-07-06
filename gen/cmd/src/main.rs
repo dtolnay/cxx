@@ -12,7 +12,6 @@
     clippy::match_bool,
     clippy::match_on_vec_items,
     clippy::match_same_arms,
-    clippy::match_wildcard_for_single_variants,
     clippy::module_name_repetitions,
     clippy::needless_pass_by_value,
     clippy::new_without_default,
