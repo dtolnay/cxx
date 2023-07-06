@@ -84,7 +84,7 @@ pub(super) fn from_args() -> Opt {
                 }
             } else {
                 Include {
-                    path: include.to_owned(),
+                    path: include.clone(),
                     kind: IncludeKind::Quoted,
                 }
             }

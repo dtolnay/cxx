@@ -5,7 +5,6 @@
     clippy::derive_partial_eq_without_eq,
     clippy::enum_glob_use,
     clippy::if_same_then_else,
-    clippy::implicit_clone,
     clippy::inherent_to_string,
     clippy::items_after_statements,
     clippy::large_enum_variant,
