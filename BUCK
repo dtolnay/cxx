@@ -4,7 +4,7 @@ rust_library(
     doc_deps = [
         ":cxx-build",
     ],
-    edition = "2018",
+    edition = "2021",
     features = [
         "alloc",
         "std",
@@ -28,7 +28,7 @@ rust_binary(
         "gen/cmd/src/gen",
         "gen/cmd/src/syntax",
     ],
-    edition = "2018",
+    edition = "2021",
     deps = [
         "//third-party:clap",
         "//third-party:codespan-reporting",
@@ -53,7 +53,7 @@ rust_library(
     name = "cxxbridge-macro",
     srcs = glob(["macro/src/**/*.rs"]) + ["macro/src/syntax"],
     doctests = False,
-    edition = "2018",
+    edition = "2021",
     proc_macro = True,
     deps = [
         "//third-party:proc-macro2",
@@ -69,7 +69,7 @@ rust_library(
         "gen/build/src/syntax",
     ],
     doctests = False,
-    edition = "2018",
+    edition = "2021",
     deps = [
         "//third-party:cc",
         "//third-party:codespan-reporting",
@@ -87,7 +87,7 @@ rust_library(
         "gen/lib/src/gen",
         "gen/lib/src/syntax",
     ],
-    edition = "2018",
+    edition = "2021",
     visibility = ["PUBLIC"],
     deps = [
         "//third-party:cc",
