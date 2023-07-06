@@ -1,4 +1,5 @@
 #include "../include/cxx.h"
+#include <cstdio>
 #include <cstring>
 #include <iostream>
 #include <memory>
@@ -76,8 +77,8 @@ inline namespace cxxbridge1 {
 template <typename Exception>
 void panic [[noreturn]] (const char *msg) {
 #if defined(RUST_CXX_NO_EXCEPTIONS)
-  std::cerr << "Error: " << msg << ". Aborting." << std::endl;
-  std::terminate();
+  std::fprintf(stderr, "Error: %s. Aborting.\n", msg);
+  std::abort();
 #else
   throw Exception(msg);
 #endif
