@@ -1,7 +1,6 @@
 use crate::syntax::qualified::QualifiedName;
 use quote::IdentFragment;
 use std::fmt::{self, Display};
-use std::iter::FromIterator;
 use std::slice::Iter;
 use syn::parse::{Error, Parse, ParseStream, Result};
 use syn::{Expr, Ident, Lit, Meta, Token};
