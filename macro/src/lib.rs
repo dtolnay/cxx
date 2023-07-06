@@ -17,7 +17,6 @@
     clippy::option_if_let_else,
     clippy::or_fun_call,
     clippy::redundant_else,
-    clippy::semicolon_if_nothing_returned,
     clippy::shadow_unrelated,
     clippy::similar_names,
     clippy::single_match,

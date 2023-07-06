@@ -42,7 +42,7 @@ pub fn parse_items(
             },
             Item::Enum(item) => apis.push(parse_enum(cx, item, namespace)),
             Item::ForeignMod(foreign_mod) => {
-                parse_foreign_mod(cx, foreign_mod, &mut apis, trusted, namespace)
+                parse_foreign_mod(cx, foreign_mod, &mut apis, trusted, namespace);
             }
             Item::Impl(item) => match parse_impl(cx, item) {
                 Ok(imp) => apis.push(imp),

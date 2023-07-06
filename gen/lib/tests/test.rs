@@ -1,5 +1,3 @@
-#![allow(clippy::semicolon_if_nothing_returned)]
-
 use cxx_gen::Opt;
 use quote::quote;
 
@@ -26,5 +24,5 @@ fn test_positive() {
 fn test_negative() {
     let rs = quote! {};
     let opt = Opt::default();
-    assert!(cxx_gen::generate_header_and_cc(rs, &opt).is_err())
+    assert!(cxx_gen::generate_header_and_cc(rs, &opt).is_err());
 }

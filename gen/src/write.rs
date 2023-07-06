@@ -129,7 +129,7 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
     for api in apis {
         if let Api::TypeAlias(ety) = api {
             if let Some(reasons) = out.types.required_trivial.get(&ety.name.rust) {
-                check_trivial_extern_type(out, ety, reasons)
+                check_trivial_extern_type(out, ety, reasons);
             }
         }
     }
