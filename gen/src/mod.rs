@@ -106,6 +106,14 @@ pub(super) fn generate_from_path(path: &Path, opt: &Opt) -> GeneratedCode {
     }
 }
 
+#[allow(dead_code)]
+pub(super) fn export_cxx_bridge<P: AsRef<Path>>(path: P) -> Result<()> {
+    let cc = include_str!("cxx.cc");
+    let hpp = include_str!("include/cxx.h");
+    fs::write(path.as_ref().join("cxx.cc"), cc).map_err(Error::from)?;
+    fs::write(path.as_ref().join("../include/cxx.h"), hpp).map_err(Error::from)
+}
+
 fn read_to_string(path: &Path) -> Result<String> {
     let bytes = if path == Path::new("-") {
         fs::read_stdin()

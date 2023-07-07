@@ -51,6 +51,7 @@ pub use crate::gen::include::{Include, HEADER};
 pub use crate::gen::{GeneratedCode, Opt};
 pub use crate::syntax::IncludeKind;
 use proc_macro2::TokenStream;
+use std::path::Path;
 
 /// Generate C++ bindings code from a Rust token stream. This should be a Rust
 /// token stream which somewhere contains a `#[cxx::bridge] mod {}`.
@@ -59,4 +60,16 @@ pub fn generate_header_and_cc(rust_source: TokenStream, opt: &Opt) -> Result<Gen
         .map_err(crate::gen::Error::from)
         .map_err(Error::from)?;
     gen::generate(syntax, opt).map_err(Error::from)
+}
+
+/// Generate C++ bindings code from a file.
+/// This should be a Rust file containing a `#[cxx::bridge] mod {}`.
+pub fn generate_header_and_cc_with_path<P: AsRef<Path>>(path: P, opt: &Opt) -> GeneratedCode {
+    gen::generate_from_path(path.as_ref(), opt)
+}
+
+/// Generate cxx.h and cxx.cc in the given directory.
+/// This can be used to manually compile library cxxbridge1
+pub fn export_cxx_bridge<P: AsRef<Path>>(path: P) -> Result<(), Error> {
+    gen::export_cxx_bridge(path).map_err(Error::from)
 }
