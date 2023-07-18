@@ -241,7 +241,7 @@ impl Eq for CxxString {}
 
 impl PartialOrd for CxxString {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.as_bytes().partial_cmp(other.as_bytes())
+        Some(self.cmp(other))
     }
 }
 
