@@ -1,4 +1,4 @@
-load("@prelude//toolchains:cxx.bzl", "system_cxx_toolchain")
+load(":cxx.bzl", "system_cxx_toolchain")
 load("@prelude//toolchains:genrule.bzl", "system_genrule_toolchain")
 load("@prelude//toolchains:python.bzl", "system_python_bootstrap_toolchain")
 load("@prelude//toolchains:rust.bzl", "system_rust_toolchain")
