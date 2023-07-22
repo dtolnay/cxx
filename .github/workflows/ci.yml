@@ -88,11 +88,8 @@ jobs:
       - name: Update buck2-prelude submodule
         run: git submodule update --init --remote --no-fetch --depth 1 --single-branch tools/buck/prelude
       - run: buck2 run demo
-        continue-on-error: ${{matrix.os == 'windows'}}  # FIXME: cl.exe not found
       - run: buck2 build ...
-        continue-on-error: ${{matrix.os == 'windows'}}
       - run: buck2 test ...
-        continue-on-error: ${{matrix.os == 'windows'}}
 
   reindeer:
     name: Reindeer

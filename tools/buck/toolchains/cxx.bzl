@@ -13,6 +13,7 @@ load("@prelude//cxx:linker.bzl", "is_pdb_generated")
 load("@prelude//linking:link_info.bzl", "LinkStyle")
 load("@prelude//linking:lto.bzl", "LtoMode")
 load("@prelude//utils:cmd_script.bzl", "ScriptOs", "cmd_script")
+load("@toolchains//msvc:tools.bzl", "VisualStudio")
 
 def _system_cxx_toolchain_impl(ctx):
     archiver_args = ["ar", "rcs"]
@@ -34,9 +35,10 @@ def _system_cxx_toolchain_impl(ctx):
         linker_type = "darwin"
         pic_behavior = PicBehavior("always_enabled")
     elif host_info().os.is_windows:
-        archiver_args = ["lib.exe"]
+        msvc_tools = ctx.attrs.msvc_tools[VisualStudio]
+        archiver_args = [msvc_tools.lib_exe]
         archiver_type = "windows"
-        asm_compiler = "ml64.exe"
+        asm_compiler = msvc_tools.ml64_exe
         asm_compiler_type = "windows_ml64"
         compiler = _windows_compiler_wrapper(ctx)
         cxx_compiler = compiler
@@ -47,9 +49,7 @@ def _system_cxx_toolchain_impl(ctx):
         static_library_extension = "lib"
         shared_library_name_format = "{}.dll"
         shared_library_versioned_name_format = "{}.dll"
-        additional_linker_flags = [
-            "msvcrt.lib",
-        ]
+        additional_linker_flags = ["msvcrt.lib"]
         pic_behavior = PicBehavior("not_supported")
     elif ctx.attrs.linker == "g++" or ctx.attrs.cxx_compiler == "g++":
         pass
@@ -148,17 +148,19 @@ def _windows_linker_wrapper(ctx: AnalysisContext) -> cmd_args:
 def _windows_compiler_wrapper(ctx: AnalysisContext) -> cmd_args:
     # The wrapper is needed to dynamically find compiler location and
     # Windows SDK to add necessary includes.
-    return cmd_script(
-        ctx = ctx,
-        name = "windows_compiler",
-        cmd = cmd_args(
-            ctx.attrs.windows_compiler_wrapper[RunInfo],
-            ctx.attrs.compiler,
-        ),
-        os = ScriptOs("windows"),
-    )
+    if ctx.attrs.compiler == "cl.exe":
+        return cmd_script(
+            ctx = ctx,
+            name = "windows_compiler",
+            cmd = cmd_args(
+                ctx.attrs.windows_compiler_wrapper[RunInfo],
+                ctx.attrs.msvc_tools[VisualStudio].cl_exe,
+            ),
+            os = ScriptOs("windows"),
+        )
+    else:
+        return cmd_args(ctx.attrs.compiler)
 
-# Use clang, since thats available everywhere and what we have tested with.
 system_cxx_toolchain = rule(
     impl = _system_cxx_toolchain_impl,
     attrs = {
@@ -173,6 +175,7 @@ system_cxx_toolchain = rule(
         "linker": attrs.string(default = "link.exe" if host_info().os.is_windows else "clang++"),
         "linker_wrapper": attrs.default_only(attrs.dep(providers = [RunInfo], default = "prelude//cxx/tools:linker_wrapper")),
         "make_comp_db": attrs.default_only(attrs.dep(providers = [RunInfo], default = "prelude//cxx/tools:make_comp_db")),
+        "msvc_tools": attrs.default_only(attrs.dep(providers = [VisualStudio], default = "toolchains//msvc:msvc_tools")),
         "windows_compiler_wrapper": attrs.default_only(attrs.dep(providers = [RunInfo], default = "prelude//cxx/tools:windows_compiler_wrapper")),
     },
     is_toolchain_rule = True,
