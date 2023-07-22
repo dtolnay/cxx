@@ -88,8 +88,11 @@ jobs:
           components: rust-src
       - uses: dtolnay/install-buck2@latest
       - run: buck2 run demo
+        continue-on-error: ${{matrix.os == 'windows'}}  # FIXME: cl.exe not found
       - run: buck2 build ...
+        continue-on-error: ${{matrix.os == 'windows'}}
       - run: buck2 test ...
+        continue-on-error: ${{matrix.os == 'windows'}}
       - uses: dtolnay/install@reindeer
         if: matrix.os == 'ubuntu'
       - run: reindeer buckify
