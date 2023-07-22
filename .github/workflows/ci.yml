@@ -93,14 +93,22 @@ jobs:
         continue-on-error: ${{matrix.os == 'windows'}}
       - run: buck2 test ...
         continue-on-error: ${{matrix.os == 'windows'}}
+
+  reindeer:
+    name: Reindeer
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rust-src
       - uses: dtolnay/install@reindeer
-        if: matrix.os == 'ubuntu'
       - run: reindeer buckify
-        if: matrix.os == 'ubuntu'
         working-directory: third-party
       - name: Check reindeer-generated BUCK file up to date
         run: git diff --exit-code
-        if: matrix.os == 'ubuntu'
 
   bazel:
     name: Bazel on ${{matrix.os == 'ubuntu' && 'Linux' || matrix.os == 'macos' && 'macOS' || matrix.os == 'windows' && 'Windows' || '???'}}
