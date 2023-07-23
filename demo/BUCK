@@ -20,7 +20,6 @@ rust_cxx_bridge(
 cxx_library(
     name = "blobstore-sys",
     srcs = ["src/blobstore.cc"],
-    compiler_flags = ["-std=c++14"],
     preferred_linkage = "static",
     deps = [
         ":blobstore-include",
