@@ -31,5 +31,6 @@ system_python_bootstrap_toolchain(
 system_rust_toolchain(
     name = "rust",
     default_edition = None,
+    doctests = True,
     visibility = ["PUBLIC"],
 )
