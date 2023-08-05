@@ -185,13 +185,12 @@ fn shared_root(left: &Path, right: &Path) -> PathBuf {
     let mut left = left.components();
     let mut right = right.components();
     loop {
-        let left = left.next();
-        let right = right.next();
-
-        if left != right || left.is_none() {
-            return shared_root;
+        match (left.next(), right.next()) {
+            (Some(left_component), Some(right_component)) if left_component == right_component => {
+                shared_root.push(left_component);
+            }
+            _ => return shared_root,
         }
-        shared_root.push(left.unwrap());
     }
 }
 
