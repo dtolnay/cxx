@@ -1,8 +1,8 @@
 use crate::error::{Error, Result};
 use crate::gen::fs;
 use crate::paths;
-use std::io;
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use std::{env, io};
 
 pub(crate) fn write(path: impl AsRef<Path>, content: &[u8]) -> Result<()> {
     let path = path.as_ref();
@@ -32,6 +32,8 @@ pub(crate) fn write(path: impl AsRef<Path>, content: &[u8]) -> Result<()> {
 pub(crate) fn symlink_file(original: impl AsRef<Path>, link: impl AsRef<Path>) -> Result<()> {
     let original = original.as_ref();
     let link = link.as_ref();
+
+    let original = best_effort_relativize_symlink(original, link);
 
     let mut create_dir_error = None;
     if fs::exists(link) {
@@ -64,7 +66,7 @@ pub(crate) fn symlink_file(original: impl AsRef<Path>, link: impl AsRef<Path>) -
 }
 
 pub(crate) fn symlink_dir(original: impl AsRef<Path>, link: impl AsRef<Path>) -> Result<()> {
-    let original = original.as_ref();
+    let original = best_effort_relativize_symlink(original.as_ref(), link.as_ref());
     let link = link.as_ref();
 
     let mut create_dir_error = None;
@@ -115,5 +117,118 @@ fn best_effort_remove(path: &Path) {
                 let _ = fs::remove_file(path);
             }
         }
+    }
+}
+
+fn best_effort_relativize_symlink(original: impl AsRef<Path>, link: impl AsRef<Path>) -> PathBuf {
+    let original = original.as_ref();
+    let link = link.as_ref();
+
+    // relativization only makes sense if there is a semantically meaningful root between the two
+    // (aka it's unlikely that a user moving a directory will cause a break).
+    // e.g. /Volumes/code/library/src/lib.rs and /Volumes/code/library/target/path/to/something.a
+    // have a meaningful shared root of /Volumes/code/library, as the person who moves target
+    // out of library would expect it to break.
+    // on the other hand, /Volumes/code/library/src/lib.rs and /Volumes/shared_target do not, since
+    // moving library to a different location should not be expected to break things.
+    let likely_no_semantic_root = env::var_os("CARGO_TARGET_DIR").is_some();
+
+    if likely_no_semantic_root
+        || original.is_relative()
+        || link.is_relative()
+        || path_contains_intermediate_components(original)
+        || path_contains_intermediate_components(link)
+    {
+        return original.to_path_buf();
+    }
+
+    let shared_root = shared_root(original, link);
+
+    if shared_root == PathBuf::new() {
+        return original.to_path_buf();
+    }
+
+    let relative_original = original.strip_prefix(&shared_root).expect("unreachable");
+    let mut link = link
+        .parent()
+        .expect("we know that link is an absolute path, so at least one parent exists")
+        .to_path_buf();
+
+    let mut path_to_shared_root = PathBuf::new();
+    while link != shared_root {
+        path_to_shared_root.push("..");
+        assert!(
+            link.pop(),
+            "we know there is a shared root of nonzero size, so this should never return 'no parent'"
+        );
+    }
+
+    path_to_shared_root.join(relative_original)
+}
+
+fn path_contains_intermediate_components(path: impl AsRef<Path>) -> bool {
+    path.as_ref().iter().any(|segment| segment == "..")
+}
+
+fn shared_root(left: &Path, right: &Path) -> PathBuf {
+    let mut shared_root = PathBuf::new();
+    let mut left = left.iter();
+    let mut right = right.iter();
+    loop {
+        let left = left.next();
+        let right = right.next();
+
+        if left != right || left.is_none() {
+            return shared_root;
+        }
+        shared_root.push(left.unwrap());
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::out::best_effort_relativize_symlink;
+
+    #[cfg(not(windows))]
+    #[test]
+    fn test_relativize_symlink_unix() {
+        assert_eq!(
+            best_effort_relativize_symlink("/foo/bar/baz", "/foo/spam/eggs")
+                .to_str()
+                .unwrap(),
+            "../bar/baz"
+        );
+        assert_eq!(
+            best_effort_relativize_symlink("/foo/bar/../baz", "/foo/spam/eggs")
+                .to_str()
+                .unwrap(),
+            "/foo/bar/../baz"
+        );
+        assert_eq!(
+            best_effort_relativize_symlink("/foo/bar/baz", "/foo/spam/./eggs")
+                .to_str()
+                .unwrap(),
+            "../bar/baz"
+        );
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn test_relativize_symlink_windows() {
+        use std::path::PathBuf;
+        let windows_target: PathBuf = ["c:\\", "windows", "foo"].iter().collect();
+        let windows_link: PathBuf = ["c:\\", "users", "link"].iter().collect();
+        let windows_different_volume_link: PathBuf = ["d:\\", "users", "link"].iter().collect();
+
+        assert_eq!(
+            best_effort_relativize_symlink(windows_target.clone(), windows_link)
+                .to_str()
+                .unwrap(),
+            "..\\windows\\foo"
+        );
+        assert_eq!(
+            best_effort_relativize_symlink(windows_target.clone(), windows_different_volume_link),
+            windows_target
+        );
     }
 }
