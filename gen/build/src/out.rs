@@ -1,7 +1,7 @@
 use crate::error::{Error, Result};
 use crate::gen::fs;
 use crate::paths;
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 use std::{env, io};
 
 pub(crate) fn write(path: impl AsRef<Path>, content: &[u8]) -> Result<()> {
@@ -66,8 +66,10 @@ pub(crate) fn symlink_file(original: impl AsRef<Path>, link: impl AsRef<Path>) -
 }
 
 pub(crate) fn symlink_dir(original: impl AsRef<Path>, link: impl AsRef<Path>) -> Result<()> {
-    let original = best_effort_relativize_symlink(original.as_ref(), link.as_ref());
+    let original = original.as_ref();
     let link = link.as_ref();
+
+    let original = best_effort_relativize_symlink(original, link);
 
     let mut create_dir_error = None;
     if fs::exists(link) {
@@ -150,7 +152,7 @@ fn best_effort_relativize_symlink(original: impl AsRef<Path>, link: impl AsRef<P
 
     let shared_root = shared_root(original, link);
 
-    if shared_root == PathBuf::new() {
+    if shared_root == Path::new("") {
         return original.to_path_buf();
     }
 
@@ -162,7 +164,7 @@ fn best_effort_relativize_symlink(original: impl AsRef<Path>, link: impl AsRef<P
 
     let mut path_to_shared_root = PathBuf::new();
     while link != shared_root {
-        path_to_shared_root.push("..");
+        path_to_shared_root.push(Component::ParentDir);
         assert!(
             link.pop(),
             "we know there is a shared root of nonzero size, so this should never return 'no parent'"
@@ -173,13 +175,15 @@ fn best_effort_relativize_symlink(original: impl AsRef<Path>, link: impl AsRef<P
 }
 
 fn path_contains_intermediate_components(path: impl AsRef<Path>) -> bool {
-    path.as_ref().iter().any(|segment| segment == "..")
+    path.as_ref()
+        .components()
+        .any(|component| component == Component::ParentDir)
 }
 
 fn shared_root(left: &Path, right: &Path) -> PathBuf {
     let mut shared_root = PathBuf::new();
-    let mut left = left.iter();
-    let mut right = right.iter();
+    let mut left = left.components();
+    let mut right = right.components();
     loop {
         let left = left.next();
         let right = right.next();
