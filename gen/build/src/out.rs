@@ -124,13 +124,19 @@ fn best_effort_relativize_symlink(original: impl AsRef<Path>, link: impl AsRef<P
     let original = original.as_ref();
     let link = link.as_ref();
 
-    // relativization only makes sense if there is a semantically meaningful root between the two
-    // (aka it's unlikely that a user moving a directory will cause a break).
-    // e.g. /Volumes/code/library/src/lib.rs and /Volumes/code/library/target/path/to/something.a
-    // have a meaningful shared root of /Volumes/code/library, as the person who moves target
-    // out of library would expect it to break.
-    // on the other hand, /Volumes/code/library/src/lib.rs and /Volumes/shared_target do not, since
-    // moving library to a different location should not be expected to break things.
+    // Relativization only makes sense if there is a semantically meaningful
+    // base directory shared between the two paths.
+    //
+    // For example /Volumes/code/library/src/lib.rs
+    //         and /Volumes/code/library/target/path/to/something.a
+    // have a meaningful shared base of /Volumes/code/library. The target and
+    // source directory only likely ever get relocated as one unit.
+    //
+    // On the other hand, /Volumes/code/library/src/lib.rs
+    //                and /Volumes/shared_target
+    // do not, since upon moving library to a different location it should
+    // continue referring to the original location of that shared Cargo target
+    // directory.
     let likely_no_semantic_root = env::var_os("CARGO_TARGET_DIR").is_some();
 
     if likely_no_semantic_root
