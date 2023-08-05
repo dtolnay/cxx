@@ -150,28 +150,23 @@ fn best_effort_relativize_symlink(original: impl AsRef<Path>, link: impl AsRef<P
         return original.to_path_buf();
     }
 
-    let common_prefix = common_prefix(original, link);
+    let (common_prefix, rest_of_original, rest_of_link) = split_after_common_prefix(original, link);
 
     if common_prefix == Path::new("") {
         return original.to_path_buf();
     }
 
-    let relative_original = original.strip_prefix(&common_prefix).expect("unreachable");
-    let mut link = link
-        .parent()
-        .expect("we know that link is an absolute path, so at least one parent exists")
-        .to_path_buf();
+    let mut rest_of_link = rest_of_link.components();
+    rest_of_link
+        .next_back()
+        .expect("original can't be a subdirectory of link");
 
     let mut path_to_common_prefix = PathBuf::new();
-    while link != common_prefix {
+    while rest_of_link.next_back().is_some() {
         path_to_common_prefix.push(Component::ParentDir);
-        assert!(
-            link.pop(),
-            "we know there is a common prefix of nonzero size, so this should never return 'no parent'"
-        );
     }
 
-    path_to_common_prefix.join(relative_original)
+    path_to_common_prefix.join(rest_of_original)
 }
 
 fn path_contains_intermediate_components(path: impl AsRef<Path>) -> bool {
@@ -180,18 +175,23 @@ fn path_contains_intermediate_components(path: impl AsRef<Path>) -> bool {
         .any(|component| component == Component::ParentDir)
 }
 
-fn common_prefix(first: &Path, second: &Path) -> PathBuf {
+fn split_after_common_prefix<'first, 'second>(
+    first: &'first Path,
+    second: &'second Path,
+) -> (PathBuf, &'first Path, &'second Path) {
     let mut common_prefix = PathBuf::new();
     let mut first = first.components();
     let mut second = second.components();
     loop {
+        let rest_of_first = first.as_path();
+        let rest_of_second = second.as_path();
         match (first.next(), second.next()) {
             (Some(first_component), Some(second_component))
                 if first_component == second_component =>
             {
                 common_prefix.push(first_component);
             }
-            _ => return common_prefix,
+            _ => return (common_prefix, rest_of_first, rest_of_second),
         }
     }
 }
