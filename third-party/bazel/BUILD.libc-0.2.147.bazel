@@ -6,6 +6,7 @@
 #     bazel run @//third-party:vendor
 ###############################################################################
 
+load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
 package(default_visibility = ["//visibility:public"])
@@ -15,7 +16,7 @@ package(default_visibility = ["//visibility:public"])
 # ])
 
 rust_library(
-    name = "clap",
+    name = "libc",
     srcs = glob(["**/*.rs"]),
     compile_data = glob(
         include = ["**"],
@@ -29,17 +30,15 @@ rust_library(
         ],
     ),
     crate_features = [
-        "error-context",
-        "help",
+        "default",
         "std",
-        "usage",
     ],
     crate_root = "src/lib.rs",
-    edition = "2021",
+    edition = "2015",
     rustc_flags = ["--cap-lints=allow"],
     tags = [
         "cargo-bazel",
-        "crate-name=clap",
+        "crate-name=libc",
         "manual",
         "noclippy",
         "norustfmt",
@@ -78,8 +77,49 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-none": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "4.3.15",
+    version = "0.2.147",
     deps = [
-        "@vendor__clap_builder-4.3.15//:clap_builder",
+        "@vendor__libc-0.2.147//:build_script_build",
     ],
+)
+
+cargo_build_script(
+    name = "libc_build_script",
+    srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+        "std",
+    ],
+    crate_name = "build_script_build",
+    crate_root = "build.rs",
+    data = glob(
+        include = ["**"],
+        exclude = [
+            "**/* *",
+            ".tmp_git_root/**/*",
+            "BUILD",
+            "BUILD.bazel",
+            "WORKSPACE",
+            "WORKSPACE.bazel",
+        ],
+    ),
+    edition = "2015",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-bazel",
+        "crate-name=libc",
+        "manual",
+        "noclippy",
+        "norustfmt",
+    ],
+    version = "0.2.147",
+    visibility = ["//visibility:private"],
+)
+
+alias(
+    name = "build_script_build",
+    actual = "libc_build_script",
+    tags = ["manual"],
 )
