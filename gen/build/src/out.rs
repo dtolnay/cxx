@@ -180,14 +180,16 @@ fn path_contains_intermediate_components(path: impl AsRef<Path>) -> bool {
         .any(|component| component == Component::ParentDir)
 }
 
-fn common_prefix(left: &Path, right: &Path) -> PathBuf {
+fn common_prefix(first: &Path, second: &Path) -> PathBuf {
     let mut common_prefix = PathBuf::new();
-    let mut left = left.components();
-    let mut right = right.components();
+    let mut first = first.components();
+    let mut second = second.components();
     loop {
-        match (left.next(), right.next()) {
-            (Some(left_component), Some(right_component)) if left_component == right_component => {
-                common_prefix.push(left_component);
+        match (first.next(), second.next()) {
+            (Some(first_component), Some(second_component))
+                if first_component == second_component =>
+            {
+                common_prefix.push(first_component);
             }
             _ => return common_prefix,
         }
