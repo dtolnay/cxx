@@ -139,9 +139,9 @@ fn best_effort_relativize_symlink(original: impl AsRef<Path>, link: impl AsRef<P
     // do not, since upon moving library to a different location it should
     // continue referring to the original location of that shared Cargo target
     // directory.
-    let likely_no_semantic_root = env::var_os("CARGO_TARGET_DIR").is_some();
+    let likely_no_semantic_prefix = env::var_os("CARGO_TARGET_DIR").is_some();
 
-    if likely_no_semantic_root
+    if likely_no_semantic_prefix
         || original.is_relative()
         || link.is_relative()
         || path_contains_intermediate_components(original)
@@ -150,28 +150,28 @@ fn best_effort_relativize_symlink(original: impl AsRef<Path>, link: impl AsRef<P
         return original.to_path_buf();
     }
 
-    let shared_root = shared_root(original, link);
+    let common_prefix = common_prefix(original, link);
 
-    if shared_root == Path::new("") {
+    if common_prefix == Path::new("") {
         return original.to_path_buf();
     }
 
-    let relative_original = original.strip_prefix(&shared_root).expect("unreachable");
+    let relative_original = original.strip_prefix(&common_prefix).expect("unreachable");
     let mut link = link
         .parent()
         .expect("we know that link is an absolute path, so at least one parent exists")
         .to_path_buf();
 
-    let mut path_to_shared_root = PathBuf::new();
-    while link != shared_root {
-        path_to_shared_root.push(Component::ParentDir);
+    let mut path_to_common_prefix = PathBuf::new();
+    while link != common_prefix {
+        path_to_common_prefix.push(Component::ParentDir);
         assert!(
             link.pop(),
-            "we know there is a shared root of nonzero size, so this should never return 'no parent'"
+            "we know there is a common prefix of nonzero size, so this should never return 'no parent'"
         );
     }
 
-    path_to_shared_root.join(relative_original)
+    path_to_common_prefix.join(relative_original)
 }
 
 fn path_contains_intermediate_components(path: impl AsRef<Path>) -> bool {
@@ -180,16 +180,16 @@ fn path_contains_intermediate_components(path: impl AsRef<Path>) -> bool {
         .any(|component| component == Component::ParentDir)
 }
 
-fn shared_root(left: &Path, right: &Path) -> PathBuf {
-    let mut shared_root = PathBuf::new();
+fn common_prefix(left: &Path, right: &Path) -> PathBuf {
+    let mut common_prefix = PathBuf::new();
     let mut left = left.components();
     let mut right = right.components();
     loop {
         match (left.next(), right.next()) {
             (Some(left_component), Some(right_component)) if left_component == right_component => {
-                shared_root.push(left_component);
+                common_prefix.push(left_component);
             }
-            _ => return shared_root,
+            _ => return common_prefix,
         }
     }
 }
