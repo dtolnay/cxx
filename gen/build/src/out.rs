@@ -199,27 +199,22 @@ fn split_after_common_prefix<'first, 'second>(
 #[cfg(test)]
 mod tests {
     use crate::out::best_effort_relativize_symlink;
+    use std::path::Path;
 
     #[cfg(not(windows))]
     #[test]
     fn test_relativize_symlink_unix() {
         assert_eq!(
-            best_effort_relativize_symlink("/foo/bar/baz", "/foo/spam/eggs")
-                .to_str()
-                .unwrap(),
-            "../bar/baz"
+            best_effort_relativize_symlink("/foo/bar/baz", "/foo/spam/eggs"),
+            Path::new("../bar/baz"),
         );
         assert_eq!(
-            best_effort_relativize_symlink("/foo/bar/../baz", "/foo/spam/eggs")
-                .to_str()
-                .unwrap(),
-            "/foo/bar/../baz"
+            best_effort_relativize_symlink("/foo/bar/../baz", "/foo/spam/eggs"),
+            Path::new("/foo/bar/../baz"),
         );
         assert_eq!(
-            best_effort_relativize_symlink("/foo/bar/baz", "/foo/spam/./eggs")
-                .to_str()
-                .unwrap(),
-            "../bar/baz"
+            best_effort_relativize_symlink("/foo/bar/baz", "/foo/spam/./eggs"),
+            Path::new("../bar/baz"),
         );
     }
 
@@ -227,19 +222,18 @@ mod tests {
     #[test]
     fn test_relativize_symlink_windows() {
         use std::path::PathBuf;
-        let windows_target: PathBuf = ["c:\\", "windows", "foo"].iter().collect();
-        let windows_link: PathBuf = ["c:\\", "users", "link"].iter().collect();
-        let windows_different_volume_link: PathBuf = ["d:\\", "users", "link"].iter().collect();
+
+        let windows_target = PathBuf::from_iter(["c:\\", "windows", "foo"]);
+        let windows_link = PathBuf::from_iter(["c:\\", "users", "link"]);
+        let windows_different_volume_link = PathBuf::from_iter(["d:\\", "users", "link"]);
 
         assert_eq!(
-            best_effort_relativize_symlink(windows_target.clone(), windows_link)
-                .to_str()
-                .unwrap(),
-            "..\\windows\\foo"
+            best_effort_relativize_symlink(&windows_target, windows_link),
+            Path::new("..\\windows\\foo"),
         );
         assert_eq!(
-            best_effort_relativize_symlink(windows_target.clone(), windows_different_volume_link),
-            windows_target
+            best_effort_relativize_symlink(&windows_target, windows_different_volume_link),
+            windows_target,
         );
     }
 }
