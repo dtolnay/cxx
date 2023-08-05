@@ -178,8 +178,8 @@ fn path_contains_intermediate_components(path: impl AsRef<Path>) -> bool {
 fn split_after_common_prefix<'first, 'second>(
     first: &'first Path,
     second: &'second Path,
-) -> (PathBuf, &'first Path, &'second Path) {
-    let mut common_prefix = PathBuf::new();
+) -> (&'first Path, &'first Path, &'second Path) {
+    let entire_first = first;
     let mut first = first.components();
     let mut second = second.components();
     loop {
@@ -187,11 +187,19 @@ fn split_after_common_prefix<'first, 'second>(
         let rest_of_second = second.as_path();
         match (first.next(), second.next()) {
             (Some(first_component), Some(second_component))
-                if first_component == second_component =>
-            {
-                common_prefix.push(first_component);
+                if first_component == second_component => {}
+            _ => {
+                let mut common_prefix = entire_first;
+                for _ in rest_of_first.components().rev() {
+                    if let Some(parent) = common_prefix.parent() {
+                        common_prefix = parent;
+                    } else {
+                        common_prefix = Path::new("");
+                        break;
+                    }
+                }
+                return (common_prefix, rest_of_first, rest_of_second);
             }
-            _ => return (common_prefix, rest_of_first, rest_of_second),
         }
     }
 }
