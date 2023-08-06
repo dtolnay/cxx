@@ -29,12 +29,41 @@ pub(crate) fn write(path: impl AsRef<Path>, content: &[u8]) -> Result<()> {
     }
 }
 
-pub(crate) fn symlink_file(original: impl AsRef<Path>, link: impl AsRef<Path>) -> Result<()> {
+pub(crate) fn relative_symlink_file(
+    original: impl AsRef<Path>,
+    link: impl AsRef<Path>,
+) -> Result<()> {
     let original = original.as_ref();
     let link = link.as_ref();
 
-    let original = best_effort_relativize_symlink(original, link);
+    let relativized = best_effort_relativize_symlink(original, link);
 
+    symlink_file(&relativized, original, link)
+}
+
+pub(crate) fn absolute_symlink_file(
+    original: impl AsRef<Path>,
+    link: impl AsRef<Path>,
+) -> Result<()> {
+    let original = original.as_ref();
+    let link = link.as_ref();
+
+    symlink_file(original, original, link)
+}
+
+pub(crate) fn relative_symlink_dir(
+    original: impl AsRef<Path>,
+    link: impl AsRef<Path>,
+) -> Result<()> {
+    let original = original.as_ref();
+    let link = link.as_ref();
+
+    let relativized = best_effort_relativize_symlink(original, link);
+
+    symlink_dir(&relativized, link)
+}
+
+fn symlink_file(path_for_symlink: &Path, path_for_copy: &Path, link: &Path) -> Result<()> {
     let mut create_dir_error = None;
     if fs::exists(link) {
         best_effort_remove(link);
@@ -43,7 +72,7 @@ pub(crate) fn symlink_file(original: impl AsRef<Path>, link: impl AsRef<Path>) -
         create_dir_error = fs::create_dir_all(parent).err();
     }
 
-    match paths::symlink_or_copy(original, link) {
+    match paths::symlink_or_copy(path_for_symlink, path_for_copy, link) {
         // As long as symlink_or_copy succeeded, ignore any create_dir_all error.
         Ok(()) => Ok(()),
         Err(err) => {
@@ -65,12 +94,7 @@ pub(crate) fn symlink_file(original: impl AsRef<Path>, link: impl AsRef<Path>) -
     }
 }
 
-pub(crate) fn symlink_dir(original: impl AsRef<Path>, link: impl AsRef<Path>) -> Result<()> {
-    let original = original.as_ref();
-    let link = link.as_ref();
-
-    let original = best_effort_relativize_symlink(original, link);
-
+fn symlink_dir(path_for_symlink: &Path, link: &Path) -> Result<()> {
     let mut create_dir_error = None;
     if fs::exists(link) {
         best_effort_remove(link);
@@ -79,7 +103,7 @@ pub(crate) fn symlink_dir(original: impl AsRef<Path>, link: impl AsRef<Path>) ->
         create_dir_error = fs::create_dir_all(parent).err();
     }
 
-    match fs::symlink_dir(original, link) {
+    match fs::symlink_dir(path_for_symlink, link) {
         // As long as symlink_dir succeeded, ignore any create_dir_all error.
         Ok(()) => Ok(()),
         // If create_dir_all and symlink_dir both failed, prefer the first error.
