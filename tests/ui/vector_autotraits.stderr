@@ -5,6 +5,7 @@ error[E0277]: `*const cxx::void` cannot be sent between threads safely
    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `*const cxx::void` cannot be sent between threads safely
    |
    = help: within `CxxVector<NotThreadSafe>`, the trait `Send` is not implemented for `*const cxx::void`
+   = note: consider using `std::sync::Arc<*const cxx::void>`; for more information visit <https://doc.rust-lang.org/book/ch16-03-shared-state.html>
    = note: required because it appears within the type `[*const void; 0]`
 note: required because it appears within the type `Opaque`
   --> src/opaque.rs
