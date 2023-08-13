@@ -26,23 +26,23 @@ cargo.rust_library(
 
 alias(
     name = "cc",
-    actual = ":cc-1.0.81",
+    actual = ":cc-1.0.82",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "cc-1.0.81.crate",
-    sha256 = "6c6b2562119bf28c3439f7f02db99faf0aa1a8cdfe5772a2ee155d32227239f0",
-    strip_prefix = "cc-1.0.81",
-    urls = ["https://crates.io/api/v1/crates/cc/1.0.81/download"],
+    name = "cc-1.0.82.crate",
+    sha256 = "305fe645edc1442a0fa8b6726ba61d422798d37a52e12eaecf4b022ebbb88f01",
+    strip_prefix = "cc-1.0.82",
+    urls = ["https://crates.io/api/v1/crates/cc/1.0.82/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "cc-1.0.81",
-    srcs = [":cc-1.0.81.crate"],
+    name = "cc-1.0.82",
+    srcs = [":cc-1.0.82.crate"],
     crate = "cc",
-    crate_root = "cc-1.0.81.crate/src/lib.rs",
+    crate_root = "cc-1.0.82.crate/src/lib.rs",
     edition = "2018",
     platform = {
         "linux-arm64": dict(
@@ -63,23 +63,23 @@ cargo.rust_library(
 
 alias(
     name = "clap",
-    actual = ":clap-4.3.19",
+    actual = ":clap-4.3.21",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "clap-4.3.19.crate",
-    sha256 = "5fd304a20bff958a57f04c4e96a2e7594cc4490a0e809cbd48bb6437edaa452d",
-    strip_prefix = "clap-4.3.19",
-    urls = ["https://crates.io/api/v1/crates/clap/4.3.19/download"],
+    name = "clap-4.3.21.crate",
+    sha256 = "c27cdf28c0f604ba3f512b0c9a409f8de8513e4816705deb0498b627e7c3a3fd",
+    strip_prefix = "clap-4.3.21",
+    urls = ["https://crates.io/api/v1/crates/clap/4.3.21/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "clap-4.3.19",
-    srcs = [":clap-4.3.19.crate"],
+    name = "clap-4.3.21",
+    srcs = [":clap-4.3.21.crate"],
     crate = "clap",
-    crate_root = "clap-4.3.19.crate/src/lib.rs",
+    crate_root = "clap-4.3.21.crate/src/lib.rs",
     edition = "2021",
     features = [
         "error-context",
@@ -88,22 +88,22 @@ cargo.rust_library(
         "usage",
     ],
     visibility = [],
-    deps = [":clap_builder-4.3.19"],
+    deps = [":clap_builder-4.3.21"],
 )
 
 http_archive(
-    name = "clap_builder-4.3.19.crate",
-    sha256 = "01c6a3f08f1fe5662a35cfe393aec09c4df95f60ee93b7556505260f75eee9e1",
-    strip_prefix = "clap_builder-4.3.19",
-    urls = ["https://crates.io/api/v1/crates/clap_builder/4.3.19/download"],
+    name = "clap_builder-4.3.21.crate",
+    sha256 = "08a9f1ab5e9f01a9b81f202e8562eb9a10de70abf9eaeac1be465c28b75aa4aa",
+    strip_prefix = "clap_builder-4.3.21",
+    urls = ["https://crates.io/api/v1/crates/clap_builder/4.3.21/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "clap_builder-4.3.19",
-    srcs = [":clap_builder-4.3.19.crate"],
+    name = "clap_builder-4.3.21",
+    srcs = [":clap_builder-4.3.21.crate"],
     crate = "clap_builder",
-    crate_root = "clap_builder-4.3.19.crate/src/lib.rs",
+    crate_root = "clap_builder-4.3.21.crate/src/lib.rs",
     edition = "2021",
     features = [
         "error-context",

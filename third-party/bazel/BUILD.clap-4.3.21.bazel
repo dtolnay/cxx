@@ -78,8 +78,8 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-none": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "4.3.19",
+    version = "4.3.21",
     deps = [
-        "@vendor__clap_builder-4.3.19//:clap_builder",
+        "@vendor__clap_builder-4.3.21//:clap_builder",
     ],
 )
