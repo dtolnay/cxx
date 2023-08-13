@@ -47,6 +47,22 @@ members = ["demo", "flags", "gen/build", "gen/cmd", "gen/lib", "macro", "tests/f
 targets = ["x86_64-unknown-linux-gnu"]
 rustdoc-args = ["--cfg", "doc_cfg", "--generate-link-to-definition"]
 
+[package.metadata.bazel]
+additive_build_file_content = """
+cc_library(
+    name = "cxx_cc",
+    srcs = ["src/cxx.cc"],
+    hdrs = ["include/cxx.h"],
+    include_prefix = "rust",
+    includes = ["include"],
+    linkstatic = True,
+    strip_include_prefix = "include",
+    visibility = ["//visibility:public"],
+)
+"""
+extra_aliased_targets = { cxx_cc = "cxx_cc" }
+gen_build_script = false
+
 [patch.crates-io]
 cxx = { path = "." }
 cxx-build = { path = "gen/build" }
