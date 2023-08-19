@@ -36,9 +36,10 @@ pub(crate) fn relative_symlink_file(
     let original = original.as_ref();
     let link = link.as_ref();
 
+    let parent_directory_error = prepare_parent_directory_for_symlink(link).err();
     let relativized = best_effort_relativize_symlink(original, link);
 
-    symlink_file(&relativized, original, link)
+    symlink_file(&relativized, original, link, parent_directory_error)
 }
 
 pub(crate) fn absolute_symlink_file(
@@ -48,7 +49,9 @@ pub(crate) fn absolute_symlink_file(
     let original = original.as_ref();
     let link = link.as_ref();
 
-    symlink_file(original, original, link)
+    let parent_directory_error = prepare_parent_directory_for_symlink(link).err();
+
+    symlink_file(original, original, link, parent_directory_error)
 }
 
 pub(crate) fn relative_symlink_dir(
@@ -58,20 +61,28 @@ pub(crate) fn relative_symlink_dir(
     let original = original.as_ref();
     let link = link.as_ref();
 
+    let parent_directory_error = prepare_parent_directory_for_symlink(link).err();
     let relativized = best_effort_relativize_symlink(original, link);
 
-    symlink_dir(&relativized, link)
+    symlink_dir(&relativized, link, parent_directory_error)
 }
 
-fn symlink_file(path_for_symlink: &Path, path_for_copy: &Path, link: &Path) -> Result<()> {
-    let mut create_dir_error = None;
+fn prepare_parent_directory_for_symlink(link: &Path) -> fs::Result<()> {
     if fs::exists(link) {
         best_effort_remove(link);
+        Ok(())
     } else {
         let parent = link.parent().unwrap();
-        create_dir_error = fs::create_dir_all(parent).err();
+        fs::create_dir_all(parent)
     }
+}
 
+fn symlink_file(
+    path_for_symlink: &Path,
+    path_for_copy: &Path,
+    link: &Path,
+    parent_directory_error: Option<fs::Error>,
+) -> Result<()> {
     match paths::symlink_or_copy(path_for_symlink, path_for_copy, link) {
         // As long as symlink_or_copy succeeded, ignore any create_dir_all error.
         Ok(()) => Ok(()),
@@ -88,26 +99,22 @@ fn symlink_file(path_for_symlink: &Path, path_for_copy: &Path, link: &Path) -> R
             } else {
                 // If create_dir_all and symlink_or_copy both failed, prefer the
                 // first error.
-                Err(Error::Fs(create_dir_error.unwrap_or(err)))
+                Err(Error::Fs(parent_directory_error.unwrap_or(err)))
             }
         }
     }
 }
 
-fn symlink_dir(path_for_symlink: &Path, link: &Path) -> Result<()> {
-    let mut create_dir_error = None;
-    if fs::exists(link) {
-        best_effort_remove(link);
-    } else {
-        let parent = link.parent().unwrap();
-        create_dir_error = fs::create_dir_all(parent).err();
-    }
-
+fn symlink_dir(
+    path_for_symlink: &Path,
+    link: &Path,
+    parent_directory_error: Option<fs::Error>,
+) -> Result<()> {
     match fs::symlink_dir(path_for_symlink, link) {
         // As long as symlink_dir succeeded, ignore any create_dir_all error.
         Ok(()) => Ok(()),
         // If create_dir_all and symlink_dir both failed, prefer the first error.
-        Err(err) => Err(Error::Fs(create_dir_error.unwrap_or(err))),
+        Err(err) => Err(Error::Fs(parent_directory_error.unwrap_or(err))),
     }
 }
 
@@ -150,6 +157,34 @@ fn best_effort_relativize_symlink(original: impl AsRef<Path>, link: impl AsRef<P
     let original = original.as_ref();
     let link = link.as_ref();
 
+    let relative_path = match abstractly_relativize_symlink(original, link) {
+        Some(relative_path) => relative_path,
+        None => return original.to_path_buf(),
+    };
+
+    // Sometimes "a/b/../c" refers to a different canonical location than "a/c".
+    // This can happen if 'b' is a symlink. The '..' canonicalizes to the parent
+    // directory of the symlink's target, not back to 'a'. In cxx-build's case
+    // someone could be using `--target-dir` with a location containing such
+    // symlinks.
+    if let Ok(original_canonical) = original.canonicalize() {
+        if let Ok(relative_canonical) = link.parent().unwrap().join(&relative_path).canonicalize() {
+            if original_canonical == relative_canonical {
+                return relative_path;
+            }
+        }
+    }
+
+    original.to_path_buf()
+}
+
+fn abstractly_relativize_symlink(
+    original: impl AsRef<Path>,
+    link: impl AsRef<Path>,
+) -> Option<PathBuf> {
+    let original = original.as_ref();
+    let link = link.as_ref();
+
     // Relativization only makes sense if there is a semantically meaningful
     // base directory shared between the two paths.
     //
@@ -171,13 +206,13 @@ fn best_effort_relativize_symlink(original: impl AsRef<Path>, link: impl AsRef<P
         || path_contains_intermediate_components(original)
         || path_contains_intermediate_components(link)
     {
-        return original.to_path_buf();
+        return None;
     }
 
     let (common_prefix, rest_of_original, rest_of_link) = split_after_common_prefix(original, link);
 
     if common_prefix == Path::new("") {
-        return original.to_path_buf();
+        return None;
     }
 
     let mut rest_of_link = rest_of_link.components();
@@ -190,7 +225,7 @@ fn best_effort_relativize_symlink(original: impl AsRef<Path>, link: impl AsRef<P
         path_to_common_prefix.push(Component::ParentDir);
     }
 
-    path_to_common_prefix.join(rest_of_original)
+    Some(path_to_common_prefix.join(rest_of_original))
 }
 
 fn path_contains_intermediate_components(path: impl AsRef<Path>) -> bool {
@@ -230,23 +265,23 @@ fn split_after_common_prefix<'first, 'second>(
 
 #[cfg(test)]
 mod tests {
-    use crate::out::best_effort_relativize_symlink;
+    use crate::out::abstractly_relativize_symlink;
     use std::path::Path;
 
     #[cfg(not(windows))]
     #[test]
     fn test_relativize_symlink_unix() {
         assert_eq!(
-            best_effort_relativize_symlink("/foo/bar/baz", "/foo/spam/eggs"),
-            Path::new("../bar/baz"),
+            abstractly_relativize_symlink("/foo/bar/baz", "/foo/spam/eggs").as_deref(),
+            Some(Path::new("../bar/baz")),
         );
         assert_eq!(
-            best_effort_relativize_symlink("/foo/bar/../baz", "/foo/spam/eggs"),
-            Path::new("/foo/bar/../baz"),
+            abstractly_relativize_symlink("/foo/bar/../baz", "/foo/spam/eggs"),
+            None,
         );
         assert_eq!(
-            best_effort_relativize_symlink("/foo/bar/baz", "/foo/spam/./eggs"),
-            Path::new("../bar/baz"),
+            abstractly_relativize_symlink("/foo/bar/baz", "/foo/spam/./eggs").as_deref(),
+            Some(Path::new("../bar/baz")),
         );
     }
 
@@ -260,12 +295,12 @@ mod tests {
         let windows_different_volume_link = PathBuf::from_iter(["d:\\", "users", "link"]);
 
         assert_eq!(
-            best_effort_relativize_symlink(&windows_target, windows_link),
-            Path::new("..\\windows\\foo"),
+            abstractly_relativize_symlink(&windows_target, windows_link).as_deref(),
+            Some(Path::new("..\\windows\\foo")),
         );
         assert_eq!(
-            best_effort_relativize_symlink(&windows_target, windows_different_volume_link),
-            windows_target,
+            abstractly_relativize_symlink(&windows_target, windows_different_volume_link),
+            None,
         );
     }
 }
