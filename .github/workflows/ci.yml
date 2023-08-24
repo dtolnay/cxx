@@ -26,7 +26,7 @@ jobs:
           - rust: beta
           - rust: stable
           - rust: 1.60.0
-          - rust: 1.64.0
+          - rust: 1.70.0
           - name: Cargo on macOS
             rust: nightly
             os: macos
