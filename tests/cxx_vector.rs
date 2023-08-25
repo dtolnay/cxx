@@ -1,5 +1,4 @@
 use cxx::{CxxVector};
-use std::fmt::Write as _;
 
 #[test]
 fn test_cxx_vector_new() {
