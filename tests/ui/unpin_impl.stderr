@@ -5,10 +5,10 @@ error[E0282]: type annotations needed
   |              ^^^^^^ cannot infer type
 
 error[E0283]: type annotations needed
- --> tests/ui/unpin_impl.rs:1:1
+ --> tests/ui/unpin_impl.rs:4:14
   |
-1 | #[cxx::bridge]
-  | ^^^^^^^^^^^^^^ cannot infer type
+4 |         type Opaque;
+  |              ^^^^^^ cannot infer type
   |
 note: multiple `impl`s satisfying `ffi::Opaque: __AmbiguousIfImpl<_>` found
  --> tests/ui/unpin_impl.rs:1:1
