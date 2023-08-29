@@ -487,6 +487,11 @@ cargo.rust_library(
         "winerror",
         "winnt",
     ],
+    platform = {
+        "windows-gnu": dict(
+            deps = [":winapi-x86_64-pc-windows-gnu-0.4.0"],
+        ),
+    },
     rustc_flags = ["@$(location :winapi-0.3.9-build-script-run[rustc_flags])"],
     visibility = [],
 )
@@ -553,5 +558,22 @@ cargo.rust_library(
             deps = [":winapi-0.3.9"],
         ),
     },
+    visibility = [],
+)
+
+http_archive(
+    name = "winapi-x86_64-pc-windows-gnu-0.4.0.crate",
+    sha256 = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f",
+    strip_prefix = "winapi-x86_64-pc-windows-gnu-0.4.0",
+    urls = ["https://crates.io/api/v1/crates/winapi-x86_64-pc-windows-gnu/0.4.0/download"],
+    visibility = [],
+)
+
+cargo.rust_library(
+    name = "winapi-x86_64-pc-windows-gnu-0.4.0",
+    srcs = [":winapi-x86_64-pc-windows-gnu-0.4.0.crate"],
+    crate = "winapi_x86_64_pc_windows_gnu",
+    crate_root = "winapi-x86_64-pc-windows-gnu-0.4.0.crate/src/lib.rs",
+    edition = "2015",
     visibility = [],
 )
