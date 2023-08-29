@@ -1671,6 +1671,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
         "static_assert(alignof(::std::unique_ptr<{}>) == alignof(void *), \"\");",
         inner,
     );
+
     begin_function_definition(out);
     writeln!(
         out,
@@ -1679,6 +1680,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     );
     writeln!(out, "  ::new (ptr) ::std::unique_ptr<{}>();", inner);
     writeln!(out, "}}");
+
     if can_construct_from_value {
         out.builtin.maybe_uninit = true;
         begin_function_definition(out);
@@ -1926,6 +1928,20 @@ fn write_cxx_vector(out: &mut OutFile, key: NamedImplKey) {
         writeln!(out, "}}");
     }
 
+    let ty = UniquePtr::CxxVector(element);
+
     out.include.memory = true;
-    write_unique_ptr_common(out, UniquePtr::CxxVector(element));
+    write_unique_ptr_common(out, ty);
+
+    let inner = ty.to_typename(out.types);
+    let instance = ty.to_mangled(out.types);
+
+    begin_function_definition(out);
+    writeln!(
+        out,
+        "{} *cxxbridge1$unique_ptr${}$new() noexcept {{",
+        inner, instance,
+    );
+    writeln!(out, "  return new {}();", inner);
+    writeln!(out, "}}");
 }
