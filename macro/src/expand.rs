@@ -1613,6 +1613,7 @@ fn expand_cxx_vector(
     let name = elem.to_string();
     let resolve = types.resolve(elem);
     let prefix = format!("cxxbridge1$std$vector${}$", resolve.name.to_symbol());
+    let link_new = format!("{}new", prefix);
     let link_size = format!("{}size", prefix);
     let link_get_unchecked = format!("{}get_unchecked", prefix);
     let link_push_back = format!("{}push_back", prefix);
@@ -1622,7 +1623,6 @@ fn expand_cxx_vector(
         resolve.name.to_symbol(),
     );
     let link_unique_ptr_null = format!("{}null", unique_ptr_prefix);
-    let link_unique_ptr_new = format!("{}new", unique_ptr_prefix);
     let link_unique_ptr_raw = format!("{}raw", unique_ptr_prefix);
     let link_unique_ptr_get = format!("{}get", unique_ptr_prefix);
     let link_unique_ptr_release = format!("{}release", unique_ptr_prefix);
@@ -1673,6 +1673,13 @@ fn expand_cxx_vector(
             fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
                 f.write_str(#name)
             }
+            fn __vector_new() -> *mut ::cxx::CxxVector<Self> {
+                extern "C" {
+                    #[link_name = #link_new]
+                    fn __vector_new #impl_generics() -> *mut ::cxx::CxxVector<#elem #ty_generics>;
+                }
+                unsafe { __vector_new() }
+            }
             fn __vector_size(v: &::cxx::CxxVector<Self>) -> usize {
                 extern "C" {
                     #[link_name = #link_size]
@@ -1699,13 +1706,6 @@ fn expand_cxx_vector(
                 let mut repr = ::cxx::core::mem::MaybeUninit::uninit();
                 unsafe { __unique_ptr_null(&mut repr) }
                 repr
-            }
-            fn __unique_ptr_new() -> *mut ::cxx::CxxVector<Self> {
-                extern "C" {
-                    #[link_name = #link_unique_ptr_new]
-                    fn __unique_ptr_new #impl_generics() -> *mut ::cxx::CxxVector<#elem #ty_generics>;
-                }
-                unsafe { __unique_ptr_new() }
             }
             unsafe fn __unique_ptr_raw(raw: *mut ::cxx::CxxVector<Self>) -> ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void> {
                 extern "C" {

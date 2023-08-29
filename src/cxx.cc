@@ -593,6 +593,9 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
 } // namespace
 
 #define STD_VECTOR_OPS(RUST_TYPE, CXX_TYPE)                                    \
+  std::vector<CXX_TYPE> *cxxbridge1$std$vector$##RUST_TYPE##$new() noexcept {  \
+    return new std::vector<CXX_TYPE>();                                        \
+  }                                                                            \
   std::size_t cxxbridge1$std$vector$##RUST_TYPE##$size(                        \
       const std::vector<CXX_TYPE> &s) noexcept {                               \
     return s.size();                                                           \
@@ -604,10 +607,6 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
   void cxxbridge1$unique_ptr$std$vector$##RUST_TYPE##$null(                    \
       std::unique_ptr<std::vector<CXX_TYPE>> *ptr) noexcept {                  \
     new (ptr) std::unique_ptr<std::vector<CXX_TYPE>>();                        \
-  }                                                                            \
-  std::vector<CXX_TYPE>                                                        \
-      *cxxbridge1$unique_ptr$std$vector$##RUST_TYPE##$new() noexcept {         \
-    return new std::vector<CXX_TYPE>();                                        \
   }                                                                            \
   void cxxbridge1$unique_ptr$std$vector$##RUST_TYPE##$raw(                     \
       std::unique_ptr<std::vector<CXX_TYPE>> *ptr,                             \

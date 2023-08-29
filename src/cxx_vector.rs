@@ -41,7 +41,7 @@ where
     ///
     /// The C++ vector is default constructed.
     pub fn new() -> UniquePtr<Self> {
-        unsafe { UniquePtr::from_raw(T::__unique_ptr_new()) }
+        unsafe { UniquePtr::from_raw(T::__vector_new()) }
     }
 
     /// Returns the number of elements in the vector.
@@ -342,6 +342,8 @@ pub unsafe trait VectorElement: Sized {
     #[doc(hidden)]
     fn __typename(f: &mut fmt::Formatter) -> fmt::Result;
     #[doc(hidden)]
+    fn __vector_new() -> *mut CxxVector<Self>;
+    #[doc(hidden)]
     fn __vector_size(v: &CxxVector<Self>) -> usize;
     #[doc(hidden)]
     unsafe fn __get_unchecked(v: *mut CxxVector<Self>, pos: usize) -> *mut Self;
@@ -363,8 +365,6 @@ pub unsafe trait VectorElement: Sized {
     }
     #[doc(hidden)]
     fn __unique_ptr_null() -> MaybeUninit<*mut c_void>;
-    #[doc(hidden)]
-    fn __unique_ptr_new() -> *mut CxxVector<Self>;
     #[doc(hidden)]
     unsafe fn __unique_ptr_raw(raw: *mut CxxVector<Self>) -> MaybeUninit<*mut c_void>;
     #[doc(hidden)]
@@ -408,6 +408,15 @@ macro_rules! impl_vector_element {
             fn __typename(f: &mut fmt::Formatter) -> fmt::Result {
                 f.write_str($name)
             }
+            fn __vector_new() -> *mut CxxVector<Self> {
+                extern "C" {
+                    attr! {
+                        #[link_name = concat!("cxxbridge1$std$vector$", $segment, "$new")]
+                        fn __vector_new() -> *mut CxxVector<$ty>;
+                    }
+                }
+                unsafe { __vector_new() }
+            }
             fn __vector_size(v: &CxxVector<$ty>) -> usize {
                 extern "C" {
                     attr! {
@@ -437,15 +446,6 @@ macro_rules! impl_vector_element {
                 let mut repr = MaybeUninit::uninit();
                 unsafe { __unique_ptr_null(&mut repr) }
                 repr
-            }
-            fn __unique_ptr_new() -> *mut CxxVector<Self> {
-                extern "C" {
-                    attr! {
-                        #[link_name = concat!("cxxbridge1$unique_ptr$std$vector$", $segment, "$new")]
-                        fn __unique_ptr_new() -> *mut CxxVector<$ty>;
-                    }
-                }
-                unsafe { __unique_ptr_new() }
             }
             unsafe fn __unique_ptr_raw(raw: *mut CxxVector<Self>) -> MaybeUninit<*mut c_void> {
                 extern "C" {

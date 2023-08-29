@@ -1907,6 +1907,15 @@ fn write_cxx_vector(out: &mut OutFile, key: NamedImplKey) {
     begin_function_definition(out);
     writeln!(
         out,
+        "::std::vector<{}> *cxxbridge1$std$vector${}$new() noexcept {{",
+        inner, instance,
+    );
+    writeln!(out, "  return new ::std::vector<{}>();", inner);
+    writeln!(out, "}}");
+
+    begin_function_definition(out);
+    writeln!(
+        out,
         "::std::size_t cxxbridge1$std$vector${}$size(::std::vector<{}> const &s) noexcept {{",
         instance, inner,
     );
@@ -1944,20 +1953,6 @@ fn write_cxx_vector(out: &mut OutFile, key: NamedImplKey) {
         writeln!(out, "}}");
     }
 
-    let ty = UniquePtr::CxxVector(element);
-
     out.include.memory = true;
-    write_unique_ptr_common(out, ty);
-
-    let inner = ty.to_typename(out.types);
-    let instance = ty.to_mangled(out.types);
-
-    begin_function_definition(out);
-    writeln!(
-        out,
-        "{} *cxxbridge1$unique_ptr${}$new() noexcept {{",
-        inner, instance,
-    );
-    writeln!(out, "  return new {}();", inner);
-    writeln!(out, "}}");
+    write_unique_ptr_common(out, UniquePtr::CxxVector(element));
 }
