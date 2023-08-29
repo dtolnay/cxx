@@ -4,6 +4,7 @@
 use crate::extern_type::ExternType;
 use crate::kind::Trivial;
 use crate::string::CxxString;
+use crate::unique_ptr::UniquePtr;
 use core::ffi::c_void;
 use core::fmt::{self, Debug};
 use core::iter::FusedIterator;
@@ -36,6 +37,13 @@ impl<T> CxxVector<T>
 where
     T: VectorElement,
 {
+    /// Constructs a new heap allocated vector, wrapped by UniquePtr.
+    ///
+    /// The C++ vector is default constructed.
+    pub fn new() -> UniquePtr<Self> {
+        unsafe { UniquePtr::from_raw(T::__unique_ptr_new()) }
+    }
+
     /// Returns the number of elements in the vector.
     ///
     /// Matches the behavior of C++ [std::vector\<T\>::size][size].
@@ -356,6 +364,8 @@ pub unsafe trait VectorElement: Sized {
     #[doc(hidden)]
     fn __unique_ptr_null() -> MaybeUninit<*mut c_void>;
     #[doc(hidden)]
+    fn __unique_ptr_new() -> *mut CxxVector<Self>;
+    #[doc(hidden)]
     unsafe fn __unique_ptr_raw(raw: *mut CxxVector<Self>) -> MaybeUninit<*mut c_void>;
     #[doc(hidden)]
     unsafe fn __unique_ptr_get(repr: MaybeUninit<*mut c_void>) -> *const CxxVector<Self>;
@@ -427,6 +437,15 @@ macro_rules! impl_vector_element {
                 let mut repr = MaybeUninit::uninit();
                 unsafe { __unique_ptr_null(&mut repr) }
                 repr
+            }
+            fn __unique_ptr_new() -> *mut CxxVector<Self> {
+                extern "C" {
+                    attr! {
+                        #[link_name = concat!("cxxbridge1$unique_ptr$std$vector$", $segment, "$new")]
+                        fn __unique_ptr_new() -> *mut CxxVector<$ty>;
+                    }
+                }
+                unsafe { __unique_ptr_new() }
             }
             unsafe fn __unique_ptr_raw(raw: *mut CxxVector<Self>) -> MaybeUninit<*mut c_void> {
                 extern "C" {

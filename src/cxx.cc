@@ -605,6 +605,10 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
       std::unique_ptr<std::vector<CXX_TYPE>> *ptr) noexcept {                  \
     new (ptr) std::unique_ptr<std::vector<CXX_TYPE>>();                        \
   }                                                                            \
+  std::vector<CXX_TYPE>                                                        \
+      *cxxbridge1$unique_ptr$std$vector$##RUST_TYPE##$new() noexcept {         \
+    return new std::vector<CXX_TYPE>();                                        \
+  }                                                                            \
   void cxxbridge1$unique_ptr$std$vector$##RUST_TYPE##$raw(                     \
       std::unique_ptr<std::vector<CXX_TYPE>> *ptr,                             \
       std::vector<CXX_TYPE> *raw) noexcept {                                   \
