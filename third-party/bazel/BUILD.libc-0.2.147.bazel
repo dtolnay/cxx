@@ -29,10 +29,6 @@ rust_library(
             "WORKSPACE.bazel",
         ],
     ),
-    crate_features = [
-        "default",
-        "std",
-    ],
     crate_root = "src/lib.rs",
     edition = "2015",
     rustc_flags = ["--cap-lints=allow"],
@@ -86,10 +82,6 @@ rust_library(
 cargo_build_script(
     name = "libc_build_script",
     srcs = glob(["**/*.rs"]),
-    crate_features = [
-        "default",
-        "std",
-    ],
     crate_name = "build_script_build",
     crate_root = "build.rs",
     data = glob(

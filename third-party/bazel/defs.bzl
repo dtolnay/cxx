@@ -295,14 +295,14 @@ def aliases(
 _NORMAL_DEPENDENCIES = {
     "third-party": {
         _COMMON_CONDITION: {
-            "cc": "@vendor__cc-1.0.82//:cc",
-            "clap": "@vendor__clap-4.3.21//:clap",
+            "cc": "@vendor__cc-1.0.83//:cc",
+            "clap": "@vendor__clap-4.4.1//:clap",
             "codespan-reporting": "@vendor__codespan-reporting-0.11.1//:codespan_reporting",
             "once_cell": "@vendor__once_cell-1.18.0//:once_cell",
             "proc-macro2": "@vendor__proc-macro2-1.0.66//:proc_macro2",
-            "quote": "@vendor__quote-1.0.32//:quote",
+            "quote": "@vendor__quote-1.0.33//:quote",
             "scratch": "@vendor__scratch-1.0.7//:scratch",
-            "syn": "@vendor__syn-2.0.28//:syn",
+            "syn": "@vendor__syn-2.0.29//:syn",
         },
     },
 }
@@ -377,52 +377,52 @@ def crate_repositories():
     """A macro for defining repositories for all generated crates"""
     maybe(
         http_archive,
-        name = "vendor__anstyle-1.0.1",
-        sha256 = "3a30da5c5f2d5e72842e00bcb57657162cdabef0931f40e2deb9b4140440cecd",
+        name = "vendor__anstyle-1.0.2",
+        sha256 = "15c4c2c83f81532e5845a733998b6971faca23490340a418e9b72a3ec9de12ea",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/anstyle/1.0.1/download"],
-        strip_prefix = "anstyle-1.0.1",
-        build_file = Label("@cxx.rs//third-party/bazel:BUILD.anstyle-1.0.1.bazel"),
+        urls = ["https://crates.io/api/v1/crates/anstyle/1.0.2/download"],
+        strip_prefix = "anstyle-1.0.2",
+        build_file = Label("@cxx.rs//third-party/bazel:BUILD.anstyle-1.0.2.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__cc-1.0.82",
-        sha256 = "305fe645edc1442a0fa8b6726ba61d422798d37a52e12eaecf4b022ebbb88f01",
+        name = "vendor__cc-1.0.83",
+        sha256 = "f1174fb0b6ec23863f8b971027804a42614e347eafb0a95bf0b12cdae21fc4d0",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/cc/1.0.82/download"],
-        strip_prefix = "cc-1.0.82",
-        build_file = Label("@cxx.rs//third-party/bazel:BUILD.cc-1.0.82.bazel"),
+        urls = ["https://crates.io/api/v1/crates/cc/1.0.83/download"],
+        strip_prefix = "cc-1.0.83",
+        build_file = Label("@cxx.rs//third-party/bazel:BUILD.cc-1.0.83.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__clap-4.3.21",
-        sha256 = "c27cdf28c0f604ba3f512b0c9a409f8de8513e4816705deb0498b627e7c3a3fd",
+        name = "vendor__clap-4.4.1",
+        sha256 = "7c8d502cbaec4595d2e7d5f61e318f05417bd2b66fdc3809498f0d3fdf0bea27",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/clap/4.3.21/download"],
-        strip_prefix = "clap-4.3.21",
-        build_file = Label("@cxx.rs//third-party/bazel:BUILD.clap-4.3.21.bazel"),
+        urls = ["https://crates.io/api/v1/crates/clap/4.4.1/download"],
+        strip_prefix = "clap-4.4.1",
+        build_file = Label("@cxx.rs//third-party/bazel:BUILD.clap-4.4.1.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__clap_builder-4.3.21",
-        sha256 = "08a9f1ab5e9f01a9b81f202e8562eb9a10de70abf9eaeac1be465c28b75aa4aa",
+        name = "vendor__clap_builder-4.4.1",
+        sha256 = "5891c7bc0edb3e1c2204fc5e94009affabeb1821c9e5fdc3959536c5c0bb984d",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/clap_builder/4.3.21/download"],
-        strip_prefix = "clap_builder-4.3.21",
-        build_file = Label("@cxx.rs//third-party/bazel:BUILD.clap_builder-4.3.21.bazel"),
+        urls = ["https://crates.io/api/v1/crates/clap_builder/4.4.1/download"],
+        strip_prefix = "clap_builder-4.4.1",
+        build_file = Label("@cxx.rs//third-party/bazel:BUILD.clap_builder-4.4.1.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__clap_lex-0.5.0",
-        sha256 = "2da6da31387c7e4ef160ffab6d5e7f00c42626fe39aea70a7b0f1773f7dd6c1b",
+        name = "vendor__clap_lex-0.5.1",
+        sha256 = "cd7cc57abe963c6d3b9d8be5b06ba7c8957a930305ca90304f24ef040aa6f961",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/clap_lex/0.5.0/download"],
-        strip_prefix = "clap_lex-0.5.0",
-        build_file = Label("@cxx.rs//third-party/bazel:BUILD.clap_lex-0.5.0.bazel"),
+        urls = ["https://crates.io/api/v1/crates/clap_lex/0.5.1/download"],
+        strip_prefix = "clap_lex-0.5.1",
+        build_file = Label("@cxx.rs//third-party/bazel:BUILD.clap_lex-0.5.1.bazel"),
     )
 
     maybe(
@@ -467,12 +467,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__quote-1.0.32",
-        sha256 = "50f3b39ccfb720540debaa0164757101c08ecb8d326b15358ce76a62c7e85965",
+        name = "vendor__quote-1.0.33",
+        sha256 = "5267fca4496028628a95160fc423a33e8b2e6af8a5302579e322e4b520293cae",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/quote/1.0.32/download"],
-        strip_prefix = "quote-1.0.32",
-        build_file = Label("@cxx.rs//third-party/bazel:BUILD.quote-1.0.32.bazel"),
+        urls = ["https://crates.io/api/v1/crates/quote/1.0.33/download"],
+        strip_prefix = "quote-1.0.33",
+        build_file = Label("@cxx.rs//third-party/bazel:BUILD.quote-1.0.33.bazel"),
     )
 
     maybe(
@@ -487,12 +487,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__syn-2.0.28",
-        sha256 = "04361975b3f5e348b2189d8dc55bc942f278b2d482a6a0365de5bdd62d351567",
+        name = "vendor__syn-2.0.29",
+        sha256 = "c324c494eba9d92503e6f1ef2e6df781e78f6a7705a0202d9801b198807d518a",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/syn/2.0.28/download"],
-        strip_prefix = "syn-2.0.28",
-        build_file = Label("@cxx.rs//third-party/bazel:BUILD.syn-2.0.28.bazel"),
+        urls = ["https://crates.io/api/v1/crates/syn/2.0.29/download"],
+        strip_prefix = "syn-2.0.29",
+        build_file = Label("@cxx.rs//third-party/bazel:BUILD.syn-2.0.29.bazel"),
     )
 
     maybe(
