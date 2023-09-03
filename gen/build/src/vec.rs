@@ -1,7 +1,7 @@
 use crate::intern::{self, InternedString};
 use std::path::Path;
 
-pub trait InternedVec<T>
+pub(crate) trait InternedVec<T>
 where
     T: ?Sized,
 {
@@ -17,14 +17,14 @@ where
     }
 }
 
-pub fn intern<T>(elements: &[&T]) -> Vec<InternedString>
+pub(crate) fn intern<T>(elements: &[&T]) -> Vec<InternedString>
 where
     T: ?Sized + Element,
 {
     elements.iter().copied().map(Element::intern).collect()
 }
 
-pub trait Element {
+pub(crate) trait Element {
     fn intern(&self) -> InternedString;
     fn unintern(_: InternedString) -> &'static Self;
 }

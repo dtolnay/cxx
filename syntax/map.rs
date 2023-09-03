@@ -3,9 +3,9 @@ use std::hash::Hash;
 use std::ops::Index;
 use std::slice;
 
-pub use self::ordered::OrderedMap;
-pub use self::unordered::UnorderedMap;
-pub use std::collections::hash_map::Entry;
+pub(crate) use self::ordered::OrderedMap;
+pub(crate) use self::unordered::UnorderedMap;
+pub(crate) use std::collections::hash_map::Entry;
 
 mod ordered {
     use super::{Entry, Iter, UnorderedMap};

@@ -7,7 +7,7 @@ use std::fmt::{self, Display};
 use std::str::FromStr;
 use syn::{Error, Expr, Lit, Result, Token, UnOp};
 
-pub struct DiscriminantSet {
+pub(crate) struct DiscriminantSet {
     repr: Option<Atom>,
     values: BTreeSet<Discriminant>,
     previous: Option<Discriminant>,
@@ -149,7 +149,7 @@ fn insert(set: &mut DiscriminantSet, discriminant: Discriminant) -> Result<Discr
 }
 
 impl Discriminant {
-    pub const fn zero() -> Self {
+    pub(crate) const fn zero() -> Self {
         Discriminant {
             sign: Sign::Positive,
             magnitude: 0,
@@ -180,7 +180,7 @@ impl Discriminant {
     }
 
     #[cfg(feature = "experimental-enum-variants-from-header")]
-    pub const fn checked_succ(self) -> Option<Self> {
+    pub(crate) const fn checked_succ(self) -> Option<Self> {
         match self.sign {
             Sign::Negative => {
                 if self.magnitude == 1 {

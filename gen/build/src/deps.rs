@@ -4,19 +4,19 @@ use std::ffi::OsString;
 use std::path::PathBuf;
 
 #[derive(Default)]
-pub struct Crate {
+pub(crate) struct Crate {
     pub include_prefix: Option<PathBuf>,
     pub links: Option<OsString>,
     pub header_dirs: Vec<HeaderDir>,
 }
 
-pub struct HeaderDir {
+pub(crate) struct HeaderDir {
     pub exported: bool,
     pub path: PathBuf,
 }
 
 impl Crate {
-    pub fn print_to_cargo(&self) {
+    pub(crate) fn print_to_cargo(&self) {
         if let Some(include_prefix) = &self.include_prefix {
             println!(
                 "cargo:CXXBRIDGE_PREFIX={}",
@@ -38,7 +38,7 @@ impl Crate {
     }
 }
 
-pub fn direct_dependencies() -> Vec<Crate> {
+pub(crate) fn direct_dependencies() -> Vec<Crate> {
     let mut crates: BTreeMap<String, Crate> = BTreeMap::new();
     let mut exported_header_dirs: BTreeMap<String, Vec<(usize, PathBuf)>> = BTreeMap::new();
 

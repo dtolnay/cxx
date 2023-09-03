@@ -28,7 +28,7 @@ pub struct Types<'a> {
 }
 
 impl<'a> Types<'a> {
-    pub fn collect(cx: &mut Errors, apis: &'a [Api]) -> Self {
+    pub(crate) fn collect(cx: &mut Errors, apis: &'a [Api]) -> Self {
         let mut all = OrderedSet::new();
         let mut structs = UnorderedMap::new();
         let mut enums = UnorderedMap::new();
@@ -241,7 +241,7 @@ impl<'a> Types<'a> {
         types
     }
 
-    pub fn needs_indirect_abi(&self, ty: &Type) -> bool {
+    pub(crate) fn needs_indirect_abi(&self, ty: &Type) -> bool {
         match ty {
             Type::RustBox(_) | Type::UniquePtr(_) => false,
             Type::Array(_) => true,
@@ -264,7 +264,7 @@ impl<'a> Types<'a> {
 
     // Types which we need to assume could possibly exist by value on the Rust
     // side.
-    pub fn is_maybe_trivial(&self, ty: &Ident) -> bool {
+    pub(crate) fn is_maybe_trivial(&self, ty: &Ident) -> bool {
         self.structs.contains_key(ty)
             || self.enums.contains_key(ty)
             || self.aliases.contains_key(ty)

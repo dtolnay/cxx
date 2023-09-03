@@ -1,8 +1,8 @@
 use std::fmt::{self, Debug};
 use std::slice;
 
-pub use self::ordered::OrderedSet;
-pub use self::unordered::UnorderedSet;
+pub(crate) use self::ordered::OrderedSet;
+pub(crate) use self::unordered::UnorderedSet;
 
 mod ordered {
     use super::{Iter, UnorderedSet};

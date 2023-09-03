@@ -2,9 +2,12 @@ use crate::syntax::{derive, Enum, Struct, Trait};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, quote_spanned, ToTokens};
 
-pub use crate::syntax::derive::*;
+pub(crate) use crate::syntax::derive::*;
 
-pub fn expand_struct(strct: &Struct, actual_derives: &mut Option<TokenStream>) -> TokenStream {
+pub(crate) fn expand_struct(
+    strct: &Struct,
+    actual_derives: &mut Option<TokenStream>,
+) -> TokenStream {
     let mut expanded = TokenStream::new();
     let mut traits = Vec::new();
 
@@ -35,7 +38,7 @@ pub fn expand_struct(strct: &Struct, actual_derives: &mut Option<TokenStream>) -
     expanded
 }
 
-pub fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) -> TokenStream {
+pub(crate) fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) -> TokenStream {
     let mut expanded = TokenStream::new();
     let mut traits = Vec::new();
     let mut has_copy = false;

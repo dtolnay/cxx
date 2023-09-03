@@ -15,7 +15,7 @@ pub enum TrivialReason<'a> {
     UnpinnedMut(&'a ExternFn),
 }
 
-pub fn required_trivial_reasons<'a>(
+pub(crate) fn required_trivial_reasons<'a>(
     apis: &'a [Api],
     all: &Set<&'a Type>,
     structs: &UnorderedMap<&'a Ident, &'a Struct>,
@@ -124,7 +124,7 @@ pub fn required_trivial_reasons<'a>(
 // Context:
 // "type {type} should be trivially move constructible and trivially destructible in C++ to be used as {what} in Rust"
 // "needs a cxx::ExternType impl in order to be used as {what}"
-pub fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl Display + 'a {
+pub(crate) fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl Display + 'a {
     struct Description<'a> {
         name: &'a Pair,
         reasons: &'a [TrivialReason<'a>],

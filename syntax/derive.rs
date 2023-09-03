@@ -76,6 +76,6 @@ impl Display for Derive {
     }
 }
 
-pub fn contains(derives: &[Derive], query: Trait) -> bool {
+pub(crate) fn contains(derives: &[Derive], query: Trait) -> bool {
     derives.iter().any(|derive| derive.what == query)
 }

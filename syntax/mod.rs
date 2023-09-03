@@ -1,33 +1,33 @@
 // Functionality that is shared between the cxxbridge macro and the cmd.
 
-pub mod atom;
-pub mod attrs;
-pub mod cfg;
-pub mod check;
-pub mod derive;
+pub(crate) mod atom;
+pub(crate) mod attrs;
+pub(crate) mod cfg;
+pub(crate) mod check;
+pub(crate) mod derive;
 mod discriminant;
 mod doc;
-pub mod error;
-pub mod file;
-pub mod ident;
+pub(crate) mod error;
+pub(crate) mod file;
+pub(crate) mod ident;
 mod impls;
 mod improper;
-pub mod instantiate;
-pub mod mangle;
-pub mod map;
+pub(crate) mod instantiate;
+pub(crate) mod mangle;
+pub(crate) mod map;
 mod names;
-pub mod namespace;
+pub(crate) mod namespace;
 mod parse;
 mod pod;
-pub mod qualified;
-pub mod report;
-pub mod resolve;
-pub mod set;
-pub mod symbol;
+pub(crate) mod qualified;
+pub(crate) mod report;
+pub(crate) mod resolve;
+pub(crate) mod set;
+pub(crate) mod symbol;
 mod tokens;
 mod toposort;
-pub mod trivial;
-pub mod types;
+pub(crate) mod trivial;
+pub(crate) mod types;
 mod visit;
 
 use self::attrs::OtherAttrs;
@@ -40,13 +40,13 @@ use syn::punctuated::Punctuated;
 use syn::token::{Brace, Bracket, Paren};
 use syn::{Attribute, Expr, Generics, Lifetime, LitInt, Token, Type as RustType};
 
-pub use self::atom::Atom;
-pub use self::derive::{Derive, Trait};
-pub use self::discriminant::Discriminant;
-pub use self::doc::Doc;
-pub use self::names::ForeignName;
-pub use self::parse::parse_items;
-pub use self::types::Types;
+pub(crate) use self::atom::Atom;
+pub(crate) use self::derive::{Derive, Trait};
+pub(crate) use self::discriminant::Discriminant;
+pub(crate) use self::doc::Doc;
+pub(crate) use self::names::ForeignName;
+pub(crate) use self::parse::parse_items;
+pub(crate) use self::types::Types;
 
 pub enum Api {
     Include(Include),

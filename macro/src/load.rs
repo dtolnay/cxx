@@ -18,7 +18,7 @@ use syn::{parse_quote, Path};
 
 const CXX_CLANG_AST: &str = "CXX_CLANG_AST";
 
-pub fn load(cx: &mut Errors, apis: &mut [Api]) {
+pub(crate) fn load(cx: &mut Errors, apis: &mut [Api]) {
     let ref mut variants_from_header = Vec::new();
     for api in apis {
         if let Api::Enum(enm) = api {

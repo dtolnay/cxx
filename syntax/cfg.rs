@@ -25,7 +25,7 @@ impl CfgExpr {
     }
 }
 
-pub fn parse_attribute(attr: &Attribute) -> Result<CfgExpr> {
+pub(crate) fn parse_attribute(attr: &Attribute) -> Result<CfgExpr> {
     attr.parse_args_with(|input: ParseStream| {
         let cfg_expr = input.call(parse_single)?;
         input.parse::<Option<Token![,]>>()?;
