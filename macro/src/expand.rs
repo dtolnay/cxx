@@ -17,7 +17,7 @@ use quote::{format_ident, quote, quote_spanned, ToTokens};
 use std::mem;
 use syn::{parse_quote, punctuated, Generics, Lifetime, Result, Token};
 
-pub fn bridge(mut ffi: Module) -> Result<TokenStream> {
+pub(crate) fn bridge(mut ffi: Module) -> Result<TokenStream> {
     let ref mut errors = Errors::new();
 
     let mut cfg = CfgExpr::Unconditional;
