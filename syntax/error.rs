@@ -1,9 +1,11 @@
 use std::fmt::{self, Display};
 
 #[derive(Copy, Clone)]
-pub struct Error {
+pub(crate) struct Error {
     pub msg: &'static str,
+    #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
     pub label: Option<&'static str>,
+    #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
     pub note: Option<&'static str>,
 }
 

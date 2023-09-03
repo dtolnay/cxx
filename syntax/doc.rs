@@ -2,8 +2,8 @@ use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use syn::LitStr;
 
-pub struct Doc {
-    pub(crate) hidden: bool,
+pub(crate) struct Doc {
+    pub hidden: bool,
     fragments: Vec<LitStr>,
 }
 

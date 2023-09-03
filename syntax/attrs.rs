@@ -283,14 +283,14 @@ fn parse_rust_name_attribute(meta: &Meta) -> Result<Ident> {
 }
 
 #[derive(Clone)]
-pub struct OtherAttrs(Vec<Attribute>);
+pub(crate) struct OtherAttrs(Vec<Attribute>);
 
 impl OtherAttrs {
-    pub fn none() -> Self {
+    pub(crate) fn none() -> Self {
         OtherAttrs(Vec::new())
     }
 
-    pub fn extend(&mut self, other: Self) {
+    pub(crate) fn extend(&mut self, other: Self) {
         self.0.extend(other.0);
     }
 }

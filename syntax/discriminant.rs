@@ -14,7 +14,7 @@ pub(crate) struct DiscriminantSet {
 }
 
 #[derive(Copy, Clone, Eq, PartialEq)]
-pub struct Discriminant {
+pub(crate) struct Discriminant {
     sign: Sign,
     magnitude: u64,
 }
@@ -26,7 +26,7 @@ enum Sign {
 }
 
 impl DiscriminantSet {
-    pub fn new(repr: Option<Atom>) -> Self {
+    pub(crate) fn new(repr: Option<Atom>) -> Self {
         DiscriminantSet {
             repr,
             values: BTreeSet::new(),
@@ -34,7 +34,7 @@ impl DiscriminantSet {
         }
     }
 
-    pub fn insert(&mut self, expr: &Expr) -> Result<Discriminant> {
+    pub(crate) fn insert(&mut self, expr: &Expr) -> Result<Discriminant> {
         let (discriminant, repr) = expr_to_discriminant(expr)?;
         match (self.repr, repr) {
             (None, Some(new_repr)) => {
@@ -61,7 +61,7 @@ impl DiscriminantSet {
         insert(self, discriminant)
     }
 
-    pub fn insert_next(&mut self) -> Result<Discriminant> {
+    pub(crate) fn insert_next(&mut self) -> Result<Discriminant> {
         let discriminant = match self.previous {
             None => Discriminant::zero(),
             Some(mut discriminant) => match discriminant.sign {
@@ -85,7 +85,7 @@ impl DiscriminantSet {
         insert(self, discriminant)
     }
 
-    pub fn inferred_repr(&self) -> Result<Atom> {
+    pub(crate) fn inferred_repr(&self) -> Result<Atom> {
         if let Some(repr) = self.repr {
             return Ok(repr);
         }

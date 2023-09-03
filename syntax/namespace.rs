@@ -10,7 +10,7 @@ mod kw {
 }
 
 #[derive(Clone, Default)]
-pub struct Namespace {
+pub(crate) struct Namespace {
     segments: Vec<Ident>,
 }
 

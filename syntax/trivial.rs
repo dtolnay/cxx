@@ -5,7 +5,7 @@ use proc_macro2::Ident;
 use std::fmt::{self, Display};
 
 #[derive(Copy, Clone)]
-pub enum TrivialReason<'a> {
+pub(crate) enum TrivialReason<'a> {
     StructField(&'a Struct),
     FunctionArgument(&'a ExternFn),
     FunctionReturn(&'a ExternFn),

@@ -12,7 +12,7 @@ use crate::syntax::{
 use proc_macro2::Ident;
 use quote::ToTokens;
 
-pub struct Types<'a> {
+pub(crate) struct Types<'a> {
     pub all: OrderedSet<&'a Type>,
     pub structs: UnorderedMap<&'a Ident, &'a Struct>,
     pub enums: UnorderedMap<&'a Ident, &'a Enum>,
@@ -255,7 +255,8 @@ impl<'a> Types<'a> {
     // refuses to believe that C could know how to supply us with a pointer to a
     // Rust String, even though C could easily have obtained that pointer
     // legitimately from a Rust call.
-    pub fn is_considered_improper_ctype(&self, ty: &Type) -> bool {
+    #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
+    pub(crate) fn is_considered_improper_ctype(&self, ty: &Type) -> bool {
         match self.determine_improper_ctype(ty) {
             ImproperCtype::Definite(improper) => improper,
             ImproperCtype::Depends(ident) => self.struct_improper_ctypes.contains(ident),

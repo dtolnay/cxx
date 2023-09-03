@@ -8,7 +8,7 @@ use syn::parse::{Error, Parser, Result};
 use syn::punctuated::Punctuated;
 
 #[derive(Clone)]
-pub struct ForeignName {
+pub(crate) struct ForeignName {
     text: String,
 }
 
@@ -31,10 +31,6 @@ impl NamedType {
             gt_token: None,
         };
         NamedType { rust, generics }
-    }
-
-    pub fn span(&self) -> Span {
-        self.rust.span()
     }
 }
 

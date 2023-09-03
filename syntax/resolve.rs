@@ -3,7 +3,7 @@ use crate::syntax::{Lifetimes, NamedType, Pair, Types};
 use proc_macro2::Ident;
 
 #[derive(Copy, Clone)]
-pub struct Resolution<'a> {
+pub(crate) struct Resolution<'a> {
     pub name: &'a Pair,
     pub generics: &'a Lifetimes,
 }
