@@ -1,8 +1,9 @@
-load("//tools/buck:remote_execution.bzl", "remote_execution_action_key_providers")
+load("//tools/buck:build_mode.bzl", "build_mode")
 load("//tools/buck:rust_cxx_bridge.bzl", "rust_cxx_bridge")
 
-remote_execution_action_key_providers(
-    name = "remote_execution_action_key_providers",
+build_mode(
+    name = "build_mode",
+    cell = native.get_cell_name(),
 )
 
 rust_test(
@@ -13,7 +14,7 @@ rust_test(
         ":ffi",
         "//:cxx",
     ],
-    remote_execution_action_key_providers = ":remote_execution_action_key_providers",
+    remote_execution_action_key_providers = ":build_mode",
 )
 
 rust_library(
