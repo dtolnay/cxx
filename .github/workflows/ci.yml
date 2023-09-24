@@ -139,6 +139,26 @@ jobs:
       - run: cargo generate-lockfile -Z minimal-versions
       - run: cargo check --locked --workspace
 
+  doc:
+    name: Documentation
+    needs: pre_ci
+    if: needs.pre_ci.outputs.continue
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      RUSTDOCFLAGS: -Dwarnings
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          components: rust-src
+      - uses: dtolnay/install@cargo-docs-rs
+      - run: cargo docs-rs
+      - run: cargo docs-rs -p cxx-build
+      - run: cargo docs-rs -p cxx-gen
+      - run: cargo docs-rs -p cxxbridge-flags
+      - run: cargo docs-rs -p cxxbridge-macro
+
   clippy:
     name: Clippy
     runs-on: ubuntu-latest
