@@ -3,6 +3,7 @@ name: Install
 on:
   workflow_dispatch:
   schedule: [cron: "40 1 * * *"]
+  push: {tags: ['*']}
 
 permissions: {}
 
