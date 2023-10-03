@@ -62,6 +62,24 @@ where
         self.len() == 0
     }
 
+    /// Increase the capacity of the vector.
+    ///
+    /// Matches the behavior of C++ [std::vector\<T\>::reserve][reserve].
+    ///
+    /// [reserve]: https://en.cppreference.com/w/cpp/container/vector/reserve
+    pub fn reserve(self: Pin<&mut Self>, capacity: usize) {
+        unsafe { T::__vector_reserve(self.get_unchecked_mut(), capacity) }
+    }
+
+    /// Returns the number of elements that the vector has currently allocated space for.
+    ///
+    /// Matches the behavior of C++ [std::vector\<T\>::capacity][capacity].
+    ///
+    /// [capacity]: https://en.cppreference.com/w/cpp/container/vector/capacity
+    pub fn capacity(&self) -> usize {
+        T::__vector_capacity(self)
+    }
+
     /// Returns a reference to an element at the given position, or `None` if
     /// out of bounds.
     pub fn get(&self, pos: usize) -> Option<&T> {
@@ -346,6 +364,10 @@ pub unsafe trait VectorElement: Sized {
     #[doc(hidden)]
     fn __vector_size(v: &CxxVector<Self>) -> usize;
     #[doc(hidden)]
+    unsafe fn __vector_reserve(v: *mut CxxVector<Self>, capacity: usize);
+    #[doc(hidden)]
+    fn __vector_capacity(v: &CxxVector<Self>) -> usize;
+    #[doc(hidden)]
     unsafe fn __get_unchecked(v: *mut CxxVector<Self>, pos: usize) -> *mut Self;
     #[doc(hidden)]
     unsafe fn __push_back(v: Pin<&mut CxxVector<Self>>, value: &mut ManuallyDrop<Self>) {
@@ -417,6 +439,20 @@ macro_rules! impl_vector_element {
                     fn __vector_size(_: &CxxVector<$ty>) -> usize;
                 }
                 unsafe { __vector_size(v) }
+            }
+            unsafe fn __vector_reserve(v: *mut CxxVector<$ty>, capacity: usize) {
+                extern "C" {
+                    #[link_name = concat!("cxxbridge1$std$vector$", $segment, "$reserve")]
+                    fn __vector_reserve(_: *mut CxxVector<$ty>, _: usize);
+                }
+                unsafe { __vector_reserve(v, capacity) }
+            }
+            fn __vector_capacity(v: &CxxVector<$ty>) -> usize {
+                extern "C" {
+                    #[link_name = concat!("cxxbridge1$std$vector$", $segment, "$capacity")]
+                    fn __vector_capacity(_: &CxxVector<$ty>) -> usize;
+                }
+                unsafe { __vector_capacity(v) }
             }
             unsafe fn __get_unchecked(v: *mut CxxVector<$ty>, pos: usize) -> *mut $ty {
                 extern "C" {

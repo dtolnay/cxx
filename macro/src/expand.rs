@@ -1615,6 +1615,8 @@ fn expand_cxx_vector(
     let prefix = format!("cxxbridge1$std$vector${}$", resolve.name.to_symbol());
     let link_new = format!("{}new", prefix);
     let link_size = format!("{}size", prefix);
+    let link_reserve = format!("{}reserve", prefix);
+    let link_capacity = format!("{}capacity", prefix);
     let link_get_unchecked = format!("{}get_unchecked", prefix);
     let link_push_back = format!("{}push_back", prefix);
     let link_pop_back = format!("{}pop_back", prefix);
@@ -1686,6 +1688,23 @@ fn expand_cxx_vector(
                     fn __vector_size #impl_generics(_: &::cxx::CxxVector<#elem #ty_generics>) -> usize;
                 }
                 unsafe { __vector_size(v) }
+            }
+            unsafe fn __vector_reserve(v: *mut ::cxx::CxxVector<Self>, capacity: usize) {
+                extern "C" {
+                    #[link_name = #link_reserve]
+                    fn __vector_reserve #impl_generics(
+                        _: *mut ::cxx::CxxVector<#elem #ty_generics>,
+                        _: usize
+                    );
+                }
+                __vector_reserve(v, capacity)
+            }
+            fn __vector_capacity(v: &::cxx::CxxVector<Self>) -> usize {
+                extern "C" {
+                    #[link_name = #link_capacity]
+                    fn __vector_capacity #impl_generics(_: &::cxx::CxxVector<#elem #ty_generics>) -> usize;
+                }
+                unsafe { __vector_capacity(v) }
             }
             unsafe fn __get_unchecked(v: *mut ::cxx::CxxVector<Self>, pos: usize) -> *mut Self {
                 extern "C" {
