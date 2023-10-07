@@ -55,6 +55,7 @@
     clippy::explicit_auto_deref,
     clippy::if_same_then_else,
     clippy::inherent_to_string,
+    clippy::into_iter_without_iter,
     clippy::items_after_statements,
     clippy::match_bool,
     clippy::match_on_vec_items,

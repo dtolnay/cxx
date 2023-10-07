@@ -6,6 +6,7 @@
     clippy::enum_glob_use,
     clippy::if_same_then_else,
     clippy::inherent_to_string,
+    clippy::into_iter_without_iter,
     clippy::items_after_statements,
     clippy::large_enum_variant,
     clippy::match_bool,
