@@ -1,10 +1,15 @@
 use std::env;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 fn main() {
+    let cc_path = if let Some(manifest_dir) = env::var_os("CARGO_MANIFEST_DIR") {
+        PathBuf::from(manifest_dir).join("src").join("cxx.cc")
+    } else {
+        PathBuf::from("src/cxx.cc")
+    };
     cc::Build::new()
-        .file("src/cxx.cc")
+        .file(&cc_path)
         .cpp(true)
         .cpp_link_stdlib(None) // linked via link-cplusplus crate
         .flag_if_supported(cxxbridge_flags::STD)
