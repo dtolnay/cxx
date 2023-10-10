@@ -11,11 +11,11 @@ load("@rules_rust//rust:defs.bzl", "rust_library")
 package(default_visibility = ["//visibility:public"])
 
 # licenses([
-#     "TODO",  # Unlicense/MIT
+#     "TODO",  # MIT/Apache-2.0
 # ])
 
 rust_library(
-    name = "winapi_util",
+    name = "unicode_width",
     srcs = glob(["**/*.rs"]),
     compile_data = glob(
         include = ["**"],
@@ -28,12 +28,15 @@ rust_library(
             "WORKSPACE.bazel",
         ],
     ),
+    crate_features = [
+        "default",
+    ],
     crate_root = "src/lib.rs",
-    edition = "2018",
+    edition = "2015",
     rustc_flags = ["--cap-lints=allow"],
     tags = [
         "cargo-bazel",
-        "crate-name=winapi-util",
+        "crate-name=unicode-width",
         "manual",
         "noclippy",
         "norustfmt",
@@ -72,17 +75,5 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-none": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "0.1.5",
-    deps = select({
-        "@rules_rust//rust/platform:aarch64-pc-windows-msvc": [
-            "@vendor__winapi-0.3.9//:winapi",  # cfg(windows)
-        ],
-        "@rules_rust//rust/platform:i686-pc-windows-msvc": [
-            "@vendor__winapi-0.3.9//:winapi",  # cfg(windows)
-        ],
-        "@rules_rust//rust/platform:x86_64-pc-windows-msvc": [
-            "@vendor__winapi-0.3.9//:winapi",  # cfg(windows)
-        ],
-        "//conditions:default": [],
-    }),
+    version = "0.1.11",
 )

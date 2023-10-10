@@ -6,16 +6,17 @@
 #     bazel run @//third-party:vendor
 ###############################################################################
 
+load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
 package(default_visibility = ["//visibility:public"])
 
 # licenses([
-#     "TODO",  # MIT/Apache-2.0
+#     "TODO",  # MIT OR Apache-2.0
 # ])
 
 rust_library(
-    name = "unicode_width",
+    name = "proc_macro2",
     srcs = glob(["**/*.rs"]),
     compile_data = glob(
         include = ["**"],
@@ -30,13 +31,15 @@ rust_library(
     ),
     crate_features = [
         "default",
+        "proc-macro",
+        "span-locations",
     ],
     crate_root = "src/lib.rs",
-    edition = "2015",
+    edition = "2021",
     rustc_flags = ["--cap-lints=allow"],
     tags = [
         "cargo-bazel",
-        "crate-name=unicode-width",
+        "crate-name=proc-macro2",
         "manual",
         "noclippy",
         "norustfmt",
@@ -75,5 +78,51 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-none": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "0.1.10",
+    version = "1.0.69",
+    deps = [
+        "@vendor__proc-macro2-1.0.69//:build_script_build",
+        "@vendor__unicode-ident-1.0.12//:unicode_ident",
+    ],
+)
+
+cargo_build_script(
+    name = "proc-macro2_build_script",
+    srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+        "proc-macro",
+        "span-locations",
+    ],
+    crate_name = "build_script_build",
+    crate_root = "build.rs",
+    data = glob(
+        include = ["**"],
+        exclude = [
+            "**/* *",
+            ".tmp_git_root/**/*",
+            "BUILD",
+            "BUILD.bazel",
+            "WORKSPACE",
+            "WORKSPACE.bazel",
+        ],
+    ),
+    edition = "2021",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-bazel",
+        "crate-name=proc-macro2",
+        "manual",
+        "noclippy",
+        "norustfmt",
+    ],
+    version = "1.0.69",
+    visibility = ["//visibility:private"],
+)
+
+alias(
+    name = "build_script_build",
+    actual = "proc-macro2_build_script",
+    tags = ["manual"],
 )
