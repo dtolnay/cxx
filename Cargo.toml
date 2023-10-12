@@ -60,6 +60,7 @@ cc_library(
     visibility = ["//visibility:public"],
 )
 """
+deps = [":cxx_cc"]
 extra_aliased_targets = { cxx_cc = "cxx_cc" }
 gen_build_script = false
 
