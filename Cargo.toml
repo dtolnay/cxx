@@ -1,6 +1,6 @@
 [package]
 name = "cxx"
-version = "1.0.109" # remember to update html_root_url
+version = "1.0.109"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 categories = ["development-tools::ffi", "api-bindings", "no-std"]
 description = "Safe interop between Rust and C++"
