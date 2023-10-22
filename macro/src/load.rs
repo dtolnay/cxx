@@ -60,7 +60,7 @@ pub(crate) fn load(cx: &mut Errors, apis: &mut [Api]) {
             if is_gzipped {
                 gunzipped = Vec::new();
                 let decode_result = GzDecoder::new(&mut gunzipped).write_all(memmap);
-                decode_result.map(|_| gunzipped.as_slice())
+                decode_result.map(|()| gunzipped.as_slice())
             } else {
                 Ok(memmap as &[u8])
             }
