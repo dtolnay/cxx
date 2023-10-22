@@ -22,6 +22,7 @@
     clippy::similar_names,
     clippy::single_match,
     clippy::single_match_else,
+    clippy::struct_field_names,
     clippy::too_many_arguments,
     clippy::too_many_lines,
     clippy::toplevel_ref_arg,
