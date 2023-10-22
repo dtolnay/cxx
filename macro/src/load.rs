@@ -36,7 +36,7 @@ pub(crate) fn load(cx: &mut Errors, apis: &mut [Api]) {
         }
     }
 
-    let span = match variants_from_header.get(0) {
+    let span = match variants_from_header.first() {
         None => return,
         Some(enm) => enm.variants_from_header_attr.clone().unwrap(),
     };
