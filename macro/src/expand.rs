@@ -142,6 +142,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
         #[allow(
             non_camel_case_types,
             non_snake_case,
+            unused_unsafe, // FIXME: only needed by rustc 1.64 and older
             clippy::extra_unused_type_parameters,
             clippy::items_after_statements,
             clippy::ptr_as_ptr,
