@@ -1,3 +1,4 @@
+#![forbid(unsafe_op_in_unsafe_fn)]
 #![allow(
     clippy::boxed_local,
     clippy::derive_partial_eq_without_eq,
