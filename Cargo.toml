@@ -15,20 +15,21 @@ repository = "https://github.com/dtolnay/cxx"
 rust-version = "1.60"
 
 [features]
-default = ["std", "cxxbridge-flags/default"] # c++11
-"c++14" = ["cxxbridge-flags/c++14"]
-"c++17" = ["cxxbridge-flags/c++17"]
-"c++20" = ["cxxbridge-flags/c++20"]
+default = ["std", "cxxbridge-flags/default", "cc"] # c++11
+"c++14" = ["cc", "cxxbridge-flags/c++14"]
+"c++17" = ["cc", "cxxbridge-flags/c++17"]
+"c++20" = ["cc", "cxxbridge-flags/c++20"]
 alloc = []
 std = ["alloc"]
+cc = [ "dep:cc", "dep:cxxbridge-flags" ]
 
 [dependencies]
 cxxbridge-macro = { version = "=1.0.110", path = "macro" }
 link-cplusplus = "1.0.9"
 
 [build-dependencies]
-cc = "1.0.79"
-cxxbridge-flags = { version = "=1.0.110", path = "flags", default-features = false }
+cc = { version="1.0.79", optional=true }
+cxxbridge-flags = { version = "=1.0.110", path = "flags", default-features = false, optional=true }
 
 [dev-dependencies]
 cxx-build = { version = "=1.0.110", path = "gen/build" }

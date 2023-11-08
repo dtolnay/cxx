@@ -1,27 +1,11 @@
 use std::env;
-use std::path::{Path, PathBuf};
 use std::process::Command;
+#[cfg(feature="cc")]
+use std::path::{Path, PathBuf};
 
 fn main() {
-    let manifest_dir_opt = env::var_os("CARGO_MANIFEST_DIR").map(PathBuf::from);
-    let manifest_dir = manifest_dir_opt.as_deref().unwrap_or(Path::new(""));
-
-    cc::Build::new()
-        .file(manifest_dir.join("src/cxx.cc"))
-        .cpp(true)
-        .cpp_link_stdlib(None) // linked via link-cplusplus crate
-        .flag_if_supported(cxxbridge_flags::STD)
-        .warnings_into_errors(cfg!(deny_warnings))
-        .compile("cxxbridge1");
-
-    println!("cargo:rerun-if-changed=src/cxx.cc");
-    println!("cargo:rerun-if-changed=include/cxx.h");
-    println!("cargo:rustc-cfg=built_with_cargo");
-
-    if let Some(manifest_dir) = &manifest_dir_opt {
-        let cxx_h = manifest_dir.join("include").join("cxx.h");
-        println!("cargo:HEADER={}", cxx_h.to_string_lossy());
-    }
+    #[cfg(feature="cc")]
+    build_cc();
 
     if let Some(rustc) = rustc_version() {
         if rustc.minor < 60 {
@@ -49,4 +33,27 @@ fn rustc_version() -> Option<RustVersion> {
     }
     let minor = pieces.next()?.parse().ok()?;
     Some(RustVersion { version, minor })
+}
+
+#[cfg(feature="cc")]
+fn build_cc() {
+    let manifest_dir_opt = env::var_os("CARGO_MANIFEST_DIR").map(PathBuf::from);
+    let manifest_dir = manifest_dir_opt.as_deref().unwrap_or(Path::new(""));
+
+    cc::Build::new()
+        .file(manifest_dir.join("src/cxx.cc"))
+        .cpp(true)
+        .cpp_link_stdlib(None) // linked via link-cplusplus crate
+        .flag_if_supported(cxxbridge_flags::STD)
+        .warnings_into_errors(cfg!(deny_warnings))
+        .compile("cxxbridge1");
+
+    println!("cargo:rerun-if-changed=src/cxx.cc");
+    println!("cargo:rerun-if-changed=include/cxx.h");
+    println!("cargo:rustc-cfg=built_with_cargo");
+
+    if let Some(manifest_dir) = &manifest_dir_opt {
+        let cxx_h = manifest_dir.join("include").join("cxx.h");
+        println!("cargo:HEADER={}", cxx_h.to_string_lossy());
+    }
 }
