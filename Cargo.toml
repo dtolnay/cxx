@@ -28,8 +28,8 @@ cxxbridge-macro = { version = "=1.0.110", path = "macro" }
 link-cplusplus = "1.0.9"
 
 [build-dependencies]
-cc = { version="1.0.79", optional=true }
-cxxbridge-flags = { version = "=1.0.110", path = "flags", default-features = false, optional=true }
+cc = { version="1.0.79", optional = true }
+cxxbridge-flags = { version = "=1.0.110", path = "flags", default-features = false, optional = true }
 
 [dev-dependencies]
 cxx-build = { version = "=1.0.110", path = "gen/build" }
