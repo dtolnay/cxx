@@ -22,6 +22,7 @@ default = ["std", "cxxbridge-flags/default", "cc"] # c++11
 alloc = []
 std = ["alloc"]
 cc = [ "dep:cc", "dep:cxxbridge-flags" ]
+cxxbridge-flags = [ "dep:cxxbridge-flags" ]
 
 [dependencies]
 cxxbridge-macro = { version = "=1.0.110", path = "macro" }
