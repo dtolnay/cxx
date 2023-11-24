@@ -366,6 +366,7 @@
 #![no_std]
 #![doc(html_root_url = "https://docs.rs/cxx/1.0.110")]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
+#![feature(utf8_chunks)] // FIXME
 #![deny(
     improper_ctypes,
     improper_ctypes_definitions,
