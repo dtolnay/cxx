@@ -1,9 +1,10 @@
 [package]
 name = "cxx-gen"
-version = "0.7.107"
+version = "0.7.110"
 authors = ["Adrian Taylor <adetaylor@chromium.org>"]
 categories = ["development-tools::ffi"]
 description = "C++ code generator for integrating `cxx` crate into higher level tools."
+documentation = "https://docs.rs/cxx-gen"
 edition = "2021"
 exclude = ["build.rs"]
 keywords = ["ffi"]

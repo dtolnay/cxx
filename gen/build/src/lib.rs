@@ -45,7 +45,7 @@
 //! $ cxxbridge src/main.rs > path/to/mybridge.cc
 //! ```
 
-#![doc(html_root_url = "https://docs.rs/cxx-build/1.0.107")]
+#![doc(html_root_url = "https://docs.rs/cxx-build/1.0.110")]
 #![allow(
     clippy::cast_sign_loss,
     clippy::default_trait_access,
@@ -55,6 +55,7 @@
     clippy::explicit_auto_deref,
     clippy::if_same_then_else,
     clippy::inherent_to_string,
+    clippy::into_iter_without_iter,
     clippy::items_after_statements,
     clippy::match_bool,
     clippy::match_on_vec_items,
@@ -72,6 +73,7 @@
     clippy::similar_names,
     clippy::single_match_else,
     clippy::struct_excessive_bools,
+    clippy::struct_field_names,
     clippy::too_many_arguments,
     clippy::too_many_lines,
     clippy::toplevel_ref_arg,

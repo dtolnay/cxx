@@ -7,7 +7,7 @@
 //! [dtolnay/cxx#235]: https://github.com/dtolnay/cxx/issues/235
 //! [https://github.com/google/autocxx]: https://github.com/google/autocxx
 
-#![doc(html_root_url = "https://docs.rs/cxx-gen/0.7.107")]
+#![doc(html_root_url = "https://docs.rs/cxx-gen/0.7.110")]
 #![deny(missing_docs)]
 #![allow(dead_code)]
 #![allow(
@@ -17,6 +17,7 @@
     clippy::enum_glob_use,
     clippy::if_same_then_else,
     clippy::inherent_to_string,
+    clippy::into_iter_without_iter,
     clippy::items_after_statements,
     clippy::match_bool,
     clippy::match_on_vec_items,
@@ -34,6 +35,7 @@
     clippy::similar_names,
     clippy::single_match_else,
     clippy::struct_excessive_bools,
+    clippy::struct_field_names,
     clippy::too_many_arguments,
     clippy::too_many_lines,
     clippy::toplevel_ref_arg,

@@ -74,7 +74,7 @@ rust_library(
     }),
     version = "0.11.1",
     deps = [
-        "@vendor__termcolor-1.2.0//:termcolor",
-        "@vendor__unicode-width-0.1.10//:unicode_width",
+        "@vendor__termcolor-1.3.0//:termcolor",
+        "@vendor__unicode-width-0.1.11//:unicode_width",
     ],
 )
