@@ -823,8 +823,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
             write_type(out, &arg.ty);
             write!(out, "::from_raw({})", arg.name.cxx);
         } else if let Type::UniquePtr(_) = &arg.ty {
-            write_type(out, &arg.ty);
-            write!(out, "({})", arg.name.cxx);
+            write!(out, "::std::move(*{})", arg.name.cxx);
         } else if arg.ty == RustString {
             out.builtin.unsafe_bitcopy = true;
             write!(
@@ -846,7 +845,6 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     write!(out, ")");
     match &efn.ret {
         Some(Type::RustBox(_)) => write!(out, ".into_raw()"),
-        Some(Type::UniquePtr(_)) => write!(out, ".release()"),
         Some(Type::Str(_) | Type::SliceRef(_)) if !indirect_return => write!(out, ")"),
         _ => {}
     }
@@ -1092,7 +1090,6 @@ fn write_rust_function_shim_impl(
         write!(out, "{}", arg.name.cxx);
         match &arg.ty {
             Type::RustBox(_) => write!(out, ".into_raw()"),
-            Type::UniquePtr(_) => write!(out, ".release()"),
             ty if ty != RustString && out.types.needs_indirect_abi(ty) => write!(out, "$.value"),
             _ => {}
         }
@@ -1155,9 +1152,18 @@ fn indirect_return(sig: &Signature, types: &Types) -> bool {
 
 fn write_indirect_return_type(out: &mut OutFile, ty: &Type) {
     match ty {
-        Type::RustBox(ty) | Type::UniquePtr(ty) => {
+        Type::RustBox(ty) => {
             write_type_space(out, &ty.inner);
             write!(out, "*");
+        }
+        Type::UniquePtr(ty) => {
+            write!(out, "::std::unique_ptr<");
+            write_type(out, &ty.first);
+            if let Some(deleter) = &ty.second {
+                write!(out, ", ");
+                write_type(out, deleter);
+            }
+            write!(out, "> ");
         }
         Type::Ref(ty) => {
             write_type_space(out, &ty.inner);
@@ -1181,7 +1187,7 @@ fn write_indirect_return_type_space(out: &mut OutFile, ty: &Type) {
 
 fn write_extern_return_type_space(out: &mut OutFile, ty: &Option<Type>) {
     match ty {
-        Some(Type::RustBox(ty) | Type::UniquePtr(ty)) => {
+        Some(Type::RustBox(ty)) => {
             write_type_space(out, &ty.inner);
             write!(out, "*");
         }
@@ -1203,7 +1209,7 @@ fn write_extern_return_type_space(out: &mut OutFile, ty: &Option<Type>) {
 
 fn write_extern_arg(out: &mut OutFile, arg: &Var) {
     match &arg.ty {
-        Type::RustBox(ty) | Type::UniquePtr(ty) | Type::CxxVector(ty) => {
+        Type::RustBox(ty) | Type::CxxVector(ty) => {
             write_type_space(out, &ty.inner);
             write!(out, "*");
         }
@@ -1237,7 +1243,11 @@ fn write_type(out: &mut OutFile, ty: &Type) {
         }
         Type::UniquePtr(ptr) => {
             write!(out, "::std::unique_ptr<");
-            write_type(out, &ptr.inner);
+            write_type(out, &ptr.first);
+            if let Some(deleter) = &ptr.second {
+                write!(out, ", ");
+                write_type(out, deleter);
+            }
             write!(out, ">");
         }
         Type::SharedPtr(ptr) => {
@@ -1350,7 +1360,7 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
 
 #[derive(Copy, Clone)]
 enum UniquePtr<'a> {
-    Ident(&'a Ident),
+    Ident(&'a Ident, Option<&'a Ident>),
     CxxVector(&'a Ident),
 }
 
@@ -1367,7 +1377,7 @@ impl ToTypename for Ident {
 impl<'a> ToTypename for UniquePtr<'a> {
     fn to_typename(&self, types: &Types) -> String {
         match self {
-            UniquePtr::Ident(ident) => ident.to_typename(types),
+            UniquePtr::Ident(ident, _) => ident.to_typename(types),
             UniquePtr::CxxVector(element) => {
                 format!("::std::vector<{}>", element.to_typename(types))
             }
@@ -1388,7 +1398,7 @@ impl ToMangled for Ident {
 impl<'a> ToMangled for UniquePtr<'a> {
     fn to_mangled(&self, types: &Types) -> Symbol {
         match self {
-            UniquePtr::Ident(ident) => ident.to_mangled(types),
+            UniquePtr::Ident(ident, _) => ident.to_mangled(types),
             UniquePtr::CxxVector(element) => {
                 symbol::join(&[&"std", &"vector", &element.to_mangled(types)])
             }
@@ -1409,7 +1419,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
         match *impl_key {
             ImplKey::RustBox(ident) => write_rust_box_extern(out, ident),
             ImplKey::RustVec(ident) => write_rust_vec_extern(out, ident),
-            ImplKey::UniquePtr(ident) => write_unique_ptr(out, ident),
+            ImplKey::UniquePtr(ident, deleter) => write_unique_ptr(out, ident, deleter),
             ImplKey::SharedPtr(ident) => write_shared_ptr(out, ident),
             ImplKey::WeakPtr(ident) => write_weak_ptr(out, ident),
             ImplKey::CxxVector(ident) => write_cxx_vector(out, ident),
@@ -1621,8 +1631,8 @@ fn write_rust_vec_impl(out: &mut OutFile, key: NamedImplKey) {
     writeln!(out, "}}");
 }
 
-fn write_unique_ptr(out: &mut OutFile, key: NamedImplKey) {
-    let ty = UniquePtr::Ident(key.rust);
+fn write_unique_ptr(out: &mut OutFile, key: NamedImplKey, deleter: Option<&Ident>) {
+    let ty = UniquePtr::Ident(key.rust, deleter);
     write_unique_ptr_common(out, ty);
 }
 
@@ -1632,18 +1642,34 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     out.include.utility = true;
     let inner = ty.to_typename(out.types);
     let instance = ty.to_mangled(out.types);
+    let (cxx_type_string, mangled_prefix, deleter_name) =
+        if let UniquePtr::Ident(_, Some(deleter)) = &ty {
+            let deleter_instance = deleter.to_mangled(out.types);
+            let deleter_inner = deleter.to_typename(out.types);
+            (
+                format!("::std::unique_ptr<{}, {}>", inner, &deleter_inner),
+                format!("cxxbridge1$unique_ptr${}${}$", instance, deleter_instance),
+                Some(deleter_inner),
+            )
+        } else {
+            (
+                format!("::std::unique_ptr<{}>", inner),
+                format!("cxxbridge1$unique_ptr${}$", instance),
+                None,
+            )
+        };
 
     let can_construct_from_value = match ty {
         // Some aliases are to opaque types; some are to trivial types. We can't
         // know at code generation time, so we generate both C++ and Rust side
         // bindings for a "new" method anyway. But the Rust code can't be called
         // for Opaque types because the 'new' method is not implemented.
-        UniquePtr::Ident(ident) => out.types.is_maybe_trivial(ident),
+        UniquePtr::Ident(ident, _) => out.types.is_maybe_trivial(ident),
         UniquePtr::CxxVector(_) => false,
     };
 
     let conditional_delete = match ty {
-        UniquePtr::Ident(ident) => {
+        UniquePtr::Ident(ident, _) => {
             !out.types.structs.contains_key(ident) && !out.types.enums.contains_key(ident)
         }
         UniquePtr::CxxVector(_) => false,
@@ -1652,7 +1678,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     if conditional_delete {
         out.builtin.is_complete = true;
         let definition = match ty {
-            UniquePtr::Ident(ty) => &out.types.resolve(ty).name.cxx,
+            UniquePtr::Ident(ty, _) => &out.types.resolve(ty).name.cxx,
             UniquePtr::CxxVector(_) => unreachable!(),
         };
         writeln!(
@@ -1661,22 +1687,36 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
             inner, definition,
         );
     }
-    writeln!(
-        out,
-        "static_assert(sizeof(::std::unique_ptr<{}>) == sizeof(void *), \"\");",
-        inner,
-    );
-    writeln!(
-        out,
-        "static_assert(alignof(::std::unique_ptr<{}>) == alignof(void *), \"\");",
-        inner,
-    );
+    if let Some(deleter_name) = &deleter_name {
+        writeln!(
+            out,
+            "static_assert(sizeof(::std::unique_ptr<{inner}, {deleter_name}>) >= (sizeof(void *) + \
+             sizeof({deleter_name})), \"Implausible size of unique_ptr with deleter {deleter_name}\");",
+        );
+        out.include.type_traits = true;
+        writeln!(
+            out,
+            "static_assert(std::is_trivially_move_constructible<{deleter_name}>::value && std::is_trivially_destructible<{deleter_name}>::value, \
+            \"Only trivial types are supported as deleter for unique_ptr\");",
+        )
+    } else {
+        writeln!(
+            out,
+            "static_assert(sizeof(::std::unique_ptr<{}>) == sizeof(void *), \"\");",
+            inner,
+        );
+        writeln!(
+            out,
+            "static_assert(alignof(::std::unique_ptr<{}>) == alignof(void *), \"\");",
+            inner,
+        );
+    }
 
     begin_function_definition(out);
     writeln!(
         out,
-        "void cxxbridge1$unique_ptr${}$null(::std::unique_ptr<{}> *ptr) noexcept {{",
-        instance, inner,
+        "void {}null(::std::unique_ptr<{}> *ptr) noexcept {{",
+        mangled_prefix, inner,
     );
     writeln!(out, "  ::new (ptr) ::std::unique_ptr<{}>();", inner);
     writeln!(out, "}}");
@@ -1686,8 +1726,8 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
         begin_function_definition(out);
         writeln!(
             out,
-            "{} *cxxbridge1$unique_ptr${}$uninit(::std::unique_ptr<{}> *ptr) noexcept {{",
-            inner, instance, inner,
+            "{} *{}uninit(::std::unique_ptr<{}> *ptr) noexcept {{",
+            inner, mangled_prefix, inner,
         );
         writeln!(
             out,
@@ -1702,8 +1742,8 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     begin_function_definition(out);
     writeln!(
         out,
-        "void cxxbridge1$unique_ptr${}$raw(::std::unique_ptr<{}> *ptr, {} *raw) noexcept {{",
-        instance, inner, inner,
+        "void {}raw(::std::unique_ptr<{}> *ptr, {} *raw) noexcept {{",
+        mangled_prefix, inner, inner,
     );
     writeln!(out, "  ::new (ptr) ::std::unique_ptr<{}>(raw);", inner);
     writeln!(out, "}}");
@@ -1711,8 +1751,8 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     begin_function_definition(out);
     writeln!(
         out,
-        "{} const *cxxbridge1$unique_ptr${}$get(::std::unique_ptr<{}> const &ptr) noexcept {{",
-        inner, instance, inner,
+        "{} const *{}get(::std::unique_ptr<{}> const &ptr) noexcept {{",
+        inner, mangled_prefix, inner,
     );
     writeln!(out, "  return ptr.get();");
     writeln!(out, "}}");
@@ -1720,8 +1760,8 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     begin_function_definition(out);
     writeln!(
         out,
-        "{} *cxxbridge1$unique_ptr${}$release(::std::unique_ptr<{}> &ptr) noexcept {{",
-        inner, instance, inner,
+        "{} *{}release(::std::unique_ptr<{}> &ptr) noexcept {{",
+        inner, mangled_prefix, inner,
     );
     writeln!(out, "  return ptr.release();");
     writeln!(out, "}}");
@@ -1729,9 +1769,14 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     begin_function_definition(out);
     writeln!(
         out,
-        "void cxxbridge1$unique_ptr${}$drop(::std::unique_ptr<{}> *ptr) noexcept {{",
-        instance, inner,
+        "void {}drop({} *ptr) noexcept {{",
+        mangled_prefix, &cxx_type_string,
     );
+    if deleter_name.is_some() {
+        // Check whether the deleter is really the first member as expected by the Rust type
+        out.include.cassert = true;
+        writeln!(out, "  assert(reinterpret_cast<void*>(&ptr->get_deleter()) == reinterpret_cast<void*>(ptr));");
+    }
     if conditional_delete {
         out.builtin.deleter_if = true;
         writeln!(

@@ -2,6 +2,7 @@
 #include "tests/ffi/lib.rs.h"
 #include <cstdlib>
 #include <cstring>
+#include <cstdint>
 #include <iterator>
 #include <memory>
 #include <numeric>
@@ -15,9 +16,71 @@ extern "C" bool cxx_test_suite_r_is_correct(const tests::R *) noexcept;
 
 namespace tests {
 
+#if __cplusplus < 201703L
+
+class default_resource final : public memory_resource {
+  private:
+    static constexpr std::size_t BASE_PTR_BYTES{sizeof(std::uint8_t*) + alignof(std::uint8_t*)-1U}; // Additional space after the data holding a pointer to the allocated buffer
+    static std::uint8_t** aligned_base_ptr(void* const ptr) {
+        void* base_ptr = ptr;
+        size_t base_ptr_bytes = BASE_PTR_BYTES;
+        return reinterpret_cast<std::uint8_t**>(std::align(alignof(std::uint8_t*), sizeof(std::uint8_t*), base_ptr, base_ptr_bytes));
+    }
+
+    void* do_allocate(std::size_t bytes, std::size_t alignment) override {
+        std::size_t buffer_bytes = bytes + alignment-1; // Actual buffer for the data, with headroom for alignment
+        const std::size_t total_bytes = buffer_bytes + BASE_PTR_BYTES; // Number of bytes needed for the data and the bookkeeping
+        auto* const base_buffer = new std::uint8_t[total_bytes];
+        void* buffer = base_buffer;
+        if (std::align(alignment, bytes, buffer, buffer_bytes) == nullptr) {
+            delete[] base_buffer;
+            return nullptr;
+        }
+        auto* const buffer_end = static_cast<std::uint8_t*>(buffer) + bytes; // Pointer to the first byte after the data
+        std::uint8_t** const base_ptr = aligned_base_ptr(buffer_end);
+        if (base_ptr == nullptr) {
+            delete[] base_buffer;
+            return nullptr;
+        }
+
+        *base_ptr = base_buffer; // Store a pointer to the allocated buffer
+        return buffer;
+    }
+
+    void do_deallocate(void* p, std::size_t bytes, std::size_t alignment) override {
+        auto* const buffer_end = static_cast<std::uint8_t*>(p) + bytes;
+        std::uint8_t** const base_ptr = aligned_base_ptr(buffer_end);
+        auto* const base_buffer = *base_ptr;
+        delete[] base_buffer;
+    }
+
+    bool do_is_equal(const memory_resource& other) const noexcept override {
+        auto* other_me = dynamic_cast<const default_resource*>(&other);
+        return other_me != nullptr;
+    }
+};
+
+memory_resource* new_delete_resource() noexcept {
+    static default_resource instance;
+    return &instance;
+}
+
+#else // __cplusplus < 201703L
+
+namespace {
+memory_resource* new_delete_resource() {
+    return ::std::pmr::new_delete_resource();
+}
+}
+
+#endif // __cplusplus < 201703L
+
 static constexpr char SLICE_DATA[] = "2020";
 
-C::C(size_t n) : n(n) {}
+C::C(size_t n)
+  : n(n),
+    v{}
+{}
 
 size_t C::get() const { return this->n; }
 
@@ -74,6 +137,22 @@ rust::Box<R> c_return_box() {
 
 std::unique_ptr<C> c_return_unique_ptr() {
   return std::unique_ptr<C>(new C{2020});
+}
+
+extern "C" bool PmrDeleterForC_callback_used{false};
+
+void PmrDeleterForC::operator()(C* obj) {
+    alloc.destroy(obj);
+    alloc.deallocate(obj, 1);
+    PmrDeleterForC_callback_used = true;
+}
+
+std::unique_ptr<C, PmrDeleterForC> c_return_unique_ptr_with_deleter() {
+  auto* resource{new_delete_resource()};
+  polymorphic_allocator<C> alloc{resource};
+  C* ptr{alloc.allocate(1)};
+  alloc.construct(ptr, 42U);
+  return std::unique_ptr<C, PmrDeleterForC>{ptr, {alloc}};
 }
 
 std::shared_ptr<C> c_return_shared_ptr() {

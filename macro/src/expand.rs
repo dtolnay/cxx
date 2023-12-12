@@ -99,8 +99,8 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
             ImplKey::RustVec(ident) => {
                 hidden.extend(expand_rust_vec(ident, types, explicit_impl));
             }
-            ImplKey::UniquePtr(ident) => {
-                expanded.extend(expand_unique_ptr(ident, types, explicit_impl));
+            ImplKey::UniquePtr(ident, deleter) => {
+                expanded.extend(expand_unique_ptr(ident, types, explicit_impl, deleter));
             }
             ImplKey::SharedPtr(ident) => {
                 expanded.extend(expand_shared_ptr(ident, types, explicit_impl));
@@ -538,12 +538,8 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                     quote_spanned!(span=> ::cxx::alloc::boxed::Box::into_raw(#var))
                 }
             }
-            Type::UniquePtr(ty) => {
-                if types.is_considered_improper_ctype(&ty.inner) {
-                    quote_spanned!(span=> ::cxx::UniquePtr::into_raw(#var).cast())
-                } else {
-                    quote_spanned!(span=> ::cxx::UniquePtr::into_raw(#var))
-                }
+            Type::UniquePtr(_) => {
+                quote_spanned!(span=> #var.as_mut_ptr())
             }
             Type::RustVec(_) => quote_spanned!(span=> #var.as_mut_ptr() as *const ::cxx::private::RustVec<_>),
             Type::Ref(ty) => match &ty.inner {
@@ -664,13 +660,6 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                         quote_spanned!(span=> #call.into_vec_string())
                     } else {
                         quote_spanned!(span=> #call.into_vec())
-                    }
-                }
-                Type::UniquePtr(ty) => {
-                    if types.is_considered_improper_ctype(&ty.inner) {
-                        quote_spanned!(span=> ::cxx::UniquePtr::from_raw(#call.cast()))
-                    } else {
-                        quote_spanned!(span=> ::cxx::UniquePtr::from_raw(#call))
                     }
                 }
                 Type::Ref(ty) => match &ty.inner {
@@ -1007,7 +996,7 @@ fn expand_rust_function_shim_impl(
             }
             Type::UniquePtr(_) => {
                 requires_unsafe = true;
-                quote_spanned!(span=> ::cxx::UniquePtr::from_raw(#var))
+                quote_spanned!(span=> ::cxx::core::ptr::read(#var))
             }
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(i) if i.rust == RustString => match ty.mutable {
@@ -1075,7 +1064,6 @@ fn expand_rust_function_shim_impl(
                 Some(quote_spanned!(span=> ::cxx::private::RustVec::from))
             }
         }
-        Type::UniquePtr(_) => Some(quote_spanned!(span=> ::cxx::UniquePtr::into_raw)),
         Type::Ref(ty) => match &ty.inner {
             Type::Ident(ident) if ident.rust == RustString => match ty.mutable {
                 false => Some(quote_spanned!(span=> ::cxx::private::RustString::from_ref)),
@@ -1422,11 +1410,31 @@ fn expand_unique_ptr(
     key: NamedImplKey,
     types: &Types,
     explicit_impl: Option<&Impl>,
+    deleter: Option<&Ident>,
 ) -> TokenStream {
     let ident = key.rust;
     let name = ident.to_string();
     let resolve = types.resolve(ident);
-    let prefix = format!("cxxbridge1$unique_ptr${}$", resolve.name.to_symbol());
+
+    let (deleter_token, unique_ptr_token, prefix) = if let Some(deleter) = deleter {
+        let resolve_deleter = types.resolve(deleter);
+        (
+            quote! { <#deleter> },
+            quote! { ::cxx::UniquePtr<#ident, #deleter> },
+            format!(
+                "cxxbridge1$unique_ptr${}${}$",
+                resolve.name.to_symbol(),
+                resolve_deleter.name.to_symbol()
+            ),
+        )
+    } else {
+        (
+            TokenStream::default(),
+            quote! { ::cxx::UniquePtr<#ident> },
+            format!("cxxbridge1$unique_ptr${}$", resolve.name.to_symbol()),
+        )
+    };
+
     let link_null = format!("{}null", prefix);
     let link_uninit = format!("{}uninit", prefix);
     let link_raw = format!("{}raw", prefix);
@@ -1460,7 +1468,7 @@ fn expand_unique_ptr(
     let unsafe_token = format_ident!("unsafe", span = begin_span);
 
     quote_spanned! {end_span=>
-        #unsafe_token impl #impl_generics ::cxx::private::UniquePtrTarget for #ident #ty_generics {
+        #unsafe_token impl #impl_generics ::cxx::private::UniquePtrTarget #deleter_token for #ident #ty_generics {
             fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
                 f.write_str(#name)
             }
@@ -1501,13 +1509,13 @@ fn expand_unique_ptr(
                 }
                 unsafe { __release(&mut repr).cast() }
             }
-            unsafe fn __drop(mut repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) {
+            unsafe fn __drop(this: &mut #unique_ptr_token) where Self: Sized {
                 extern "C" {
                     #[link_name = #link_drop]
-                    fn __drop(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>);
+                    fn __drop(this: &mut #unique_ptr_token);
                 }
                 unsafe {
-                    __drop(&mut repr);
+                    __drop(this);
                 }
             }
         }
@@ -1839,13 +1847,23 @@ fn expand_extern_type(ty: &Type, types: &Types, proper: bool) -> TokenStream {
             let span = ident.rust.span();
             quote_spanned!(span=> ::cxx::private::RustString)
         }
-        Type::RustBox(ty) | Type::UniquePtr(ty) => {
+        Type::RustBox(ty) => {
             let span = ty.name.span();
             if proper && types.is_considered_improper_ctype(&ty.inner) {
                 quote_spanned!(span=> *mut ::cxx::core::ffi::c_void)
             } else {
                 let inner = expand_extern_type(&ty.inner, types, proper);
                 quote_spanned!(span=> *mut #inner)
+            }
+        }
+        Type::UniquePtr(ty) => {
+            let span = ty.name.span();
+            let inner = expand_extern_type(&ty.first, types, proper);
+            if let Some(deleter) = &ty.second {
+                let deleter = expand_extern_type(deleter, types, proper);
+                quote_spanned!(span=> ::cxx::UniquePtr<#inner, #deleter>)
+            } else {
+                quote_spanned!(span=> ::cxx::UniquePtr<#inner>)
             }
         }
         Type::RustVec(ty) => {

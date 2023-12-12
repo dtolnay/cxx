@@ -3,6 +3,10 @@
 #include <memory>
 #include <string>
 
+#if __cplusplus >= 201703L
+#include <memory_resource>
+#endif
+
 namespace A {
 struct AShared;
 enum class AEnum : uint16_t;
@@ -86,12 +90,81 @@ struct Borrow {
 
 typedef char Buffer[12];
 
+#if __cplusplus < 201703L
+
+class memory_resource {
+public:
+  virtual ~memory_resource() = default;
+
+  void* allocate(std::size_t bytes, std::size_t alignment = alignof(std::max_align_t)) {
+    return do_allocate(bytes, alignment);
+  }
+  void deallocate(void* p, std::size_t bytes, std::size_t alignment = alignof(std::max_align_t)) {
+    do_deallocate(p, bytes, alignment);
+  }
+  bool is_equal(const memory_resource& other) const noexcept {
+    return do_is_equal(other);
+  }
+
+private:
+  virtual void* do_allocate(std::size_t bytes, std::size_t alignment) = 0;
+  virtual void do_deallocate(void* p, std::size_t bytes, std::size_t alignment) = 0;
+  virtual bool do_is_equal(const memory_resource& other) const noexcept = 0;
+};
+
+memory_resource* get_default_resource() noexcept;
+
+template<typename T>
+class polymorphic_allocator {
+public:
+  polymorphic_allocator(memory_resource* r) : memory_resource_{r} {}
+
+  T* allocate(std::size_t n) {
+    return static_cast<T*>(memory_resource_->allocate(sizeof(T) * n, alignof(T)));
+  }
+
+  void deallocate(T* p, std::size_t n) {
+    memory_resource_->deallocate(p, sizeof(T) * n, alignof(T));
+  }
+
+  template<typename U, typename... Args>
+  void construct(U* p, Args... args) {
+    new (p) U{std::forward<Args>(args)...};
+  }
+
+  template<typename U>
+  void destroy(U* p) {
+    p->~U();
+  }
+
+  memory_resource* resource() const { return memory_resource_; }
+private:
+  memory_resource* memory_resource_;
+};
+
+#else // __cplusplus < 201703L
+
+#include <memory_resource>
+
+using memory_resource = ::std::pmr::memory_resource;
+
+template<typename T>
+using polymorphic_allocator = ::std::pmr::polymorphic_allocator<T>;
+
+#endif // __cplusplus < 201703L
+
+struct PmrDeleterForC final {
+  polymorphic_allocator<C> alloc;
+  void operator()(C* obj);
+};
+
 size_t c_return_primitive();
 Shared c_return_shared();
 ::A::AShared c_return_ns_shared();
 ::A::B::ABShared c_return_nested_ns_shared();
 rust::Box<R> c_return_box();
 std::unique_ptr<C> c_return_unique_ptr();
+std::unique_ptr<C, PmrDeleterForC> c_return_unique_ptr_with_deleter();
 std::shared_ptr<C> c_return_shared_ptr();
 std::unique_ptr<::H::H> c_return_ns_unique_ptr();
 const size_t &c_return_ref(const Shared &shared);

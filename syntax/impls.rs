@@ -1,5 +1,6 @@
 use crate::syntax::{
-    Array, ExternFn, Include, Lifetimes, Ptr, Receiver, Ref, Signature, SliceRef, Ty1, Type, Var,
+    Array, ExternFn, Include, Lifetimes, Ptr, Receiver, Ref, Signature, SliceRef, Ty1, Ty2, Type,
+    Var,
 };
 use std::hash::{Hash, Hasher};
 use std::mem;
@@ -145,6 +146,22 @@ impl Hash for Ty1 {
         } = self;
         name.hash(state);
         inner.hash(state);
+    }
+}
+
+impl Eq for Ty2 {}
+
+impl PartialEq for Ty2 {
+    fn eq(&self, other: &Self) -> bool {
+        self.first == other.first && self.second == other.second && self.name == other.name
+    }
+}
+
+impl Hash for Ty2 {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.name.hash(state);
+        self.first.hash(state);
+        self.second.hash(state);
     }
 }
 

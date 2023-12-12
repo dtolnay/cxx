@@ -8,8 +8,9 @@ the link for documentation of the Rust API.
 
 ### Restrictions:
 
-Only `std::unique_ptr<T, std::default_delete<T>>` is currently supported. Custom
-deleters may be supported in the future.
+If a custom deleter is used, it needs to be a type that is
+[shared between C++ and Rust](../shared.md) so that the instance of UniquePtr can still
+be passed by value in Rust code.
 
 UniquePtr\<T\> does not support T being an opaque Rust type. You should use a
 Box\<T\> (C++ [rust::Box\<T\>](box.md)) instead for transferring ownership of

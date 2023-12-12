@@ -7,7 +7,7 @@ use crate::syntax::Atom::*;
 use crate::syntax::{
     attrs, error, Api, Array, Derive, Doc, Enum, EnumRepr, ExternFn, ExternType, ForeignName, Impl,
     Include, IncludeKind, Lang, Lifetimes, NamedType, Namespace, Pair, Ptr, Receiver, Ref,
-    Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var, Variant,
+    Signature, SliceRef, Struct, Ty1, Ty2, Type, TypeAlias, Var, Variant,
 };
 use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
@@ -1063,10 +1063,13 @@ fn parse_impl(cx: &mut Errors, imp: ItemImpl) -> Result<Api> {
     let ty_generics = match &ty {
         Type::RustBox(ty)
         | Type::RustVec(ty)
-        | Type::UniquePtr(ty)
         | Type::SharedPtr(ty)
         | Type::WeakPtr(ty)
         | Type::CxxVector(ty) => match &ty.inner {
+            Type::Ident(ident) => ident.generics.clone(),
+            _ => Lifetimes::default(),
+        },
+        Type::UniquePtr(ty) => match &ty.first {
             Type::Ident(ident) => ident.generics.clone(),
             _ => Lifetimes::default(),
         },
@@ -1221,13 +1224,27 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
         match &segment.arguments {
             PathArguments::None => return Ok(Type::Ident(NamedType::new(ident))),
             PathArguments::AngleBracketed(generic) => {
-                if ident == "UniquePtr" && generic.args.len() == 1 {
-                    if let GenericArgument::Type(arg) = &generic.args[0] {
-                        let inner = parse_type(arg)?;
-                        return Ok(Type::UniquePtr(Box::new(Ty1 {
+                if ident == "UniquePtr" && (1..=2).contains(&generic.args.len()) {
+                    let first = if let GenericArgument::Type(arg) = &generic.args[0] {
+                        Some(parse_type(arg)?)
+                    } else {
+                        None
+                    };
+                    let second = if generic.args.len() == 2 {
+                        if let GenericArgument::Type(arg) = &generic.args[1] {
+                            Some(parse_type(arg)?)
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    };
+                    if let Some(first) = first {
+                        return Ok(Type::UniquePtr(Box::new(Ty2 {
                             name: ident,
                             langle: generic.lt_token,
-                            inner,
+                            first,
+                            second,
                             rangle: generic.gt_token,
                         })));
                     }

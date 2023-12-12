@@ -178,7 +178,7 @@ impl<'a> Types<'a> {
             let implicit_impl = match impl_key {
                 ImplKey::RustBox(ident)
                 | ImplKey::RustVec(ident)
-                | ImplKey::UniquePtr(ident)
+                | ImplKey::UniquePtr(ident, _)
                 | ImplKey::SharedPtr(ident)
                 | ImplKey::WeakPtr(ident)
                 | ImplKey::CxxVector(ident) => {
@@ -243,8 +243,8 @@ impl<'a> Types<'a> {
 
     pub(crate) fn needs_indirect_abi(&self, ty: &Type) -> bool {
         match ty {
-            Type::RustBox(_) | Type::UniquePtr(_) => false,
-            Type::Array(_) => true,
+            Type::RustBox(_) => false,
+            Type::Array(_) | Type::UniquePtr(_) => true,
             _ => !self.is_guaranteed_pod(ty),
         }
     }
