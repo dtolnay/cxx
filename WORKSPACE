@@ -4,8 +4,8 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "rules_rust",
-    sha256 = "1e7114ea2af800c6987ca38daeee13e3ae6e934875b4f7ca24b798857f95431e",
-    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.32.0/rules_rust-v0.32.0.tar.gz"],
+    sha256 = "0f18dd752b87d2203c140b3e356364b08a91eb6aa9b2d689ea69eb7cc2530f4d",
+    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.33.0/rules_rust-v0.33.0.tar.gz"],
 )
 
 load("@rules_rust//rust:repositories.bzl", "rules_rust_dependencies", "rust_register_toolchains")
