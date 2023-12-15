@@ -5,13 +5,13 @@ error[E0277]: `*const cxx::void` cannot be sent between threads safely
    |                   ^^^^^^^^^^^ `*const cxx::void` cannot be sent between threads safely
    |
    = help: within `ffi::Opaque`, the trait `Send` is not implemented for `*const cxx::void`
-   = note: required because it appears within the type `[*const void; 0]`
-note: required because it appears within the type `Opaque`
+   = note: required because it appears within the type `[*const cxx::void; 0]`
+note: required because it appears within the type `cxx::private::Opaque`
   --> src/opaque.rs
    |
    | pub struct Opaque {
    |            ^^^^^^
-note: required because it appears within the type `Opaque`
+note: required because it appears within the type `ffi::Opaque`
   --> tests/ui/opaque_autotraits.rs:4:14
    |
 4  |         type Opaque;
@@ -29,13 +29,13 @@ error[E0277]: `*const cxx::void` cannot be shared between threads safely
    |                   ^^^^^^^^^^^ `*const cxx::void` cannot be shared between threads safely
    |
    = help: within `ffi::Opaque`, the trait `Sync` is not implemented for `*const cxx::void`
-   = note: required because it appears within the type `[*const void; 0]`
-note: required because it appears within the type `Opaque`
+   = note: required because it appears within the type `[*const cxx::void; 0]`
+note: required because it appears within the type `cxx::private::Opaque`
   --> src/opaque.rs
    |
    | pub struct Opaque {
    |            ^^^^^^
-note: required because it appears within the type `Opaque`
+note: required because it appears within the type `ffi::Opaque`
   --> tests/ui/opaque_autotraits.rs:4:14
    |
 4  |         type Opaque;
@@ -59,12 +59,12 @@ note: required because it appears within the type `PhantomData<PhantomPinned>`
    |
    | pub struct PhantomData<T: ?Sized>;
    |            ^^^^^^^^^^^
-note: required because it appears within the type `Opaque`
+note: required because it appears within the type `cxx::private::Opaque`
   --> src/opaque.rs
    |
    | pub struct Opaque {
    |            ^^^^^^
-note: required because it appears within the type `Opaque`
+note: required because it appears within the type `ffi::Opaque`
   --> tests/ui/opaque_autotraits.rs:4:14
    |
 4  |         type Opaque;
