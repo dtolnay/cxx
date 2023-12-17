@@ -145,6 +145,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
             unused_unsafe, // FIXME: only needed by rustc 1.64 and older
             clippy::extra_unused_type_parameters,
             clippy::items_after_statements,
+            clippy::no_effect_underscore_binding,
             clippy::ptr_as_ptr,
             clippy::upper_case_acronyms,
             clippy::use_self,
