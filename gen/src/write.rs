@@ -110,7 +110,7 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
             }
             Api::EnumUnnamed(enm) => {
                 out.next_section();
-                write_enum_using(out, &enm);
+                write_enum_using(out, enm);
             }
             Api::RustType(ety) => {
                 out.next_section();

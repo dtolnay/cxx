@@ -225,8 +225,7 @@ fn parse_enum_unnamed(cx: &mut Errors, mut item: ItemEnum, namespace: &Namespace
     );
 
     // Generate the variants.
-    let mut variants = Vec::new();
-    variants.reserve(item.variants.len());
+    let mut variants = Vec::with_capacity(item.variants.len());
 
     for variant in &mut item.variants {
         // Having both, Rust typed variants and c-style value variants is
