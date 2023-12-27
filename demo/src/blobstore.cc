@@ -71,6 +71,7 @@ std::unique_ptr<BlobstoreClient> new_blobstore_client() {
 BlobEnum make_enum() { return BlobEnum{false}; }
 
 std::ostream &operator<<(std::ostream &os, const BlobMetadata &md) {
+  os << "The size [" << md.size << "] and some tags...";
   return os;
 }
 

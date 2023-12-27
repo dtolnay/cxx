@@ -254,9 +254,9 @@ impl<'a> Types<'a> {
                 let mut retain = false;
                 for var in &types.enums[ident].variants {
                     // If the ty is missing we're dealing with the C-style enum.
-                    let Some(ty) = &var.ty else {
-                        new_information = true;
-                        return false;
+                    let ty = match &var.ty {
+                        None => return false,
+                        Some(ty) => ty
                     };
                     if match types.determine_improper_ctype(ty) {
                         ImproperCtype::Depends(inner) => {
