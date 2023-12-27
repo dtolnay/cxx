@@ -12,6 +12,12 @@ pub(crate) enum CfgExpr {
     Not(Box<CfgExpr>),
 }
 
+impl Default for CfgExpr {
+    fn default() -> Self {
+        Self::Unconditional
+    }
+}
+
 impl CfgExpr {
     pub(crate) fn merge(&mut self, expr: CfgExpr) {
         if let CfgExpr::Unconditional = self {

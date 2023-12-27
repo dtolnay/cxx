@@ -51,7 +51,8 @@ pub(crate) use self::types::Types;
 pub(crate) enum Api {
     Include(Include),
     Struct(Struct),
-    Enum(Enum),
+    Enum(Enum, CEnumOpts),
+    EnumUnnamed(Enum),
     CxxType(ExternType),
     CxxFunction(ExternFn),
     RustType(ExternType),
@@ -130,6 +131,9 @@ pub(crate) struct Enum {
     pub generics: Lifetimes,
     pub brace_token: Brace,
     pub variants: Vec<Variant>,
+}
+
+pub(crate) struct CEnumOpts {
     pub variants_from_header: bool,
     #[allow(dead_code)]
     pub variants_from_header_attr: Option<Attribute>,
@@ -253,10 +257,13 @@ pub(crate) struct Variant {
     pub doc: Doc,
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
     pub attrs: OtherAttrs,
+    //     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
+    // pub visibility: Token![pub],
     pub name: Pair,
     pub discriminant: Discriminant,
     #[allow(dead_code)]
     pub expr: Option<Expr>,
+    pub ty: Option<Type>,
 }
 
 pub(crate) enum Type {

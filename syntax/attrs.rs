@@ -282,7 +282,7 @@ fn parse_rust_name_attribute(meta: &Meta) -> Result<Ident> {
     Err(Error::new_spanned(meta, "unsupported rust_name attribute"))
 }
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub(crate) struct OtherAttrs(Vec<Attribute>);
 
 impl OtherAttrs {

@@ -4,6 +4,7 @@
 #include <functional>
 #include <set>
 #include <string>
+#include <iostream>
 #include <unordered_map>
 
 namespace org {
@@ -65,6 +66,22 @@ BlobMetadata BlobstoreClient::metadata(uint64_t blobid) const {
 
 std::unique_ptr<BlobstoreClient> new_blobstore_client() {
   return std::make_unique<BlobstoreClient>();
+}
+
+Foo make_foo() {
+  return Foo{false};
+}
+
+void take_foo(const Foo& foo) {
+  std::cout << "The index of foo is " << foo.index() << std::endl;
+}
+
+void take_metadata(const BlobWrapper&) {
+
+}
+
+BlobWrapper make_metadata() {
+  return {};
 }
 
 } // namespace blobstore

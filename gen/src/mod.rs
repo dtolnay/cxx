@@ -159,6 +159,7 @@ pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
             ));
         }
     }
+    // TODO here is the c++ side - maybe I have to add here something.
 
     cfg::strip(errors, cfg_errors, opt.cfg_evaluator.as_ref(), apis);
     errors.propagate()?;

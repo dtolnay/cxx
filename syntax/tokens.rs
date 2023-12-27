@@ -1,7 +1,7 @@
 use crate::syntax::atom::Atom::*;
 use crate::syntax::{
-    Array, Atom, Derive, Enum, EnumRepr, ExternFn, ExternType, Impl, Lifetimes, NamedType, Ptr,
-    Ref, Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var,
+    Array, Atom, Derive, Enum, EnumRepr, ExternFn, ExternType, Impl, Lifetimes,
+    NamedType, Ptr, Ref, Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote_spanned, ToTokens};
@@ -53,6 +53,16 @@ impl ToTokens for Var {
         name.rust.to_tokens(tokens);
         Token![:](name.rust.span()).to_tokens(tokens);
         ty.to_tokens(tokens);
+    }
+}
+
+impl ToTokens for Variant {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let name = &self.name;
+        name.rust.to_tokens(tokens);
+        if let Some(ref ty) = self.ty {
+            ty.to_tokens(tokens);
+        }
     }
 }
 

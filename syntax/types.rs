@@ -59,6 +59,7 @@ impl<'a> Types<'a> {
         };
 
         let mut type_names = UnorderedSet::new();
+
         let mut function_names = UnorderedSet::new();
         for api in apis {
             // The same identifier is permitted to be declared as both a shared
@@ -71,11 +72,7 @@ impl<'a> Types<'a> {
                 Api::Include(_) => {}
                 Api::Struct(strct) => {
                     let ident = &strct.name.rust;
-                    if !type_names.insert(ident)
-                        && (!cxx.contains(ident)
-                            || structs.contains_key(ident)
-                            || enums.contains_key(ident))
-                    {
+                    if !type_names.insert(ident) && !cxx.contains(ident) {
                         // If already declared as a struct or enum, or if
                         // colliding with something other than an extern C++
                         // type, then error.
@@ -87,8 +84,8 @@ impl<'a> Types<'a> {
                     }
                     add_resolution(&strct.name, &strct.generics);
                 }
-                Api::Enum(enm) => {
-                    match &enm.repr {
+                Api::Enum(enm, opts) => {
+                    match &opts.repr {
                         EnumRepr::Native { atom: _, repr_type } => {
                             all.insert(repr_type);
                         }
@@ -96,21 +93,32 @@ impl<'a> Types<'a> {
                         EnumRepr::Foreign { rust_type: _ } => {}
                     }
                     let ident = &enm.name.rust;
-                    if !type_names.insert(ident)
-                        && (!cxx.contains(ident)
-                            || structs.contains_key(ident)
-                            || enums.contains_key(ident))
-                    {
+                    if !type_names.insert(ident) && !cxx.contains(ident) {
                         // If already declared as a struct or enum, or if
                         // colliding with something other than an extern C++
                         // type, then error.
                         duplicate_name(cx, enm, ident);
                     }
                     enums.insert(ident, enm);
-                    if enm.variants_from_header {
+                    if opts.variants_from_header {
                         // #![variants_from_header] enums are implicitly extern
                         // C++ type.
                         cxx.insert(&enm.name.rust);
+                    }
+                    add_resolution(&enm.name, &enm.generics);
+                }
+                Api::EnumUnnamed(enm) => {
+                    let ident = &enm.name.rust;
+                    if !type_names.insert(ident) && !cxx.contains(ident) {
+                        // If already declared as a struct or enum, or if
+                        // colliding with something other than an extern C++
+                        // type, then error.
+                        duplicate_name(cx, enm, ident);
+                    }
+
+                    enums.insert(ident, enm);
+                    for variant in &enm.variants {
+                        visit(&mut all, variant.ty.as_ref().unwrap());
                     }
                     add_resolution(&enm.name, &enm.generics);
                 }
@@ -222,6 +230,35 @@ impl<'a> Types<'a> {
                 let mut retain = false;
                 for var in &types.structs[ident].fields {
                     if match types.determine_improper_ctype(&var.ty) {
+                        ImproperCtype::Depends(inner) => {
+                            retain = true;
+                            types.struct_improper_ctypes.contains(inner)
+                        }
+                        ImproperCtype::Definite(improper) => improper,
+                    } {
+                        types.struct_improper_ctypes.insert(ident);
+                        new_information = true;
+                        return false;
+                    }
+                }
+                // If all fields definite false, remove from unresolved_structs.
+                retain
+            });
+        }
+
+        let mut unresolved_enums = types.enums.keys();
+        new_information = true;
+        while new_information {
+            new_information = false;
+            unresolved_enums.retain(|ident| {
+                let mut retain = false;
+                for var in &types.enums[ident].variants {
+                    // If the ty is missing we're dealing with the C-style enum.
+                    let Some(ty) = &var.ty else {
+                        new_information = true;
+                        return false;
+                    };
+                    if match types.determine_improper_ctype(ty) {
                         ImproperCtype::Depends(inner) => {
                             retain = true;
                             types.struct_improper_ctypes.contains(inner)

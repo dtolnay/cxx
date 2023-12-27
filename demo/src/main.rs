@@ -6,6 +6,19 @@ mod ffi {
         tags: Vec<String>,
     }
 
+    struct BlobWrapper {
+        pub inner: BlobMetadata
+    }
+
+    /// A classic.
+    // #[derive(Debug)]
+    enum Foo {
+        /// This is my doc
+        Bar(i32),
+        Baz(bool),
+        Bam(BlobMetadata),
+    }
+
     // Rust types and signatures exposed to C++.
     extern "Rust" {
         type MultiBuf;
@@ -23,6 +36,9 @@ mod ffi {
         fn put(&self, parts: &mut MultiBuf) -> u64;
         fn tag(&self, blobid: u64, tag: &str);
         fn metadata(&self, blobid: u64) -> BlobMetadata;
+
+        fn make_foo() -> Foo;
+        fn take_foo(foo: &Foo);
     }
 }
 
@@ -42,6 +58,15 @@ pub fn next_chunk(buf: &mut MultiBuf) -> &[u8] {
 }
 
 fn main() {
+    let f = ffi::Foo::Bar(1);
+    ffi::take_foo(&f);
+    let f = ffi::make_foo();
+    match f {
+        ffi::Foo::Bar(val) => println!("The value is {val}"),
+        ffi::Foo::Baz(val) => println!("The value is {val}"),
+        _ => {},
+    }
+
     let client = ffi::new_blobstore_client();
 
     // Upload a blob.

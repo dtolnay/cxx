@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <exception>
 #include <initializer_list>
 #include <iosfwd>
@@ -13,6 +14,9 @@
 #include <string>
 #include <type_traits>
 #include <utility>
+#if __cplusplus >= 201703L
+#include <variant>
+#endif
 #include <vector>
 #if defined(_WIN32)
 #include <basetsd.h>
@@ -363,6 +367,460 @@ private:
   std::array<std::uintptr_t, 3> repr;
 };
 #endif // CXXBRIDGE1_RUST_VEC
+
+#ifndef CXXBRIDGE1_RUST_VARIANT
+#define CXXBRIDGE1_RUST_VARIANT
+
+#if __cplusplus >= 201703L
+
+template <typename Type>
+struct type_from_index_impl {
+  using type = Type;
+};
+
+template <std::size_t I, typename... Ts>
+struct type_from_index;
+
+template <std::size_t I>
+struct type_from_index<I> {};
+
+template <std::size_t I, typename First, typename... Remainder>
+struct type_from_index<I, First, Remainder...>
+    : std::conditional_t<I == 0, type_from_index_impl<First>,
+                         type_from_index<I - 1, Remainder...>> {};
+
+template <bool... Values>
+constexpr size_t compile_time_count() noexcept {
+  return 0 + (static_cast<std::size_t>(Values) + ...);
+}
+
+template <bool... Values>
+struct count
+    : std::integral_constant<std::size_t, compile_time_count<Values...>()> {};
+
+template <bool... Values>
+struct exactly_once : std::conditional_t<count<Values...>::value == 1,
+                                         std::true_type, std::false_type> {};
+
+template <bool... Values>
+constexpr std::size_t compile_time_index() noexcept {
+  static_assert(sizeof...(Values) != 0, "Provide at least one value");
+  static_assert(exactly_once<Values...>::value, "Ambiguous index");
+  std::size_t ii = 0;
+  // Note: This might be a too simplistic implementation. The order of `ii++`
+  // should be guaranteed by the standard but I haven't found where.
+  return ((ii++ * static_cast<std::size_t>(Values)) + ...);
+}
+
+template <typename Type, typename... Ts>
+struct index_from_type
+    : std::integral_constant<
+          std::size_t,
+          compile_time_index<std::is_same_v<std::decay_t<Type>, Ts>...>()> {};
+
+template <typename First, typename... Remainder>
+struct visitor_type {
+  /// @brief The visit method which will pick the right type depending on the
+  /// `index` value.
+  template <typename Visitor>
+  constexpr static auto visit(Visitor &&visitor, std::size_t index,
+                              std::byte *data)
+      -> decltype(visitor(*reinterpret_cast<First *>(data))) {
+    if (index == 0) {
+      return visitor(*reinterpret_cast<First *>(data));
+    }
+    if constexpr (sizeof...(Remainder) != 0) {
+      return visitor_type<Remainder...>::visit(std::forward<Visitor>(visitor),
+                                               --index, data);
+    }
+    throw std::out_of_range("invalid");
+  }
+
+  template <typename Visitor>
+  constexpr static auto visit(Visitor &&visitor, std::size_t index,
+                              const std::byte *data)
+      -> decltype(visitor(*reinterpret_cast<const First *>(data))) {
+    if (index == 0) {
+      return visitor(*reinterpret_cast<const First *>(data));
+    }
+    if constexpr (sizeof...(Remainder) != 0) {
+      return visitor_type<Remainder...>::visit(std::forward<Visitor>(visitor),
+                                               --index, data);
+    }
+    throw std::out_of_range("invalid");
+  }
+};
+
+template <typename... Ts>
+struct attempt;
+
+template <std::size_t I, typename... Ts>
+constexpr decltype(auto) get(attempt<Ts...> &);
+
+template <std::size_t I, typename... Ts>
+constexpr decltype(auto) get(const attempt<Ts...> &);
+
+template <typename Visitor, typename... Ts>
+constexpr auto visit(Visitor &&visitor, attempt<Ts...> &);
+
+template <typename Visitor, typename... Ts>
+constexpr auto visit(Visitor &&visitor, const attempt<Ts...> &);
+
+template <typename... Ts>
+struct attempt {
+  static_assert(sizeof...(Ts) > 0,
+                "attempt must hold at least one alternative");
+
+  /// @brief Delete the default constructor since we cannot be in an
+  /// uninitialized state (if the first alternative throws). Corresponds to the
+  /// (1) constructor in std::variant.
+  attempt() = delete;
+
+  constexpr static bool all_copy_constructible_v =
+      std::conjunction_v<std::is_copy_constructible<Ts>...>;
+
+  /// @brief Copy constructor. Participates only in the resolution if all types
+  /// are copy constructable. Corresponds to (2) constructor of std::variant.
+  attempt(const attempt &other) {
+    static_assert(
+        all_copy_constructible_v,
+        "Copy constructor requires that all types are copy constructable");
+
+    m_Type = other.m_Type;
+    visit(
+        [this](const auto &value) {
+          using type = std::decay_t<decltype(value)>;
+          new (static_cast<void *>(t_buff)) type(value);
+        },
+        other);
+  };
+
+  /// @brief Delete the move constructor since if we move this container it's
+  /// unclear in which state it is. Corresponds to (3) constructor of
+  /// std::variant.
+  attempt(attempt &&other) = delete;
+
+  template <typename T>
+  constexpr static bool is_unique_v =
+      exactly_once<std::is_same_v<Ts, std::decay_t<T>>...>::value;
+
+  template <typename T>
+  constexpr static std::size_t index_from_type_v =
+      index_from_type<T, Ts...>::value;
+
+  /// @brief Converting constructor. Corresponds to (4) constructor of
+  /// std::variant.
+  template <typename T, typename D = std::decay_t<T>,
+            typename = std::enable_if_t<is_unique_v<T> &&
+                                        std::is_constructible_v<D, T>>>
+  attempt(T &&other) noexcept(std::is_nothrow_constructible_v<D, T>) {
+    m_Type = index_from_type_v<D>;
+    new (static_cast<void *>(t_buff)) D(std::forward<T>(other));
+  }
+
+  /// @brief Participates in the resolution only if we can construct T from Args
+  /// and if T is unique in Ts. Corresponds to (5) constructor of std::variant.
+  template <typename T, typename... Args,
+            typename = std::enable_if_t<is_unique_v<T>>,
+            typename = std::enable_if_t<std::is_constructible_v<T, Args...>>>
+  explicit attempt(std::in_place_type_t<T> type, Args &&...args) noexcept(
+      std::is_nothrow_constructible_v<T, Args...>)
+      : attempt{std::in_place_index<index_from_type_v<T>>,
+                std::forward<Args>(args)...} {}
+
+  template <std::size_t I>
+  using type_from_index_t = typename type_from_index<I, Ts...>::type;
+
+  /// @brief Participates in the resolution only if the index is within range
+  /// and if the type can be constructor from Args. Corresponds to (7) of
+  /// std::variant.
+  template <std::size_t I, typename... Args, typename T = type_from_index_t<I>,
+            typename = std::enable_if_t<std::is_constructible_v<T, Args...>>>
+  explicit attempt(std::in_place_index_t<I> index, Args &&...args) noexcept(
+      std::is_nothrow_constructible_v<T, Args...>) {
+    m_Type = I;
+    new (static_cast<void *>(t_buff)) T(std::forward<Args>(args)...);
+  }
+
+  template <typename... Rs>
+  constexpr static bool all_same_v =
+      std::conjunction_v<std::is_same<Rs, Ts>...>;
+
+  /// @brief Converts the std::variant to our variant. Participates only in
+  /// the resolution if all types in Ts are copy constructable.
+  template <typename... Rs, typename = std::enable_if_t<
+                                all_same_v<Rs...> && all_copy_constructible_v>>
+  attempt(const std::variant<Rs...> &other) {
+    m_Type = other.index();
+    std::visit(
+        [this](const auto &value) {
+          using type = std::decay_t<decltype(value)>;
+          new (static_cast<void *>(t_buff)) type(value);
+        },
+        other);
+  }
+
+  constexpr static bool all_move_constructible_v =
+      std::conjunction_v<std::is_move_constructible<Ts>...>;
+
+  /// @brief Converts the std::variant to our variant. Participates only in
+  /// the resolution if all types in Ts are move constructable.
+  template <typename... Rs, typename = std::enable_if_t<
+                                all_same_v<Rs...> && all_move_constructible_v>>
+  attempt(std::variant<Rs...> &&other) {
+    m_Type = other.index();
+    std::visit(
+        [this](auto &&value) {
+          using type = std::decay_t<decltype(value)>;
+          new (static_cast<void *>(t_buff)) type(std::move(value));
+        },
+        other);
+  }
+
+  ~attempt() { destroy(); }
+
+  /// @brief Copy assignment. Staticly fails if not every type in Ts is copy
+  /// constructable. Corresponds to (1) assignment of std::variant.
+  attempt &operator=(const attempt &other) {
+    static_assert(
+        all_copy_constructible_v,
+        "Copy assignment requires that all types are copy constructable");
+
+    visit([this](const auto &value) { *this = value; }, other);
+
+    return *this;
+  };
+
+  /// @brief Deleted move assignment. Same as for the move constructor.
+  /// Would correspond to (2) assignment of std::variant.
+  attempt &operator=(attempt &&other) = delete;
+
+  /// @brief Converting assignment. Corresponds to (3) assignment of
+  /// std::variant.
+  template <typename T, typename = std::enable_if_t<
+                            is_unique_v<T> && std::is_constructible_v<T &&, T>>>
+  attempt &operator=(T &&other) {
+    constexpr auto index = index_from_type_v<T>;
+
+    if (m_Type == index) {
+      if constexpr (std::is_nothrow_assignable_v<T, T &&>) {
+        get<index>(*this) = std::forward<T>(other);
+        return *this;
+      }
+    }
+    this->emplace<std::decay_t<T>>(std::forward<T>(other));
+    return *this;
+  }
+
+  /// @brief Converting assignment from std::variant. Participates only in the
+  /// resolution if all types in Ts are copy constructable.
+  template <typename... Rs, typename = std::enable_if_t<
+                                all_same_v<Rs...> && all_copy_constructible_v>>
+  attempt &operator=(const std::variant<Rs...> &other) {
+    // TODO this is not really clean since we fail if std::variant has
+    // duplicated types.
+    std::visit(
+        [this](const auto &value) {
+          using type = decltype(value);
+          emplace<std::decay_t<type>>(value);
+        },
+        other);
+    return *this;
+  }
+
+  /// @brief Converting assignment from std::variant. Participates only in the
+  /// resolution if all types in Ts are move constructable.
+  template <typename... Rs, typename = std::enable_if_t<
+                                all_same_v<Rs...> && all_move_constructible_v>>
+  attempt &operator=(std::variant<Rs...> &&other) {
+    // TODO this is not really clean since we fail if std::variant has
+    // duplicated types.
+    std::visit(
+        [this](auto &&value) {
+          using type = decltype(value);
+          emplace<std::decay_t<type>>(std::move(value));
+        },
+        other);
+    return *this;
+  }
+
+  /// @brief Emplace function. Participates in the resolution only if T is
+  /// unique in Ts and if T can be constructed from Args. Offers strong
+  /// exception guarantee. Corresponds to the (1) emplace function of
+  /// std::variant.
+  template <typename T, typename... Args,
+            typename = std::enable_if_t<is_unique_v<T>>,
+            typename = std::enable_if_t<std::is_constructible_v<T, Args...>>>
+  T &emplace(Args &&...args) {
+    constexpr std::size_t index = index_from_type_v<T>;
+    return this->emplace<index>(std::forward<Args>(args)...);
+  }
+
+  /// @brief Emplace function. Participates in the resolution only if T can be
+  /// constructed from Args. Offers strong exception guarantee. Corresponds to
+  /// the (2) emplace function of std::variant.
+  template <std::size_t I, typename... Args, typename T = type_from_index_t<I>,
+            typename = std::enable_if_t<std::is_constructible_v<T, Args...>>>
+  T &emplace(Args &&...args) {
+    if constexpr (std::is_nothrow_constructible_v<T, Args...>) {
+      destroy();
+      new (static_cast<void *>(t_buff)) T(std::forward<Args>(args)...);
+    } else if constexpr (std::is_nothrow_move_constructible_v<T>) {
+      // This operation may throw, but we know that the move does not.
+      const T tmp{std::forward<Args>(args)...};
+
+      // The operations below are save.
+      destroy();
+      new (static_cast<void *>(t_buff)) T(std::move(tmp));
+    } else {
+      // Backup the old data.
+      alignas(Ts...) std::byte old_buff[std::max({sizeof(Ts)...})];
+      std::memcpy(old_buff, t_buff, sizeof(t_buff));
+
+      try {
+        // Try to construct the new object
+        new (static_cast<void *>(t_buff)) T(std::forward<Args>(args)...);
+      } catch (...) {
+        // Restore the old buffer
+        std::memcpy(t_buff, old_buff, sizeof(t_buff));
+        throw;
+      }
+      // Fetch the old buffer and detroy it.
+      std::swap_ranges(t_buff, t_buff + sizeof(t_buff), old_buff);
+
+      destroy();
+      std::memcpy(t_buff, old_buff, sizeof(t_buff));
+    }
+
+    m_Type = I;
+    return get<I>(*this);
+  }
+
+  constexpr std::size_t index() const noexcept { return m_Type; }
+  void swap(attempt &other) {
+    // TODO
+  }
+
+  struct my_bad_variant_access : std::runtime_error {
+    my_bad_variant_access(std::size_t index)
+        : std::runtime_error{"The index should be " + std::to_string(index)} {}
+  };
+
+ public:
+  template <std::size_t I>
+  friend constexpr decltype(auto) get(attempt &variant) {
+    variant.throw_if_invalid<I>();
+    return *reinterpret_cast<type_from_index_t<I> *>(variant.t_buff);
+  }
+
+  template <std::size_t I>
+  friend constexpr decltype(auto) get(const attempt &variant) {
+    variant.throw_if_invalid<I>();
+    return *reinterpret_cast<const type_from_index_t<I> *>(variant.t_buff);
+  }
+
+ private:
+  template <std::size_t I>
+  void throw_if_invalid() const {
+    static_assert(I < (sizeof...(Ts)), "Invalid index");
+
+    if (m_Type != I) throw my_bad_variant_access(m_Type);
+  }
+
+  void destroy() {
+    visit(
+        [this](const auto &value) {
+          using type = std::decay_t<decltype(value)>;
+          value.~type();
+        },
+        *this);
+  }
+
+  // Until c++23 enums are represented as ints.
+  int m_Type;
+  // https://stackoverflow.com/questions/71828288/why-is-stdaligned-storage-to-be-deprecated-in-c23-and-what-to-use-instead
+  alignas(Ts...) std::byte t_buff[std::max({sizeof(Ts)...})];
+
+ public:
+  using this_visitor_type = visitor_type<Ts...>;
+
+  /// @brief Applies the visitor to the variant. Corresponds to the (3)
+  /// std::visit defintion.
+  template <typename Visitor>
+  friend constexpr auto visit(Visitor &&visitor, attempt &variant)
+      -> decltype(this_visitor_type::visit(std::forward<Visitor>(visitor),
+                                           variant.m_Type, variant.t_buff)) {
+    return this_visitor_type::visit(std::forward<Visitor>(visitor),
+                                    variant.m_Type, variant.t_buff);
+  }
+
+  /// @brief Applies the visitor to the variant. Corresponds to the (4)
+  /// std::visit defintion.
+  template <typename Visitor>
+  friend constexpr auto visit(Visitor &&visitor, const attempt &variant)
+      -> decltype(this_visitor_type::visit(std::forward<Visitor>(visitor),
+                                           variant.m_Type, variant.t_buff)) {
+    return this_visitor_type::visit(std::forward<Visitor>(visitor),
+                                    variant.m_Type, variant.t_buff);
+  }
+};
+
+template <typename T, typename... Ts,
+          typename = std::enable_if_t<
+              exactly_once<std::is_same_v<Ts, std::decay_t<T>>...>::value>>
+constexpr const T &get(const attempt<Ts...> &variant) {
+  constexpr auto index = index_from_type<T, Ts...>::value;
+  return get<index>(variant);
+}
+
+template <typename T, typename... Ts,
+          typename = std::enable_if_t<
+              exactly_once<std::is_same_v<Ts, std::decay_t<T>>...>::value>>
+constexpr T &get(attempt<Ts...> &variant) {
+  constexpr auto index = index_from_type<T, Ts...>::value;
+  return get<index>(variant);
+}
+
+template <bool>
+struct copy_control;
+
+template <>
+struct copy_control<true> {
+  copy_control() = default;
+  copy_control(const copy_control &other) = default;
+  copy_control &operator=(const copy_control &) = default;
+};
+
+template <>
+struct copy_control<false> {
+  copy_control() = default;
+  copy_control(const copy_control &other) = delete;
+  copy_control &operator=(const copy_control &) = delete;
+};
+
+template <typename... Ts>
+using allow_copy =
+    copy_control<std::conjunction_v<std::is_copy_constructible<Ts>...>>;
+
+template <typename... Ts>
+struct variant : public attempt<Ts...>, private allow_copy<Ts...> {
+  using base = attempt<Ts...>;
+
+  variant() = delete;
+  variant(const variant &) = default;
+  variant(variant &&) = delete;
+
+  using base::base;
+
+  variant &operator=(const variant &) = default;
+  variant &operator=(variant &&) = delete;
+
+  using base::operator=;
+};
+
+#endif
+
+#endif
 
 #ifndef CXXBRIDGE1_RUST_FN
 // https://cxx.rs/binding/fn.html
