@@ -7,7 +7,7 @@ namespace blobstore {
 
 struct MultiBuf;
 struct BlobMetadata;
-struct Foo;
+struct BlobEnum;
 
 class BlobstoreClient {
 public:
@@ -23,9 +23,9 @@ private:
 
 std::unique_ptr<BlobstoreClient> new_blobstore_client();
 
-Foo make_enum();
-void take_enum(const Foo&);
-void take_mut_enum(Foo&);
+BlobEnum make_enum();
+void take_enum(const BlobEnum&);
+void take_mut_enum(BlobEnum&);
 
 } // namespace blobstore
 } // namespace org

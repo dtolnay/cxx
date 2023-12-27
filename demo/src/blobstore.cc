@@ -68,27 +68,27 @@ std::unique_ptr<BlobstoreClient> new_blobstore_client() {
   return std::make_unique<BlobstoreClient>();
 }
 
-Foo make_enum() { return Foo{false}; }
+BlobEnum make_enum() { return BlobEnum{false}; }
 
 std::ostream &operator<<(std::ostream &os, const BlobMetadata &md) {
   return os;
 }
 
-void take_enum(const Foo &foo) {
-  std::cout << "The index of foo is " << foo.index() << std::endl;
+void take_enum(const BlobEnum &enm) {
+  std::cout << "The index of foo is " << enm.index() << std::endl;
   rust::visit(
       [](const auto &v) {
         std::cout << "The value of foo is " << v << std::endl;
       },
-      foo);
+      enm);
 }
 
-void take_mut_enum(Foo &foo) {
-  take_enum(foo);
-  if (foo.index() == 0) {
-    foo = false;
+void take_mut_enum(BlobEnum &enm) {
+  take_enum(enm);
+  if (enm.index() == 0) {
+    enm = false;
   } else {
-    foo = 111;
+    enm = 111;
   }
 }
 
