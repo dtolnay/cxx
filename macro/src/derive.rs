@@ -97,37 +97,37 @@ pub(crate) fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) 
     expanded
 }
 
-pub(crate) fn expand_enum_unnamed(enm: &Enum, actual_derives: &mut Option<TokenStream>) -> TokenStream {
-    let mut expanded = TokenStream::new();
-    let mut traits = Vec::new();
+// pub(crate) fn expand_enum_unnamed(enm: &Enum, actual_derives: &mut Option<TokenStream>) -> TokenStream {
+//     let mut expanded = TokenStream::new();
+//     let mut traits = Vec::new();
 
-    for derive in &enm.derives {
-        let span = derive.span;
-        match derive.what {
-            // The traits below will always be implemented. This is consistent
-            // with the logic for c-like enums.
-            Trait::Copy | Trait::Clone | Trait::Eq | Trait::PartialEq => {}
-            Trait::Debug => expanded.extend(enum_debug(enm, span)),
-            Trait::Default => unreachable!(),
-            Trait::ExternType => unreachable!(),
-            Trait::Hash => traits.push(quote_spanned!(span=> ::cxx::core::hash::Hash)),
-            Trait::Ord => expanded.extend(enum_ord(enm, span)),
-            Trait::PartialOrd => expanded.extend(enum_partial_ord(enm, span)),
-            Trait::Serialize => traits.push(quote_spanned!(span=> ::serde::Serialize)),
-            Trait::Deserialize => traits.push(quote_spanned!(span=> ::serde::Deserialize)),
-        }
-    }
+//     for derive in &enm.derives {
+//         let span = derive.span;
+//         match derive.what {
+//             // The traits below will always be implemented. This is consistent
+//             // with the logic for c-like enums.
+//             Trait::Copy | Trait::Clone | Trait::Eq | Trait::PartialEq => {}
+//             Trait::Debug => expanded.extend(enum_debug(enm, span)),
+//             Trait::Default => unreachable!(),
+//             Trait::ExternType => unreachable!(),
+//             Trait::Hash => traits.push(quote_spanned!(span=> ::cxx::core::hash::Hash)),
+//             Trait::Ord => expanded.extend(enum_ord(enm, span)),
+//             Trait::PartialOrd => expanded.extend(enum_partial_ord(enm, span)),
+//             Trait::Serialize => traits.push(quote_spanned!(span=> ::serde::Serialize)),
+//             Trait::Deserialize => traits.push(quote_spanned!(span=> ::serde::Deserialize)),
+//         }
+//     }
 
-    let span = enm.name.rust.span();
-    expanded.extend(enum_copy(enm, span));
-    expanded.extend(enum_clone(enm, span));
-    traits.push(quote_spanned!(span=> ::cxx::core::cmp::Eq));
-    traits.push(quote_spanned!(span=> ::cxx::core::cmp::PartialEq));
+//     let span = enm.name.rust.span();
+//     expanded.extend(enum_copy(enm, span));
+//     expanded.extend(enum_clone(enm, span));
+//     traits.push(quote_spanned!(span=> ::cxx::core::cmp::Eq));
+//     traits.push(quote_spanned!(span=> ::cxx::core::cmp::PartialEq));
 
-    *actual_derives = Some(quote!(#[derive(#(#traits),*)]));
+//     *actual_derives = Some(quote!(#[derive(#(#traits),*)]));
 
-    expanded
-}
+//     expanded
+// }
 
 fn struct_copy(strct: &Struct, span: Span) -> TokenStream {
     let ident = &strct.name.rust;
