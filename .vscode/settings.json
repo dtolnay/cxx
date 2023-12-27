@@ -1,5 +1,8 @@
 {
     "search.exclude": {
         "**/target": true
+    },
+    "files.associations": {
+        "variant": "cpp"
     }
 }

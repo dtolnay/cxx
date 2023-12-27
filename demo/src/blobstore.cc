@@ -2,9 +2,9 @@
 #include "demo/src/main.rs.h"
 #include <algorithm>
 #include <functional>
+#include <iostream>
 #include <set>
 #include <string>
-#include <iostream>
 #include <unordered_map>
 
 namespace org {
@@ -68,20 +68,28 @@ std::unique_ptr<BlobstoreClient> new_blobstore_client() {
   return std::make_unique<BlobstoreClient>();
 }
 
-Foo make_foo() {
-  return Foo{false};
+Foo make_enum() { return Foo{false}; }
+
+std::ostream &operator<<(std::ostream &os, const BlobMetadata &md) {
+  return os;
 }
 
-void take_foo(const Foo& foo) {
+void take_enum(const Foo &foo) {
   std::cout << "The index of foo is " << foo.index() << std::endl;
+  rust::visit(
+      [](const auto &v) {
+        std::cout << "The value of foo is " << v << std::endl;
+      },
+      foo);
 }
 
-void take_metadata(const BlobWrapper&) {
-
-}
-
-BlobWrapper make_metadata() {
-  return {};
+void take_mut_enum(Foo &foo) {
+  take_enum(foo);
+  if (foo.index() == 0) {
+    foo = false;
+  } else {
+    foo = 111;
+  }
 }
 
 } // namespace blobstore
