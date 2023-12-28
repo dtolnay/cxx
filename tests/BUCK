@@ -10,11 +10,11 @@ rust_test(
     name = "test",
     srcs = ["test.rs"],
     edition = "2021",
+    remote_execution_action_key_providers = ":build_mode",
     deps = [
         ":ffi",
         "//:cxx",
     ],
-    remote_execution_action_key_providers = ":build_mode",
 )
 
 rust_library(
