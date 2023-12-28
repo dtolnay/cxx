@@ -7,7 +7,7 @@ use syn::ext::IdentExt;
 use syn::parse::{Error, Parser, Result};
 use syn::punctuated::Punctuated;
 
-#[derive(Clone, Default)]
+#[derive(Clone)]
 pub(crate) struct ForeignName {
     text: String,
 }

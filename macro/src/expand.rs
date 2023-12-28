@@ -35,8 +35,6 @@ pub(crate) fn bridge(mut ffi: Module) -> Result<TokenStream> {
     let content = mem::take(&mut ffi.content);
     let trusted = ffi.unsafety.is_some();
     let namespace = &ffi.namespace;
-    // TODO this generates my token stream for rust! I probably don't need to
-    // do anything here.
     let ref mut apis = syntax::parse_items(errors, content, trusted, namespace);
     #[cfg(feature = "experimental-enum-variants-from-header")]
     crate::load::load(errors, apis);

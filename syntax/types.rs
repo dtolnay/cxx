@@ -59,7 +59,6 @@ impl<'a> Types<'a> {
         };
 
         let mut type_names = UnorderedSet::new();
-
         let mut function_names = UnorderedSet::new();
         for api in apis {
             // The same identifier is permitted to be declared as both a shared

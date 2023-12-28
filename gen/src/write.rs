@@ -110,7 +110,7 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
             }
             Api::EnumUnnamed(enm) => {
                 out.next_section();
-                write_enum_using(out, enm);
+                write_enum_unnamed(out, enm);
             }
             Api::RustType(ety) => {
                 out.next_section();
@@ -344,32 +344,30 @@ fn write_enum_decl(out: &mut OutFile, enm: &Enum, opts: &CEnumOpts) {
     writeln!(out, ";");
 }
 
-fn write_enum_using(out: &mut OutFile, enm: &Enum) {
-    write!(
-        out,
-        "struct {} final : public ::rust::variant<",
-        enm.name.cxx
-    );
+fn write_enum_unnamed(out: &mut OutFile, enm: &Enum) {
+    write!(out, "struct {} final : public", enm.name.cxx);
 
-    let mut iter = enm.variants.iter().peekable();
-    while let Some(value) = iter.next() {
-        write_type(out, value.ty.as_ref().unwrap());
-        if iter.peek().is_some() {
-            write!(out, ", ");
+    /// Writes something like `::rust::variant<type1, type2, ...>` with type1...
+    /// being cxx types of the enum's variants.
+    fn write_variants(out: &mut OutFile, enm: &Enum) {
+        write!(out, "::rust::variant<");
+        let mut iter = enm.variants.iter().peekable();
+        while let Some(value) = iter.next() {
+            write_type(out, value.ty.as_ref().unwrap());
+            if iter.peek().is_some() {
+                write!(out, ", ");
+            }
         }
+        write!(out, ">");
     }
 
-    writeln!(out, "> {{");
-    write!(out, "using base =  ::rust::variant<");
-    let mut iter = enm.variants.iter().peekable();
-    while let Some(value) = iter.next() {
-        write_type(out, value.ty.as_ref().unwrap());
-        if iter.peek().is_some() {
-            write!(out, ", ");
-        }
-    }
+    write_variants(out, enm);
+    writeln!(out, "{{");
 
-    writeln!(out, ">;");
+    write!(out, "using base = ");
+    write_variants(out, enm);
+    writeln!(out, ";");
+
     writeln!(out, " using base::base;");
     writeln!(out, " using base::operator=;");
     writeln!(out, "}};");
@@ -446,7 +444,7 @@ fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum, opts: &'a CEnumOpts) {
     writeln!(out, "#endif // {}", guard);
 }
 
-fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum, opts: & 'a CEnumOpts) {
+fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum, opts: &'a CEnumOpts) {
     let repr = match &opts.repr {
         #[cfg(feature = "experimental-enum-variants-from-header")]
         EnumRepr::Foreign { .. } => return,
