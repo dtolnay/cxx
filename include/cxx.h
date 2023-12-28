@@ -426,7 +426,7 @@ struct index_from_type
           std::size_t,
           compile_time_index<std::is_same_v<std::decay_t<Type>, Ts>...>()> {};
 
-template <typename First, typename... Remainder>
+template <typename ...Ts>
 struct visitor_type;
 
 template <typename... Ts>
@@ -720,12 +720,12 @@ private:
   // https://stackoverflow.com/questions/71828288/why-is-stdaligned-storage-to-be-deprecated-in-c23-and-what-to-use-instead
   alignas(Ts...) std::byte t_buff[std::max({sizeof(Ts)...})];
 
-  template <typename First, typename... Rs>
+  template <typename... Rs>
   friend struct visitor_type;
 };
 
 template <typename First, typename... Remainder>
-struct visitor_type {
+struct visitor_type<First, Remainder...> {
   template <typename Visitor, typename Variant>
   constexpr static decltype(auto) visit(Visitor &&visitor, Variant &&variant) {
     return visit(std::forward<Visitor>(visitor), variant.m_Type,

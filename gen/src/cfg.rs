@@ -29,10 +29,9 @@ pub(super) fn strip(
             Api::Struct(strct) => strct
                 .fields
                 .retain(|field| eval(cx, cfg_errors, cfg_evaluator, &field.cfg)),
-            Api::Enum(enm, _) => enm
+            Api::Enum(enm, _) | Api::EnumUnnamed(enm) => enm
                 .variants
                 .retain(|variant| eval(cx, cfg_errors, cfg_evaluator, &variant.cfg)),
-            // TODO What is this doing??
             _ => {}
         }
     }

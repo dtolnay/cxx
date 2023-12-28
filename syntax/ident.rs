@@ -34,13 +34,12 @@ pub(crate) fn check_all(cx: &mut Check, apis: &[Api]) {
                     check(cx, &field.name);
                 }
             }
-            Api::Enum(enm, _) => {
+            Api::Enum(enm, _) | Api::EnumUnnamed(enm) => {
                 check(cx, &enm.name);
                 for variant in &enm.variants {
                     check(cx, &variant.name);
                 }
             }
-            Api::EnumUnnamed(_) => {} // TODO
             Api::CxxType(ety) | Api::RustType(ety) => {
                 check(cx, &ety.name);
             }
