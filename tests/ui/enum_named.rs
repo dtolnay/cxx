@@ -1,8 +1,8 @@
 #[cxx::bridge]
 mod ffi {
     enum Bad {
-        A(i32),
-        B = 1,
+        A{age: i32},
+        B(i32),
     }
 }
 

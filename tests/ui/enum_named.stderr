@@ -1,0 +1,8 @@
+error: Named variants are not supported
+ --> tests/ui/enum_named.rs:3:5
+  |
+3 | /     enum Bad {
+4 | |         A{age: i32},
+5 | |         B(i32),
+6 | |     }
+  | |_____^
