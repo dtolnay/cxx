@@ -76,10 +76,10 @@ std::ostream &operator<<(std::ostream &os, const BlobMetadata &md) {
 }
 
 void take_enum(const BlobEnum &enm) {
-  std::cout << "The index of foo is " << enm.index() << std::endl;
+  std::cout << "The index of enum is " << enm.index() << std::endl;
   rust::visit(
       [](const auto &v) {
-        std::cout << "The value of foo is " << v << std::endl;
+        std::cout << "The value of enum is " << v << std::endl;
       },
       enm);
 }
