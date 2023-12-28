@@ -18,6 +18,12 @@ mod ffi {
         Bam(BlobMetadata),
     }
 
+    enum BlobCLike {
+        Bar,
+        Baz,
+        Bam,
+    }
+
     // Rust types and signatures exposed to C++.
     extern "Rust" {
         type MultiBuf;

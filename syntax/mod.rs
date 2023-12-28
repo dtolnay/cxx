@@ -38,7 +38,7 @@ use self::symbol::Symbol;
 use proc_macro2::{Ident, Span};
 use syn::punctuated::Punctuated;
 use syn::token::{Brace, Bracket, Paren};
-use syn::{Attribute, Expr, Generics, Lifetime, LitInt, Token, Type as RustType};
+use syn::{Attribute, Expr, Generics, Lifetime, LitInt, Token, Type as RustType, Visibility};
 
 pub(crate) use self::atom::Atom;
 pub(crate) use self::derive::{Derive, Trait};
@@ -257,8 +257,8 @@ pub(crate) struct Variant {
     pub doc: Doc,
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
     pub attrs: OtherAttrs,
-    //     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
-    // pub visibility: Token![pub],
+    #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
+    pub vis: Visibility,
     pub name: Pair,
     pub discriminant: Discriminant,
     #[allow(dead_code)]

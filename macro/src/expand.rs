@@ -329,11 +329,13 @@ fn expand_enum_unnamed(enm: &Enum) -> TokenStream {
         let doc = &variant.doc;
         let attrs = &variant.attrs;
         let ty = &variant.ty.as_ref().unwrap();
+        let vis = &variant.vis;
         let variant = &variant.name.rust;
-        // TODO add here the visibility and let it crash since the doc says
-        // that the syntax allows Visibilty specifiers but they should be
-        // rejected https://doc.rust-lang.org/reference/items/enumerations.html#variant-visibility
-        quote!(#doc #attrs #variant(#ty))
+        // We add the visibility if defined here and let it crash since the doc
+        // says that the syntax allows visibility specifiers but they should be
+        // rejected. See
+        // https://doc.rust-lang.org/reference/items/enumerations.html#variant-visibility
+        quote!(#doc #attrs #variant(#vis #ty))
     });
     // TODO I don't understand the custom derives.
     // let mut derives = None;

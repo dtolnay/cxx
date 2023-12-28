@@ -16,8 +16,8 @@
 #include <utility>
 // If you're using enums and variants on windows, you need to pass also
 // `/Zc:__cplusplus` as a compiler to make __cplusplus work correctly. If users
-// ever report that they have a too old compiler to `/Zc:__cplusplus` we still
-// may support a `_MSVC_LANG` define.
+// ever report that they have a too old compiler to `/Zc:__cplusplus` we may
+// fallback to the `_MSVC_LANG` define.
 //
 // Sources:
 // https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus/
@@ -415,7 +415,7 @@ constexpr std::size_t compile_time_index() noexcept {
   static_assert(sizeof...(Values) != 0, "Provide at least one value");
   static_assert(exactly_once<Values...>::value, "Ambiguous index");
   std::size_t ii = 0;
-  // Note: This might be a too simplistic implementation. The order of `ii++`
+  // TODO: This might be a too simplistic implementation. The order of `ii++`
   // should be guaranteed by the standard but I haven't found where.
   return ((ii++ * static_cast<std::size_t>(Values)) + ...);
 }
