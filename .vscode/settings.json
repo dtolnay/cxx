@@ -3,6 +3,7 @@
         "**/target": true
     },
     "files.associations": {
-        "variant": "cpp"
+        "variant": "cpp",
+        "string": "cpp"
     }
 }

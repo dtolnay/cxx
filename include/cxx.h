@@ -14,6 +14,14 @@
 #include <string>
 #include <type_traits>
 #include <utility>
+// If you're using enums and variants on windows, you need to pass also
+// `/Zc:__cplusplus` as a compiler to make __cplusplus work correctly. If users
+// ever report that they have a too old compiler to `/Zc:__cplusplus` we still
+// may support a `_MSVC_LANG` define.
+//
+// Sources:
+// https://devblogs.microsoft.com/cppblog/msvc-now-correctly-reports-__cplusplus/
+// https://learn.microsoft.com/en-us/cpp/build/reference/zc-cplusplus?view=msvc-170
 #if __cplusplus >= 201703L
 #include <variant>
 #endif
