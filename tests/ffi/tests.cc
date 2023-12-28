@@ -229,6 +229,19 @@ std::unique_ptr<Borrow> c_return_borrow(const std::string &s) {
   return std::unique_ptr<Borrow>(new Borrow(s));
 }
 
+EnumSimple c_return_enum_simple(bool first) {
+  if(first)
+    return false;
+  return Shared{123};
+}
+
+EnumImproper c_return_enum_improper(bool first) {
+  if (first) {
+    return 2;
+  }
+  return SharedString{rust::String{"Some string"}};
+}
+
 void c_take_primitive(size_t n) {
   if (n == 2020) {
     cxx_test_suite_set_correct();

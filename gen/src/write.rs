@@ -344,7 +344,7 @@ fn write_enum_decl(out: &mut OutFile, enm: &Enum, opts: &CEnumOpts) {
 }
 
 fn write_enum_unnamed(out: &mut OutFile, enm: &Enum) {
-    write!(out, "struct {} final : public", enm.name.cxx);
+    write!(out, "struct {} final : public ", enm.name.cxx);
 
     /// Writes something like `::rust::variant<type1, type2, ...>` with type1...
     /// being cxx types of the enum's variants.
@@ -363,12 +363,14 @@ fn write_enum_unnamed(out: &mut OutFile, enm: &Enum) {
     write_variants(out, enm);
     writeln!(out, "{{");
 
-    write!(out, "using base = ");
+    write!(out, "  using base = ");
     write_variants(out, enm);
     writeln!(out, ";");
-
-    writeln!(out, " using base::base;");
-    writeln!(out, " using base::operator=;");
+    writeln!(out, "  {}() = delete;", enm.name.cxx);
+    writeln!(out, "  {}(const {}&) = default;", enm.name.cxx, enm.name.cxx);
+    writeln!(out, "  {}({}&&) = default;", enm.name.cxx, enm.name.cxx);
+    writeln!(out, "  using base::base;");
+    writeln!(out, "  using base::operator=;");
     writeln!(out, "}};");
 }
 

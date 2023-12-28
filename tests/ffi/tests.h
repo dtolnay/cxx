@@ -39,6 +39,9 @@ struct Shared;
 struct SharedString;
 enum class Enum : uint16_t;
 
+struct EnumSimple;
+struct EnumImproper;
+
 class C {
 public:
   C(size_t n);
@@ -124,6 +127,8 @@ Enum c_return_enum(uint16_t n);
 std::unique_ptr<Borrow> c_return_borrow(const std::string &s);
 const C *c_return_const_ptr(size_t n);
 C *c_return_mut_ptr(size_t n);
+EnumSimple c_return_enum_simple(bool first);
+EnumImproper c_return_enum_improper(bool first);
 
 void c_take_primitive(size_t n);
 void c_take_shared(Shared shared);

@@ -92,6 +92,16 @@ pub mod ffi {
         s: &'a str,
     }
 
+    enum EnumSimple {
+        AVal(bool),
+        BVal(Shared),
+    }
+
+    enum EnumImproper {
+        AVal(i32),
+        BVal(SharedString),
+    }
+
     unsafe extern "C++" {
         include!("tests/ffi/tests.h");
 
@@ -131,6 +141,8 @@ pub mod ffi {
         fn c_return_nested_ns_enum(n: u16) -> ABEnum;
         fn c_return_const_ptr(n: usize) -> *const C;
         fn c_return_mut_ptr(n: usize) -> *mut C;
+        fn c_return_enum_simple(first: bool) -> EnumSimple;
+        fn c_return_enum_improper(first: bool) -> EnumImproper;
 
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);

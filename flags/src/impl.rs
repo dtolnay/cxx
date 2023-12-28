@@ -7,6 +7,7 @@ pub const STD: &str = {
 
     #[cfg(feature = "c++17")]
     (flags = ["-std=c++17", "/std:c++17"]);
+    // TODO if I add a feature for the enum add here /Zc:__cplusplus for windows.
 
     #[cfg(feature = "c++20")]
     (flags = ["-std=c++20", "/std:c++20"]);
