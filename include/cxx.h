@@ -410,7 +410,6 @@ template <bool... Values>
 struct exactly_once : std::conditional_t<count<Values...>::value == 1,
                                          std::true_type, std::false_type> {};
 
-
 template <size_t Index, bool... Values>
 struct index_from_type_impl;
 
@@ -424,7 +423,10 @@ struct index_from_type_impl<Index, First, Remainder...>
 
 template <typename Type, typename... Ts>
 struct index_from_type
-    : index_from_type_impl<0, std::is_same_v<std::decay_t<Type>, Ts>...> {};
+    : index_from_type_impl<0, std::is_same_v<std::decay_t<Type>, Ts>...> {
+  static_assert(exactly_once<std::is_same_v<std::decay_t<Type>, Ts>...>::value,
+                "Index must be unique");
+};
 
 template <typename... Ts>
 struct visitor_type;
