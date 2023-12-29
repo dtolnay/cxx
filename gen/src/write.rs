@@ -367,8 +367,8 @@ fn write_enum_unnamed(out: &mut OutFile, enm: &Enum) {
     write_variants(out, enm);
     writeln!(out, ";");
     writeln!(out, "  {}() = delete;", enm.name.cxx);
-    writeln!(out, "  {}(const {}&) = default;", enm.name.cxx, enm.name.cxx);
-    writeln!(out, "  {}({}&&) = default;", enm.name.cxx, enm.name.cxx);
+    writeln!(out, "  {0}(const {0}&) = default;", enm.name.cxx);
+    writeln!(out, "  {0}({0}&&) = delete;", enm.name.cxx);
     writeln!(out, "  using base::base;");
     writeln!(out, "  using base::operator=;");
     writeln!(out, "}};");

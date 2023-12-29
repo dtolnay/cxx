@@ -382,9 +382,31 @@ fn test_raw_ptr() {
 
 #[test]
 fn test_data_enums() {
-    let v1 = ffi::c_return_enum_improper(true);
-    assert!(matches!(v1, ffi::EnumImproper::AVal(2)));
+    use ffi::{c_return_enum_improper, c_return_enum_simple};
+    use ffi::{EnumImproper, EnumSimple};
 
-    // let v1 = ffi::c_return_enum_simple(true);
-    // assert!(matches!(v1, ffi::EnumSimple::AVal(false)));
+    assert!(matches!(
+        c_return_enum_simple(true),
+        EnumSimple::AVal(false)
+    ));
+
+    assert!(matches!(
+        c_return_enum_simple(false),
+        EnumSimple::BVal(ffi::Shared { z: 123 })
+    ));
+
+    assert!(matches!(
+        c_return_enum_improper(true),
+        EnumImproper::AVal(2)
+    ));
+
+    let msg = "Some string".to_string();
+    match c_return_enum_improper(false) {
+        EnumImproper::BVal(val) => {
+            assert_eq!(val.msg, msg);
+        }
+        EnumImproper::AVal(_) => {
+            assert!(false);
+        }
+    }
 }

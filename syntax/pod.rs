@@ -19,15 +19,10 @@ impl<'a> Types<'a> {
                             .iter()
                             .all(|field| self.is_guaranteed_pod(&field.ty))
                 } else if let Some(enm) = self.enums.get(ident) {
-                    if enm.variants.iter().all(|variant| variant.ty.is_some()) {
-                        enm.variants
-                            .iter()
-                            .all(|variant| self.is_guaranteed_pod(variant.ty.as_ref().unwrap()))
-                    } else {
-                        // This assumes that every variant has no ty set which
-                        // means we're in the "c-style" branch.
-                        true
-                    }
+                    // The data enums are not pods, since the c++ side
+                    // implements custom copy constructors and destructors. The
+                    // c-like enums are pods, though.
+                    !enm.variants.iter().any(|variant| variant.ty.is_some())
                 } else {
                     false
                 }

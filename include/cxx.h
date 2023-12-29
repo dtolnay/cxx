@@ -410,23 +410,23 @@ template <bool... Values>
 struct exactly_once : std::conditional_t<count<Values...>::value == 1,
                                          std::true_type, std::false_type> {};
 
-template <bool... Values>
-constexpr std::size_t compile_time_index() noexcept {
-  static_assert(sizeof...(Values) != 0, "Provide at least one value");
-  static_assert(exactly_once<Values...>::value, "Ambiguous index");
-  std::size_t ii = 0;
-  // TODO: This might be a too simplistic implementation. The order of `ii++`
-  // should be guaranteed by the standard but I haven't found where.
-  return ((ii++ * static_cast<std::size_t>(Values)) + ...);
-}
+
+template <size_t Index, bool... Values>
+struct index_from_type_impl;
+
+template <size_t Index>
+struct index_from_type_impl<Index> {};
+
+template <size_t Index, bool First, bool... Remainder>
+struct index_from_type_impl<Index, First, Remainder...>
+    : std::conditional_t<First, std::integral_constant<size_t, Index>,
+                         index_from_type_impl<Index + 1, Remainder...>> {};
 
 template <typename Type, typename... Ts>
 struct index_from_type
-    : std::integral_constant<
-          std::size_t,
-          compile_time_index<std::is_same_v<std::decay_t<Type>, Ts>...>()> {};
+    : index_from_type_impl<0, std::is_same_v<std::decay_t<Type>, Ts>...> {};
 
-template <typename ...Ts>
+template <typename... Ts>
 struct visitor_type;
 
 template <typename... Ts>
