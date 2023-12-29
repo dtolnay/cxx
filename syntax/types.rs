@@ -71,7 +71,11 @@ impl<'a> Types<'a> {
                 Api::Include(_) => {}
                 Api::Struct(strct) => {
                     let ident = &strct.name.rust;
-                    if !type_names.insert(ident) && !cxx.contains(ident) {
+                    if !type_names.insert(ident)
+                        && (!cxx.contains(ident)
+                            || structs.contains_key(ident)
+                            || enums.contains_key(ident))
+                    {
                         // If already declared as a struct or enum, or if
                         // colliding with something other than an extern C++
                         // type, then error.
@@ -92,7 +96,11 @@ impl<'a> Types<'a> {
                         EnumRepr::Foreign { rust_type: _ } => {}
                     }
                     let ident = &enm.name.rust;
-                    if !type_names.insert(ident) && !cxx.contains(ident) {
+                    if !type_names.insert(ident)
+                        && (!cxx.contains(ident)
+                            || structs.contains_key(ident)
+                            || enums.contains_key(ident))
+                    {
                         // If already declared as a struct or enum, or if
                         // colliding with something other than an extern C++
                         // type, then error.
@@ -108,7 +116,11 @@ impl<'a> Types<'a> {
                 }
                 Api::EnumUnnamed(enm) => {
                     let ident = &enm.name.rust;
-                    if !type_names.insert(ident) && !cxx.contains(ident) {
+                    if !type_names.insert(ident)
+                        && (!cxx.contains(ident)
+                            || structs.contains_key(ident)
+                            || enums.contains_key(ident))
+                    {
                         // If already declared as a struct or enum, or if
                         // colliding with something other than an extern C++
                         // type, then error.
@@ -255,7 +267,7 @@ impl<'a> Types<'a> {
                     // If the ty is missing we're dealing with the C-style enum.
                     let ty = match &var.ty {
                         None => return false,
-                        Some(ty) => ty
+                        Some(ty) => ty,
                     };
                     if match types.determine_improper_ctype(ty) {
                         ImproperCtype::Depends(inner) => {
