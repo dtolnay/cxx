@@ -1,6 +1,7 @@
 #include "../include/cxx.h"
 #include <cstdio>
 #include <cstring>
+#include <functional>
 #include <iostream>
 #include <memory>
 
@@ -186,7 +187,7 @@ String String::lossy(const char16_t *s, std::size_t len) noexcept {
   return String(lossy_t{}, s, len);
 }
 
-String &String::operator=(const String &other) &noexcept {
+String &String::operator=(const String &other) & noexcept {
   if (this != &other) {
     cxxbridge1$string$drop(this);
     cxxbridge1$string$clone(this, other);
@@ -194,7 +195,7 @@ String &String::operator=(const String &other) &noexcept {
   return *this;
 }
 
-String &String::operator=(String &&other) &noexcept {
+String &String::operator=(String &&other) & noexcept {
   cxxbridge1$string$drop(this);
   this->repr = other.repr;
   cxxbridge1$string$new(&other);
@@ -641,6 +642,15 @@ static_assert(
 static_assert(
     !std::is_constructible_v<duplicate_variant, std::in_place_index_t<2>, int>);
 
+// We're using the std::reference_wrapper if the enum holds a reference. The
+// standard however does not guarantee that the size of std::reference_wrapper
+// is the same size as a pointer (required to be compatible with Rust's
+// references). Therefore we check it at compile time.
+//
+// [1] https://en.cppreference.com/w/cpp/utility/functional/reference_wrapper
+// [2] https://doc.rust-lang.org/std/mem/fn.size_of.html#examples
+static_assert(sizeof(std::reference_wrapper<all_variant>) ==
+              sizeof(std::ptrdiff_t));
 
 } // namespace detail
 #endif
@@ -683,7 +693,7 @@ Error &Error::operator=(const Error &other) & {
   return *this;
 }
 
-Error &Error::operator=(Error &&other) &noexcept {
+Error &Error::operator=(Error &&other) & noexcept {
   std::exception::operator=(std::move(other));
   delete[] this->msg;
   this->msg = other.msg;
