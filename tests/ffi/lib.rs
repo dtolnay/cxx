@@ -102,6 +102,11 @@ pub mod ffi {
         BVal(SharedString),
     }
 
+    enum EnumWithLifeTime<'a> {
+        AVal(&'a str),
+        BVal(&'a i32),
+    }
+
     unsafe extern "C++" {
         include!("tests/ffi/tests.h");
 
@@ -143,6 +148,7 @@ pub mod ffi {
         fn c_return_mut_ptr(n: usize) -> *mut C;
         fn c_return_enum_simple(first: bool) -> EnumSimple;
         fn c_return_enum_improper(first: bool) -> EnumImproper;
+        fn c_return_enum_with_lifetime<'a>(val: &'a i32) -> EnumWithLifeTime<'a>;
 
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);

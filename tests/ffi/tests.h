@@ -41,6 +41,7 @@ enum class Enum : uint16_t;
 
 struct EnumSimple;
 struct EnumImproper;
+struct EnumWithLifeTime;
 
 class C {
 public:
@@ -129,6 +130,7 @@ const C *c_return_const_ptr(size_t n);
 C *c_return_mut_ptr(size_t n);
 EnumSimple c_return_enum_simple(bool first);
 EnumImproper c_return_enum_improper(bool first);
+EnumWithLifeTime c_return_enum_with_lifetime(const int& val);
 
 void c_take_primitive(size_t n);
 void c_take_shared(Shared shared);

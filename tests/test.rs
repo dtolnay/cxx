@@ -382,8 +382,8 @@ fn test_raw_ptr() {
 
 #[test]
 fn test_data_enums() {
-    use ffi::{c_return_enum_improper, c_return_enum_simple};
-    use ffi::{EnumImproper, EnumSimple};
+    use ffi::{c_return_enum_improper, c_return_enum_simple, c_return_enum_with_lifetime};
+    use ffi::{EnumImproper, EnumSimple, EnumWithLifeTime};
 
     assert!(matches!(
         c_return_enum_simple(true),
@@ -407,6 +407,14 @@ fn test_data_enums() {
         }
         EnumImproper::AVal(_) => {
             assert!(false);
+        }
+    }
+
+    let a = 0xdead;
+    match c_return_enum_with_lifetime(&a) {
+        EnumWithLifeTime::AVal(_) => assert!(false),
+        EnumWithLifeTime::BVal(&v) => {
+            assert_eq!(a, v);
         }
     }
 }

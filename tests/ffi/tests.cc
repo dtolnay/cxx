@@ -230,7 +230,7 @@ std::unique_ptr<Borrow> c_return_borrow(const std::string &s) {
 }
 
 EnumSimple c_return_enum_simple(bool first) {
-  if(first)
+  if (first)
     return false;
   return Shared{123};
 }
@@ -242,7 +242,13 @@ EnumImproper c_return_enum_improper(bool first) {
   return SharedString{rust::String{"Some string"}};
 }
 
+EnumWithLifeTime c_return_enum_with_lifetime(const int &val) {
+  return std::reference_wrapper<const int>(val);
+}
+
 void c_take_primitive(size_t n) {
+  int v = 123;
+  c_return_enum_with_lifetime(v);
   if (n == 2020) {
     cxx_test_suite_set_correct();
   }
