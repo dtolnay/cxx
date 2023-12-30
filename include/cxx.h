@@ -710,7 +710,7 @@ private:
 
   void destroy() {
     visit(
-        [this](const auto &value) {
+        [](const auto &value) {
           using type = std::decay_t<decltype(value)>;
           value.~type();
         },
