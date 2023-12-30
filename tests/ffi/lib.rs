@@ -92,6 +92,7 @@ pub mod ffi {
         s: &'a str,
     }
 
+    #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
     enum EnumSimple {
         AVal(bool),
         BVal(Shared),

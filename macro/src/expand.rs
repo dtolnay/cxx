@@ -337,9 +337,8 @@ fn expand_enum_unnamed(enm: &Enum) -> TokenStream {
         // https://doc.rust-lang.org/reference/items/enumerations.html#variant-visibility
         quote!(#doc #attrs #variant(#vis #ty))
     });
-    // TODO I don't understand the custom derives.
-    // let mut derives = None;
-    // let derived_traits = derive::expand_struct(strct, &mut derives);
+    let mut derives = None;
+    let derived_traits = derive::expand_enum_unnamed(enm, &mut derives);
 
     let span = ident.span();
     let visibility = enm.visibility;
@@ -353,7 +352,7 @@ fn expand_enum_unnamed(enm: &Enum) -> TokenStream {
 
     quote! {
         #doc
-        // #derives
+        #derives
         #attrs
         #[repr(C)]
         #enum_def
@@ -365,7 +364,7 @@ fn expand_enum_unnamed(enm: &Enum) -> TokenStream {
             type Kind = ::cxx::kind::Trivial;
         }
 
-        // #derived_traits
+        #derived_traits
     }
 }
 
