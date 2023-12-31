@@ -395,6 +395,9 @@ fn check_api_enum_unnamed(cx: &mut Check, enm: &Enum) {
     }
 
     for variant in &enm.variants {
+        if variant.ty.is_none() {
+            continue;
+        }
         let ty = variant.ty.as_ref().unwrap();
         if let Type::Fn(_) = ty {
             cx.error(

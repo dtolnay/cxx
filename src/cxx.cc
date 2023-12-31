@@ -664,6 +664,8 @@ static_assert(std::is_same_v<decltype(get<0>(std::declval<copy_variant>())),
 static_assert(std::is_same_v<decltype(get<1>(std::declval<copy_variant>())),
                              const copy_variant_alternative_t<1> &>);
 
+static_assert(sizeof(empty) == sizeof(std::uint8_t));
+
 } // namespace detail
 #endif
 

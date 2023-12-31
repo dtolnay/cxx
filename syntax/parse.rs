@@ -242,14 +242,12 @@ fn parse_enum_unnamed(cx: &mut Errors, mut item: ItemEnum, namespace: &Namespace
         }
 
         // Get the unnamed field of the variant.
-        let field = match variant.fields {
-            // TODO(ddo) This is consistent with the struct but it makes the
-            // feature way less useful.
-            Fields::Unit => {
-                return Err(Error::new_spanned(item, "Unit variants are not supported"))
-            }
+        let (ty, vis) = match variant.fields {
             Fields::Named(_) => {
                 return Err(Error::new_spanned(item, "Named variants are not supported"))
+            }
+            Fields::Unit => {
+                (None, Visibility::Inherited)
             }
             Fields::Unnamed(ref unnamed_variant) => {
                 // Having move than one unnamed field is also illegal since we can't
@@ -260,17 +258,18 @@ fn parse_enum_unnamed(cx: &mut Errors, mut item: ItemEnum, namespace: &Namespace
                         "More than one unnamed field is not supported",
                     ));
                 }
-                unnamed_variant.unnamed.first().unwrap()
+                let field = unnamed_variant.unnamed.first().unwrap();
+                let ty = match parse_type(&field.ty) {
+                    Ok(ty) => ty,
+                    Err(err) => {
+                        cx.push(err);
+                        continue;
+                    }
+                };
+                (Some(ty), field.vis.clone())
             }
         };
 
-        let ty = match parse_type(&field.ty) {
-            Ok(ty) => ty,
-            Err(err) => {
-                cx.push(err);
-                continue;
-            }
-        };
 
         let mut cfg = CfgExpr::Unconditional;
         let mut doc = Doc::new();
@@ -292,10 +291,10 @@ fn parse_enum_unnamed(cx: &mut Errors, mut item: ItemEnum, namespace: &Namespace
             doc,
             attrs: variant_attrs,
             name,
-            vis: field.vis.clone(),
+            vis,
             discriminant: Discriminant::zero(),
             expr: None,
-            ty: Some(ty),
+            ty,
         });
     }
 

@@ -7,8 +7,8 @@ use crate::syntax::qualified::QualifiedName;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    self, check, mangle, Api, Doc, Enum, ExternFn, ExternType, Impl, Lifetimes, Pair,
-    Signature, Struct, Trait, Type, TypeAlias, Types, CEnumOpts,
+    self, check, mangle, Api, CEnumOpts, Doc, Enum, ExternFn, ExternType, Impl, Lifetimes, Pair,
+    Signature, Struct, Trait, Type, TypeAlias, Types,
 };
 use crate::type_id::Crate;
 use crate::{derive, generics};
@@ -328,14 +328,21 @@ fn expand_enum_unnamed(enm: &Enum) -> TokenStream {
     let variants = enm.variants.iter().map(|variant| {
         let doc = &variant.doc;
         let attrs = &variant.attrs;
-        let ty = &variant.ty.as_ref().unwrap();
-        let vis = &variant.vis;
-        let variant = &variant.name.rust;
-        // We add the visibility if defined here and let it crash since the doc
-        // says that the syntax allows visibility specifiers but they should be
-        // rejected. See
-        // https://doc.rust-lang.org/reference/items/enumerations.html#variant-visibility
-        quote!(#doc #attrs #variant(#vis #ty))
+        let ident = &variant.name.rust;
+
+        match &variant.ty {
+            None => {
+                quote!(#doc #attrs #ident)
+            }
+            Some(ty) => {
+                let vis = &variant.vis;
+                // We add the visibility if defined here and let it crash since the doc
+                // says that the syntax allows visibility specifiers but they should be
+                // rejected. See
+                // https://doc.rust-lang.org/reference/items/enumerations.html#variant-visibility
+                quote!(#doc #attrs #ident(#vis #ty))
+            }
+        }
     });
     let mut derives = None;
     let derived_traits = derive::expand_enum_unnamed(enm, &mut derives);
@@ -368,7 +375,7 @@ fn expand_enum_unnamed(enm: &Enum) -> TokenStream {
     }
 }
 
-fn expand_enum(enm: &Enum, opts:& CEnumOpts) -> TokenStream {
+fn expand_enum(enm: &Enum, opts: &CEnumOpts) -> TokenStream {
     let ident = &enm.name.rust;
     let doc = &enm.doc;
     let attrs = &enm.attrs;

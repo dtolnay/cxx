@@ -19,7 +19,7 @@ impl<'a> Types<'a> {
                 } else if let Some(strct) = self.structs.get(ident) {
                     Depends(&strct.name.rust) // iterate to fixed-point
                 } else if let Some(enm) = self.enums.get(ident) {
-                    if enm.variants.iter().all(|variant| variant.ty.is_some()) {
+                    if enm.variants.iter().any(|variant| variant.ty.is_some()) {
                         Depends(&enm.name.rust) // iterate to fixed-point
                     } else {
                         Definite(self.rust.contains(ident) || self.aliases.contains_key(ident))

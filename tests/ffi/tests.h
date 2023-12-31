@@ -128,7 +128,7 @@ Enum c_return_enum(uint16_t n);
 std::unique_ptr<Borrow> c_return_borrow(const std::string &s);
 const C *c_return_const_ptr(size_t n);
 C *c_return_mut_ptr(size_t n);
-EnumSimple c_return_enum_simple(bool first);
+EnumSimple c_return_enum_simple(int value);
 EnumImproper c_return_enum_improper(bool first);
 EnumWithLifeTime c_return_enum_with_lifetime(const int& val);
 

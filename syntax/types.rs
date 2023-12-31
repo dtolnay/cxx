@@ -129,7 +129,9 @@ impl<'a> Types<'a> {
 
                     enums.insert(ident, enm);
                     for variant in &enm.variants {
-                        visit(&mut all, variant.ty.as_ref().unwrap());
+                        if variant.ty.is_some() {
+                            visit(&mut all, variant.ty.as_ref().unwrap());
+                        }
                     }
                     add_resolution(&enm.name, &enm.generics);
                 }

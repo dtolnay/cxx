@@ -385,15 +385,14 @@ fn test_data_enums() {
     use ffi::{c_return_enum_improper, c_return_enum_simple, c_return_enum_with_lifetime};
     use ffi::{EnumImproper, EnumSimple, EnumWithLifeTime};
 
-    assert!(matches!(
-        c_return_enum_simple(true),
-        EnumSimple::AVal(false)
-    ));
+    assert!(matches!(c_return_enum_simple(0), EnumSimple::AVal(false)));
 
     assert!(matches!(
-        c_return_enum_simple(false),
+        c_return_enum_simple(1),
         EnumSimple::BVal(ffi::Shared { z: 123 })
     ));
+
+    assert!(matches!(c_return_enum_simple(2), EnumSimple::CVal));
 
     assert!(matches!(
         c_return_enum_improper(true),

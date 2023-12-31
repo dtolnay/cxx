@@ -352,20 +352,26 @@ fn write_enum_unnamed(out: &mut OutFile, enm: &Enum) {
         write!(out, "::rust::variant<");
         let mut iter = enm.variants.iter().peekable();
         while let Some(value) = iter.next() {
-            let ty = value.ty.as_ref().unwrap();
-            match ty {
-                Type::Ref(r) => {
-                    // References are not allowed in variants, so we wrap them
-                    // into std::reference_wrapper.
-                    write!(out, "std::reference_wrapper<");
-                    write_type_space(out, &r.inner);
-                    if !r.mutable {
-                        write!(out, "const ");
+            match &value.ty {
+                None => {
+                    write!(out, "::rust::empty");
+                }
+                Some(ty) => {
+                    match ty {
+                        Type::Ref(r) => {
+                            // References are not allowed in variants, so we wrap them
+                            // into std::reference_wrapper.
+                            write!(out, "std::reference_wrapper<");
+                            write_type_space(out, &r.inner);
+                            if !r.mutable {
+                                write!(out, "const ");
+                            }
+                            write!(out, ">");
+                        }
+                        _ => write_type(out, ty),
                     }
-                    write!(out, ">");
-                },
-                _ => write_type(out, ty),
-            }
+                }
+            };
             if iter.peek().is_some() {
                 write!(out, ", ");
             }

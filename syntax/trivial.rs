@@ -38,6 +38,7 @@ pub(crate) fn required_trivial_reasons<'a>(
 
     for api in apis {
         match api {
+            // TODO Add here the enums
             Api::Struct(strct) => {
                 for field in &strct.fields {
                     if let Type::Ident(ident) = &field.ty {

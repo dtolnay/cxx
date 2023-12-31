@@ -850,11 +850,8 @@ struct variant : public attempt<Ts...>, private allow_copy<Ts...> {
   using base::operator=;
 };
 
-template <typename Visitor, typename... Ts>
-constexpr decltype(auto) visit(Visitor &&visitor, attempt<Ts...> &);
-
-template <typename Visitor, typename... Ts>
-constexpr decltype(auto) visit(Visitor &&visitor, const attempt<Ts...> &);
+/// An empty type used for unit variants from Rust.
+struct empty {};
 
 #endif
 

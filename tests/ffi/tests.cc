@@ -229,10 +229,12 @@ std::unique_ptr<Borrow> c_return_borrow(const std::string &s) {
   return std::unique_ptr<Borrow>(new Borrow(s));
 }
 
-EnumSimple c_return_enum_simple(bool first) {
-  if (first)
+EnumSimple c_return_enum_simple(int value) {
+  if (value == 0)
     return false;
-  return Shared{123};
+  else if (value == 1)
+    return Shared{123};
+  return rust::empty{};
 }
 
 EnumImproper c_return_enum_improper(bool first) {

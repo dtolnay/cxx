@@ -96,6 +96,7 @@ pub mod ffi {
     enum EnumSimple {
         AVal(bool),
         BVal(Shared),
+        CVal,
     }
 
     enum EnumImproper {
@@ -147,7 +148,7 @@ pub mod ffi {
         fn c_return_nested_ns_enum(n: u16) -> ABEnum;
         fn c_return_const_ptr(n: usize) -> *const C;
         fn c_return_mut_ptr(n: usize) -> *mut C;
-        fn c_return_enum_simple(first: bool) -> EnumSimple;
+        fn c_return_enum_simple(value: i32) -> EnumSimple;
         fn c_return_enum_improper(first: bool) -> EnumImproper;
         fn c_return_enum_with_lifetime<'a>(val: &'a i32) -> EnumWithLifeTime<'a>;
 
