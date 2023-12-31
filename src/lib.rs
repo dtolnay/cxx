@@ -477,6 +477,7 @@ mod weak_ptr;
 
 pub use crate::cxx_vector::CxxVector;
 #[cfg(feature = "alloc")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "alloc")))]
 pub use crate::exception::Exception;
 pub use crate::extern_type::{kind, ExternType};
 pub use crate::shared_ptr::SharedPtr;
