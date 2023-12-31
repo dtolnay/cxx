@@ -381,21 +381,28 @@ private:
 
 #if __cplusplus >= 201703L
 
-template <typename Type>
-struct type_from_index_impl {
-  using type = Type;
+// Adjusted from std::variant_alternative. Standard selects always the most
+// specialized template specialization. See
+// https://timsong-cpp.github.io/cppwp/n4140/temp.class.spec.match and
+// https://timsong-cpp.github.io/cppwp/n4140/temp.class.order.
+template <std::size_t I, typename... Ts>
+struct variant_alternative;
+
+// Specialization for gracefully handling invalid indices.
+template <std::size_t I>
+struct variant_alternative<I> {};
+
+template <std::size_t I, typename First, typename... Remainder>
+struct variant_alternative<I, First, Remainder...>
+    : variant_alternative<I - 1, Remainder...> {};
+
+template <typename First, typename... Remainder>
+struct variant_alternative<0, First, Remainder...> {
+  using type = First;
 };
 
 template <std::size_t I, typename... Ts>
-struct type_from_index;
-
-template <std::size_t I>
-struct type_from_index<I> {};
-
-template <std::size_t I, typename First, typename... Remainder>
-struct type_from_index<I, First, Remainder...>
-    : std::conditional_t<I == 0, type_from_index_impl<First>,
-                         type_from_index<I - 1, Remainder...>> {};
+using variant_alternative_t = typename variant_alternative<I, Ts...>::type;
 
 template <bool... Values>
 constexpr size_t compile_time_count() noexcept {
@@ -410,20 +417,23 @@ template <bool... Values>
 struct exactly_once : std::conditional_t<count<Values...>::value == 1,
                                          std::true_type, std::false_type> {};
 
-template <size_t Index, bool... Values>
-struct index_from_type_impl;
+template <std::size_t I, bool... Values>
+struct index_from_booleans;
 
-template <size_t Index>
-struct index_from_type_impl<Index> {};
+template <std::size_t I>
+struct index_from_booleans<I> {};
 
-template <size_t Index, bool First, bool... Remainder>
-struct index_from_type_impl<Index, First, Remainder...>
-    : std::conditional_t<First, std::integral_constant<size_t, Index>,
-                         index_from_type_impl<Index + 1, Remainder...>> {};
+template <std::size_t I, bool First, bool... Remainder>
+struct index_from_booleans<I, First, Remainder...>
+    : index_from_booleans<I + 1, Remainder...> {};
+
+template <std::size_t I, bool... Remainder>
+struct index_from_booleans<I, true, Remainder...>
+    : std::integral_constant<std::size_t, I> {};
 
 template <typename Type, typename... Ts>
 struct index_from_type
-    : index_from_type_impl<0, std::is_same_v<std::decay_t<Type>, Ts>...> {
+    : index_from_booleans<0, std::is_same_v<std::decay_t<Type>, Ts>...> {
   static_assert(exactly_once<std::is_same_v<std::decay_t<Type>, Ts>...>::value,
                 "Index must be unique");
 };
@@ -435,10 +445,10 @@ template <typename... Ts>
 struct attempt;
 
 template <std::size_t I, typename... Ts>
-constexpr decltype(auto) get(attempt<Ts...> &);
+constexpr variant_alternative_t<I, Ts...> &get(attempt<Ts...> &);
 
 template <std::size_t I, typename... Ts>
-constexpr decltype(auto) get(const attempt<Ts...> &);
+constexpr const variant_alternative_t<I, Ts...> &get(const attempt<Ts...> &);
 
 template <typename Visitor, typename... Ts>
 constexpr decltype(auto) visit(Visitor &&visitor, attempt<Ts...> &);
@@ -509,7 +519,7 @@ struct attempt {
                 std::forward<Args>(args)...} {}
 
   template <std::size_t I>
-  using type_from_index_t = typename type_from_index<I, Ts...>::type;
+  using type_from_index_t = variant_alternative_t<I, Ts...>;
 
   /// @brief Participates in the resolution only if the index is within range
   /// and if the type can be constructor from Args. Corresponds to (7) of
@@ -686,19 +696,6 @@ struct attempt {
         : std::runtime_error{"The index should be " + std::to_string(index)} {}
   };
 
-public:
-  template <std::size_t I>
-  friend constexpr decltype(auto) get(attempt &variant) {
-    variant.throw_if_invalid<I>();
-    return *reinterpret_cast<type_from_index_t<I> *>(variant.t_buff);
-  }
-
-  template <std::size_t I>
-  friend constexpr decltype(auto) get(const attempt &variant) {
-    variant.throw_if_invalid<I>();
-    return *reinterpret_cast<const type_from_index_t<I> *>(variant.t_buff);
-  }
-
 private:
   template <std::size_t I>
   void throw_if_invalid() const {
@@ -721,6 +718,15 @@ private:
   int m_Type;
   // https://stackoverflow.com/questions/71828288/why-is-stdaligned-storage-to-be-deprecated-in-c23-and-what-to-use-instead
   alignas(Ts...) std::byte t_buff[std::max({sizeof(Ts)...})];
+
+  // The friend zone
+  template <std::size_t I, typename... Rs>
+  friend constexpr variant_alternative_t<I, Rs...> &
+  get(attempt<Rs...> &variant);
+
+  template <std::size_t I, typename... Rs>
+  friend constexpr const variant_alternative_t<I, Rs...> &
+  get(const attempt<Rs...> &variant);
 
   template <typename... Rs>
   friend struct visitor_type;
@@ -778,6 +784,20 @@ template <typename Visitor, typename... Ts>
 constexpr decltype(auto) visit(Visitor &&visitor,
                                const attempt<Ts...> &variant) {
   return visitor_type<Ts...>::visit(std::forward<Visitor>(visitor), variant);
+}
+
+template <std::size_t I, typename... Ts>
+constexpr variant_alternative_t<I, Ts...> &get(attempt<Ts...> &variant) {
+  variant.template throw_if_invalid<I>();
+  return *reinterpret_cast<variant_alternative_t<I, Ts...> *>(variant.t_buff);
+}
+
+template <std::size_t I, typename... Ts>
+constexpr const variant_alternative_t<I, Ts...> &
+get(const attempt<Ts...> &variant) {
+  variant.template throw_if_invalid<I>();
+  return *reinterpret_cast<const variant_alternative_t<I, Ts...> *>(
+      variant.t_buff);
 }
 
 template <typename T, typename... Ts,
