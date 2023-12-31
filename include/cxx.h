@@ -445,10 +445,10 @@ template <typename... Ts>
 struct attempt;
 
 template <std::size_t I, typename... Ts>
-constexpr variant_alternative_t<I, Ts...> &get(attempt<Ts...> &);
+constexpr decltype(auto) get(attempt<Ts...> &);
 
 template <std::size_t I, typename... Ts>
-constexpr const variant_alternative_t<I, Ts...> &get(const attempt<Ts...> &);
+constexpr decltype(auto) get(const attempt<Ts...> &);
 
 template <typename Visitor, typename... Ts>
 constexpr decltype(auto) visit(Visitor &&visitor, attempt<Ts...> &);
@@ -721,12 +721,10 @@ private:
 
   // The friend zone
   template <std::size_t I, typename... Rs>
-  friend constexpr variant_alternative_t<I, Rs...> &
-  get(attempt<Rs...> &variant);
+  friend constexpr decltype(auto) get(attempt<Rs...> &variant);
 
   template <std::size_t I, typename... Rs>
-  friend constexpr const variant_alternative_t<I, Rs...> &
-  get(const attempt<Rs...> &variant);
+  friend constexpr decltype(auto) get(const attempt<Rs...> &variant);
 
   template <typename... Rs>
   friend struct visitor_type;
@@ -787,14 +785,13 @@ constexpr decltype(auto) visit(Visitor &&visitor,
 }
 
 template <std::size_t I, typename... Ts>
-constexpr variant_alternative_t<I, Ts...> &get(attempt<Ts...> &variant) {
+constexpr decltype(auto) get(attempt<Ts...> &variant) {
   variant.template throw_if_invalid<I>();
   return *reinterpret_cast<variant_alternative_t<I, Ts...> *>(variant.t_buff);
 }
 
 template <std::size_t I, typename... Ts>
-constexpr const variant_alternative_t<I, Ts...> &
-get(const attempt<Ts...> &variant) {
+constexpr decltype(auto) get(const attempt<Ts...> &variant) {
   variant.template throw_if_invalid<I>();
   return *reinterpret_cast<const variant_alternative_t<I, Ts...> *>(
       variant.t_buff);

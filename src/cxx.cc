@@ -652,6 +652,18 @@ static_assert(
 static_assert(sizeof(std::reference_wrapper<all_variant>) ==
               sizeof(std::ptrdiff_t));
 
+
+// Check that getting something works and actually returns the same type.
+template <std::size_t I>
+using copy_variant_alternative_t =
+    variant_alternative_t<I, CopyType, CopyAndMoveType>;
+
+static_assert(std::is_same_v<decltype(get<0>(std::declval<copy_variant>())),
+                             const copy_variant_alternative_t<0> &>);
+
+static_assert(std::is_same_v<decltype(get<1>(std::declval<copy_variant>())),
+                             const copy_variant_alternative_t<1> &>);
+
 } // namespace detail
 #endif
 
