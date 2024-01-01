@@ -1,2 +1,4 @@
 /.package-cache
+/.package-cache-mutate
 /config.toml
+/registry/
