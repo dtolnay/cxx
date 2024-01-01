@@ -83,7 +83,7 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-none": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "4.4.11",
+    version = "4.4.12",
     deps = [
         "@vendor__anstyle-1.0.4//:anstyle",
         "@vendor__clap_lex-0.6.0//:clap_lex",
