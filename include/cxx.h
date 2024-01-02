@@ -442,36 +442,41 @@ template <typename... Ts>
 struct visitor_type;
 
 template <typename... Ts>
-struct attempt;
+struct variant_base;
 
 template <std::size_t I, typename... Ts>
-constexpr decltype(auto) get(attempt<Ts...> &);
+constexpr decltype(auto) get(variant_base<Ts...> &);
 
 template <std::size_t I, typename... Ts>
-constexpr decltype(auto) get(const attempt<Ts...> &);
+constexpr decltype(auto) get(const variant_base<Ts...> &);
 
 template <typename Visitor, typename... Ts>
-constexpr decltype(auto) visit(Visitor &&visitor, attempt<Ts...> &);
+constexpr decltype(auto) visit(Visitor &&visitor, variant_base<Ts...> &);
 
 template <typename Visitor, typename... Ts>
-constexpr decltype(auto) visit(Visitor &&visitor, const attempt<Ts...> &);
+constexpr decltype(auto) visit(Visitor &&visitor, const variant_base<Ts...> &);
 
+/// @brief A std::variant like tagged union with the same memory layout as a
+/// Rust Enum.
+///
+/// The memory layout of the Rust enum is defined under
+/// https://doc.rust-lang.org/reference/type-layout.html#reprc-enums-with-fields
 template <typename... Ts>
-struct attempt {
+struct variant_base {
   static_assert(sizeof...(Ts) > 0,
-                "attempt must hold at least one alternative");
+                "variant_base must hold at least one alternative");
 
   /// @brief Delete the default constructor since we cannot be in an
   /// uninitialized state (if the first alternative throws). Corresponds to the
   /// (1) constructor in std::variant.
-  attempt() = delete;
+  variant_base() = delete;
 
   constexpr static bool all_copy_constructible_v =
       std::conjunction_v<std::is_copy_constructible<Ts>...>;
 
   /// @brief Copy constructor. Participates only in the resolution if all types
   /// are copy constructable. Corresponds to (2) constructor of std::variant.
-  attempt(const attempt &other) {
+  variant_base(const variant_base &other) {
     static_assert(
         all_copy_constructible_v,
         "Copy constructor requires that all types are copy constructable");
@@ -488,7 +493,7 @@ struct attempt {
   /// @brief Delete the move constructor since if we move this container it's
   /// unclear in which state it is. Corresponds to (3) constructor of
   /// std::variant.
-  attempt(attempt &&other) = delete;
+  variant_base(variant_base &&other) = delete;
 
   template <typename T>
   constexpr static bool is_unique_v =
@@ -503,7 +508,7 @@ struct attempt {
   template <typename T, typename D = std::decay_t<T>,
             typename = std::enable_if_t<is_unique_v<T> &&
                                         std::is_constructible_v<D, T>>>
-  attempt(T &&other) noexcept(std::is_nothrow_constructible_v<D, T>) {
+  variant_base(T &&other) noexcept(std::is_nothrow_constructible_v<D, T>) {
     m_Type = index_from_type_v<D>;
     new (static_cast<void *>(t_buff)) D(std::forward<T>(other));
   }
@@ -513,10 +518,10 @@ struct attempt {
   template <typename T, typename... Args,
             typename = std::enable_if_t<is_unique_v<T>>,
             typename = std::enable_if_t<std::is_constructible_v<T, Args...>>>
-  explicit attempt(std::in_place_type_t<T> type, Args &&...args) noexcept(
+  explicit variant_base(std::in_place_type_t<T> type, Args &&...args) noexcept(
       std::is_nothrow_constructible_v<T, Args...>)
-      : attempt{std::in_place_index<index_from_type_v<T>>,
-                std::forward<Args>(args)...} {}
+      : variant_base{std::in_place_index<index_from_type_v<T>>,
+                     std::forward<Args>(args)...} {}
 
   template <std::size_t I>
   using type_from_index_t = variant_alternative_t<I, Ts...>;
@@ -526,8 +531,9 @@ struct attempt {
   /// std::variant.
   template <std::size_t I, typename... Args, typename T = type_from_index_t<I>,
             typename = std::enable_if_t<std::is_constructible_v<T, Args...>>>
-  explicit attempt(std::in_place_index_t<I> index, Args &&...args) noexcept(
-      std::is_nothrow_constructible_v<T, Args...>) {
+  explicit variant_base(
+      std::in_place_index_t<I> index,
+      Args &&...args) noexcept(std::is_nothrow_constructible_v<T, Args...>) {
     m_Type = I;
     new (static_cast<void *>(t_buff)) T(std::forward<Args>(args)...);
   }
@@ -540,7 +546,7 @@ struct attempt {
   /// the resolution if all types in Ts are copy constructable.
   template <typename... Rs, typename = std::enable_if_t<
                                 all_same_v<Rs...> && all_copy_constructible_v>>
-  attempt(const std::variant<Rs...> &other) {
+  variant_base(const std::variant<Rs...> &other) {
     m_Type = other.index();
     std::visit(
         [this](const auto &value) {
@@ -557,7 +563,7 @@ struct attempt {
   /// the resolution if all types in Ts are move constructable.
   template <typename... Rs, typename = std::enable_if_t<
                                 all_same_v<Rs...> && all_move_constructible_v>>
-  attempt(std::variant<Rs...> &&other) {
+  variant_base(std::variant<Rs...> &&other) {
     m_Type = other.index();
     std::visit(
         [this](auto &&value) {
@@ -567,11 +573,11 @@ struct attempt {
         other);
   }
 
-  ~attempt() { destroy(); }
+  ~variant_base() { destroy(); }
 
   /// @brief Copy assignment. Staticly fails if not every type in Ts is copy
   /// constructable. Corresponds to (1) assignment of std::variant.
-  attempt &operator=(const attempt &other) {
+  variant_base &operator=(const variant_base &other) {
     static_assert(
         all_copy_constructible_v,
         "Copy assignment requires that all types are copy constructable");
@@ -583,13 +589,13 @@ struct attempt {
 
   /// @brief Deleted move assignment. Same as for the move constructor.
   /// Would correspond to (2) assignment of std::variant.
-  attempt &operator=(attempt &&other) = delete;
+  variant_base &operator=(variant_base &&other) = delete;
 
   /// @brief Converting assignment. Corresponds to (3) assignment of
   /// std::variant.
   template <typename T, typename = std::enable_if_t<
                             is_unique_v<T> && std::is_constructible_v<T &&, T>>>
-  attempt &operator=(T &&other) {
+  variant_base &operator=(T &&other) {
     constexpr auto index = index_from_type_v<T>;
 
     if (m_Type == index) {
@@ -606,7 +612,7 @@ struct attempt {
   /// resolution if all types in Ts are copy constructable.
   template <typename... Rs, typename = std::enable_if_t<
                                 all_same_v<Rs...> && all_copy_constructible_v>>
-  attempt &operator=(const std::variant<Rs...> &other) {
+  variant_base &operator=(const std::variant<Rs...> &other) {
     // TODO this is not really clean since we fail if std::variant has
     // duplicated types.
     std::visit(
@@ -622,7 +628,7 @@ struct attempt {
   /// resolution if all types in Ts are move constructable.
   template <typename... Rs, typename = std::enable_if_t<
                                 all_same_v<Rs...> && all_move_constructible_v>>
-  attempt &operator=(std::variant<Rs...> &&other) {
+  variant_base &operator=(std::variant<Rs...> &&other) {
     // TODO this is not really clean since we fail if std::variant has
     // duplicated types.
     std::visit(
@@ -649,6 +655,37 @@ struct attempt {
   /// @brief Emplace function. Participates in the resolution only if T can be
   /// constructed from Args. Offers strong exception guarantee. Corresponds to
   /// the (2) emplace function of std::variant.
+  ///
+  /// The std::variant can have no valid state if the type throws during the
+  /// construction. This is represented by the `valueless_by_exception` flag.
+  /// The same approach is also used in absl::variant [2].
+  /// In our case we can't accept valueless enums since we can't represent this
+  /// in Rust. We must therefore provide a strong exception guarantee for all
+  /// operations using `emplace`. Two famous implementations of never valueless
+  /// variants are Boost/variant [3] and Boost/variant2 [4]. Boost/variant2 uses
+  /// two memory buffers - which would be not compatible with Rust Enum's memory
+  /// layout. The Boost/variant backs up the old object and calls its d'tor
+  /// before constructing the new object; It then copies the old data back to
+  /// the buffer if the construction fails - which might contain garbage (since)
+  /// the d'tor was already called.
+  ///
+  ///
+  /// We take a similar approach to Boost/variant. Assuming that constructing or
+  /// moving the new type can throw, we backup the old data, try to construct
+  /// the new object in the final buffer, swap the buffers, such that the old
+  /// object is back in its original place, detroy it and move the new object
+  /// from the old buffer back to the final place.
+  ///
+  /// Sources
+  ///
+  /// [1]
+  /// https://en.cppreference.com/w/cpp/utility/variant/valueless_by_exception
+  /// [2]
+  /// https://github.com/abseil/abseil-cpp/blob/master/absl/types/variant.h
+  /// [3]
+  /// https://www.boost.org/doc/libs/1_84_0/libs/variant2/doc/html/variant2.html
+  /// [4]
+  /// https://www.boost.org/doc/libs/1_84_0/doc/html/variant/design.html#variant.design.never-empty
   template <std::size_t I, typename... Args, typename T = type_from_index_t<I>,
             typename = std::enable_if_t<std::is_constructible_v<T, Args...>>>
   T &emplace(Args &&...args) {
@@ -687,7 +724,7 @@ struct attempt {
   }
 
   constexpr std::size_t index() const noexcept { return m_Type; }
-  void swap(attempt &other) {
+  void swap(variant_base &other) {
     // TODO
   }
 
@@ -717,15 +754,16 @@ private:
   // Until c++23 enums are represented as ints.
   int m_Type;
   // std::aligned_storage is deprecated and may be replaced with the construct
-  // below. See https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p1413r3.pdf
+  // below. See
+  // https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p1413r3.pdf
   alignas(Ts...) std::byte t_buff[std::max({sizeof(Ts)...})];
 
   // The friend zone
   template <std::size_t I, typename... Rs>
-  friend constexpr decltype(auto) get(attempt<Rs...> &variant);
+  friend constexpr decltype(auto) get(variant_base<Rs...> &variant);
 
   template <std::size_t I, typename... Rs>
-  friend constexpr decltype(auto) get(const attempt<Rs...> &variant);
+  friend constexpr decltype(auto) get(const variant_base<Rs...> &variant);
 
   template <typename... Rs>
   friend struct visitor_type;
@@ -773,7 +811,8 @@ struct visitor_type<First, Remainder...> {
 /// @brief Applies the visitor to the variant. Corresponds to the (3)
 /// std::visit defintion.
 template <typename Visitor, typename... Ts>
-constexpr decltype(auto) visit(Visitor &&visitor, attempt<Ts...> &variant) {
+constexpr decltype(auto) visit(Visitor &&visitor,
+                               variant_base<Ts...> &variant) {
   return visitor_type<Ts...>::visit(std::forward<Visitor>(visitor), variant);
 }
 
@@ -781,18 +820,18 @@ constexpr decltype(auto) visit(Visitor &&visitor, attempt<Ts...> &variant) {
 /// std::visit defintion.
 template <typename Visitor, typename... Ts>
 constexpr decltype(auto) visit(Visitor &&visitor,
-                               const attempt<Ts...> &variant) {
+                               const variant_base<Ts...> &variant) {
   return visitor_type<Ts...>::visit(std::forward<Visitor>(visitor), variant);
 }
 
 template <std::size_t I, typename... Ts>
-constexpr decltype(auto) get(attempt<Ts...> &variant) {
+constexpr decltype(auto) get(variant_base<Ts...> &variant) {
   variant.template throw_if_invalid<I>();
   return *reinterpret_cast<variant_alternative_t<I, Ts...> *>(variant.t_buff);
 }
 
 template <std::size_t I, typename... Ts>
-constexpr decltype(auto) get(const attempt<Ts...> &variant) {
+constexpr decltype(auto) get(const variant_base<Ts...> &variant) {
   variant.template throw_if_invalid<I>();
   return *reinterpret_cast<const variant_alternative_t<I, Ts...> *>(
       variant.t_buff);
@@ -801,7 +840,7 @@ constexpr decltype(auto) get(const attempt<Ts...> &variant) {
 template <typename T, typename... Ts,
           typename = std::enable_if_t<
               exactly_once<std::is_same_v<Ts, std::decay_t<T>>...>::value>>
-constexpr const T &get(const attempt<Ts...> &variant) {
+constexpr const T &get(const variant_base<Ts...> &variant) {
   constexpr auto index = index_from_type<T, Ts...>::value;
   return get<index>(variant);
 }
@@ -809,7 +848,7 @@ constexpr const T &get(const attempt<Ts...> &variant) {
 template <typename T, typename... Ts,
           typename = std::enable_if_t<
               exactly_once<std::is_same_v<Ts, std::decay_t<T>>...>::value>>
-constexpr T &get(attempt<Ts...> &variant) {
+constexpr T &get(variant_base<Ts...> &variant) {
   constexpr auto index = index_from_type<T, Ts...>::value;
   return get<index>(variant);
 }
@@ -836,8 +875,8 @@ using allow_copy =
     copy_control<std::conjunction_v<std::is_copy_constructible<Ts>...>>;
 
 template <typename... Ts>
-struct variant : public attempt<Ts...>, private allow_copy<Ts...> {
-  using base = attempt<Ts...>;
+struct variant : public variant_base<Ts...>, private allow_copy<Ts...> {
+  using base = variant_base<Ts...>;
 
   variant() = delete;
   variant(const variant &) = default;

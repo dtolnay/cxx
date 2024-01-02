@@ -892,7 +892,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
             write!(out, "(::rust::unsafe_bitcopy, *{})", arg.name.cxx);
         } else if out.types.needs_indirect_abi(&arg.ty) {
             out.include.utility = true;
-            // TODO -how do I get with unmovable types?
+            // Let the compiler resolve if this is a copy or a move constructor.
             write!(out, "*{}", arg.name.cxx);
         } else {
             write!(out, "{}", arg.name.cxx);
