@@ -481,11 +481,11 @@ struct variant_base {
         all_copy_constructible_v,
         "Copy constructor requires that all types are copy constructable");
 
-    m_Type = other.m_Type;
+    m_Index = other.m_Index;
     visit(
         [this](const auto &value) {
           using type = std::decay_t<decltype(value)>;
-          new (static_cast<void *>(t_buff)) type(value);
+          new (static_cast<void *>(m_Buff)) type(value);
         },
         other);
   };
@@ -509,8 +509,8 @@ struct variant_base {
             typename = std::enable_if_t<is_unique_v<T> &&
                                         std::is_constructible_v<D, T>>>
   variant_base(T &&other) noexcept(std::is_nothrow_constructible_v<D, T>) {
-    m_Type = index_from_type_v<D>;
-    new (static_cast<void *>(t_buff)) D(std::forward<T>(other));
+    m_Index = index_from_type_v<D>;
+    new (static_cast<void *>(m_Buff)) D(std::forward<T>(other));
   }
 
   /// @brief Participates in the resolution only if we can construct T from Args
@@ -534,8 +534,8 @@ struct variant_base {
   explicit variant_base(
       std::in_place_index_t<I> index,
       Args &&...args) noexcept(std::is_nothrow_constructible_v<T, Args...>) {
-    m_Type = I;
-    new (static_cast<void *>(t_buff)) T(std::forward<Args>(args)...);
+    m_Index = I;
+    new (static_cast<void *>(m_Buff)) T(std::forward<Args>(args)...);
   }
 
   template <typename... Rs>
@@ -547,11 +547,11 @@ struct variant_base {
   template <typename... Rs, typename = std::enable_if_t<
                                 all_same_v<Rs...> && all_copy_constructible_v>>
   variant_base(const std::variant<Rs...> &other) {
-    m_Type = other.index();
+    m_Index = other.index();
     std::visit(
         [this](const auto &value) {
           using type = std::decay_t<decltype(value)>;
-          new (static_cast<void *>(t_buff)) type(value);
+          new (static_cast<void *>(m_Buff)) type(value);
         },
         other);
   }
@@ -564,11 +564,11 @@ struct variant_base {
   template <typename... Rs, typename = std::enable_if_t<
                                 all_same_v<Rs...> && all_move_constructible_v>>
   variant_base(std::variant<Rs...> &&other) {
-    m_Type = other.index();
+    m_Index = other.index();
     std::visit(
         [this](auto &&value) {
           using type = std::decay_t<decltype(value)>;
-          new (static_cast<void *>(t_buff)) type(std::move(value));
+          new (static_cast<void *>(m_Buff)) type(std::move(value));
         },
         other);
   }
@@ -598,7 +598,7 @@ struct variant_base {
   variant_base &operator=(T &&other) {
     constexpr auto index = index_from_type_v<T>;
 
-    if (m_Type == index) {
+    if (m_Index == index) {
       if constexpr (std::is_nothrow_assignable_v<T, T &&>) {
         get<index>(*this) = std::forward<T>(other);
         return *this;
@@ -691,39 +691,39 @@ struct variant_base {
   T &emplace(Args &&...args) {
     if constexpr (std::is_nothrow_constructible_v<T, Args...>) {
       destroy();
-      new (static_cast<void *>(t_buff)) T(std::forward<Args>(args)...);
+      new (static_cast<void *>(m_Buff)) T(std::forward<Args>(args)...);
     } else if constexpr (std::is_nothrow_move_constructible_v<T>) {
       // This operation may throw, but we know that the move does not.
       const T tmp{std::forward<Args>(args)...};
 
       // The operations below are save.
       destroy();
-      new (static_cast<void *>(t_buff)) T(std::move(tmp));
+      new (static_cast<void *>(m_Buff)) T(std::move(tmp));
     } else {
       // Backup the old data.
       alignas(Ts...) std::byte old_buff[std::max({sizeof(Ts)...})];
-      std::memcpy(old_buff, t_buff, sizeof(t_buff));
+      std::memcpy(old_buff, m_Buff, sizeof(m_Buff));
 
       try {
         // Try to construct the new object
-        new (static_cast<void *>(t_buff)) T(std::forward<Args>(args)...);
+        new (static_cast<void *>(m_Buff)) T(std::forward<Args>(args)...);
       } catch (...) {
         // Restore the old buffer
-        std::memcpy(t_buff, old_buff, sizeof(t_buff));
+        std::memcpy(m_Buff, old_buff, sizeof(m_Buff));
         throw;
       }
       // Fetch the old buffer and detroy it.
-      std::swap_ranges(t_buff, t_buff + sizeof(t_buff), old_buff);
+      std::swap_ranges(m_Buff, m_Buff + sizeof(m_Buff), old_buff);
 
       destroy();
-      std::memcpy(t_buff, old_buff, sizeof(t_buff));
+      std::memcpy(m_Buff, old_buff, sizeof(m_Buff));
     }
 
-    m_Type = I;
+    m_Index = I;
     return get<I>(*this);
   }
 
-  constexpr std::size_t index() const noexcept { return m_Type; }
+  constexpr std::size_t index() const noexcept { return m_Index; }
   void swap(variant_base &other) {
     // TODO
   }
@@ -738,8 +738,8 @@ private:
   void throw_if_invalid() const {
     static_assert(I < (sizeof...(Ts)), "Invalid index");
 
-    if (m_Type != I)
-      throw my_bad_variant_access(m_Type);
+    if (m_Index != I)
+      throw my_bad_variant_access(m_Index);
   }
 
   void destroy() {
@@ -752,11 +752,11 @@ private:
   }
 
   // Until c++23 enums are represented as ints.
-  int m_Type;
+  int m_Index;
   // std::aligned_storage is deprecated and may be replaced with the construct
   // below. See
   // https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p1413r3.pdf
-  alignas(Ts...) std::byte t_buff[std::max({sizeof(Ts)...})];
+  alignas(Ts...) std::byte m_Buff[std::max({sizeof(Ts)...})];
 
   // The friend zone
   template <std::size_t I, typename... Rs>
@@ -773,8 +773,8 @@ template <typename First, typename... Remainder>
 struct visitor_type<First, Remainder...> {
   template <typename Visitor, typename Variant>
   constexpr static decltype(auto) visit(Visitor &&visitor, Variant &&variant) {
-    return visit(std::forward<Visitor>(visitor), variant.m_Type,
-                 variant.t_buff);
+    return visit(std::forward<Visitor>(visitor), variant.m_Index,
+                 variant.m_Buff);
   }
 
   /// @brief The visit method which will pick the right type depending on the
@@ -827,14 +827,14 @@ constexpr decltype(auto) visit(Visitor &&visitor,
 template <std::size_t I, typename... Ts>
 constexpr decltype(auto) get(variant_base<Ts...> &variant) {
   variant.template throw_if_invalid<I>();
-  return *reinterpret_cast<variant_alternative_t<I, Ts...> *>(variant.t_buff);
+  return *reinterpret_cast<variant_alternative_t<I, Ts...> *>(variant.m_Buff);
 }
 
 template <std::size_t I, typename... Ts>
 constexpr decltype(auto) get(const variant_base<Ts...> &variant) {
   variant.template throw_if_invalid<I>();
   return *reinterpret_cast<const variant_alternative_t<I, Ts...> *>(
-      variant.t_buff);
+      variant.m_Buff);
 }
 
 template <typename T, typename... Ts,
