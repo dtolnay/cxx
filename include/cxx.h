@@ -716,7 +716,8 @@ private:
 
   // Until c++23 enums are represented as ints.
   int m_Type;
-  // https://stackoverflow.com/questions/71828288/why-is-stdaligned-storage-to-be-deprecated-in-c23-and-what-to-use-instead
+  // std::aligned_storage is deprecated and may be replaced with the construct
+  // below. See https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p1413r3.pdf
   alignas(Ts...) std::byte t_buff[std::max({sizeof(Ts)...})];
 
   // The friend zone
