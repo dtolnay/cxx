@@ -51,13 +51,13 @@ alias(
 
 alias(
     name = "proc-macro2",
-    actual = "@vendor__proc-macro2-1.0.73//:proc_macro2",
+    actual = "@vendor__proc-macro2-1.0.74//:proc_macro2",
     tags = ["manual"],
 )
 
 alias(
     name = "quote",
-    actual = "@vendor__quote-1.0.34//:quote",
+    actual = "@vendor__quote-1.0.35//:quote",
     tags = ["manual"],
 )
 
@@ -69,6 +69,6 @@ alias(
 
 alias(
     name = "syn",
-    actual = "@vendor__syn-2.0.43//:syn",
+    actual = "@vendor__syn-2.0.46//:syn",
     tags = ["manual"],
 )
