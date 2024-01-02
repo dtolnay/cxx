@@ -86,7 +86,7 @@ void take_enum(const BlobEnum &enm) {
 
 void take_mut_enum(BlobEnum &enm) {
   take_enum(enm);
-  if (enm.index() == 0) {
+  if (!::rust::holds_alternative<bool>(enm)) {
     enm = false;
   } else {
     enm = 111;

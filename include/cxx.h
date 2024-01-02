@@ -853,6 +853,18 @@ constexpr T &get(variant_base<Ts...> &variant) {
   return get<index>(variant);
 }
 
+template <std::size_t I, typename... Ts>
+constexpr bool holds_alternative(const variant_base<Ts...> &variant) {
+  return variant.index() == I;
+}
+
+template <typename T, typename... Ts,
+          typename = std::enable_if_t<
+              exactly_once<std::is_same_v<Ts, std::decay_t<T>>...>::value>>
+constexpr bool holds_alternative(const variant_base<Ts...> &variant) {
+  return variant.index() == index_from_type<T, Ts...>::value;
+}
+
 template <bool>
 struct copy_control;
 
