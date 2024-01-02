@@ -666,6 +666,13 @@ static_assert(std::is_same_v<decltype(get<1>(std::declval<copy_variant>())),
 
 static_assert(sizeof(empty) == sizeof(std::uint8_t));
 
+// Verify that enums are represented as ints. We kind of assume that the enums
+// with more fields would be represented by the underlying type not smaller
+// than this enum (which is our smallest...). If this fails, we would need
+// to pass the enum-type to the variant.
+enum a_enum { AA };
+
+static_assert(sizeof(std::underlying_type_t<a_enum>) == sizeof(int));
 } // namespace detail
 #endif
 

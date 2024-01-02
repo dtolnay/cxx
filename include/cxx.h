@@ -751,8 +751,11 @@ private:
         *this);
   }
 
-  // Until c++23 enums are represented as ints.
+  // The underlying type is not fixed, but should be int - which we will verify
+  // statically. See
+  // https://timsong-cpp.github.io/cppwp/n4659/dcl.enum#7
   int m_Index;
+
   // std::aligned_storage is deprecated and may be replaced with the construct
   // below. See
   // https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p1413r3.pdf
