@@ -199,6 +199,9 @@ pub mod ffi {
         fn c_take_rust_vec_nested_ns_shared(v: Vec<ABShared>);
         unsafe fn c_take_const_ptr(c: *const C) -> usize;
         unsafe fn c_take_mut_ptr(c: *mut C) -> usize;
+        fn c_take_enum_simple(enm: EnumSimple) -> i32;
+        fn c_take_enum_improper(enm: EnumImproper) -> i32;
+        fn c_take_enum_with_lifetime<'a>(enm: &'a EnumWithLifeTime<'a>) -> i32;
 
         fn c_try_return_void() -> Result<()>;
         fn c_try_return_primitive() -> Result<usize>;

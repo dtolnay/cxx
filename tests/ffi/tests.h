@@ -180,6 +180,9 @@ void c_take_ns_enum(::A::AEnum e);
 void c_take_nested_ns_enum(::A::B::ABEnum e);
 size_t c_take_const_ptr(const C *c);
 size_t c_take_mut_ptr(C *c);
+int c_take_enum_simple(EnumSimple enm);
+int c_take_enum_improper(EnumImproper enm);
+int c_take_enum_with_lifetime(const EnumWithLifeTime& enm);
 
 void c_try_return_void();
 size_t c_try_return_primitive();

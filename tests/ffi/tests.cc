@@ -576,6 +576,26 @@ size_t c_take_mut_ptr(C *c) {
   return result;
 }
 
+int _visit(bool v) { return static_cast<int>(v); };
+int _visit(const Shared &v) { return v.z; };
+int _visit(const ::rust::empty &) { return -1; };
+int _visit(rust::Str value) { return value.size(); }
+
+int c_take_enum_simple(EnumSimple enm) {
+  return ::rust::visit([](const auto &val) { return _visit(val); }, enm);
+}
+
+int c_take_enum_improper(EnumImproper enm) { return enm.index(); }
+
+int c_take_enum_with_lifetime(const EnumWithLifeTime &enm) {
+  try {
+    return ::rust::get<std::reference_wrapper<::std::int32_t const>>(enm) +
+           ::rust::get<1>(enm);
+  } catch (...) {
+    return ::rust::get<0>(enm).size();
+  }
+}
+
 void c_try_return_void() {}
 
 size_t c_try_return_primitive() { return 2020; }
