@@ -315,7 +315,8 @@ where
 ///
 /// This trait has no publicly callable or implementable methods. Implementing
 /// it outside of the CXX codebase requires using [explicit shim trait impls],
-/// adding the line `impl CxxVector<MyType> {}` in the same `cxx::bridge` that defines `MyType`.
+/// adding the line `impl CxxVector<MyType> {}` in the same `cxx::bridge` that
+/// defines `MyType`.
 ///
 /// # Example
 ///
