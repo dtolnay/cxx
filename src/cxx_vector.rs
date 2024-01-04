@@ -57,7 +57,7 @@ where
     ///
     /// Matches the behavior of C++ [std::vector\<T\>::capacity][capacity].
     ///
-    /// [size]: https://en.cppreference.com/w/cpp/container/vector/capacity
+    /// [capacity]: https://en.cppreference.com/w/cpp/container/vector/capacity
     pub fn capacity(&self) -> usize {
         T::__vector_capacity(self)
     }
