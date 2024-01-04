@@ -2,11 +2,6 @@ module(name = "cxx.rs")
 
 bazel_dep(name = "bazel_skylib", version = "1.5.0")
 bazel_dep(name = "rules_rust", version = "0.36.2")
-archive_override(
-    module_name = "rules_rust",
-    integrity = "sha256-p2HVTknbBvhjRo5rukoTJSsb1Jno9wbaZeJ5s7y8XFI=",
-    urls = ["https://github.com/bazelbuild/rules_rust/releases/download/0.36.2/rules_rust-v0.36.2.tar.gz"],
-)
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(
