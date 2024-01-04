@@ -53,6 +53,15 @@ where
         T::__vector_size(self)
     }
 
+    /// Returns the capacity of the vector
+    ///
+    /// Matches the behavior of C++ [std::vector\<T\>::capacity][capacity].
+    ///
+    /// [size]: https://en.cppreference.com/w/cpp/container/vector/capacity
+    pub fn capacity(&self) -> usize {
+        T::__vector_capacity(self)
+    }
+
     /// Returns true if the vector contains no elements.
     ///
     /// Matches the behavior of C++ [std::vector\<T\>::empty][empty].
@@ -194,6 +203,18 @@ where
                 T::__pop_back(self, &mut value);
                 value.assume_init()
             })
+        }
+    }
+
+    /// Reserve additional space in the vector
+    ///
+    /// Note that this follows Rust semantics of being *additional*
+    /// capacity instead of absolute capacity. Equivalent to `vec.reserve(vec.size() + additional)`
+    /// in C++
+    pub fn reserve(self: Pin<&mut Self>, additional: usize) {
+        unsafe {
+            let len = self.as_ref().len();
+            T::__reserve(self, len + additional);
         }
     }
 }
@@ -350,7 +371,11 @@ pub unsafe trait VectorElement: Sized {
     #[doc(hidden)]
     fn __vector_size(v: &CxxVector<Self>) -> usize;
     #[doc(hidden)]
+    fn __vector_capacity(v: &CxxVector<Self>) -> usize;
+    #[doc(hidden)]
     unsafe fn __get_unchecked(v: *mut CxxVector<Self>, pos: usize) -> *mut Self;
+    #[doc(hidden)]
+    unsafe fn __reserve(v: Pin<&mut CxxVector<Self>>, new_capacity: usize);
     #[doc(hidden)]
     unsafe fn __push_back(v: Pin<&mut CxxVector<Self>>, value: &mut ManuallyDrop<Self>) {
         // Opaque C type vector elements do not get this method because they can
@@ -422,12 +447,26 @@ macro_rules! impl_vector_element {
                 }
                 unsafe { __vector_size(v) }
             }
+            fn __vector_capacity(v: &CxxVector<$ty>) -> usize {
+                extern "C" {
+                    #[link_name = concat!("cxxbridge1$std$vector$", $segment, "$capacity")]
+                    fn __vector_capacity(_: &CxxVector<$ty>) -> usize;
+                }
+                unsafe { __vector_capacity(v) }
+            }
             unsafe fn __get_unchecked(v: *mut CxxVector<$ty>, pos: usize) -> *mut $ty {
                 extern "C" {
                     #[link_name = concat!("cxxbridge1$std$vector$", $segment, "$get_unchecked")]
                     fn __get_unchecked(_: *mut CxxVector<$ty>, _: usize) -> *mut $ty;
                 }
                 unsafe { __get_unchecked(v, pos) }
+            }
+            unsafe fn __reserve(v: Pin<&mut CxxVector<$ty>>, pos: usize) {
+                extern "C" {
+                    #[link_name = concat!("cxxbridge1$std$vector$", $segment, "$reserve")]
+                    fn __reserve(_: Pin<&mut CxxVector<$ty>>, _: usize);
+                }
+                unsafe { __reserve(v, pos) }
             }
             vector_element_by_value_methods!($kind, $segment, $ty);
             fn __unique_ptr_null() -> MaybeUninit<*mut c_void> {
