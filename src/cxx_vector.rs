@@ -225,6 +225,8 @@ where
     A: VectorElement,
 {
     fn extend<T: IntoIterator<Item = A>>(&mut self, iter: T) {
+        let iter = iter.into_iter();
+        self.as_mut().reserve(iter.size_hint().0);
         for i in iter {
             self.as_mut().push(i);
         }

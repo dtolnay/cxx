@@ -161,7 +161,7 @@ fn test_c_take() {
     assert_eq!(vector.pin_mut().pop(), Some(9));
     check!(ffi::c_take_unique_ptr_vector_u8(vector));
     let mut vector = ffi::c_return_unique_ptr_vector_f64();
-    vector.pin_mut().push(9.0);
+    vector.pin_mut().extend(Some(9.0));
     assert!(vector.pin_mut().capacity() >= 1);
     vector.pin_mut().reserve(100);
     assert!(vector.pin_mut().capacity() >= 101);
