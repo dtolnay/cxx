@@ -219,6 +219,18 @@ where
     }
 }
 
+impl<A> Extend<A> for Pin<&mut CxxVector<A>>
+where
+    A: ExternType<Kind = Trivial>,
+    A: VectorElement,
+{
+    fn extend<T: IntoIterator<Item = A>>(&mut self, iter: T) {
+        for i in iter {
+            self.as_mut().push(i);
+        }
+    }
+}
+
 /// Iterator over elements of a `CxxVector` by shared reference.
 ///
 /// The iterator element type is `&'a T`.
