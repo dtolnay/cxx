@@ -15,11 +15,11 @@ crate_repositories = use_extension("//tools/bazel:extension.bzl", "crate_reposit
 use_repo(
     crate_repositories,
     "vendor__cc-1.0.83",
-    "vendor__clap-4.4.12",
+    "vendor__clap-4.4.13",
     "vendor__codespan-reporting-0.11.1",
     "vendor__once_cell-1.19.0",
-    "vendor__proc-macro2-1.0.74",
+    "vendor__proc-macro2-1.0.76",
     "vendor__quote-1.0.35",
     "vendor__scratch-1.0.7",
-    "vendor__syn-2.0.46",
+    "vendor__syn-2.0.48",
 )

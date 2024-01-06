@@ -6,6 +6,7 @@
 #     bazel run @@//third-party:vendor
 ###############################################################################
 
+load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
 package(default_visibility = ["//visibility:public"])
@@ -15,7 +16,7 @@ package(default_visibility = ["//visibility:public"])
 # ])
 
 rust_library(
-    name = "clap",
+    name = "proc_macro2",
     srcs = glob(["**/*.rs"]),
     compile_data = glob(
         include = ["**"],
@@ -29,10 +30,9 @@ rust_library(
         ],
     ),
     crate_features = [
-        "error-context",
-        "help",
-        "std",
-        "usage",
+        "default",
+        "proc-macro",
+        "span-locations",
     ],
     crate_root = "src/lib.rs",
     edition = "2021",
@@ -41,7 +41,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=clap",
+        "crate-name=proc-macro2",
         "manual",
         "noclippy",
         "norustfmt",
@@ -83,8 +83,51 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-none": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "4.4.12",
+    version = "1.0.76",
     deps = [
-        "@vendor__clap_builder-4.4.12//:clap_builder",
+        "@vendor__proc-macro2-1.0.76//:build_script_build",
+        "@vendor__unicode-ident-1.0.12//:unicode_ident",
     ],
+)
+
+cargo_build_script(
+    name = "proc-macro2_build_script",
+    srcs = glob(["**/*.rs"]),
+    crate_features = [
+        "default",
+        "proc-macro",
+        "span-locations",
+    ],
+    crate_name = "build_script_build",
+    crate_root = "build.rs",
+    data = glob(
+        include = ["**"],
+        exclude = [
+            "**/* *",
+            ".tmp_git_root/**/*",
+            "BUILD",
+            "BUILD.bazel",
+            "WORKSPACE",
+            "WORKSPACE.bazel",
+        ],
+    ),
+    edition = "2021",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-bazel",
+        "crate-name=proc-macro2",
+        "manual",
+        "noclippy",
+        "norustfmt",
+    ],
+    version = "1.0.76",
+    visibility = ["//visibility:private"],
+)
+
+alias(
+    name = "build_script_build",
+    actual = "proc-macro2_build_script",
+    tags = ["manual"],
 )
