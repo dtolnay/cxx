@@ -49,6 +49,7 @@ pub(crate) use self::parse::parse_items;
 pub(crate) use self::types::Types;
 
 pub(crate) enum Api {
+    #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
     Include(Include),
     Struct(Struct),
     Enum(Enum),
