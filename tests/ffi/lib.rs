@@ -408,7 +408,7 @@ impl R {
     }
 }
 
-pub struct Reference<'a>(&'a String);
+pub struct Reference<'a>(pub &'a String);
 
 impl ffi::Shared {
     fn r_method_on_shared(&self) -> String {

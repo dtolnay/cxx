@@ -548,4 +548,4 @@ chars! {
 }
 
 #[repr(transparent)]
-struct void(core::ffi::c_void);
+struct void(#[allow(dead_code)] core::ffi::c_void);
