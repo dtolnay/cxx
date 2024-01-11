@@ -13,6 +13,9 @@
 extern "C" void cxx_test_suite_set_correct() noexcept;
 extern "C" tests::R *cxx_test_suite_get_box() noexcept;
 extern "C" bool cxx_test_suite_r_is_correct(const tests::R *) noexcept;
+extern "C" bool PmrDeleterForC_callback_used;
+
+bool PmrDeleterForC_callback_used{false};
 
 namespace tests {
 
@@ -138,8 +141,6 @@ rust::Box<R> c_return_box() {
 std::unique_ptr<C> c_return_unique_ptr() {
   return std::unique_ptr<C>(new C{2020});
 }
-
-extern "C" bool PmrDeleterForC_callback_used{false};
 
 void PmrDeleterForC::operator()(C* obj) {
     alloc.destroy(obj);
