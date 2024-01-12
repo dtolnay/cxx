@@ -403,7 +403,6 @@
     clippy::transmute_undefined_repr, // clippy bug: https://github.com/rust-lang/rust-clippy/issues/8417
     clippy::uninlined_format_args,
     clippy::useless_let_if_seq,
-    clippy::wrong_self_convention
 )]
 
 #[cfg(built_with_cargo)]

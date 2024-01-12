@@ -26,8 +26,7 @@
     clippy::struct_field_names,
     clippy::too_many_arguments,
     clippy::too_many_lines,
-    clippy::toplevel_ref_arg,
-    clippy::wrong_self_convention, // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6983
+    clippy::toplevel_ref_arg
 )]
 
 mod app;
