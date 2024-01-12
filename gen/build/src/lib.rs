@@ -76,6 +76,7 @@
     clippy::too_many_arguments,
     clippy::too_many_lines,
     clippy::toplevel_ref_arg,
+    clippy::unconditional_recursion, // clippy bug: https://github.com/rust-lang/rust-clippy/issues/12133
     clippy::uninlined_format_args,
     clippy::upper_case_acronyms,
     clippy::wrong_self_convention, // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6983
