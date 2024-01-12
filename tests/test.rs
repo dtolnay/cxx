@@ -17,7 +17,7 @@ use std::cell::Cell;
 use std::ffi::CStr;
 
 thread_local! {
-    static CORRECT: Cell<bool> = Cell::new(false);
+    static CORRECT: Cell<bool> = const { Cell::new(false) };
 }
 
 #[no_mangle]
