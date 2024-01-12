@@ -78,8 +78,7 @@
     clippy::toplevel_ref_arg,
     clippy::uninlined_format_args,
     clippy::upper_case_acronyms,
-    // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6983
-    clippy::wrong_self_convention
+    clippy::wrong_self_convention, // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6983
 )]
 
 mod cargo;

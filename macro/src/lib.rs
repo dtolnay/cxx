@@ -27,8 +27,7 @@
     clippy::toplevel_ref_arg,
     clippy::uninlined_format_args,
     clippy::useless_let_if_seq,
-    // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6983
-    clippy::wrong_self_convention
+    clippy::wrong_self_convention, // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6983
 )]
 
 mod derive;
