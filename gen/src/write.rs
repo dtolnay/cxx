@@ -1775,7 +1775,10 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     if deleter_name.is_some() {
         // Check whether the deleter is really the first member as expected by the Rust type
         out.include.cassert = true;
+        #[cfg(not(target_os = "macos"))]
         writeln!(out, "  assert(reinterpret_cast<void*>(&ptr->get_deleter()) == reinterpret_cast<void*>(ptr));");
+        #[cfg(target_os = "macos")]
+        writeln!(out, "  assert(reinterpret_cast<char*>(&ptr->get_deleter()) >= reinterpret_cast<char*>(ptr) + sizeof(void*));");
     }
     if conditional_delete {
         out.builtin.deleter_if = true;

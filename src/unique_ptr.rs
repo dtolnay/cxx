@@ -20,6 +20,22 @@ unsafe impl ExternType for DefaultDeleter {
     type Kind = Trivial;
 }
 
+#[cfg(not(target_os = "macos"))]
+#[repr(C)]
+struct UniquePtrInner<T, D> {
+    deleter: D,
+    repr: MaybeUninit<*mut c_void>,
+    ty: PhantomData<T>,
+}
+
+#[cfg(target_os = "macos")]
+#[repr(C)]
+struct UniquePtrInner<T, D> {
+    repr: MaybeUninit<*mut c_void>,
+    deleter: D,
+    ty: PhantomData<T>,
+}
+
 /// Binding to C++ `std::unique_ptr<T, D>`.
 ///
 /// This representation assumes that the deleter is
@@ -29,15 +45,13 @@ unsafe impl ExternType for DefaultDeleter {
 ///    side.
 /// 3. trivial to copy and move. This is trivially true for all stateless deleters as well as
 ///    deleters that just contain references/pointers (e.g. when using an std::pmr::memory_resource)
-#[repr(C)]
+#[repr(transparent)]
 pub struct UniquePtr<T, D = DefaultDeleter>
 where
     T: UniquePtrTarget<D>,
     D: ExternType<Kind = Trivial>,
 {
-    deleter: D,
-    repr: MaybeUninit<*mut c_void>,
-    ty: PhantomData<T>,
+    inner: UniquePtrInner<T, D>,
 }
 
 impl<T, D> UniquePtr<T, D>
@@ -45,6 +59,16 @@ where
     T: UniquePtrTarget<D>,
     D: ExternType<Kind = Trivial>,
 {
+    fn make_ptr(repr: MaybeUninit<*mut c_void>, deleter: D) -> Self {
+        UniquePtr {
+            inner: UniquePtrInner {
+                deleter,
+                repr,
+                ty: PhantomData,
+            },
+        }
+    }
+
     /// Makes a new UniquePtr wrapping a null pointer.
     ///
     /// Matches the behavior of default-constructing a std::unique\_ptr.
@@ -52,11 +76,7 @@ where
     where
         D: Default,
     {
-        UniquePtr {
-            deleter: D::default(),
-            repr: T::__null(),
-            ty: PhantomData,
-        }
+        UniquePtr::make_ptr(T::__null(), D::default())
     }
 
     /// Allocates memory on the heap and makes a UniquePtr pointing to it.
@@ -68,11 +88,7 @@ where
         T: ExternType<Kind = Trivial>,
         D: Default,
     {
-        UniquePtr {
-            deleter: D::default(),
-            repr: T::__new(value),
-            ty: PhantomData,
-        }
+        UniquePtr::make_ptr(T::__new(value), D::default())
     }
 
     /// Allocates memory on the heap and makes a UniquePtr pointing to it.
@@ -83,32 +99,28 @@ where
     where
         T: ExternType<Kind = Trivial>,
     {
-        UniquePtr {
-            deleter,
-            repr: T::__new(value),
-            ty: PhantomData,
-        }
+        UniquePtr::make_ptr(T::__new(value), deleter)
     }
 
     /// Checks whether the UniquePtr does not own an object.
     ///
     /// This is the opposite of [std::unique_ptr\<T\>::operator bool](https://en.cppreference.com/w/cpp/memory/unique_ptr/operator_bool).
     pub fn is_null(&self) -> bool {
-        let ptr = unsafe { T::__get(self.repr) };
+        let ptr = unsafe { T::__get(self.inner.repr) };
         ptr.is_null()
     }
 
     /// Returns a reference to the object owned by this UniquePtr if any,
     /// otherwise None.
     pub fn as_ref(&self) -> Option<&T> {
-        unsafe { T::__get(self.repr).as_ref() }
+        unsafe { T::__get(self.inner.repr).as_ref() }
     }
 
     /// Returns a mutable pinned reference to the object owned by this UniquePtr
     /// if any, otherwise None.
     pub fn as_mut(&mut self) -> Option<Pin<&mut T>> {
         unsafe {
-            let mut_reference = (T::__get(self.repr) as *mut T).as_mut()?;
+            let mut_reference = (T::__get(self.inner.repr) as *mut T).as_mut()?;
             Some(Pin::new_unchecked(mut_reference))
         }
     }
@@ -133,7 +145,7 @@ where
     ///
     /// Matches the behavior of [std::unique_ptr\<T\>::release](https://en.cppreference.com/w/cpp/memory/unique_ptr/release).
     pub fn into_raw(self) -> *mut T {
-        let ptr = unsafe { T::__release(self.repr) };
+        let ptr = unsafe { T::__release(self.inner.repr) };
         mem::forget(self);
         ptr
     }
@@ -152,11 +164,7 @@ where
     where
         D: Default,
     {
-        UniquePtr {
-            deleter: D::default(),
-            repr: unsafe { T::__raw(raw) },
-            ty: PhantomData,
-        }
+        UniquePtr::make_ptr(unsafe { T::__raw(raw) }, D::default())
     }
 
     /// Constructs a UniquePtr retaking ownership of a pointer previously
@@ -169,16 +177,12 @@ where
     /// twice on the same raw pointer. In addition, the given deleter needs to
     /// be able to handle the pointer.
     pub unsafe fn from_raw_with_deleter(raw: *mut T, deleter: D) -> Self {
-        UniquePtr {
-            deleter,
-            repr: unsafe { T::__raw(raw) },
-            ty: PhantomData,
-        }
+        UniquePtr::make_ptr(unsafe { T::__raw(raw) }, deleter)
     }
 
     /// Returns a reference to the deleter used during destruction or releasing of the pointee.
     pub fn get_deleter(&self) -> &D {
-        &self.deleter
+        &self.inner.deleter
     }
 }
 
@@ -367,7 +371,7 @@ unsafe impl UniquePtrTarget for CxxString {
     where
         Self: Sized,
     {
-        unsafe { unique_ptr_std_string_drop(&mut ptr.repr) }
+        unsafe { unique_ptr_std_string_drop(&mut ptr.inner.repr) }
     }
 }
 
@@ -394,6 +398,6 @@ where
     where
         Self: Sized,
     {
-        unsafe { T::__unique_ptr_drop(ptr.repr) }
+        unsafe { T::__unique_ptr_drop(ptr.inner.repr) }
     }
 }
