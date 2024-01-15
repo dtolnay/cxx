@@ -106,6 +106,38 @@ fn test_c_return() {
         ffi::c_return_rust_pin_mut_option_native(Pin::new(&mut 200)),
         Some(Pin::new(&mut 200))
     );
+    assert_eq!(
+        Some(&vec![1, 2, 3]),
+        ffi::c_return_rust_ref_option_vec_native(&vec![1, 2, 3])
+    );
+    assert_eq!(
+        Some(&mut vec![1, 2, 3]),
+        ffi::c_return_rust_mut_option_vec_native(&mut vec![1, 2, 3])
+    );
+    assert_eq!(
+        Some(&vec![shared.clone()]),
+        ffi::c_return_rust_ref_option_vec_shared(&vec![shared.clone()])
+    );
+    assert_eq!(
+        Some(&mut vec![shared.clone()]),
+        ffi::c_return_rust_mut_option_vec_shared(&mut vec![shared.clone()])
+    );
+    assert_eq!(
+        Some(&vec!["2020".to_string()]),
+        ffi::c_return_rust_ref_option_vec_string(&vec!["2020".to_string()])
+    );
+    assert_eq!(
+        Some(&mut vec!["2020".to_string()]),
+        ffi::c_return_rust_mut_option_vec_string(&mut vec!["2020".to_string()])
+    );
+    assert_eq!(
+        Some(&"2020".to_string()),
+        ffi::c_return_rust_ref_option_string(&"2020".to_string())
+    );
+    assert_eq!(
+        Some(&mut "2020".to_string()),
+        ffi::c_return_rust_mut_option_string(&mut "2020".to_string())
+    );
     assert_eq!(2020, ffi::c_return_identity(2020));
     assert_eq!(2021, ffi::c_return_sum(2020, 1));
     match ffi::c_return_enum(0) {
@@ -253,6 +285,26 @@ fn test_c_take() {
     check!(ffi::c_take_rust_pin_mut_option_native(Some(Pin::new(
         &mut 200
     ))));
+    check!(ffi::c_take_rust_ref_option_vec_shared(Some(&vec![
+        ffi::Shared { z: 2020 }
+    ])));
+    check!(ffi::c_take_rust_mut_option_vec_shared(Some(&mut vec![
+        ffi::Shared { z: 2020 }
+    ])));
+    check!(ffi::c_take_rust_ref_option_vec_native(Some(&vec![200])));
+    check!(ffi::c_take_rust_mut_option_vec_native(Some(&mut vec![200])));
+    check!(ffi::c_take_rust_ref_option_vec_string(Some(&vec![
+        "2020".to_string()
+    ])));
+    check!(ffi::c_take_rust_mut_option_vec_string(Some(&mut vec![
+        "2020".to_string()
+    ])));
+    check!(ffi::c_take_rust_ref_option_string(Some(
+        &"2020".to_string()
+    )));
+    check!(ffi::c_take_rust_mut_option_string(Some(
+        &mut "2020".to_string()
+    )));
 
     check!(ffi::c_take_enum(ffi::Enum::AVal));
     check!(ffi::c_take_ns_enum(ffi::AEnum::AAVal));

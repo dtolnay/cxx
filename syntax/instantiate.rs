@@ -19,6 +19,8 @@ pub(crate) enum OptionInner<'a> {
     RustBox(NamedImplKey<'a>),
     Ref(NamedImplKey<'a>),
     MutRef(NamedImplKey<'a>),
+    RefVec(NamedImplKey<'a>),
+    MutRefVec(NamedImplKey<'a>),
 }
 
 #[derive(Copy, Clone)]
@@ -56,6 +58,15 @@ impl Type {
                     }
                 }
                 Type::Ref(r) => match &r.inner {
+                    Type::RustVec(_) => {
+                        if let Some(ImplKey::RustVec(impl_key)) = r.inner.impl_key() {
+                            if r.mutable {
+                                return Some(ImplKey::RustOption(OptionInner::MutRefVec(impl_key)));
+                            } else {
+                                return Some(ImplKey::RustOption(OptionInner::RefVec(impl_key)));
+                            }
+                        }
+                    }
                     Type::Ident(ident) => {
                         if r.mutable {
                             return Some(ImplKey::RustOption(OptionInner::MutRef(

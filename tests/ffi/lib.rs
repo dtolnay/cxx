@@ -132,6 +132,14 @@ pub mod ffi {
         fn c_return_rust_ref_option_native(u: &u8) -> Option<&u8>;
         fn c_return_rust_mut_option_native(u: &mut u8) -> Option<&mut u8>;
         fn c_return_rust_pin_mut_option_native(u: Pin<&mut u8>) -> Option<Pin<&mut u8>>;
+        fn c_return_rust_ref_option_vec_native(v: &Vec<u8>) -> Option<&Vec<u8>>;
+        fn c_return_rust_mut_option_vec_native(v: &mut Vec<u8>) -> Option<&mut Vec<u8>>;
+        fn c_return_rust_ref_option_vec_shared(v: &Vec<Shared>) -> Option<&Vec<Shared>>;
+        fn c_return_rust_mut_option_vec_shared(v: &mut Vec<Shared>) -> Option<&mut Vec<Shared>>;
+        fn c_return_rust_ref_option_vec_string(v: &Vec<String>) -> Option<&Vec<String>>;
+        fn c_return_rust_mut_option_vec_string(v: &mut Vec<String>) -> Option<&mut Vec<String>>;
+        fn c_return_rust_ref_option_string(s: &String) -> Option<&String>;
+        fn c_return_rust_mut_option_string(s: &mut String) -> Option<&mut String>;
         fn c_return_identity(_: usize) -> usize;
         fn c_return_sum(_: usize, _: usize) -> usize;
         fn c_return_enum(n: u16) -> Enum;
@@ -184,6 +192,14 @@ pub mod ffi {
         fn c_take_rust_ref_option_native(rust: Option<&u8>);
         fn c_take_rust_mut_option_native(rust: Option<&mut u8>);
         fn c_take_rust_pin_mut_option_native(rust: Option<Pin<&mut u8>>);
+        fn c_take_rust_ref_option_vec_native(rust: Option<&Vec<u8>>);
+        fn c_take_rust_mut_option_vec_native(rust: Option<&mut Vec<u8>>);
+        fn c_take_rust_ref_option_vec_shared(rust: Option<&Vec<Shared>>);
+        fn c_take_rust_mut_option_vec_shared(rust: Option<&mut Vec<Shared>>);
+        fn c_take_rust_ref_option_vec_string(rust: Option<&Vec<String>>);
+        fn c_take_rust_mut_option_vec_string(rust: Option<&mut Vec<String>>);
+        fn c_take_rust_ref_option_string(rust: Option<&String>);
+        fn c_take_rust_mut_option_string(rust: Option<&mut String>);
 
         fn c_take_ref_shared_string(s: &SharedString) -> &SharedString;
         fn c_take_callback(callback: fn(String) -> usize);
@@ -223,6 +239,14 @@ pub mod ffi {
         fn c_try_return_rust_ref_option_native() -> Result<Option<&'static u8>>;
         fn c_try_return_rust_mut_option_native() -> Result<Option<&'static mut u8>>;
         fn c_try_return_rust_pin_mut_option_native() -> Result<Option<Pin<&'static mut u8>>>;
+        fn c_try_return_rust_ref_option_vec_native() -> Option<&'static Vec<u8>>;
+        fn c_try_return_rust_mut_option_vec_native() -> Option<&'static mut Vec<u8>>;
+        fn c_try_return_rust_ref_option_vec_shared() -> Option<&'static Vec<Shared>>;
+        fn c_try_return_rust_mut_option_vec_shared() -> Option<&'static mut Vec<Shared>>;
+        fn c_try_return_rust_ref_option_vec_string() -> Option<&'static Vec<String>>;
+        fn c_try_return_rust_mut_option_vec_string() -> Option<&'static mut Vec<String>>;
+        fn c_try_return_rust_ref_option_string() -> Option<&'static String>;
+        fn c_try_return_rust_mut_option_string() -> Option<&'static mut String>;
 
         fn get(self: &C) -> usize;
         fn set(self: Pin<&mut C>, n: usize) -> usize;
@@ -361,6 +385,12 @@ pub mod ffi {
         fn r_take_rust_option_ref_native(o: Option<&u8>);
         fn r_take_rust_option_mut_native(o: Option<&mut u8>);
         fn r_take_rust_option_pin_mut_native(o: Option<Pin<&mut u8>>);
+        fn r_take_rust_option_ref_string(o: Option<&String>);
+        fn r_take_rust_option_mut_ref_string(o: Option<&mut String>);
+        fn r_take_rust_option_ref_vec(o: Option<&Vec<u8>>);
+        fn r_take_rust_option_mut_ref_vec(o: Option<&mut Vec<u8>>);
+        fn r_take_rust_option_ref_vec_string(o: Option<&Vec<String>>);
+        fn r_take_rust_option_mut_ref_vec_string(o: Option<&mut Vec<String>>);
 
         fn r_take_enum(e: Enum);
 
@@ -806,6 +836,30 @@ fn r_take_rust_option_mut_native(o: Option<&mut u8>) {
 }
 
 fn r_take_rust_option_pin_mut_native(o: Option<Pin<&mut u8>>) {
+    let _ = o;
+}
+
+fn r_take_rust_option_ref_string(o: Option<&String>) {
+    let _ = o;
+}
+
+fn r_take_rust_option_mut_ref_string(o: Option<&mut String>) {
+    let _ = o;
+}
+
+fn r_take_rust_option_ref_vec(o: Option<&Vec<u8>>) {
+    let _ = o;
+}
+
+fn r_take_rust_option_mut_ref_vec(o: Option<&mut Vec<u8>>) {
+    let _ = o;
+}
+
+fn r_take_rust_option_ref_vec_string(o: Option<&Vec<String>>) {
+    let _ = o;
+}
+
+fn r_take_rust_option_mut_ref_vec_string(o: Option<&mut Vec<String>>) {
     let _ = o;
 }
 

@@ -145,17 +145,7 @@ fn check_type_rust_vec(cx: &mut Check, ty: &Ty1) {
 fn check_type_rust_option(cx: &mut Check, ty: &Ty1) {
     match &ty.inner {
         Type::RustBox(_) => return,
-        Type::Ref(r) => {
-            // Vec and String are not supported
-            match &r.inner {
-                Type::RustVec(_) => {}
-                Type::Ident(ident) => match Atom::from(&ident.rust) {
-                    Some(RustString) => {}
-                    _ => return,
-                },
-                _ => return,
-            }
-        }
+        Type::Ref(_) => return,
         _ => {}
     }
 

@@ -1377,6 +1377,8 @@ enum RustOption<'a> {
     RustBox(&'a Ident),
     Ref(&'a Ident),
     MutRef(&'a Ident),
+    RefVec(&'a Ident),
+    MutRefVec(&'a Ident),
 }
 
 trait ToTypename {
@@ -1408,6 +1410,13 @@ impl<'a> ToTypename for RustOption<'a> {
             }
             RustOption::Ref(inner) => format!("const {}*", inner.to_typename(types)),
             RustOption::MutRef(inner) => format!("{}*", inner.to_typename(types)),
+            RustOption::RefVec(inner) => format!(
+                "const ::rust::cxxbridge1::Vec<{}>*",
+                inner.to_typename(types)
+            ),
+            RustOption::MutRefVec(inner) => {
+                format!("::rust::cxxbridge1::Vec<{}>*", inner.to_typename(types))
+            }
         }
     }
 }
@@ -1443,6 +1452,14 @@ impl<'a> ToMangled for RustOption<'a> {
             }
             RustOption::MutRef(inner) => {
                 let symbol = symbol::join(&[&inner.to_mangled(types)]);
+                symbol
+            }
+            RustOption::RefVec(inner) => {
+                let symbol = symbol::join(&[&"const", &"Vec", &inner.to_mangled(types)]);
+                symbol
+            }
+            RustOption::MutRefVec(inner) => {
+                let symbol = symbol::join(&[&"Vec", &inner.to_mangled(types)]);
                 symbol
             }
         }
@@ -1571,6 +1588,18 @@ fn write_rust_option_extern(out: &mut OutFile, inner: OptionInner) {
                 return;
             }
             RustOption::MutRef(key.rust)
+        }
+        OptionInner::RefVec(key) => {
+            if out.types.try_resolve(key.rust).is_none() {
+                return;
+            }
+            RustOption::RefVec(key.rust)
+        }
+        OptionInner::MutRefVec(key) => {
+            if out.types.try_resolve(key.rust).is_none() {
+                return;
+            }
+            RustOption::MutRefVec(key.rust)
         }
     };
     let inner = element.to_typename(out.types);
@@ -1737,6 +1766,18 @@ fn write_rust_option_impl(out: &mut OutFile, inner: OptionInner) {
                 return;
             }
             RustOption::MutRef(key.rust)
+        }
+        OptionInner::RefVec(key) => {
+            if out.types.try_resolve(key.rust).is_none() {
+                return;
+            }
+            RustOption::RefVec(key.rust)
+        }
+        OptionInner::MutRefVec(key) => {
+            if out.types.try_resolve(key.rust).is_none() {
+                return;
+            }
+            RustOption::MutRefVec(key.rust)
         }
     };
     let inner = element.to_typename(out.types);

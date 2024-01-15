@@ -4,4 +4,4 @@ pub unsafe trait RustType {}
 pub unsafe trait ImplBox {}
 pub unsafe trait ImplVec {}
 
-pub unsafe trait ImplOption {}
+pub unsafe trait ImplOption<T> {}

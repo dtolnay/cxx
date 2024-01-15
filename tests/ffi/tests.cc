@@ -244,6 +244,54 @@ rust::Option<uint8_t*> c_return_rust_pin_mut_option_native(uint8_t& u) {
   return opt2;
 }
 
+rust::Option<const rust::Vec<uint8_t>*> c_return_rust_ref_option_vec_native(const rust::Vec<uint8_t>& v) {
+  rust::Option<const rust::Vec<uint8_t>*> opt; // Default constructor
+  opt.set(&v); // Set value
+  return opt;
+}
+
+rust::Option<rust::Vec<uint8_t>*> c_return_rust_mut_option_vec_native(rust::Vec<uint8_t>& v) {
+  rust::Option<rust::Vec<uint8_t>*> opt; // Default constructor
+  opt.set(&v); // Set value
+  return opt;
+}
+
+rust::Option<const rust::Vec<Shared>*> c_return_rust_ref_option_vec_shared(const rust::Vec<Shared>& v) {
+  rust::Option<const rust::Vec<Shared>*> opt; // Default constructor
+  opt.set(&v); // Set value
+  return opt;
+}
+
+rust::Option<rust::Vec<Shared>*> c_return_rust_mut_option_vec_shared(rust::Vec<Shared>& v) {
+  rust::Option<rust::Vec<Shared>*> opt; // Default constructor
+  opt.set(&v); // Set value
+  return opt;
+}
+
+rust::Option<const rust::Vec<rust::String>*> c_return_rust_ref_option_vec_string(const rust::Vec<rust::String>& v) {
+  rust::Option<const rust::Vec<rust::String>*> opt; // Default constructor
+  opt.set(&v); // Set value
+  return opt;
+}
+
+rust::Option<rust::Vec<rust::String>*> c_return_rust_mut_option_vec_string(rust::Vec<rust::String>& v) {
+  rust::Option<rust::Vec<rust::String>*> opt; // Default constructor
+  opt.set(&v); // Set value
+  return opt;
+}
+
+rust::Option<const rust::String*> c_return_rust_ref_option_string(const rust::String& s) {
+  rust::Option<const rust::String*> opt; // Default constructor
+  opt.set(&s); // Set value
+  return opt;
+}
+
+rust::Option<rust::String*> c_return_rust_mut_option_string(rust::String& s) {
+  rust::Option<rust::String*> opt; // Default constructor
+  opt.set(&s); // Set value
+  return opt;
+}
+
 size_t c_return_identity(size_t n) { return n; }
 
 size_t c_return_sum(size_t n1, size_t n2) { return n1 + n2; }
@@ -636,6 +684,58 @@ void c_take_rust_pin_mut_option_native(rust::Option<uint8_t *> opt) {
   }
 }
 
+void c_take_rust_ref_option_vec_shared(rust::Option<const rust::Vec<Shared>*> opt) {
+  if (opt.has_value() && opt.value()->size() == 1 && (*opt.value())[0].z == 2020) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_rust_mut_option_vec_shared(rust::Option<rust::Vec<Shared>*> opt) {
+  if (opt.has_value() && opt.value()->size() == 1 && (*opt.value())[0].z == 2020) {
+    (*opt.value())[0].z = 43;
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_rust_ref_option_vec_native(rust::Option<const rust::Vec<uint8_t>*> opt) {
+  if (opt.has_value() && opt.value()->size() == 1 && (*(opt.value()))[0] == 200) {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_rust_mut_option_vec_native(rust::Option<rust::Vec<uint8_t>*> opt) {
+  if (opt.has_value() && opt.value()->size() == 1 && (*(opt.value()))[0] == 200) {
+    (*opt.value())[0] = 201;
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_rust_ref_option_vec_string(rust::Option<const rust::Vec<rust::String>*> opt) {
+  if (opt.has_value() && opt.value()->size() == 1 && (*(opt.value()))[0] == "2020") {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_rust_mut_option_vec_string(rust::Option<rust::Vec<rust::String>*> opt) {
+  if (opt.has_value() && opt.value()->size() == 1 && (*(opt.value()))[0] == "2020") {
+    (*opt.value())[0] = "2021";
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_rust_ref_option_string(rust::Option<const rust::String*> opt) {
+  if (opt.has_value() && (*(opt.value())) == "2020") {
+    cxx_test_suite_set_correct();
+  }
+}
+
+void c_take_rust_mut_option_string(rust::Option<rust::String*> opt) {
+  if (opt.has_value() && *(opt.value()) == "2020") {
+    *(opt.value()) = "2021";
+    cxx_test_suite_set_correct();
+  }
+}
+
 const SharedString &c_take_ref_shared_string(const SharedString &s) {
   if (std::string(s.msg) == "2020") {
     cxx_test_suite_set_correct();
@@ -725,6 +825,38 @@ rust::Option<uint8_t*> c_try_return_rust_mut_option_native() {
 
 rust::Option<uint8_t*> c_try_return_rust_pin_mut_option_native() {
   throw std::runtime_error("unimplemented");
+}
+
+rust::Option<const rust::Vec<uint8_t>*> c_try_return_rust_ref_option_vec_native() {
+    throw std::runtime_error("unimplemented");
+}
+
+rust::Option<rust::Vec<uint8_t>*> c_try_return_rust_mut_option_vec_native() {
+    throw std::runtime_error("unimplemented");
+}
+
+rust::Option<const rust::Vec<Shared>*> c_try_return_rust_ref_option_vec_shared() {
+    throw std::runtime_error("unimplemented");
+}
+
+rust::Option<rust::Vec<Shared>*> c_try_return_rust_mut_option_vec_shared() {
+    throw std::runtime_error("unimplemented");
+}
+
+rust::Option<const rust::Vec<rust::String>*> c_try_return_rust_ref_option_vec_string() {
+    throw std::runtime_error("unimplemented");
+}
+
+rust::Option<rust::Vec<rust::String>*> c_try_return_rust_mut_option_vec_string() {
+    throw std::runtime_error("unimplemented");
+}
+
+rust::Option<const rust::String*> c_try_return_rust_ref_option_string() {
+    throw std::runtime_error("unimplemented");
+}
+
+rust::Option<rust::String*> c_try_return_rust_mut_option_string() {
+    throw std::runtime_error("unimplemented");
 }
 
 const rust::String &c_try_return_ref(const rust::String &s) { return s; }

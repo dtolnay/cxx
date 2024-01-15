@@ -2,7 +2,15 @@
 #![allow(clippy::let_unit_value)]
 
 #[cfg(feature = "alloc")]
+use crate::private::RustString;
+#[cfg(feature = "alloc")]
+use crate::private::RustVec;
+#[cfg(feature = "alloc")]
 use alloc::boxed::Box;
+#[cfg(feature = "alloc")]
+use alloc::string::String;
+#[cfg(feature = "alloc")]
+use alloc::vec::Vec;
 use core::mem::ManuallyDrop;
 use core::ops::Deref;
 use core::ops::DerefMut;
@@ -40,6 +48,17 @@ union OptionInner<T: OptionTarget> {
 }
 
 impl<T: OptionTarget> OptionInner<T> {
+    fn none() -> Self {
+        Self { empty: 0 }
+    }
+
+    #[cfg(feature = "alloc")]
+    fn new(t: T) -> Self {
+        Self {
+            value: ManuallyDrop::new(t),
+        }
+    }
+
     fn has_value(&self) -> bool {
         let _: () = assert_option_safe::<&T>();
         unsafe { self.empty != 0 }
@@ -47,7 +66,7 @@ impl<T: OptionTarget> OptionInner<T> {
 
     fn into_inner_unchecked(mut self) -> T {
         let value = unsafe { ManuallyDrop::take(&mut self.value) };
-        unsafe { core::ptr::write(&mut self as _, OptionInner { empty: 0 }) };
+        unsafe { core::ptr::write(&mut self as _, OptionInner::none()) };
         value
     }
 }
@@ -83,13 +102,21 @@ impl<T: OptionTarget> RustOption<T> {
     pub fn new() -> Self {
         let _: () = assert_option_safe::<&mut T>();
         RustOption {
-            inner: OptionInner { empty: 0 },
+            inner: OptionInner::none(),
         }
     }
 
     pub fn value(&self) -> Option<&T> {
         if self.has_value() {
             unsafe { Some(self.inner.value.deref()) }
+        } else {
+            None
+        }
+    }
+
+    pub fn into_value(self) -> Option<T> {
+        if self.has_value() {
+            unsafe { Some(self.into_inner_unchecked()) }
         } else {
             None
         }
@@ -153,6 +180,11 @@ where
     }
 
     pub fn as_mut_option_mut(&mut self) -> &mut Option<&'a mut T> {
+        let _: () = assert_option_safe::<&mut T>();
+        unsafe { &mut *(self as *mut RustOption<&'a mut T> as *mut Option<&'a mut T>) }
+    }
+
+    pub fn as_mut_option_mut_improper(&mut self) -> &mut Option<&'a mut T> {
         let _: () = assert_option_safe::<&mut T>();
         unsafe { &mut *(self as *mut RustOption<&'a mut T> as *mut Option<&'a mut T>) }
     }
@@ -345,5 +377,170 @@ impl RustOption<*mut core::ffi::c_void> {
     pub unsafe fn as_mut_option_mut_improper<'a, T>(&mut self) -> &mut Option<&'a mut T> {
         let _: () = assert_option_safe::<&mut T>();
         unsafe { &mut *(self as *mut RustOption<*mut core::ffi::c_void> as *mut Option<&'a mut T>) }
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl<'a, T> RustOption<&'a RustVec<T>> {
+    pub fn from_option_vec_ref(other: Option<&'a Vec<T>>) -> Self {
+        let _: () = assert_option_safe::<&'a Vec<T>>();
+        match other {
+            None => Self::new(),
+            Some(r) => Self {
+                inner: OptionInner::new(RustVec::from_ref(r)),
+            },
+        }
+    }
+
+    pub fn into_option_vec_ref(self) -> Option<&'a Vec<T>> {
+        let _: () = assert_option_safe::<&Vec<T>>();
+        match self.into_value() {
+            None => None,
+            Some(r) => Some(r.as_vec()),
+        }
+    }
+
+    pub fn as_option_vec_ref(&mut self) -> &mut Option<&'a Vec<T>> {
+        let _: () = assert_option_safe::<&Vec<T>>();
+        unsafe { &mut *(self as *mut RustOption<&'a RustVec<T>> as *mut Option<&'a Vec<T>>) }
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl<'a, T> RustOption<&'a mut RustVec<T>> {
+    pub fn from_option_vec_mut(other: Option<&'a mut Vec<T>>) -> Self {
+        let _: () = assert_option_safe::<&mut Vec<T>>();
+        match other {
+            None => Self::new(),
+            Some(r) => Self {
+                inner: OptionInner::new(RustVec::from_mut(r)),
+            },
+        }
+    }
+
+    pub fn into_option_vec_mut(self) -> Option<&'a mut Vec<T>> {
+        let _: () = assert_option_safe::<&mut Vec<T>>();
+        match self.into_value() {
+            None => None,
+            Some(r) => Some(r.as_mut_vec()),
+        }
+    }
+
+    pub fn as_option_vec_mut(&mut self) -> &mut Option<&'a mut Vec<T>> {
+        let _: () = assert_option_safe::<&mut Vec<T>>();
+        unsafe {
+            &mut *(self as *mut RustOption<&'a mut RustVec<T>> as *mut Option<&'a mut Vec<T>>)
+        }
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl<'a> RustOption<&'a RustVec<RustString>> {
+    pub fn from_option_vec_string_ref(other: Option<&'a Vec<String>>) -> Self {
+        let _: () = assert_option_safe::<&Vec<String>>();
+        match other {
+            None => Self::new(),
+            Some(r) => Self {
+                inner: OptionInner::new(RustVec::from_ref_vec_string(r)),
+            },
+        }
+    }
+
+    pub fn into_option_vec_string_ref(self) -> Option<&'a Vec<String>> {
+        let _: () = assert_option_safe::<&Vec<String>>();
+        match self.into_value() {
+            None => None,
+            Some(r) => Some(r.as_vec_string()),
+        }
+    }
+
+    pub fn as_option_vec_string_ref(&mut self) -> &mut Option<&'a Vec<String>> {
+        let _: () = assert_option_safe::<&Vec<String>>();
+        unsafe {
+            &mut *(self as *mut RustOption<&'a RustVec<RustString>> as *mut Option<&'a Vec<String>>)
+        }
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl<'a> RustOption<&'a mut RustVec<RustString>> {
+    pub fn from_option_vec_string_mut(other: Option<&'a mut Vec<String>>) -> Self {
+        let _: () = assert_option_safe::<&mut Vec<String>>();
+        match other {
+            None => Self::new(),
+            Some(r) => Self {
+                inner: OptionInner::new(RustVec::from_mut_vec_string(r)),
+            },
+        }
+    }
+
+    pub fn into_option_vec_string_mut(self) -> Option<&'a mut Vec<String>> {
+        let _: () = assert_option_safe::<&mut Vec<String>>();
+        match self.into_value() {
+            None => None,
+            Some(r) => Some(r.as_mut_vec_string()),
+        }
+    }
+
+    pub fn as_option_vec_string_mut(&mut self) -> &mut Option<&'a mut Vec<String>> {
+        let _: () = assert_option_safe::<&mut Vec<String>>();
+        unsafe {
+            &mut *(self as *mut RustOption<&'a mut RustVec<RustString>>
+                as *mut Option<&'a mut Vec<String>>)
+        }
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl<'a> RustOption<&'a RustString> {
+    pub fn from_option_string_ref(other: Option<&'a String>) -> Self {
+        let _: () = assert_option_safe::<&String>();
+        match other {
+            None => Self::new(),
+            Some(r) => Self {
+                inner: OptionInner::new(RustString::from_ref(r)),
+            },
+        }
+    }
+
+    pub fn into_option_string_ref(self) -> Option<&'a String> {
+        let _: () = assert_option_safe::<&String>();
+        match self.into_value() {
+            None => None,
+            Some(r) => Some(r.as_string()),
+        }
+    }
+
+    pub fn as_option_string_ref(&mut self) -> &mut Option<&'a String> {
+        let _: () = assert_option_safe::<&String>();
+        unsafe { &mut *(self as *mut RustOption<&'a RustString> as *mut Option<&'a String>) }
+    }
+}
+
+#[cfg(feature = "alloc")]
+impl<'a> RustOption<&'a mut RustString> {
+    pub fn from_option_string_mut(other: Option<&'a mut String>) -> Self {
+        let _: () = assert_option_safe::<&mut String>();
+        match other {
+            None => Self::new(),
+            Some(r) => Self {
+                inner: OptionInner::new(RustString::from_mut(r)),
+            },
+        }
+    }
+
+    pub fn into_option_string_mut(self) -> Option<&'a mut String> {
+        let _: () = assert_option_safe::<&mut String>();
+        match self.into_value() {
+            None => None,
+            Some(r) => Some(r.as_mut_string()),
+        }
+    }
+
+    pub fn as_option_string_mut(&mut self) -> &mut Option<&'a mut String> {
+        let _: () = assert_option_safe::<&mut String>();
+        unsafe {
+            &mut *(self as *mut RustOption<&'a mut RustString> as *mut Option<&'a mut String>)
+        }
     }
 }

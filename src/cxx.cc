@@ -804,7 +804,29 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
   CXX_TYPE** cxxbridge1$rust_option$##RUST_TYPE##$value_ptr(                   \
       rust::Option<CXX_TYPE *> *ptr) noexcept;                                 \
   void cxxbridge1$rust_option$##RUST_TYPE##$set(                               \
-      rust::Option<CXX_TYPE *> *ptr, CXX_TYPE *&& value) noexcept;
+      rust::Option<CXX_TYPE *> *ptr, CXX_TYPE *&& value) noexcept;             \
+  /* Vec<T> implementation */                                                  \
+  void cxxbridge1$rust_option$const$rust_vec$##RUST_TYPE##$new(                         \
+      rust::Option<rust::Vec<CXX_TYPE> const *> *ptr) noexcept;                           \
+  void cxxbridge1$rust_option$const$rust_vec$##RUST_TYPE##$drop(                        \
+      rust::Option<rust::Vec<CXX_TYPE> const *> *ptr) noexcept;                           \
+  bool cxxbridge1$rust_option$const$rust_vec$##RUST_TYPE##$has_value(                   \
+      const rust::Option<rust::Vec<CXX_TYPE> const *> *ptr) noexcept;                     \
+  rust::Vec<CXX_TYPE> const ** cxxbridge1$rust_option$const$rust_vec$##RUST_TYPE##$value_ptr(      \
+      rust::Option<rust::Vec<CXX_TYPE> const *> *ptr) noexcept;                           \
+  void cxxbridge1$rust_option$const$rust_vec$##RUST_TYPE##$set(                         \
+      rust::Option<rust::Vec<CXX_TYPE> const *> *ptr, rust::Vec<CXX_TYPE> const *&& value) noexcept; \
+  void cxxbridge1$rust_option$rust_vec$##RUST_TYPE##$new(                               \
+      rust::Option<rust::Vec<CXX_TYPE> *> *ptr) noexcept;                                 \
+  void cxxbridge1$rust_option$rust_vec$##RUST_TYPE##$drop(                              \
+      rust::Option<rust::Vec<CXX_TYPE> *> *ptr) noexcept;                                 \
+  bool cxxbridge1$rust_option$rust_vec$##RUST_TYPE##$has_value(                         \
+      const rust::Option<rust::Vec<CXX_TYPE> *> *ptr) noexcept;                           \
+  rust::Vec<CXX_TYPE>** cxxbridge1$rust_option$rust_vec$##RUST_TYPE##$value_ptr(                   \
+      rust::Option<rust::Vec<CXX_TYPE> *> *ptr) noexcept;                                 \
+  void cxxbridge1$rust_option$rust_vec$##RUST_TYPE##$set(                               \
+      rust::Option<rust::Vec<CXX_TYPE> *> *ptr, rust::Vec<CXX_TYPE> *&& value) noexcept;
+
 
 #define RUST_OPTION_OPS(RUST_TYPE, CXX_TYPE)                                   \
   template <>                                                                  \
@@ -847,10 +869,53 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
   template <>                                                                  \
   void Option<CXX_TYPE *>::set(CXX_TYPE *&& value) noexcept {                  \
     return cxxbridge1$rust_option$##RUST_TYPE##$set(this, std::move(value));   \
+  }    \
+  /* Vec<T> impl */                                                           \
+  template <>                                                                  \
+  Option<rust::Vec<CXX_TYPE> const *>::Option() noexcept {                                \
+    cxxbridge1$rust_option$const$rust_vec$##RUST_TYPE##$new(this);                      \
+  }                                                                            \
+  template <>                                                                  \
+  void Option<rust::Vec<CXX_TYPE> const *>::drop() noexcept {                             \
+    cxxbridge1$rust_option$const$rust_vec$##RUST_TYPE##$drop(this);                     \
+  }                                                                            \
+  template <>                                                                  \
+  bool Option<rust::Vec<CXX_TYPE> const *>::has_value() const noexcept {                  \
+    return cxxbridge1$rust_option$const$rust_vec$##RUST_TYPE##$has_value(this);         \
+  }                                                                            \
+  template <>                                                                  \
+  rust::Vec<CXX_TYPE> const ** Option<rust::Vec<CXX_TYPE> const *>::value_ptr() noexcept {           \
+    return cxxbridge1$rust_option$const$rust_vec$##RUST_TYPE##$value_ptr(this);         \
+  }                                                                            \
+  template <>                                                                  \
+  void Option<rust::Vec<CXX_TYPE> const *>::set(rust::Vec<CXX_TYPE> const *&& value) noexcept {      \
+    return cxxbridge1$rust_option$const$rust_vec$##RUST_TYPE##$set(                     \
+      this, std::move(value));                                                 \
+  }                                                                            \
+  template <>                                                                  \
+  Option<rust::Vec<CXX_TYPE> *>::Option() noexcept {                                      \
+    cxxbridge1$rust_option$rust_vec$##RUST_TYPE##$new(this);                            \
+  }                                                                            \
+  template <>                                                                  \
+  void Option<rust::Vec<CXX_TYPE> *>::drop() noexcept {                                   \
+    cxxbridge1$rust_option$rust_vec$##RUST_TYPE##$drop(this);                           \
+  }                                                                            \
+  template <>                                                                  \
+  bool Option<rust::Vec<CXX_TYPE> *>::has_value() const noexcept {                        \
+    return cxxbridge1$rust_option$rust_vec$##RUST_TYPE##$has_value(this);               \
+  }                                                                            \
+  template <>                                                                  \
+  rust::Vec<CXX_TYPE>**  Option<rust::Vec<CXX_TYPE> *>::value_ptr() noexcept {                       \
+    return cxxbridge1$rust_option$rust_vec$##RUST_TYPE##$value_ptr(this);               \
+  }                                                                            \
+  template <>                                                                  \
+  void Option<rust::Vec<CXX_TYPE> *>::set(rust::Vec<CXX_TYPE> *&& value) noexcept {                  \
+    return cxxbridge1$rust_option$rust_vec$##RUST_TYPE##$set(this, std::move(value));   \
   }
 
 #define FOR_EACH_RUST_OPTION(MACRO)                                            \
-  FOR_EACH_NUMERIC(MACRO)
+  FOR_EACH_NUMERIC(MACRO)                                                      \
+  MACRO(string, rust::String)
 
 extern "C" {
 FOR_EACH_STD_VECTOR(STD_VECTOR_OPS)
