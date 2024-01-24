@@ -143,6 +143,6 @@ cargo_build_script(
 
 alias(
     name = "build_script_build",
-    actual = "winapi_build_script",
+    actual = ":winapi_build_script",
     tags = ["manual"],
 )

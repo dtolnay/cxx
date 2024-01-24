@@ -117,6 +117,6 @@ cargo_build_script(
 
 alias(
     name = "build_script_build",
-    actual = "winapi-i686-pc-windows-gnu_build_script",
+    actual = ":winapi-i686-pc-windows-gnu_build_script",
     tags = ["manual"],
 )
