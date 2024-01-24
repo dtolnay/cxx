@@ -1165,7 +1165,7 @@
   "moduleExtensions": {
     "//tools/bazel:extension.bzl%crate_repositories": {
       "general": {
-        "bzlTransitiveDigest": "10flF35nXyx2wqwN6ClSkVRt4wW0gBOA9BDFJwgXAG8=",
+        "bzlTransitiveDigest": "r215f3vC2ieYJ9EM++ex0yzpap87ONovMm1RXq6JztI=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1450,7 +1450,23 @@
           "explicitRootModuleDirectDevDeps": [],
           "useAllRepos": "NO"
         },
-        "recordedRepoMappingEntries": []
+        "recordedRepoMappingEntries": [
+          [
+            "",
+            "",
+            ""
+          ],
+          [
+            "",
+            "bazel_skylib",
+            "bazel_skylib~1.5.0"
+          ],
+          [
+            "",
+            "bazel_tools",
+            "bazel_tools"
+          ]
+        ]
       }
     },
     "@@apple_support~1.11.1//crosstool:setup.bzl%apple_cc_configure_extension": {
