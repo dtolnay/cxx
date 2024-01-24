@@ -23,8 +23,8 @@ jobs:
         with:
           components: rust-src
       - uses: dtolnay/install-buck2@latest
-      - name: Update buck2-prelude submodule
-        run: git submodule update --init --remote --no-fetch --depth 1 --single-branch tools/buck/prelude
+        with:
+          prelude-submodule: tools/buck/prelude
       - run: buck2 run demo
       - run: buck2 build ...
       - run: buck2 test ...
