@@ -1415,12 +1415,19 @@ fn expand_unique_ptr(
     let ident = key.rust;
     let name = ident.to_string();
     let resolve = types.resolve(ident);
+    let unnamed_lifetimes = if key.lifetimes.is_empty() {
+        TokenStream::default()
+    } else {
+        let unnamed = quote! { '_ };
+        let lt_iter = key.lifetimes.iter().map(|_| &unnamed);
+        quote! { <#(#lt_iter),*> }
+    };
 
     let (deleter_token, unique_ptr_token, prefix) = if let Some(deleter) = deleter {
         let resolve_deleter = types.resolve(deleter);
         (
             quote! { <#deleter> },
-            quote! { ::cxx::UniquePtr<#ident, #deleter> },
+            quote! { ::cxx::UniquePtr<#ident #unnamed_lifetimes, #deleter> },
             format!(
                 "cxxbridge1$unique_ptr${}${}$",
                 resolve.name.to_symbol(),
@@ -1430,7 +1437,7 @@ fn expand_unique_ptr(
     } else {
         (
             TokenStream::default(),
-            quote! { ::cxx::UniquePtr<#ident> },
+            quote! { ::cxx::UniquePtr<#ident #unnamed_lifetimes> },
             format!("cxxbridge1$unique_ptr${}$", resolve.name.to_symbol()),
         )
     };

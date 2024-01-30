@@ -1,7 +1,7 @@
 use crate::syntax::{NamedType, Ty1, Ty2, Type};
 use proc_macro2::{Ident, Span};
 use std::hash::{Hash, Hasher};
-use syn::Token;
+use syn::{Lifetime, Token, punctuated::Punctuated};
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum ImplKey<'a> {
@@ -20,6 +20,8 @@ pub(crate) struct NamedImplKey<'a> {
     pub rust: &'a Ident,
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
     pub lt_token: Option<Token![<]>,
+    #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
+    pub lifetimes: &'a Punctuated<Lifetime, Token![,]>,
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
     pub gt_token: Option<Token![>]>,
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
@@ -87,6 +89,7 @@ impl<'a> NamedImplKey<'a> {
             begin_span: outer.name.span(),
             rust: &inner.rust,
             lt_token: inner.generics.lt_token,
+            lifetimes: &inner.generics.lifetimes,
             gt_token: inner.generics.gt_token,
             end_span: outer.rangle.span,
         }
@@ -97,6 +100,7 @@ impl<'a> NamedImplKey<'a> {
             begin_span: outer.name.span(),
             rust: &inner.rust,
             lt_token: inner.generics.lt_token,
+            lifetimes: &inner.generics.lifetimes,
             gt_token: inner.generics.gt_token,
             end_span: outer.rangle.span,
         }
