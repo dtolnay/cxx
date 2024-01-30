@@ -13,6 +13,7 @@ use cxx::type_id;
 
 /// Rust representation of the default deleter of std::unique_ptr, `std::default_delete<T>`
 #[derive(Default, Copy, Clone, Debug)]
+#[repr(C)]
 pub struct DefaultDeleter([u8; 0]);
 
 unsafe impl ExternType for DefaultDeleter {
