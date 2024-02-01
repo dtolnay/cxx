@@ -4,7 +4,7 @@ error[E0277]: `*const cxx::void` cannot be sent between threads safely
 20 |     assert_send::<CxxVector<ffi::NotThreadSafe>>();
    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `*const cxx::void` cannot be sent between threads safely
    |
-   = help: within `CxxVector<NotThreadSafe>`, the trait `Send` is not implemented for `*const cxx::void`
+   = help: within `CxxVector<NotThreadSafe>`, the trait `Send` is not implemented for `*const cxx::void`, which is required by `CxxVector<NotThreadSafe>: Send`
    = note: required because it appears within the type `[*const cxx::void; 0]`
 note: required because it appears within the type `cxx::private::Opaque`
   --> src/opaque.rs
