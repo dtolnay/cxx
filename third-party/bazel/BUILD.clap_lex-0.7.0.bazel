@@ -15,7 +15,7 @@ package(default_visibility = ["//visibility:public"])
 # ])
 
 rust_library(
-    name = "clap_builder",
+    name = "clap_lex",
     srcs = glob(["**/*.rs"]),
     compile_data = glob(
         include = ["**"],
@@ -28,12 +28,6 @@ rust_library(
             "WORKSPACE.bazel",
         ],
     ),
-    crate_features = [
-        "error-context",
-        "help",
-        "std",
-        "usage",
-    ],
     crate_root = "src/lib.rs",
     edition = "2021",
     rustc_flags = [
@@ -41,7 +35,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=clap_builder",
+        "crate-name=clap_lex",
         "manual",
         "noclippy",
         "norustfmt",
@@ -83,9 +77,5 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-none": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "4.4.12",
-    deps = [
-        "@vendor__anstyle-1.0.4//:anstyle",
-        "@vendor__clap_lex-0.6.0//:clap_lex",
-    ],
+    version = "0.7.0",
 )

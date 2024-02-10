@@ -11,11 +11,11 @@ load("@rules_rust//rust:defs.bzl", "rust_library")
 package(default_visibility = ["//visibility:public"])
 
 # licenses([
-#     "TODO",  # MIT OR Apache-2.0
+#     "TODO",  # Unlicense OR MIT
 # ])
 
 rust_library(
-    name = "clap_lex",
+    name = "termcolor",
     srcs = glob(["**/*.rs"]),
     compile_data = glob(
         include = ["**"],
@@ -29,13 +29,13 @@ rust_library(
         ],
     ),
     crate_root = "src/lib.rs",
-    edition = "2021",
+    edition = "2018",
     rustc_flags = [
         "--cap-lints=allow",
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=clap_lex",
+        "crate-name=termcolor",
         "manual",
         "noclippy",
         "norustfmt",
@@ -77,5 +77,17 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-none": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "0.6.0",
+    version = "1.4.1",
+    deps = select({
+        "@rules_rust//rust/platform:aarch64-pc-windows-msvc": [
+            "@vendor__winapi-util-0.1.6//:winapi_util",  # cfg(windows)
+        ],
+        "@rules_rust//rust/platform:i686-pc-windows-msvc": [
+            "@vendor__winapi-util-0.1.6//:winapi_util",  # cfg(windows)
+        ],
+        "@rules_rust//rust/platform:x86_64-pc-windows-msvc": [
+            "@vendor__winapi-util-0.1.6//:winapi_util",  # cfg(windows)
+        ],
+        "//conditions:default": [],
+    }),
 )

@@ -33,7 +33,7 @@ alias(
 
 alias(
     name = "clap",
-    actual = "@vendor__clap-4.4.13//:clap",
+    actual = "@vendor__clap-4.5.0//:clap",
     tags = ["manual"],
 )
 
@@ -51,7 +51,7 @@ alias(
 
 alias(
     name = "proc-macro2",
-    actual = "@vendor__proc-macro2-1.0.76//:proc_macro2",
+    actual = "@vendor__proc-macro2-1.0.78//:proc_macro2",
     tags = ["manual"],
 )
 
