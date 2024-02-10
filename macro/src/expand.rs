@@ -147,6 +147,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
             clippy::items_after_statements,
             clippy::no_effect_underscore_binding,
             clippy::ptr_as_ptr,
+            clippy::ref_as_ptr,
             clippy::upper_case_acronyms,
             clippy::use_self,
         )]
