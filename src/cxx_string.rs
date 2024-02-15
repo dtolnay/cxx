@@ -264,6 +264,16 @@ impl fmt::Write for Pin<&mut CxxString> {
     }
 }
 
+#[cfg(feature = "alloc")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "alloc")))]
+impl TryInto<String> for &CxxString {
+    type Error = Utf8Error;
+
+    fn try_into(self) -> Result<String, Utf8Error> {
+        Ok(String::from(self.to_str()?))
+    }
+}
+
 #[cfg(feature = "std")]
 impl std::io::Write for Pin<&mut CxxString> {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
