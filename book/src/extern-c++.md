@@ -220,6 +220,18 @@ pub mod ffi {
 }
 ```
 
+If there are multiple bridge blocks within a crate, you need to include them in `build.rs` with a `bridges` builder
+
+```rust,noplayground
+// build.rs
+fn main() {
+    cxx_build::bridges(["src/file1.rs", "src/file2.rs", ...])
+        .file("src/file1.cc")
+        .file("src/file2.cc")
+    ...
+}
+```
+
 #### Integrating with bindgen-generated or handwritten unsafe bindings
 
 Handwritten `ExternType` impls make it possible to plug in a data structure
