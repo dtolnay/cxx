@@ -26,38 +26,24 @@ cargo.rust_library(
 
 alias(
     name = "cc",
-    actual = ":cc-1.0.83",
+    actual = ":cc-1.0.88",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "cc-1.0.83.crate",
-    sha256 = "f1174fb0b6ec23863f8b971027804a42614e347eafb0a95bf0b12cdae21fc4d0",
-    strip_prefix = "cc-1.0.83",
-    urls = ["https://crates.io/api/v1/crates/cc/1.0.83/download"],
+    name = "cc-1.0.88.crate",
+    sha256 = "02f341c093d19155a6e41631ce5971aac4e9a868262212153124c15fa22d1cdc",
+    strip_prefix = "cc-1.0.88",
+    urls = ["https://crates.io/api/v1/crates/cc/1.0.88/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "cc-1.0.83",
-    srcs = [":cc-1.0.83.crate"],
+    name = "cc-1.0.88",
+    srcs = [":cc-1.0.88.crate"],
     crate = "cc",
-    crate_root = "cc-1.0.83.crate/src/lib.rs",
+    crate_root = "cc-1.0.88.crate/src/lib.rs",
     edition = "2018",
-    platform = {
-        "linux-arm64": dict(
-            deps = [":libc-0.2.153"],
-        ),
-        "linux-x86_64": dict(
-            deps = [":libc-0.2.153"],
-        ),
-        "macos-arm64": dict(
-            deps = [":libc-0.2.153"],
-        ),
-        "macos-x86_64": dict(
-            deps = [":libc-0.2.153"],
-        ),
-    },
     visibility = [],
 )
 
@@ -160,40 +146,6 @@ cargo.rust_library(
         ":termcolor-1.4.1",
         ":unicode-width-0.1.11",
     ],
-)
-
-http_archive(
-    name = "libc-0.2.153.crate",
-    sha256 = "9c198f91728a82281a64e1f4f9eeb25d82cb32a5de251c6bd1b5154d63a8e7bd",
-    strip_prefix = "libc-0.2.153",
-    urls = ["https://crates.io/api/v1/crates/libc/0.2.153/download"],
-    visibility = [],
-)
-
-cargo.rust_library(
-    name = "libc-0.2.153",
-    srcs = [":libc-0.2.153.crate"],
-    crate = "libc",
-    crate_root = "libc-0.2.153.crate/src/lib.rs",
-    edition = "2015",
-    rustc_flags = ["@$(location :libc-0.2.153-build-script-run[rustc_flags])"],
-    visibility = [],
-)
-
-cargo.rust_binary(
-    name = "libc-0.2.153-build-script-build",
-    srcs = [":libc-0.2.153.crate"],
-    crate = "build_script_build",
-    crate_root = "libc-0.2.153.crate/build.rs",
-    edition = "2015",
-    visibility = [],
-)
-
-buildscript_run(
-    name = "libc-0.2.153-build-script-run",
-    package_name = "libc",
-    buildscript_rule = ":libc-0.2.153-build-script-build",
-    version = "0.2.153",
 )
 
 alias(
@@ -353,23 +305,23 @@ buildscript_run(
 
 alias(
     name = "syn",
-    actual = ":syn-2.0.50",
+    actual = ":syn-2.0.51",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "syn-2.0.50.crate",
-    sha256 = "74f1bdc9872430ce9b75da68329d1c1746faf50ffac5f19e02b71e37ff881ffb",
-    strip_prefix = "syn-2.0.50",
-    urls = ["https://crates.io/api/v1/crates/syn/2.0.50/download"],
+    name = "syn-2.0.51.crate",
+    sha256 = "6ab617d94515e94ae53b8406c628598680aa0c9587474ecbe58188f7b345d66c",
+    strip_prefix = "syn-2.0.51",
+    urls = ["https://crates.io/api/v1/crates/syn/2.0.51/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "syn-2.0.50",
-    srcs = [":syn-2.0.50.crate"],
+    name = "syn-2.0.51",
+    srcs = [":syn-2.0.51.crate"],
     crate = "syn",
-    crate_root = "syn-2.0.50.crate/src/lib.rs",
+    crate_root = "syn-2.0.51.crate/src/lib.rs",
     edition = "2021",
     features = [
         "clone-impls",

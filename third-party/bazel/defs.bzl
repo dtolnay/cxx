@@ -295,14 +295,14 @@ def aliases(
 _NORMAL_DEPENDENCIES = {
     "third-party": {
         _COMMON_CONDITION: {
-            "cc": "@vendor__cc-1.0.83//:cc",
+            "cc": "@vendor__cc-1.0.88//:cc",
             "clap": "@vendor__clap-4.5.1//:clap",
             "codespan-reporting": "@vendor__codespan-reporting-0.11.1//:codespan_reporting",
             "once_cell": "@vendor__once_cell-1.19.0//:once_cell",
             "proc-macro2": "@vendor__proc-macro2-1.0.78//:proc_macro2",
             "quote": "@vendor__quote-1.0.35//:quote",
             "scratch": "@vendor__scratch-1.0.7//:scratch",
-            "syn": "@vendor__syn-2.0.50//:syn",
+            "syn": "@vendor__syn-2.0.51//:syn",
         },
     },
 }
@@ -377,7 +377,6 @@ _CONDITIONS = {
     "arm-unknown-linux-gnueabi": ["@rules_rust//rust/platform:arm-unknown-linux-gnueabi"],
     "armv7-linux-androideabi": ["@rules_rust//rust/platform:armv7-linux-androideabi"],
     "armv7-unknown-linux-gnueabi": ["@rules_rust//rust/platform:armv7-unknown-linux-gnueabi"],
-    "cfg(unix)": ["@rules_rust//rust/platform:aarch64-apple-darwin", "@rules_rust//rust/platform:aarch64-apple-ios", "@rules_rust//rust/platform:aarch64-apple-ios-sim", "@rules_rust//rust/platform:aarch64-fuchsia", "@rules_rust//rust/platform:aarch64-linux-android", "@rules_rust//rust/platform:aarch64-unknown-linux-gnu", "@rules_rust//rust/platform:aarch64-unknown-nixos-gnu", "@rules_rust//rust/platform:aarch64-unknown-nto-qnx710", "@rules_rust//rust/platform:arm-unknown-linux-gnueabi", "@rules_rust//rust/platform:armv7-linux-androideabi", "@rules_rust//rust/platform:armv7-unknown-linux-gnueabi", "@rules_rust//rust/platform:i686-apple-darwin", "@rules_rust//rust/platform:i686-linux-android", "@rules_rust//rust/platform:i686-unknown-freebsd", "@rules_rust//rust/platform:i686-unknown-linux-gnu", "@rules_rust//rust/platform:powerpc-unknown-linux-gnu", "@rules_rust//rust/platform:s390x-unknown-linux-gnu", "@rules_rust//rust/platform:x86_64-apple-darwin", "@rules_rust//rust/platform:x86_64-apple-ios", "@rules_rust//rust/platform:x86_64-fuchsia", "@rules_rust//rust/platform:x86_64-linux-android", "@rules_rust//rust/platform:x86_64-unknown-freebsd", "@rules_rust//rust/platform:x86_64-unknown-linux-gnu", "@rules_rust//rust/platform:x86_64-unknown-nixos-gnu"],
     "cfg(windows)": ["@rules_rust//rust/platform:aarch64-pc-windows-msvc", "@rules_rust//rust/platform:i686-pc-windows-msvc", "@rules_rust//rust/platform:x86_64-pc-windows-msvc"],
     "i686-apple-darwin": ["@rules_rust//rust/platform:i686-apple-darwin"],
     "i686-linux-android": ["@rules_rust//rust/platform:i686-linux-android"],
@@ -425,12 +424,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__cc-1.0.83",
-        sha256 = "f1174fb0b6ec23863f8b971027804a42614e347eafb0a95bf0b12cdae21fc4d0",
+        name = "vendor__cc-1.0.88",
+        sha256 = "02f341c093d19155a6e41631ce5971aac4e9a868262212153124c15fa22d1cdc",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/cc/1.0.83/download"],
-        strip_prefix = "cc-1.0.83",
-        build_file = Label("@//third-party/bazel:BUILD.cc-1.0.83.bazel"),
+        urls = ["https://crates.io/api/v1/crates/cc/1.0.88/download"],
+        strip_prefix = "cc-1.0.88",
+        build_file = Label("@//third-party/bazel:BUILD.cc-1.0.88.bazel"),
     )
 
     maybe(
@@ -475,16 +474,6 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__libc-0.2.153",
-        sha256 = "9c198f91728a82281a64e1f4f9eeb25d82cb32a5de251c6bd1b5154d63a8e7bd",
-        type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/libc/0.2.153/download"],
-        strip_prefix = "libc-0.2.153",
-        build_file = Label("@//third-party/bazel:BUILD.libc-0.2.153.bazel"),
-    )
-
-    maybe(
-        http_archive,
         name = "vendor__once_cell-1.19.0",
         sha256 = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92",
         type = "tar.gz",
@@ -525,12 +514,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__syn-2.0.50",
-        sha256 = "74f1bdc9872430ce9b75da68329d1c1746faf50ffac5f19e02b71e37ff881ffb",
+        name = "vendor__syn-2.0.51",
+        sha256 = "6ab617d94515e94ae53b8406c628598680aa0c9587474ecbe58188f7b345d66c",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/syn/2.0.50/download"],
-        strip_prefix = "syn-2.0.50",
-        build_file = Label("@//third-party/bazel:BUILD.syn-2.0.50.bazel"),
+        urls = ["https://crates.io/api/v1/crates/syn/2.0.51/download"],
+        strip_prefix = "syn-2.0.51",
+        build_file = Label("@//third-party/bazel:BUILD.syn-2.0.51.bazel"),
     )
 
     maybe(
@@ -604,12 +593,12 @@ def crate_repositories():
     )
 
     return [
-        struct(repo = "vendor__cc-1.0.83", is_dev_dep = False),
+        struct(repo = "vendor__cc-1.0.88", is_dev_dep = False),
         struct(repo = "vendor__clap-4.5.1", is_dev_dep = False),
         struct(repo = "vendor__codespan-reporting-0.11.1", is_dev_dep = False),
         struct(repo = "vendor__once_cell-1.19.0", is_dev_dep = False),
         struct(repo = "vendor__proc-macro2-1.0.78", is_dev_dep = False),
         struct(repo = "vendor__quote-1.0.35", is_dev_dep = False),
         struct(repo = "vendor__scratch-1.0.7", is_dev_dep = False),
-        struct(repo = "vendor__syn-2.0.50", is_dev_dep = False),
+        struct(repo = "vendor__syn-2.0.51", is_dev_dep = False),
     ]
