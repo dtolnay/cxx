@@ -1,0 +1,62 @@
+error[E0277]: the size for values of type `(dyn Debug + 'static)` cannot be known at compilation time
+ --> tests/ui_build/option_not_sized.rs:2:14
+  |
+2 |     const _: cxx::RustOption::<&dyn core::fmt::Debug> = cxx::RustOption::<&dyn core::fmt::Debug>::new();
+  |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ doesn't have a size known at compile-time
+  |
+  = help: the trait `Sized` is not implemented for `(dyn Debug + 'static)`, which is required by `&'static (dyn Debug + 'static): cxx::rust_option::OptionTarget`
+  = help: the following other types implement trait `cxx::rust_option::OptionTarget`:
+            Box<T>
+            Pin<&mut T>
+            *const T
+            *mut T
+            &T
+            &mut T
+  = note: required for `&'static (dyn Debug + 'static)` to implement `cxx::rust_option::OptionTarget`
+note: required by a bound in `RustOption`
+ --> src/rust_option.rs
+  |
+  | pub struct RustOption<T: OptionTarget> {
+  |                          ^^^^^^^^^^^^ required by this bound in `RustOption`
+
+error[E0599]: the function or associated item `new` exists for struct `RustOption<&dyn Debug>`, but its trait bounds were not satisfied
+ --> tests/ui_build/option_not_sized.rs:2:99
+  |
+2 |     const _: cxx::RustOption::<&dyn core::fmt::Debug> = cxx::RustOption::<&dyn core::fmt::Debug>::new();
+  |                                                                                                   ^^^ function or associated item cannot be called on `RustOption<&dyn Debug>` due to unsatisfied trait bounds
+  |
+note: if you're trying to build a new `RustOption<&dyn Debug>` consider using one of the following associated functions:
+      RustOption::<T>::new
+      RustOption::<&'a T>::from_option_ref
+   --> src/rust_option.rs
+    |
+    |     pub fn new() -> Self {
+    |     ^^^^^^^^^^^^^^^^^^^^
+...
+    |     pub fn from_option_ref(other: Option<&'a T>) -> Self {
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: the following trait bounds were not satisfied:
+            `&dyn Debug: cxx::rust_option::OptionTarget`
+            `&dyn Debug: cxx::rust_option::private::Sealed`
+            which is required by `&dyn Debug: cxx::rust_option::OptionTarget`
+
+error[E0277]: the size for values of type `dyn Debug` cannot be known at compilation time
+ --> tests/ui_build/option_not_sized.rs:2:57
+  |
+2 |     const _: cxx::RustOption::<&dyn core::fmt::Debug> = cxx::RustOption::<&dyn core::fmt::Debug>::new();
+  |                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ doesn't have a size known at compile-time
+  |
+  = help: the trait `Sized` is not implemented for `dyn Debug`, which is required by `&dyn Debug: cxx::rust_option::OptionTarget`
+  = help: the following other types implement trait `cxx::rust_option::OptionTarget`:
+            Box<T>
+            Pin<&mut T>
+            *const T
+            *mut T
+            &T
+            &mut T
+  = note: required for `&dyn Debug` to implement `cxx::rust_option::OptionTarget`
+note: required by a bound in `RustOption`
+ --> src/rust_option.rs
+  |
+  | pub struct RustOption<T: OptionTarget> {
+  |                          ^^^^^^^^^^^^ required by this bound in `RustOption`

@@ -1063,6 +1063,7 @@ fn parse_impl(cx: &mut Errors, imp: ItemImpl) -> Result<Api> {
     let ty_generics = match &ty {
         Type::RustBox(ty)
         | Type::RustVec(ty)
+        | Type::RustOption(ty)
         | Type::UniquePtr(ty)
         | Type::SharedPtr(ty)
         | Type::WeakPtr(ty)
@@ -1275,6 +1276,16 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
                         let inner = parse_type(arg)?;
                         return Ok(Type::RustVec(Box::new(Ty1 {
+                            name: ident,
+                            langle: generic.lt_token,
+                            inner,
+                            rangle: generic.gt_token,
+                        })));
+                    }
+                } else if ident == "Option" && generic.args.len() == 1 {
+                    if let GenericArgument::Type(arg) = &generic.args[0] {
+                        let inner = parse_type(arg)?;
+                        return Ok(Type::RustOption(Box::new(Ty1 {
                             name: ident,
                             langle: generic.lt_token,
                             inner,

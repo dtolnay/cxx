@@ -7,10 +7,20 @@ use syn::Token;
 pub(crate) enum ImplKey<'a> {
     RustBox(NamedImplKey<'a>),
     RustVec(NamedImplKey<'a>),
+    RustOption(OptionInner<'a>),
     UniquePtr(NamedImplKey<'a>),
     SharedPtr(NamedImplKey<'a>),
     WeakPtr(NamedImplKey<'a>),
     CxxVector(NamedImplKey<'a>),
+}
+
+#[derive(Copy, Clone, PartialEq, Eq, Hash)]
+pub(crate) enum OptionInner<'a> {
+    RustBox(NamedImplKey<'a>),
+    Ref(NamedImplKey<'a>),
+    MutRef(NamedImplKey<'a>),
+    RefVec(NamedImplKey<'a>),
+    MutRefVec(NamedImplKey<'a>),
 }
 
 #[derive(Copy, Clone)]
@@ -35,6 +45,42 @@ impl Type {
         } else if let Type::RustVec(ty) = self {
             if let Type::Ident(ident) = &ty.inner {
                 return Some(ImplKey::RustVec(NamedImplKey::new(ty, ident)));
+            }
+        } else if let Type::RustOption(ty) = self {
+            match &ty.inner {
+                Type::RustBox(_) => {
+                    let impl_key = ty.inner.impl_key()?;
+                    match impl_key {
+                        ImplKey::RustBox(named) => {
+                            return Some(ImplKey::RustOption(OptionInner::RustBox(named)))
+                        }
+                        _ => unreachable!(),
+                    }
+                }
+                Type::Ref(r) => match &r.inner {
+                    Type::RustVec(_) => {
+                        if let Some(ImplKey::RustVec(impl_key)) = r.inner.impl_key() {
+                            if r.mutable {
+                                return Some(ImplKey::RustOption(OptionInner::MutRefVec(impl_key)));
+                            } else {
+                                return Some(ImplKey::RustOption(OptionInner::RefVec(impl_key)));
+                            }
+                        }
+                    }
+                    Type::Ident(ident) => {
+                        if r.mutable {
+                            return Some(ImplKey::RustOption(OptionInner::MutRef(
+                                NamedImplKey::new(ty, ident),
+                            )));
+                        } else {
+                            return Some(ImplKey::RustOption(OptionInner::Ref(NamedImplKey::new(
+                                ty, ident,
+                            ))));
+                        }
+                    }
+                    _ => {}
+                },
+                _ => {}
             }
         } else if let Type::UniquePtr(ty) = self {
             if let Type::Ident(ident) = &ty.inner {

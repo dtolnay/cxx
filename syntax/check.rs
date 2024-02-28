@@ -47,6 +47,7 @@ fn do_typecheck(cx: &mut Check) {
             Type::Ident(ident) => check_type_ident(cx, ident),
             Type::RustBox(ptr) => check_type_box(cx, ptr),
             Type::RustVec(ty) => check_type_rust_vec(cx, ty),
+            Type::RustOption(ty) => check_type_rust_option(cx, ty),
             Type::UniquePtr(ptr) => check_type_unique_ptr(cx, ptr),
             Type::SharedPtr(ptr) => check_type_shared_ptr(cx, ptr),
             Type::WeakPtr(ptr) => check_type_weak_ptr(cx, ptr),
@@ -93,20 +94,23 @@ fn check_type_ident(cx: &mut Check, name: &NamedType) {
 }
 
 fn check_type_box(cx: &mut Check, ptr: &Ty1) {
-    if let Type::Ident(ident) = &ptr.inner {
-        if cx.types.cxx.contains(&ident.rust)
-            && !cx.types.aliases.contains_key(&ident.rust)
-            && !cx.types.structs.contains_key(&ident.rust)
-            && !cx.types.enums.contains_key(&ident.rust)
-        {
-            cx.error(ptr, error::BOX_CXX_TYPE.msg);
-        }
+    match &ptr.inner {
+        Type::Ident(ident) => {
+            if cx.types.cxx.contains(&ident.rust)
+                && !cx.types.aliases.contains_key(&ident.rust)
+                && !cx.types.structs.contains_key(&ident.rust)
+                && !cx.types.enums.contains_key(&ident.rust)
+            {
+                cx.error(ptr, error::BOX_CXX_TYPE.msg);
+            }
 
-        if Atom::from(&ident.rust).is_none() {
-            return;
+            if Atom::from(&ident.rust).is_none() {
+                return;
+            }
         }
+        Type::RustOption(_) => return,
+        _ => {}
     }
-
     cx.error(ptr, "unsupported target type of Box");
 }
 
@@ -136,6 +140,16 @@ fn check_type_rust_vec(cx: &mut Check, ty: &Ty1) {
     }
 
     cx.error(ty, "unsupported element type of Vec");
+}
+
+fn check_type_rust_option(cx: &mut Check, ty: &Ty1) {
+    match &ty.inner {
+        Type::RustBox(_) => return,
+        Type::Ref(_) => return,
+        _ => {}
+    }
+
+    cx.error(ty, "unsupported element type of Option");
 }
 
 fn check_type_unique_ptr(cx: &mut Check, ptr: &Ty1) {
@@ -245,7 +259,7 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
     }
 
     match ty.inner {
-        Type::Fn(_) | Type::Void(_) => {}
+        Type::Fn(_) | Type::Void(_) | Type::RustOption(_) => {}
         Type::Ref(_) => {
             cx.error(ty, "C++ does not allow references to references");
             return;
@@ -523,6 +537,7 @@ fn check_api_impl(cx: &mut Check, imp: &Impl) {
     match ty {
         Type::RustBox(ty)
         | Type::RustVec(ty)
+        | Type::RustOption(ty)
         | Type::UniquePtr(ty)
         | Type::SharedPtr(ty)
         | Type::WeakPtr(ty)
@@ -609,6 +624,7 @@ fn check_reserved_name(cx: &mut Check, ident: &Ident) {
         || ident == "WeakPtr"
         || ident == "Vec"
         || ident == "CxxVector"
+        || ident == "Option"
         || ident == "str"
         || Atom::from(ident).is_some()
     {
@@ -651,6 +667,7 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
         Type::CxxVector(_) | Type::Fn(_) | Type::Void(_) => true,
         Type::RustBox(_)
         | Type::RustVec(_)
+        | Type::RustOption(_)
         | Type::UniquePtr(_)
         | Type::SharedPtr(_)
         | Type::WeakPtr(_)
@@ -725,6 +742,7 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         }
         Type::RustBox(_) => "Box".to_owned(),
         Type::RustVec(_) => "Vec".to_owned(),
+        Type::RustOption(_) => "Option".to_owned(),
         Type::UniquePtr(_) => "unique_ptr".to_owned(),
         Type::SharedPtr(_) => "shared_ptr".to_owned(),
         Type::WeakPtr(_) => "weak_ptr".to_owned(),

@@ -826,6 +826,93 @@ template <typename T>
 Box<T>::Box(uninit) noexcept {}
 #endif // CXXBRIDGE1_RUST_BOX
 
+#ifndef CXXBRIDGE1_RUST_OPTION
+template <typename T>
+class Option final {
+public:
+  Option() noexcept;
+  Option(Option&&) noexcept;
+  Option(T&&) noexcept;
+  ~Option() noexcept;
+
+  const T *operator->() const;
+  const T &operator*() const;
+  T *operator->();
+  T &operator*();
+
+  Option<T>& operator=(Option&&) noexcept;
+
+  bool has_value() const noexcept;
+  T& value() noexcept;
+  void reset();
+  void set(T&&) noexcept;
+private:
+  void* empty_;
+
+  T* value_ptr() noexcept;
+  void drop() noexcept;
+};
+#endif // CXXBRIDGE1_RUST_OPTION
+
+#ifndef CXXBRIDGE1_RUST_OPTION
+#define CXXBRIDGE1_RUST_OPTION
+template <typename T>
+Option<T>::Option(Option&& other) noexcept {
+  new (this) Option();
+  if (other.has_value()) {
+    set(std::move(other.value()));
+  }
+  new (&other) Option();
+}
+
+template <typename T>
+Option<T>::~Option() noexcept {
+  this->drop();
+}
+
+template <typename T>
+Option<T>& Option<T>::operator=(Option&& other) noexcept {
+  this->reset();
+  if (other.has_value()) {
+    set(std::move(other.value()));
+  }
+  new (&other) Option();
+  return *this;
+}
+
+template <typename T>
+const T *Option<T>::operator->() const {
+  return &value();
+}
+
+template <typename T>
+const T &Option<T>::operator*() const {
+  return value();
+}
+
+template <typename T>
+T *Option<T>::operator->() {
+  return &value();
+}
+
+template <typename T>
+T &Option<T>::operator*() {
+  return value();
+}
+
+template <typename T>
+T &Option<T>::value() noexcept {
+  return *value_ptr();
+}
+
+template <typename T>
+void Option<T>::reset() {
+  this->drop();
+  new (this) Option();
+}
+
+#endif // CXXBRIDGE1_RUST_OPTION
+
 #ifndef CXXBRIDGE1_RUST_VEC
 #define CXXBRIDGE1_RUST_VEC
 template <typename T>

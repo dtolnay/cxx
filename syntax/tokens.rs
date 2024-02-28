@@ -28,7 +28,8 @@ impl ToTokens for Type {
             | Type::SharedPtr(ty)
             | Type::WeakPtr(ty)
             | Type::CxxVector(ty)
-            | Type::RustVec(ty) => ty.to_tokens(tokens),
+            | Type::RustVec(ty)
+            | Type::RustOption(ty) => ty.to_tokens(tokens),
             Type::Ref(r) | Type::Str(r) => r.to_tokens(tokens),
             Type::Ptr(p) => p.to_tokens(tokens),
             Type::Array(a) => a.to_tokens(tokens),
@@ -74,6 +75,9 @@ impl ToTokens for Ty1 {
             }
             "Vec" => {
                 tokens.extend(quote_spanned!(span=> ::cxx::alloc::vec::));
+            }
+            "Option" => {
+                tokens.extend(quote_spanned!(span=> ::std::option::));
             }
             _ => {}
         }

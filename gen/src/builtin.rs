@@ -10,6 +10,7 @@ pub(crate) struct Builtins<'a> {
     pub rust_slice: bool,
     pub rust_box: bool,
     pub rust_vec: bool,
+    pub rust_option: bool,
     pub rust_fn: bool,
     pub rust_isize: bool,
     pub opaque: bool,

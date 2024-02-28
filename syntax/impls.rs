@@ -53,6 +53,7 @@ impl Hash for Type {
             Type::Str(t) => t.hash(state),
             Type::RustVec(t) => t.hash(state),
             Type::CxxVector(t) => t.hash(state),
+            Type::RustOption(t) => t.hash(state),
             Type::Fn(t) => t.hash(state),
             Type::SliceRef(t) => t.hash(state),
             Type::Array(t) => t.hash(state),

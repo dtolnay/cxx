@@ -184,6 +184,7 @@ impl<'a> Types<'a> {
                 | ImplKey::CxxVector(ident) => {
                     Atom::from(ident.rust).is_none() && !aliases.contains_key(ident.rust)
                 }
+                ImplKey::RustOption(_) => true,
             };
             if implicit_impl && !impls.contains_key(&impl_key) {
                 impls.insert(impl_key, None);
