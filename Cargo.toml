@@ -27,7 +27,7 @@ cxxbridge-macro = { version = "=1.0.118", path = "macro" }
 link-cplusplus = "1.0.9"
 
 [build-dependencies]
-cc = "1.0.79"
+cc = "1.0.83"
 cxxbridge-flags = { version = "=1.0.118", path = "flags", default-features = false }
 
 [dev-dependencies]
