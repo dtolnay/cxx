@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "24b78f036a0d10a5e9c8a5be3469ecf2ee6112cd00444004e431212e21afd1ec",
+  "moduleFileHash": "bb765dcdcb2fa0322a486eb1c5c7b4e10a5eb3cf25104fc7ce57c8c547bcd22a",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -68,14 +68,14 @@
             "column": 35
           },
           "imports": {
-            "vendor__cc-1.0.88": "vendor__cc-1.0.88",
+            "vendor__cc-1.0.89": "vendor__cc-1.0.89",
             "vendor__clap-4.5.1": "vendor__clap-4.5.1",
             "vendor__codespan-reporting-0.11.1": "vendor__codespan-reporting-0.11.1",
             "vendor__once_cell-1.19.0": "vendor__once_cell-1.19.0",
             "vendor__proc-macro2-1.0.78": "vendor__proc-macro2-1.0.78",
             "vendor__quote-1.0.35": "vendor__quote-1.0.35",
             "vendor__scratch-1.0.7": "vendor__scratch-1.0.7",
-            "vendor__syn-2.0.51": "vendor__syn-2.0.51"
+            "vendor__syn-2.0.52": "vendor__syn-2.0.52"
           },
           "devImports": [],
           "tags": [],
@@ -1167,7 +1167,7 @@
   "moduleExtensions": {
     "//tools/bazel:extension.bzl%crate_repositories": {
       "general": {
-        "bzlTransitiveDigest": "hUjyA/te0jwSer7gJ5Nj1oZjaa7HmmL3RmGla1ThXz8=",
+        "bzlTransitiveDigest": "00EKH2eYB7H5AKUxn1qbT2nn7BrdHGcNhwb4O7pLdwk=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1297,6 +1297,20 @@
               "build_file": "@@//third-party/bazel:BUILD.winapi-i686-pc-windows-gnu-0.4.0.bazel"
             }
           },
+          "vendor__cc-1.0.89": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "name": "_main~crate_repositories~vendor__cc-1.0.89",
+              "sha256": "a0ba8f7aaa012f30d5b2861462f6708eccd49c3c39863fe083a308035f63d723",
+              "type": "tar.gz",
+              "urls": [
+                "https://crates.io/api/v1/crates/cc/1.0.89/download"
+              ],
+              "strip_prefix": "cc-1.0.89",
+              "build_file": "@@//third-party/bazel:BUILD.cc-1.0.89.bazel"
+            }
+          },
           "vendor__unicode-ident-1.0.12": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
@@ -1309,20 +1323,6 @@
               ],
               "strip_prefix": "unicode-ident-1.0.12",
               "build_file": "@@//third-party/bazel:BUILD.unicode-ident-1.0.12.bazel"
-            }
-          },
-          "vendor__cc-1.0.88": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_archive",
-            "attributes": {
-              "name": "_main~crate_repositories~vendor__cc-1.0.88",
-              "sha256": "02f341c093d19155a6e41631ce5971aac4e9a868262212153124c15fa22d1cdc",
-              "type": "tar.gz",
-              "urls": [
-                "https://crates.io/api/v1/crates/cc/1.0.88/download"
-              ],
-              "strip_prefix": "cc-1.0.88",
-              "build_file": "@@//third-party/bazel:BUILD.cc-1.0.88.bazel"
             }
           },
           "vendor__scratch-1.0.7": {
@@ -1353,6 +1353,20 @@
               "build_file": "@@//third-party/bazel:BUILD.clap-4.5.1.bazel"
             }
           },
+          "vendor__syn-2.0.52": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "name": "_main~crate_repositories~vendor__syn-2.0.52",
+              "sha256": "b699d15b36d1f02c3e7c69f8ffef53de37aefae075d8488d4ba1a7788d574a07",
+              "type": "tar.gz",
+              "urls": [
+                "https://crates.io/api/v1/crates/syn/2.0.52/download"
+              ],
+              "strip_prefix": "syn-2.0.52",
+              "build_file": "@@//third-party/bazel:BUILD.syn-2.0.52.bazel"
+            }
+          },
           "vendor__codespan-reporting-0.11.1": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
@@ -1379,20 +1393,6 @@
               ],
               "strip_prefix": "clap_lex-0.7.0",
               "build_file": "@@//third-party/bazel:BUILD.clap_lex-0.7.0.bazel"
-            }
-          },
-          "vendor__syn-2.0.51": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_archive",
-            "attributes": {
-              "name": "_main~crate_repositories~vendor__syn-2.0.51",
-              "sha256": "6ab617d94515e94ae53b8406c628598680aa0c9587474ecbe58188f7b345d66c",
-              "type": "tar.gz",
-              "urls": [
-                "https://crates.io/api/v1/crates/syn/2.0.51/download"
-              ],
-              "strip_prefix": "syn-2.0.51",
-              "build_file": "@@//third-party/bazel:BUILD.syn-2.0.51.bazel"
             }
           },
           "vendor__winapi-util-0.1.6": {
@@ -1426,14 +1426,14 @@
         },
         "moduleExtensionMetadata": {
           "explicitRootModuleDirectDeps": [
-            "vendor__cc-1.0.88",
+            "vendor__cc-1.0.89",
             "vendor__clap-4.5.1",
             "vendor__codespan-reporting-0.11.1",
             "vendor__once_cell-1.19.0",
             "vendor__proc-macro2-1.0.78",
             "vendor__quote-1.0.35",
             "vendor__scratch-1.0.7",
-            "vendor__syn-2.0.51"
+            "vendor__syn-2.0.52"
           ],
           "explicitRootModuleDirectDevDeps": [],
           "useAllRepos": "NO"
