@@ -159,7 +159,7 @@ std::unique_ptr<BlobstoreClient> new_blobstore_client() {
 }
 ```
 
-Using `std::make_unique` would work too, as long as you pass `-std=c++14` to the
+Using `std::make_unique` would work too, as long as you pass `std("c++14")` to the
 C++ compiler as described later on.
 
 The placement in *include/* and *src/* is not significant; you can place C++
@@ -222,7 +222,7 @@ integration.
 # fn main() {
     cxx_build::bridge("src/main.rs")
         .file("src/blobstore.cc")
-        .flag_if_supported("-std=c++14")
+        .std("c++14")
         .compile("cxx-demo");
 # }
 ```
