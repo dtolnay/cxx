@@ -295,14 +295,14 @@ def aliases(
 _NORMAL_DEPENDENCIES = {
     "third-party": {
         _COMMON_CONDITION: {
-            "cc": "@vendor__cc-1.0.89//:cc",
-            "clap": "@vendor__clap-4.5.1//:clap",
-            "codespan-reporting": "@vendor__codespan-reporting-0.11.1//:codespan_reporting",
-            "once_cell": "@vendor__once_cell-1.19.0//:once_cell",
-            "proc-macro2": "@vendor__proc-macro2-1.0.78//:proc_macro2",
-            "quote": "@vendor__quote-1.0.35//:quote",
-            "scratch": "@vendor__scratch-1.0.7//:scratch",
-            "syn": "@vendor__syn-2.0.52//:syn",
+            "cc": Label("@vendor__cc-1.0.89//:cc"),
+            "clap": Label("@vendor__clap-4.5.1//:clap"),
+            "codespan-reporting": Label("@vendor__codespan-reporting-0.11.1//:codespan_reporting"),
+            "once_cell": Label("@vendor__once_cell-1.19.0//:once_cell"),
+            "proc-macro2": Label("@vendor__proc-macro2-1.0.78//:proc_macro2"),
+            "quote": Label("@vendor__quote-1.0.35//:quote"),
+            "scratch": Label("@vendor__scratch-1.0.7//:scratch"),
+            "syn": Label("@vendor__syn-2.0.52//:syn"),
         },
     },
 }

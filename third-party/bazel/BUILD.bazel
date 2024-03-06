@@ -13,15 +13,21 @@ exports_files(
         "cargo-bazel.json",
         "crates.bzl",
         "defs.bzl",
-    ] + glob(["*.bazel"]),
+    ] + glob(
+        include = ["*.bazel"],
+        allow_empty = True,
+    ),
 )
 
 filegroup(
     name = "srcs",
-    srcs = glob([
-        "*.bazel",
-        "*.bzl",
-    ]),
+    srcs = glob(
+        include = [
+            "*.bazel",
+            "*.bzl",
+        ],
+        allow_empty = True,
+    ),
 )
 
 # Workspace Member Dependencies
