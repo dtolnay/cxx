@@ -6,15 +6,6 @@ mod ffi {
         tags: Vec<String>,
     }
 
-    struct Blob<'a> {
-        size: &'a usize,
-    }
-
-    enum BlobB<'a> {
-        Foo(Blob<'a>),
-        Bar(&'a usize),
-    }
-
     /// A classic.
     enum BlobEnum {
         /// This is my doc
