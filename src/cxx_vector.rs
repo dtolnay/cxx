@@ -314,7 +314,9 @@ where
 /// `CxxVector<T>` in generic code.
 ///
 /// This trait has no publicly callable or implementable methods. Implementing
-/// it outside of the CXX codebase is not supported.
+/// it outside of the CXX codebase requires using [explicit shim trait impls],
+/// adding the line `impl CxxVector<MyType> {}` in the same `cxx::bridge` that
+/// defines `MyType`.
 ///
 /// # Example
 ///
@@ -338,6 +340,8 @@ where
 ///
 /// Writing the same generic function without a `VectorElement` trait bound
 /// would not compile.
+///
+/// [explicit shim trait impls]: https://cxx.rs/extern-c++.html#explicit-shim-trait-impls
 pub unsafe trait VectorElement: Sized {
     #[doc(hidden)]
     fn __typename(f: &mut fmt::Formatter) -> fmt::Result;

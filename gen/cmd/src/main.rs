@@ -9,6 +9,7 @@
     clippy::into_iter_without_iter,
     clippy::items_after_statements,
     clippy::large_enum_variant,
+    clippy::map_clone,
     clippy::match_bool,
     clippy::match_on_vec_items,
     clippy::match_same_arms,
@@ -16,7 +17,6 @@
     clippy::needless_pass_by_value,
     clippy::new_without_default,
     clippy::nonminimal_bool,
-    clippy::option_if_let_else,
     clippy::or_fun_call,
     clippy::redundant_else,
     clippy::shadow_unrelated,
@@ -26,9 +26,7 @@
     clippy::struct_field_names,
     clippy::too_many_arguments,
     clippy::too_many_lines,
-    clippy::toplevel_ref_arg,
-    // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6983
-    clippy::wrong_self_convention
+    clippy::toplevel_ref_arg
 )]
 
 mod app;

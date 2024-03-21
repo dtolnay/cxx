@@ -9,7 +9,7 @@ publish = false
 path = "/dev/null"
 
 [dependencies]
-cc = "1.0.49"
+cc = "1.0.83"
 clap = { version = "4", default-features = false, features = ["error-context", "help", "std", "usage"] }
 codespan-reporting = "0.11.1"
 once_cell = "1.9"

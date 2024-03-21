@@ -45,7 +45,7 @@
 //! $ cxxbridge src/main.rs > path/to/mybridge.cc
 //! ```
 
-#![doc(html_root_url = "https://docs.rs/cxx-build/1.0.111")]
+#![doc(html_root_url = "https://docs.rs/cxx-build/1.0.119")]
 #![allow(
     clippy::cast_sign_loss,
     clippy::default_trait_access,
@@ -65,7 +65,6 @@
     clippy::needless_pass_by_value,
     clippy::new_without_default,
     clippy::nonminimal_bool,
-    clippy::option_if_let_else,
     clippy::or_fun_call,
     clippy::redundant_else,
     clippy::shadow_unrelated,
@@ -77,10 +76,9 @@
     clippy::too_many_arguments,
     clippy::too_many_lines,
     clippy::toplevel_ref_arg,
+    clippy::unconditional_recursion, // clippy bug: https://github.com/rust-lang/rust-clippy/issues/12133
     clippy::uninlined_format_args,
     clippy::upper_case_acronyms,
-    // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6983
-    clippy::wrong_self_convention
 )]
 
 mod cargo;

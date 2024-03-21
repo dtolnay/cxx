@@ -7,7 +7,7 @@
 //! [dtolnay/cxx#235]: https://github.com/dtolnay/cxx/issues/235
 //! [https://github.com/google/autocxx]: https://github.com/google/autocxx
 
-#![doc(html_root_url = "https://docs.rs/cxx-gen/0.7.111")]
+#![doc(html_root_url = "https://docs.rs/cxx-gen/0.7.119")]
 #![deny(missing_docs)]
 #![allow(dead_code)]
 #![allow(
@@ -28,7 +28,6 @@
     clippy::needless_pass_by_value,
     clippy::new_without_default,
     clippy::nonminimal_bool,
-    clippy::option_if_let_else,
     clippy::or_fun_call,
     clippy::redundant_else,
     clippy::shadow_unrelated,
@@ -39,9 +38,7 @@
     clippy::too_many_arguments,
     clippy::too_many_lines,
     clippy::toplevel_ref_arg,
-    clippy::uninlined_format_args,
-    // clippy bug: https://github.com/rust-lang/rust-clippy/issues/6983
-    clippy::wrong_self_convention
+    clippy::uninlined_format_args
 )]
 
 mod error;

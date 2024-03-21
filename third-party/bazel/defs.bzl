@@ -295,14 +295,14 @@ def aliases(
 _NORMAL_DEPENDENCIES = {
     "third-party": {
         _COMMON_CONDITION: {
-            "cc": "@vendor__cc-1.0.83//:cc",
-            "clap": "@vendor__clap-4.4.11//:clap",
-            "codespan-reporting": "@vendor__codespan-reporting-0.11.1//:codespan_reporting",
-            "once_cell": "@vendor__once_cell-1.19.0//:once_cell",
-            "proc-macro2": "@vendor__proc-macro2-1.0.70//:proc_macro2",
-            "quote": "@vendor__quote-1.0.33//:quote",
-            "scratch": "@vendor__scratch-1.0.7//:scratch",
-            "syn": "@vendor__syn-2.0.41//:syn",
+            "cc": Label("@vendor__cc-1.0.89//:cc"),
+            "clap": Label("@vendor__clap-4.5.1//:clap"),
+            "codespan-reporting": Label("@vendor__codespan-reporting-0.11.1//:codespan_reporting"),
+            "once_cell": Label("@vendor__once_cell-1.19.0//:once_cell"),
+            "proc-macro2": Label("@vendor__proc-macro2-1.0.78//:proc_macro2"),
+            "quote": Label("@vendor__quote-1.0.35//:quote"),
+            "scratch": Label("@vendor__scratch-1.0.7//:scratch"),
+            "syn": Label("@vendor__syn-2.0.52//:syn"),
         },
     },
 }
@@ -371,12 +371,12 @@ _CONDITIONS = {
     "aarch64-fuchsia": ["@rules_rust//rust/platform:aarch64-fuchsia"],
     "aarch64-linux-android": ["@rules_rust//rust/platform:aarch64-linux-android"],
     "aarch64-pc-windows-msvc": ["@rules_rust//rust/platform:aarch64-pc-windows-msvc"],
-    "aarch64-unknown-linux-gnu": ["@rules_rust//rust/platform:aarch64-unknown-linux-gnu", "@rules_rust//rust/platform:aarch64-unknown-nixos-gnu"],
+    "aarch64-unknown-linux-gnu": ["@rules_rust//rust/platform:aarch64-unknown-linux-gnu"],
+    "aarch64-unknown-nixos-gnu": ["@rules_rust//rust/platform:aarch64-unknown-nixos-gnu"],
     "aarch64-unknown-nto-qnx710": ["@rules_rust//rust/platform:aarch64-unknown-nto-qnx710"],
     "arm-unknown-linux-gnueabi": ["@rules_rust//rust/platform:arm-unknown-linux-gnueabi"],
     "armv7-linux-androideabi": ["@rules_rust//rust/platform:armv7-linux-androideabi"],
     "armv7-unknown-linux-gnueabi": ["@rules_rust//rust/platform:armv7-unknown-linux-gnueabi"],
-    "cfg(unix)": ["@rules_rust//rust/platform:aarch64-apple-darwin", "@rules_rust//rust/platform:aarch64-apple-ios", "@rules_rust//rust/platform:aarch64-apple-ios-sim", "@rules_rust//rust/platform:aarch64-fuchsia", "@rules_rust//rust/platform:aarch64-linux-android", "@rules_rust//rust/platform:aarch64-unknown-linux-gnu", "@rules_rust//rust/platform:aarch64-unknown-nixos-gnu", "@rules_rust//rust/platform:aarch64-unknown-nto-qnx710", "@rules_rust//rust/platform:arm-unknown-linux-gnueabi", "@rules_rust//rust/platform:armv7-linux-androideabi", "@rules_rust//rust/platform:armv7-unknown-linux-gnueabi", "@rules_rust//rust/platform:i686-apple-darwin", "@rules_rust//rust/platform:i686-linux-android", "@rules_rust//rust/platform:i686-unknown-freebsd", "@rules_rust//rust/platform:i686-unknown-linux-gnu", "@rules_rust//rust/platform:powerpc-unknown-linux-gnu", "@rules_rust//rust/platform:s390x-unknown-linux-gnu", "@rules_rust//rust/platform:x86_64-apple-darwin", "@rules_rust//rust/platform:x86_64-apple-ios", "@rules_rust//rust/platform:x86_64-fuchsia", "@rules_rust//rust/platform:x86_64-linux-android", "@rules_rust//rust/platform:x86_64-unknown-freebsd", "@rules_rust//rust/platform:x86_64-unknown-linux-gnu", "@rules_rust//rust/platform:x86_64-unknown-nixos-gnu"],
     "cfg(windows)": ["@rules_rust//rust/platform:aarch64-pc-windows-msvc", "@rules_rust//rust/platform:i686-pc-windows-msvc", "@rules_rust//rust/platform:x86_64-pc-windows-msvc"],
     "i686-apple-darwin": ["@rules_rust//rust/platform:i686-apple-darwin"],
     "i686-linux-android": ["@rules_rust//rust/platform:i686-linux-android"],
@@ -399,7 +399,8 @@ _CONDITIONS = {
     "x86_64-pc-windows-gnu": [],
     "x86_64-pc-windows-msvc": ["@rules_rust//rust/platform:x86_64-pc-windows-msvc"],
     "x86_64-unknown-freebsd": ["@rules_rust//rust/platform:x86_64-unknown-freebsd"],
-    "x86_64-unknown-linux-gnu": ["@rules_rust//rust/platform:x86_64-unknown-linux-gnu", "@rules_rust//rust/platform:x86_64-unknown-nixos-gnu"],
+    "x86_64-unknown-linux-gnu": ["@rules_rust//rust/platform:x86_64-unknown-linux-gnu"],
+    "x86_64-unknown-nixos-gnu": ["@rules_rust//rust/platform:x86_64-unknown-nixos-gnu"],
     "x86_64-unknown-none": ["@rules_rust//rust/platform:x86_64-unknown-none"],
 }
 
@@ -413,52 +414,52 @@ def crate_repositories():
     """
     maybe(
         http_archive,
-        name = "vendor__anstyle-1.0.4",
-        sha256 = "7079075b41f533b8c61d2a4d073c4676e1f8b249ff94a393b0595db304e0dd87",
+        name = "vendor__anstyle-1.0.6",
+        sha256 = "8901269c6307e8d93993578286ac0edf7f195079ffff5ebdeea6a59ffb7e36bc",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/anstyle/1.0.4/download"],
-        strip_prefix = "anstyle-1.0.4",
-        build_file = Label("@//third-party/bazel:BUILD.anstyle-1.0.4.bazel"),
+        urls = ["https://crates.io/api/v1/crates/anstyle/1.0.6/download"],
+        strip_prefix = "anstyle-1.0.6",
+        build_file = Label("@//third-party/bazel:BUILD.anstyle-1.0.6.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__cc-1.0.83",
-        sha256 = "f1174fb0b6ec23863f8b971027804a42614e347eafb0a95bf0b12cdae21fc4d0",
+        name = "vendor__cc-1.0.89",
+        sha256 = "a0ba8f7aaa012f30d5b2861462f6708eccd49c3c39863fe083a308035f63d723",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/cc/1.0.83/download"],
-        strip_prefix = "cc-1.0.83",
-        build_file = Label("@//third-party/bazel:BUILD.cc-1.0.83.bazel"),
+        urls = ["https://crates.io/api/v1/crates/cc/1.0.89/download"],
+        strip_prefix = "cc-1.0.89",
+        build_file = Label("@//third-party/bazel:BUILD.cc-1.0.89.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__clap-4.4.11",
-        sha256 = "bfaff671f6b22ca62406885ece523383b9b64022e341e53e009a62ebc47a45f2",
+        name = "vendor__clap-4.5.1",
+        sha256 = "c918d541ef2913577a0f9566e9ce27cb35b6df072075769e0b26cb5a554520da",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/clap/4.4.11/download"],
-        strip_prefix = "clap-4.4.11",
-        build_file = Label("@//third-party/bazel:BUILD.clap-4.4.11.bazel"),
+        urls = ["https://crates.io/api/v1/crates/clap/4.5.1/download"],
+        strip_prefix = "clap-4.5.1",
+        build_file = Label("@//third-party/bazel:BUILD.clap-4.5.1.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__clap_builder-4.4.11",
-        sha256 = "a216b506622bb1d316cd51328dce24e07bdff4a6128a47c7e7fad11878d5adbb",
+        name = "vendor__clap_builder-4.5.1",
+        sha256 = "9f3e7391dad68afb0c2ede1bf619f579a3dc9c2ec67f089baa397123a2f3d1eb",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/clap_builder/4.4.11/download"],
-        strip_prefix = "clap_builder-4.4.11",
-        build_file = Label("@//third-party/bazel:BUILD.clap_builder-4.4.11.bazel"),
+        urls = ["https://crates.io/api/v1/crates/clap_builder/4.5.1/download"],
+        strip_prefix = "clap_builder-4.5.1",
+        build_file = Label("@//third-party/bazel:BUILD.clap_builder-4.5.1.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__clap_lex-0.6.0",
-        sha256 = "702fc72eb24e5a1e48ce58027a675bc24edd52096d5397d4aea7c6dd9eca0bd1",
+        name = "vendor__clap_lex-0.7.0",
+        sha256 = "98cc8fbded0c607b7ba9dd60cd98df59af97e84d24e49c8557331cfc26d301ce",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/clap_lex/0.6.0/download"],
-        strip_prefix = "clap_lex-0.6.0",
-        build_file = Label("@//third-party/bazel:BUILD.clap_lex-0.6.0.bazel"),
+        urls = ["https://crates.io/api/v1/crates/clap_lex/0.7.0/download"],
+        strip_prefix = "clap_lex-0.7.0",
+        build_file = Label("@//third-party/bazel:BUILD.clap_lex-0.7.0.bazel"),
     )
 
     maybe(
@@ -473,16 +474,6 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__libc-0.2.151",
-        sha256 = "302d7ab3130588088d277783b1e2d2e10c9e9e4a16dd9050e6ec93fb3e7048f4",
-        type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/libc/0.2.151/download"],
-        strip_prefix = "libc-0.2.151",
-        build_file = Label("@//third-party/bazel:BUILD.libc-0.2.151.bazel"),
-    )
-
-    maybe(
-        http_archive,
         name = "vendor__once_cell-1.19.0",
         sha256 = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92",
         type = "tar.gz",
@@ -493,22 +484,22 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__proc-macro2-1.0.70",
-        sha256 = "39278fbbf5fb4f646ce651690877f89d1c5811a3d4acb27700c1cb3cdb78fd3b",
+        name = "vendor__proc-macro2-1.0.78",
+        sha256 = "e2422ad645d89c99f8f3e6b88a9fdeca7fabeac836b1002371c4367c8f984aae",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/proc-macro2/1.0.70/download"],
-        strip_prefix = "proc-macro2-1.0.70",
-        build_file = Label("@//third-party/bazel:BUILD.proc-macro2-1.0.70.bazel"),
+        urls = ["https://crates.io/api/v1/crates/proc-macro2/1.0.78/download"],
+        strip_prefix = "proc-macro2-1.0.78",
+        build_file = Label("@//third-party/bazel:BUILD.proc-macro2-1.0.78.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__quote-1.0.33",
-        sha256 = "5267fca4496028628a95160fc423a33e8b2e6af8a5302579e322e4b520293cae",
+        name = "vendor__quote-1.0.35",
+        sha256 = "291ec9ab5efd934aaf503a6466c5d5251535d108ee747472c3977cc5acc868ef",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/quote/1.0.33/download"],
-        strip_prefix = "quote-1.0.33",
-        build_file = Label("@//third-party/bazel:BUILD.quote-1.0.33.bazel"),
+        urls = ["https://crates.io/api/v1/crates/quote/1.0.35/download"],
+        strip_prefix = "quote-1.0.35",
+        build_file = Label("@//third-party/bazel:BUILD.quote-1.0.35.bazel"),
     )
 
     maybe(
@@ -523,22 +514,22 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__syn-2.0.41",
-        sha256 = "44c8b28c477cc3bf0e7966561e3460130e1255f7a1cf71931075f1c5e7a7e269",
+        name = "vendor__syn-2.0.52",
+        sha256 = "b699d15b36d1f02c3e7c69f8ffef53de37aefae075d8488d4ba1a7788d574a07",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/syn/2.0.41/download"],
-        strip_prefix = "syn-2.0.41",
-        build_file = Label("@//third-party/bazel:BUILD.syn-2.0.41.bazel"),
+        urls = ["https://crates.io/api/v1/crates/syn/2.0.52/download"],
+        strip_prefix = "syn-2.0.52",
+        build_file = Label("@//third-party/bazel:BUILD.syn-2.0.52.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__termcolor-1.4.0",
-        sha256 = "ff1bc3d3f05aff0403e8ac0d92ced918ec05b666a43f83297ccef5bea8a3d449",
+        name = "vendor__termcolor-1.4.1",
+        sha256 = "06794f8f6c5c898b3275aebefa6b8a1cb24cd2c6c79397ab15774837a0bc5755",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/termcolor/1.4.0/download"],
-        strip_prefix = "termcolor-1.4.0",
-        build_file = Label("@//third-party/bazel:BUILD.termcolor-1.4.0.bazel"),
+        urls = ["https://crates.io/api/v1/crates/termcolor/1.4.1/download"],
+        strip_prefix = "termcolor-1.4.1",
+        build_file = Label("@//third-party/bazel:BUILD.termcolor-1.4.1.bazel"),
     )
 
     maybe(
@@ -602,12 +593,12 @@ def crate_repositories():
     )
 
     return [
-        struct(repo = "vendor__cc-1.0.83", is_dev_dep = False),
-        struct(repo = "vendor__clap-4.4.11", is_dev_dep = False),
+        struct(repo = "vendor__cc-1.0.89", is_dev_dep = False),
+        struct(repo = "vendor__clap-4.5.1", is_dev_dep = False),
         struct(repo = "vendor__codespan-reporting-0.11.1", is_dev_dep = False),
         struct(repo = "vendor__once_cell-1.19.0", is_dev_dep = False),
-        struct(repo = "vendor__proc-macro2-1.0.70", is_dev_dep = False),
-        struct(repo = "vendor__quote-1.0.33", is_dev_dep = False),
+        struct(repo = "vendor__proc-macro2-1.0.78", is_dev_dep = False),
+        struct(repo = "vendor__quote-1.0.35", is_dev_dep = False),
         struct(repo = "vendor__scratch-1.0.7", is_dev_dep = False),
-        struct(repo = "vendor__syn-2.0.41", is_dev_dep = False),
+        struct(repo = "vendor__syn-2.0.52", is_dev_dep = False),
     ]

@@ -1,10 +1,14 @@
 """Alias that transitions its target to `compilation_mode=opt`.  Use `transition_alias="opt"` to enable."""
 
+load("@rules_cc//cc:defs.bzl", "CcInfo")
 load("@rules_rust//rust:rust_common.bzl", "COMMON_PROVIDERS")
 
 def _transition_alias_impl(ctx):
     # `ctx.attr.actual` is a list of 1 item due to the transition
-    return [ctx.attr.actual[0][provider] for provider in COMMON_PROVIDERS]
+    providers = [ctx.attr.actual[0][provider] for provider in COMMON_PROVIDERS]
+    if CcInfo in ctx.attr.actual[0]:
+        providers.append(ctx.attr.actual[0][CcInfo])
+    return providers
 
 def _change_compilation_mode(compilation_mode):
     def _change_compilation_mode_impl(_settings, _attr):

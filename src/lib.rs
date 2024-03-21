@@ -364,7 +364,7 @@
 //! </table>
 
 #![no_std]
-#![doc(html_root_url = "https://docs.rs/cxx/1.0.111")]
+#![doc(html_root_url = "https://docs.rs/cxx/1.0.119")]
 #![cfg_attr(doc_cfg, feature(doc_cfg))]
 #![deny(
     improper_ctypes,
@@ -403,7 +403,6 @@
     clippy::transmute_undefined_repr, // clippy bug: https://github.com/rust-lang/rust-clippy/issues/8417
     clippy::uninlined_format_args,
     clippy::useless_let_if_seq,
-    clippy::wrong_self_convention
 )]
 
 #[cfg(built_with_cargo)]
@@ -477,6 +476,7 @@ mod weak_ptr;
 
 pub use crate::cxx_vector::CxxVector;
 #[cfg(feature = "alloc")]
+#[cfg_attr(doc_cfg, doc(cfg(feature = "alloc")))]
 pub use crate::exception::Exception;
 pub use crate::extern_type::{kind, ExternType};
 pub use crate::shared_ptr::SharedPtr;
@@ -547,4 +547,4 @@ chars! {
 }
 
 #[repr(transparent)]
-struct void(core::ffi::c_void);
+struct void(#[allow(dead_code)] core::ffi::c_void);

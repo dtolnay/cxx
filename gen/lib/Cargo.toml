@@ -1,6 +1,6 @@
 [package]
 name = "cxx-gen"
-version = "0.7.111"
+version = "0.7.119"
 authors = ["Adrian Taylor <adetaylor@chromium.org>"]
 categories = ["development-tools::ffi"]
 description = "C++ code generator for integrating `cxx` crate into higher level tools."
@@ -14,9 +14,9 @@ rust-version = "1.60"
 
 [dependencies]
 codespan-reporting = "0.11.1"
-proc-macro2 = { version = "1.0.63", default-features = false, features = ["span-locations"] }
-quote = { version = "1.0.29", default-features = false }
-syn = { version = "2.0.23", default-features = false, features = ["clone-impls", "full", "parsing", "printing"] }
+proc-macro2 = { version = "1.0.74", default-features = false, features = ["span-locations"] }
+quote = { version = "1.0.35", default-features = false }
+syn = { version = "2.0.46", default-features = false, features = ["clone-impls", "full", "parsing", "printing"] }
 
 [lib]
 doc-scrape-examples = false
