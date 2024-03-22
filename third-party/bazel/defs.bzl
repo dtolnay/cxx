@@ -417,7 +417,7 @@ def crate_repositories():
         name = "vendor__anstyle-1.0.6",
         sha256 = "8901269c6307e8d93993578286ac0edf7f195079ffff5ebdeea6a59ffb7e36bc",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/anstyle/1.0.6/download"],
+        urls = ["https://static.crates.io/crates/anstyle/1.0.6/download"],
         strip_prefix = "anstyle-1.0.6",
         build_file = Label("@//third-party/bazel:BUILD.anstyle-1.0.6.bazel"),
     )
@@ -427,7 +427,7 @@ def crate_repositories():
         name = "vendor__cc-1.0.89",
         sha256 = "a0ba8f7aaa012f30d5b2861462f6708eccd49c3c39863fe083a308035f63d723",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/cc/1.0.89/download"],
+        urls = ["https://static.crates.io/crates/cc/1.0.89/download"],
         strip_prefix = "cc-1.0.89",
         build_file = Label("@//third-party/bazel:BUILD.cc-1.0.89.bazel"),
     )
@@ -437,7 +437,7 @@ def crate_repositories():
         name = "vendor__clap-4.5.1",
         sha256 = "c918d541ef2913577a0f9566e9ce27cb35b6df072075769e0b26cb5a554520da",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/clap/4.5.1/download"],
+        urls = ["https://static.crates.io/crates/clap/4.5.1/download"],
         strip_prefix = "clap-4.5.1",
         build_file = Label("@//third-party/bazel:BUILD.clap-4.5.1.bazel"),
     )
@@ -447,7 +447,7 @@ def crate_repositories():
         name = "vendor__clap_builder-4.5.1",
         sha256 = "9f3e7391dad68afb0c2ede1bf619f579a3dc9c2ec67f089baa397123a2f3d1eb",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/clap_builder/4.5.1/download"],
+        urls = ["https://static.crates.io/crates/clap_builder/4.5.1/download"],
         strip_prefix = "clap_builder-4.5.1",
         build_file = Label("@//third-party/bazel:BUILD.clap_builder-4.5.1.bazel"),
     )
@@ -457,7 +457,7 @@ def crate_repositories():
         name = "vendor__clap_lex-0.7.0",
         sha256 = "98cc8fbded0c607b7ba9dd60cd98df59af97e84d24e49c8557331cfc26d301ce",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/clap_lex/0.7.0/download"],
+        urls = ["https://static.crates.io/crates/clap_lex/0.7.0/download"],
         strip_prefix = "clap_lex-0.7.0",
         build_file = Label("@//third-party/bazel:BUILD.clap_lex-0.7.0.bazel"),
     )
@@ -467,7 +467,7 @@ def crate_repositories():
         name = "vendor__codespan-reporting-0.11.1",
         sha256 = "3538270d33cc669650c4b093848450d380def10c331d38c768e34cac80576e6e",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/codespan-reporting/0.11.1/download"],
+        urls = ["https://static.crates.io/crates/codespan-reporting/0.11.1/download"],
         strip_prefix = "codespan-reporting-0.11.1",
         build_file = Label("@//third-party/bazel:BUILD.codespan-reporting-0.11.1.bazel"),
     )
@@ -477,7 +477,7 @@ def crate_repositories():
         name = "vendor__once_cell-1.19.0",
         sha256 = "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/once_cell/1.19.0/download"],
+        urls = ["https://static.crates.io/crates/once_cell/1.19.0/download"],
         strip_prefix = "once_cell-1.19.0",
         build_file = Label("@//third-party/bazel:BUILD.once_cell-1.19.0.bazel"),
     )
@@ -487,7 +487,7 @@ def crate_repositories():
         name = "vendor__proc-macro2-1.0.78",
         sha256 = "e2422ad645d89c99f8f3e6b88a9fdeca7fabeac836b1002371c4367c8f984aae",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/proc-macro2/1.0.78/download"],
+        urls = ["https://static.crates.io/crates/proc-macro2/1.0.78/download"],
         strip_prefix = "proc-macro2-1.0.78",
         build_file = Label("@//third-party/bazel:BUILD.proc-macro2-1.0.78.bazel"),
     )
@@ -497,7 +497,7 @@ def crate_repositories():
         name = "vendor__quote-1.0.35",
         sha256 = "291ec9ab5efd934aaf503a6466c5d5251535d108ee747472c3977cc5acc868ef",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/quote/1.0.35/download"],
+        urls = ["https://static.crates.io/crates/quote/1.0.35/download"],
         strip_prefix = "quote-1.0.35",
         build_file = Label("@//third-party/bazel:BUILD.quote-1.0.35.bazel"),
     )
@@ -507,7 +507,7 @@ def crate_repositories():
         name = "vendor__scratch-1.0.7",
         sha256 = "a3cf7c11c38cb994f3d40e8a8cde3bbd1f72a435e4c49e85d6553d8312306152",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/scratch/1.0.7/download"],
+        urls = ["https://static.crates.io/crates/scratch/1.0.7/download"],
         strip_prefix = "scratch-1.0.7",
         build_file = Label("@//third-party/bazel:BUILD.scratch-1.0.7.bazel"),
     )
@@ -517,7 +517,7 @@ def crate_repositories():
         name = "vendor__syn-2.0.52",
         sha256 = "b699d15b36d1f02c3e7c69f8ffef53de37aefae075d8488d4ba1a7788d574a07",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/syn/2.0.52/download"],
+        urls = ["https://static.crates.io/crates/syn/2.0.52/download"],
         strip_prefix = "syn-2.0.52",
         build_file = Label("@//third-party/bazel:BUILD.syn-2.0.52.bazel"),
     )
@@ -527,7 +527,7 @@ def crate_repositories():
         name = "vendor__termcolor-1.4.1",
         sha256 = "06794f8f6c5c898b3275aebefa6b8a1cb24cd2c6c79397ab15774837a0bc5755",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/termcolor/1.4.1/download"],
+        urls = ["https://static.crates.io/crates/termcolor/1.4.1/download"],
         strip_prefix = "termcolor-1.4.1",
         build_file = Label("@//third-party/bazel:BUILD.termcolor-1.4.1.bazel"),
     )
@@ -537,7 +537,7 @@ def crate_repositories():
         name = "vendor__unicode-ident-1.0.12",
         sha256 = "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/unicode-ident/1.0.12/download"],
+        urls = ["https://static.crates.io/crates/unicode-ident/1.0.12/download"],
         strip_prefix = "unicode-ident-1.0.12",
         build_file = Label("@//third-party/bazel:BUILD.unicode-ident-1.0.12.bazel"),
     )
@@ -547,7 +547,7 @@ def crate_repositories():
         name = "vendor__unicode-width-0.1.11",
         sha256 = "e51733f11c9c4f72aa0c160008246859e340b00807569a0da0e7a1079b27ba85",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/unicode-width/0.1.11/download"],
+        urls = ["https://static.crates.io/crates/unicode-width/0.1.11/download"],
         strip_prefix = "unicode-width-0.1.11",
         build_file = Label("@//third-party/bazel:BUILD.unicode-width-0.1.11.bazel"),
     )
@@ -557,7 +557,7 @@ def crate_repositories():
         name = "vendor__winapi-0.3.9",
         sha256 = "5c839a674fcd7a98952e593242ea400abe93992746761e38641405d28b00f419",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/winapi/0.3.9/download"],
+        urls = ["https://static.crates.io/crates/winapi/0.3.9/download"],
         strip_prefix = "winapi-0.3.9",
         build_file = Label("@//third-party/bazel:BUILD.winapi-0.3.9.bazel"),
     )
@@ -567,7 +567,7 @@ def crate_repositories():
         name = "vendor__winapi-i686-pc-windows-gnu-0.4.0",
         sha256 = "ac3b87c63620426dd9b991e5ce0329eff545bccbbb34f3be09ff6fb6ab51b7b6",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/winapi-i686-pc-windows-gnu/0.4.0/download"],
+        urls = ["https://static.crates.io/crates/winapi-i686-pc-windows-gnu/0.4.0/download"],
         strip_prefix = "winapi-i686-pc-windows-gnu-0.4.0",
         build_file = Label("@//third-party/bazel:BUILD.winapi-i686-pc-windows-gnu-0.4.0.bazel"),
     )
@@ -577,7 +577,7 @@ def crate_repositories():
         name = "vendor__winapi-util-0.1.6",
         sha256 = "f29e6f9198ba0d26b4c9f07dbe6f9ed633e1f3d5b8b414090084349e46a52596",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/winapi-util/0.1.6/download"],
+        urls = ["https://static.crates.io/crates/winapi-util/0.1.6/download"],
         strip_prefix = "winapi-util-0.1.6",
         build_file = Label("@//third-party/bazel:BUILD.winapi-util-0.1.6.bazel"),
     )
@@ -587,7 +587,7 @@ def crate_repositories():
         name = "vendor__winapi-x86_64-pc-windows-gnu-0.4.0",
         sha256 = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f",
         type = "tar.gz",
-        urls = ["https://crates.io/api/v1/crates/winapi-x86_64-pc-windows-gnu/0.4.0/download"],
+        urls = ["https://static.crates.io/crates/winapi-x86_64-pc-windows-gnu/0.4.0/download"],
         strip_prefix = "winapi-x86_64-pc-windows-gnu-0.4.0",
         build_file = Label("@//third-party/bazel:BUILD.winapi-x86_64-pc-windows-gnu-0.4.0.bazel"),
     )
