@@ -2,8 +2,9 @@ use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::visit::{self, Visit};
 use crate::syntax::{
-    error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Lifetimes,
-    NamedType, Ptr, Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
+    error, ident, trivial, Api, Array, CEnumOpts, Enum, ExternFn, ExternType, Impl, Lang,
+    Lifetimes, NamedType, Ptr, Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Type,
+    TypeAlias, Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
@@ -64,7 +65,8 @@ fn do_typecheck(cx: &mut Check) {
         match api {
             Api::Include(_) => {}
             Api::Struct(strct) => check_api_struct(cx, strct),
-            Api::Enum(enm) => check_api_enum(cx, enm),
+            Api::Enum(enm, opts) => check_api_enum(cx, enm, opts),
+            Api::EnumUnnamed(enm) => check_api_enum_unnamed(cx, enm),
             Api::CxxType(ety) | Api::RustType(ety) => check_api_type(cx, ety),
             Api::CxxFunction(efn) | Api::RustFunction(efn) => check_api_fn(cx, efn),
             Api::TypeAlias(alias) => check_api_type_alias(cx, alias),
@@ -353,11 +355,11 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
     }
 }
 
-fn check_api_enum(cx: &mut Check, enm: &Enum) {
+fn check_api_enum(cx: &mut Check, enm: &Enum, opts: &CEnumOpts) {
     check_reserved_name(cx, &enm.name.rust);
     check_lifetimes(cx, &enm.generics);
 
-    if enm.variants.is_empty() && !enm.explicit_repr && !enm.variants_from_header {
+    if enm.variants.is_empty() && !opts.explicit_repr && !opts.variants_from_header {
         let span = span_for_enum_error(enm);
         cx.error(
             span,
@@ -369,6 +371,43 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
         if derive.what == Trait::Default || derive.what == Trait::ExternType {
             let msg = format!("derive({}) on shared enum is not supported", derive);
             cx.error(derive, msg);
+        }
+    }
+}
+
+fn check_api_enum_unnamed(cx: &mut Check, enm: &Enum) {
+    let name = &enm.name.rust;
+    check_reserved_name(cx, name);
+    check_lifetimes(cx, &enm.generics);
+
+    if enm.variants.is_empty() {
+        let span = span_for_enum_unnamed_error(enm);
+        cx.error(span, "enums without any variants are not supported");
+    }
+
+    // TODO how do I check if cxx has the variant.
+    // TODO I think the derives below make sense.
+    for derive in &enm.derives {
+        if derive.what == Trait::Default || derive.what == Trait::ExternType {
+            let msg = format!("derive({}) on shared struct is not supported", derive);
+            cx.error(derive, msg);
+        }
+    }
+
+    for variant in &enm.variants {
+        if variant.ty.is_none() {
+            continue;
+        }
+        let ty = variant.ty.as_ref().unwrap();
+        if let Type::Fn(_) = ty {
+            cx.error(
+                variant,
+                "function pointers in a enum variant are not implemented yet",
+            );
+        } else if is_unsized(cx, ty) {
+            let desc = describe(cx, ty);
+            let msg = format!("using {} by value is not supported", desc);
+            cx.error(variant, msg);
         }
     }
 }
@@ -676,6 +715,13 @@ fn span_for_struct_error(strct: &Struct) -> TokenStream {
 }
 
 fn span_for_enum_error(enm: &Enum) -> TokenStream {
+    let enum_token = enm.enum_token;
+    let mut brace_token = Group::new(Delimiter::Brace, TokenStream::new());
+    brace_token.set_span(enm.brace_token.span.join());
+    quote!(#enum_token #brace_token)
+}
+
+fn span_for_enum_unnamed_error(enm: &Enum) -> TokenStream {
     let enum_token = enm.enum_token;
     let mut brace_token = Group::new(Delimiter::Brace, TokenStream::new());
     brace_token.set_span(enm.brace_token.span.join());

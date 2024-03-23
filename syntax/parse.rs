@@ -1,13 +1,13 @@
 use crate::syntax::attrs::OtherAttrs;
 use crate::syntax::cfg::CfgExpr;
-use crate::syntax::discriminant::DiscriminantSet;
+use crate::syntax::discriminant::{Discriminant, DiscriminantSet};
 use crate::syntax::file::{Item, ItemForeignMod};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
-    attrs, error, Api, Array, Derive, Doc, Enum, EnumRepr, ExternFn, ExternType, ForeignName, Impl,
-    Include, IncludeKind, Lang, Lifetimes, NamedType, Namespace, Pair, Ptr, Receiver, Ref,
-    Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var, Variant,
+    attrs, error, Api, Array, CEnumOpts, Derive, Doc, Enum, EnumRepr, ExternFn, ExternType,
+    ForeignName, Impl, Include, IncludeKind, Lang, Lifetimes, NamedType, Namespace, Pair, Ptr,
+    Receiver, Ref, Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
 use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
@@ -40,7 +40,22 @@ pub(crate) fn parse_items(
                 Ok(strct) => apis.push(strct),
                 Err(err) => cx.push(err),
             },
-            Item::Enum(item) => apis.push(parse_enum(cx, item, namespace)),
+            Item::Enum(item) => {
+                // Check if we have any unnamed field - in this ase we have to make sure
+                // that there is no field with an determinant.
+                if item
+                    .variants
+                    .iter()
+                    .any(|variant| matches!(variant.fields, Fields::Unnamed(_)))
+                {
+                    match parse_enum_unnamed(cx, item, namespace) {
+                        Ok(enumct) => apis.push(enumct),
+                        Err(err) => cx.push(err),
+                    }
+                } else {
+                    apis.push(parse_enum(cx, item, namespace));
+                }
+            }
             Item::ForeignMod(foreign_mod) => {
                 parse_foreign_mod(cx, foreign_mod, &mut apis, trusted, namespace);
             }
@@ -53,6 +68,54 @@ pub(crate) fn parse_items(
         }
     }
     apis
+}
+
+fn parse_generics(cx: &mut Errors, generics: Generics) -> Lifetimes {
+    let mut lifetimes = Punctuated::new();
+    let mut has_unsupported_generic_param = false;
+    for pair in generics.params.into_pairs() {
+        let (param, punct) = pair.into_tuple();
+        match param {
+            GenericParam::Lifetime(param) => {
+                if !param.bounds.is_empty() && !has_unsupported_generic_param {
+                    let msg = "lifetime parameter with bounds is not supported yet";
+                    cx.error(&param, msg);
+                    has_unsupported_generic_param = true;
+                }
+                lifetimes.push_value(param.lifetime);
+                if let Some(punct) = punct {
+                    lifetimes.push_punct(punct);
+                }
+            }
+            GenericParam::Type(param) => {
+                if !has_unsupported_generic_param {
+                    let msg = "user defined type with generic type parameter is not supported yet";
+                    cx.error(&param, msg);
+                    has_unsupported_generic_param = true;
+                }
+            }
+            GenericParam::Const(param) => {
+                if !has_unsupported_generic_param {
+                    let msg = "user defined type with const generic parameter is not supported yet";
+                    cx.error(&param, msg);
+                    has_unsupported_generic_param = true;
+                }
+            }
+        }
+    }
+
+    if let Some(where_clause) = &generics.where_clause {
+        cx.error(
+            where_clause,
+            "user defined type with where-clause is not supported yet",
+        );
+    }
+
+    Lifetimes {
+        lt_token: generics.lt_token,
+        lifetimes,
+        gt_token: generics.gt_token,
+    }
 }
 
 fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) -> Result<Api> {
@@ -83,46 +146,6 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
             return Err(Error::new_spanned(item, "tuple structs are not supported"));
         }
     };
-
-    let mut lifetimes = Punctuated::new();
-    let mut has_unsupported_generic_param = false;
-    for pair in item.generics.params.into_pairs() {
-        let (param, punct) = pair.into_tuple();
-        match param {
-            GenericParam::Lifetime(param) => {
-                if !param.bounds.is_empty() && !has_unsupported_generic_param {
-                    let msg = "lifetime parameter with bounds is not supported yet";
-                    cx.error(&param, msg);
-                    has_unsupported_generic_param = true;
-                }
-                lifetimes.push_value(param.lifetime);
-                if let Some(punct) = punct {
-                    lifetimes.push_punct(punct);
-                }
-            }
-            GenericParam::Type(param) => {
-                if !has_unsupported_generic_param {
-                    let msg = "struct with generic type parameter is not supported yet";
-                    cx.error(&param, msg);
-                    has_unsupported_generic_param = true;
-                }
-            }
-            GenericParam::Const(param) => {
-                if !has_unsupported_generic_param {
-                    let msg = "struct with const generic parameter is not supported yet";
-                    cx.error(&param, msg);
-                    has_unsupported_generic_param = true;
-                }
-            }
-        }
-    }
-
-    if let Some(where_clause) = &item.generics.where_clause {
-        cx.error(
-            where_clause,
-            "struct with where-clause is not supported yet",
-        );
-    }
 
     let mut fields = Vec::new();
     for field in named_fields.named {
@@ -166,11 +189,7 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
     let struct_token = item.struct_token;
     let visibility = visibility_pub(&item.vis, struct_token.span);
     let name = pair(namespace, &item.ident, cxx_name, rust_name);
-    let generics = Lifetimes {
-        lt_token: item.generics.lt_token,
-        lifetimes,
-        gt_token: item.generics.gt_token,
-    };
+    let generics = parse_generics(cx, item.generics);
     let brace_token = named_fields.brace_token;
 
     Ok(Api::Struct(Struct {
@@ -187,6 +206,119 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
     }))
 }
 
+/// Parses an "Rust" enum with unnamed fields.
+fn parse_enum_unnamed(cx: &mut Errors, mut item: ItemEnum, namespace: &Namespace) -> Result<Api> {
+    let mut cfg = CfgExpr::Unconditional;
+    let mut doc = Doc::new();
+    let mut derives = Vec::new();
+    let mut namespace = namespace.clone();
+    let mut cxx_name = None;
+    let mut rust_name = None;
+    let attrs = attrs::parse(
+        cx,
+        item.attrs.clone(),
+        attrs::Parser {
+            cfg: Some(&mut cfg),
+            doc: Some(&mut doc),
+            derives: Some(&mut derives),
+            namespace: Some(&mut namespace),
+            cxx_name: Some(&mut cxx_name),
+            rust_name: Some(&mut rust_name),
+            ..Default::default()
+        },
+    );
+
+    // Generate the variants.
+    let mut variants = Vec::with_capacity(item.variants.len());
+
+    for variant in &mut item.variants {
+        // Having both, Rust typed variants and c-style value variants is
+        // illegal.
+        if variant.discriminant.is_some() {
+            return Err(Error::new_spanned(
+                item,
+                "Mixed c-style enums with Rust enums",
+            ));
+        }
+
+        // Get the unnamed field of the variant.
+        let (ty, vis) = match variant.fields {
+            Fields::Named(_) => {
+                return Err(Error::new_spanned(item, "Named variants are not supported"))
+            }
+            Fields::Unit => {
+                (None, Visibility::Inherited)
+            }
+            Fields::Unnamed(ref unnamed_variant) => {
+                // Having move than one unnamed field is also illegal since we can't
+                // represent it in c++.
+                if unnamed_variant.unnamed.len() != 1 {
+                    return Err(Error::new_spanned(
+                        item,
+                        "More than one unnamed field is not supported",
+                    ));
+                }
+                let field = unnamed_variant.unnamed.first().unwrap();
+                let ty = match parse_type(&field.ty) {
+                    Ok(ty) => ty,
+                    Err(err) => {
+                        cx.push(err);
+                        continue;
+                    }
+                };
+                (Some(ty), field.vis.clone())
+            }
+        };
+
+
+        let mut cfg = CfgExpr::Unconditional;
+        let mut doc = Doc::new();
+
+        // This is kind of stupid - there are no "names" in c++ for the variant
+        // but just indices...
+        let name = pair(Namespace::default(), &variant.ident, None, None);
+        let variant_attrs = attrs::parse(
+            cx,
+            mem::take(&mut variant.attrs),
+            attrs::Parser {
+                cfg: Some(&mut cfg),
+                doc: Some(&mut doc),
+                ..Default::default()
+            },
+        );
+        variants.push(Variant {
+            cfg,
+            doc,
+            attrs: variant_attrs,
+            name,
+            vis,
+            discriminant: Discriminant::zero(),
+            expr: None,
+            ty,
+        });
+    }
+
+    let enum_token = item.enum_token;
+    let visibility = visibility_pub(&item.vis, enum_token.span);
+    let brace_token = item.brace_token;
+    let name = pair(namespace, &item.ident, cxx_name, rust_name);
+    let generics = parse_generics(cx, item.generics);
+
+    Ok(Api::EnumUnnamed(Enum {
+        cfg,
+        doc,
+        derives,
+        attrs,
+        visibility,
+        enum_token,
+        name,
+        generics,
+        brace_token,
+        variants,
+    }))
+}
+
+/// Parses a "C-like" enum where all fields are units.
 fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
     let mut cfg = CfgExpr::Unconditional;
     let mut doc = Doc::new();
@@ -262,22 +394,26 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
     let variants_from_header_attr = variants_from_header;
     let variants_from_header = variants_from_header_attr.is_some();
 
-    Api::Enum(Enum {
-        cfg,
-        doc,
-        derives,
-        attrs,
-        visibility,
-        enum_token,
-        name,
-        generics,
-        brace_token,
-        variants,
-        variants_from_header,
-        variants_from_header_attr,
-        repr,
-        explicit_repr,
-    })
+    Api::Enum(
+        Enum {
+            cfg,
+            doc,
+            derives,
+            attrs,
+            visibility,
+            enum_token,
+            name,
+            generics,
+            brace_token,
+            variants,
+        },
+        CEnumOpts {
+            variants_from_header,
+            variants_from_header_attr,
+            repr,
+            explicit_repr,
+        },
+    )
 }
 
 fn parse_variant(
@@ -326,9 +462,11 @@ fn parse_variant(
         cfg,
         doc,
         attrs,
+        vis: Visibility::Inherited,
         name,
         discriminant,
         expr,
+        ty: None,
     })
 }
 

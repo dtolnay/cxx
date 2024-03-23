@@ -1,7 +1,8 @@
 #[cxx::bridge]
 mod ffi {
-    enum A {
-        Field(u64),
+    enum Bad {
+        A(i32),
+        B = 1,
     }
 }
 

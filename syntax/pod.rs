@@ -18,8 +18,13 @@ impl<'a> Types<'a> {
                             .fields
                             .iter()
                             .all(|field| self.is_guaranteed_pod(&field.ty))
+                } else if let Some(enm) = self.enums.get(ident) {
+                    // The data enums are not pods, since the c++ side
+                    // implements custom copy constructors and destructors. The
+                    // c-like enums are pods, though.
+                    !enm.variants.iter().any(|variant| variant.ty.is_some())
                 } else {
-                    self.enums.contains_key(ident)
+                    false
                 }
             }
             Type::RustBox(_)

@@ -9,8 +9,8 @@ use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::{self, Symbol};
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::{
-    derive, mangle, Api, Doc, Enum, EnumRepr, ExternFn, ExternType, Pair, Signature, Struct, Trait,
-    Type, TypeAlias, Types, Var,
+    derive, mangle, Api, CEnumOpts, Doc, Enum, EnumRepr, ExternFn, ExternType, Pair, Signature,
+    Struct, Trait, Type, TypeAlias, Types, Var,
 };
 use proc_macro2::Ident;
 
@@ -34,8 +34,8 @@ pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u
 
 fn write_forward_declarations(out: &mut OutFile, apis: &[Api]) {
     let needs_forward_declaration = |api: &&Api| match api {
-        Api::Struct(_) | Api::CxxType(_) | Api::RustType(_) => true,
-        Api::Enum(enm) => !out.types.cxx.contains(&enm.name.rust),
+        Api::Struct(_) | Api::CxxType(_) | Api::RustType(_) | Api::EnumUnnamed(_) => true,
+        Api::Enum(enm, _) => !out.types.cxx.contains(&enm.name.rust),
         _ => false,
     };
 
@@ -46,12 +46,12 @@ fn write_forward_declarations(out: &mut OutFile, apis: &[Api]) {
 
     fn write(out: &mut OutFile, ns_entries: &NamespaceEntries, indent: usize) {
         let apis = ns_entries.direct_content();
-
         for api in apis {
             write!(out, "{:1$}", "", indent);
             match api {
                 Api::Struct(strct) => write_struct_decl(out, &strct.name),
-                Api::Enum(enm) => write_enum_decl(out, enm),
+                Api::Enum(enm, opts) => write_enum_decl(out, enm, opts),
+                Api::EnumUnnamed(enm) => write_struct_decl(out, &enm.name),
                 Api::CxxType(ety) => write_struct_using(out, &ety.name),
                 Api::RustType(ety) => write_struct_decl(out, &ety.name),
                 _ => unreachable!(),
@@ -99,13 +99,17 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
                     }
                 }
             }
-            Api::Enum(enm) => {
+            Api::Enum(enm, opts) => {
                 out.next_section();
                 if !out.types.cxx.contains(&enm.name.rust) {
-                    write_enum(out, enm);
-                } else if !enm.variants_from_header {
-                    check_enum(out, enm);
+                    write_enum(out, enm, opts);
+                } else if !opts.variants_from_header {
+                    check_enum(out, enm, opts);
                 }
+            }
+            Api::EnumUnnamed(enm) => {
+                out.next_section();
+                write_enum_unnamed(out, enm);
             }
             Api::RustType(ety) => {
                 out.next_section();
@@ -328,8 +332,8 @@ fn write_struct_decl(out: &mut OutFile, ident: &Pair) {
     writeln!(out, "struct {};", ident.cxx);
 }
 
-fn write_enum_decl(out: &mut OutFile, enm: &Enum) {
-    let repr = match &enm.repr {
+fn write_enum_decl(out: &mut OutFile, enm: &Enum, opts: &CEnumOpts) {
+    let repr = match &opts.repr {
         #[cfg(feature = "experimental-enum-variants-from-header")]
         EnumRepr::Foreign { .. } => return,
         EnumRepr::Native { atom, .. } => *atom,
@@ -337,6 +341,56 @@ fn write_enum_decl(out: &mut OutFile, enm: &Enum) {
     write!(out, "enum class {} : ", enm.name.cxx);
     write_atom(out, repr);
     writeln!(out, ";");
+}
+
+fn write_enum_unnamed(out: &mut OutFile, enm: &Enum) {
+    write!(out, "struct {} final : public ", enm.name.cxx);
+
+    /// Writes something like `::rust::variant<type1, type2, ...>` with type1...
+    /// being cxx types of the enum's variants.
+    fn write_variants(out: &mut OutFile, enm: &Enum) {
+        write!(out, "::rust::variant<");
+        let mut iter = enm.variants.iter().peekable();
+        while let Some(value) = iter.next() {
+            match &value.ty {
+                None => {
+                    write!(out, "::rust::empty");
+                }
+                Some(ty) => {
+                    match ty {
+                        Type::Ref(r) => {
+                            // References are not allowed in variants, so we wrap them
+                            // into std::reference_wrapper.
+                            write!(out, "std::reference_wrapper<");
+                            write_type_space(out, &r.inner);
+                            if !r.mutable {
+                                write!(out, "const ");
+                            }
+                            write!(out, ">");
+                        }
+                        _ => write_type(out, ty),
+                    }
+                }
+            };
+            if iter.peek().is_some() {
+                write!(out, ", ");
+            }
+        }
+        write!(out, ">");
+    }
+
+    write_variants(out, enm);
+    writeln!(out, "{{");
+
+    write!(out, "  using base = ");
+    write_variants(out, enm);
+    writeln!(out, ";");
+    writeln!(out, "  {}() = delete;", enm.name.cxx);
+    writeln!(out, "  {0}(const {0}&) = default;", enm.name.cxx);
+    writeln!(out, "  {0}({0}&&) = delete;", enm.name.cxx);
+    writeln!(out, "  using base::base;");
+    writeln!(out, "  using base::operator=;");
+    writeln!(out, "}};");
 }
 
 fn write_struct_using(out: &mut OutFile, ident: &Pair) {
@@ -388,8 +442,8 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
     writeln!(out, "#endif // {}", guard);
 }
 
-fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
-    let repr = match &enm.repr {
+fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum, opts: &'a CEnumOpts) {
+    let repr = match &opts.repr {
         #[cfg(feature = "experimental-enum-variants-from-header")]
         EnumRepr::Foreign { .. } => return,
         EnumRepr::Native { atom, .. } => *atom,
@@ -410,8 +464,8 @@ fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
     writeln!(out, "#endif // {}", guard);
 }
 
-fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
-    let repr = match &enm.repr {
+fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum, opts: &'a CEnumOpts) {
+    let repr = match &opts.repr {
         #[cfg(feature = "experimental-enum-variants-from-header")]
         EnumRepr::Foreign { .. } => return,
         EnumRepr::Native { atom, .. } => *atom,
@@ -838,7 +892,8 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
             write!(out, "(::rust::unsafe_bitcopy, *{})", arg.name.cxx);
         } else if out.types.needs_indirect_abi(&arg.ty) {
             out.include.utility = true;
-            write!(out, "::std::move(*{})", arg.name.cxx);
+            // Let the compiler resolve if this is a copy or a move constructor.
+            write!(out, "*{}", arg.name.cxx);
         } else {
             write!(out, "{}", arg.name.cxx);
         }

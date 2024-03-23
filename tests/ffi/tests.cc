@@ -229,7 +229,28 @@ std::unique_ptr<Borrow> c_return_borrow(const std::string &s) {
   return std::unique_ptr<Borrow>(new Borrow(s));
 }
 
+EnumSimple c_return_enum_simple(int value) {
+  if (value == 0)
+    return false;
+  else if (value == 1)
+    return Shared{123};
+  return rust::empty{};
+}
+
+EnumImproper c_return_enum_improper(bool first) {
+  if (first) {
+    return 2;
+  }
+  return SharedString{rust::String{"Some string"}};
+}
+
+EnumWithLifeTime c_return_enum_with_lifetime(const int &val) {
+  return std::reference_wrapper<const int>(val);
+}
+
 void c_take_primitive(size_t n) {
+  int v = 123;
+  c_return_enum_with_lifetime(v);
   if (n == 2020) {
     cxx_test_suite_set_correct();
   }
@@ -553,6 +574,26 @@ size_t c_take_mut_ptr(C *c) {
   size_t result = c->get();
   delete c;
   return result;
+}
+
+int _visit(bool v) { return static_cast<int>(v); };
+int _visit(const Shared &v) { return v.z; };
+int _visit(const ::rust::empty &) { return -1; };
+int _visit(rust::Str value) { return value.size(); }
+
+int c_take_enum_simple(EnumSimple enm) {
+  return ::rust::visit([](const auto &val) { return _visit(val); }, enm);
+}
+
+int c_take_enum_improper(EnumImproper enm) { return enm.index(); }
+
+int c_take_enum_with_lifetime(const EnumWithLifeTime &enm) {
+  try {
+    return ::rust::get<std::reference_wrapper<::std::int32_t const>>(enm) +
+           ::rust::get<1>(enm);
+  } catch (...) {
+    return ::rust::get<0>(enm).size();
+  }
 }
 
 void c_try_return_void() {}

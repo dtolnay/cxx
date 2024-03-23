@@ -1,0 +1,8 @@
+error: Mixed c-style enums with Rust enums
+ --> tests/ui/enum_mixed.rs:3:5
+  |
+3 | /     enum Bad {
+4 | |         A(i32),
+5 | |         B = 1,
+6 | |     }
+  | |_____^

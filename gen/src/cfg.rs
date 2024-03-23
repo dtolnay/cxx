@@ -29,7 +29,7 @@ pub(super) fn strip(
             Api::Struct(strct) => strct
                 .fields
                 .retain(|field| eval(cx, cfg_errors, cfg_evaluator, &field.cfg)),
-            Api::Enum(enm) => enm
+            Api::Enum(enm, _) | Api::EnumUnnamed(enm) => enm
                 .variants
                 .retain(|variant| eval(cx, cfg_errors, cfg_evaluator, &variant.cfg)),
             _ => {}
@@ -113,7 +113,7 @@ impl Api {
         match self {
             Api::Include(include) => &include.cfg,
             Api::Struct(strct) => &strct.cfg,
-            Api::Enum(enm) => &enm.cfg,
+            Api::Enum(enm, _) | Api::EnumUnnamed(enm) => &enm.cfg,
             Api::CxxType(ety) | Api::RustType(ety) => &ety.cfg,
             Api::CxxFunction(efn) | Api::RustFunction(efn) => &efn.cfg,
             Api::TypeAlias(alias) => &alias.cfg,

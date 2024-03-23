@@ -1,0 +1,8 @@
+error: More than one unnamed field is not supported
+ --> tests/ui/enum_many_types_tuple.rs:3:5
+  |
+3 | /     enum Bad {
+4 | |         A(i32, bool),
+5 | |         B(i32),
+6 | |     }
+  | |_____^

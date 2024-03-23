@@ -1,0 +1,7 @@
+error[E0449]: visibility qualifiers are not permitted here
+ --> tests/ui/enum_visibility.rs:4:11
+  |
+4 |         A(pub i32),
+  |           ^^^
+  |
+  = note: enum variants and their fields always share the visibility of the enum they are in

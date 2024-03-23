@@ -7,8 +7,8 @@ use crate::syntax::qualified::QualifiedName;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    self, check, mangle, Api, Doc, Enum, ExternFn, ExternType, Impl, Lifetimes, Pair, Signature,
-    Struct, Trait, Type, TypeAlias, Types,
+    self, check, mangle, Api, CEnumOpts, Doc, Enum, ExternFn, ExternType, Impl, Lifetimes, Pair,
+    Signature, Struct, Trait, Type, TypeAlias, Types,
 };
 use crate::type_id::Crate;
 use crate::{derive, generics};
@@ -68,7 +68,10 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
                 hidden.extend(expand_struct_operators(strct));
                 forbid.extend(expand_struct_forbid_drop(strct));
             }
-            Api::Enum(enm) => expanded.extend(expand_enum(enm)),
+            Api::Enum(enm, opts) => expanded.extend(expand_enum(enm, opts)),
+            Api::EnumUnnamed(enm) => {
+                expanded.extend(expand_enum_unnamed(enm));
+            }
             Api::CxxType(ety) => {
                 let ident = &ety.name.rust;
                 if !types.structs.contains_key(ident) && !types.enums.contains_key(ident) {
@@ -317,11 +320,67 @@ fn expand_struct_forbid_drop(strct: &Struct) -> TokenStream {
     }
 }
 
-fn expand_enum(enm: &Enum) -> TokenStream {
+fn expand_enum_unnamed(enm: &Enum) -> TokenStream {
     let ident = &enm.name.rust;
     let doc = &enm.doc;
     let attrs = &enm.attrs;
-    let repr = &enm.repr;
+    let generics = &enm.generics;
+
+    let variants = enm.variants.iter().map(|variant| {
+        let doc = &variant.doc;
+        let attrs = &variant.attrs;
+        let ident = &variant.name.rust;
+
+        match &variant.ty {
+            None => {
+                quote!(#doc #attrs #ident)
+            }
+            Some(ty) => {
+                let vis = &variant.vis;
+                // We add the visibility if defined here and let it crash since the doc
+                // says that the syntax allows visibility specifiers but they should be
+                // rejected. See
+                // https://doc.rust-lang.org/reference/items/enumerations.html#variant-visibility
+                quote!(#doc #attrs #ident(#vis #ty))
+            }
+        }
+    });
+    let mut derives = None;
+    let derived_traits = derive::expand_enum_unnamed(enm, &mut derives);
+
+    let span = ident.span();
+    let visibility = enm.visibility;
+    let enum_token = enm.enum_token;
+    let type_id = type_id(&enm.name);
+    let enum_def = quote_spanned! {span=>
+        #visibility #enum_token #ident #generics {
+            #(#variants,)*
+        }
+    };
+
+    quote! {
+        #doc
+        #derives
+        #attrs
+        #[repr(C)]
+        #enum_def
+
+        unsafe impl #generics ::cxx::ExternType for #ident #generics {
+            #[allow(unused_attributes)] // incorrect lint
+            #[doc(hidden)]
+            type Id = #type_id;
+            type Kind = ::cxx::kind::Trivial;
+        }
+
+        #derived_traits
+    }
+}
+
+fn expand_enum(enm: &Enum, opts: &CEnumOpts) -> TokenStream {
+    let ident = &enm.name.rust;
+    let doc = &enm.doc;
+    let attrs = &enm.attrs;
+    let repr = &opts.repr;
     let type_id = type_id(&enm.name);
     let variants = enm.variants.iter().map(|variant| {
         let doc = &variant.doc;

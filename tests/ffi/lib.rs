@@ -92,6 +92,23 @@ pub mod ffi {
         s: &'a str,
     }
 
+    #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+    enum EnumSimple {
+        AVal(bool),
+        BVal(Shared),
+        CVal,
+    }
+
+    enum EnumImproper {
+        AVal(i32),
+        BVal(SharedString),
+    }
+
+    enum EnumWithLifeTime<'a> {
+        AVal(&'a str),
+        BVal(&'a i32),
+    }
+
     unsafe extern "C++" {
         include!("tests/ffi/tests.h");
 
@@ -131,6 +148,9 @@ pub mod ffi {
         fn c_return_nested_ns_enum(n: u16) -> ABEnum;
         fn c_return_const_ptr(n: usize) -> *const C;
         fn c_return_mut_ptr(n: usize) -> *mut C;
+        fn c_return_enum_simple(value: i32) -> EnumSimple;
+        fn c_return_enum_improper(first: bool) -> EnumImproper;
+        fn c_return_enum_with_lifetime<'a>(val: &'a i32) -> EnumWithLifeTime<'a>;
 
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);
@@ -179,6 +199,9 @@ pub mod ffi {
         fn c_take_rust_vec_nested_ns_shared(v: Vec<ABShared>);
         unsafe fn c_take_const_ptr(c: *const C) -> usize;
         unsafe fn c_take_mut_ptr(c: *mut C) -> usize;
+        fn c_take_enum_simple(enm: EnumSimple) -> i32;
+        fn c_take_enum_improper(enm: EnumImproper) -> i32;
+        fn c_take_enum_with_lifetime<'a>(enm: &'a EnumWithLifeTime<'a>) -> i32;
 
         fn c_try_return_void() -> Result<()>;
         fn c_try_return_primitive() -> Result<usize>;

@@ -2,6 +2,7 @@
 #include "demo/src/main.rs.h"
 #include <algorithm>
 #include <functional>
+#include <iostream>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -65,6 +66,31 @@ BlobMetadata BlobstoreClient::metadata(uint64_t blobid) const {
 
 std::unique_ptr<BlobstoreClient> new_blobstore_client() {
   return std::make_unique<BlobstoreClient>();
+}
+
+BlobEnum make_enum() { return BlobEnum{false}; }
+
+std::ostream &operator<<(std::ostream &os, const BlobMetadata &md) {
+  os << "The size [" << md.size << "] and some tags...";
+  return os;
+}
+
+void take_enum(const BlobEnum &enm) {
+  std::cout << "The index of enum is " << enm.index() << std::endl;
+  rust::visit(
+      [](const auto &v) {
+        std::cout << "The value of enum is " << v << std::endl;
+      },
+      enm);
+}
+
+void take_mut_enum(BlobEnum &enm) {
+  take_enum(enm);
+  if (!::rust::holds_alternative<bool>(enm)) {
+    enm = false;
+  } else {
+    enm = 111;
+  }
 }
 
 } // namespace blobstore

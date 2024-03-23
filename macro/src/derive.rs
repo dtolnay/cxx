@@ -97,6 +97,37 @@ pub(crate) fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) 
     expanded
 }
 
+pub(crate) fn expand_enum_unnamed(
+    enm: &Enum,
+    actual_derives: &mut Option<TokenStream>,
+) -> TokenStream {
+    let mut traits = Vec::new();
+
+    // I don't get it why we're using everywhere self written derives. For now
+    // I just use the build ins until someone complains.
+    for derive in &enm.derives {
+        let span = derive.span;
+        match derive.what {
+            Trait::Copy => traits.push(quote_spanned!(span=> Copy)),
+            Trait::Clone => traits.push(quote_spanned!(span=> Clone)),
+            Trait::Eq => traits.push(quote_spanned!(span=> Eq)),
+            Trait::PartialEq => traits.push(quote_spanned!(span=> PartialEq)),
+            Trait::Debug => traits.push(quote_spanned!(span=> Debug)),
+            Trait::Default => unreachable!(),
+            Trait::ExternType => unreachable!(),
+            Trait::Hash => traits.push(quote_spanned!(span=> ::cxx::core::hash::Hash)),
+            Trait::Ord => traits.push(quote_spanned!(span=> Ord)),
+            Trait::PartialOrd => traits.push(quote_spanned!(span=> PartialOrd)),
+            Trait::Serialize => traits.push(quote_spanned!(span=> ::serde::Serialize)),
+            Trait::Deserialize => traits.push(quote_spanned!(span=> ::serde::Deserialize)),
+        }
+    }
+
+    *actual_derives = Some(quote!(#[derive(#(#traits),*)]));
+
+    TokenStream::new()
+}
+
 fn struct_copy(strct: &Struct, span: Span) -> TokenStream {
     let ident = &strct.name.rust;
     let generics = &strct.generics;

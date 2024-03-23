@@ -39,6 +39,10 @@ struct Shared;
 struct SharedString;
 enum class Enum : uint16_t;
 
+struct EnumSimple;
+struct EnumImproper;
+struct EnumWithLifeTime;
+
 class C {
 public:
   C(size_t n);
@@ -124,6 +128,9 @@ Enum c_return_enum(uint16_t n);
 std::unique_ptr<Borrow> c_return_borrow(const std::string &s);
 const C *c_return_const_ptr(size_t n);
 C *c_return_mut_ptr(size_t n);
+EnumSimple c_return_enum_simple(int value);
+EnumImproper c_return_enum_improper(bool first);
+EnumWithLifeTime c_return_enum_with_lifetime(const int& val);
 
 void c_take_primitive(size_t n);
 void c_take_shared(Shared shared);
@@ -173,6 +180,9 @@ void c_take_ns_enum(::A::AEnum e);
 void c_take_nested_ns_enum(::A::B::ABEnum e);
 size_t c_take_const_ptr(const C *c);
 size_t c_take_mut_ptr(C *c);
+int c_take_enum_simple(EnumSimple enm);
+int c_take_enum_improper(EnumImproper enm);
+int c_take_enum_with_lifetime(const EnumWithLifeTime& enm);
 
 void c_try_return_void();
 size_t c_try_return_primitive();

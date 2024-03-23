@@ -38,7 +38,7 @@ use self::symbol::Symbol;
 use proc_macro2::{Ident, Span};
 use syn::punctuated::Punctuated;
 use syn::token::{Brace, Bracket, Paren};
-use syn::{Attribute, Expr, Generics, Lifetime, LitInt, Token, Type as RustType};
+use syn::{Attribute, Expr, Generics, Lifetime, LitInt, Token, Type as RustType, Visibility};
 
 pub(crate) use self::atom::Atom;
 pub(crate) use self::derive::{Derive, Trait};
@@ -52,7 +52,8 @@ pub(crate) enum Api {
     #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
     Include(Include),
     Struct(Struct),
-    Enum(Enum),
+    Enum(Enum, CEnumOpts),
+    EnumUnnamed(Enum),
     CxxType(ExternType),
     CxxFunction(ExternFn),
     RustType(ExternType),
@@ -131,6 +132,9 @@ pub(crate) struct Enum {
     pub generics: Lifetimes,
     pub brace_token: Brace,
     pub variants: Vec<Variant>,
+}
+
+pub(crate) struct CEnumOpts {
     pub variants_from_header: bool,
     #[allow(dead_code)]
     pub variants_from_header_attr: Option<Attribute>,
@@ -254,10 +258,13 @@ pub(crate) struct Variant {
     pub doc: Doc,
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
     pub attrs: OtherAttrs,
+    #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
+    pub vis: Visibility,
     pub name: Pair,
     pub discriminant: Discriminant,
     #[allow(dead_code)]
     pub expr: Option<Expr>,
+    pub ty: Option<Type>,
 }
 
 pub(crate) enum Type {
