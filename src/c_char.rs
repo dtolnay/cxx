@@ -1,3 +1,5 @@
+#![allow(clippy::duplicated_attributes)] // clippy bug: https://github.com/rust-lang/rust-clippy/issues/12538
+
 #[allow(missing_docs)]
 pub type c_char = c_char_definition::c_char;
 
