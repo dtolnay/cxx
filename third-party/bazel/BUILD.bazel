@@ -33,13 +33,13 @@ filegroup(
 # Workspace Member Dependencies
 alias(
     name = "cc",
-    actual = "@vendor__cc-1.0.89//:cc",
+    actual = "@vendor__cc-1.0.90//:cc",
     tags = ["manual"],
 )
 
 alias(
     name = "clap",
-    actual = "@vendor__clap-4.5.1//:clap",
+    actual = "@vendor__clap-4.5.3//:clap",
     tags = ["manual"],
 )
 
@@ -57,7 +57,7 @@ alias(
 
 alias(
     name = "proc-macro2",
-    actual = "@vendor__proc-macro2-1.0.78//:proc_macro2",
+    actual = "@vendor__proc-macro2-1.0.79//:proc_macro2",
     tags = ["manual"],
 )
 
@@ -75,6 +75,6 @@ alias(
 
 alias(
     name = "syn",
-    actual = "@vendor__syn-2.0.52//:syn",
+    actual = "@vendor__syn-2.0.53//:syn",
     tags = ["manual"],
 )
