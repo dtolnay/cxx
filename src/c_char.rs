@@ -8,6 +8,12 @@ pub type c_char = c_char_definition::c_char;
 #[cfg(all(test, feature = "std"))]
 const _: self::c_char = 0 as std::os::raw::c_char;
 
+#[cfg(not(no_core_ffi_c_char))]
+mod c_char_definition {
+    pub use core::ffi::c_char;
+}
+
+#[cfg(no_core_ffi_c_char)]
 #[allow(dead_code)]
 mod c_char_definition {
     // These are the targets on which c_char is unsigned.
