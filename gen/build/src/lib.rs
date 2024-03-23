@@ -45,7 +45,7 @@
 //! $ cxxbridge src/main.rs > path/to/mybridge.cc
 //! ```
 
-#![doc(html_root_url = "https://docs.rs/cxx-build/1.0.119")]
+#![doc(html_root_url = "https://docs.rs/cxx-build/1.0.120")]
 #![allow(
     clippy::cast_sign_loss,
     clippy::default_trait_access,
