@@ -859,6 +859,7 @@ fn parse_type_alias(
     let mut cxx_name = None;
     let mut rust_name = None;
     let mut attrs = attrs.clone();
+    let mut is_renamed = false;
     attrs.extend(attrs::parse(
         cx,
         unparsed_attrs,
@@ -869,6 +870,7 @@ fn parse_type_alias(
             namespace: Some(&mut namespace),
             cxx_name: Some(&mut cxx_name),
             rust_name: Some(&mut rust_name),
+            is_renamed: Some(&mut is_renamed),
             ..Default::default()
         },
     ));
@@ -894,6 +896,7 @@ fn parse_type_alias(
         eq_token,
         ty,
         semi_token,
+        is_renamed,
     }))
 }
 
