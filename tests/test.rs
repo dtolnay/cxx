@@ -33,6 +33,10 @@ macro_rules! check {
     }};
 }
 
+extern "C" {
+    static PmrDeleterForC_callback_used: bool;
+}
+
 #[test]
 fn test_c_return() {
     let shared = ffi::Shared { z: 2020 };
@@ -43,6 +47,12 @@ fn test_c_return() {
     assert_eq!(2020, ffi::c_return_shared().z);
     assert_eq!(2020, ffi::c_return_box().0);
     ffi::c_return_unique_ptr();
+    {
+        ffi::c_return_unique_ptr_with_deleter();
+    }
+    unsafe {
+        assert!(PmrDeleterForC_callback_used);
+    }
     ffi2::c_return_ns_unique_ptr();
     assert_eq!(2020, *ffi::c_return_ref(&shared));
     assert_eq!(2020, *ffi::c_return_ns_ref(&ns_shared));
@@ -367,7 +377,7 @@ fn test_extern_opaque() {
 #[test]
 fn test_raw_ptr() {
     let c = ffi::c_return_mut_ptr(2023);
-    let mut c_unique = unsafe { cxx::UniquePtr::from_raw(c) };
+    let mut c_unique = unsafe { cxx::UniquePtr::<ffi::C>::from_raw(c) };
     assert_eq!(2023, c_unique.pin_mut().set_succeed(2023).unwrap());
     // c will be dropped as it's now in a UniquePtr
 

@@ -264,7 +264,7 @@ pub(crate) enum Type {
     Ident(NamedType),
     RustBox(Box<Ty1>),
     RustVec(Box<Ty1>),
-    UniquePtr(Box<Ty1>),
+    UniquePtr(Box<Ty2>),
     SharedPtr(Box<Ty1>),
     WeakPtr(Box<Ty1>),
     Ref(Box<Ref>),
@@ -281,6 +281,14 @@ pub(crate) struct Ty1 {
     pub name: Ident,
     pub langle: Token![<],
     pub inner: Type,
+    pub rangle: Token![>],
+}
+
+pub(crate) struct Ty2 {
+    pub name: Ident,
+    pub langle: Token![<],
+    pub first: Type,
+    pub second: Option<Type>,
     pub rangle: Token![>],
 }
 

@@ -1,7 +1,7 @@
 use crate::syntax::atom::Atom::*;
 use crate::syntax::{
     Array, Atom, Derive, Enum, EnumRepr, ExternFn, ExternType, Impl, Lifetimes, NamedType, Ptr,
-    Ref, Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var,
+    Ref, Signature, SliceRef, Struct, Ty1, Ty2, Type, TypeAlias, Var,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote_spanned, ToTokens};
@@ -24,11 +24,11 @@ impl ToTokens for Type {
                 ident.to_tokens(tokens);
             }
             Type::RustBox(ty)
-            | Type::UniquePtr(ty)
             | Type::SharedPtr(ty)
             | Type::WeakPtr(ty)
             | Type::CxxVector(ty)
             | Type::RustVec(ty) => ty.to_tokens(tokens),
+            Type::UniquePtr(ty) => ty.to_tokens(tokens),
             Type::Ref(r) | Type::Str(r) => r.to_tokens(tokens),
             Type::Ptr(p) => p.to_tokens(tokens),
             Type::Array(a) => a.to_tokens(tokens),
@@ -81,6 +81,26 @@ impl ToTokens for Ty1 {
         langle.to_tokens(tokens);
         inner.to_tokens(tokens);
         rangle.to_tokens(tokens);
+    }
+}
+
+impl ToTokens for Ty2 {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let span = self.name.span();
+        match self.name.to_string().as_str() {
+            "UniquePtr" => {
+                tokens.extend(quote_spanned!(span=> ::cxx::));
+            }
+            _ => panic!("Unknown type name"),
+        }
+        self.name.to_tokens(tokens);
+        self.langle.to_tokens(tokens);
+        self.first.to_tokens(tokens);
+        if let Some(ty) = &self.second {
+            Token![,](span).to_tokens(tokens);
+            ty.to_tokens(tokens);
+        }
+        self.rangle.to_tokens(tokens);
     }
 }
 

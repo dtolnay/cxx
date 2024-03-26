@@ -13,6 +13,8 @@ fn main() {
     build.warnings_into_errors(cfg!(deny_warnings));
     if cfg!(not(target_env = "msvc")) {
         build.define("CXX_TEST_INSTANTIATIONS", None);
+    } else {
+        build.flag_if_supported("/Zc:__cplusplus");
     }
     build.compile("cxx-test-suite");
 
