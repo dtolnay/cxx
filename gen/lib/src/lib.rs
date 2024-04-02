@@ -47,7 +47,7 @@ mod syntax;
 
 pub use crate::error::Error;
 pub use crate::gen::include::{Include, HEADER};
-pub use crate::gen::{GeneratedCode, Opt};
+pub use crate::gen::{CfgEvaluator, CfgResult, GeneratedCode, Opt};
 pub use crate::syntax::IncludeKind;
 use proc_macro2::TokenStream;
 
