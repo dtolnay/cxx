@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 6,
-  "moduleFileHash": "4932bb0707a913f01cc9b3acdf340f6ee417e9af7a1892e9db664262edeaac48",
+  "moduleFileHash": "8f9429967456bf62a199cd865ab0820044af07fc276f60d717b243a508311eac",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -68,14 +68,7 @@
             "column": 35
           },
           "imports": {
-            "vendor__cc-1.0.90": "vendor__cc-1.0.90",
-            "vendor__clap-4.5.3": "vendor__clap-4.5.3",
-            "vendor__codespan-reporting-0.11.1": "vendor__codespan-reporting-0.11.1",
-            "vendor__once_cell-1.19.0": "vendor__once_cell-1.19.0",
-            "vendor__proc-macro2-1.0.79": "vendor__proc-macro2-1.0.79",
-            "vendor__quote-1.0.35": "vendor__quote-1.0.35",
-            "vendor__scratch-1.0.7": "vendor__scratch-1.0.7",
-            "vendor__syn-2.0.53": "vendor__syn-2.0.53"
+            "vendor": "vendor"
           },
           "devImports": [],
           "tags": [],
@@ -1335,7 +1328,7 @@
   "moduleExtensions": {
     "//tools/bazel:extension.bzl%crate_repositories": {
       "general": {
-        "bzlTransitiveDigest": "TUTSy4pBPit3wfyZ46hzjY/MybQAyx2A/8xAKxOruOM=",
+        "bzlTransitiveDigest": "82LNMqtYo7rmi4vVOrxBnxiUgtCfcdw0VbROG1p0jQk=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1522,6 +1515,14 @@
               "build_file": "@@//third-party/bazel:BUILD.codespan-reporting-0.11.1.bazel"
             }
           },
+          "vendor": {
+            "bzlFile": "@@rules_rust~//crate_universe/private:crates_vendor.bzl",
+            "ruleClassName": "crates_vendor_remote_repository",
+            "attributes": {
+              "build_file": "@@//third-party/bazel:BUILD.bazel",
+              "defs_module": "@@//third-party/bazel:defs.bzl"
+            }
+          },
           "vendor__clap_lex-0.7.0": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
@@ -1577,14 +1578,7 @@
         },
         "moduleExtensionMetadata": {
           "explicitRootModuleDirectDeps": [
-            "vendor__cc-1.0.90",
-            "vendor__clap-4.5.3",
-            "vendor__codespan-reporting-0.11.1",
-            "vendor__once_cell-1.19.0",
-            "vendor__proc-macro2-1.0.79",
-            "vendor__quote-1.0.35",
-            "vendor__scratch-1.0.7",
-            "vendor__syn-2.0.53"
+            "vendor"
           ],
           "explicitRootModuleDirectDevDeps": [],
           "useAllRepos": "NO",
@@ -1608,43 +1602,48 @@
           ],
           [
             "",
+            "rules_rust",
+            "rules_rust~"
+          ],
+          [
+            "",
             "vendor__cc-1.0.90",
-            "_main~crate_repositories~vendor__cc-1.0.90"
+            "vendor__cc-1.0.90"
           ],
           [
             "",
             "vendor__clap-4.5.3",
-            "_main~crate_repositories~vendor__clap-4.5.3"
+            "vendor__clap-4.5.3"
           ],
           [
             "",
             "vendor__codespan-reporting-0.11.1",
-            "_main~crate_repositories~vendor__codespan-reporting-0.11.1"
+            "vendor__codespan-reporting-0.11.1"
           ],
           [
             "",
             "vendor__once_cell-1.19.0",
-            "_main~crate_repositories~vendor__once_cell-1.19.0"
+            "vendor__once_cell-1.19.0"
           ],
           [
             "",
             "vendor__proc-macro2-1.0.79",
-            "_main~crate_repositories~vendor__proc-macro2-1.0.79"
+            "vendor__proc-macro2-1.0.79"
           ],
           [
             "",
             "vendor__quote-1.0.35",
-            "_main~crate_repositories~vendor__quote-1.0.35"
+            "vendor__quote-1.0.35"
           ],
           [
             "",
             "vendor__scratch-1.0.7",
-            "_main~crate_repositories~vendor__scratch-1.0.7"
+            "vendor__scratch-1.0.7"
           ],
           [
             "",
             "vendor__syn-2.0.53",
-            "_main~crate_repositories~vendor__syn-2.0.53"
+            "vendor__syn-2.0.53"
           ]
         ]
       }

@@ -13,7 +13,7 @@ crates_vendor(
 [
     alias(
         name = name,
-        actual = "//third-party/bazel:{}".format(name),
+        actual = "@vendor//:{}".format(name),
         visibility = ["//visibility:public"],
     )
     for name in [
