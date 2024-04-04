@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 6,
-  "moduleFileHash": "36542d567471d94e13bc08e148c59304483983deecce62b38c1dfa8b870f296e",
+  "moduleFileHash": "cfc1fb790ae3b331704c8cb14306153abf7a406b141152022ddb5c2a13e5c566",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -68,7 +68,7 @@
             "column": 35
           },
           "imports": {
-            "third_party": "vendor"
+            "crates.io": "crates.io"
           },
           "devImports": [],
           "tags": [],
@@ -1328,7 +1328,7 @@
   "moduleExtensions": {
     "//tools/bazel:extension.bzl%crate_repositories": {
       "general": {
-        "bzlTransitiveDigest": "82LNMqtYo7rmi4vVOrxBnxiUgtCfcdw0VbROG1p0jQk=",
+        "bzlTransitiveDigest": "mMVzzptFEe4M3dfpM1chYMwTdpqJiAez+R1cfoMax1o=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1450,6 +1450,13 @@
               "build_file": "@@//third-party/bazel:BUILD.winapi-i686-pc-windows-gnu-0.4.0.bazel"
             }
           },
+          "crates.io": {
+            "bzlFile": "@@//tools/bazel:extension.bzl",
+            "ruleClassName": "_crates_vendor_remote_repository",
+            "attributes": {
+              "build_file": "@@//third-party/bazel:BUILD.bazel"
+            }
+          },
           "vendor__unicode-ident-1.0.12": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
@@ -1515,14 +1522,6 @@
               "build_file": "@@//third-party/bazel:BUILD.codespan-reporting-0.11.1.bazel"
             }
           },
-          "vendor": {
-            "bzlFile": "@@rules_rust~//crate_universe/private:crates_vendor.bzl",
-            "ruleClassName": "crates_vendor_remote_repository",
-            "attributes": {
-              "build_file": "@@//third-party/bazel:BUILD.bazel",
-              "defs_module": "@@//third-party/bazel:defs.bzl"
-            }
-          },
           "vendor__clap_lex-0.7.0": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
@@ -1576,14 +1575,6 @@
             }
           }
         },
-        "moduleExtensionMetadata": {
-          "explicitRootModuleDirectDeps": [
-            "vendor"
-          ],
-          "explicitRootModuleDirectDevDeps": [],
-          "useAllRepos": "NO",
-          "reproducible": false
-        },
         "recordedRepoMappingEntries": [
           [
             "",
@@ -1599,11 +1590,6 @@
             "",
             "bazel_tools",
             "bazel_tools"
-          ],
-          [
-            "",
-            "rules_rust",
-            "rules_rust~"
           ],
           [
             "",
