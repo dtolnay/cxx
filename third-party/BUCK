@@ -49,23 +49,23 @@ cargo.rust_library(
 
 alias(
     name = "clap",
-    actual = ":clap-4.5.3",
+    actual = ":clap-4.5.4",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "clap-4.5.3.crate",
-    sha256 = "949626d00e063efc93b6dca932419ceb5432f99769911c0b995f7e884c778813",
-    strip_prefix = "clap-4.5.3",
-    urls = ["https://static.crates.io/crates/clap/4.5.3/download"],
+    name = "clap-4.5.4.crate",
+    sha256 = "90bc066a67923782aa8515dbaea16946c5bcc5addbd668bb80af688e53e548a0",
+    strip_prefix = "clap-4.5.4",
+    urls = ["https://static.crates.io/crates/clap/4.5.4/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "clap-4.5.3",
-    srcs = [":clap-4.5.3.crate"],
+    name = "clap-4.5.4",
+    srcs = [":clap-4.5.4.crate"],
     crate = "clap",
-    crate_root = "clap-4.5.3.crate/src/lib.rs",
+    crate_root = "clap-4.5.4.crate/src/lib.rs",
     edition = "2021",
     features = [
         "error-context",
@@ -305,23 +305,23 @@ buildscript_run(
 
 alias(
     name = "syn",
-    actual = ":syn-2.0.53",
+    actual = ":syn-2.0.58",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "syn-2.0.53.crate",
-    sha256 = "7383cd0e49fff4b6b90ca5670bfd3e9d6a733b3f90c686605aa7eec8c4996032",
-    strip_prefix = "syn-2.0.53",
-    urls = ["https://static.crates.io/crates/syn/2.0.53/download"],
+    name = "syn-2.0.58.crate",
+    sha256 = "44cfb93f38070beee36b3fef7d4f5a16f27751d94b187b666a5cc5e9b0d30687",
+    strip_prefix = "syn-2.0.58",
+    urls = ["https://static.crates.io/crates/syn/2.0.58/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "syn-2.0.53",
-    srcs = [":syn-2.0.53.crate"],
+    name = "syn-2.0.58",
+    srcs = [":syn-2.0.58.crate"],
     crate = "syn",
-    crate_root = "syn-2.0.53.crate/src/lib.rs",
+    crate_root = "syn-2.0.58.crate/src/lib.rs",
     edition = "2021",
     features = [
         "clone-impls",
@@ -331,7 +331,6 @@ cargo.rust_library(
         "parsing",
         "printing",
         "proc-macro",
-        "quote",
     ],
     visibility = [],
     deps = [

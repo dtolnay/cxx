@@ -39,7 +39,7 @@ alias(
 
 alias(
     name = "clap",
-    actual = "@vendor__clap-4.5.3//:clap",
+    actual = "@vendor__clap-4.5.4//:clap",
     tags = ["manual"],
 )
 
@@ -75,6 +75,6 @@ alias(
 
 alias(
     name = "syn",
-    actual = "@vendor__syn-2.0.53//:syn",
+    actual = "@vendor__syn-2.0.58//:syn",
     tags = ["manual"],
 )
