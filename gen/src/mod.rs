@@ -54,22 +54,32 @@ pub struct Opt {
     /// Rust code from one shared object or executable depends on these C++
     /// functions in another.
     pub cxx_impl_annotations: Option<String>,
+    /// Optional [`CfgEvaluator`] for handling cfg attributes
+    pub cfg_evaluator: Box<dyn CfgEvaluator>,
 
     pub(super) gen_header: bool,
     pub(super) gen_implementation: bool,
     pub(super) allow_dot_includes: bool,
-    pub(super) cfg_evaluator: Box<dyn CfgEvaluator>,
     pub(super) doxygen: bool,
 }
 
-pub(super) trait CfgEvaluator {
+/// An evaluator which parses cfg attributes
+pub trait CfgEvaluator {
+    /// For a given cfg name and value return a [`CfgResult`] indicating if it's enabled
     fn eval(&self, name: &str, value: Option<&str>) -> CfgResult;
 }
 
-pub(super) enum CfgResult {
+/// Results of a [`CfgEvaluator`]
+pub enum CfgResult {
+    /// cfg option is enabled
     True,
+    /// cfg option is disabled
     False,
-    Undetermined { msg: String },
+    /// cfg option is not enabled or disabled
+    Undetermined {
+        /// Custom message explaining why the cfg option is undetermined
+        msg: String,
+    },
 }
 
 /// Results of code generation.
