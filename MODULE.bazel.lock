@@ -1328,7 +1328,7 @@
   "moduleExtensions": {
     "//tools/bazel:extension.bzl%crate_repositories": {
       "general": {
-        "bzlTransitiveDigest": "VFquPq5tG7GsqSE7NbevWF6ieSFEXcHkppBOgV3IoTE=",
+        "bzlTransitiveDigest": "TsQgQi13G5yAQGDXUxspaktUq2+4PJ3lhFLa4pLDbwE=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1496,6 +1496,19 @@
               "build_file": "@@//third-party/bazel:BUILD.codespan-reporting-0.11.1.bazel"
             }
           },
+          "vendor__cc-1.0.92": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "sha256": "2678b2e3449475e95b0aa6f9b506a28e61b3dc8996592b983695e8ebb58a8b41",
+              "type": "tar.gz",
+              "urls": [
+                "https://static.crates.io/crates/cc/1.0.92/download"
+              ],
+              "strip_prefix": "cc-1.0.92",
+              "build_file": "@@//third-party/bazel:BUILD.cc-1.0.92.bazel"
+            }
+          },
           "vendor__clap-4.5.4": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
@@ -1533,19 +1546,6 @@
               ],
               "strip_prefix": "winapi-util-0.1.6",
               "build_file": "@@//third-party/bazel:BUILD.winapi-util-0.1.6.bazel"
-            }
-          },
-          "vendor__cc-1.0.90": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_archive",
-            "attributes": {
-              "sha256": "8cd6604a82acf3039f1144f54b8eb34e91ffba622051189e71b781822d5ee1f5",
-              "type": "tar.gz",
-              "urls": [
-                "https://static.crates.io/crates/cc/1.0.90/download"
-              ],
-              "strip_prefix": "cc-1.0.90",
-              "build_file": "@@//third-party/bazel:BUILD.cc-1.0.90.bazel"
             }
           },
           "vendor__proc-macro2-1.0.79": {
@@ -1593,8 +1593,8 @@
           ],
           [
             "",
-            "vendor__cc-1.0.90",
-            "vendor__cc-1.0.90"
+            "vendor__cc-1.0.92",
+            "vendor__cc-1.0.92"
           ],
           [
             "",
