@@ -24,8 +24,8 @@ fn main() {
     }
 
     if let Some(rustc) = rustc_version() {
-        if rustc.minor < 60 {
-            println!("cargo:warning=The cxx crate requires a rustc version 1.60.0 or newer.");
+        if rustc.minor < 63 {
+            println!("cargo:warning=The cxx crate requires a rustc version 1.63.0 or newer.");
             println!(
                 "cargo:warning=You appear to be building with: {}",
                 rustc.version,
