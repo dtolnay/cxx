@@ -1,4 +1,4 @@
-#[allow(unused_assignments, unused_mut, unused_variables)]
+#![allow(unused_assignments, unused_mut, unused_variables)]
 pub const STD: &str = {
     let mut flag = "c++11";
 
@@ -10,6 +10,15 @@ pub const STD: &str = {
 
     #[cfg(feature = "c++20")]
     (flag = "c++20");
+
+    flag
+};
+
+pub const EXCEPTIONS: &str = {
+    let mut flag = "RUST_CXX_ALLOW_EXCEPTIONS";
+
+    #[cfg(feature = "no_exceptions")]
+    (flag = "RUST_CXX_NO_EXCEPTIONS");
 
     flag
 };

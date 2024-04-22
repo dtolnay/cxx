@@ -19,6 +19,7 @@ default = ["std", "cxxbridge-flags/default"] # c++11
 "c++14" = ["cxxbridge-flags/c++14"]
 "c++17" = ["cxxbridge-flags/c++17"]
 "c++20" = ["cxxbridge-flags/c++20"]
+"no_exceptions" = ["cxxbridge-flags/no_exceptions"]
 alloc = []
 std = ["alloc"]
 

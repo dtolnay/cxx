@@ -11,6 +11,7 @@ fn main() {
         .cpp(true)
         .cpp_link_stdlib(None) // linked via link-cplusplus crate
         .std(cxxbridge_flags::STD)
+        .define(cxxbridge_flags::EXCEPTIONS, None)
         .warnings_into_errors(cfg!(deny_warnings))
         .compile("cxxbridge1");
 
