@@ -1,3 +1,6 @@
+#![allow(unknown_lints)]
+#![allow(unexpected_cfgs)]
+
 use cxx_build::CFG;
 
 fn main() {
