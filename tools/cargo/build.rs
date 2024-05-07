@@ -48,6 +48,8 @@ through crates.io.
 ";
 
 fn main() {
+    println!("cargo:rustc-cfg=check_cfg");
+    println!("cargo:rustc-check-cfg=cfg(check_cfg)");
     println!("cargo:rustc-check-cfg=cfg(feature, values(\"experimental-async-fn\"))");
     println!("cargo:rustc-check-cfg=cfg(feature, values(\"experimental-enum-variants-from-header\"))");
 
