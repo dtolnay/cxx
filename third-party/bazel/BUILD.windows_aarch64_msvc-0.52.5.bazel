@@ -6,12 +6,13 @@
 #     bazel run @@//third-party:vendor
 ###############################################################################
 
+load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
 package(default_visibility = ["//visibility:public"])
 
 rust_library(
-    name = "clap_builder",
+    name = "windows_aarch64_msvc",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = False,
@@ -28,12 +29,6 @@ rust_library(
             "WORKSPACE.bazel",
         ],
     ),
-    crate_features = [
-        "error-context",
-        "help",
-        "std",
-        "usage",
-    ],
     crate_root = "src/lib.rs",
     edition = "2021",
     rustc_flags = [
@@ -41,7 +36,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=clap_builder",
+        "crate-name=windows_aarch64_msvc",
         "manual",
         "noclippy",
         "norustfmt",
@@ -83,9 +78,49 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-none": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "4.5.2",
+    version = "0.52.5",
     deps = [
-        "@vendor__anstyle-1.0.7//:anstyle",
-        "@vendor__clap_lex-0.7.0//:clap_lex",
+        "@vendor__windows_aarch64_msvc-0.52.5//:build_script_build",
     ],
+)
+
+cargo_build_script(
+    name = "windows_aarch64_msvc_bs",
+    srcs = glob(
+        include = ["**/*.rs"],
+        allow_empty = False,
+    ),
+    crate_name = "build_script_build",
+    crate_root = "build.rs",
+    data = glob(
+        include = ["**"],
+        allow_empty = True,
+        exclude = [
+            "**/* *",
+            ".tmp_git_root/**/*",
+            "BUILD",
+            "BUILD.bazel",
+            "WORKSPACE",
+            "WORKSPACE.bazel",
+        ],
+    ),
+    edition = "2021",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-bazel",
+        "crate-name=windows_aarch64_msvc",
+        "manual",
+        "noclippy",
+        "norustfmt",
+    ],
+    version = "0.52.5",
+    visibility = ["//visibility:private"],
+)
+
+alias(
+    name = "build_script_build",
+    actual = ":windows_aarch64_msvc_bs",
+    tags = ["manual"],
 )

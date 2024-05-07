@@ -6,13 +6,12 @@
 #     bazel run @@//third-party:vendor
 ###############################################################################
 
-load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
 package(default_visibility = ["//visibility:public"])
 
 rust_library(
-    name = "winapi",
+    name = "anstyle",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = False,
@@ -30,26 +29,17 @@ rust_library(
         ],
     ),
     crate_features = [
-        "consoleapi",
-        "errhandlingapi",
-        "fileapi",
-        "minwindef",
-        "processenv",
+        "default",
         "std",
-        "sysinfoapi",
-        "winbase",
-        "wincon",
-        "winerror",
-        "winnt",
     ],
     crate_root = "src/lib.rs",
-    edition = "2015",
+    edition = "2021",
     rustc_flags = [
         "--cap-lints=allow",
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=winapi",
+        "crate-name=anstyle",
         "manual",
         "noclippy",
         "norustfmt",
@@ -91,62 +81,5 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-none": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "0.3.9",
-    deps = [
-        "@vendor__winapi-0.3.9//:build_script_build",
-    ],
-)
-
-cargo_build_script(
-    name = "winapi_bs",
-    srcs = glob(
-        include = ["**/*.rs"],
-        allow_empty = False,
-    ),
-    crate_features = [
-        "consoleapi",
-        "errhandlingapi",
-        "fileapi",
-        "minwindef",
-        "processenv",
-        "std",
-        "sysinfoapi",
-        "winbase",
-        "wincon",
-        "winerror",
-        "winnt",
-    ],
-    crate_name = "build_script_build",
-    crate_root = "build.rs",
-    data = glob(
-        include = ["**"],
-        allow_empty = True,
-        exclude = [
-            "**/* *",
-            ".tmp_git_root/**/*",
-            "BUILD",
-            "BUILD.bazel",
-            "WORKSPACE",
-            "WORKSPACE.bazel",
-        ],
-    ),
-    edition = "2015",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    tags = [
-        "cargo-bazel",
-        "crate-name=winapi",
-        "manual",
-        "noclippy",
-        "norustfmt",
-    ],
-    version = "0.3.9",
-    visibility = ["//visibility:private"],
-)
-
-alias(
-    name = "build_script_build",
-    actual = ":winapi_bs",
-    tags = ["manual"],
+    version = "1.0.7",
 )

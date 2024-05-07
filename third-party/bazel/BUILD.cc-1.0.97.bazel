@@ -6,13 +6,12 @@
 #     bazel run @@//third-party:vendor
 ###############################################################################
 
-load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
 package(default_visibility = ["//visibility:public"])
 
 rust_library(
-    name = "winapi_i686_pc_windows_gnu",
+    name = "cc",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = False,
@@ -30,13 +29,13 @@ rust_library(
         ],
     ),
     crate_root = "src/lib.rs",
-    edition = "2015",
+    edition = "2018",
     rustc_flags = [
         "--cap-lints=allow",
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=winapi-i686-pc-windows-gnu",
+        "crate-name=cc",
         "manual",
         "noclippy",
         "norustfmt",
@@ -78,49 +77,5 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-none": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "0.4.0",
-    deps = [
-        "@vendor__winapi-i686-pc-windows-gnu-0.4.0//:build_script_build",
-    ],
-)
-
-cargo_build_script(
-    name = "winapi-i686-pc-windows-gnu_bs",
-    srcs = glob(
-        include = ["**/*.rs"],
-        allow_empty = False,
-    ),
-    crate_name = "build_script_build",
-    crate_root = "build.rs",
-    data = glob(
-        include = ["**"],
-        allow_empty = True,
-        exclude = [
-            "**/* *",
-            ".tmp_git_root/**/*",
-            "BUILD",
-            "BUILD.bazel",
-            "WORKSPACE",
-            "WORKSPACE.bazel",
-        ],
-    ),
-    edition = "2015",
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    tags = [
-        "cargo-bazel",
-        "crate-name=winapi-i686-pc-windows-gnu",
-        "manual",
-        "noclippy",
-        "norustfmt",
-    ],
-    version = "0.4.0",
-    visibility = ["//visibility:private"],
-)
-
-alias(
-    name = "build_script_build",
-    actual = ":winapi-i686-pc-windows-gnu_bs",
-    tags = ["manual"],
+    version = "1.0.97",
 )

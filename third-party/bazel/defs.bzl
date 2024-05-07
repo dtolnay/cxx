@@ -295,14 +295,14 @@ def aliases(
 _NORMAL_DEPENDENCIES = {
     "third-party": {
         _COMMON_CONDITION: {
-            "cc": Label("@vendor__cc-1.0.92//:cc"),
+            "cc": Label("@vendor__cc-1.0.97//:cc"),
             "clap": Label("@vendor__clap-4.5.4//:clap"),
             "codespan-reporting": Label("@vendor__codespan-reporting-0.11.1//:codespan_reporting"),
             "once_cell": Label("@vendor__once_cell-1.19.0//:once_cell"),
-            "proc-macro2": Label("@vendor__proc-macro2-1.0.79//:proc_macro2"),
-            "quote": Label("@vendor__quote-1.0.35//:quote"),
+            "proc-macro2": Label("@vendor__proc-macro2-1.0.82//:proc_macro2"),
+            "quote": Label("@vendor__quote-1.0.36//:quote"),
             "scratch": Label("@vendor__scratch-1.0.7//:scratch"),
-            "syn": Label("@vendor__syn-2.0.58//:syn"),
+            "syn": Label("@vendor__syn-2.0.61//:syn"),
         },
     },
 }
@@ -370,6 +370,7 @@ _CONDITIONS = {
     "aarch64-apple-ios-sim": ["@rules_rust//rust/platform:aarch64-apple-ios-sim"],
     "aarch64-fuchsia": ["@rules_rust//rust/platform:aarch64-fuchsia"],
     "aarch64-linux-android": ["@rules_rust//rust/platform:aarch64-linux-android"],
+    "aarch64-pc-windows-gnullvm": [],
     "aarch64-pc-windows-msvc": ["@rules_rust//rust/platform:aarch64-pc-windows-msvc"],
     "aarch64-unknown-linux-gnu": ["@rules_rust//rust/platform:aarch64-unknown-linux-gnu"],
     "aarch64-unknown-nixos-gnu": ["@rules_rust//rust/platform:aarch64-unknown-nixos-gnu"],
@@ -377,10 +378,15 @@ _CONDITIONS = {
     "arm-unknown-linux-gnueabi": ["@rules_rust//rust/platform:arm-unknown-linux-gnueabi"],
     "armv7-linux-androideabi": ["@rules_rust//rust/platform:armv7-linux-androideabi"],
     "armv7-unknown-linux-gnueabi": ["@rules_rust//rust/platform:armv7-unknown-linux-gnueabi"],
+    "cfg(all(any(target_arch = \"x86_64\", target_arch = \"arm64ec\"), target_env = \"msvc\", not(windows_raw_dylib)))": ["@rules_rust//rust/platform:x86_64-pc-windows-msvc"],
+    "cfg(all(target_arch = \"aarch64\", target_env = \"msvc\", not(windows_raw_dylib)))": ["@rules_rust//rust/platform:aarch64-pc-windows-msvc"],
+    "cfg(all(target_arch = \"x86\", target_env = \"gnu\", not(target_abi = \"llvm\"), not(windows_raw_dylib)))": ["@rules_rust//rust/platform:i686-unknown-linux-gnu"],
+    "cfg(all(target_arch = \"x86\", target_env = \"msvc\", not(windows_raw_dylib)))": ["@rules_rust//rust/platform:i686-pc-windows-msvc"],
+    "cfg(all(target_arch = \"x86_64\", target_env = \"gnu\", not(target_abi = \"llvm\"), not(windows_raw_dylib)))": ["@rules_rust//rust/platform:x86_64-unknown-linux-gnu", "@rules_rust//rust/platform:x86_64-unknown-nixos-gnu"],
     "cfg(windows)": ["@rules_rust//rust/platform:aarch64-pc-windows-msvc", "@rules_rust//rust/platform:i686-pc-windows-msvc", "@rules_rust//rust/platform:x86_64-pc-windows-msvc"],
     "i686-apple-darwin": ["@rules_rust//rust/platform:i686-apple-darwin"],
     "i686-linux-android": ["@rules_rust//rust/platform:i686-linux-android"],
-    "i686-pc-windows-gnu": [],
+    "i686-pc-windows-gnullvm": [],
     "i686-pc-windows-msvc": ["@rules_rust//rust/platform:i686-pc-windows-msvc"],
     "i686-unknown-freebsd": ["@rules_rust//rust/platform:i686-unknown-freebsd"],
     "i686-unknown-linux-gnu": ["@rules_rust//rust/platform:i686-unknown-linux-gnu"],
@@ -396,7 +402,7 @@ _CONDITIONS = {
     "x86_64-apple-ios": ["@rules_rust//rust/platform:x86_64-apple-ios"],
     "x86_64-fuchsia": ["@rules_rust//rust/platform:x86_64-fuchsia"],
     "x86_64-linux-android": ["@rules_rust//rust/platform:x86_64-linux-android"],
-    "x86_64-pc-windows-gnu": [],
+    "x86_64-pc-windows-gnullvm": [],
     "x86_64-pc-windows-msvc": ["@rules_rust//rust/platform:x86_64-pc-windows-msvc"],
     "x86_64-unknown-freebsd": ["@rules_rust//rust/platform:x86_64-unknown-freebsd"],
     "x86_64-unknown-linux-gnu": ["@rules_rust//rust/platform:x86_64-unknown-linux-gnu"],
@@ -414,22 +420,22 @@ def crate_repositories():
     """
     maybe(
         http_archive,
-        name = "vendor__anstyle-1.0.6",
-        sha256 = "8901269c6307e8d93993578286ac0edf7f195079ffff5ebdeea6a59ffb7e36bc",
+        name = "vendor__anstyle-1.0.7",
+        sha256 = "038dfcf04a5feb68e9c60b21c9625a54c2c0616e79b72b0fd87075a056ae1d1b",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/anstyle/1.0.6/download"],
-        strip_prefix = "anstyle-1.0.6",
-        build_file = Label("@//third-party/bazel:BUILD.anstyle-1.0.6.bazel"),
+        urls = ["https://static.crates.io/crates/anstyle/1.0.7/download"],
+        strip_prefix = "anstyle-1.0.7",
+        build_file = Label("@//third-party/bazel:BUILD.anstyle-1.0.7.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__cc-1.0.92",
-        sha256 = "2678b2e3449475e95b0aa6f9b506a28e61b3dc8996592b983695e8ebb58a8b41",
+        name = "vendor__cc-1.0.97",
+        sha256 = "099a5357d84c4c61eb35fc8eafa9a79a902c2f76911e5747ced4e032edd8d9b4",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/cc/1.0.92/download"],
-        strip_prefix = "cc-1.0.92",
-        build_file = Label("@//third-party/bazel:BUILD.cc-1.0.92.bazel"),
+        urls = ["https://static.crates.io/crates/cc/1.0.97/download"],
+        strip_prefix = "cc-1.0.97",
+        build_file = Label("@//third-party/bazel:BUILD.cc-1.0.97.bazel"),
     )
 
     maybe(
@@ -484,22 +490,22 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__proc-macro2-1.0.79",
-        sha256 = "e835ff2298f5721608eb1a980ecaee1aef2c132bf95ecc026a11b7bf3c01c02e",
+        name = "vendor__proc-macro2-1.0.82",
+        sha256 = "8ad3d49ab951a01fbaafe34f2ec74122942fe18a3f9814c3268f1bb72042131b",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/proc-macro2/1.0.79/download"],
-        strip_prefix = "proc-macro2-1.0.79",
-        build_file = Label("@//third-party/bazel:BUILD.proc-macro2-1.0.79.bazel"),
+        urls = ["https://static.crates.io/crates/proc-macro2/1.0.82/download"],
+        strip_prefix = "proc-macro2-1.0.82",
+        build_file = Label("@//third-party/bazel:BUILD.proc-macro2-1.0.82.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__quote-1.0.35",
-        sha256 = "291ec9ab5efd934aaf503a6466c5d5251535d108ee747472c3977cc5acc868ef",
+        name = "vendor__quote-1.0.36",
+        sha256 = "0fa76aaf39101c457836aec0ce2316dbdc3ab723cdda1c6bd4e6ad4208acaca7",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/quote/1.0.35/download"],
-        strip_prefix = "quote-1.0.35",
-        build_file = Label("@//third-party/bazel:BUILD.quote-1.0.35.bazel"),
+        urls = ["https://static.crates.io/crates/quote/1.0.36/download"],
+        strip_prefix = "quote-1.0.36",
+        build_file = Label("@//third-party/bazel:BUILD.quote-1.0.36.bazel"),
     )
 
     maybe(
@@ -514,12 +520,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__syn-2.0.58",
-        sha256 = "44cfb93f38070beee36b3fef7d4f5a16f27751d94b187b666a5cc5e9b0d30687",
+        name = "vendor__syn-2.0.61",
+        sha256 = "c993ed8ccba56ae856363b1845da7266a7cb78e1d146c8a32d54b45a8b831fc9",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/syn/2.0.58/download"],
-        strip_prefix = "syn-2.0.58",
-        build_file = Label("@//third-party/bazel:BUILD.syn-2.0.58.bazel"),
+        urls = ["https://static.crates.io/crates/syn/2.0.61/download"],
+        strip_prefix = "syn-2.0.61",
+        build_file = Label("@//third-party/bazel:BUILD.syn-2.0.61.bazel"),
     )
 
     maybe(
@@ -544,61 +550,131 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__unicode-width-0.1.11",
-        sha256 = "e51733f11c9c4f72aa0c160008246859e340b00807569a0da0e7a1079b27ba85",
+        name = "vendor__unicode-width-0.1.12",
+        sha256 = "68f5e5f3158ecfd4b8ff6fe086db7c8467a2dfdac97fe420f2b7c4aa97af66d6",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/unicode-width/0.1.11/download"],
-        strip_prefix = "unicode-width-0.1.11",
-        build_file = Label("@//third-party/bazel:BUILD.unicode-width-0.1.11.bazel"),
+        urls = ["https://static.crates.io/crates/unicode-width/0.1.12/download"],
+        strip_prefix = "unicode-width-0.1.12",
+        build_file = Label("@//third-party/bazel:BUILD.unicode-width-0.1.12.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__winapi-0.3.9",
-        sha256 = "5c839a674fcd7a98952e593242ea400abe93992746761e38641405d28b00f419",
+        name = "vendor__winapi-util-0.1.8",
+        sha256 = "4d4cc384e1e73b93bafa6fb4f1df8c41695c8a91cf9c4c64358067d15a7b6c6b",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/winapi/0.3.9/download"],
-        strip_prefix = "winapi-0.3.9",
-        build_file = Label("@//third-party/bazel:BUILD.winapi-0.3.9.bazel"),
+        urls = ["https://static.crates.io/crates/winapi-util/0.1.8/download"],
+        strip_prefix = "winapi-util-0.1.8",
+        build_file = Label("@//third-party/bazel:BUILD.winapi-util-0.1.8.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__winapi-i686-pc-windows-gnu-0.4.0",
-        sha256 = "ac3b87c63620426dd9b991e5ce0329eff545bccbbb34f3be09ff6fb6ab51b7b6",
+        name = "vendor__windows-sys-0.52.0",
+        sha256 = "282be5f36a8ce781fad8c8ae18fa3f9beff57ec1b52cb3de0789201425d9a33d",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/winapi-i686-pc-windows-gnu/0.4.0/download"],
-        strip_prefix = "winapi-i686-pc-windows-gnu-0.4.0",
-        build_file = Label("@//third-party/bazel:BUILD.winapi-i686-pc-windows-gnu-0.4.0.bazel"),
+        urls = ["https://static.crates.io/crates/windows-sys/0.52.0/download"],
+        strip_prefix = "windows-sys-0.52.0",
+        build_file = Label("@//third-party/bazel:BUILD.windows-sys-0.52.0.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__winapi-util-0.1.6",
-        sha256 = "f29e6f9198ba0d26b4c9f07dbe6f9ed633e1f3d5b8b414090084349e46a52596",
+        name = "vendor__windows-targets-0.52.5",
+        sha256 = "6f0713a46559409d202e70e28227288446bf7841d3211583a4b53e3f6d96e7eb",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/winapi-util/0.1.6/download"],
-        strip_prefix = "winapi-util-0.1.6",
-        build_file = Label("@//third-party/bazel:BUILD.winapi-util-0.1.6.bazel"),
+        urls = ["https://static.crates.io/crates/windows-targets/0.52.5/download"],
+        strip_prefix = "windows-targets-0.52.5",
+        build_file = Label("@//third-party/bazel:BUILD.windows-targets-0.52.5.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__winapi-x86_64-pc-windows-gnu-0.4.0",
-        sha256 = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f",
+        name = "vendor__windows_aarch64_gnullvm-0.52.5",
+        sha256 = "7088eed71e8b8dda258ecc8bac5fb1153c5cffaf2578fc8ff5d61e23578d3263",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/winapi-x86_64-pc-windows-gnu/0.4.0/download"],
-        strip_prefix = "winapi-x86_64-pc-windows-gnu-0.4.0",
-        build_file = Label("@//third-party/bazel:BUILD.winapi-x86_64-pc-windows-gnu-0.4.0.bazel"),
+        urls = ["https://static.crates.io/crates/windows_aarch64_gnullvm/0.52.5/download"],
+        strip_prefix = "windows_aarch64_gnullvm-0.52.5",
+        build_file = Label("@//third-party/bazel:BUILD.windows_aarch64_gnullvm-0.52.5.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "vendor__windows_aarch64_msvc-0.52.5",
+        sha256 = "9985fd1504e250c615ca5f281c3f7a6da76213ebd5ccc9561496568a2752afb6",
+        type = "tar.gz",
+        urls = ["https://static.crates.io/crates/windows_aarch64_msvc/0.52.5/download"],
+        strip_prefix = "windows_aarch64_msvc-0.52.5",
+        build_file = Label("@//third-party/bazel:BUILD.windows_aarch64_msvc-0.52.5.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "vendor__windows_i686_gnu-0.52.5",
+        sha256 = "88ba073cf16d5372720ec942a8ccbf61626074c6d4dd2e745299726ce8b89670",
+        type = "tar.gz",
+        urls = ["https://static.crates.io/crates/windows_i686_gnu/0.52.5/download"],
+        strip_prefix = "windows_i686_gnu-0.52.5",
+        build_file = Label("@//third-party/bazel:BUILD.windows_i686_gnu-0.52.5.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "vendor__windows_i686_gnullvm-0.52.5",
+        sha256 = "87f4261229030a858f36b459e748ae97545d6f1ec60e5e0d6a3d32e0dc232ee9",
+        type = "tar.gz",
+        urls = ["https://static.crates.io/crates/windows_i686_gnullvm/0.52.5/download"],
+        strip_prefix = "windows_i686_gnullvm-0.52.5",
+        build_file = Label("@//third-party/bazel:BUILD.windows_i686_gnullvm-0.52.5.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "vendor__windows_i686_msvc-0.52.5",
+        sha256 = "db3c2bf3d13d5b658be73463284eaf12830ac9a26a90c717b7f771dfe97487bf",
+        type = "tar.gz",
+        urls = ["https://static.crates.io/crates/windows_i686_msvc/0.52.5/download"],
+        strip_prefix = "windows_i686_msvc-0.52.5",
+        build_file = Label("@//third-party/bazel:BUILD.windows_i686_msvc-0.52.5.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "vendor__windows_x86_64_gnu-0.52.5",
+        sha256 = "4e4246f76bdeff09eb48875a0fd3e2af6aada79d409d33011886d3e1581517d9",
+        type = "tar.gz",
+        urls = ["https://static.crates.io/crates/windows_x86_64_gnu/0.52.5/download"],
+        strip_prefix = "windows_x86_64_gnu-0.52.5",
+        build_file = Label("@//third-party/bazel:BUILD.windows_x86_64_gnu-0.52.5.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "vendor__windows_x86_64_gnullvm-0.52.5",
+        sha256 = "852298e482cd67c356ddd9570386e2862b5673c85bd5f88df9ab6802b334c596",
+        type = "tar.gz",
+        urls = ["https://static.crates.io/crates/windows_x86_64_gnullvm/0.52.5/download"],
+        strip_prefix = "windows_x86_64_gnullvm-0.52.5",
+        build_file = Label("@//third-party/bazel:BUILD.windows_x86_64_gnullvm-0.52.5.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "vendor__windows_x86_64_msvc-0.52.5",
+        sha256 = "bec47e5bfd1bff0eeaf6d8b485cc1074891a197ab4225d504cb7a1ab88b02bf0",
+        type = "tar.gz",
+        urls = ["https://static.crates.io/crates/windows_x86_64_msvc/0.52.5/download"],
+        strip_prefix = "windows_x86_64_msvc-0.52.5",
+        build_file = Label("@//third-party/bazel:BUILD.windows_x86_64_msvc-0.52.5.bazel"),
     )
 
     return [
-        struct(repo = "vendor__cc-1.0.92", is_dev_dep = False),
+        struct(repo = "vendor__cc-1.0.97", is_dev_dep = False),
         struct(repo = "vendor__clap-4.5.4", is_dev_dep = False),
         struct(repo = "vendor__codespan-reporting-0.11.1", is_dev_dep = False),
         struct(repo = "vendor__once_cell-1.19.0", is_dev_dep = False),
-        struct(repo = "vendor__proc-macro2-1.0.79", is_dev_dep = False),
-        struct(repo = "vendor__quote-1.0.35", is_dev_dep = False),
+        struct(repo = "vendor__proc-macro2-1.0.82", is_dev_dep = False),
+        struct(repo = "vendor__quote-1.0.36", is_dev_dep = False),
         struct(repo = "vendor__scratch-1.0.7", is_dev_dep = False),
-        struct(repo = "vendor__syn-2.0.58", is_dev_dep = False),
+        struct(repo = "vendor__syn-2.0.61", is_dev_dep = False),
     ]

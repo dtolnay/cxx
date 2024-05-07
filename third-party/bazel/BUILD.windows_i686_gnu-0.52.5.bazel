@@ -12,7 +12,7 @@ load("@rules_rust//rust:defs.bzl", "rust_library")
 package(default_visibility = ["//visibility:public"])
 
 rust_library(
-    name = "proc_macro2",
+    name = "windows_i686_gnu",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = False,
@@ -29,11 +29,6 @@ rust_library(
             "WORKSPACE.bazel",
         ],
     ),
-    crate_features = [
-        "default",
-        "proc-macro",
-        "span-locations",
-    ],
     crate_root = "src/lib.rs",
     edition = "2021",
     rustc_flags = [
@@ -41,7 +36,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=proc-macro2",
+        "crate-name=windows_i686_gnu",
         "manual",
         "noclippy",
         "norustfmt",
@@ -83,24 +78,18 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-none": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "1.0.79",
+    version = "0.52.5",
     deps = [
-        "@vendor__proc-macro2-1.0.79//:build_script_build",
-        "@vendor__unicode-ident-1.0.12//:unicode_ident",
+        "@vendor__windows_i686_gnu-0.52.5//:build_script_build",
     ],
 )
 
 cargo_build_script(
-    name = "proc-macro2_bs",
+    name = "windows_i686_gnu_bs",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = False,
     ),
-    crate_features = [
-        "default",
-        "proc-macro",
-        "span-locations",
-    ],
     crate_name = "build_script_build",
     crate_root = "build.rs",
     data = glob(
@@ -121,17 +110,17 @@ cargo_build_script(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=proc-macro2",
+        "crate-name=windows_i686_gnu",
         "manual",
         "noclippy",
         "norustfmt",
     ],
-    version = "1.0.79",
+    version = "0.52.5",
     visibility = ["//visibility:private"],
 )
 
 alias(
     name = "build_script_build",
-    actual = ":proc-macro2_bs",
+    actual = ":windows_i686_gnu_bs",
     tags = ["manual"],
 )
