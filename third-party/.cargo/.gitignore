@@ -1,3 +1,4 @@
+/.global-cache
 /.package-cache
 /.package-cache-mutate
 /config.toml
