@@ -80,6 +80,6 @@ rust_library(
     version = "0.11.1",
     deps = [
         "@vendor__termcolor-1.4.1//:termcolor",
-        "@vendor__unicode-width-0.1.12//:unicode_width",
+        "@vendor__unicode-width-0.1.13//:unicode_width",
     ],
 )
