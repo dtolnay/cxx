@@ -532,7 +532,7 @@ using isize_if_unique =
     typename std::conditional<std::is_same<rust::isize, int64_t>::value ||
                                   std::is_same<rust::isize, int32_t>::value,
                               struct isize_ignore, rust::isize>::type;
-// Similarly, on some platforms char may just be an alias for [u]int8_t
+// Similarly, on some platforms char may just be an alias for [u]int8_t.
 using char_if_unique =
     typename std::conditional<std::is_same<char, uint8_t>::value ||
                                   std::is_same<char, int8_t>::value,
