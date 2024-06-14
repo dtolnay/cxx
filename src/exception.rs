@@ -3,7 +3,7 @@
 use alloc::boxed::Box;
 use core::fmt::{self, Display};
 
-#[cfg(all(feature = "std", not(no_core_error)))]
+#[cfg(not(no_core_error))]
 use core::error::Error as StdError;
 #[cfg(all(feature = "std", no_core_error))]
 use std::error::Error as StdError;
@@ -21,8 +21,7 @@ impl Display for Exception {
     }
 }
 
-#[cfg(feature = "std")]
-#[cfg_attr(docsrs, doc(cfg(feature = "std")))]
+#[cfg(any(not(no_core_error), feature = "std"))]
 impl StdError for Exception {}
 
 impl Exception {
