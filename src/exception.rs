@@ -3,9 +3,9 @@
 use alloc::boxed::Box;
 use core::fmt::{self, Display};
 
-#[cfg(not(no_core_error))]
+#[cfg(error_in_core)]
 use core::error::Error as StdError;
-#[cfg(all(feature = "std", no_core_error))]
+#[cfg(all(feature = "std", not(error_in_core)))]
 use std::error::Error as StdError;
 
 /// Exception thrown from an `extern "C++"` function.
@@ -21,7 +21,7 @@ impl Display for Exception {
     }
 }
 
-#[cfg(any(not(no_core_error), feature = "std"))]
+#[cfg(any(error_in_core, feature = "std"))]
 impl StdError for Exception {}
 
 impl Exception {
