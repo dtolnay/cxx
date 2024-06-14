@@ -11,7 +11,7 @@ load("@rules_rust//rust:defs.bzl", "rust_library")
 package(default_visibility = ["//visibility:public"])
 
 rust_library(
-    name = "clap_builder",
+    name = "clap",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = False,
@@ -41,7 +41,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=clap_builder",
+        "crate-name=clap",
         "manual",
         "noclippy",
         "norustfmt",
@@ -83,9 +83,8 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-none": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "4.5.2",
+    version = "4.5.7",
     deps = [
-        "@vendor__anstyle-1.0.7//:anstyle",
-        "@vendor__clap_lex-0.7.0//:clap_lex",
+        "@vendor__clap_builder-4.5.7//:clap_builder",
     ],
 )
