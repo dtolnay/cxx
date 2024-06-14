@@ -3,6 +3,11 @@
 use alloc::boxed::Box;
 use core::fmt::{self, Display};
 
+#[cfg(all(feature = "std", not(no_core_error)))]
+use core::error::Error as StdError;
+#[cfg(all(feature = "std", no_core_error))]
+use std::error::Error as StdError;
+
 /// Exception thrown from an `extern "C++"` function.
 #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 #[derive(Debug)]
@@ -18,7 +23,7 @@ impl Display for Exception {
 
 #[cfg(feature = "std")]
 #[cfg_attr(docsrs, doc(cfg(feature = "std")))]
-impl std::error::Error for Exception {}
+impl StdError for Exception {}
 
 impl Exception {
     #[allow(missing_docs)]
