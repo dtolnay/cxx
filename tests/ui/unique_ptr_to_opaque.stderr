@@ -11,11 +11,11 @@ note: expected this to be `Trivial`
    |
 8  |         type Kind = cxx::kind::Opaque;
    |                     ^^^^^^^^^^^^^^^^^
-note: required by a bound in `UniquePtr::<T>::new`
+note: required by a bound in `UniquePtr::<T, D>::new`
   --> src/unique_ptr.rs
    |
    |     pub fn new(value: T) -> Self
    |            --- required by a bound in this associated function
    |     where
    |         T: ExternType<Kind = Trivial>,
-   |                       ^^^^^^^^^^^^^^ required by this bound in `UniquePtr::<T>::new`
+   |                       ^^^^^^^^^^^^^^ required by this bound in `UniquePtr::<T, D>::new`

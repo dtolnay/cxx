@@ -19,9 +19,26 @@ pub mod cast;
 pub mod module;
 
 use cxx::{type_id, CxxString, CxxVector, ExternType, SharedPtr, UniquePtr};
+use std::ffi::c_void;
 use std::fmt::{self, Display};
 use std::mem::MaybeUninit;
 use std::os::raw::c_char;
+
+#[repr(C)]
+pub struct polymorphic_allocator {
+    memory_resource: *mut c_void,
+}
+
+#[repr(C)]
+pub struct PmrDeleterForC {
+    alloc: polymorphic_allocator,
+    deleter_callback: fn(),
+}
+
+unsafe impl ExternType for PmrDeleterForC {
+    type Id = type_id!("tests::PmrDeleterForC");
+    type Kind = cxx::kind::Trivial;
+}
 
 #[cxx::bridge(namespace = "tests")]
 pub mod ffi {
@@ -92,6 +109,10 @@ pub mod ffi {
         s: &'a str,
     }
 
+    extern "C++" {
+        type PmrDeleterForC = crate::PmrDeleterForC;
+    }
+
     unsafe extern "C++" {
         include!("tests/ffi/tests.h");
 
@@ -101,6 +122,7 @@ pub mod ffi {
         fn c_return_shared() -> Shared;
         fn c_return_box() -> Box<R>;
         fn c_return_unique_ptr() -> UniquePtr<C>;
+        fn c_return_unique_ptr_with_deleter() -> UniquePtr<C, PmrDeleterForC>;
         fn c_return_shared_ptr() -> SharedPtr<C>;
         fn c_return_ref(shared: &Shared) -> &usize;
         fn c_return_mut(shared: &mut Shared) -> &mut usize;
@@ -339,6 +361,7 @@ pub mod ffi {
     }
 
     impl Box<Shared> {}
+
     impl CxxVector<SharedString> {}
 }
 

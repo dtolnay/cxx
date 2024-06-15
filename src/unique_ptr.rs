@@ -9,61 +9,119 @@ use core::marker::PhantomData;
 use core::mem::{self, MaybeUninit};
 use core::ops::{Deref, DerefMut};
 use core::pin::Pin;
+use cxx::type_id;
 
-/// Binding to C++ `std::unique_ptr<T, std::default_delete<T>>`.
+/// Rust representation of the default deleter of std::unique_ptr, `std::default_delete<T>`
+#[derive(Default, Copy, Clone, Debug)]
 #[repr(C)]
-pub struct UniquePtr<T>
-where
-    T: UniquePtrTarget,
-{
+pub struct DefaultDeleter([u8; 0]);
+
+unsafe impl ExternType for DefaultDeleter {
+    type Id = type_id!("std::default_delete");
+    type Kind = Trivial;
+}
+
+#[cfg(not(target_os = "macos"))]
+#[repr(C)]
+struct UniquePtrInner<T, D> {
+    deleter: D,
     repr: MaybeUninit<*mut c_void>,
     ty: PhantomData<T>,
 }
 
-impl<T> UniquePtr<T>
+#[cfg(target_os = "macos")]
+#[repr(C)]
+struct UniquePtrInner<T, D> {
+    repr: MaybeUninit<*mut c_void>,
+    deleter: D,
+    ty: PhantomData<T>,
+}
+
+/// Binding to C++ `std::unique_ptr<T, D>`.
+///
+/// This representation assumes that the deleter is
+/// 1. the first member of the smart pointer.
+/// 2. optimized away by some form of empty base class optimization in case the deleter is stateless
+///    (which is the case for the default deleter). For this, a zero-sized type is used on the Rust
+///    side.
+/// 3. trivial to copy and move. This is trivially true for all stateless deleters as well as
+///    deleters that just contain references/pointers (e.g. when using an std::pmr::memory_resource)
+#[repr(transparent)]
+pub struct UniquePtr<T, D = DefaultDeleter>
 where
-    T: UniquePtrTarget,
+    T: UniquePtrTarget<D>,
+    D: ExternType<Kind = Trivial>,
 {
-    /// Makes a new UniquePtr wrapping a null pointer.
-    ///
-    /// Matches the behavior of default-constructing a std::unique\_ptr.
-    pub fn null() -> Self {
+    inner: UniquePtrInner<T, D>,
+}
+
+impl<T, D> UniquePtr<T, D>
+where
+    T: UniquePtrTarget<D>,
+    D: ExternType<Kind = Trivial>,
+{
+    fn make_ptr(repr: MaybeUninit<*mut c_void>, deleter: D) -> Self {
         UniquePtr {
-            repr: T::__null(),
-            ty: PhantomData,
+            inner: UniquePtrInner {
+                deleter,
+                repr,
+                ty: PhantomData,
+            },
         }
     }
 
+    /// Makes a new UniquePtr wrapping a null pointer.
+    ///
+    /// Matches the behavior of default-constructing a std::unique\_ptr.
+    pub fn null() -> Self
+    where
+        D: Default,
+    {
+        UniquePtr::make_ptr(T::__null(), D::default())
+    }
+
     /// Allocates memory on the heap and makes a UniquePtr pointing to it.
+    ///
+    /// The deleter will be default-constructed. Please note that the memory is allocated using
+    /// operator ::new. The deleter needs to be able to handle such a pointer on deletion.
     pub fn new(value: T) -> Self
     where
         T: ExternType<Kind = Trivial>,
+        D: Default,
     {
-        UniquePtr {
-            repr: T::__new(value),
-            ty: PhantomData,
-        }
+        UniquePtr::make_ptr(T::__new(value), D::default())
+    }
+
+    /// Allocates memory on the heap and makes a UniquePtr pointing to it.
+    ///
+    /// Please note that the memory is allocated using operator ::new. The deleter needs to be able
+    /// to handle such a pointer on deletion.
+    pub fn with_deleter(value: T, deleter: D) -> Self
+    where
+        T: ExternType<Kind = Trivial>,
+    {
+        UniquePtr::make_ptr(T::__new(value), deleter)
     }
 
     /// Checks whether the UniquePtr does not own an object.
     ///
     /// This is the opposite of [std::unique_ptr\<T\>::operator bool](https://en.cppreference.com/w/cpp/memory/unique_ptr/operator_bool).
     pub fn is_null(&self) -> bool {
-        let ptr = unsafe { T::__get(self.repr) };
+        let ptr = unsafe { T::__get(self.inner.repr) };
         ptr.is_null()
     }
 
     /// Returns a reference to the object owned by this UniquePtr if any,
     /// otherwise None.
     pub fn as_ref(&self) -> Option<&T> {
-        unsafe { T::__get(self.repr).as_ref() }
+        unsafe { T::__get(self.inner.repr).as_ref() }
     }
 
     /// Returns a mutable pinned reference to the object owned by this UniquePtr
     /// if any, otherwise None.
     pub fn as_mut(&mut self) -> Option<Pin<&mut T>> {
         unsafe {
-            let mut_reference = (T::__get(self.repr) as *mut T).as_mut()?;
+            let mut_reference = (T::__get(self.inner.repr) as *mut T).as_mut()?;
             Some(Pin::new_unchecked(mut_reference))
         }
     }
@@ -88,7 +146,7 @@ where
     ///
     /// Matches the behavior of [std::unique_ptr\<T\>::release](https://en.cppreference.com/w/cpp/memory/unique_ptr/release).
     pub fn into_raw(self) -> *mut T {
-        let ptr = unsafe { T::__release(self.repr) };
+        let ptr = unsafe { T::__release(self.inner.repr) };
         mem::forget(self);
         ptr
     }
@@ -100,34 +158,72 @@ where
     ///
     /// This function is unsafe because improper use may lead to memory
     /// problems. For example a double-free may occur if the function is called
-    /// twice on the same raw pointer.
-    pub unsafe fn from_raw(raw: *mut T) -> Self {
-        UniquePtr {
-            repr: unsafe { T::__raw(raw) },
-            ty: PhantomData,
-        }
+    /// twice on the same raw pointer. In addition, the caller must make sure
+    /// that the used deleter is able to handle the given pointer when default
+    /// constructed.
+    pub unsafe fn from_raw(raw: *mut T) -> Self
+    where
+        D: Default,
+    {
+        UniquePtr::make_ptr(unsafe { T::__raw(raw) }, D::default())
+    }
+
+    /// Constructs a UniquePtr retaking ownership of a pointer previously
+    /// obtained from `into_raw`.
+    ///
+    /// # Safety
+    ///
+    /// This function is unsafe because improper use may lead to memory
+    /// problems. For example a double-free may occur if the function is called
+    /// twice on the same raw pointer. In addition, the given deleter needs to
+    /// be able to handle the pointer.
+    pub unsafe fn from_raw_with_deleter(raw: *mut T, deleter: D) -> Self {
+        UniquePtr::make_ptr(unsafe { T::__raw(raw) }, deleter)
+    }
+
+    /// Returns a reference to the deleter used during destruction or releasing of the pointee.
+    pub fn get_deleter(&self) -> &D {
+        &self.inner.deleter
     }
 }
 
-unsafe impl<T> Send for UniquePtr<T> where T: Send + UniquePtrTarget {}
-unsafe impl<T> Sync for UniquePtr<T> where T: Sync + UniquePtrTarget {}
+unsafe impl<T, D> Send for UniquePtr<T, D>
+where
+    T: Send + UniquePtrTarget<D>,
+    D: Send + ExternType<Kind = Trivial>,
+{
+}
+
+unsafe impl<T, D> Sync for UniquePtr<T, D>
+where
+    T: Sync + UniquePtrTarget<D>,
+    D: Sync + ExternType<Kind = Trivial>,
+{
+}
 
 // UniquePtr is not a self-referential type and is safe to move out of a Pin,
 // regardless whether the pointer's target is Unpin.
-impl<T> Unpin for UniquePtr<T> where T: UniquePtrTarget {}
-
-impl<T> Drop for UniquePtr<T>
+impl<T, D> Unpin for UniquePtr<T, D>
 where
-    T: UniquePtrTarget,
+    T: UniquePtrTarget<D>,
+    D: Unpin + ExternType<Kind = Trivial>,
+{
+}
+
+impl<T, D> Drop for UniquePtr<T, D>
+where
+    T: UniquePtrTarget<D>,
+    D: ExternType<Kind = Trivial>,
 {
     fn drop(&mut self) {
-        unsafe { T::__drop(self.repr) }
+        unsafe { T::__drop(self) }
     }
 }
 
-impl<T> Deref for UniquePtr<T>
+impl<T, D> Deref for UniquePtr<T, D>
 where
-    T: UniquePtrTarget,
+    T: UniquePtrTarget<D>,
+    D: ExternType<Kind = Trivial>,
 {
     type Target = T;
 
@@ -142,9 +238,10 @@ where
     }
 }
 
-impl<T> DerefMut for UniquePtr<T>
+impl<T, D> DerefMut for UniquePtr<T, D>
 where
-    T: UniquePtrTarget + Unpin,
+    T: UniquePtrTarget<D> + Unpin,
+    D: ExternType<Kind = Trivial>,
 {
     fn deref_mut(&mut self) -> &mut Self::Target {
         match self.as_mut() {
@@ -157,9 +254,10 @@ where
     }
 }
 
-impl<T> Debug for UniquePtr<T>
+impl<T, D> Debug for UniquePtr<T, D>
 where
-    T: Debug + UniquePtrTarget,
+    T: Debug + UniquePtrTarget<D>,
+    D: ExternType<Kind = Trivial>,
 {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self.as_ref() {
@@ -169,9 +267,10 @@ where
     }
 }
 
-impl<T> Display for UniquePtr<T>
+impl<T, D> Display for UniquePtr<T, D>
 where
-    T: Display + UniquePtrTarget,
+    T: Display + UniquePtrTarget<D>,
+    D: ExternType<Kind = Trivial>,
 {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match self.as_ref() {
@@ -206,7 +305,7 @@ where
 ///
 /// Writing the same generic function without a `UniquePtrTarget` trait bound
 /// would not compile.
-pub unsafe trait UniquePtrTarget {
+pub unsafe trait UniquePtrTarget<D = DefaultDeleter> {
     #[doc(hidden)]
     fn __typename(f: &mut fmt::Formatter) -> fmt::Result;
     #[doc(hidden)]
@@ -228,7 +327,10 @@ pub unsafe trait UniquePtrTarget {
     #[doc(hidden)]
     unsafe fn __release(repr: MaybeUninit<*mut c_void>) -> *mut Self;
     #[doc(hidden)]
-    unsafe fn __drop(repr: MaybeUninit<*mut c_void>);
+    unsafe fn __drop(ptr: &mut UniquePtr<Self, D>)
+    where
+        Self: Sized,
+        D: ExternType<Kind = Trivial>;
 }
 
 extern "C" {
@@ -266,8 +368,11 @@ unsafe impl UniquePtrTarget for CxxString {
     unsafe fn __release(mut repr: MaybeUninit<*mut c_void>) -> *mut Self {
         unsafe { unique_ptr_std_string_release(&mut repr) }
     }
-    unsafe fn __drop(mut repr: MaybeUninit<*mut c_void>) {
-        unsafe { unique_ptr_std_string_drop(&mut repr) }
+    unsafe fn __drop(ptr: &mut UniquePtr<Self>)
+    where
+        Self: Sized,
+    {
+        unsafe { unique_ptr_std_string_drop(&mut ptr.inner.repr) }
     }
 }
 
@@ -290,7 +395,10 @@ where
     unsafe fn __release(repr: MaybeUninit<*mut c_void>) -> *mut Self {
         unsafe { T::__unique_ptr_release(repr) }
     }
-    unsafe fn __drop(repr: MaybeUninit<*mut c_void>) {
-        unsafe { T::__unique_ptr_drop(repr) }
+    unsafe fn __drop(ptr: &mut UniquePtr<Self>)
+    where
+        Self: Sized,
+    {
+        unsafe { T::__unique_ptr_drop(ptr.inner.repr) }
     }
 }
