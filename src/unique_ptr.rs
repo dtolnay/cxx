@@ -84,6 +84,14 @@ where
         }
     }
 
+    /// Converts a `UniquePtr<T>` into a `Pin<UniquePtr<T>>`.
+    ///
+    /// If `T` does not implement `Unpin`, then `*self` will be pinned in
+    /// memory and unable to move.
+    pub fn into_pin(self) -> Pin<Self> {
+        unsafe { Pin::new_unchecked(self) }
+    }
+
     /// Consumes the UniquePtr, releasing its ownership of the heap-allocated T.
     ///
     /// Matches the behavior of [std::unique_ptr\<T\>::release](https://en.cppreference.com/w/cpp/memory/unique_ptr/release).
