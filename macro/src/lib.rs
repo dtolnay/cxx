@@ -9,6 +9,7 @@
     clippy::into_iter_without_iter,
     clippy::items_after_statements,
     clippy::large_enum_variant,
+    clippy::manual_let_else,
     clippy::match_bool,
     clippy::match_same_arms,
     clippy::module_name_repetitions,

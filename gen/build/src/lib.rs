@@ -58,6 +58,7 @@
     clippy::inherent_to_string,
     clippy::into_iter_without_iter,
     clippy::items_after_statements,
+    clippy::manual_let_else,
     clippy::match_bool,
     clippy::match_on_vec_items,
     clippy::match_same_arms,
