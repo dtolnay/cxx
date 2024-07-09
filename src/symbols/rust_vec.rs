@@ -1,9 +1,9 @@
 #![cfg(feature = "alloc")]
 
-use crate::c_char::c_char;
 use crate::rust_string::RustString;
 use crate::rust_vec::RustVec;
 use alloc::vec::Vec;
+use core::ffi::c_char;
 use core::mem;
 use core::ptr;
 

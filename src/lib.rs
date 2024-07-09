@@ -449,7 +449,6 @@ compile_error! {
 #[macro_use]
 mod macros;
 
-mod c_char;
 mod cxx_vector;
 mod exception;
 mod extern_type;
@@ -504,7 +503,6 @@ pub type Vector<T> = CxxVector<T>;
 // Not public API.
 #[doc(hidden)]
 pub mod private {
-    pub use crate::c_char::c_char;
     pub use crate::cxx_vector::VectorElement;
     pub use crate::extern_type::{verify_extern_kind, verify_extern_type};
     pub use crate::function::FatFunction;
