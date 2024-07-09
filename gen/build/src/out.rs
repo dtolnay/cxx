@@ -157,9 +157,8 @@ fn best_effort_relativize_symlink(original: impl AsRef<Path>, link: impl AsRef<P
     let original = original.as_ref();
     let link = link.as_ref();
 
-    let relative_path = match abstractly_relativize_symlink(original, link) {
-        Some(relative_path) => relative_path,
-        None => return original.to_path_buf(),
+    let Some(relative_path) = abstractly_relativize_symlink(original, link) else {
+        return original.to_path_buf();
     };
 
     // Sometimes "a/b/../c" refers to a different canonical location than "a/c".

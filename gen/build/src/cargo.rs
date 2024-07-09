@@ -51,13 +51,11 @@ impl CargoEnv {
         let mut features = Set::new();
         let mut cfgs = Map::new();
         for (k, v) in env::vars_os() {
-            let k = match k.to_str() {
-                Some(k) => k,
-                None => continue,
+            let Some(k) = k.to_str() else {
+                continue;
             };
-            let v = match v.into_string() {
-                Ok(v) => v,
-                Err(_) => continue,
+            let Ok(v) = v.into_string() else {
+                continue;
             };
             if let Some(feature_name) = k.strip_prefix(CARGO_FEATURE_PREFIX) {
                 let feature_name = Name(feature_name.to_owned());

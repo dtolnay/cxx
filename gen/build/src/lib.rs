@@ -58,7 +58,6 @@
     clippy::inherent_to_string,
     clippy::into_iter_without_iter,
     clippy::items_after_statements,
-    clippy::manual_let_else,
     clippy::match_bool,
     clippy::match_on_vec_items,
     clippy::match_same_arms,
@@ -435,9 +434,8 @@ fn best_effort_copy_headers(src: &Path, dst: &Path, max_depth: usize) {
     use std::fs;
 
     let mut dst_created = false;
-    let mut entries = match fs::read_dir(src) {
-        Ok(entries) => entries,
-        Err(_) => return,
+    let Ok(mut entries) = fs::read_dir(src) else {
+        return;
     };
 
     while let Some(Ok(entry)) = entries.next() {
