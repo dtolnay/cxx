@@ -3,7 +3,8 @@ use crate::syntax::report::Errors;
 use crate::syntax::visit::{self, Visit};
 use crate::syntax::{
     error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Lifetimes,
-    NamedType, Ptr, Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
+    NamedType, Ptr, Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Ty2, Type, TypeAlias,
+    Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
@@ -138,8 +139,8 @@ fn check_type_rust_vec(cx: &mut Check, ty: &Ty1) {
     cx.error(ty, "unsupported element type of Vec");
 }
 
-fn check_type_unique_ptr(cx: &mut Check, ptr: &Ty1) {
-    if let Type::Ident(ident) = &ptr.inner {
+fn check_type_unique_ptr(cx: &mut Check, ptr: &Ty2) {
+    if let Type::Ident(ident) = &ptr.first {
         if cx.types.rust.contains(&ident.rust) {
             cx.error(ptr, "unique_ptr of a Rust type is not supported yet");
             return;
@@ -149,7 +150,7 @@ fn check_type_unique_ptr(cx: &mut Check, ptr: &Ty1) {
             None | Some(CxxString) => return,
             _ => {}
         }
-    } else if let Type::CxxVector(_) = &ptr.inner {
+    } else if let Type::CxxVector(_) = &ptr.first {
         return;
     }
 
@@ -523,11 +524,17 @@ fn check_api_impl(cx: &mut Check, imp: &Impl) {
     match ty {
         Type::RustBox(ty)
         | Type::RustVec(ty)
-        | Type::UniquePtr(ty)
         | Type::SharedPtr(ty)
         | Type::WeakPtr(ty)
         | Type::CxxVector(ty) => {
             if let Type::Ident(inner) = &ty.inner {
+                if Atom::from(&inner.rust).is_none() {
+                    return;
+                }
+            }
+        }
+        Type::UniquePtr(ty) => {
+            if let Type::Ident(inner) = &ty.first {
                 if Atom::from(&inner.rust).is_none() {
                     return;
                 }

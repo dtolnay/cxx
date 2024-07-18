@@ -13,11 +13,11 @@ where
     match ty {
         Type::Ident(_) | Type::Str(_) | Type::Void(_) => {}
         Type::RustBox(ty)
-        | Type::UniquePtr(ty)
         | Type::SharedPtr(ty)
         | Type::WeakPtr(ty)
         | Type::CxxVector(ty)
         | Type::RustVec(ty) => visitor.visit_type(&ty.inner),
+        Type::UniquePtr(ty) => visitor.visit_type(&ty.first),
         Type::Ref(r) => visitor.visit_type(&r.inner),
         Type::Ptr(p) => visitor.visit_type(&p.inner),
         Type::Array(a) => visitor.visit_type(&a.inner),
