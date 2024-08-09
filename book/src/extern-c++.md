@@ -286,6 +286,33 @@ value, and include it in `struct`s that you have declared to `cxx::bridge`. Your
 claim about the triviality of the C++ type will be checked by a `static_assert`
 in the generated C++ side of the binding.
 
+### Handling renamed or aliased types
+
+By default, the name of an Extern C++ type must match the `Id` of the Rust
+type's `ExternType` impl. For example, a `i32` in Rust may only be used as a
+`std::int32_t` in C++.
+
+In the case where a single Rust type maps to multiple C++ types, or a different
+type than in its `ExternType` impl, then you can use the `#[renamed]` attribute
+in the `extern "C++"` block to indicate that the type is intentionally renamed.
+
+For example, if we wanted to call an extern C++ function called `may_fail` that
+returns a Windows-style `HRESULT` and we wanted to use the name `HRESULT` in the
+Rust definition to note that the return value is a result and not a general
+number, then we can add `#[renamed]` to the type alias:
+
+```rust,noplayground
+#[cxx::bridge]
+mod ffi {
+    extern "C++" {
+        #[renamed]
+        type HRESULT = i32;
+
+        fn may_fail() -> HRESULT;
+    }
+}
+```
+
 ## Explicit shim trait impls
 
 This is a somewhat niche feature, but important when you need it.
