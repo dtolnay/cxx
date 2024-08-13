@@ -884,6 +884,12 @@ extern "C" const char *cxx_run_test() noexcept {
   rust::String bad_utf16_rstring = rust::String::lossy(bad_utf16_literal);
   ASSERT(bad_utf8_rstring == bad_utf16_rstring);
 
+  std::vector<int> cpp_vec{1, 2, 3};
+  rust::Slice<int> slice_of_cpp_vec(cpp_vec);
+  ASSERT(slice_of_cpp_vec.data() == cpp_vec.data());
+  ASSERT(slice_of_cpp_vec.size() == cpp_vec.size());
+  ASSERT(slice_of_cpp_vec[0] == 1);
+
   rust::Vec<int> vec1{1, 2};
   rust::Vec<int> vec2{3, 4};
   swap(vec1, vec2);
