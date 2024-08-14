@@ -1,13 +1,13 @@
-use crate::syntax::{NamedType, Ty1, Type};
+use crate::syntax::{NamedType, Ty1, Ty2, Type};
 use proc_macro2::{Ident, Span};
 use std::hash::{Hash, Hasher};
-use syn::Token;
+use syn::{Lifetime, Token, punctuated::Punctuated};
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum ImplKey<'a> {
     RustBox(NamedImplKey<'a>),
     RustVec(NamedImplKey<'a>),
-    UniquePtr(NamedImplKey<'a>),
+    UniquePtr(NamedImplKey<'a>, Option<&'a Ident>),
     SharedPtr(NamedImplKey<'a>),
     WeakPtr(NamedImplKey<'a>),
     CxxVector(NamedImplKey<'a>),
@@ -20,6 +20,8 @@ pub(crate) struct NamedImplKey<'a> {
     pub rust: &'a Ident,
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
     pub lt_token: Option<Token![<]>,
+    #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
+    pub lifetimes: &'a Punctuated<Lifetime, Token![,]>,
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
     pub gt_token: Option<Token![>]>,
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
@@ -37,8 +39,18 @@ impl Type {
                 return Some(ImplKey::RustVec(NamedImplKey::new(ty, ident)));
             }
         } else if let Type::UniquePtr(ty) = self {
-            if let Type::Ident(ident) = &ty.inner {
-                return Some(ImplKey::UniquePtr(NamedImplKey::new(ty, ident)));
+            let deleter = ty.second.as_ref().and_then(|ty| {
+                if let Type::Ident(ident) = ty {
+                    Some(&ident.rust)
+                } else {
+                    None
+                }
+            });
+            if let Type::Ident(ident) = &ty.first {
+                return Some(ImplKey::UniquePtr(
+                    NamedImplKey::new_ty2(ty, ident),
+                    deleter,
+                ));
             }
         } else if let Type::SharedPtr(ty) = self {
             if let Type::Ident(ident) = &ty.inner {
@@ -77,6 +89,18 @@ impl<'a> NamedImplKey<'a> {
             begin_span: outer.name.span(),
             rust: &inner.rust,
             lt_token: inner.generics.lt_token,
+            lifetimes: &inner.generics.lifetimes,
+            gt_token: inner.generics.gt_token,
+            end_span: outer.rangle.span,
+        }
+    }
+
+    fn new_ty2(outer: &Ty2, inner: &'a NamedType) -> Self {
+        NamedImplKey {
+            begin_span: outer.name.span(),
+            rust: &inner.rust,
+            lt_token: inner.generics.lt_token,
+            lifetimes: &inner.generics.lifetimes,
             gt_token: inner.generics.gt_token,
             end_span: outer.rangle.span,
         }
