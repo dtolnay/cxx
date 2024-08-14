@@ -65,8 +65,8 @@
     "https://bcr.bazel.build/modules/rules_go/0.39.1/source.json": "f21e042154010ae2c944ab230d572b17d71cdb27c5255806d61df6ccaed4354c",
     "https://bcr.bazel.build/modules/rules_java/4.0.0/MODULE.bazel": "5a78a7ae82cd1a33cef56dc578c7d2a46ed0dca12643ee45edbb8417899e6f74",
     "https://bcr.bazel.build/modules/rules_java/5.3.5/MODULE.bazel": "a4ec4f2db570171e3e5eb753276ee4b389bae16b96207e9d3230895c99644b86",
-    "https://bcr.bazel.build/modules/rules_java/7.6.1/MODULE.bazel": "2f14b7e8a1aa2f67ae92bc69d1ec0fa8d9f827c4e17ff5e5f02e91caa3b2d0fe",
-    "https://bcr.bazel.build/modules/rules_java/7.6.1/source.json": "8f3f3076554e1558e8e468b2232991c510ecbcbed9e6f8c06ac31c93bcf38362",
+    "https://bcr.bazel.build/modules/rules_java/7.6.5/MODULE.bazel": "481164be5e02e4cab6e77a36927683263be56b7e36fef918b458d7a8a1ebadb1",
+    "https://bcr.bazel.build/modules/rules_java/7.6.5/source.json": "a805b889531d1690e3c72a7a7e47a870d00323186a9904b36af83aa3d053ee8d",
     "https://bcr.bazel.build/modules/rules_jvm_external/4.4.2/MODULE.bazel": "a56b85e418c83eb1839819f0b515c431010160383306d13ec21959ac412d2fe7",
     "https://bcr.bazel.build/modules/rules_jvm_external/4.4.2/source.json": "a075731e1b46bc8425098512d038d416e966ab19684a10a34f4741295642fc35",
     "https://bcr.bazel.build/modules/rules_license/0.0.3/MODULE.bazel": "627e9ab0247f7d1e05736b59dbb1b6871373de5ad31c3011880b4133cafd4bd0",
@@ -85,8 +85,8 @@
     "https://bcr.bazel.build/modules/rules_python/0.22.1/MODULE.bazel": "26114f0c0b5e93018c0c066d6673f1a2c3737c7e90af95eff30cfee38d0bbac7",
     "https://bcr.bazel.build/modules/rules_python/0.22.1/source.json": "57226905e783bae7c37c2dd662be078728e48fa28ee4324a7eabcafb5a43d014",
     "https://bcr.bazel.build/modules/rules_python/0.4.0/MODULE.bazel": "9208ee05fd48bf09ac60ed269791cf17fb343db56c8226a720fbb1cdf467166c",
-    "https://bcr.bazel.build/modules/rules_rust/0.49.0/MODULE.bazel": "27cdce7872632cacfb393b79336a37642b50421ffef095760baae7b9057792cf",
-    "https://bcr.bazel.build/modules/rules_rust/0.49.0/source.json": "5fbd9a633b74d8ea9484b4f073d305f763e4572755e0b419127bccf0268eab49",
+    "https://bcr.bazel.build/modules/rules_rust/0.49.1/MODULE.bazel": "b9687abc62fcaa8891c17cea412e044b4a6c84dab81b9decc7d02319ea7946f1",
+    "https://bcr.bazel.build/modules/rules_rust/0.49.1/source.json": "176c9d73779a5edb8e4f66ee13f527b98099ca97f47e4eed2e8dc541dc46e1b7",
     "https://bcr.bazel.build/modules/stardoc/0.5.0/MODULE.bazel": "f9f1f46ba8d9c3362648eea571c6f9100680efc44913618811b58cc9c02cd678",
     "https://bcr.bazel.build/modules/stardoc/0.5.1/MODULE.bazel": "1a05d92974d0c122f5ccf09291442580317cdd859f07a8655f1db9a60374f9f8",
     "https://bcr.bazel.build/modules/stardoc/0.5.4/MODULE.bazel": "6569966df04610b8520957cb8e97cf2e9faac2c0309657c537ab51c16c18a2a4",
@@ -95,8 +95,8 @@
     "https://bcr.bazel.build/modules/upb/0.0.0-20220923-a547704/source.json": "f1ef7d3f9e0e26d4b23d1c39b5f5de71f584dd7d1b4ef83d9bbba6ec7a6a6459",
     "https://bcr.bazel.build/modules/zlib/1.2.11/MODULE.bazel": "07b389abc85fdbca459b69e2ec656ae5622873af3f845e1c9d80fe179f3effa0",
     "https://bcr.bazel.build/modules/zlib/1.2.12/MODULE.bazel": "3b1a8834ada2a883674be8cbd36ede1b6ec481477ada359cd2d3ddc562340b27",
-    "https://bcr.bazel.build/modules/zlib/1.3/MODULE.bazel": "6a9c02f19a24dcedb05572b2381446e27c272cd383aed11d41d99da9e3167a72",
-    "https://bcr.bazel.build/modules/zlib/1.3/source.json": "b6b43d0737af846022636e6e255fd4a96fee0d34f08f3830e6e0bac51465c37c"
+    "https://bcr.bazel.build/modules/zlib/1.3.1.bcr.3/MODULE.bazel": "af322bc08976524477c79d1e45e241b6efbeb918c497e8840b8ab116802dda79",
+    "https://bcr.bazel.build/modules/zlib/1.3.1.bcr.3/source.json": "2be409ac3c7601245958cd4fcdff4288be79ed23bd690b4b951f500d54ee6e7d"
   },
   "selectedYankedVersions": {},
   "moduleExtensions": {
@@ -1056,8 +1056,8 @@
     },
     "@@rules_rust~//rust:extensions.bzl%rust": {
       "general": {
-        "bzlTransitiveDigest": "ElG2ZYiKrbj/hi+Ta4XnIhNXK+1Y5Kggs+WL938dcq0=",
-        "usagesDigest": "U1ramLpW34oozaXbW+0tfhH7XlKaX91L5HXPjD18K2s=",
+        "bzlTransitiveDigest": "BLdGslS4M0cpDNOMVhWoJqBVkGfcEmJU74B4QI6fV2w=",
+        "usagesDigest": "9nncUUlbPFNazA/z0xxdQQ6agEq6xKM7gyUDAIsQuDo=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -2643,8 +2643,8 @@
     },
     "@@rules_rust~//rust/private:extensions.bzl%i": {
       "general": {
-        "bzlTransitiveDigest": "TkcNgr5FW7AgE4KGKmk+bECpAcefSuTM4v0+3abmzCI=",
-        "usagesDigest": "R9TyACisLZbaeZXPbScsyWHQyca6juEfjWIvFMoXu+I=",
+        "bzlTransitiveDigest": "9SGldd38PHYuYHvXHTTca4jSoCf/EHOU+L1ztik3FBU=",
+        "usagesDigest": "G2MQN/io1m6/q/SiBTjnPO5LDNPn2CBtP77/wXWGbB8=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
