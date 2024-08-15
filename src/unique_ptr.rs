@@ -9,9 +9,8 @@ use core::marker::PhantomData;
 use core::mem::{self, MaybeUninit};
 use core::ops::{Deref, DerefMut};
 use core::pin::Pin;
-
 #[cfg(feature = "std")]
-use std::io::Read;
+use std::io::{self, Read};
 
 /// Binding to C++ `std::unique_ptr<T, std::default_delete<T>>`.
 #[repr(C)]
@@ -184,8 +183,9 @@ where
     }
 }
 
-/// Forwarding `Read` trait implementation in a manner similar to `Box<T>`.  Note that the
-/// implementation will panic for null `UniquePtr<T>`.
+/// Forwarding `Read` trait implementation in a manner similar to `Box<T>`.
+///
+/// Note that the implementation will panic for null `UniquePtr<T>`.
 #[cfg(feature = "std")]
 impl<T> Read for UniquePtr<T>
 where
@@ -193,22 +193,22 @@ where
     T: UniquePtrTarget,
 {
     #[inline]
-    fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+    fn read(&mut self, buf: &mut [u8]) -> io::Result<usize> {
         self.pin_mut().read(buf)
     }
 
     #[inline]
-    fn read_to_end(&mut self, buf: &mut std::vec::Vec<u8>) -> std::io::Result<usize> {
+    fn read_to_end(&mut self, buf: &mut std::vec::Vec<u8>) -> io::Result<usize> {
         self.pin_mut().read_to_end(buf)
     }
 
     #[inline]
-    fn read_to_string(&mut self, buf: &mut std::string::String) -> std::io::Result<usize> {
+    fn read_to_string(&mut self, buf: &mut std::string::String) -> io::Result<usize> {
         self.pin_mut().read_to_string(buf)
     }
 
     #[inline]
-    fn read_exact(&mut self, buf: &mut [u8]) -> std::io::Result<()> {
+    fn read_exact(&mut self, buf: &mut [u8]) -> io::Result<()> {
         self.pin_mut().read_exact(buf)
     }
 
