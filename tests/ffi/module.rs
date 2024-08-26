@@ -21,6 +21,8 @@ pub mod ffi2 {
         include!("tests/ffi/tests.h");
 
         type D = crate::other::D;
+        #[renamed]
+        type DRenamed = crate::other::DRenamed;
         type E = crate::other::E;
         #[namespace = "F"]
         type F = crate::other::f::F;
@@ -29,6 +31,9 @@ pub mod ffi2 {
 
         #[namespace = "H"]
         type H;
+
+        #[renamed]
+        type Int64Alias = i64;
 
         fn c_take_trivial_ptr(d: UniquePtr<D>);
         fn c_take_trivial_ref(d: &D);
@@ -56,6 +61,7 @@ pub mod ffi2 {
         fn c_return_ns_opaque_ptr() -> UniquePtr<F>;
         fn c_return_ns_unique_ptr() -> UniquePtr<H>;
         fn c_take_ref_ns_c(h: &H);
+        fn c_take_renamed(d: DRenamed, val: Int64Alias);
 
         #[namespace = "other"]
         fn ns_c_take_trivial(d: D);

@@ -36,6 +36,7 @@ pub(crate) struct Parser<'a> {
     pub cxx_name: Option<&'a mut Option<ForeignName>>,
     pub rust_name: Option<&'a mut Option<Ident>>,
     pub variants_from_header: Option<&'a mut Option<Attribute>>,
+    pub is_renamed: Option<&'a mut bool>,
     pub ignore_unrecognized: bool,
 
     // Suppress clippy needless_update lint ("struct update has no effect, all
@@ -152,6 +153,19 @@ pub(crate) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) 
             if let Some(variants_from_header) = &mut parser.variants_from_header {
                 **variants_from_header = Some(attr);
                 continue;
+            }
+        } else if attr_path.is_ident("renamed") {
+            match parse_renamed_attribute(&attr.meta) {
+                Ok(_) => {
+                    if let Some(is_renamed) = &mut parser.is_renamed {
+                        **is_renamed = true;
+                        continue;
+                    }
+                }
+                Err(err) => {
+                    cx.push(err);
+                    break;
+                }
             }
         } else if attr_path.is_ident("allow")
             || attr_path.is_ident("warn")
@@ -280,6 +294,14 @@ fn parse_rust_name_attribute(meta: &Meta) -> Result<Ident> {
         }
     }
     Err(Error::new_spanned(meta, "unsupported rust_name attribute"))
+}
+
+fn parse_renamed_attribute(meta: &Meta) -> Result<()> {
+    if let Meta::Path(_) = meta {
+        Ok(())
+    } else {
+        Err(Error::new_spanned(meta, "unsupported renamed attribute"))
+    }
 }
 
 #[derive(Clone)]

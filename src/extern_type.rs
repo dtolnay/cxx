@@ -184,6 +184,9 @@ mod private {
 pub fn verify_extern_type<T: ExternType<Id = Id>, Id>() {}
 
 #[doc(hidden)]
+pub fn verify_extern_type_renamed<T: ExternType>() {}
+
+#[doc(hidden)]
 pub fn verify_extern_kind<T: ExternType<Kind = Kind>, Kind: self::Kind>() {}
 
 macro_rules! impl_extern_type {

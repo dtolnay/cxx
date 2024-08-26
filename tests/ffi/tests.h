@@ -64,6 +64,8 @@ struct D {
   void c_take_trivial_ref_method() const;
   void c_take_trivial_mut_ref_method();
 };
+using DRenamed = D;
+using Int64Alias = uint64_t;
 
 struct E {
   uint64_t e;
@@ -196,6 +198,8 @@ void c_take_trivial_mut_ref(D &d);
 void c_take_trivial_pin_ref(const D &d);
 void c_take_trivial_pin_mut_ref(D &d);
 void c_take_trivial(D d);
+
+void c_take_renamed(D d, Int64Alias val);
 
 void c_take_trivial_ns_ptr(std::unique_ptr<::G::G> g);
 void c_take_trivial_ns_ref(const ::G::G &g);
