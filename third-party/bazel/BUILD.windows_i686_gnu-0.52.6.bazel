@@ -6,12 +6,13 @@
 #     bazel run @@//third-party:vendor
 ###############################################################################
 
+load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
 package(default_visibility = ["//visibility:public"])
 
 rust_library(
-    name = "winapi_util",
+    name = "windows_i686_gnu",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = True,
@@ -35,7 +36,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=winapi-util",
+        "crate-name=windows_i686_gnu",
         "manual",
         "noclippy",
         "norustfmt",
@@ -77,17 +78,50 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-none": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "0.1.8",
-    deps = select({
-        "@rules_rust//rust/platform:aarch64-pc-windows-msvc": [
-            "@vendor__windows-sys-0.52.0//:windows_sys",  # cfg(windows)
+    version = "0.52.6",
+    deps = [
+        "@vendor__windows_i686_gnu-0.52.6//:build_script_build",
+    ],
+)
+
+cargo_build_script(
+    name = "_bs",
+    srcs = glob(
+        include = ["**/*.rs"],
+        allow_empty = True,
+    ),
+    crate_name = "build_script_build",
+    crate_root = "build.rs",
+    data = glob(
+        include = ["**"],
+        allow_empty = True,
+        exclude = [
+            "**/* *",
+            ".tmp_git_root/**/*",
+            "BUILD",
+            "BUILD.bazel",
+            "WORKSPACE",
+            "WORKSPACE.bazel",
         ],
-        "@rules_rust//rust/platform:i686-pc-windows-msvc": [
-            "@vendor__windows-sys-0.52.0//:windows_sys",  # cfg(windows)
-        ],
-        "@rules_rust//rust/platform:x86_64-pc-windows-msvc": [
-            "@vendor__windows-sys-0.52.0//:windows_sys",  # cfg(windows)
-        ],
-        "//conditions:default": [],
-    }),
+    ),
+    edition = "2021",
+    pkg_name = "windows_i686_gnu",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-bazel",
+        "crate-name=windows_i686_gnu",
+        "manual",
+        "noclippy",
+        "norustfmt",
+    ],
+    version = "0.52.6",
+    visibility = ["//visibility:private"],
+)
+
+alias(
+    name = "build_script_build",
+    actual = ":_bs",
+    tags = ["manual"],
 )

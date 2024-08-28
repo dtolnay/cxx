@@ -11,7 +11,7 @@ load("@rules_rust//rust:defs.bzl", "rust_library")
 package(default_visibility = ["//visibility:public"])
 
 rust_library(
-    name = "clap_builder",
+    name = "windows_sys",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = True,
@@ -29,10 +29,14 @@ rust_library(
         ],
     ),
     crate_features = [
-        "error-context",
-        "help",
-        "std",
-        "usage",
+        "Win32",
+        "Win32_Foundation",
+        "Win32_Storage",
+        "Win32_Storage_FileSystem",
+        "Win32_System",
+        "Win32_System_Console",
+        "Win32_System_SystemInformation",
+        "default",
     ],
     crate_root = "src/lib.rs",
     edition = "2021",
@@ -41,7 +45,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=clap_builder",
+        "crate-name=windows-sys",
         "manual",
         "noclippy",
         "norustfmt",
@@ -83,9 +87,8 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-none": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "4.5.7",
+    version = "0.59.0",
     deps = [
-        "@vendor__anstyle-1.0.7//:anstyle",
-        "@vendor__clap_lex-0.7.1//:clap_lex",
+        "@vendor__windows-targets-0.52.6//:windows_targets",
     ],
 )

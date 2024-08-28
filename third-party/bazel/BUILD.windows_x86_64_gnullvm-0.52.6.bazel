@@ -6,12 +6,13 @@
 #     bazel run @@//third-party:vendor
 ###############################################################################
 
+load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
 package(default_visibility = ["//visibility:public"])
 
 rust_library(
-    name = "clap_lex",
+    name = "windows_x86_64_gnullvm",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = True,
@@ -35,7 +36,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=clap_lex",
+        "crate-name=windows_x86_64_gnullvm",
         "manual",
         "noclippy",
         "norustfmt",
@@ -77,5 +78,50 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-none": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "0.7.1",
+    version = "0.52.6",
+    deps = [
+        "@vendor__windows_x86_64_gnullvm-0.52.6//:build_script_build",
+    ],
+)
+
+cargo_build_script(
+    name = "_bs",
+    srcs = glob(
+        include = ["**/*.rs"],
+        allow_empty = True,
+    ),
+    crate_name = "build_script_build",
+    crate_root = "build.rs",
+    data = glob(
+        include = ["**"],
+        allow_empty = True,
+        exclude = [
+            "**/* *",
+            ".tmp_git_root/**/*",
+            "BUILD",
+            "BUILD.bazel",
+            "WORKSPACE",
+            "WORKSPACE.bazel",
+        ],
+    ),
+    edition = "2021",
+    pkg_name = "windows_x86_64_gnullvm",
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-bazel",
+        "crate-name=windows_x86_64_gnullvm",
+        "manual",
+        "noclippy",
+        "norustfmt",
+    ],
+    version = "0.52.6",
+    visibility = ["//visibility:private"],
+)
+
+alias(
+    name = "build_script_build",
+    actual = ":_bs",
+    tags = ["manual"],
 )
