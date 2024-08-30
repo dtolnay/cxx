@@ -13,6 +13,7 @@ use core::panic::RefUnwindSafe;
 // . !Sync
 // . !Unpin
 // . not readonly
+// . unwind-safe
 #[repr(C, packed)]
 pub struct Opaque {
     _private: [*const void; 0],
