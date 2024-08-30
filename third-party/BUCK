@@ -26,23 +26,23 @@ cargo.rust_library(
 
 alias(
     name = "cc",
-    actual = ":cc-1.1.11",
+    actual = ":cc-1.1.15",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "cc-1.1.11.crate",
-    sha256 = "5fb8dd288a69fc53a1996d7ecfbf4a20d59065bff137ce7e56bbd620de191189",
-    strip_prefix = "cc-1.1.11",
-    urls = ["https://static.crates.io/crates/cc/1.1.11/download"],
+    name = "cc-1.1.15.crate",
+    sha256 = "57b6a275aa2903740dc87da01c62040406b8812552e97129a63ea8850a17c6e6",
+    strip_prefix = "cc-1.1.15",
+    urls = ["https://static.crates.io/crates/cc/1.1.15/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "cc-1.1.11",
-    srcs = [":cc-1.1.11.crate"],
+    name = "cc-1.1.15",
+    srcs = [":cc-1.1.15.crate"],
     crate = "cc",
-    crate_root = "cc-1.1.11.crate/src/lib.rs",
+    crate_root = "cc-1.1.15.crate/src/lib.rs",
     edition = "2018",
     visibility = [],
     deps = [":shlex-1.3.0"],
@@ -50,23 +50,23 @@ cargo.rust_library(
 
 alias(
     name = "clap",
-    actual = ":clap-4.5.15",
+    actual = ":clap-4.5.16",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "clap-4.5.15.crate",
-    sha256 = "11d8838454fda655dafd3accb2b6e2bea645b9e4078abe84a22ceb947235c5cc",
-    strip_prefix = "clap-4.5.15",
-    urls = ["https://static.crates.io/crates/clap/4.5.15/download"],
+    name = "clap-4.5.16.crate",
+    sha256 = "ed6719fffa43d0d87e5fd8caeab59be1554fb028cd30edc88fc4369b17971019",
+    strip_prefix = "clap-4.5.16",
+    urls = ["https://static.crates.io/crates/clap/4.5.16/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "clap-4.5.15",
-    srcs = [":clap-4.5.15.crate"],
+    name = "clap-4.5.16",
+    srcs = [":clap-4.5.16.crate"],
     crate = "clap",
-    crate_root = "clap-4.5.15.crate/src/lib.rs",
+    crate_root = "clap-4.5.16.crate/src/lib.rs",
     edition = "2021",
     features = [
         "error-context",
@@ -236,23 +236,23 @@ buildscript_run(
 
 alias(
     name = "quote",
-    actual = ":quote-1.0.36",
+    actual = ":quote-1.0.37",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "quote-1.0.36.crate",
-    sha256 = "0fa76aaf39101c457836aec0ce2316dbdc3ab723cdda1c6bd4e6ad4208acaca7",
-    strip_prefix = "quote-1.0.36",
-    urls = ["https://static.crates.io/crates/quote/1.0.36/download"],
+    name = "quote-1.0.37.crate",
+    sha256 = "b5b9d34b8991d19d98081b46eacdd8eb58c6f2b201139f7c5f643cc155a633af",
+    strip_prefix = "quote-1.0.37",
+    urls = ["https://static.crates.io/crates/quote/1.0.37/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "quote-1.0.36",
-    srcs = [":quote-1.0.36.crate"],
+    name = "quote-1.0.37",
+    srcs = [":quote-1.0.37.crate"],
     crate = "quote",
-    crate_root = "quote-1.0.36.crate/src/lib.rs",
+    crate_root = "quote-1.0.37.crate/src/lib.rs",
     edition = "2018",
     features = [
         "default",
@@ -327,23 +327,23 @@ cargo.rust_library(
 
 alias(
     name = "syn",
-    actual = ":syn-2.0.74",
+    actual = ":syn-2.0.76",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "syn-2.0.74.crate",
-    sha256 = "1fceb41e3d546d0bd83421d3409b1460cc7444cd389341a4c880fe7a042cb3d7",
-    strip_prefix = "syn-2.0.74",
-    urls = ["https://static.crates.io/crates/syn/2.0.74/download"],
+    name = "syn-2.0.76.crate",
+    sha256 = "578e081a14e0cefc3279b0472138c513f37b41a08d5a3cca9b6e4e8ceb6cd525",
+    strip_prefix = "syn-2.0.76",
+    urls = ["https://static.crates.io/crates/syn/2.0.76/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "syn-2.0.74",
-    srcs = [":syn-2.0.74.crate"],
+    name = "syn-2.0.76",
+    srcs = [":syn-2.0.76.crate"],
     crate = "syn",
-    crate_root = "syn-2.0.74.crate/src/lib.rs",
+    crate_root = "syn-2.0.76.crate/src/lib.rs",
     edition = "2021",
     features = [
         "clone-impls",
@@ -357,7 +357,7 @@ cargo.rust_library(
     visibility = [],
     deps = [
         ":proc-macro2-1.0.86",
-        ":quote-1.0.36",
+        ":quote-1.0.37",
         ":unicode-ident-1.0.12",
     ],
 )

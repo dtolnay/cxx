@@ -33,13 +33,13 @@ filegroup(
 # Workspace Member Dependencies
 alias(
     name = "cc",
-    actual = "@vendor__cc-1.1.11//:cc",
+    actual = "@vendor__cc-1.1.15//:cc",
     tags = ["manual"],
 )
 
 alias(
     name = "clap",
-    actual = "@vendor__clap-4.5.15//:clap",
+    actual = "@vendor__clap-4.5.16//:clap",
     tags = ["manual"],
 )
 
@@ -63,7 +63,7 @@ alias(
 
 alias(
     name = "quote",
-    actual = "@vendor__quote-1.0.36//:quote",
+    actual = "@vendor__quote-1.0.37//:quote",
     tags = ["manual"],
 )
 
@@ -75,6 +75,6 @@ alias(
 
 alias(
     name = "syn",
-    actual = "@vendor__syn-2.0.74//:syn",
+    actual = "@vendor__syn-2.0.76//:syn",
     tags = ["manual"],
 )
