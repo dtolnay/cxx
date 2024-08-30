@@ -11,6 +11,7 @@ use core::mem;
 // . !Send
 // . !Sync
 // . !Unpin
+// . not readonly
 #[repr(C, packed)]
 pub struct Opaque {
     _private: [*const void; 0],
