@@ -383,6 +383,7 @@ fn test_raw_ptr() {
 }
 
 #[test]
+#[allow(clippy::items_after_statements, clippy::no_effect_underscore_binding)]
 fn test_unwind_safe() {
     fn inspect(_c: &ffi::C) {}
     let _unwind_safe = |c: UniquePtr<ffi::C>| panic::catch_unwind(|| drop(c));
