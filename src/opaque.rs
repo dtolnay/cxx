@@ -15,7 +15,7 @@ use core::mem;
 pub struct Opaque {
     _private: [*const void; 0],
     _pinned: PhantomData<PhantomPinned>,
-    _mutable: SyncUnsafeCell<()>,
+    _mutable: SyncUnsafeCell<PhantomData<()>>,
 }
 
 // TODO: https://github.com/rust-lang/rust/issues/95439
