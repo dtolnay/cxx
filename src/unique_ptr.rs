@@ -198,12 +198,12 @@ where
     }
 
     #[inline]
-    fn read_to_end(&mut self, buf: &mut std::vec::Vec<u8>) -> io::Result<usize> {
+    fn read_to_end(&mut self, buf: &mut alloc::vec::Vec<u8>) -> io::Result<usize> {
         self.pin_mut().read_to_end(buf)
     }
 
     #[inline]
-    fn read_to_string(&mut self, buf: &mut std::string::String) -> io::Result<usize> {
+    fn read_to_string(&mut self, buf: &mut alloc::string::String) -> io::Result<usize> {
         self.pin_mut().read_to_string(buf)
     }
 
