@@ -1,6 +1,7 @@
 #![allow(missing_docs)]
 
 use crate::void;
+use core::cell::UnsafeCell;
 use core::marker::{PhantomData, PhantomPinned};
 use core::mem;
 
@@ -14,6 +15,7 @@ use core::mem;
 pub struct Opaque {
     _private: [*const void; 0],
     _pinned: PhantomData<PhantomPinned>,
+    _mutable: UnsafeCell<()>,
 }
 
 const_assert_eq!(0, mem::size_of::<Opaque>());
