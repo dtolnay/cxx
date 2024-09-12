@@ -4,7 +4,7 @@ mod ffi {
         x: u8,
     }
 
-    impl fn() -> &S {}
+    impl<'a> fn() -> &'a S {}
 }
 
 fn main() {}

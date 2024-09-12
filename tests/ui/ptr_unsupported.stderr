@@ -1,8 +1,8 @@
 error: C++ does not allow pointer to reference as a type
  --> tests/ui/ptr_unsupported.rs:6:38
   |
-6 |         fn get_ptr_to_reference() -> *mut &C;
-  |                                      ^^^^^^^
+6 |         fn get_ptr_to_reference<'a>() -> *mut &'a C;
+  |                                          ^^^^^^^^^^
 
 error: unsupported unique_ptr target type
  --> tests/ui/ptr_unsupported.rs:7:38

@@ -54,7 +54,7 @@ pub mod ffi2 {
         fn c_return_trivial_ns_ptr() -> UniquePtr<G>;
         fn c_return_trivial_ns() -> G;
         fn c_return_opaque_ptr() -> UniquePtr<E>;
-        fn c_return_opaque_mut_pin(e: Pin<&mut E>) -> Pin<&mut E>;
+        fn c_return_opaque_mut_pin<'a>(e: Pin<&'a mut E>) -> Pin<&'a mut E>;
         fn c_return_ns_opaque_ptr() -> UniquePtr<F>;
         fn c_return_ns_unique_ptr() -> UniquePtr<H>;
         fn c_take_ref_ns_c(h: &H);

@@ -10,7 +10,8 @@ mod ffi {
     extern "Rust" {
         type MultiBuf;
 
-        fn next_chunk(buf: &mut MultiBuf) -> &[u8];
+        #[allow(clippy::needless_lifetimes)]
+        unsafe fn next_chunk<'a>(buf: &'a mut MultiBuf) -> &'a [u8];
     }
 
     // C++ types and signatures exposed to Rust.

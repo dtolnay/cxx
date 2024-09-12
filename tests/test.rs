@@ -43,13 +43,15 @@ fn test_c_return() {
     assert_eq!(2020, ffi::c_return_box().0);
     ffi::c_return_unique_ptr();
     ffi2::c_return_ns_unique_ptr();
-    assert_eq!(2020, *ffi::c_return_ref(&shared));
-    assert_eq!(2020, *ffi::c_return_ns_ref(&ns_shared));
-    assert_eq!(2020, *ffi::c_return_nested_ns_ref(&nested_ns_shared));
-    assert_eq!("2020", ffi::c_return_str(&shared));
+    assert_eq!(2020, *unsafe { ffi::c_return_ref(&shared) });
+    assert_eq!(2020, *unsafe { ffi::c_return_ns_ref(&ns_shared) });
+    assert_eq!(2020, *unsafe {
+        ffi::c_return_nested_ns_ref(&nested_ns_shared)
+    });
+    assert_eq!("2020", unsafe { ffi::c_return_str(&shared) });
     assert_eq!(
         b"2020\0",
-        cast::c_char_to_unsigned(ffi::c_return_slice_char(&shared)),
+        cast::c_char_to_unsigned(unsafe { ffi::c_return_slice_char(&shared) }),
     );
     assert_eq!("2020", ffi::c_return_rust_string());
     assert_eq!("Hello \u{fffd}World", ffi::c_return_rust_string_lossy());
@@ -107,9 +109,15 @@ fn test_c_try_return() {
         ffi::c_fail_return_primitive().unwrap_err().what(),
     );
     assert_eq!(2020, ffi::c_try_return_box().unwrap().0);
-    assert_eq!("2020", *ffi::c_try_return_ref(&"2020".to_owned()).unwrap());
-    assert_eq!("2020", ffi::c_try_return_str("2020").unwrap());
-    assert_eq!(b"2020", ffi::c_try_return_sliceu8(b"2020").unwrap());
+    assert_eq!(
+        "2020",
+        *unsafe { ffi::c_try_return_ref(&"2020".to_owned()) }.unwrap()
+    );
+    assert_eq!("2020", unsafe { ffi::c_try_return_str("2020") }.unwrap());
+    assert_eq!(
+        b"2020",
+        unsafe { ffi::c_try_return_sliceu8(b"2020") }.unwrap()
+    );
     assert_eq!("2020", ffi::c_try_return_rust_string().unwrap());
     assert_eq!("2020", &*ffi::c_try_return_unique_ptr_string().unwrap());
 }
@@ -189,9 +197,11 @@ fn test_c_take() {
     check!(ffi::c_take_ref_rust_vec(&test_vec));
     check!(ffi::c_take_ref_rust_vec_index(&test_vec));
     check!(ffi::c_take_ref_rust_vec_copy(&test_vec));
-    check!(ffi::c_take_ref_shared_string(&ffi::SharedString {
-        msg: "2020".to_owned()
-    }));
+    check!(unsafe {
+        ffi::c_take_ref_shared_string(&ffi::SharedString {
+            msg: "2020".to_owned(),
+        })
+    });
     let ns_shared_test_vec = vec![ffi::AShared { z: 1010 }, ffi::AShared { z: 1011 }];
     check!(ffi::c_take_rust_vec_ns_shared(ns_shared_test_vec));
     let nested_ns_shared_test_vec = vec![ffi::ABShared { z: 1010 }, ffi::ABShared { z: 1011 }];
@@ -256,15 +266,19 @@ fn test_c_method_calls() {
     assert_eq!(2021, unique_ptr.pin_mut().set(2021));
     assert_eq!(2021, unique_ptr.get());
     assert_eq!(2021, unique_ptr.get2());
-    assert_eq!(2021, *unique_ptr.getRef());
+    assert_eq!(2021, *unsafe { unique_ptr.getRef() });
     assert_eq!(2021, unsafe { &mut *unique_ptr.as_mut_ptr() }.get());
     assert_eq!(2021, unsafe { &*unique_ptr.as_ptr() }.get());
-    assert_eq!(2021, *unique_ptr.pin_mut().getMut());
+    assert_eq!(2021, *unsafe { unique_ptr.pin_mut().getMut() });
     assert_eq!(2022, unique_ptr.pin_mut().set_succeed(2022).unwrap());
     assert!(unique_ptr.pin_mut().get_fail().is_err());
     assert_eq!(2021, ffi::Shared { z: 0 }.c_method_on_shared());
-    assert_eq!(2022, *ffi::Shared { z: 2022 }.c_method_ref_on_shared());
-    assert_eq!(2023, *ffi::Shared { z: 2023 }.c_method_mut_on_shared());
+    assert_eq!(2022, *unsafe {
+        ffi::Shared { z: 2022 }.c_method_ref_on_shared()
+    });
+    assert_eq!(2023, *unsafe {
+        ffi::Shared { z: 2023 }.c_method_mut_on_shared()
+    });
 
     let val = 42;
     let mut array = ffi::Array {
