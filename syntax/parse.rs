@@ -1454,7 +1454,31 @@ fn parse_return_type(
 
     match parse_type(ret)? {
         Type::Void(_) => Ok(None),
-        ty => Ok(Some(ty)),
+        ty => {
+            if has_references_without_lifetime(&ty) {
+                return Err(Error::new_spanned(
+                    ret,
+                    "cxx bridge requires all return type references to have explicit lifetimes",
+                ));
+            }
+            Ok(Some(ty))
+        }
+    }
+}
+
+fn has_references_without_lifetime(ty: &Type) -> bool {
+    match ty {
+        Type::Fn(_) | Type::Ident(_) | Type::Str(_) | Type::Void(_) => false,
+        Type::RustBox(t)
+        | Type::RustVec(t)
+        | Type::UniquePtr(t)
+        | Type::SharedPtr(t)
+        | Type::WeakPtr(t)
+        | Type::CxxVector(t) => has_references_without_lifetime(&t.inner),
+        Type::Ptr(t) => has_references_without_lifetime(&t.inner),
+        Type::Array(t) => has_references_without_lifetime(&t.inner),
+        Type::SliceRef(t) => t.lifetime.is_none(),
+        Type::Ref(t) => t.lifetime.is_none(),
     }
 }
 

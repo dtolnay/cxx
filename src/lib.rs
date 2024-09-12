@@ -90,7 +90,7 @@
 //!         type MultiBuf;
 //!
 //!         // Functions implemented in Rust.
-//!         fn next_chunk(buf: &mut MultiBuf) -> &[u8];
+//!         unsafe fn next_chunk<'a>(buf: &'a mut MultiBuf) -> &'a [u8];
 //!     }
 //!
 //!     unsafe extern "C++" {

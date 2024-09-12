@@ -102,11 +102,11 @@ pub mod ffi {
         fn c_return_box() -> Box<R>;
         fn c_return_unique_ptr() -> UniquePtr<C>;
         fn c_return_shared_ptr() -> SharedPtr<C>;
-        fn c_return_ref(shared: &Shared) -> &usize;
-        fn c_return_mut(shared: &mut Shared) -> &mut usize;
-        fn c_return_str(shared: &Shared) -> &str;
-        fn c_return_slice_char(shared: &Shared) -> &[c_char];
-        fn c_return_mutsliceu8(slice: &mut [u8]) -> &mut [u8];
+        unsafe fn c_return_mut<'a>(shared: &'a mut Shared) -> &'a mut usize;
+        unsafe fn c_return_str<'a>(shared: &'a Shared) -> &'a str;
+        unsafe fn c_return_slice_char<'a>(shared: &'a Shared) -> &'a [c_char];
+        unsafe fn c_return_mutsliceu8<'a>(slice: &'a mut [u8]) -> &'a mut [u8];
+        unsafe fn c_return_ref<'a>(shared: &'a Shared) -> &'a usize;
         fn c_return_rust_string() -> String;
         fn c_return_rust_string_lossy() -> String;
         fn c_return_unique_ptr_string() -> UniquePtr<CxxString>;
@@ -115,18 +115,18 @@ pub mod ffi {
         fn c_return_unique_ptr_vector_string() -> UniquePtr<CxxVector<CxxString>>;
         fn c_return_unique_ptr_vector_shared() -> UniquePtr<CxxVector<Shared>>;
         fn c_return_unique_ptr_vector_opaque() -> UniquePtr<CxxVector<C>>;
-        fn c_return_ref_vector(c: &C) -> &CxxVector<u8>;
-        fn c_return_mut_vector(c: Pin<&mut C>) -> Pin<&mut CxxVector<u8>>;
+        unsafe fn c_return_ref_vector<'a>(c: &'a C) -> &'a CxxVector<u8>;
+        unsafe fn c_return_mut_vector<'a>(c: Pin<&'a mut C>) -> Pin<&'a mut CxxVector<u8>>;
         fn c_return_rust_vec_u8() -> Vec<u8>;
-        fn c_return_ref_rust_vec(c: &C) -> &Vec<u8>;
-        fn c_return_mut_rust_vec(c: Pin<&mut C>) -> &mut Vec<u8>;
+        unsafe fn c_return_ref_rust_vec<'a>(c: &'a C) -> &'a Vec<u8>;
+        unsafe fn c_return_mut_rust_vec<'a>(c: Pin<&'a mut C>) -> &'a mut Vec<u8>;
         fn c_return_rust_vec_string() -> Vec<String>;
         fn c_return_rust_vec_bool() -> Vec<bool>;
         fn c_return_identity(_: usize) -> usize;
         fn c_return_sum(_: usize, _: usize) -> usize;
         fn c_return_enum(n: u16) -> Enum;
-        fn c_return_ns_ref(shared: &AShared) -> &usize;
-        fn c_return_nested_ns_ref(shared: &ABShared) -> &usize;
+        unsafe fn c_return_ns_ref<'a>(shared: &'a AShared) -> &'a usize;
+        unsafe fn c_return_nested_ns_ref<'a>(shared: &'a ABShared) -> &'a usize;
         fn c_return_ns_enum(n: u16) -> AEnum;
         fn c_return_nested_ns_enum(n: u16) -> ABEnum;
         fn c_return_const_ptr(n: usize) -> *const C;
@@ -164,7 +164,7 @@ pub mod ffi {
         fn c_take_ref_rust_vec_string(v: &Vec<String>);
         fn c_take_ref_rust_vec_index(v: &Vec<u8>);
         fn c_take_ref_rust_vec_copy(v: &Vec<u8>);
-        fn c_take_ref_shared_string(s: &SharedString) -> &SharedString;
+        unsafe fn c_take_ref_shared_string<'a>(s: &'a SharedString) -> &'a SharedString;
         fn c_take_callback(callback: fn(String) -> usize);
         fn c_take_callback_ref(callback: fn(&String));
         #[cxx_name = "c_take_callback_ref"]
@@ -184,26 +184,26 @@ pub mod ffi {
         fn c_try_return_primitive() -> Result<usize>;
         fn c_fail_return_primitive() -> Result<usize>;
         fn c_try_return_box() -> Result<Box<R>>;
-        fn c_try_return_ref(s: &String) -> Result<&String>;
-        fn c_try_return_str(s: &str) -> Result<&str>;
-        fn c_try_return_sliceu8(s: &[u8]) -> Result<&[u8]>;
-        fn c_try_return_mutsliceu8(s: &mut [u8]) -> Result<&mut [u8]>;
+        unsafe fn c_try_return_ref<'a>(s: &'a String) -> Result<&'a String>;
+        unsafe fn c_try_return_str<'a>(s: &'a str) -> Result<&'a str>;
+        unsafe fn c_try_return_sliceu8<'a>(s: &'a [u8]) -> Result<&'a [u8]>;
+        unsafe fn c_try_return_mutsliceu8<'a>(s: &'a mut [u8]) -> Result<&'a mut [u8]>;
         fn c_try_return_rust_string() -> Result<String>;
         fn c_try_return_unique_ptr_string() -> Result<UniquePtr<CxxString>>;
         fn c_try_return_rust_vec() -> Result<Vec<u8>>;
         fn c_try_return_rust_vec_string() -> Result<Vec<String>>;
-        fn c_try_return_ref_rust_vec(c: &C) -> Result<&Vec<u8>>;
+        unsafe fn c_try_return_ref_rust_vec<'a>(c: &'a C) -> Result<&'a Vec<u8>>;
 
         fn get(self: &C) -> usize;
         fn set(self: Pin<&mut C>, n: usize) -> usize;
         fn get2(&self) -> usize;
-        fn getRef(self: &C) -> &usize;
-        fn getMut(self: Pin<&mut C>) -> &mut usize;
+        unsafe fn getRef<'a>(self: &'a C) -> &'a usize;
+        unsafe fn getMut<'a>(self: Pin<&'a mut C>) -> &'a mut usize;
         fn set_succeed(self: Pin<&mut C>, n: usize) -> Result<usize>;
         fn get_fail(self: Pin<&mut C>) -> Result<usize>;
         fn c_method_on_shared(self: &Shared) -> usize;
-        fn c_method_ref_on_shared(self: &Shared) -> &usize;
-        fn c_method_mut_on_shared(self: &mut Shared) -> &mut usize;
+        unsafe fn c_method_ref_on_shared<'a>(self: &'a Shared) -> &'a usize;
+        unsafe fn c_method_mut_on_shared<'a>(self: &'a mut Shared) -> &'a mut usize;
         fn c_set_array(self: &mut Array, value: i32);
 
         fn c_get_use_count(weak: &WeakPtr<C>) -> usize;
@@ -258,6 +258,7 @@ pub mod ffi {
         type Buffer = crate::Buffer;
     }
 
+    #[allow(clippy::extra_unused_lifetimes)]
     extern "Rust" {
         type R;
 
@@ -266,18 +267,18 @@ pub mod ffi {
         fn r_return_box() -> Box<R>;
         fn r_return_unique_ptr() -> UniquePtr<C>;
         fn r_return_shared_ptr() -> SharedPtr<C>;
-        fn r_return_ref(shared: &Shared) -> &usize;
-        fn r_return_mut(shared: &mut Shared) -> &mut usize;
-        fn r_return_str(shared: &Shared) -> &str;
-        fn r_return_sliceu8(shared: &Shared) -> &[u8];
-        fn r_return_mutsliceu8(slice: &mut [u8]) -> &mut [u8];
+        unsafe fn r_return_ref<'a>(shared: &'a Shared) -> &'a usize;
+        unsafe fn r_return_mut<'a>(shared: &'a mut Shared) -> &'a mut usize;
+        unsafe fn r_return_str<'a>(shared: &'a Shared) -> &'a str;
+        unsafe fn r_return_sliceu8<'a>(shared: &'a Shared) -> &'a [u8];
+        unsafe fn r_return_mutsliceu8<'a>(slice: &'a mut [u8]) -> &'a mut [u8];
         fn r_return_rust_string() -> String;
         fn r_return_unique_ptr_string() -> UniquePtr<CxxString>;
         fn r_return_rust_vec() -> Vec<u8>;
         fn r_return_rust_vec_string() -> Vec<String>;
         fn r_return_rust_vec_extern_struct() -> Vec<Job>;
-        fn r_return_ref_rust_vec(shared: &Shared) -> &Vec<u8>;
-        fn r_return_mut_rust_vec(shared: &mut Shared) -> &mut Vec<u8>;
+        unsafe fn r_return_ref_rust_vec<'a>(shared: &'a Shared) -> &'a Vec<u8>;
+        unsafe fn r_return_mut_rust_vec<'a>(shared: &'a mut Shared) -> &'a mut Vec<u8>;
         fn r_return_identity(_: usize) -> usize;
         fn r_return_sum(_: usize, _: usize) -> usize;
         fn r_return_enum(n: u32) -> Enum;
@@ -305,8 +306,8 @@ pub mod ffi {
         fn r_try_return_primitive() -> Result<usize>;
         fn r_try_return_box() -> Result<Box<R>>;
         fn r_fail_return_primitive() -> Result<usize>;
-        fn r_try_return_sliceu8(s: &[u8]) -> Result<&[u8]>;
-        fn r_try_return_mutsliceu8(s: &mut [u8]) -> Result<&mut [u8]>;
+        unsafe fn r_try_return_sliceu8<'a>(s: &'a [u8]) -> Result<&'a [u8]>;
+        unsafe fn r_try_return_mutsliceu8<'a>(s: &'a mut [u8]) -> Result<&'a mut [u8]>;
 
         fn get(self: &R) -> usize;
         fn set(self: &mut R, n: usize) -> usize;
