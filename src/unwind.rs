@@ -1,6 +1,9 @@
 #![allow(missing_docs)]
 
-use core::mem;
+use alloc::boxed::Box;
+use alloc::format;
+use core::{any::Any, mem};
+use std::panic;
 
 pub fn prevent_unwind<F, R>(label: &'static str, foreign_call: F) -> R
 where
@@ -36,4 +39,33 @@ impl Drop for Guard {
     fn drop(&mut self) {
         panic!("panic in ffi function {}, aborting.", self.label);
     }
+}
+
+/// Run the void `foreign_call`, intercepting panics and converting them to errors.
+pub fn catch_unwind<F>(label: &'static str, foreign_call: F) -> ::cxx::private::Result
+where
+    F: FnOnce(),
+{
+    match panic::catch_unwind(panic::AssertUnwindSafe(foreign_call)) {
+        Ok(()) => ::cxx::private::Result::ok(),
+        Err(err) => panic_result(label, &err),
+    }
+}
+
+/// Run the error-returning `foreign_call`, intercepting panics and converting them to errors.
+pub fn try_unwind<F>(label: &'static str, foreign_call: F) -> ::cxx::private::Result
+where
+    F: FnOnce() -> ::cxx::private::Result,
+{
+    match panic::catch_unwind(panic::AssertUnwindSafe(foreign_call)) {
+        Ok(r) => r,
+        Err(err) => panic_result(label, &err),
+    }
+}
+
+fn panic_result(label: &'static str, err: &Box<dyn Any + Send>) -> ::cxx::private::Result {
+    if let Some(err) = err.downcast_ref::<alloc::string::String>() {
+        return ::cxx::private::Result::error(format!("panic in {label}: {err}"));
+    }
+    ::cxx::private::Result::error(format!("panic in {label}"))
 }

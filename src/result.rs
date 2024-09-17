@@ -23,6 +23,16 @@ pub union Result {
     ok: *const u8, // null
 }
 
+impl Result {
+    pub(crate) fn ok() -> Self {
+        Result { ok: ptr::null() }
+    }
+
+    pub(crate) fn error<E: Display>(err: E) -> Self {
+        unsafe { to_c_error(err.to_string()) }
+    }
+}
+
 pub unsafe fn r#try<T, E>(ret: *mut T, result: StdResult<T, E>) -> Result
 where
     E: Display,
@@ -30,9 +40,9 @@ where
     match result {
         Ok(ok) => {
             unsafe { ptr::write(ret, ok) }
-            Result { ok: ptr::null() }
+            Result::ok()
         }
-        Err(err) => unsafe { to_c_error(err.to_string()) },
+        Err(err) => Result::error(err),
     }
 }
 

@@ -904,6 +904,13 @@ extern "C" const char *cxx_run_test() noexcept {
   (void)rust::Vec<size_t>();
   (void)rust::Vec<rust::isize>();
 
+  try {
+    r_panic("foobar");
+    ASSERT(false);
+  } catch (const rust::Error &e) {
+    ASSERT(std::strcmp(e.what(), "panic in cxx_test_suite::ffi::r_panic: foobar") == 0);
+  }
+
   cxx_test_suite_set_correct();
   return nullptr;
 }

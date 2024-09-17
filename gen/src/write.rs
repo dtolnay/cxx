@@ -8,6 +8,7 @@ use crate::syntax::map::UnorderedMap as Map;
 use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::{self, Symbol};
 use crate::syntax::trivial::{self, TrivialReason};
+use crate::syntax::Lang;
 use crate::syntax::{
     derive, mangle, Api, Doc, Enum, EnumRepr, ExternFn, ExternType, Pair, Signature, Struct, Trait,
     Type, TypeAlias, Types, Var,
@@ -274,7 +275,8 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
         let sig = &method.sig;
         let local_name = method.name.cxx.to_string();
         let indirect_call = false;
-        write_rust_function_shim_decl(out, &local_name, sig, indirect_call);
+        let throws = sig.throws || method.lang == Lang::Rust;
+        write_rust_function_shim_decl(out, &local_name, sig, indirect_call, throws);
         writeln!(out, ";");
         if !method.doc.is_empty() {
             out.next_section();
@@ -366,7 +368,8 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
         let sig = &method.sig;
         let local_name = method.name.cxx.to_string();
         let indirect_call = false;
-        write_rust_function_shim_decl(out, &local_name, sig, indirect_call);
+        let throws = sig.throws || method.lang == Lang::Rust;
+        write_rust_function_shim_decl(out, &local_name, sig, indirect_call, throws);
         writeln!(out, ";");
         if !method.doc.is_empty() {
             out.next_section();
@@ -897,12 +900,11 @@ fn write_rust_function_decl_impl(
     indirect_call: bool,
 ) {
     out.next_section();
-    if sig.throws {
-        out.builtin.ptr_len = true;
-        write!(out, "::rust::repr::PtrLen ");
-    } else {
-        write_extern_return_type_space(out, &sig.ret);
-    }
+
+    // rust functions always throw because of panic
+    out.builtin.ptr_len = true;
+    write!(out, "::rust::repr::PtrLen ");
+
     write!(out, "{}(", link_name);
     let mut needs_comma = false;
     if let Some(receiver) = &sig.receiver {
@@ -924,7 +926,9 @@ fn write_rust_function_decl_impl(
         write_extern_arg(out, arg);
         needs_comma = true;
     }
-    if indirect_return(sig, out.types) {
+    // rust functions always use indirect return
+    let indirect_return = sig.ret.is_some();
+    if indirect_return {
         if needs_comma {
             write!(out, ", ");
         }
@@ -947,7 +951,7 @@ fn write_rust_function_decl_impl(
         }
         write!(out, "void *");
     }
-    writeln!(out, ") noexcept;");
+    writeln!(out, ");");
 }
 
 fn write_rust_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
@@ -971,6 +975,7 @@ fn write_rust_function_shim_decl(
     local_name: &str,
     sig: &Signature,
     indirect_call: bool,
+    throws: bool,
 ) {
     begin_function_definition(out);
     write_return_type(out, &sig.ret);
@@ -994,7 +999,7 @@ fn write_rust_function_shim_decl(
             write!(out, " const");
         }
     }
-    if !sig.throws {
+    if !throws {
         write!(out, " noexcept");
     }
 }
@@ -1015,7 +1020,7 @@ fn write_rust_function_shim_impl(
         // Member functions already documented at their declaration.
         write_doc(out, "", doc);
     }
-    write_rust_function_shim_decl(out, local_name, sig, indirect_call);
+    write_rust_function_shim_decl(out, local_name, sig, indirect_call, true);
     if out.header {
         writeln!(out, ";");
         return;
@@ -1031,7 +1036,8 @@ fn write_rust_function_shim_impl(
         }
     }
     write!(out, "  ");
-    let indirect_return = indirect_return(sig, out.types);
+    // rust functions always use indirect return
+    let indirect_return = sig.ret.is_some();
     if indirect_return {
         out.builtin.maybe_uninit = true;
         write!(out, "::rust::MaybeUninit<");
@@ -1047,35 +1053,10 @@ fn write_rust_function_shim_impl(
         }
         writeln!(out, "> return$;");
         write!(out, "  ");
-    } else if let Some(ret) = &sig.ret {
-        write!(out, "return ");
-        match ret {
-            Type::RustBox(_) => {
-                write_type(out, ret);
-                write!(out, "::from_raw(");
-            }
-            Type::UniquePtr(_) => {
-                write_type(out, ret);
-                write!(out, "(");
-            }
-            Type::Ref(_) => write!(out, "*"),
-            Type::Str(_) => {
-                out.builtin.rust_str_new_unchecked = true;
-                write!(out, "::rust::impl<::rust::Str>::new_unchecked(");
-            }
-            Type::SliceRef(_) => {
-                out.builtin.rust_slice_new = true;
-                write!(out, "::rust::impl<");
-                write_type(out, ret);
-                write!(out, ">::slice(");
-            }
-            _ => {}
-        }
     }
-    if sig.throws {
-        out.builtin.ptr_len = true;
-        write!(out, "::rust::repr::PtrLen error$ = ");
-    }
+    out.builtin.ptr_len = true;
+    write!(out, "::rust::repr::PtrLen error$ = ");
+
     write!(out, "{}(", invoke);
     let mut needs_comma = false;
     if sig.receiver.is_some() {
@@ -1120,12 +1101,11 @@ fn write_rust_function_shim_impl(
         }
     }
     writeln!(out, ";");
-    if sig.throws {
-        out.builtin.rust_error = true;
-        writeln!(out, "  if (error$.ptr) {{");
-        writeln!(out, "    throw ::rust::impl<::rust::Error>::error(error$);");
-        writeln!(out, "  }}");
-    }
+    out.builtin.rust_error = true;
+    writeln!(out, "  if (error$.ptr) {{");
+    writeln!(out, "    throw ::rust::impl<::rust::Error>::error(error$);");
+    writeln!(out, "  }}");
+
     if indirect_return {
         write!(out, "  return ");
         match sig.ret.as_ref().unwrap() {

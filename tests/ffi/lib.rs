@@ -316,6 +316,8 @@ pub mod ffi {
 
         #[cxx_name = "rAliasedFunction"]
         fn r_aliased_function(x: i32) -> String;
+
+        fn r_panic(s: &str);
     }
 
     struct Dag0 {
@@ -649,4 +651,8 @@ fn r_try_return_mutsliceu8(slice: &mut [u8]) -> Result<&mut [u8], Error> {
 
 fn r_aliased_function(x: i32) -> String {
     x.to_string()
+}
+
+fn r_panic(s: &str) {
+    panic!("{s}");
 }
