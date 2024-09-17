@@ -508,7 +508,12 @@ pub mod private {
     pub use crate::shared_ptr::SharedPtrTarget;
     pub use crate::string::StackString;
     pub use crate::unique_ptr::UniquePtrTarget;
+    #[cfg(feature = "std")]
+    pub use crate::unwind::catch_unwind;
+    #[cfg(feature = "std")]
     pub use crate::unwind::prevent_unwind;
+    #[cfg(feature = "std")]
+    pub use crate::unwind::try_unwind;
     pub use crate::weak_ptr::WeakPtrTarget;
     pub use core::{concat, module_path};
     pub use cxxbridge_macro::type_id;

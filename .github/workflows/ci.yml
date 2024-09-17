@@ -31,7 +31,7 @@ jobs:
           - name: Cargo on Windows (msvc)
             rust: nightly-x86_64-pc-windows-msvc
             os: windows
-            flags: /EHsc
+            flags: /EHs
           - name: C++14
             rust: nightly
             os: ubuntu

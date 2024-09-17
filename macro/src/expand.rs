@@ -1123,17 +1123,17 @@ fn expand_rust_function_shim_impl(
         }
     };
 
-    let mut outparam = None;
-    let indirect_return = indirect_return(sig, types);
-    if indirect_return {
-        let ret = expand_extern_type(sig.ret.as_ref().unwrap(), types, false);
-        outparam = Some(quote_spanned!(span=> __return: *mut #ret,));
-    }
+    // always indirect return when there's a return value
+    let out_param = sig.ret.as_ref().map(|ret| {
+        let ret = expand_extern_type(ret, types, false);
+        quote_spanned!(span=> __return: *mut #ret,)
+    });
+    let out = match sig.ret {
+        Some(_) => quote_spanned!(span=> __return),
+        None => quote_spanned!(span=> &mut ()),
+    };
+    let indirect_return = sig.ret.is_some();
     if sig.throws {
-        let out = match sig.ret {
-            Some(_) => quote_spanned!(span=> __return),
-            None => quote_spanned!(span=> &mut ()),
-        };
         requires_closure = true;
         requires_unsafe = true;
         expr = quote_spanned!(span=> ::cxx::private::r#try(#out, #expr));
@@ -1153,13 +1153,15 @@ fn expand_rust_function_shim_impl(
         quote!(#local_name)
     };
 
-    expr = quote_spanned!(span=> ::cxx::private::prevent_unwind(__fn, #closure));
-
-    let ret = if sig.throws {
-        quote!(-> ::cxx::private::Result)
+    if sig.throws {
+        // the function itself throws, wire through the exception
+        expr = quote_spanned!(span=> ::cxx::private::try_unwind(__fn, #closure));
     } else {
-        expand_extern_return_type(&sig.ret, types, false)
-    };
+        // always protect against the panic
+        expr = quote_spanned!(span=> ::cxx::private::catch_unwind(__fn, #closure));
+    }
+    // rust functions always potentially throw
+    let ret = quote!(-> ::cxx::private::Result);
 
     let pointer = match invoke {
         None => Some(quote_spanned!(span=> __extern: *const ())),
@@ -1170,7 +1172,7 @@ fn expand_rust_function_shim_impl(
         #attrs
         #[doc(hidden)]
         #[#UnsafeAttr(#ExportNameAttr = #link_name)]
-        unsafe extern "C" fn #local_name #generics(#(#all_args,)* #outparam #pointer) #ret {
+        unsafe extern "C" fn #local_name #generics(#(#all_args,)* #out_param #pointer) #ret {
             let __fn = ::cxx::private::concat!(::cxx::private::module_path!(), #prevent_unwind_label);
             #wrap_super
             #expr
