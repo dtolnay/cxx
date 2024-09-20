@@ -90,6 +90,19 @@ cargo_build_script(
         include = ["**/*.rs"],
         allow_empty = True,
     ),
+    compile_data = glob(
+        include = ["**"],
+        allow_empty = True,
+        exclude = [
+            "**/* *",
+            "**/*.rs",
+            ".tmp_git_root/**/*",
+            "BUILD",
+            "BUILD.bazel",
+            "WORKSPACE",
+            "WORKSPACE.bazel",
+        ],
+    ),
     crate_name = "build_script_build",
     crate_root = "build.rs",
     data = glob(

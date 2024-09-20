@@ -96,6 +96,19 @@ cargo_build_script(
         include = ["**/*.rs"],
         allow_empty = True,
     ),
+    compile_data = glob(
+        include = ["**"],
+        allow_empty = True,
+        exclude = [
+            "**/* *",
+            "**/*.rs",
+            ".tmp_git_root/**/*",
+            "BUILD",
+            "BUILD.bazel",
+            "WORKSPACE",
+            "WORKSPACE.bazel",
+        ],
+    ),
     crate_features = [
         "default",
         "proc-macro",
