@@ -80,23 +80,33 @@ fn test_c_return() {
     assert_eq!(2021, ffi::c_return_sum(2020, 1));
     match ffi::c_return_enum(0) {
         enm @ ffi::Enum::AVal => assert_eq!(0, enm.repr),
-        _ => assert!(false),
+        ffi::Enum::BVal => assert!(false),
+        ffi::Enum::LastVal => assert!(false),
+        cxx_test_suite::_Enum!() => assert!(false),
     }
     match ffi::c_return_enum(1) {
+        ffi::Enum::AVal => assert!(false),
         enm @ ffi::Enum::BVal => assert_eq!(2020, enm.repr),
-        _ => assert!(false),
+        ffi::Enum::LastVal => assert!(false),
+        cxx_test_suite::_Enum!() => assert!(false),
     }
     match ffi::c_return_enum(2021) {
+        ffi::Enum::AVal => assert!(false),
+        ffi::Enum::BVal => assert!(false),
         enm @ ffi::Enum::LastVal => assert_eq!(2021, enm.repr),
-        _ => assert!(false),
+        cxx_test_suite::_Enum!() => assert!(false),
     }
     match ffi::c_return_ns_enum(0) {
         enm @ ffi::AEnum::AAVal => assert_eq!(0, enm.repr),
-        _ => assert!(false),
+        ffi::AEnum::ABVal => assert!(false),
+        ffi::AEnum::ACVal => assert!(false),
+        cxx_test_suite::_AEnum!() => assert!(false),
     }
     match ffi::c_return_nested_ns_enum(0) {
         enm @ ffi::ABEnum::ABAVal => assert_eq!(0, enm.repr),
-        _ => assert!(false),
+        ffi::ABEnum::ABBVal => assert!(false),
+        ffi::ABEnum::ABCVal => assert!(false),
+        cxx_test_suite::_ABEnum!() => assert!(false),
     }
 }
 

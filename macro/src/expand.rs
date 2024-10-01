@@ -68,7 +68,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
                 hidden.extend(expand_struct_operators(strct));
                 forbid.extend(expand_struct_forbid_drop(strct));
             }
-            Api::Enum(enm) => expanded.extend(expand_enum(enm)),
+            Api::Enum(enm) => expanded.extend(expand_enum(enm, &ffi.ident)),
             Api::CxxType(ety) => {
                 let ident = &ety.name.rust;
                 if !types.structs.contains_key(ident) && !types.enums.contains_key(ident) {
@@ -317,7 +317,7 @@ fn expand_struct_forbid_drop(strct: &Struct) -> TokenStream {
     }
 }
 
-fn expand_enum(enm: &Enum) -> TokenStream {
+fn expand_enum(enm: &Enum, ffi: &Ident) -> TokenStream {
     let ident = &enm.name.rust;
     let doc = &enm.doc;
     let attrs = &enm.attrs;
@@ -352,6 +352,49 @@ fn expand_enum(enm: &Enum) -> TokenStream {
         }
     };
 
+    let gaps = {
+        // discriminants must be sorted to build the range patterns of the gaps between them
+        let discriminants = {
+            let mut discriminants: Vec<_> = enm
+                .variants
+                .iter()
+                .map(|variant| variant.discriminant)
+                .collect();
+            discriminants.sort();
+            discriminants
+        };
+
+        // When map_windows gets stabilized:
+        // let gaps = std::iter::once(None)
+        //     .chain(discriminants.into_iter().map(Some))
+        //     .chain(std::iter::once(None))
+        //     .map_windows::<_, _, 2>(|&[start, end]| match (start, end) ...);
+        let gaps = {
+            let starts =
+                std::iter::once(None).chain(discriminants.iter().map(|d| d.checked_succ()));
+            let ends = discriminants
+                .iter()
+                .copied()
+                .map(Some)
+                .chain(std::iter::once(None));
+
+            starts.zip(ends)
+        };
+
+        let gaps = gaps.flat_map(|(start, end)| match (start, end) {
+            (None, None) => None,
+            // ..#end is not a valid range pattern when end is the first admissible value for the discriminant (typically 0 for unsigned discriminants)
+            (None, Some(end)) if end == enm.repr.limits().min => None,
+            (None, Some(end)) => Some(quote! { ..#end }),
+            (Some(start), None) => Some(quote! { #start.. }),
+            (Some(start), Some(end)) if start == end => None,
+            (Some(start), Some(end)) => Some(quote! { #start..#end }),
+        });
+
+        quote! { #(#gaps)|* }
+    };
+    let gaps_macro = format_ident!("_{}", ident);
+
     quote! {
         #doc
         #derives
@@ -362,6 +405,11 @@ fn expand_enum(enm: &Enum) -> TokenStream {
         #[allow(non_upper_case_globals)]
         impl #ident {
             #(#variants)*
+        }
+
+        #[macro_export] macro_rules! #gaps_macro {
+            () => { $crate::#ffi::#ident{ repr: #gaps } };
+            ($i:ident) => { $crate::#ffi::#ident{ repr: $i @ #gaps } };
         }
 
         unsafe impl ::cxx::ExternType for #ident {
