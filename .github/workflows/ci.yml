@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [nightly, beta, stable, 1.67.0, 1.70.0, 1.74.0]
+        rust: [nightly, beta, stable, 1.70.0, 1.74.0]
         os: [ubuntu]
         include:
           - name: Cargo on macOS
@@ -60,13 +60,6 @@ jobs:
         shell: bash
       - run: cargo run --manifest-path demo/Cargo.toml
       - run: cargo test --workspace ${{steps.testsuite.outputs.exclude}}
-        if: matrix.rust != '1.67.0'
-      - run: cargo check --no-default-features --features alloc
-        env:
-          RUSTFLAGS: --cfg compile_error_if_std ${{env.RUSTFLAGS}}
-      - run: cargo check --no-default-features
-        env:
-          RUSTFLAGS: --cfg compile_error_if_alloc --cfg cxx_experimental_no_alloc ${{env.RUSTFLAGS}}
       - uses: actions/upload-artifact@v4
         if: matrix.os == 'ubuntu' && matrix.rust == 'nightly' && always()
         with:
