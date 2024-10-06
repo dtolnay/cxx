@@ -18,6 +18,7 @@
     clippy::nonminimal_bool,
     clippy::or_fun_call,
     clippy::redundant_else,
+    clippy::ref_option,
     clippy::shadow_unrelated,
     clippy::similar_names,
     clippy::single_match,
