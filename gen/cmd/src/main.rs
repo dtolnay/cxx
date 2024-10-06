@@ -15,6 +15,7 @@
     clippy::match_on_vec_items,
     clippy::match_same_arms,
     clippy::module_name_repetitions,
+    clippy::needless_lifetimes,
     clippy::needless_pass_by_value,
     clippy::new_without_default,
     clippy::nonminimal_bool,
