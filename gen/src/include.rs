@@ -174,7 +174,7 @@ pub(super) fn write(out: &mut OutFile) {
     }
 }
 
-impl<'a> Extend<&Include> for Includes<'a> {
+impl<'i, 'a> Extend<&'i Include> for Includes<'a> {
     fn extend<I: IntoIterator<Item = &'i Include>>(&mut self, iter: I) {
         self.custom.extend(iter.into_iter().cloned());
     }
