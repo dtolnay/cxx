@@ -174,13 +174,13 @@ pub(super) fn write(out: &mut OutFile) {
     }
 }
 
-impl<'i, 'a> Extend<&'i Include> for Includes<'a> {
+impl<'a> Extend<&Include> for Includes<'a> {
     fn extend<I: IntoIterator<Item = &'i Include>>(&mut self, iter: I) {
         self.custom.extend(iter.into_iter().cloned());
     }
 }
 
-impl<'i> From<&'i syntax::Include> for Include {
+impl From<&syntax::Include> for Include {
     fn from(include: &syntax::Include) -> Self {
         Include {
             path: include.path.clone(),
