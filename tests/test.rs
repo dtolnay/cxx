@@ -13,7 +13,7 @@
 
 use cxx::{SharedPtr, UniquePtr};
 use cxx_test_suite::module::ffi2;
-use cxx_test_suite::{cast, ffi, R};
+use cxx_test_suite::{cast, ffi, test_for_inner_attrs, R};
 use std::cell::Cell;
 use std::ffi::CStr;
 use std::panic::{self, RefUnwindSafe, UnwindSafe};
@@ -394,4 +394,9 @@ fn test_unwind_safe() {
 
     fn require_ref_unwind_safe<T: RefUnwindSafe>() {}
     require_ref_unwind_safe::<ffi::C>();
+}
+
+#[test]
+fn test_inner_attrs() {
+    test_for_inner_attrs::may_not_be_called();
 }

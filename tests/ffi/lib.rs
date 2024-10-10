@@ -394,6 +394,11 @@ mod other {
     }
 }
 
+pub mod test_for_inner_attrs {
+    #![allow(dead_code)]
+    pub fn may_not_be_called() {}
+}
+
 #[derive(PartialEq, Debug)]
 pub struct R(pub usize);
 
