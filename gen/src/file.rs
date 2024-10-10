@@ -21,7 +21,9 @@ fn parse(input: ParseStream, modules: &mut Vec<Module>) -> Result<()> {
     while !input.is_empty() {
         let mut cxx_bridge = false;
         let mut namespace = Namespace::ROOT;
+        let inner_attrs = input.call(Attribute::parse_inner)?;
         let mut attrs = input.call(Attribute::parse_outer)?;
+        attrs.extend(inner_attrs);
         for attr in &attrs {
             let path = &attr.path().segments;
             if path.len() == 2 && path[0].ident == "cxx" && path[1].ident == "bridge" {
