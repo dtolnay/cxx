@@ -111,6 +111,11 @@ jobs:
       - name: Check MODULE.bazel.lock up to date
         run: git diff --exit-code
         if: matrix.os == 'ubuntu' || matrix.os == 'macos'
+      - run: bazel run //third-party:vendor
+        if: matrix.os == 'ubuntu' || matrix.os == 'macos'
+      - name: Check third-party/bazel up to date
+        run: git diff --exit-code
+        if: matrix.os == 'ubuntu' || matrix.os == 'macos'
 
   minimal:
     name: Minimal versions
