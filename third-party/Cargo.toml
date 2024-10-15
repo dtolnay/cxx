@@ -4,6 +4,7 @@ name = "third-party"
 version = "0.0.0"
 edition = "2021"
 publish = false
+rust-version = "1.77"
 
 [dependencies]
 cc = "1.0.83"
