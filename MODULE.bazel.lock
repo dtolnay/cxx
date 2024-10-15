@@ -102,36 +102,23 @@
   "moduleExtensions": {
     "//tools/bazel:extension.bzl%crate_repositories": {
       "general": {
-        "bzlTransitiveDigest": "gJDg6gTp/VsgJd51w2/R2RiQxGoiL4LKK8VRFpNbas4=",
+        "bzlTransitiveDigest": "9oNuuIjsAAxBcCJpund16uJxFTBaHmfR+EwwwAwaD8E=",
         "usagesDigest": "6gRFPDvHh/8FhOfzCv0qcO3u/dw+ZWFe2lB7qQ0p5Uc=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
         "generatedRepoSpecs": {
-          "vendor__unicode-width-0.1.13": {
+          "vendor__unicode-width-0.1.14": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "sha256": "0336d538f7abc86d282a4189614dfaa90810dfc2c6f6427eaf88e16311dd225d",
+              "sha256": "7dd6e30e90baa6f72411720665d41d89b9a3d039dc45b8faea1ddd07f617f6af",
               "type": "tar.gz",
               "urls": [
-                "https://static.crates.io/crates/unicode-width/0.1.13/download"
+                "https://static.crates.io/crates/unicode-width/0.1.14/download"
               ],
-              "strip_prefix": "unicode-width-0.1.13",
-              "build_file": "@@//third-party/bazel:BUILD.unicode-width-0.1.13.bazel"
-            }
-          },
-          "vendor__clap_builder-4.5.15": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_archive",
-            "attributes": {
-              "sha256": "216aec2b177652e3846684cbfe25c9964d18ec45234f0f5da5157b207ed1aab6",
-              "type": "tar.gz",
-              "urls": [
-                "https://static.crates.io/crates/clap_builder/4.5.15/download"
-              ],
-              "strip_prefix": "clap_builder-4.5.15",
-              "build_file": "@@//third-party/bazel:BUILD.clap_builder-4.5.15.bazel"
+              "strip_prefix": "unicode-width-0.1.14",
+              "build_file": "@@//third-party/bazel:BUILD.unicode-width-0.1.14.bazel"
             }
           },
           "vendor__clap_lex-0.7.2": {
@@ -173,6 +160,32 @@
               "build_file": "@@//third-party/bazel:BUILD.quote-1.0.37.bazel"
             }
           },
+          "vendor__clap-4.5.20": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "sha256": "b97f376d85a664d5837dbae44bf546e6477a679ff6610010f17276f686d867e8",
+              "type": "tar.gz",
+              "urls": [
+                "https://static.crates.io/crates/clap/4.5.20/download"
+              ],
+              "strip_prefix": "clap-4.5.20",
+              "build_file": "@@//third-party/bazel:BUILD.clap-4.5.20.bazel"
+            }
+          },
+          "vendor__once_cell-1.20.2": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "sha256": "1261fe7e33c73b354eab43b1273a57c8f967d0391e80353e51f764ac02cf6775",
+              "type": "tar.gz",
+              "urls": [
+                "https://static.crates.io/crates/once_cell/1.20.2/download"
+              ],
+              "strip_prefix": "once_cell-1.20.2",
+              "build_file": "@@//third-party/bazel:BUILD.once_cell-1.20.2.bazel"
+            }
+          },
           "vendor__anstyle-1.0.8": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
@@ -184,19 +197,6 @@
               ],
               "strip_prefix": "anstyle-1.0.8",
               "build_file": "@@//third-party/bazel:BUILD.anstyle-1.0.8.bazel"
-            }
-          },
-          "vendor__cc-1.1.15": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_archive",
-            "attributes": {
-              "sha256": "57b6a275aa2903740dc87da01c62040406b8812552e97129a63ea8850a17c6e6",
-              "type": "tar.gz",
-              "urls": [
-                "https://static.crates.io/crates/cc/1.1.15/download"
-              ],
-              "strip_prefix": "cc-1.1.15",
-              "build_file": "@@//third-party/bazel:BUILD.cc-1.1.15.bazel"
             }
           },
           "vendor__windows_x86_64_gnu-0.52.6": {
@@ -238,19 +238,6 @@
               "build_file": "@@//third-party/bazel:BUILD.windows-sys-0.59.0.bazel"
             }
           },
-          "vendor__clap-4.5.16": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_archive",
-            "attributes": {
-              "sha256": "ed6719fffa43d0d87e5fd8caeab59be1554fb028cd30edc88fc4369b17971019",
-              "type": "tar.gz",
-              "urls": [
-                "https://static.crates.io/crates/clap/4.5.16/download"
-              ],
-              "strip_prefix": "clap-4.5.16",
-              "build_file": "@@//third-party/bazel:BUILD.clap-4.5.16.bazel"
-            }
-          },
           "vendor__windows_aarch64_gnullvm-0.52.6": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
@@ -290,30 +277,30 @@
               "build_file": "@@//third-party/bazel:BUILD.windows_x86_64_gnullvm-0.52.6.bazel"
             }
           },
-          "vendor__syn-2.0.76": {
+          "vendor__proc-macro2-1.0.87": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "sha256": "578e081a14e0cefc3279b0472138c513f37b41a08d5a3cca9b6e4e8ceb6cd525",
+              "sha256": "b3e4daa0dcf6feba26f985457cdf104d4b4256fc5a09547140f3631bb076b19a",
               "type": "tar.gz",
               "urls": [
-                "https://static.crates.io/crates/syn/2.0.76/download"
+                "https://static.crates.io/crates/proc-macro2/1.0.87/download"
               ],
-              "strip_prefix": "syn-2.0.76",
-              "build_file": "@@//third-party/bazel:BUILD.syn-2.0.76.bazel"
+              "strip_prefix": "proc-macro2-1.0.87",
+              "build_file": "@@//third-party/bazel:BUILD.proc-macro2-1.0.87.bazel"
             }
           },
-          "vendor__proc-macro2-1.0.86": {
+          "vendor__syn-2.0.79": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "sha256": "5e719e8df665df0d1c8fbfd238015744736151d4445ec0836b8e628aae103b77",
+              "sha256": "89132cd0bf050864e1d38dc3bbc07a0eb8e7530af26344d3d2bbbef83499f590",
               "type": "tar.gz",
               "urls": [
-                "https://static.crates.io/crates/proc-macro2/1.0.86/download"
+                "https://static.crates.io/crates/syn/2.0.79/download"
               ],
-              "strip_prefix": "proc-macro2-1.0.86",
-              "build_file": "@@//third-party/bazel:BUILD.proc-macro2-1.0.86.bazel"
+              "strip_prefix": "syn-2.0.79",
+              "build_file": "@@//third-party/bazel:BUILD.syn-2.0.79.bazel"
             }
           },
           "vendor__windows_i686_msvc-0.52.6": {
@@ -340,19 +327,6 @@
               ],
               "strip_prefix": "windows_x86_64_msvc-0.52.6",
               "build_file": "@@//third-party/bazel:BUILD.windows_x86_64_msvc-0.52.6.bazel"
-            }
-          },
-          "vendor__once_cell-1.19.0": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_archive",
-            "attributes": {
-              "sha256": "3fdb12b2476b595f9358c5161aa467c2438859caa136dec86c26fdd2efe17b92",
-              "type": "tar.gz",
-              "urls": [
-                "https://static.crates.io/crates/once_cell/1.19.0/download"
-              ],
-              "strip_prefix": "once_cell-1.19.0",
-              "build_file": "@@//third-party/bazel:BUILD.once_cell-1.19.0.bazel"
             }
           },
           "vendor__termcolor-1.4.1": {
@@ -401,17 +375,43 @@
               "build_file": "@@//third-party/bazel:BUILD.bazel"
             }
           },
-          "vendor__unicode-ident-1.0.12": {
+          "vendor__clap_builder-4.5.20": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "sha256": "3354b9ac3fae1ff6755cb6db53683adb661634f67557942dea4facebec0fee4b",
+              "sha256": "19bc80abd44e4bed93ca373a0704ccbd1b710dc5749406201bb018272808dc54",
               "type": "tar.gz",
               "urls": [
-                "https://static.crates.io/crates/unicode-ident/1.0.12/download"
+                "https://static.crates.io/crates/clap_builder/4.5.20/download"
               ],
-              "strip_prefix": "unicode-ident-1.0.12",
-              "build_file": "@@//third-party/bazel:BUILD.unicode-ident-1.0.12.bazel"
+              "strip_prefix": "clap_builder-4.5.20",
+              "build_file": "@@//third-party/bazel:BUILD.clap_builder-4.5.20.bazel"
+            }
+          },
+          "vendor__unicode-ident-1.0.13": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "sha256": "e91b56cd4cadaeb79bbf1a5645f6b4f8dc5bde8834ad5894a8db35fda9efa1fe",
+              "type": "tar.gz",
+              "urls": [
+                "https://static.crates.io/crates/unicode-ident/1.0.13/download"
+              ],
+              "strip_prefix": "unicode-ident-1.0.13",
+              "build_file": "@@//third-party/bazel:BUILD.unicode-ident-1.0.13.bazel"
+            }
+          },
+          "vendor__cc-1.1.30": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "sha256": "b16803a61b81d9eabb7eae2588776c4c1e584b738ede45fdbb4c972cec1e9945",
+              "type": "tar.gz",
+              "urls": [
+                "https://static.crates.io/crates/cc/1.1.30/download"
+              ],
+              "strip_prefix": "cc-1.1.30",
+              "build_file": "@@//third-party/bazel:BUILD.cc-1.1.30.bazel"
             }
           },
           "vendor__codespan-reporting-0.11.1": {
@@ -467,13 +467,13 @@
           ],
           [
             "",
-            "vendor__cc-1.1.15",
-            "vendor__cc-1.1.15"
+            "vendor__cc-1.1.30",
+            "vendor__cc-1.1.30"
           ],
           [
             "",
-            "vendor__clap-4.5.16",
-            "vendor__clap-4.5.16"
+            "vendor__clap-4.5.20",
+            "vendor__clap-4.5.20"
           ],
           [
             "",
@@ -482,13 +482,13 @@
           ],
           [
             "",
-            "vendor__once_cell-1.19.0",
-            "vendor__once_cell-1.19.0"
+            "vendor__once_cell-1.20.2",
+            "vendor__once_cell-1.20.2"
           ],
           [
             "",
-            "vendor__proc-macro2-1.0.86",
-            "vendor__proc-macro2-1.0.86"
+            "vendor__proc-macro2-1.0.87",
+            "vendor__proc-macro2-1.0.87"
           ],
           [
             "",
@@ -502,8 +502,8 @@
           ],
           [
             "",
-            "vendor__syn-2.0.76",
-            "vendor__syn-2.0.76"
+            "vendor__syn-2.0.79",
+            "vendor__syn-2.0.79"
           ]
         ]
       }
