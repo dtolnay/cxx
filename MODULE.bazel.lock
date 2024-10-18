@@ -85,8 +85,8 @@
     "https://bcr.bazel.build/modules/rules_python/0.22.1/MODULE.bazel": "26114f0c0b5e93018c0c066d6673f1a2c3737c7e90af95eff30cfee38d0bbac7",
     "https://bcr.bazel.build/modules/rules_python/0.22.1/source.json": "57226905e783bae7c37c2dd662be078728e48fa28ee4324a7eabcafb5a43d014",
     "https://bcr.bazel.build/modules/rules_python/0.4.0/MODULE.bazel": "9208ee05fd48bf09ac60ed269791cf17fb343db56c8226a720fbb1cdf467166c",
-    "https://bcr.bazel.build/modules/rules_rust/0.52.2/MODULE.bazel": "dd5891166055bbbd598eb31393041910d72e3ef7e8ba8c77a4156eeadb8e84cc",
-    "https://bcr.bazel.build/modules/rules_rust/0.52.2/source.json": "37e50dd517c33331585fe53913e6884b8f556fc7dca7fde6142b02cf38b17098",
+    "https://bcr.bazel.build/modules/rules_rust/0.53.0/MODULE.bazel": "00d5143caaa8d2caa7cc06f6c28e57510e76aa1eee0dfc9ba4914c1a2a5ac046",
+    "https://bcr.bazel.build/modules/rules_rust/0.53.0/source.json": "084705abc2de9216e75a3d012993d3ea86999ecbc6e3f93fa9e986925343b513",
     "https://bcr.bazel.build/modules/stardoc/0.5.0/MODULE.bazel": "f9f1f46ba8d9c3362648eea571c6f9100680efc44913618811b58cc9c02cd678",
     "https://bcr.bazel.build/modules/stardoc/0.5.1/MODULE.bazel": "1a05d92974d0c122f5ccf09291442580317cdd859f07a8655f1db9a60374f9f8",
     "https://bcr.bazel.build/modules/stardoc/0.5.4/MODULE.bazel": "6569966df04610b8520957cb8e97cf2e9faac2c0309657c537ab51c16c18a2a4",
@@ -1069,8 +1069,8 @@
     },
     "@@rules_rust~//rust:extensions.bzl%rust": {
       "general": {
-        "bzlTransitiveDigest": "5c1amtMqRIjZeQzRghhylnxEif6jE1Ixw5OxtVyjZ3E=",
-        "usagesDigest": "OAFKfHt/LcP0jLx6tovZ6gN3ILV5T0lAWBr3Ch9QnaM=",
+        "bzlTransitiveDigest": "9XQ0fUsWPzabxpghTSzuDZgIqyF9hIBjculN7ClU11k=",
+        "usagesDigest": "+a26KHvqrZT6VDS/QLUzbEmnimhwYKOR0ixJACgSNyE=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -2837,8 +2837,8 @@
     },
     "@@rules_rust~//rust/private:extensions.bzl%i": {
       "general": {
-        "bzlTransitiveDigest": "NdU/snnjMYl7a8wHXIYsDkIVNcoqxhgnb8ptu2NU54w=",
-        "usagesDigest": "ZZEUefWf8MERmnCauRnMvq2JYr/6042nYCYeYNbnS6M=",
+        "bzlTransitiveDigest": "zAErtVgmpSOUJ1l2NWaxZ6UyvVvtXMEXk+RmhSJwbNo=",
+        "usagesDigest": "A7MDnMKKdsuQuiE6AwCGaKNQMMIlElUn6ygcd0kEz40=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
