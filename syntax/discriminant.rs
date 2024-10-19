@@ -1,4 +1,7 @@
-use crate::syntax::Atom::{self, *};
+use crate::syntax::{
+    Atom::{self, *},
+    EnumRepr,
+};
 use proc_macro2::{Literal, Span, TokenStream};
 use quote::ToTokens;
 use std::cmp::Ordering;
@@ -179,7 +182,7 @@ impl Discriminant {
         }
     }
 
-    #[cfg(feature = "experimental-enum-variants-from-header")]
+    #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
     pub(crate) const fn checked_succ(self) -> Option<Self> {
         match self.sign {
             Sign::Negative => {
@@ -274,10 +277,10 @@ fn parse_int_suffix(suffix: &str) -> Result<Option<Atom>> {
 }
 
 #[derive(Copy, Clone)]
-struct Limits {
+pub(crate) struct Limits {
     repr: Atom,
-    min: Discriminant,
-    max: Discriminant,
+    pub min: Discriminant,
+    pub max: Discriminant,
 }
 
 impl Limits {
@@ -333,3 +336,16 @@ const LIMITS: [Limits; 8] = [
         max: Discriminant::pos(i64::MAX as u64),
     },
 ];
+
+impl EnumRepr {
+    #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
+    pub fn limits(&self) -> Limits {
+        match self {
+            &EnumRepr::Native { atom, repr_type: _ } => {
+                Limits::of(atom).expect("Unexpected EnumRepr")
+            }
+            #[cfg(feature = "experimental-enum-variants-from-header")]
+            &EnumRepr::Foreign { rust_type: _ } => todo!(),
+        }
+    }
+}
