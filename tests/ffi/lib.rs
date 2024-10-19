@@ -11,6 +11,7 @@
     clippy::needless_pass_by_value,
     clippy::ptr_arg,
     clippy::trivially_copy_pass_by_ref,
+    clippy::unnecessary_literal_bound,
     clippy::unnecessary_wraps,
     clippy::unused_self
 )]
