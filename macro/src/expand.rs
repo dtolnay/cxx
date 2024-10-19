@@ -2,7 +2,7 @@ use crate::syntax::atom::Atom::*;
 use crate::syntax::attrs::{self, OtherAttrs};
 use crate::syntax::cfg::CfgExpr;
 use crate::syntax::file::Module;
-use crate::syntax::instantiate::{ImplKey, NamedImplKey};
+use crate::syntax::instantiate::{CxxVectorPayloadImplKey, ImplKey, NamedImplKey, PtrMutability};
 use crate::syntax::qualified::QualifiedName;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
@@ -108,8 +108,8 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
             ImplKey::WeakPtr(ident) => {
                 expanded.extend(expand_weak_ptr(ident, types, explicit_impl));
             }
-            ImplKey::CxxVector(ident) => {
-                expanded.extend(expand_cxx_vector(ident, explicit_impl, types));
+            ImplKey::CxxVector(payload) => {
+                expanded.extend(expand_cxx_vector(payload, explicit_impl, types));
             }
         }
     }
@@ -1670,21 +1670,32 @@ fn expand_weak_ptr(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
 }
 
 fn expand_cxx_vector(
-    key: NamedImplKey,
+    payload: CxxVectorPayloadImplKey,
     explicit_impl: Option<&Impl>,
     types: &Types,
 ) -> TokenStream {
+    let (ptr_prefix, key, ty_prefix) = match payload {
+        CxxVectorPayloadImplKey::Named(id) => ("", id, quote! {}),
+        CxxVectorPayloadImplKey::Ptr(id, PtrMutability::Const) => ("ptrc$", id, quote! { *const }),
+        CxxVectorPayloadImplKey::Ptr(id, PtrMutability::Mut) => ("ptrm$", id, quote! { *mut }),
+    };
     let elem = key.rust;
+
     let name = elem.to_string();
     let resolve = types.resolve(elem);
-    let prefix = format!("cxxbridge1$std$vector${}$", resolve.name.to_symbol());
+    let prefix = format!(
+        "cxxbridge1$std$vector${}{}$",
+        ptr_prefix,
+        resolve.name.to_symbol()
+    );
     let link_new = format!("{}new", prefix);
     let link_size = format!("{}size", prefix);
     let link_get_unchecked = format!("{}get_unchecked", prefix);
     let link_push_back = format!("{}push_back", prefix);
     let link_pop_back = format!("{}pop_back", prefix);
     let unique_ptr_prefix = format!(
-        "cxxbridge1$unique_ptr$std$vector${}$",
+        "cxxbridge1$unique_ptr$std$vector${}{}$",
+        ptr_prefix,
         resolve.name.to_symbol(),
     );
     let link_unique_ptr_null = format!("{}null", unique_ptr_prefix);
@@ -1694,6 +1705,8 @@ fn expand_cxx_vector(
     let link_unique_ptr_drop = format!("{}drop", unique_ptr_prefix);
 
     let (impl_generics, ty_generics) = generics::split_for_impl(key, explicit_impl, resolve);
+    let impl_target = quote! { #elem #ty_generics };
+    let impl_ptr_target = quote! ( #ty_prefix #elem #ty_generics );
 
     let begin_span = explicit_impl.map_or(key.begin_span, |explicit| explicit.impl_token.span);
     let end_span = explicit_impl.map_or(key.end_span, |explicit| explicit.brace_token.span.join());
@@ -1743,82 +1756,286 @@ fn expand_cxx_vector(
         None
     };
 
-    quote_spanned! {end_span=>
-        #unsafe_token impl #impl_generics ::cxx::private::VectorElement for #elem #ty_generics {
-            fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
-                f.write_str(#name)
-            }
-            fn __vector_new() -> *mut ::cxx::CxxVector<Self> {
+    let by_value_methods_for_ptr = if can_pass_element_by_value {
+        Some(quote_spanned! {end_span=>
+            unsafe fn __push_back(
+                this: ::cxx::core::pin::Pin<&mut ::cxx::CxxVector<#ty_prefix Self>>,
+                value: &mut ::cxx::core::mem::ManuallyDrop<#ty_prefix Self>,
+            ) {
                 extern "C" {
-                    #[link_name = #link_new]
-                    fn __vector_new #impl_generics() -> *mut ::cxx::CxxVector<#elem #ty_generics>;
-                }
-                unsafe { __vector_new() }
-            }
-            fn __vector_size(v: &::cxx::CxxVector<Self>) -> usize {
-                extern "C" {
-                    #[link_name = #link_size]
-                    fn __vector_size #impl_generics(_: &::cxx::CxxVector<#elem #ty_generics>) -> usize;
-                }
-                unsafe { __vector_size(v) }
-            }
-            unsafe fn __get_unchecked(v: *mut ::cxx::CxxVector<Self>, pos: usize) -> *mut Self {
-                extern "C" {
-                    #[link_name = #link_get_unchecked]
-                    fn __get_unchecked #impl_generics(
-                        v: *mut ::cxx::CxxVector<#elem #ty_generics>,
-                        pos: usize,
-                    ) -> *mut ::cxx::core::ffi::c_void;
-                }
-                unsafe { __get_unchecked(v, pos) as *mut Self }
-            }
-            #by_value_methods
-            fn __unique_ptr_null() -> ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void> {
-                extern "C" {
-                    #[link_name = #link_unique_ptr_null]
-                    fn __unique_ptr_null(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>);
-                }
-                let mut repr = ::cxx::core::mem::MaybeUninit::uninit();
-                unsafe {
-                    __unique_ptr_null(&mut repr);
-                }
-                repr
-            }
-            unsafe fn __unique_ptr_raw(raw: *mut ::cxx::CxxVector<Self>) -> ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void> {
-                extern "C" {
-                    #[link_name = #link_unique_ptr_raw]
-                    fn __unique_ptr_raw #impl_generics(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>, raw: *mut ::cxx::CxxVector<#elem #ty_generics>);
-                }
-                let mut repr = ::cxx::core::mem::MaybeUninit::uninit();
-                unsafe {
-                    __unique_ptr_raw(&mut repr, raw);
-                }
-                repr
-            }
-            unsafe fn __unique_ptr_get(repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *const ::cxx::CxxVector<Self> {
-                extern "C" {
-                    #[link_name = #link_unique_ptr_get]
-                    fn __unique_ptr_get #impl_generics(this: *const ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *const ::cxx::CxxVector<#elem #ty_generics>;
-                }
-                unsafe { __unique_ptr_get(&repr) }
-            }
-            unsafe fn __unique_ptr_release(mut repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *mut ::cxx::CxxVector<Self> {
-                extern "C" {
-                    #[link_name = #link_unique_ptr_release]
-                    fn __unique_ptr_release #impl_generics(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *mut ::cxx::CxxVector<#elem #ty_generics>;
-                }
-                unsafe { __unique_ptr_release(&mut repr) }
-            }
-            unsafe fn __unique_ptr_drop(mut repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) {
-                extern "C" {
-                    #[link_name = #link_unique_ptr_drop]
-                    fn __unique_ptr_drop(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>);
+                    #[link_name = #link_push_back]
+                    fn __push_back #impl_generics(
+                        this: ::cxx::core::pin::Pin<&mut ::cxx::CxxVector<#ty_prefix #elem #ty_generics>>,
+                        value: *mut ::cxx::core::ffi::c_void,
+                    );
                 }
                 unsafe {
-                    __unique_ptr_drop(&mut repr);
+                    __push_back(
+                        this,
+                        value as *mut ::cxx::core::mem::ManuallyDrop<#ty_prefix Self> as *mut ::cxx::core::ffi::c_void,
+                    );
                 }
             }
-        }
+            unsafe fn __pop_back(
+                this: ::cxx::core::pin::Pin<&mut ::cxx::CxxVector<#ty_prefix Self>>,
+                out: &mut ::cxx::core::mem::MaybeUninit<#ty_prefix Self>,
+            ) {
+                extern "C" {
+                    #[link_name = #link_pop_back]
+                    fn __pop_back #impl_generics(
+                        this: ::cxx::core::pin::Pin<&mut ::cxx::CxxVector<#ty_prefix #elem #ty_generics>>,
+                        out: *mut ::cxx::core::ffi::c_void,
+                    );
+                }
+                unsafe {
+                    __pop_back(
+                        this,
+                        out as *mut ::cxx::core::mem::MaybeUninit<#ty_prefix Self> as *mut ::cxx::core::ffi::c_void,
+                    );
+                }
+            }
+        })
+    } else {
+        None
+    };
+    match ptr_prefix {
+        "ptrc$" => quote_spanned! {end_span=>
+            #unsafe_token impl #impl_generics ::cxx::private::ConstPtr for #impl_target {
+                #[doc(hidden)]
+                fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
+                    f.write_str(#name)
+                }
+                fn __vector_new() -> *mut ::cxx::CxxVector<*const Self> {
+                    extern "C" {
+                        #[link_name = #link_new]
+                        fn __vector_new #impl_generics() -> *mut ::cxx::CxxVector<#ty_prefix #elem #ty_generics>;
+                    }
+                    unsafe { __vector_new() }
+                }
+                fn __vector_size(v: &::cxx::CxxVector<*const Self>) -> usize {
+                    extern "C" {
+                        #[link_name = #link_size]
+                        fn __vector_size #impl_generics(_: &::cxx::CxxVector<#impl_ptr_target>) -> usize;
+                    }
+                    unsafe { __vector_size(v) }
+                }
+                unsafe fn __get_unchecked(v: *mut ::cxx::CxxVector<*const Self>, pos: usize) -> *mut *const Self {
+                    extern "C" {
+                        #[link_name = #link_get_unchecked]
+                        fn __get_unchecked #impl_generics(
+                            v: *mut ::cxx::CxxVector<#impl_ptr_target>,
+                            pos: usize,
+                        ) -> *mut ::cxx::core::ffi::c_void;
+                    }
+                    unsafe { __get_unchecked(v, pos) as *mut *const Self }
+                }
+                #by_value_methods_for_ptr
+                fn __unique_ptr_null() -> ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void> {
+                    extern "C" {
+                        #[link_name = #link_unique_ptr_null]
+                        fn __unique_ptr_null(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>);
+                    }
+                    let mut repr = ::cxx::core::mem::MaybeUninit::uninit();
+                    unsafe {
+                        __unique_ptr_null(&mut repr);
+                    }
+                    repr
+                }
+                unsafe fn __unique_ptr_raw(raw: *mut ::cxx::CxxVector<*const Self>) -> ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void> {
+                    extern "C" {
+                        #[link_name = #link_unique_ptr_raw]
+                        fn __unique_ptr_raw #impl_generics(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>, raw: *mut ::cxx::CxxVector<#impl_ptr_target>);
+                    }
+                    let mut repr = ::cxx::core::mem::MaybeUninit::uninit();
+                    unsafe {
+                        __unique_ptr_raw(&mut repr, raw);
+                    }
+                    repr
+                }
+                unsafe fn __unique_ptr_get(repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *const ::cxx::CxxVector<*const Self> {
+                    extern "C" {
+                        #[link_name = #link_unique_ptr_get]
+                        fn __unique_ptr_get #impl_generics(this: *const ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *const ::cxx::CxxVector<#impl_ptr_target>;
+                    }
+                    unsafe { __unique_ptr_get(&repr) }
+                }
+                unsafe fn __unique_ptr_release(mut repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *mut ::cxx::CxxVector<*const Self> {
+                    extern "C" {
+                        #[link_name = #link_unique_ptr_release]
+                        fn __unique_ptr_release #impl_generics(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *mut ::cxx::CxxVector<#impl_ptr_target>;
+                    }
+                    unsafe { __unique_ptr_release(&mut repr) }
+                }
+                unsafe fn __unique_ptr_drop(mut repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) {
+                    extern "C" {
+                        #[link_name = #link_unique_ptr_drop]
+                        fn __unique_ptr_drop(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>);
+                    }
+                    unsafe {
+                        __unique_ptr_drop(&mut repr);
+                    }
+                }
+            }
+        },
+
+        "ptrm$" => quote_spanned! {end_span=>
+            #unsafe_token impl #impl_generics ::cxx::private::MutPtr for #impl_target {
+                #[doc(hidden)]
+                fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
+                    f.write_str(#name)
+                }
+                fn __vector_new() -> *mut ::cxx::CxxVector<*mut Self> {
+                    extern "C" {
+                        #[link_name = #link_new]
+                        fn __vector_new #impl_generics() -> *mut ::cxx::CxxVector<#ty_prefix #elem #ty_generics>;
+                    }
+                    unsafe { __vector_new() }
+                }
+                fn __vector_size(v: &::cxx::CxxVector<*mut Self>) -> usize {
+                    extern "C" {
+                        #[link_name = #link_size]
+                        fn __vector_size #impl_generics(_: &::cxx::CxxVector<#impl_ptr_target>) -> usize;
+                    }
+                    unsafe { __vector_size(v) }
+                }
+                unsafe fn __get_unchecked(v: *mut ::cxx::CxxVector<*mut Self>, pos: usize) -> *mut *mut Self {
+                    extern "C" {
+                        #[link_name = #link_get_unchecked]
+                        fn __get_unchecked #impl_generics(
+                            v: *mut ::cxx::CxxVector<#impl_ptr_target>,
+                            pos: usize,
+                        ) -> *mut ::cxx::core::ffi::c_void;
+                    }
+                    unsafe { __get_unchecked(v, pos) as *mut *mut Self }
+                }
+                #by_value_methods_for_ptr
+                fn __unique_ptr_null() -> ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void> {
+                    extern "C" {
+                        #[link_name = #link_unique_ptr_null]
+                        fn __unique_ptr_null(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>);
+                    }
+                    let mut repr = ::cxx::core::mem::MaybeUninit::uninit();
+                    unsafe {
+                        __unique_ptr_null(&mut repr);
+                    }
+                    repr
+                }
+                unsafe fn __unique_ptr_raw(raw: *mut ::cxx::CxxVector<*mut Self>) -> ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void> {
+                    extern "C" {
+                        #[link_name = #link_unique_ptr_raw]
+                        fn __unique_ptr_raw #impl_generics(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>, raw: *mut ::cxx::CxxVector<#impl_ptr_target>);
+                    }
+                    let mut repr = ::cxx::core::mem::MaybeUninit::uninit();
+                    unsafe {
+                        __unique_ptr_raw(&mut repr, raw);
+                    }
+                    repr
+                }
+                unsafe fn __unique_ptr_get(repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *const ::cxx::CxxVector<*mut Self> {
+                    extern "C" {
+                        #[link_name = #link_unique_ptr_get]
+                        fn __unique_ptr_get #impl_generics(this: *const ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *const ::cxx::CxxVector<#impl_ptr_target>;
+                    }
+                    unsafe { __unique_ptr_get(&repr) }
+                }
+                unsafe fn __unique_ptr_release(mut repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *mut ::cxx::CxxVector<*mut Self> {
+                    extern "C" {
+                        #[link_name = #link_unique_ptr_release]
+                        fn __unique_ptr_release #impl_generics(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *mut ::cxx::CxxVector<#impl_ptr_target>;
+                    }
+                    unsafe { __unique_ptr_release(&mut repr) }
+                }
+                unsafe fn __unique_ptr_drop(mut repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) {
+                    extern "C" {
+                        #[link_name = #link_unique_ptr_drop]
+                        fn __unique_ptr_drop(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>);
+                    }
+                    unsafe {
+                        __unique_ptr_drop(&mut repr);
+                    }
+                }
+
+            }
+        },
+
+        _ => quote_spanned! {end_span=>
+            #unsafe_token impl #impl_generics ::cxx::private::VectorElement for #impl_target {
+                #[doc(hidden)]
+                fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
+                    f.write_str(#name)
+                }
+                fn __vector_new() -> *mut ::cxx::CxxVector<Self> {
+                    extern "C" {
+                        #[link_name = #link_new]
+                        fn __vector_new #impl_generics() -> *mut ::cxx::CxxVector<#elem #ty_generics>;
+                    }
+                    unsafe { __vector_new() }
+                }
+                fn __vector_size(v: &::cxx::CxxVector<Self>) -> usize {
+                    extern "C" {
+                        #[link_name = #link_size]
+                        fn __vector_size #impl_generics(_: &::cxx::CxxVector<#impl_target>) -> usize;
+                    }
+                    unsafe { __vector_size(v) }
+                }
+                unsafe fn __get_unchecked(v: *mut ::cxx::CxxVector<Self>, pos: usize) -> *mut Self {
+                    extern "C" {
+                        #[link_name = #link_get_unchecked]
+                        fn __get_unchecked #impl_generics(
+                            v: *mut ::cxx::CxxVector<#impl_target>,
+                            pos: usize,
+                        ) -> *mut ::cxx::core::ffi::c_void;
+                    }
+                    unsafe { __get_unchecked(v, pos) as *mut Self }
+                }
+                #by_value_methods
+                fn __unique_ptr_null() -> ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void> {
+                    extern "C" {
+                        #[link_name = #link_unique_ptr_null]
+                        fn __unique_ptr_null(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>);
+                    }
+                    let mut repr = ::cxx::core::mem::MaybeUninit::uninit();
+                    unsafe {
+                        __unique_ptr_null(&mut repr);
+                    }
+                    repr
+                }
+                unsafe fn __unique_ptr_raw(raw: *mut ::cxx::CxxVector<Self>) -> ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void> {
+                    extern "C" {
+                        #[link_name = #link_unique_ptr_raw]
+                        fn __unique_ptr_raw #impl_generics(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>, raw: *mut ::cxx::CxxVector<#impl_target>);
+                    }
+                    let mut repr = ::cxx::core::mem::MaybeUninit::uninit();
+                    unsafe {
+                        __unique_ptr_raw(&mut repr, raw);
+                    }
+                    repr
+                }
+                unsafe fn __unique_ptr_get(repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *const ::cxx::CxxVector<Self> {
+                    extern "C" {
+                        #[link_name = #link_unique_ptr_get]
+                        fn __unique_ptr_get #impl_generics(this: *const ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *const ::cxx::CxxVector<#impl_target>;
+                    }
+                    unsafe { __unique_ptr_get(&repr) }
+                }
+                unsafe fn __unique_ptr_release(mut repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *mut ::cxx::CxxVector<Self> {
+                    extern "C" {
+                        #[link_name = #link_unique_ptr_release]
+                        fn __unique_ptr_release #impl_generics(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *mut ::cxx::CxxVector<#impl_target>;
+                    }
+                    unsafe { __unique_ptr_release(&mut repr) }
+                }
+                unsafe fn __unique_ptr_drop(mut repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) {
+                    extern "C" {
+                        #[link_name = #link_unique_ptr_drop]
+                        fn __unique_ptr_drop(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>);
+                    }
+                    unsafe {
+                        __unique_ptr_drop(&mut repr);
+                    }
+                }
+            }
+        },
     }
 }
 
