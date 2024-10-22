@@ -203,26 +203,29 @@ fn check_type_weak_ptr(cx: &mut Check, ptr: &Ty1) {
 }
 
 fn check_type_cxx_vector(cx: &mut Check, ptr: &Ty1) {
-    if let Type::Ident(ident) = &ptr.inner {
-        if cx.types.rust.contains(&ident.rust) {
-            cx.error(
-                ptr,
-                "C++ vector containing a Rust type is not supported yet",
-            );
-            return;
-        }
+    match &ptr.inner {
+        Type::Ident(ident) => {
+            if cx.types.rust.contains(&ident.rust) {
+                cx.error(
+                    ptr,
+                    "C++ vector containing a Rust type is not supported yet",
+                );
+                return;
+            }
 
-        match Atom::from(&ident.rust) {
-            None
-            | Some(
-                U8 | U16 | U32 | U64 | Usize | I8 | I16 | I32 | I64 | Isize | F32 | F64 | CxxString,
-            ) => return,
-            Some(Char) => { /* todo */ }
-            Some(Bool | RustString) => {}
+            match Atom::from(&ident.rust) {
+                None | Some(U8) | Some(U16) | Some(U32) | Some(U64) | Some(Usize) | Some(I8)
+                | Some(I16) | Some(I32) | Some(I64) | Some(Isize) | Some(F32) | Some(F64)
+                | Some(CxxString) => return,
+                Some(Char) => { /* todo */ }
+                Some(Bool) | Some(RustString) => {}
+            }
+        }
+        Type::Ptr(ptr) => check_type_ptr(cx, ptr), // TODO - confirm whether we need to recurse here
+        _ => {
+            cx.error(ptr, "unsupported vector element type");
         }
     }
-
-    cx.error(ptr, "unsupported vector element type");
 }
 
 fn check_type_ref(cx: &mut Check, ty: &Ref) {

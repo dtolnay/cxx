@@ -132,6 +132,8 @@ pub mod ffi {
         fn c_return_nested_ns_enum(n: u16) -> ABEnum;
         fn c_return_const_ptr(n: usize) -> *const C;
         fn c_return_mut_ptr(n: usize) -> *mut C;
+        fn c_return_unique_ptr_vector_const_ptr(n: usize) -> UniquePtr<CxxVector<*const C>>;
+        fn c_return_unique_ptr_vector_mut_ptr(n: usize) -> UniquePtr<CxxVector<*mut C>>;
 
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);
@@ -180,6 +182,8 @@ pub mod ffi {
         fn c_take_rust_vec_nested_ns_shared(v: Vec<ABShared>);
         unsafe fn c_take_const_ptr(c: *const C) -> usize;
         unsafe fn c_take_mut_ptr(c: *mut C) -> usize;
+        unsafe fn c_take_unique_ptr_vector_const_ptr(c: UniquePtr<CxxVector<*const C>>) -> usize;
+        unsafe fn c_take_unique_ptr_vector_mut_ptr(c: UniquePtr<CxxVector<*mut C>>) -> usize;
 
         fn c_try_return_void() -> Result<()>;
         fn c_try_return_primitive() -> Result<usize>;

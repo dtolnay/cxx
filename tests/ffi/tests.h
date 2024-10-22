@@ -124,6 +124,8 @@ Enum c_return_enum(uint16_t n);
 std::unique_ptr<Borrow> c_return_borrow(const std::string &s);
 const C *c_return_const_ptr(size_t n);
 C *c_return_mut_ptr(size_t n);
+std::unique_ptr<std::vector<const C *>> c_return_unique_ptr_vector_const_ptr(size_t n);
+std::unique_ptr<std::vector<C *>> c_return_unique_ptr_vector_mut_ptr(size_t n);
 
 void c_take_primitive(size_t n);
 void c_take_shared(Shared shared);
@@ -173,6 +175,8 @@ void c_take_ns_enum(::A::AEnum e);
 void c_take_nested_ns_enum(::A::B::ABEnum e);
 size_t c_take_const_ptr(const C *c);
 size_t c_take_mut_ptr(C *c);
+size_t c_take_unique_ptr_vector_const_ptr(std::unique_ptr<std::vector<const C *>> c);
+size_t c_take_unique_ptr_vector_mut_ptr(std::unique_ptr<std::vector<C *>> c);
 
 void c_try_return_void();
 size_t c_try_return_primitive();

@@ -633,6 +633,42 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
     ptr->~unique_ptr();                                                        \
   }
 
+#define STD_VECTOR_OPS_PTR(PTR_PREFIX, RUST_TYPE, CXX_TYPE)                    \
+  std::vector<CXX_TYPE> *cxxbridge1$std$vector$##PTR_PREFIX##$##RUST_TYPE##$new() noexcept {  \
+    return new std::vector<CXX_TYPE>();                                        \
+  }                                                                            \
+  std::size_t cxxbridge1$std$vector$##PTR_PREFIX##$##RUST_TYPE##$size(         \
+      const std::vector<CXX_TYPE> &s) noexcept {                               \
+    return s.size();                                                           \
+  }                                                                            \
+  CXX_TYPE *cxxbridge1$std$vector$##PTR_PREFIX##$##RUST_TYPE##$get_unchecked(  \
+      std::vector<CXX_TYPE> *s, std::size_t pos) noexcept {                    \
+    return &(*s)[pos];                                                         \
+  }                                                                            \
+  void cxxbridge1$unique_ptr$std$vector$##PTR_PREFIX##$##RUST_TYPE##$null(     \
+      std::unique_ptr<std::vector<CXX_TYPE>> *ptr) noexcept {                  \
+    new (ptr) std::unique_ptr<std::vector<CXX_TYPE>>();                        \
+  }                                                                            \
+  void cxxbridge1$unique_ptr$std$vector$##PTR_PREFIX##$##RUST_TYPE##$raw(      \
+      std::unique_ptr<std::vector<CXX_TYPE>> *ptr,                             \
+      std::vector<CXX_TYPE> *raw) noexcept {                                   \
+    new (ptr) std::unique_ptr<std::vector<CXX_TYPE>>(raw);                     \
+  }                                                                            \
+  const std::vector<CXX_TYPE>                                                  \
+      *cxxbridge1$unique_ptr$std$vector$##PTR_PREFIX##$##RUST_TYPE##$get(      \
+          const std::unique_ptr<std::vector<CXX_TYPE>> &ptr) noexcept {        \
+    return ptr.get();                                                          \
+  }                                                                            \
+  std::vector<CXX_TYPE>                                                        \
+      *cxxbridge1$unique_ptr$std$vector$##PTR_PREFIX##$##RUST_TYPE##$release(  \
+          std::unique_ptr<std::vector<CXX_TYPE>> &ptr) noexcept {              \
+    return ptr.release();                                                      \
+  }                                                                            \
+  void cxxbridge1$unique_ptr$std$vector$##PTR_PREFIX##$##RUST_TYPE##$drop(     \
+      std::unique_ptr<std::vector<CXX_TYPE>> *ptr) noexcept {                  \
+    ptr->~unique_ptr();                                                        \
+  }
+
 #define STD_VECTOR_TRIVIAL_OPS(RUST_TYPE, CXX_TYPE)                            \
   void cxxbridge1$std$vector$##RUST_TYPE##$push_back(                          \
       std::vector<CXX_TYPE> *v, CXX_TYPE *value) noexcept {                    \
@@ -640,6 +676,18 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
     destroy(value);                                                            \
   }                                                                            \
   void cxxbridge1$std$vector$##RUST_TYPE##$pop_back(std::vector<CXX_TYPE> *v,  \
+                                                    CXX_TYPE *out) noexcept {  \
+    new (out) CXX_TYPE(std::move(v->back()));                                  \
+    v->pop_back();                                                             \
+  }
+
+#define STD_VECTOR_TRIVIAL_OPS_PTR(PTR_PREFIX, RUST_TYPE, CXX_TYPE)            \
+  void cxxbridge1$std$vector$##PTR_PREFIX##$##RUST_TYPE##$push_back(           \
+      std::vector<CXX_TYPE> *v, CXX_TYPE *value) noexcept {                    \
+    v->push_back(std::move(*value));                                           \
+    destroy(value);                                                            \
+  }                                                                            \
+  void cxxbridge1$std$vector$##PTR_PREFIX##$##RUST_TYPE##$pop_back(std::vector<CXX_TYPE> *v,  \
                                                     CXX_TYPE *out) noexcept {  \
     new (out) CXX_TYPE(std::move(v->back()));                                  \
     v->pop_back();                                                             \
@@ -763,14 +811,48 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
   MACRO(f32, float)                                                            \
   MACRO(f64, double)
 
+#define FOR_EACH_NUMERIC_WITH_PTR_PREFIX(MACRO)                                \
+  MACRO(ptrc, u8, std::uint8_t)                                                \
+  MACRO(ptrc, u16, std::uint16_t)                                              \
+  MACRO(ptrc, u32, std::uint32_t)                                              \
+  MACRO(ptrc, u64, std::uint64_t)                                              \
+  MACRO(ptrc, i8, std::int8_t)                                                 \
+  MACRO(ptrc, i16, std::int16_t)                                               \
+  MACRO(ptrc, i32, std::int32_t)                                               \
+  MACRO(ptrc, i64, std::int64_t)                                               \
+  MACRO(ptrc, f32, float)                                                      \
+  MACRO(ptrc, f64, double)                                                     \
+  MACRO(ptrm, u8, std::uint8_t)                                                \
+  MACRO(ptrm, u16, std::uint16_t)                                              \
+  MACRO(ptrm, u32, std::uint32_t)                                              \
+  MACRO(ptrm, u64, std::uint64_t)                                              \
+  MACRO(ptrm, i8, std::int8_t)                                                 \
+  MACRO(ptrm, i16, std::int16_t)                                               \
+  MACRO(ptrm, i32, std::int32_t)                                               \
+  MACRO(ptrm, i64, std::int64_t)                                               \
+  MACRO(ptrm, f32, float)                                                      \
+  MACRO(ptrm, f64, double)                                                     
+
 #define FOR_EACH_TRIVIAL_STD_VECTOR(MACRO)                                     \
   FOR_EACH_NUMERIC(MACRO)                                                      \
   MACRO(usize, std::size_t)                                                    \
   MACRO(isize, rust::isize)
 
+#define FOR_EACH_TRIVIAL_STD_VECTOR_PTR(MACRO)                                 \
+  FOR_EACH_NUMERIC_WITH_PTR_PREFIX(MACRO)                                      \
+  MACRO(ptrc, usize, std::size_t)                                              \
+  MACRO(ptrc, isize, rust::isize)                                              \
+  MACRO(ptrm, usize, std::size_t)                                              \
+  MACRO(ptrm, isize, rust::isize)
+
 #define FOR_EACH_STD_VECTOR(MACRO)                                             \
   FOR_EACH_TRIVIAL_STD_VECTOR(MACRO)                                           \
   MACRO(string, std::string)
+
+#define FOR_EACH_STD_VECTOR_PTR(MACRO)                                         \
+  FOR_EACH_TRIVIAL_STD_VECTOR_PTR(MACRO)                                       \
+  MACRO(ptrc, string, std::string)                                             \
+  MACRO(ptrm, string, std::string)
 
 #define FOR_EACH_RUST_VEC(MACRO)                                               \
   FOR_EACH_NUMERIC(MACRO)                                                      \
@@ -791,6 +873,8 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
 extern "C" {
 FOR_EACH_STD_VECTOR(STD_VECTOR_OPS)
 FOR_EACH_TRIVIAL_STD_VECTOR(STD_VECTOR_TRIVIAL_OPS)
+FOR_EACH_STD_VECTOR_PTR(STD_VECTOR_OPS_PTR)
+FOR_EACH_TRIVIAL_STD_VECTOR_PTR(STD_VECTOR_TRIVIAL_OPS_PTR)
 FOR_EACH_RUST_VEC(RUST_VEC_EXTERNS)
 FOR_EACH_SHARED_PTR(SHARED_PTR_OPS)
 } // extern "C"
