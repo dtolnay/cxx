@@ -73,7 +73,6 @@ rust_library(
     deps = [
         "//third-party:cc",
         "//third-party:codespan-reporting",
-        "//third-party:once_cell",
         "//third-party:proc-macro2",
         "//third-party:quote",
         "//third-party:scratch",

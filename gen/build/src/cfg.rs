@@ -344,12 +344,11 @@ mod r#impl {
     use crate::intern::{intern, InternedString};
     use crate::syntax::map::UnorderedMap as Map;
     use crate::vec::{self, InternedVec as _};
-    use once_cell::sync::Lazy;
     use std::cell::RefCell;
     use std::fmt::{self, Debug};
     use std::marker::PhantomData;
     use std::ops::{Deref, DerefMut};
-    use std::sync::{PoisonError, RwLock};
+    use std::sync::{OnceLock, PoisonError, RwLock};
 
     struct CurrentCfg {
         include_prefix: InternedString,
@@ -378,7 +377,10 @@ mod r#impl {
         }
     }
 
-    static CURRENT: Lazy<RwLock<CurrentCfg>> = Lazy::new(|| RwLock::new(CurrentCfg::default()));
+    fn current() -> &'static RwLock<CurrentCfg> {
+        static CURRENT: OnceLock<RwLock<CurrentCfg>> = OnceLock::new();
+        CURRENT.get_or_init(|| RwLock::new(CurrentCfg::default()))
+    }
 
     thread_local! {
         // FIXME: If https://github.com/rust-lang/rust/issues/77425 is resolved,
@@ -401,7 +403,7 @@ mod r#impl {
 
     impl<'a> Cfg<'a> {
         fn current() -> super::Cfg<'a> {
-            let current = CURRENT.read().unwrap_or_else(PoisonError::into_inner);
+            let current = current().read().unwrap_or_else(PoisonError::into_inner);
             let include_prefix = current.include_prefix.str();
             let exported_header_dirs = current.exported_header_dirs.vec();
             let exported_header_prefixes = current.exported_header_prefixes.vec();
@@ -481,7 +483,7 @@ mod r#impl {
                     doxygen,
                     marker: _,
                 } = cfg;
-                let mut current = CURRENT.write().unwrap_or_else(PoisonError::into_inner);
+                let mut current = current().write().unwrap_or_else(PoisonError::into_inner);
                 current.include_prefix = intern(include_prefix);
                 current.exported_header_dirs = vec::intern(exported_header_dirs);
                 current.exported_header_prefixes = vec::intern(exported_header_prefixes);

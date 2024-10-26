@@ -1,11 +1,11 @@
 use crate::gen::{CfgEvaluator, CfgResult};
-use once_cell::sync::OnceCell;
 use std::borrow::Borrow;
 use std::cmp::Ordering;
 use std::collections::{BTreeMap as Map, BTreeSet as Set};
 use std::env;
+use std::sync::OnceLock;
 
-static ENV: OnceCell<CargoEnv> = OnceCell::new();
+static ENV: OnceLock<CargoEnv> = OnceLock::new();
 
 struct CargoEnv {
     features: Set<Name>,
