@@ -69,7 +69,6 @@ rust_library(
     deps = [
         "@crates.io//:cc",
         "@crates.io//:codespan-reporting",
-        "@crates.io//:once_cell",
         "@crates.io//:proc-macro2",
         "@crates.io//:quote",
         "@crates.io//:scratch",
