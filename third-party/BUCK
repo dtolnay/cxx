@@ -150,35 +150,6 @@ cargo.rust_library(
 )
 
 alias(
-    name = "once_cell",
-    actual = ":once_cell-1.20.2",
-    visibility = ["PUBLIC"],
-)
-
-http_archive(
-    name = "once_cell-1.20.2.crate",
-    sha256 = "1261fe7e33c73b354eab43b1273a57c8f967d0391e80353e51f764ac02cf6775",
-    strip_prefix = "once_cell-1.20.2",
-    urls = ["https://static.crates.io/crates/once_cell/1.20.2/download"],
-    visibility = [],
-)
-
-cargo.rust_library(
-    name = "once_cell-1.20.2",
-    srcs = [":once_cell-1.20.2.crate"],
-    crate = "once_cell",
-    crate_root = "once_cell-1.20.2.crate/src/lib.rs",
-    edition = "2021",
-    features = [
-        "alloc",
-        "default",
-        "race",
-        "std",
-    ],
-    visibility = [],
-)
-
-alias(
     name = "proc-macro2",
     actual = ":proc-macro2-1.0.87",
     visibility = ["PUBLIC"],

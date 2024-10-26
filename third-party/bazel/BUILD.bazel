@@ -50,12 +50,6 @@ alias(
 )
 
 alias(
-    name = "once_cell",
-    actual = "@vendor__once_cell-1.20.2//:once_cell",
-    tags = ["manual"],
-)
-
-alias(
     name = "proc-macro2",
     actual = "@vendor__proc-macro2-1.0.87//:proc_macro2",
     tags = ["manual"],
