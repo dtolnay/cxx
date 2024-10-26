@@ -18,7 +18,7 @@
 //!
 //! <br>
 //!
-//! *Compiler support: requires rustc 1.67+ and c++11 or newer*<br>
+//! *Compiler support: requires rustc 1.70+ and c++11 or newer*<br>
 //! *[Release notes](https://github.com/dtolnay/cxx/releases)*
 //!
 //! <br>
