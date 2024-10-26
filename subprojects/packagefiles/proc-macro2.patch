@@ -1,0 +1,10 @@
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -19,7 +19,6 @@
+     "Alex Crichton <alex@alexcrichton.com>",
+ ]
+ build = "build.rs"
+-autolib = false
+ autobins = false
+ autoexamples = false
+ autotests = false

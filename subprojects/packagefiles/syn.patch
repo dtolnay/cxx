@@ -1,0 +1,10 @@
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -25,7 +25,6 @@
+     "/src/**",
+     "/tests/**",
+ ]
+-autolib = false
+ autobins = false
+ autoexamples = false
+ autotests = false

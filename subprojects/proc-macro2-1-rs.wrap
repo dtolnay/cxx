@@ -1,0 +1,8 @@
+[wrap-file]
+directory = proc-macro2-1.0.89
+source_url = https://static.crates.io/crates/proc-macro2/1.0.89/download
+source_filename = unicode-ident-1.0.89.tar.gz
+source_hash = f139b0662de085916d1fb67d2b4169d1addddda1919e696f3252b740b629986e
+method = cargo
+# https://github.com/mesonbuild/meson/issues/13826
+diff_files = proc-macro2.patch
