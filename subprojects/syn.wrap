@@ -1,0 +1,6 @@
+[wrap-file]
+directory = syn-2.0.85
+source_url = https://static.crates.io/crates/syn/2.0.85/download
+source_filename = syn-2.0.85.tar.gz
+source_hash = 5023162dfcd14ef8f32034d8bcd4cc5ddc61ef7a247c024a33e24e1f24d21b56
+patch_directory = syn
