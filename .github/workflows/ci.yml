@@ -116,6 +116,23 @@ jobs:
         run: git diff --exit-code
         if: matrix.os == 'ubuntu' || matrix.os == 'macos'
 
+  meson:
+    name: Meson
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: mesonbuild/meson
+          path: meson
+      - run: sudo apt-get install lld ninja-build
+      - run: meson/meson.py setup --native-file=tools/meson/native.ini build
+      - run: meson/meson.py compile -C build
+      - run: build/demo/demo
+      - run: meson/meson.py test -C build
+
   minimal:
     name: Minimal versions
     needs: pre_ci
