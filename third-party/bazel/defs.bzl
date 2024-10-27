@@ -295,13 +295,13 @@ def aliases(
 _NORMAL_DEPENDENCIES = {
     "third-party": {
         _COMMON_CONDITION: {
-            "cc": Label("@vendor__cc-1.1.30//:cc"),
+            "cc": Label("@vendor__cc-1.1.31//:cc"),
             "clap": Label("@vendor__clap-4.5.20//:clap"),
             "codespan-reporting": Label("@vendor__codespan-reporting-0.11.1//:codespan_reporting"),
-            "proc-macro2": Label("@vendor__proc-macro2-1.0.87//:proc_macro2"),
+            "proc-macro2": Label("@vendor__proc-macro2-1.0.89//:proc_macro2"),
             "quote": Label("@vendor__quote-1.0.37//:quote"),
             "scratch": Label("@vendor__scratch-1.0.7//:scratch"),
-            "syn": Label("@vendor__syn-2.0.79//:syn"),
+            "syn": Label("@vendor__syn-2.0.85//:syn"),
         },
     },
 }
@@ -419,22 +419,22 @@ def crate_repositories():
     """
     maybe(
         http_archive,
-        name = "vendor__anstyle-1.0.8",
-        sha256 = "1bec1de6f59aedf83baf9ff929c98f2ad654b97c9510f4e70cf6f661d49fd5b1",
+        name = "vendor__anstyle-1.0.9",
+        sha256 = "8365de52b16c035ff4fcafe0092ba9390540e3e352870ac09933bebcaa2c8c56",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/anstyle/1.0.8/download"],
-        strip_prefix = "anstyle-1.0.8",
-        build_file = Label("//third-party/bazel:BUILD.anstyle-1.0.8.bazel"),
+        urls = ["https://static.crates.io/crates/anstyle/1.0.9/download"],
+        strip_prefix = "anstyle-1.0.9",
+        build_file = Label("//third-party/bazel:BUILD.anstyle-1.0.9.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__cc-1.1.30",
-        sha256 = "b16803a61b81d9eabb7eae2588776c4c1e584b738ede45fdbb4c972cec1e9945",
+        name = "vendor__cc-1.1.31",
+        sha256 = "c2e7962b54006dcfcc61cb72735f4d89bb97061dd6a7ed882ec6b8ee53714c6f",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/cc/1.1.30/download"],
-        strip_prefix = "cc-1.1.30",
-        build_file = Label("//third-party/bazel:BUILD.cc-1.1.30.bazel"),
+        urls = ["https://static.crates.io/crates/cc/1.1.31/download"],
+        strip_prefix = "cc-1.1.31",
+        build_file = Label("//third-party/bazel:BUILD.cc-1.1.31.bazel"),
     )
 
     maybe(
@@ -479,12 +479,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__proc-macro2-1.0.87",
-        sha256 = "b3e4daa0dcf6feba26f985457cdf104d4b4256fc5a09547140f3631bb076b19a",
+        name = "vendor__proc-macro2-1.0.89",
+        sha256 = "f139b0662de085916d1fb67d2b4169d1addddda1919e696f3252b740b629986e",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/proc-macro2/1.0.87/download"],
-        strip_prefix = "proc-macro2-1.0.87",
-        build_file = Label("//third-party/bazel:BUILD.proc-macro2-1.0.87.bazel"),
+        urls = ["https://static.crates.io/crates/proc-macro2/1.0.89/download"],
+        strip_prefix = "proc-macro2-1.0.89",
+        build_file = Label("//third-party/bazel:BUILD.proc-macro2-1.0.89.bazel"),
     )
 
     maybe(
@@ -519,12 +519,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__syn-2.0.79",
-        sha256 = "89132cd0bf050864e1d38dc3bbc07a0eb8e7530af26344d3d2bbbef83499f590",
+        name = "vendor__syn-2.0.85",
+        sha256 = "5023162dfcd14ef8f32034d8bcd4cc5ddc61ef7a247c024a33e24e1f24d21b56",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/syn/2.0.79/download"],
-        strip_prefix = "syn-2.0.79",
-        build_file = Label("//third-party/bazel:BUILD.syn-2.0.79.bazel"),
+        urls = ["https://static.crates.io/crates/syn/2.0.85/download"],
+        strip_prefix = "syn-2.0.85",
+        build_file = Label("//third-party/bazel:BUILD.syn-2.0.85.bazel"),
     )
 
     maybe(
@@ -668,11 +668,11 @@ def crate_repositories():
     )
 
     return [
-        struct(repo = "vendor__cc-1.1.30", is_dev_dep = False),
+        struct(repo = "vendor__cc-1.1.31", is_dev_dep = False),
         struct(repo = "vendor__clap-4.5.20", is_dev_dep = False),
         struct(repo = "vendor__codespan-reporting-0.11.1", is_dev_dep = False),
-        struct(repo = "vendor__proc-macro2-1.0.87", is_dev_dep = False),
+        struct(repo = "vendor__proc-macro2-1.0.89", is_dev_dep = False),
         struct(repo = "vendor__quote-1.0.37", is_dev_dep = False),
         struct(repo = "vendor__scratch-1.0.7", is_dev_dep = False),
-        struct(repo = "vendor__syn-2.0.79", is_dev_dep = False),
+        struct(repo = "vendor__syn-2.0.85", is_dev_dep = False),
     ]
