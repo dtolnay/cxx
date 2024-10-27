@@ -15,10 +15,10 @@ $  cxxbridge src/bridge.rs --header > path/to/bridge.rs.h
 $  cxxbridge src/bridge.rs > path/to/bridge.rs.cc
 ```
 
-The CXX repo maintains working [Bazel] `BUILD` and [Buck2] `BUCK` targets for
-the complete blobstore tutorial (chapter 3) for your reference, tested in CI.
-These aren't meant to be directly what you use in your codebase, but serve as an
-illustration of one possible working pattern.
+The CXX repo maintains working [Bazel] `BUILD.bazel` and [Buck2] `BUCK` targets
+for the complete blobstore tutorial (chapter 3) for your reference, tested in
+CI. These aren't meant to be directly what you use in your codebase, but serve
+as an illustration of one possible working pattern.
 
 [Bazel]: https://bazel.build
 [Buck2]: https://buck2.build
@@ -70,7 +70,7 @@ def rust_cxx_bridge(name, src, deps = []):
 ```
 
 ```python
-# demo/BUILD
+# demo/BUILD.bazel
 
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@rules_rust//rust:defs.bzl", "rust_binary")
