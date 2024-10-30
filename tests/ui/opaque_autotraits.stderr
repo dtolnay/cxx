@@ -4,7 +4,7 @@ error[E0277]: `*const cxx::void` cannot be sent between threads safely
 13 |     assert_send::<ffi::Opaque>();
    |                   ^^^^^^^^^^^ `*const cxx::void` cannot be sent between threads safely
    |
-   = help: within `ffi::Opaque`, the trait `Send` is not implemented for `*const cxx::void`, which is required by `ffi::Opaque: Send`
+   = help: within `ffi::Opaque`, the trait `Send` is not implemented for `*const cxx::void`
    = note: required because it appears within the type `[*const cxx::void; 0]`
 note: required because it appears within the type `cxx::private::Opaque`
   --> src/opaque.rs
@@ -28,7 +28,7 @@ error[E0277]: `*const cxx::void` cannot be shared between threads safely
 14 |     assert_sync::<ffi::Opaque>();
    |                   ^^^^^^^^^^^ `*const cxx::void` cannot be shared between threads safely
    |
-   = help: within `ffi::Opaque`, the trait `Sync` is not implemented for `*const cxx::void`, which is required by `ffi::Opaque: Sync`
+   = help: within `ffi::Opaque`, the trait `Sync` is not implemented for `*const cxx::void`
    = note: required because it appears within the type `[*const cxx::void; 0]`
 note: required because it appears within the type `cxx::private::Opaque`
   --> src/opaque.rs
@@ -50,7 +50,7 @@ error[E0277]: `PhantomPinned` cannot be unpinned
   --> tests/ui/opaque_autotraits.rs:15:20
    |
 15 |     assert_unpin::<ffi::Opaque>();
-   |                    ^^^^^^^^^^^ within `ffi::Opaque`, the trait `Unpin` is not implemented for `PhantomPinned`, which is required by `ffi::Opaque: Unpin`
+   |                    ^^^^^^^^^^^ within `ffi::Opaque`, the trait `Unpin` is not implemented for `PhantomPinned`
    |
    = note: consider using the `pin!` macro
            consider using `Box::pin` if you need to access the pinned value outside of the current scope
