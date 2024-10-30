@@ -1,5 +1,5 @@
 use crate::syntax::improper::ImproperCtype;
-use crate::syntax::instantiate::ImplKey;
+use crate::syntax::instantiate::{CxxVectorPayloadImplKey, ImplKey};
 use crate::syntax::map::{OrderedMap, UnorderedMap};
 use crate::syntax::report::Errors;
 use crate::syntax::resolve::Resolution;
@@ -180,7 +180,8 @@ impl<'a> Types<'a> {
                 | ImplKey::UniquePtr(ident)
                 | ImplKey::SharedPtr(ident)
                 | ImplKey::WeakPtr(ident)
-                | ImplKey::CxxVector(ident) => {
+                | ImplKey::CxxVector(CxxVectorPayloadImplKey::Named(ident))
+                | ImplKey::CxxVector(CxxVectorPayloadImplKey::Ptr(ident, _)) => {
                     Atom::from(ident.rust).is_none() && !aliases.contains_key(ident.rust)
                 }
             };

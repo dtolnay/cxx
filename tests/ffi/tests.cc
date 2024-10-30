@@ -219,6 +219,22 @@ const C *c_return_const_ptr(size_t c) { return new C(c); }
 
 C *c_return_mut_ptr(size_t c) { return new C(c); }
 
+std::unique_ptr<std::vector<const C *>> c_return_unique_ptr_vector_const_ptr(size_t n) {
+  auto v = std::unique_ptr<std::vector<const C *>>(new std::vector<const C *>());
+  for (auto i = 0; i<2; i++) {
+    v->push_back(new C(n));
+  }
+  return v;
+}
+
+std::unique_ptr<std::vector<C *>> c_return_unique_ptr_vector_mut_ptr(size_t n) {
+  auto v = std::unique_ptr<std::vector<C *>>(new std::vector<C *>());
+  for (auto i = 0; i<2; i++) {
+    v->push_back(new C(n));
+  }
+  return v;
+}
+
 Borrow::Borrow(const std::string &s) : s(s) {}
 
 void Borrow::const_member() const {}
@@ -553,6 +569,23 @@ size_t c_take_mut_ptr(C *c) {
   size_t result = c->get();
   delete c;
   return result;
+}
+
+size_t c_take_unique_ptr_vector_const_ptr(std::unique_ptr<std::vector<const C *>> c) {
+  size_t accumulator = 0;
+  for (auto& item: *c) {
+    accumulator += item->get();
+  }
+  return accumulator;
+}
+
+size_t c_take_unique_ptr_vector_mut_ptr(std::unique_ptr<std::vector<C *>> c) {
+  size_t accumulator = 0;
+  for (auto& item: *c) {
+    accumulator += item->get();
+    delete item;
+  }
+  return accumulator;
 }
 
 void c_try_return_void() {}
