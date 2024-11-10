@@ -383,6 +383,19 @@ fn test_raw_ptr() {
 }
 
 #[test]
+fn test_unique_ptr_vector_raw_ptr() {
+    let m = ffi::c_return_unique_ptr_vector_mut_ptr(2024);
+    let c = ffi::c_return_unique_ptr_vector_const_ptr(2024);
+    assert_eq!(4048, unsafe { ffi::c_take_unique_ptr_vector_const_ptr(c) });
+    assert_eq!(4048, unsafe { ffi::c_take_unique_ptr_vector_mut_ptr(m) }); // deletes elements
+
+    let m2 = ffi::c_return_unique_ptr_vector_mut_ptr(2025);
+    let c2 = ffi::c_return_unique_ptr_vector_const_ptr(2025);
+    assert_eq!(4050, unsafe { ffi::c_take_unique_ptr_vector_mut_ptr(m2) });
+    assert_eq!(4050, unsafe { ffi::c_take_unique_ptr_vector_const_ptr(c2) });
+}
+
+#[test]
 #[allow(clippy::items_after_statements, clippy::no_effect_underscore_binding)]
 fn test_unwind_safe() {
     fn inspect(_c: &ffi::C) {}

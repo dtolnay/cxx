@@ -3,7 +3,7 @@ use crate::gen::nested::NamespaceEntries;
 use crate::gen::out::OutFile;
 use crate::gen::{builtin, include, Opt};
 use crate::syntax::atom::Atom::{self, *};
-use crate::syntax::instantiate::{ImplKey, NamedImplKey};
+use crate::syntax::instantiate::{CxxVectorPayloadImplKey, ImplKey, NamedImplKey, PtrMutability};
 use crate::syntax::map::UnorderedMap as Map;
 use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::{self, Symbol};
@@ -1352,6 +1352,7 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
 enum UniquePtr<'a> {
     Ident(&'a Ident),
     CxxVector(&'a Ident),
+    CxxVectorPtr(PtrMutability, &'a Ident),
 }
 
 trait ToTypename {
@@ -1370,6 +1371,17 @@ impl<'a> ToTypename for UniquePtr<'a> {
             UniquePtr::Ident(ident) => ident.to_typename(types),
             UniquePtr::CxxVector(element) => {
                 format!("::std::vector<{}>", element.to_typename(types))
+            }
+            UniquePtr::CxxVectorPtr(mutability, element) => {
+                let const_prefix = match mutability {
+                    PtrMutability::Const => "const ",
+                    PtrMutability::Mut => "",
+                };
+                format!(
+                    "::std::vector<{}{}*>",
+                    const_prefix,
+                    element.to_typename(types)
+                )
             }
         }
     }
@@ -1392,6 +1404,13 @@ impl<'a> ToMangled for UniquePtr<'a> {
             UniquePtr::CxxVector(element) => {
                 symbol::join(&[&"std", &"vector", &element.to_mangled(types)])
             }
+            UniquePtr::CxxVectorPtr(mutability, element) => {
+                let prefix = match mutability {
+                    PtrMutability::Const => "ptrc",
+                    PtrMutability::Mut => "ptrm",
+                };
+                symbol::join(&[&"std", &"vector", &prefix, &element.to_mangled(types)])
+            }
         }
     }
 }
@@ -1412,7 +1431,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
             ImplKey::UniquePtr(ident) => write_unique_ptr(out, ident),
             ImplKey::SharedPtr(ident) => write_shared_ptr(out, ident),
             ImplKey::WeakPtr(ident) => write_weak_ptr(out, ident),
-            ImplKey::CxxVector(ident) => write_cxx_vector(out, ident),
+            ImplKey::CxxVector(payload) => write_cxx_vector(out, payload),
         }
     }
     out.end_block(Block::ExternC);
@@ -1639,21 +1658,21 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
         // bindings for a "new" method anyway. But the Rust code can't be called
         // for Opaque types because the 'new' method is not implemented.
         UniquePtr::Ident(ident) => out.types.is_maybe_trivial(ident),
-        UniquePtr::CxxVector(_) => false,
+        UniquePtr::CxxVector(_) | UniquePtr::CxxVectorPtr(..) => false,
     };
 
     let conditional_delete = match ty {
         UniquePtr::Ident(ident) => {
             !out.types.structs.contains_key(ident) && !out.types.enums.contains_key(ident)
         }
-        UniquePtr::CxxVector(_) => false,
+        UniquePtr::CxxVector(_) | UniquePtr::CxxVectorPtr(..) => false,
     };
 
     if conditional_delete {
         out.builtin.is_complete = true;
         let definition = match ty {
             UniquePtr::Ident(ty) => &out.types.resolve(ty).name.cxx,
-            UniquePtr::CxxVector(_) => unreachable!(),
+            UniquePtr::CxxVector(_) | UniquePtr::CxxVectorPtr(..) => unreachable!(),
         };
         writeln!(
             out,
@@ -1895,7 +1914,17 @@ fn write_weak_ptr(out: &mut OutFile, key: NamedImplKey) {
     writeln!(out, "}}");
 }
 
-fn write_cxx_vector(out: &mut OutFile, key: NamedImplKey) {
+fn write_cxx_vector(out: &mut OutFile, payload: CxxVectorPayloadImplKey) {
+    let (key, ptr_prefix, unique_ptr_payload) = match payload {
+        CxxVectorPayloadImplKey::Named(id) => (id, "", UniquePtr::CxxVector(id.rust)),
+        CxxVectorPayloadImplKey::Ptr(id, mutability) => {
+            let prefix = match mutability {
+                PtrMutability::Const => "ptrc$",
+                PtrMutability::Mut => "ptrm$",
+            };
+            (id, prefix, UniquePtr::CxxVectorPtr(mutability, id.rust))
+        }
+    };
     let element = key.rust;
     let inner = element.to_typename(out.types);
     let instance = element.to_mangled(out.types);
@@ -1907,8 +1936,8 @@ fn write_cxx_vector(out: &mut OutFile, key: NamedImplKey) {
     begin_function_definition(out);
     writeln!(
         out,
-        "::std::vector<{}> *cxxbridge1$std$vector${}$new() noexcept {{",
-        inner, instance,
+        "::std::vector<{}> *cxxbridge1$std$vector${}{}$new() noexcept {{",
+        inner, ptr_prefix, instance,
     );
     writeln!(out, "  return new ::std::vector<{}>();", inner);
     writeln!(out, "}}");
@@ -1916,8 +1945,8 @@ fn write_cxx_vector(out: &mut OutFile, key: NamedImplKey) {
     begin_function_definition(out);
     writeln!(
         out,
-        "::std::size_t cxxbridge1$std$vector${}$size(::std::vector<{}> const &s) noexcept {{",
-        instance, inner,
+        "::std::size_t cxxbridge1$std$vector${}{}$size(const ::std::vector<{}> &s) noexcept {{",
+        ptr_prefix, instance, inner,
     );
     writeln!(out, "  return s.size();");
     writeln!(out, "}}");
@@ -1925,8 +1954,8 @@ fn write_cxx_vector(out: &mut OutFile, key: NamedImplKey) {
     begin_function_definition(out);
     writeln!(
         out,
-        "{} *cxxbridge1$std$vector${}$get_unchecked(::std::vector<{}> *s, ::std::size_t pos) noexcept {{",
-        inner, instance, inner,
+        "{} *cxxbridge1$std$vector${}{}$get_unchecked(::std::vector<{}> *s, ::std::size_t pos) noexcept {{",
+        inner, ptr_prefix, instance, inner,
     );
     writeln!(out, "  return &(*s)[pos];");
     writeln!(out, "}}");
@@ -1935,8 +1964,8 @@ fn write_cxx_vector(out: &mut OutFile, key: NamedImplKey) {
         begin_function_definition(out);
         writeln!(
             out,
-            "void cxxbridge1$std$vector${}$push_back(::std::vector<{}> *v, {} *value) noexcept {{",
-            instance, inner, inner,
+            "void cxxbridge1$std$vector${}{}$push_back(::std::vector<{}> *v, {} *value) noexcept {{",
+            ptr_prefix, instance, inner, inner,
         );
         writeln!(out, "  v->push_back(::std::move(*value));");
         writeln!(out, "  ::rust::destroy(value);");
@@ -1945,8 +1974,8 @@ fn write_cxx_vector(out: &mut OutFile, key: NamedImplKey) {
         begin_function_definition(out);
         writeln!(
             out,
-            "void cxxbridge1$std$vector${}$pop_back(::std::vector<{}> *v, {} *out) noexcept {{",
-            instance, inner, inner,
+            "void cxxbridge1$std$vector${}{}$pop_back(::std::vector<{}> *v, {} *out) noexcept {{",
+            ptr_prefix, instance, inner, inner,
         );
         writeln!(out, "  ::new (out) {}(::std::move(v->back()));", inner);
         writeln!(out, "  v->pop_back();");
@@ -1954,5 +1983,5 @@ fn write_cxx_vector(out: &mut OutFile, key: NamedImplKey) {
     }
 
     out.include.memory = true;
-    write_unique_ptr_common(out, UniquePtr::CxxVector(element));
+    write_unique_ptr_common(out, unique_ptr_payload);
 }
