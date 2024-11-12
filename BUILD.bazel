@@ -54,6 +54,9 @@ rust_proc_macro(
     name = "cxxbridge-macro",
     srcs = glob(["macro/src/**/*.rs"]),
     edition = "2021",
+    proc_macro_deps = [
+        "@crates.io//:rustversion",
+    ],
     deps = [
         "@crates.io//:proc-macro2",
         "@crates.io//:quote",

@@ -62,6 +62,12 @@ alias(
 )
 
 alias(
+    name = "rustversion",
+    actual = "@vendor__rustversion-1.0.18//:rustversion",
+    tags = ["manual"],
+)
+
+alias(
     name = "scratch",
     actual = "@vendor__scratch-1.0.7//:scratch",
     tags = ["manual"],

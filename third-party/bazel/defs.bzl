@@ -325,6 +325,9 @@ _NORMAL_DEV_ALIASES = {
 
 _PROC_MACRO_DEPENDENCIES = {
     "third-party": {
+        _COMMON_CONDITION: {
+            "rustversion": Label("@vendor__rustversion-1.0.18//:rustversion"),
+        },
     },
 }
 
@@ -496,6 +499,16 @@ def crate_repositories():
         urls = ["https://static.crates.io/crates/quote/1.0.37/download"],
         strip_prefix = "quote-1.0.37",
         build_file = Label("//third-party/bazel:BUILD.quote-1.0.37.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "vendor__rustversion-1.0.18",
+        sha256 = "0e819f2bc632f285be6d7cd36e25940d45b2391dd6d9b939e79de557f7014248",
+        type = "tar.gz",
+        urls = ["https://static.crates.io/crates/rustversion/1.0.18/download"],
+        strip_prefix = "rustversion-1.0.18",
+        build_file = Label("//third-party/bazel:BUILD.rustversion-1.0.18.bazel"),
     )
 
     maybe(
@@ -674,6 +687,7 @@ def crate_repositories():
         struct(repo = "vendor__codespan-reporting-0.11.1", is_dev_dep = False),
         struct(repo = "vendor__proc-macro2-1.0.89", is_dev_dep = False),
         struct(repo = "vendor__quote-1.0.37", is_dev_dep = False),
+        struct(repo = "vendor__rustversion-1.0.18", is_dev_dep = False),
         struct(repo = "vendor__scratch-1.0.7", is_dev_dep = False),
         struct(repo = "vendor__syn-2.0.85", is_dev_dep = False),
     ]
