@@ -10,6 +10,12 @@ project(
 add_languages('rust', native: true)
 add_languages('rust', 'cpp', native: false)
 
+cpp_compiler = meson.get_compiler('cpp')
+add_project_arguments(
+    cpp_compiler.get_supported_arguments('-Wno-dollar-in-identifier-extension'),
+    language: 'cpp'
+)
+
 subdir('tools/meson')
 subdir('third-party')
 
