@@ -1,5 +1,6 @@
 # Must be sorted topologically, not alphabetically.
 third_party = {
+    'rustversion': subproject('rustversion').get_variable('dep'),
     'unicode_ident': subproject('unicode-ident').get_variable('dep'),
     'proc-macro2': subproject('proc-macro2').get_variable('dep'),
     'quote': subproject('quote').get_variable('dep'),
