@@ -58,6 +58,7 @@ rust_library(
     deps = [
         "//third-party:proc-macro2",
         "//third-party:quote",
+        "//third-party:rustversion",
         "//third-party:syn",
     ],
 )
