@@ -4,18 +4,18 @@ load("@prelude//rust:cargo_buildscript.bzl", "buildscript_run")
 load("@prelude//rust:cargo_package.bzl", "cargo")
 
 http_archive(
-    name = "anstyle-1.0.9.crate",
-    sha256 = "8365de52b16c035ff4fcafe0092ba9390540e3e352870ac09933bebcaa2c8c56",
-    strip_prefix = "anstyle-1.0.9",
-    urls = ["https://static.crates.io/crates/anstyle/1.0.9/download"],
+    name = "anstyle-1.0.10.crate",
+    sha256 = "55cc3b69f167a1ef2e161439aa98aed94e6028e5f9a59be9a6ffb47aef1651f9",
+    strip_prefix = "anstyle-1.0.10",
+    urls = ["https://static.crates.io/crates/anstyle/1.0.10/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "anstyle-1.0.9",
-    srcs = [":anstyle-1.0.9.crate"],
+    name = "anstyle-1.0.10",
+    srcs = [":anstyle-1.0.10.crate"],
     crate = "anstyle",
-    crate_root = "anstyle-1.0.9.crate/src/lib.rs",
+    crate_root = "anstyle-1.0.10.crate/src/lib.rs",
     edition = "2021",
     features = [
         "default",
@@ -26,23 +26,23 @@ cargo.rust_library(
 
 alias(
     name = "cc",
-    actual = ":cc-1.1.31",
+    actual = ":cc-1.1.37",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "cc-1.1.31.crate",
-    sha256 = "c2e7962b54006dcfcc61cb72735f4d89bb97061dd6a7ed882ec6b8ee53714c6f",
-    strip_prefix = "cc-1.1.31",
-    urls = ["https://static.crates.io/crates/cc/1.1.31/download"],
+    name = "cc-1.1.37.crate",
+    sha256 = "40545c26d092346d8a8dab71ee48e7685a7a9cba76e634790c215b41a4a7b4cf",
+    strip_prefix = "cc-1.1.37",
+    urls = ["https://static.crates.io/crates/cc/1.1.37/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "cc-1.1.31",
-    srcs = [":cc-1.1.31.crate"],
+    name = "cc-1.1.37",
+    srcs = [":cc-1.1.37.crate"],
     crate = "cc",
-    crate_root = "cc-1.1.31.crate/src/lib.rs",
+    crate_root = "cc-1.1.37.crate/src/lib.rs",
     edition = "2018",
     visibility = [],
     deps = [":shlex-1.3.0"],
@@ -100,7 +100,7 @@ cargo.rust_library(
     ],
     visibility = [],
     deps = [
-        ":anstyle-1.0.9",
+        ":anstyle-1.0.10",
         ":clap_lex-0.7.2",
     ],
 )
@@ -341,23 +341,23 @@ cargo.rust_library(
 
 alias(
     name = "syn",
-    actual = ":syn-2.0.85",
+    actual = ":syn-2.0.87",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "syn-2.0.85.crate",
-    sha256 = "5023162dfcd14ef8f32034d8bcd4cc5ddc61ef7a247c024a33e24e1f24d21b56",
-    strip_prefix = "syn-2.0.85",
-    urls = ["https://static.crates.io/crates/syn/2.0.85/download"],
+    name = "syn-2.0.87.crate",
+    sha256 = "25aa4ce346d03a6dcd68dd8b4010bcb74e54e62c90c573f394c46eae99aba32d",
+    strip_prefix = "syn-2.0.87",
+    urls = ["https://static.crates.io/crates/syn/2.0.87/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "syn-2.0.85",
-    srcs = [":syn-2.0.85.crate"],
+    name = "syn-2.0.87",
+    srcs = [":syn-2.0.87.crate"],
     crate = "syn",
-    crate_root = "syn-2.0.85.crate/src/lib.rs",
+    crate_root = "syn-2.0.87.crate/src/lib.rs",
     edition = "2021",
     features = [
         "clone-impls",
