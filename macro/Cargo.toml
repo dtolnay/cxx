@@ -23,6 +23,7 @@ experimental-enum-variants-from-header = ["clang-ast", "flate2", "memmap", "serd
 [dependencies]
 proc-macro2 = "1.0.74"
 quote = "1.0.35"
+rustversion = "1"
 syn = { version = "2.0.46", features = ["full"] }
 
 # optional dependencies:
