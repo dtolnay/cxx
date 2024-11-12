@@ -1,4 +1,3 @@
-#![forbid(unsafe_op_in_unsafe_fn)]
 #![allow(
     clippy::boxed_local,
     clippy::derive_partial_eq_without_eq,
@@ -15,6 +14,9 @@
     clippy::unnecessary_wraps,
     clippy::unused_self
 )]
+#![allow(unknown_lints)]
+#![warn(rust_2024_compatibility)]
+#![forbid(unsafe_op_in_unsafe_fn)]
 
 pub mod cast;
 pub mod module;
