@@ -3,6 +3,7 @@ project(
     'rust',
     default_options: ['rust_std=2018'],
     license: 'Unlicense OR MIT',
+    meson_version: '>= 1.3.0',
     version: '1.4.1',
 )
 
