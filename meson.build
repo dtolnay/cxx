@@ -4,6 +4,7 @@ project(
     license: 'MIT OR Apache-2.0',
     license_files: ['LICENSE-APACHE', 'LICENSE-MIT'],
     meson_version: '>= 1.3.0',
+    version: '1.0.129',
 )
 
 add_languages('rust', native: true)
