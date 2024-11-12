@@ -1196,7 +1196,7 @@ fn expand_rust_function_shim_super(
         // Set spans that result in the `Result<...>` written by the user being
         // highlighted as the cause if their error type has no Display impl.
         let result_begin = quote_spanned!(result.span=> ::cxx::core::result::Result<#ok, impl);
-        let result_end = quote_spanned!(rangle.span=> ::cxx::core::fmt::Display>);
+        let result_end = quote_spanned!(rangle.span=> ::cxx::core::fmt::Display + use<>>);
         quote!(-> #result_begin #result_end)
     } else {
         expand_return_type(&sig.ret)
