@@ -234,6 +234,49 @@ cargo.rust_library(
 )
 
 alias(
+    name = "rustversion",
+    actual = ":rustversion-1.0.18",
+    visibility = ["PUBLIC"],
+)
+
+http_archive(
+    name = "rustversion-1.0.18.crate",
+    sha256 = "0e819f2bc632f285be6d7cd36e25940d45b2391dd6d9b939e79de557f7014248",
+    strip_prefix = "rustversion-1.0.18",
+    urls = ["https://static.crates.io/crates/rustversion/1.0.18/download"],
+    visibility = [],
+)
+
+cargo.rust_library(
+    name = "rustversion-1.0.18",
+    srcs = [":rustversion-1.0.18.crate"],
+    crate = "rustversion",
+    crate_root = "rustversion-1.0.18.crate/src/lib.rs",
+    edition = "2018",
+    env = {
+        "OUT_DIR": "$(location :rustversion-1.0.18-build-script-run[out_dir])",
+    },
+    proc_macro = True,
+    visibility = [],
+)
+
+cargo.rust_binary(
+    name = "rustversion-1.0.18-build-script-build",
+    srcs = [":rustversion-1.0.18.crate"],
+    crate = "build_script_build",
+    crate_root = "rustversion-1.0.18.crate/build/build.rs",
+    edition = "2018",
+    visibility = [],
+)
+
+buildscript_run(
+    name = "rustversion-1.0.18-build-script-run",
+    package_name = "rustversion",
+    buildscript_rule = ":rustversion-1.0.18-build-script-build",
+    version = "1.0.18",
+)
+
+alias(
     name = "scratch",
     actual = ":scratch-1.0.7",
     visibility = ["PUBLIC"],

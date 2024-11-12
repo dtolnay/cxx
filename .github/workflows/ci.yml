@@ -128,6 +128,7 @@ jobs:
         with:
           repository: mesonbuild/meson
           path: meson
+      - uses: dtolnay/rust-toolchain@nightly
       - run: sudo apt-get install lld ninja-build
       - run: meson/meson.py setup --native-file=tools/meson/native.ini build
       - run: meson/meson.py compile -C build

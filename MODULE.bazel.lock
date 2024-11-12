@@ -102,7 +102,7 @@
   "moduleExtensions": {
     "//tools/bazel:extension.bzl%crate_repositories": {
       "general": {
-        "bzlTransitiveDigest": "g2+zc9joN4R1YJzduOoW6DhWo6XGIrHZrrpkx0tSUBA=",
+        "bzlTransitiveDigest": "ZnV4P9VqkJTp/wlYQKCyUkeyFG6O4xoCRDveR7pLjIk=",
         "usagesDigest": "asGxJIEmfRVxm6+g7CFSxl5zD/l9sk/bUAPWuK0xF7M=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -210,6 +210,19 @@
               ],
               "strip_prefix": "quote-1.0.37",
               "build_file": "@@//third-party/bazel:BUILD.quote-1.0.37.bazel"
+            }
+          },
+          "vendor__rustversion-1.0.18": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "sha256": "0e819f2bc632f285be6d7cd36e25940d45b2391dd6d9b939e79de557f7014248",
+              "type": "tar.gz",
+              "urls": [
+                "https://static.crates.io/crates/rustversion/1.0.18/download"
+              ],
+              "strip_prefix": "rustversion-1.0.18",
+              "build_file": "@@//third-party/bazel:BUILD.rustversion-1.0.18.bazel"
             }
           },
           "vendor__scratch-1.0.7": {
@@ -476,6 +489,11 @@
             "",
             "vendor__quote-1.0.37",
             "vendor__quote-1.0.37"
+          ],
+          [
+            "",
+            "vendor__rustversion-1.0.18",
+            "vendor__rustversion-1.0.18"
           ],
           [
             "",

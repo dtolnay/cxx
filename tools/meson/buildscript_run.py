@@ -73,6 +73,7 @@ def main():
         cargo_rustc_cfg_match = cargo_rustc_cfg_pattern.match(line)
         if cargo_rustc_cfg_match:
             flags += "--cfg={}\n".format(cargo_rustc_cfg_match.group(1))
+    flags += "--env-set=OUT_DIR={}\n".format(os.path.abspath(args.out_dir))
     args.rustc_args.write(flags)
 
 

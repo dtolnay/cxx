@@ -16,6 +16,8 @@ add_project_arguments(
     language: 'cpp',
 )
 
+add_global_arguments('-Zunstable-options', language: 'rust', native: true)
+
 subdir('tools/meson')
 subdir('third-party')
 
@@ -34,6 +36,7 @@ cxxbridge_macro = rust.proc_macro(
     dependencies: [
         third_party['proc-macro2'],
         third_party['quote'],
+        third_party['rustversion'],
         third_party['syn'],
     ],
     sources: files('macro/src/lib.rs'),
