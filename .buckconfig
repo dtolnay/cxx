@@ -9,7 +9,6 @@ prelude = bundled
 
 [cell_aliases]
 config = prelude
-buck = none
 fbcode = none
 fbsource = none
 
