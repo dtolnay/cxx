@@ -5,6 +5,7 @@ CXX &mdash; safe FFI between Rust and C++
 [<img alt="crates.io" src="https://img.shields.io/crates/v/cxx.svg?style=for-the-badge&color=fc8d62&logo=rust" height="20">](https://crates.io/crates/cxx)
 [<img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-cxx-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" height="20">](https://docs.rs/cxx)
 [<img alt="build status" src="https://img.shields.io/github/actions/workflow/status/dtolnay/cxx/ci.yml?branch=master&style=for-the-badge" height="20">](https://github.com/dtolnay/cxx/actions?query=branch%3Amaster)
+[<img alt="Gurubase" src="https://img.shields.io/badge/Gurubase-Ask%20CXX%20Guru-006BFF?style=for-the-badge" height="20">](https://gurubase.io/g/cxx)
 
 This library provides a **safe** mechanism for calling C++ code from Rust and
 Rust code from C++, not subject to the many ways that things can go wrong when
