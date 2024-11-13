@@ -1,3 +1,4 @@
+load("@prelude//tests:test_toolchain.bzl", "noop_test_toolchain")
 load("@prelude//toolchains:cxx.bzl", "system_cxx_toolchain")
 load("@prelude//toolchains:genrule.bzl", "system_genrule_toolchain")
 load("@prelude//toolchains:python.bzl", "system_python_bootstrap_toolchain")
@@ -33,6 +34,11 @@ system_rust_toolchain(
     name = "rust",
     default_edition = None,
     doctests = True,
+    visibility = ["PUBLIC"],
+)
+
+noop_test_toolchain(
+    name = "test",
     visibility = ["PUBLIC"],
 )
 
