@@ -137,10 +137,16 @@ you'd like for the Rust error to have.
 ...namespace behavior {
 ...
 template <typename Try, typename Fail>
-static void trycatch(Try &&func, Fail &&fail) noexcept try {
+static void trycatch(Try &&func, Fail &&fail) noexcept {
+#if defined(RUST_CXX_NO_EXCEPTIONS)
   func();
-} catch (const std::exception &e) {
-  fail(e.what());
+#else
+  try {
+    func();
+  } catch (const std::exception &e) {
+    fail(e.what());
+  }
+#endif
 }
 ...
 ...} // namespace behavior
