@@ -150,6 +150,33 @@ cargo.rust_library(
 )
 
 alias(
+    name = "foldhash",
+    actual = ":foldhash-0.1.3",
+    visibility = ["PUBLIC"],
+)
+
+http_archive(
+    name = "foldhash-0.1.3.crate",
+    sha256 = "f81ec6369c545a7d40e4589b5597581fa1c441fe1cce96dd1de43159910a36a2",
+    strip_prefix = "foldhash-0.1.3",
+    urls = ["https://static.crates.io/crates/foldhash/0.1.3/download"],
+    visibility = [],
+)
+
+cargo.rust_library(
+    name = "foldhash-0.1.3",
+    srcs = [":foldhash-0.1.3.crate"],
+    crate = "foldhash",
+    crate_root = "foldhash-0.1.3.crate/src/lib.rs",
+    edition = "2021",
+    features = [
+        "default",
+        "std",
+    ],
+    visibility = [],
+)
+
+alias(
     name = "proc-macro2",
     actual = ":proc-macro2-1.0.89",
     visibility = ["PUBLIC"],
