@@ -13,7 +13,10 @@ rust_library(
         ":cxxbridge-macro",
     ],
     visibility = ["//visibility:public"],
-    deps = [":core-lib"],
+    deps = [
+        ":core-lib",
+        "@crates.io//:foldhash",
+    ],
 )
 
 alias(

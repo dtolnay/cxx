@@ -105,7 +105,7 @@
   "moduleExtensions": {
     "//tools/bazel:extension.bzl%crate_repositories": {
       "general": {
-        "bzlTransitiveDigest": "LVm2z0+h4+WfZG/ryVPhfrrA6rJQvrCN8Bdq1dzfY1w=",
+        "bzlTransitiveDigest": "qufJ5mVjkVgXu60TdDx+mOdJvq1rtcVwH77oCaJE1K8=",
         "usagesDigest": "asGxJIEmfRVxm6+g7CFSxl5zD/l9sk/bUAPWuK0xF7M=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -187,6 +187,19 @@
               ],
               "strip_prefix": "codespan-reporting-0.11.1",
               "build_file": "@@//third-party/bazel:BUILD.codespan-reporting-0.11.1.bazel"
+            }
+          },
+          "vendor__foldhash-0.1.3": {
+            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
+            "ruleClassName": "http_archive",
+            "attributes": {
+              "sha256": "f81ec6369c545a7d40e4589b5597581fa1c441fe1cce96dd1de43159910a36a2",
+              "type": "tar.gz",
+              "urls": [
+                "https://static.crates.io/crates/foldhash/0.1.3/download"
+              ],
+              "strip_prefix": "foldhash-0.1.3",
+              "build_file": "@@//third-party/bazel:BUILD.foldhash-0.1.3.bazel"
             }
           },
           "vendor__proc-macro2-1.0.89": {
@@ -482,6 +495,11 @@
             "",
             "vendor__codespan-reporting-0.11.1",
             "vendor__codespan-reporting-0.11.1"
+          ],
+          [
+            "",
+            "vendor__foldhash-0.1.3",
+            "vendor__foldhash-0.1.3"
           ],
           [
             "",

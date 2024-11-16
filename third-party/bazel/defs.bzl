@@ -298,6 +298,7 @@ _NORMAL_DEPENDENCIES = {
             "cc": Label("@vendor__cc-1.1.37//:cc"),
             "clap": Label("@vendor__clap-4.5.20//:clap"),
             "codespan-reporting": Label("@vendor__codespan-reporting-0.11.1//:codespan_reporting"),
+            "foldhash": Label("@vendor__foldhash-0.1.3//:foldhash"),
             "proc-macro2": Label("@vendor__proc-macro2-1.0.89//:proc_macro2"),
             "quote": Label("@vendor__quote-1.0.37//:quote"),
             "scratch": Label("@vendor__scratch-1.0.7//:scratch"),
@@ -479,6 +480,16 @@ def crate_repositories():
         urls = ["https://static.crates.io/crates/codespan-reporting/0.11.1/download"],
         strip_prefix = "codespan-reporting-0.11.1",
         build_file = Label("//third-party/bazel:BUILD.codespan-reporting-0.11.1.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "vendor__foldhash-0.1.3",
+        sha256 = "f81ec6369c545a7d40e4589b5597581fa1c441fe1cce96dd1de43159910a36a2",
+        type = "tar.gz",
+        urls = ["https://static.crates.io/crates/foldhash/0.1.3/download"],
+        strip_prefix = "foldhash-0.1.3",
+        build_file = Label("//third-party/bazel:BUILD.foldhash-0.1.3.bazel"),
     )
 
     maybe(
@@ -685,6 +696,7 @@ def crate_repositories():
         struct(repo = "vendor__cc-1.1.37", is_dev_dep = False),
         struct(repo = "vendor__clap-4.5.20", is_dev_dep = False),
         struct(repo = "vendor__codespan-reporting-0.11.1", is_dev_dep = False),
+        struct(repo = "vendor__foldhash-0.1.3", is_dev_dep = False),
         struct(repo = "vendor__proc-macro2-1.0.89", is_dev_dep = False),
         struct(repo = "vendor__quote-1.0.37", is_dev_dep = False),
         struct(repo = "vendor__rustversion-1.0.18", is_dev_dep = False),
