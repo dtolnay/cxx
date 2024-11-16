@@ -13,6 +13,7 @@ rust_library(
     deps = [
         ":core",
         ":cxxbridge-macro",
+        "//third-party:foldhash",
     ],
 )
 

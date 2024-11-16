@@ -36,8 +36,8 @@ fn main() {
             println!("cargo:rustc-check-cfg=cfg(skip_ui_tests)");
         }
 
-        if rustc.minor < 71 {
-            println!("cargo:warning=The cxx crate requires a rustc version 1.71.0 or newer.");
+        if rustc.minor < 73 {
+            println!("cargo:warning=The cxx crate requires a rustc version 1.73.0 or newer.");
             println!(
                 "cargo:warning=You appear to be building with: {}",
                 rustc.version,

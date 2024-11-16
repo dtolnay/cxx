@@ -18,7 +18,7 @@
 //!
 //! <br>
 //!
-//! *Compiler support: requires rustc 1.71+ and c++11 or newer*<br>
+//! *Compiler support: requires rustc 1.73+ and c++11 or newer*<br>
 //! *[Release notes](https://github.com/dtolnay/cxx/releases)*
 //!
 //! <br>
@@ -466,7 +466,6 @@ mod rust_string;
 mod rust_type;
 mod rust_vec;
 mod shared_ptr;
-mod sip;
 #[path = "cxx_string.rs"]
 mod string;
 mod symbols;

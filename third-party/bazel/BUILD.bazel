@@ -50,6 +50,12 @@ alias(
 )
 
 alias(
+    name = "foldhash",
+    actual = "@vendor__foldhash-0.1.3//:foldhash",
+    tags = ["manual"],
+)
+
+alias(
     name = "proc-macro2",
     actual = "@vendor__proc-macro2-1.0.89//:proc_macro2",
     tags = ["manual"],
