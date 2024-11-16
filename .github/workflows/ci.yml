@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [nightly, beta, stable, 1.82.0, 1.70.0, 1.74.0]
+        rust: [nightly, beta, stable, 1.82.0, 1.74.0, 1.70.0]
         os: [ubuntu]
         include:
           - name: Cargo on macOS
