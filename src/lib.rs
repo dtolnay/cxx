@@ -466,7 +466,6 @@ mod rust_string;
 mod rust_type;
 mod rust_vec;
 mod shared_ptr;
-mod sip;
 #[path = "cxx_string.rs"]
 mod string;
 mod symbols;

@@ -20,10 +20,11 @@ default = ["std", "cxxbridge-flags/default"] # c++11
 "c++17" = ["cxxbridge-flags/c++17"]
 "c++20" = ["cxxbridge-flags/c++20"]
 alloc = []
-std = ["alloc"]
+std = ["alloc", "foldhash/std"]
 
 [dependencies]
 cxxbridge-macro = { version = "=1.0.130", path = "macro" }
+foldhash = { version = "0.1", default-features = false }
 link-cplusplus = "1.0.9"
 
 [build-dependencies]
