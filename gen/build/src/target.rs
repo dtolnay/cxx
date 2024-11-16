@@ -30,7 +30,7 @@ pub(crate) fn find_target_dir(out_dir: &Path) -> TargetDir {
             || dir.file_name() == Some(OsStr::new("target"))
                 && dir
                     .parent()
-                    .map_or(false, |parent| parent.join("Cargo.toml").exists())
+                    .is_some_and(|parent| parent.join("Cargo.toml").exists())
         {
             return TargetDir::Path(dir);
         }

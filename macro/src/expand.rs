@@ -1836,7 +1836,7 @@ fn expand_return_type(ret: &Option<Type>) -> TokenStream {
 fn indirect_return(sig: &Signature, types: &Types) -> bool {
     sig.ret
         .as_ref()
-        .map_or(false, |ret| sig.throws || types.needs_indirect_abi(ret))
+        .is_some_and(|ret| sig.throws || types.needs_indirect_abi(ret))
 }
 
 fn expand_extern_type(ty: &Type, types: &Types, proper: bool) -> TokenStream {
