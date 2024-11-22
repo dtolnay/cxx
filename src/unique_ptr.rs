@@ -14,7 +14,7 @@ use core::mem::{self, MaybeUninit};
 use core::ops::{Deref, DerefMut};
 use core::pin::Pin;
 #[cfg(feature = "std")]
-use std::io::{self, Read};
+use std::io::{self, Read, Write};
 
 /// Binding to C++ `std::unique_ptr<T, std::default_delete<T>>`.
 #[repr(C)]
@@ -218,6 +218,44 @@ where
 
     // TODO: Foward other `Read` trait methods when they get stabilized (e.g.
     // `read_buf` and/or `is_read_vectored`).
+}
+
+/// Forwarding `Write` trait implementation in a manner similar to `Box<T>`.
+///
+/// Note that the implementation will panic for null `UniquePtr<T>`.
+#[cfg(feature = "std")]
+impl<T> Write for UniquePtr<T>
+where
+    for<'a> Pin<&'a mut T>: Write,
+    T: UniquePtrTarget,
+{
+    #[inline]
+    fn write(&mut self, buf: &[u8]) -> io::Result<usize> {
+        self.pin_mut().write(buf)
+    }
+
+    #[inline]
+    fn write_vectored(&mut self, bufs: &[io::IoSlice<'_>]) -> io::Result<usize> {
+        self.pin_mut().write_vectored(bufs)
+    }
+
+    #[inline]
+    fn flush(&mut self) -> io::Result<()> {
+        self.pin_mut().flush()
+    }
+
+    #[inline]
+    fn write_all(&mut self, buf: &[u8]) -> io::Result<()> {
+        self.pin_mut().write_all(buf)
+    }
+
+    #[inline]
+    fn write_fmt(&mut self, fmt: fmt::Arguments<'_>) -> io::Result<()> {
+        self.pin_mut().write_fmt(fmt)
+    }
+
+    // TODO: Foward other `Write` trait methods when they get stabilized (e.g.
+    // `write_all_vectored` and/or `is_write_vectored`).
 }
 
 /// Trait bound for types which may be used as the `T` inside of a
