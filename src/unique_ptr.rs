@@ -14,7 +14,7 @@ use core::mem::{self, MaybeUninit};
 use core::ops::{Deref, DerefMut};
 use core::pin::Pin;
 #[cfg(feature = "std")]
-use std::io::{self, Read, Write};
+use std::io::{self, IoSlice, Read, Write};
 
 /// Binding to C++ `std::unique_ptr<T, std::default_delete<T>>`.
 #[repr(C)]
@@ -235,7 +235,7 @@ where
     }
 
     #[inline]
-    fn write_vectored(&mut self, bufs: &[io::IoSlice<'_>]) -> io::Result<usize> {
+    fn write_vectored(&mut self, bufs: &[IoSlice]) -> io::Result<usize> {
         self.pin_mut().write_vectored(bufs)
     }
 
@@ -250,7 +250,7 @@ where
     }
 
     #[inline]
-    fn write_fmt(&mut self, fmt: fmt::Arguments<'_>) -> io::Result<()> {
+    fn write_fmt(&mut self, fmt: fmt::Arguments) -> io::Result<()> {
         self.pin_mut().write_fmt(fmt)
     }
 
