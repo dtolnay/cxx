@@ -38,6 +38,10 @@ cxx-test-suite = { version = "0", path = "tests/ffi" }
 rustversion = "1.0.13"
 trybuild = { version = "1.0.81", features = ["diff"] }
 
+# Disallow incompatible cxxbridge-cmd version appearing in the same lockfile.
+[target.'cfg(any())'.dependencies]
+cxxbridge-cmd = { version = "=1.0.131", path = "gen/cmd" }
+
 [lib]
 doc-scrape-examples = false
 
