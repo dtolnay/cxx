@@ -1,6 +1,7 @@
 #pragma once
 #include <algorithm>
 #include <array>
+#include <concepts>
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -217,6 +218,7 @@ template <typename T>
 class Slice<T>::iterator final {
 public:
   using iterator_category = std::random_access_iterator_tag;
+  using iterator_concept = std::contiguous_iterator_tag;
   using value_type = T;
   using difference_type = std::ptrdiff_t;
   using pointer = typename std::add_pointer<T>::type;
@@ -244,6 +246,10 @@ public:
   bool operator>(const iterator &) const noexcept;
   bool operator>=(const iterator &) const noexcept;
 
+  template <std::integral N>
+  friend iterator operator+(N n, const iterator& it) noexcept {
+      return it + n;
+  }
 private:
   friend class Slice;
   void *pos;
