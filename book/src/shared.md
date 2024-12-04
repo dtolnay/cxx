@@ -78,14 +78,19 @@ impl Suit {
     pub const Hearts: Self = Suit { repr: 2 };
     pub const Spades: Self = Suit { repr: 3 };
 }
+macro_rules! _Suit {
+    () => { Suit{ repr: 4.. } };
+    ($i:ident) => { Suit { repr: $i @ 4.. } };
+}
 ```
 
 Notice you're free to treat the enum as an integer in Rust code via the public
 `repr` field.
 
-Pattern matching with `match` still works but will require you to write wildcard
-arms to handle the situation of an enum value that is not one of the listed
-variants.
+Pattern matching with `match` still works but will require you to write a
+fallback arm to handle the situation of an enum value that is not one of the
+listed variants. A convenience `_Enum!` macro is generated to statically ensure
+that all listed variants are covered:
 
 ```rust,noplayground
 fn main() {
@@ -95,7 +100,7 @@ fn main() {
         Suit::Diamonds => ...,
         Suit::Hearts => ...,
         Suit::Spades => ...,
-        _ => ...,  // fallback arm
+        _Suit!(unlisted) => ...,  // fallback arm
     }
 }
 ```
