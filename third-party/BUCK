@@ -26,23 +26,23 @@ cargo.rust_library(
 
 alias(
     name = "cc",
-    actual = ":cc-1.1.37",
+    actual = ":cc-1.2.3",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "cc-1.1.37.crate",
-    sha256 = "40545c26d092346d8a8dab71ee48e7685a7a9cba76e634790c215b41a4a7b4cf",
-    strip_prefix = "cc-1.1.37",
-    urls = ["https://static.crates.io/crates/cc/1.1.37/download"],
+    name = "cc-1.2.3.crate",
+    sha256 = "27f657647bcff5394bf56c7317665bbf790a137a50eaaa5c6bfbb9e27a518f2d",
+    strip_prefix = "cc-1.2.3",
+    urls = ["https://static.crates.io/crates/cc/1.2.3/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "cc-1.1.37",
-    srcs = [":cc-1.1.37.crate"],
+    name = "cc-1.2.3",
+    srcs = [":cc-1.2.3.crate"],
     crate = "cc",
-    crate_root = "cc-1.1.37.crate/src/lib.rs",
+    crate_root = "cc-1.2.3.crate/src/lib.rs",
     edition = "2018",
     visibility = [],
     deps = [":shlex-1.3.0"],
@@ -50,23 +50,23 @@ cargo.rust_library(
 
 alias(
     name = "clap",
-    actual = ":clap-4.5.20",
+    actual = ":clap-4.5.23",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "clap-4.5.20.crate",
-    sha256 = "b97f376d85a664d5837dbae44bf546e6477a679ff6610010f17276f686d867e8",
-    strip_prefix = "clap-4.5.20",
-    urls = ["https://static.crates.io/crates/clap/4.5.20/download"],
+    name = "clap-4.5.23.crate",
+    sha256 = "3135e7ec2ef7b10c6ed8950f0f792ed96ee093fa088608f1c76e569722700c84",
+    strip_prefix = "clap-4.5.23",
+    urls = ["https://static.crates.io/crates/clap/4.5.23/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "clap-4.5.20",
-    srcs = [":clap-4.5.20.crate"],
+    name = "clap-4.5.23",
+    srcs = [":clap-4.5.23.crate"],
     crate = "clap",
-    crate_root = "clap-4.5.20.crate/src/lib.rs",
+    crate_root = "clap-4.5.23.crate/src/lib.rs",
     edition = "2021",
     features = [
         "error-context",
@@ -75,22 +75,22 @@ cargo.rust_library(
         "usage",
     ],
     visibility = [],
-    deps = [":clap_builder-4.5.20"],
+    deps = [":clap_builder-4.5.23"],
 )
 
 http_archive(
-    name = "clap_builder-4.5.20.crate",
-    sha256 = "19bc80abd44e4bed93ca373a0704ccbd1b710dc5749406201bb018272808dc54",
-    strip_prefix = "clap_builder-4.5.20",
-    urls = ["https://static.crates.io/crates/clap_builder/4.5.20/download"],
+    name = "clap_builder-4.5.23.crate",
+    sha256 = "30582fc632330df2bd26877bde0c1f4470d57c582bbc070376afcd04d8cb4838",
+    strip_prefix = "clap_builder-4.5.23",
+    urls = ["https://static.crates.io/crates/clap_builder/4.5.23/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "clap_builder-4.5.20",
-    srcs = [":clap_builder-4.5.20.crate"],
+    name = "clap_builder-4.5.23",
+    srcs = [":clap_builder-4.5.23.crate"],
     crate = "clap_builder",
-    crate_root = "clap_builder-4.5.20.crate/src/lib.rs",
+    crate_root = "clap_builder-4.5.23.crate/src/lib.rs",
     edition = "2021",
     features = [
         "error-context",
@@ -101,23 +101,23 @@ cargo.rust_library(
     visibility = [],
     deps = [
         ":anstyle-1.0.10",
-        ":clap_lex-0.7.2",
+        ":clap_lex-0.7.4",
     ],
 )
 
 http_archive(
-    name = "clap_lex-0.7.2.crate",
-    sha256 = "1462739cb27611015575c0c11df5df7601141071f07518d56fcc1be504cbec97",
-    strip_prefix = "clap_lex-0.7.2",
-    urls = ["https://static.crates.io/crates/clap_lex/0.7.2/download"],
+    name = "clap_lex-0.7.4.crate",
+    sha256 = "f46ad14479a25103f283c0f10005961cf086d8dc42205bb44c46ac563475dca6",
+    strip_prefix = "clap_lex-0.7.4",
+    urls = ["https://static.crates.io/crates/clap_lex/0.7.4/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "clap_lex-0.7.2",
-    srcs = [":clap_lex-0.7.2.crate"],
+    name = "clap_lex-0.7.4",
+    srcs = [":clap_lex-0.7.4.crate"],
     crate = "clap_lex",
-    crate_root = "clap_lex-0.7.2.crate/src/lib.rs",
+    crate_root = "clap_lex-0.7.4.crate/src/lib.rs",
     edition = "2021",
     visibility = [],
 )
@@ -178,39 +178,39 @@ cargo.rust_library(
 
 alias(
     name = "proc-macro2",
-    actual = ":proc-macro2-1.0.89",
+    actual = ":proc-macro2-1.0.92",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "proc-macro2-1.0.89.crate",
-    sha256 = "f139b0662de085916d1fb67d2b4169d1addddda1919e696f3252b740b629986e",
-    strip_prefix = "proc-macro2-1.0.89",
-    urls = ["https://static.crates.io/crates/proc-macro2/1.0.89/download"],
+    name = "proc-macro2-1.0.92.crate",
+    sha256 = "37d3544b3f2748c54e147655edb5025752e2303145b5aefb3c3ea2c78b973bb0",
+    strip_prefix = "proc-macro2-1.0.92",
+    urls = ["https://static.crates.io/crates/proc-macro2/1.0.92/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "proc-macro2-1.0.89",
-    srcs = [":proc-macro2-1.0.89.crate"],
+    name = "proc-macro2-1.0.92",
+    srcs = [":proc-macro2-1.0.92.crate"],
     crate = "proc_macro2",
-    crate_root = "proc-macro2-1.0.89.crate/src/lib.rs",
+    crate_root = "proc-macro2-1.0.92.crate/src/lib.rs",
     edition = "2021",
     features = [
         "default",
         "proc-macro",
         "span-locations",
     ],
-    rustc_flags = ["@$(location :proc-macro2-1.0.89-build-script-run[rustc_flags])"],
+    rustc_flags = ["@$(location :proc-macro2-1.0.92-build-script-run[rustc_flags])"],
     visibility = [],
-    deps = [":unicode-ident-1.0.13"],
+    deps = [":unicode-ident-1.0.14"],
 )
 
 cargo.rust_binary(
-    name = "proc-macro2-1.0.89-build-script-build",
-    srcs = [":proc-macro2-1.0.89.crate"],
+    name = "proc-macro2-1.0.92-build-script-build",
+    srcs = [":proc-macro2-1.0.92.crate"],
     crate = "build_script_build",
-    crate_root = "proc-macro2-1.0.89.crate/build.rs",
+    crate_root = "proc-macro2-1.0.92.crate/build.rs",
     edition = "2021",
     features = [
         "default",
@@ -221,15 +221,15 @@ cargo.rust_binary(
 )
 
 buildscript_run(
-    name = "proc-macro2-1.0.89-build-script-run",
+    name = "proc-macro2-1.0.92-build-script-run",
     package_name = "proc-macro2",
-    buildscript_rule = ":proc-macro2-1.0.89-build-script-build",
+    buildscript_rule = ":proc-macro2-1.0.92-build-script-build",
     features = [
         "default",
         "proc-macro",
         "span-locations",
     ],
-    version = "1.0.89",
+    version = "1.0.92",
 )
 
 alias(
@@ -257,7 +257,7 @@ cargo.rust_library(
         "proc-macro",
     ],
     visibility = [],
-    deps = [":proc-macro2-1.0.89"],
+    deps = [":proc-macro2-1.0.92"],
 )
 
 alias(
@@ -368,23 +368,23 @@ cargo.rust_library(
 
 alias(
     name = "syn",
-    actual = ":syn-2.0.87",
+    actual = ":syn-2.0.90",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "syn-2.0.87.crate",
-    sha256 = "25aa4ce346d03a6dcd68dd8b4010bcb74e54e62c90c573f394c46eae99aba32d",
-    strip_prefix = "syn-2.0.87",
-    urls = ["https://static.crates.io/crates/syn/2.0.87/download"],
+    name = "syn-2.0.90.crate",
+    sha256 = "919d3b74a5dd0ccd15aeb8f93e7006bd9e14c295087c9896a110f490752bcf31",
+    strip_prefix = "syn-2.0.90",
+    urls = ["https://static.crates.io/crates/syn/2.0.90/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "syn-2.0.87",
-    srcs = [":syn-2.0.87.crate"],
+    name = "syn-2.0.90",
+    srcs = [":syn-2.0.90.crate"],
     crate = "syn",
-    crate_root = "syn-2.0.87.crate/src/lib.rs",
+    crate_root = "syn-2.0.90.crate/src/lib.rs",
     edition = "2021",
     features = [
         "clone-impls",
@@ -397,9 +397,9 @@ cargo.rust_library(
     ],
     visibility = [],
     deps = [
-        ":proc-macro2-1.0.89",
+        ":proc-macro2-1.0.92",
         ":quote-1.0.37",
-        ":unicode-ident-1.0.13",
+        ":unicode-ident-1.0.14",
     ],
 )
 
@@ -429,18 +429,18 @@ cargo.rust_library(
 )
 
 http_archive(
-    name = "unicode-ident-1.0.13.crate",
-    sha256 = "e91b56cd4cadaeb79bbf1a5645f6b4f8dc5bde8834ad5894a8db35fda9efa1fe",
-    strip_prefix = "unicode-ident-1.0.13",
-    urls = ["https://static.crates.io/crates/unicode-ident/1.0.13/download"],
+    name = "unicode-ident-1.0.14.crate",
+    sha256 = "adb9e6ca4f869e1180728b7950e35922a7fc6397f7b641499e8f3ef06e50dc83",
+    strip_prefix = "unicode-ident-1.0.14",
+    urls = ["https://static.crates.io/crates/unicode-ident/1.0.14/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "unicode-ident-1.0.13",
-    srcs = [":unicode-ident-1.0.13.crate"],
+    name = "unicode-ident-1.0.14",
+    srcs = [":unicode-ident-1.0.14.crate"],
     crate = "unicode_ident",
-    crate_root = "unicode-ident-1.0.13.crate/src/lib.rs",
+    crate_root = "unicode-ident-1.0.14.crate/src/lib.rs",
     edition = "2018",
     visibility = [],
 )
