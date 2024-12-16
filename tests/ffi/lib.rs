@@ -17,6 +17,7 @@
 #![allow(unknown_lints)]
 #![warn(rust_2024_compatibility)]
 #![forbid(unsafe_op_in_unsafe_fn)]
+#![deny(warnings)] // Check that expansion of `cxx::bridge` doesn't trigger warnings.
 
 pub mod cast;
 pub mod module;
@@ -272,6 +273,7 @@ pub mod ffi {
         fn r_return_ref(shared: &Shared) -> &usize;
         fn r_return_mut(shared: &mut Shared) -> &mut usize;
         fn r_return_str(shared: &Shared) -> &str;
+        unsafe fn r_return_str_via_out_param<'a>(shared: &'a Shared, out_param: &mut &'a str);
         fn r_return_sliceu8(shared: &Shared) -> &[u8];
         fn r_return_mutsliceu8(slice: &mut [u8]) -> &mut [u8];
         fn r_return_rust_string() -> String;
@@ -489,6 +491,11 @@ fn r_return_mut(shared: &mut ffi::Shared) -> &mut usize {
 fn r_return_str(shared: &ffi::Shared) -> &str {
     let _ = shared;
     "2020"
+}
+
+fn r_return_str_via_out_param<'a>(shared: &'a ffi::Shared, out_param: &mut &'a str) {
+    let _ = shared;
+    *out_param = "2020"
 }
 
 fn r_return_sliceu8(shared: &ffi::Shared) -> &[u8] {

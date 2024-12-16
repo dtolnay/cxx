@@ -1231,11 +1231,14 @@ fn expand_rust_function_shim_super(
     };
 
     let mut body = quote_spanned!(span=> #call(#(#vars,)*));
+    let mut allow_unused_unsafe = quote!();
     if unsafety.is_some() {
-        body = quote_spanned!(span=> unsafe { #body });
+        body = quote_spanned!(span=>unsafe { #body });
+        allow_unused_unsafe = quote_spanned!(span=> #[allow(unused_unsafe)]);
     }
 
     quote_spanned! {span=>
+        #allow_unused_unsafe
         #unsafety fn #local_name #generics(#(#all_args,)*) #ret {
             #body
         }
