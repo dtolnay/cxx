@@ -295,7 +295,7 @@ def aliases(
 _NORMAL_DEPENDENCIES = {
     "third-party": {
         _COMMON_CONDITION: {
-            "cc": Label("@vendor__cc-1.2.3//:cc"),
+            "cc": Label("@vendor__cc-1.2.4//:cc"),
             "clap": Label("@vendor__clap-4.5.23//:clap"),
             "codespan-reporting": Label("@vendor__codespan-reporting-0.11.1//:codespan_reporting"),
             "foldhash": Label("@vendor__foldhash-0.1.3//:foldhash"),
@@ -433,12 +433,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__cc-1.2.3",
-        sha256 = "27f657647bcff5394bf56c7317665bbf790a137a50eaaa5c6bfbb9e27a518f2d",
+        name = "vendor__cc-1.2.4",
+        sha256 = "9157bbaa6b165880c27a4293a474c91cdcf265cc68cc829bf10be0964a391caf",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/cc/1.2.3/download"],
-        strip_prefix = "cc-1.2.3",
-        build_file = Label("//third-party/bazel:BUILD.cc-1.2.3.bazel"),
+        urls = ["https://static.crates.io/crates/cc/1.2.4/download"],
+        strip_prefix = "cc-1.2.4",
+        build_file = Label("//third-party/bazel:BUILD.cc-1.2.4.bazel"),
     )
 
     maybe(
@@ -692,7 +692,7 @@ def crate_repositories():
     )
 
     return [
-        struct(repo = "vendor__cc-1.2.3", is_dev_dep = False),
+        struct(repo = "vendor__cc-1.2.4", is_dev_dep = False),
         struct(repo = "vendor__clap-4.5.23", is_dev_dep = False),
         struct(repo = "vendor__codespan-reporting-0.11.1", is_dev_dep = False),
         struct(repo = "vendor__foldhash-0.1.3", is_dev_dep = False),
