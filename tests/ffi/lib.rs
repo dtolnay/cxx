@@ -495,7 +495,7 @@ fn r_return_str(shared: &ffi::Shared) -> &str {
 
 fn r_return_str_via_out_param<'a>(shared: &'a ffi::Shared, out_param: &mut &'a str) {
     let _ = shared;
-    *out_param = "2020"
+    *out_param = "2020";
 }
 
 fn r_return_sliceu8(shared: &ffi::Shared) -> &[u8] {
