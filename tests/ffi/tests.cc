@@ -866,6 +866,12 @@ extern "C" const char *cxx_run_test() noexcept {
   cstring.reserve(5);
   ASSERT(cstring.capacity() >= 5);
 
+  {
+    rust::Str out_param;
+    r_return_str_via_out_param(Shared{2020}, out_param);
+    ASSERT(out_param == "2020");
+  }
+
   rust::Str cstr = "test";
   rust::Str other_cstr = "foo";
   swap(cstr, other_cstr);

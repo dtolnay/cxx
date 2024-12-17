@@ -1,3 +1,5 @@
+#![deny(warnings)] // Check that expansion of `cxx::bridge` doesn't trigger warnings.
+
 #[cxx::bridge(namespace = "tests")]
 pub mod ffi {
     struct Job {
