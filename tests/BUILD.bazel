@@ -25,6 +25,7 @@ rust_library(
         ":impl",
         "//:cxx",
     ],
+    testonly = True,
 )
 
 cc_library(
@@ -40,16 +41,19 @@ cc_library(
         ":module/include",
         "//:core",
     ],
+    testonly = True,
 )
 
 rust_cxx_bridge(
     name = "bridge",
     src = "ffi/lib.rs",
     deps = [":impl"],
+    testonly = True,
 )
 
 rust_cxx_bridge(
     name = "module",
     src = "ffi/module.rs",
     deps = [":impl"],
+    testonly = True,
 )
