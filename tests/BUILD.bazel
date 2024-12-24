@@ -15,6 +15,7 @@ rust_test(
 
 rust_library(
     name = "cxx_test_suite",
+    testonly = True,
     srcs = [
         "ffi/cast.rs",
         "ffi/lib.rs",
@@ -25,11 +26,11 @@ rust_library(
         ":impl",
         "//:cxx",
     ],
-    testonly = True,
 )
 
 cc_library(
     name = "impl",
+    testonly = True,
     srcs = [
         "ffi/tests.cc",
         ":bridge/source",
@@ -41,19 +42,18 @@ cc_library(
         ":module/include",
         "//:core",
     ],
-    testonly = True,
 )
 
 rust_cxx_bridge(
     name = "bridge",
+    testonly = True,
     src = "ffi/lib.rs",
     deps = [":impl"],
-    testonly = True,
 )
 
 rust_cxx_bridge(
     name = "module",
+    testonly = True,
     src = "ffi/module.rs",
     deps = [":impl"],
-    testonly = True,
 )

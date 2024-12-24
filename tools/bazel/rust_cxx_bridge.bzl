@@ -14,13 +14,13 @@ def rust_cxx_bridge(name, src, deps = [], **kwargs):
     native.alias(
         name = "%s/header" % name,
         actual = src + ".h",
-        **kwargs,
+        **kwargs
     )
 
     native.alias(
         name = "%s/source" % name,
         actual = src + ".cc",
-        **kwargs,
+        **kwargs
     )
 
     run_binary(
@@ -38,18 +38,18 @@ def rust_cxx_bridge(name, src, deps = [], **kwargs):
             "$(location %s.cc)" % src,
         ],
         tool = "@cxx.rs//:codegen",
-        **kwargs,
+        **kwargs
     )
 
     cc_library(
         name = name,
         srcs = [src + ".cc"],
         deps = deps + [":%s/include" % name],
-        **kwargs,
+        **kwargs
     )
 
     cc_library(
         name = "%s/include" % name,
         hdrs = [src + ".h"],
-        **kwargs,
+        **kwargs
     )
