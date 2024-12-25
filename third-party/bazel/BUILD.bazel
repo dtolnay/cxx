@@ -33,7 +33,7 @@ filegroup(
 # Workspace Member Dependencies
 alias(
     name = "cc",
-    actual = "@vendor__cc-1.2.4//:cc",
+    actual = "@vendor__cc-1.2.5//:cc",
     tags = ["manual"],
 )
 
@@ -51,7 +51,7 @@ alias(
 
 alias(
     name = "foldhash",
-    actual = "@vendor__foldhash-0.1.3//:foldhash",
+    actual = "@vendor__foldhash-0.1.4//:foldhash",
     tags = ["manual"],
 )
 
@@ -81,6 +81,6 @@ alias(
 
 alias(
     name = "syn",
-    actual = "@vendor__syn-2.0.90//:syn",
+    actual = "@vendor__syn-2.0.91//:syn",
     tags = ["manual"],
 )
