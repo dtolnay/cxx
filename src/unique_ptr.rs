@@ -55,21 +55,22 @@ where
     ///
     /// This is the opposite of [std::unique_ptr\<T\>::operator bool](https://en.cppreference.com/w/cpp/memory/unique_ptr/operator_bool).
     pub fn is_null(&self) -> bool {
-        let ptr = unsafe { T::__get(self.repr) };
-        ptr.is_null()
+        self.as_ptr().is_null()
     }
 
     /// Returns a reference to the object owned by this UniquePtr if any,
     /// otherwise None.
     pub fn as_ref(&self) -> Option<&T> {
-        unsafe { T::__get(self.repr).as_ref() }
+        let ptr = self.as_ptr();
+        unsafe { ptr.as_ref() }
     }
 
     /// Returns a mutable pinned reference to the object owned by this UniquePtr
     /// if any, otherwise None.
     pub fn as_mut(&mut self) -> Option<Pin<&mut T>> {
+        let ptr = self.as_mut_ptr();
         unsafe {
-            let mut_reference = (T::__get(self.repr) as *mut T).as_mut()?;
+            let mut_reference = ptr.as_mut()?;
             Some(Pin::new_unchecked(mut_reference))
         }
     }
@@ -93,10 +94,7 @@ where
     /// Returns a raw const pointer to the object owned by this UniquePtr if
     /// any, otherwise the null pointer.
     pub fn as_ptr(&self) -> *const T {
-        match self.as_ref() {
-            Some(target) => target as *const T,
-            None => std::ptr::null(),
-        }
+        unsafe { T::__get(self.repr) }
     }
 
     /// Returns a raw mutable pointer to the object owned by this UniquePtr if
