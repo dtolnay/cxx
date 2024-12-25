@@ -90,8 +90,8 @@ where
         }
     }
 
-    /// Returns a pointer to the object owned by this UniquePtr
-    /// if any, otherwise the null pointer.
+    /// Returns a raw const pointer to the object owned by this UniquePtr if
+    /// any, otherwise the null pointer.
     pub fn as_ptr(&self) -> *const T {
         match self.as_ref() {
             Some(target) => target as *const T,
@@ -99,13 +99,13 @@ where
         }
     }
 
-    /// Returns a mutable pointer to the object owned by this UniquePtr
-    /// if any, otherwise the null pointer.
+    /// Returns a raw mutable pointer to the object owned by this UniquePtr if
+    /// any, otherwise the null pointer.
     ///
     /// As with [std::unique_ptr\<T\>::get](https://en.cppreference.com/w/cpp/memory/unique_ptr/get),
-    /// this doesn't require that you hold a mutable reference to the `UniquePtr`.
-    /// This differs from Rust norms, so extra care should be taken in
-    /// the way the pointer is used.
+    /// this doesn't require that you hold an exclusive reference to the
+    /// UniquePtr. This differs from Rust norms, so extra care should be taken
+    /// in the way the pointer is used.
     pub fn as_mut_ptr(&self) -> *mut T {
         self.as_ptr() as *mut T
     }
