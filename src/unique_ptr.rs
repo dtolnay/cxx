@@ -55,8 +55,7 @@ where
     ///
     /// This is the opposite of [std::unique_ptr\<T\>::operator bool](https://en.cppreference.com/w/cpp/memory/unique_ptr/operator_bool).
     pub fn is_null(&self) -> bool {
-        let ptr = unsafe { T::__get(self.repr) };
-        ptr.is_null()
+        self.as_ptr().is_null()
     }
 
     /// Returns a reference to the object owned by this UniquePtr if any,
@@ -69,8 +68,9 @@ where
     /// Returns a mutable pinned reference to the object owned by this UniquePtr
     /// if any, otherwise None.
     pub fn as_mut(&mut self) -> Option<Pin<&mut T>> {
+        let ptr = self.as_mut_ptr();
         unsafe {
-            let mut_reference = (T::__get(self.repr) as *mut T).as_mut()?;
+            let mut_reference = ptr.as_mut()?;
             Some(Pin::new_unchecked(mut_reference))
         }
     }
