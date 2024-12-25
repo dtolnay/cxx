@@ -62,7 +62,8 @@ where
     /// Returns a reference to the object owned by this UniquePtr if any,
     /// otherwise None.
     pub fn as_ref(&self) -> Option<&T> {
-        unsafe { T::__get(self.repr).as_ref() }
+        let ptr = self.as_ptr();
+        unsafe { ptr.as_ref() }
     }
 
     /// Returns a mutable pinned reference to the object owned by this UniquePtr
@@ -93,10 +94,7 @@ where
     /// Returns a raw const pointer to the object owned by this UniquePtr if
     /// any, otherwise the null pointer.
     pub fn as_ptr(&self) -> *const T {
-        match self.as_ref() {
-            Some(target) => target as *const T,
-            None => std::ptr::null(),
-        }
+        unsafe { T::__get(self.repr) }
     }
 
     /// Returns a raw mutable pointer to the object owned by this UniquePtr if
