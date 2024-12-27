@@ -104,18 +104,16 @@ fn traverse<'a>(
 ) {
     match &node.kind {
         Clang::NamespaceDecl(decl) => {
-            let name = match &decl.name {
-                Some(name) => name,
+            let Some(name) = &decl.name else {
                 // Can ignore enums inside an anonymous namespace.
-                None => return,
+                return;
             };
             namespace.push(name);
             idx = None;
         }
         Clang::EnumDecl(decl) => {
-            let name = match &decl.name {
-                Some(name) => name,
-                None => return,
+            let Some(name) = &decl.name else {
+                return;
             };
             idx = None;
             for (i, enm) in variants_from_header.iter_mut().enumerate() {
@@ -127,19 +125,16 @@ fn traverse<'a>(
                         cx.error(span, msg);
                         return;
                     }
-                    let fixed_underlying_type = match &decl.fixed_underlying_type {
-                        Some(fixed_underlying_type) => fixed_underlying_type,
-                        None => {
-                            let span = &enm.variants_from_header_attr;
-                            let name = &enm.name.cxx;
-                            let qual_name = CxxName(&enm.name);
-                            let msg = format!(
-                                "implicit implementation-defined repr for enum {} is not supported yet; consider changing its C++ definition to `enum {}: int {{...}}",
-                                qual_name, name,
-                            );
-                            cx.error(span, msg);
-                            return;
-                        }
+                    let Some(fixed_underlying_type) = &decl.fixed_underlying_type else {
+                        let span = &enm.variants_from_header_attr;
+                        let name = &enm.name.cxx;
+                        let qual_name = CxxName(&enm.name);
+                        let msg = format!(
+                            "implicit implementation-defined repr for enum {} is not supported yet; consider changing its C++ definition to `enum {}: int {{...}}",
+                            qual_name, name,
+                        );
+                        cx.error(span, msg);
+                        return;
                     };
                     let repr = translate_qual_type(
                         cx,
@@ -169,13 +164,10 @@ fn traverse<'a>(
                     .get_ident()
                     .unwrap()
                     .span();
-                let cxx_name = match ForeignName::parse(&decl.name, span) {
-                    Ok(foreign_name) => foreign_name,
-                    Err(_) => {
-                        let span = &enm.variants_from_header_attr;
-                        let msg = format!("unsupported C++ variant name: {}", decl.name);
-                        return cx.error(span, msg);
-                    }
+                let Ok(cxx_name) = ForeignName::parse(&decl.name, span) else {
+                    let span = &enm.variants_from_header_attr;
+                    let msg = format!("unsupported C++ variant name: {}", decl.name);
+                    return cx.error(span, msg);
                 };
                 let rust_name: Ident = match syn::parse_str(&decl.name) {
                     Ok(ident) => ident,
