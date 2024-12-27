@@ -1,5 +1,4 @@
 #![allow(
-    clippy::incompatible_msrv, // https://github.com/rust-lang/rust-clippy/issues/12257
     clippy::items_after_statements,
     clippy::uninlined_format_args,
     clippy::unused_async

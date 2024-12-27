@@ -1,5 +1,3 @@
-#![allow(clippy::field_reassign_with_default)]
-
 use cxx_gen::{generate_header_and_cc, Opt};
 use std::str;
 

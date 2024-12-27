@@ -1,34 +1,22 @@
 #![allow(
     clippy::cast_sign_loss,
-    clippy::default_trait_access,
-    clippy::derive_partial_eq_without_eq,
     clippy::doc_markdown,
     clippy::enum_glob_use,
-    clippy::if_same_then_else,
     clippy::inherent_to_string,
-    clippy::into_iter_without_iter,
     clippy::items_after_statements,
-    clippy::large_enum_variant,
     clippy::match_bool,
     clippy::match_same_arms,
-    clippy::module_name_repetitions,
     clippy::needless_lifetimes,
     clippy::needless_pass_by_value,
-    clippy::new_without_default,
     clippy::nonminimal_bool,
-    clippy::or_fun_call,
     clippy::redundant_else,
     clippy::ref_option,
-    clippy::shadow_unrelated,
-    clippy::similar_names,
-    clippy::single_match,
     clippy::single_match_else,
     clippy::struct_field_names,
     clippy::too_many_arguments,
     clippy::too_many_lines,
     clippy::toplevel_ref_arg,
-    clippy::uninlined_format_args,
-    clippy::useless_let_if_seq
+    clippy::uninlined_format_args
 )]
 
 mod derive;

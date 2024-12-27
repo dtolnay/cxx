@@ -1,15 +1,10 @@
 #![allow(
     clippy::boxed_local,
-    clippy::derive_partial_eq_without_eq,
-    clippy::just_underscores_and_digits,
     clippy::missing_errors_doc,
     clippy::missing_safety_doc,
     clippy::must_use_candidate,
     clippy::needless_lifetimes,
-    clippy::needless_pass_by_ref_mut,
     clippy::needless_pass_by_value,
-    clippy::ptr_arg,
-    clippy::trivially_copy_pass_by_ref,
     clippy::unnecessary_literal_bound,
     clippy::unnecessary_wraps,
     clippy::unused_self
