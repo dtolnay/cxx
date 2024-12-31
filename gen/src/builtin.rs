@@ -410,10 +410,16 @@ pub(super) fn write(out: &mut OutFile) {
             "    ::std::is_same<decltype(trycatch(::std::declval<Try>(), ::std::declval<Fail>())),",
         );
         writeln!(out, "                 missing>::value>::type");
-        writeln!(out, "trycatch(Try &&func, Fail &&fail) noexcept try {{");
+        writeln!(out, "trycatch(Try &&func, Fail &&fail) noexcept {{");
+        writeln!(out, "#if defined(RUST_CXX_NO_EXCEPTIONS)");
         writeln!(out, "  func();");
-        writeln!(out, "}} catch (::std::exception const &e) {{");
-        writeln!(out, "  fail(e.what());");
+        writeln!(out, "#else");
+        writeln!(out, "  try {{");
+        writeln!(out, "    func();");
+        writeln!(out, "  }} catch (::std::exception const &e) {{");
+        writeln!(out, "    fail(e.what());");
+        writeln!(out, "  }}");
+        writeln!(out, "#endif");
         writeln!(out, "}}");
         out.end_block(Block::Namespace("behavior"));
     }
