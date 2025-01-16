@@ -16,6 +16,9 @@ rust-version = "1.73"
 name = "cxxbridge"
 path = "src/main.rs"
 
+[lib]
+path = "src/lib.rs"
+
 [features]
 # incomplete features that are not covered by a compatibility guarantee:
 experimental-async-fn = []
