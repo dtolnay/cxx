@@ -172,9 +172,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install clang-tidy
-        run: sudo apt-get install clang-tidy-11
+        run: sudo apt-get install clang-tidy-18
       - name: Run clang-tidy
-        run: clang-tidy-11 src/cxx.cc --warnings-as-errors=*
+        run: clang-tidy-18 src/cxx.cc --warnings-as-errors=*
 
   outdated:
     name: Outdated
