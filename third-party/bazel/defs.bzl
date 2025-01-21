@@ -295,14 +295,14 @@ def aliases(
 _NORMAL_DEPENDENCIES = {
     "third-party": {
         _COMMON_CONDITION: {
-            "cc": Label("@vendor__cc-1.2.10//:cc"),
-            "clap": Label("@vendor__clap-4.5.26//:clap"),
-            "codespan-reporting": Label("@vendor__codespan-reporting-0.11.1//:codespan_reporting"),
-            "foldhash": Label("@vendor__foldhash-0.1.4//:foldhash"),
-            "proc-macro2": Label("@vendor__proc-macro2-1.0.93//:proc_macro2"),
-            "quote": Label("@vendor__quote-1.0.38//:quote"),
-            "scratch": Label("@vendor__scratch-1.0.7//:scratch"),
-            "syn": Label("@vendor__syn-2.0.96//:syn"),
+            "cc": Label("@vendor//:cc-1.2.10"),
+            "clap": Label("@vendor//:clap-4.5.26"),
+            "codespan-reporting": Label("@vendor//:codespan-reporting-0.11.1"),
+            "foldhash": Label("@vendor//:foldhash-0.1.4"),
+            "proc-macro2": Label("@vendor//:proc-macro2-1.0.93"),
+            "quote": Label("@vendor//:quote-1.0.38"),
+            "scratch": Label("@vendor//:scratch-1.0.7"),
+            "syn": Label("@vendor//:syn-2.0.96"),
         },
     },
 }
@@ -327,7 +327,7 @@ _NORMAL_DEV_ALIASES = {
 _PROC_MACRO_DEPENDENCIES = {
     "third-party": {
         _COMMON_CONDITION: {
-            "rustversion": Label("@vendor__rustversion-1.0.19//:rustversion"),
+            "rustversion": Label("@vendor//:rustversion-1.0.19"),
         },
     },
 }
@@ -378,6 +378,7 @@ _CONDITIONS = {
     "aarch64-unknown-linux-gnu": ["@rules_rust//rust/platform:aarch64-unknown-linux-gnu"],
     "aarch64-unknown-nixos-gnu": ["@rules_rust//rust/platform:aarch64-unknown-nixos-gnu"],
     "aarch64-unknown-nto-qnx710": ["@rules_rust//rust/platform:aarch64-unknown-nto-qnx710"],
+    "aarch64-unknown-uefi": ["@rules_rust//rust/platform:aarch64-unknown-uefi"],
     "arm-unknown-linux-gnueabi": ["@rules_rust//rust/platform:arm-unknown-linux-gnueabi"],
     "armv7-linux-androideabi": ["@rules_rust//rust/platform:armv7-linux-androideabi"],
     "armv7-unknown-linux-gnueabi": ["@rules_rust//rust/platform:armv7-unknown-linux-gnueabi"],
@@ -411,6 +412,7 @@ _CONDITIONS = {
     "x86_64-unknown-linux-gnu": ["@rules_rust//rust/platform:x86_64-unknown-linux-gnu"],
     "x86_64-unknown-nixos-gnu": ["@rules_rust//rust/platform:x86_64-unknown-nixos-gnu"],
     "x86_64-unknown-none": ["@rules_rust//rust/platform:x86_64-unknown-none"],
+    "x86_64-unknown-uefi": ["@rules_rust//rust/platform:x86_64-unknown-uefi"],
 }
 
 ###############################################################################

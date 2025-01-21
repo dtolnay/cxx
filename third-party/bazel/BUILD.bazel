@@ -32,8 +32,20 @@ filegroup(
 
 # Workspace Member Dependencies
 alias(
+    name = "cc-1.2.10",
+    actual = "@vendor__cc-1.2.10//:cc",
+    tags = ["manual"],
+)
+
+alias(
     name = "cc",
     actual = "@vendor__cc-1.2.10//:cc",
+    tags = ["manual"],
+)
+
+alias(
+    name = "clap-4.5.26",
+    actual = "@vendor__clap-4.5.26//:clap",
     tags = ["manual"],
 )
 
@@ -44,8 +56,20 @@ alias(
 )
 
 alias(
+    name = "codespan-reporting-0.11.1",
+    actual = "@vendor__codespan-reporting-0.11.1//:codespan_reporting",
+    tags = ["manual"],
+)
+
+alias(
     name = "codespan-reporting",
     actual = "@vendor__codespan-reporting-0.11.1//:codespan_reporting",
+    tags = ["manual"],
+)
+
+alias(
+    name = "foldhash-0.1.4",
+    actual = "@vendor__foldhash-0.1.4//:foldhash",
     tags = ["manual"],
 )
 
@@ -56,8 +80,20 @@ alias(
 )
 
 alias(
+    name = "proc-macro2-1.0.93",
+    actual = "@vendor__proc-macro2-1.0.93//:proc_macro2",
+    tags = ["manual"],
+)
+
+alias(
     name = "proc-macro2",
     actual = "@vendor__proc-macro2-1.0.93//:proc_macro2",
+    tags = ["manual"],
+)
+
+alias(
+    name = "quote-1.0.38",
+    actual = "@vendor__quote-1.0.38//:quote",
     tags = ["manual"],
 )
 
@@ -68,14 +104,32 @@ alias(
 )
 
 alias(
+    name = "rustversion-1.0.19",
+    actual = "@vendor__rustversion-1.0.19//:rustversion",
+    tags = ["manual"],
+)
+
+alias(
     name = "rustversion",
     actual = "@vendor__rustversion-1.0.19//:rustversion",
     tags = ["manual"],
 )
 
 alias(
+    name = "scratch-1.0.7",
+    actual = "@vendor__scratch-1.0.7//:scratch",
+    tags = ["manual"],
+)
+
+alias(
     name = "scratch",
     actual = "@vendor__scratch-1.0.7//:scratch",
+    tags = ["manual"],
+)
+
+alias(
+    name = "syn-2.0.96",
+    actual = "@vendor__syn-2.0.96//:syn",
     tags = ["manual"],
 )
 
