@@ -6,5 +6,5 @@
 /buck-out
 /expand.cc
 /expand.rs
-Cargo.lock
-target
+/target/
+/Cargo.lock
