@@ -82,6 +82,9 @@ while (dirs.length) {
           if (i > 0 && (boring[i - 1] || ellipsis[i - 1])) {
             line = '</span>' + line;
           }
+          if (i + 1 === highlightedLines.length && (boring[i] || ellipsis[i])) {
+            line = line + '</span>';
+          }
           return line;
         })
         .join('\n');
