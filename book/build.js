@@ -67,7 +67,7 @@ while (dirs.length) {
       const lang = langClass.replace('language-', '');
       const lines = node.html().split('\n');
       const boring = lines.map((line) =>
-        line.includes('<span class="boring">')
+        line.includes('<span class="boring">'),
       );
       const ellipsis = lines.map((line) => line.includes('// ...'));
       const target = entities.decode(node.text());
@@ -105,7 +105,11 @@ while (dirs.length) {
         foundScript = true;
       }
     });
-    const pathsWithoutScript = ['build/toc.html', 'build/build/index.html', 'build/binding/index.html'];
+    const pathsWithoutScript = [
+      'build/toc.html',
+      'build/build/index.html',
+      'build/binding/index.html',
+    ];
     if (!foundScript && !pathsWithoutScript.includes(path)) {
       throw new Error('theme script not found');
     }
@@ -121,5 +125,8 @@ fs.copyFileSync('build/highlight.css', 'build/ayu-highlight.css');
 var bookjs = fs.readFileSync('build/book.js', 'utf8');
 bookjs = bookjs
   .replace('set_theme(theme, false);', '')
-  .replace('document.querySelectorAll("code.hljs")', 'document.querySelectorAll("code.hidelines")');
+  .replace(
+    'document.querySelectorAll("code.hljs")',
+    'document.querySelectorAll("code.hidelines")',
+  );
 fs.writeFileSync('build/book.js', bookjs);
