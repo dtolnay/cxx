@@ -4,7 +4,7 @@
   "main": "build.js",
   "dependencies": {
     "cheerio": "^0.22.0",
-    "html-entities": "^2.3.6"
+    "html-entities": "^2.5.2"
   },
   "prettier": {
     "singleQuote": true
