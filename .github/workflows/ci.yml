@@ -176,6 +176,18 @@ jobs:
       - name: Run clang-tidy
         run: clang-tidy-18 src/cxx.cc --warnings-as-errors=*
 
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install
+        working-directory: book
+      - run: npx eslint
+        working-directory: book
+
   outdated:
     name: Outdated
     runs-on: ubuntu-latest
