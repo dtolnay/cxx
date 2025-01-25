@@ -51,7 +51,10 @@ while (dirs.length) {
     }
 
     const index = fs.readFileSync(path, 'utf8');
-    const $ = cheerio.load(index, { decodeEntities: false });
+    const $ = cheerio.load(index, {
+      decodeEntities: false,
+      xml: { xmlMode: false },
+    });
 
     $('head').append(opengraph);
     $('nav#sidebar ol.chapter').append(githublink);

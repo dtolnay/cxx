@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "main": "build.js",
   "dependencies": {
-    "cheerio": "^0.22.0",
+    "cheerio": "^1.0.0",
     "html-entities": "^2.5.2"
   },
   "prettier": {
