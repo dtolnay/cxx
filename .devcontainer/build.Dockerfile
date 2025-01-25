@@ -1,18 +1,14 @@
-FROM mcr.microsoft.com/vscode/devcontainers/rust:1
+FROM mcr.microsoft.com/devcontainers/rust:bookworm
 
 RUN apt-get update \
     && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends openjdk-11-jdk lld \
-    && rustup default nightly 2>&1 \
-    && rustup component add rust-analyzer-preview rustfmt clippy 2>&1 \
-    && wget -q -O bin/install-bazel https://github.com/bazelbuild/bazel/releases/download/4.0.0/bazel-4.0.0-installer-linux-x86_64.sh \
-    && wget -q -O bin/buck https://jitpack.io/com/github/facebook/buck/a5f0342ae3/buck-a5f0342ae3-java11.pex \
-    && wget -q -O bin/buildifier https://github.com/bazelbuild/buildtools/releases/latest/download/buildifier \
-    && wget -q -O tmp/watchman.zip https://github.com/facebook/watchman/releases/download/v2020.09.21.00/watchman-v2020.09.21.00-linux.zip \
-    && chmod +x bin/install-bazel bin/buck bin/buildifier \
-    && bin/install-bazel \
-    && unzip tmp/watchman.zip -d tmp \
-    && mv tmp/watchman-v2020.09.21.00-linux/bin/watchman bin \
-    && mv tmp/watchman-v2020.09.21.00-linux/lib/* /usr/local/lib \
-    && mkdir -p /usr/local/var/run/watchman \
-    && rm tmp/watchman.zip
+    && apt-get -y install --no-install-recommends clang lld zstd \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && wget -q -O /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
+    && wget -q -O /tmp/buck.zst https://github.com/facebook/buck2/releases/download/latest/buck2-x86_64-unknown-linux-gnu.zst \
+    && wget -q -O /usr/local/bin/buildifier https://github.com/bazelbuild/buildtools/releases/latest/download/buildifier-linux-amd64 \
+    && unzstd /tmp/buck.zst -o /usr/local/bin/buck \
+    && chmod +x /usr/local/bin/bazel /usr/local/bin/buck /usr/local/bin/buildifier \
+    && rm /tmp/buck.zst \
+    && rustup component add rust-analyzer rust-src
