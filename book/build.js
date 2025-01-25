@@ -22,9 +22,17 @@ const opengraph = `\
 <meta name="twitter:card" content="summary" />\
 <meta name="twitter:title" content="CXX — safe interop between Rust and C++" />`;
 
-const htmljs = `\
-var html = document.querySelector('html');
-html.classList.remove('no-js');
+const themejs = `\
+var theme;
+try { theme = localStorage.getItem('mdbook-theme'); } catch(e) {}
+if (theme === null || theme === undefined) { theme = default_theme; }
+const html = document.documentElement;
+html.classList.remove('light')
+html.classList.add(theme);
+html.classList.add("js");`;
+
+const themejsReplacement = `\
+const html = document.documentElement;
 html.classList.add('js');`;
 
 const dirs = ['build'];
@@ -46,7 +54,6 @@ while (dirs.length) {
     const $ = cheerio.load(index, { decodeEntities: false });
 
     $('head').append(opengraph);
-    $('script:nth-of-type(3)').text(htmljs);
     $('nav#sidebar ol.chapter').append(githublink);
     $('head link[href="tomorrow-night.css"]').attr('disabled', true);
     $('head link[href="ayu-highlight.css"]').attr('disabled', true);
@@ -89,6 +96,19 @@ while (dirs.length) {
     $('code').each(function () {
       $(this).addClass('hljs');
     });
+
+    var foundScript = false;
+    $('body script').each(function () {
+      const node = $(this);
+      if (node.text().replace(/\s/g, '') === themejs.replace(/\s/g, '')) {
+        node.text(themejsReplacement);
+        foundScript = true;
+      }
+    });
+    const pathsWithoutScript = ['build/toc.html', 'build/build/index.html', 'build/binding/index.html'];
+    if (!foundScript && !pathsWithoutScript.includes(path)) {
+      throw new Error('theme script not found');
+    }
 
     const out = $.html();
     fs.writeFileSync(path, out);
