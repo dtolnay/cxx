@@ -65,15 +65,14 @@ while (dirs.length) {
         return;
       }
       const lang = langClass.replace('language-', '');
-      const lines = node.html().split('\n');
-      const boring = lines.map((line) =>
+      const originalLines = node.html().split('\n');
+      const boring = originalLines.map((line) =>
         line.includes('<span class="boring">'),
       );
-      const ellipsis = lines.map((line) => line.includes('// ...'));
+      const ellipsis = originalLines.map((line) => line.includes('// ...'));
       const target = entities.decode(node.text());
-      const highlighted = hljs.highlight(lang, target).value;
-      const result = highlighted
-        .split('\n')
+      const highlightedLines = hljs.highlight(lang, target).value.split('\n');
+      const result = highlightedLines
         .map(function (line, i) {
           if (boring[i]) {
             line = '<span class="boring">' + line;
