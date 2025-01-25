@@ -39,7 +39,7 @@ const dirs = ['build'];
 while (dirs.length) {
   const dir = dirs.pop();
   fs.readdirSync(dir).forEach((entry) => {
-    path = dir + '/' + entry;
+    const path = dir + '/' + entry;
     const stat = fs.statSync(path);
     if (stat.isDirectory()) {
       dirs.push(path);
