@@ -58,6 +58,9 @@ jobs:
           RUSTFLAGS: ${{env.RUSTFLAGS}} ${{matrix.os != 'ubuntu' && github.event_name != 'schedule' && '--cfg skip_ui_tests' || ''}}
         id: testsuite
         shell: bash
+      - name: Ignore macOS linker warning
+        run: echo RUSTFLAGS=${RUSTFLAGS}\ -Alinker_messages >> $GITHUB_ENV
+        if: matrix.os == 'macos'
       - run: cargo run --manifest-path demo/Cargo.toml
       - run: cargo test --workspace ${{steps.testsuite.outputs.exclude}}
       - run: cargo check --no-default-features --features alloc
