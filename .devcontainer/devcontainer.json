@@ -13,8 +13,8 @@
     },
     "extensions": [
         "BazelBuild.vscode-bazel",
-        "matklad.rust-analyzer",
         "ms-vscode.cpptools",
+        "rust-lang.rust-analyzer",
         "vadimcn.vscode-lldb"
     ]
 }
