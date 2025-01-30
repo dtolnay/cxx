@@ -10,10 +10,10 @@ pub(crate) enum TargetDir {
 pub(crate) fn find_target_dir(out_dir: &Path) -> TargetDir {
     if let Some(target_dir) = env::var_os("CARGO_TARGET_DIR") {
         let target_dir = PathBuf::from(target_dir);
-        if target_dir.is_absolute() {
-            return TargetDir::Path(target_dir);
+        return if target_dir.is_absolute() {
+            TargetDir::Path(target_dir)
         } else {
-            return TargetDir::Unknown;
+            TargetDir::Unknown
         };
     }
 
