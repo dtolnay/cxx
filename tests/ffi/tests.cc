@@ -44,6 +44,8 @@ const size_t &Shared::c_method_ref_on_shared() const noexcept {
 
 size_t &Shared::c_method_mut_on_shared() noexcept { return this->z; }
 
+size_t Shared::c_static_method_on_shared() noexcept { return 2025; }
+
 void Array::c_set_array(int32_t val) noexcept {
   this->a = {val, val, val, val};
 }
@@ -627,6 +629,8 @@ rust::String cOverloadedFunction(rust::Str x) {
   return rust::String(std::string(x));
 }
 
+size_t C::c_static_method() { return 2026; }
+
 void c_take_trivial_ptr(std::unique_ptr<D> d) {
   if (d->d == 30) {
     cxx_test_suite_set_correct();
@@ -786,6 +790,8 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(r_return_enum(0) == Enum::AVal);
   ASSERT(r_return_enum(1) == Enum::BVal);
   ASSERT(r_return_enum(2021) == Enum::CVal);
+  ASSERT(Shared::r_static_method_on_shared() == 2023);
+  ASSERT(R::r_static_method() == 2024);
 
   r_take_primitive(2020);
   r_take_shared(Shared{2020});
