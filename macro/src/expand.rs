@@ -487,8 +487,13 @@ fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
     };
     let mut outparam = None;
     if indirect_return(efn, types) {
-        let ret = expand_extern_type(efn.ret.as_ref().unwrap(), types, true);
-        outparam = Some(quote!(__return: *mut #ret));
+        if efn.sig.constructor {
+            let self_type = expand_extern_type(&types.resolve(efn.self_type.as_ref().unwrap()).into(), types, true);
+            outparam = Some(quote!(__return: *mut #self_type));
+        } else {
+            let ret = expand_extern_type(efn.ret.as_ref().unwrap(), types, true);
+            outparam = Some(quote!(__return: *mut #ret));
+        }
     }
     let link_name = mangle::extern_fn(efn, types);
     let local_name = format_ident!("__{}", efn.name.rust);
@@ -523,6 +528,8 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
             None => quote!(()),
         };
         quote!(-> ::cxx::core::result::Result<#ok, ::cxx::Exception>)
+    } else if efn.sig.constructor {
+        quote!(-> Self)
     } else {
         expand_return_type(&efn.ret)
     };
@@ -626,10 +633,17 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let local_name = format_ident!("__{}", efn.name.rust);
     let span = efn.semi_token.span;
     let call = if indirect_return {
-        let ret = expand_extern_type(efn.ret.as_ref().unwrap(), types, true);
-        setup.extend(quote_spanned! {span=>
-            let mut __return = ::cxx::core::mem::MaybeUninit::<#ret>::uninit();
-        });
+        if efn.sig.constructor {
+            let self_type = expand_extern_type(&types.resolve(efn.self_type.as_ref().unwrap()).into(), types, true);
+            setup.extend(quote_spanned! {span=>
+                let mut __return = ::cxx::core::mem::MaybeUninit::<#self_type>::uninit();
+            });
+        } else {
+            let ret = expand_extern_type(efn.ret.as_ref().unwrap(), types, true);
+            setup.extend(quote_spanned! {span=>
+                let mut __return = ::cxx::core::mem::MaybeUninit::<#ret>::uninit();
+            });
+        }
         setup.extend(if efn.throws {
             quote_spanned! {span=>
                 #local_name(#(#vars,)* __return.as_mut_ptr()).exception()?;
@@ -1177,8 +1191,13 @@ fn expand_rust_function_shim_impl(
     let mut outparam = None;
     let indirect_return = indirect_return(sig, types);
     if indirect_return {
-        let ret = expand_extern_type(sig.ret.as_ref().unwrap(), types, false);
-        outparam = Some(quote_spanned!(span=> __return: *mut #ret,));
+        if sig.constructor {
+            let self_type  = expand_extern_type(&types.resolve(self_type.as_ref().unwrap()).into(), types, false);
+            outparam = Some(quote_spanned!(span=> __return: *mut #self_type,));
+        } else {
+            let ret = expand_extern_type(sig.ret.as_ref().unwrap(), types, false);
+            outparam = Some(quote_spanned!(span=> __return: *mut #ret,));
+        }
     }
     if sig.throws {
         let out = match sig.ret {
@@ -1267,6 +1286,8 @@ fn expand_rust_function_shim_super(
             quote_spanned!(rangle.span=> ::cxx::core::fmt::Display>)
         };
         quote!(-> #result_begin #result_end)
+    } else if sig.constructor {
+        expand_return_type(&Some(types.resolve(self_type.as_ref().unwrap()).into()))
     } else {
         expand_return_type(&sig.ret)
     };
@@ -1912,9 +1933,11 @@ fn expand_return_type(ret: &Option<Type>) -> TokenStream {
 }
 
 fn indirect_return(sig: &Signature, types: &Types) -> bool {
-    sig.ret
-        .as_ref()
-        .is_some_and(|ret| sig.throws || types.needs_indirect_abi(ret))
+    sig.constructor
+        || sig
+            .ret
+            .as_ref()
+            .is_some_and(|ret| sig.throws || types.needs_indirect_abi(ret))
 }
 
 fn expand_extern_type(ty: &Type, types: &Types, proper: bool) -> TokenStream {

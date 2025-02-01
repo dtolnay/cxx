@@ -510,6 +510,10 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
         if efn.receiver.is_some() {
             cx.error(efn, "self type and receiver are mutually exclusive");
         }
+
+        if efn.sig.constructor && !cx.types.structs.contains_key(self_type) {
+            cx.error(efn, "constructor is only allowed for shared structure");
+        }
     }
 }
 

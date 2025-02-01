@@ -218,6 +218,7 @@ pub(crate) struct Signature {
     pub throws: bool,
     pub paren_token: Paren,
     pub throws_tokens: Option<(kw::Result, Token![<], Token![>])>,
+    pub constructor: bool,
 }
 
 pub(crate) struct Var {

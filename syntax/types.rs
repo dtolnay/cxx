@@ -25,6 +25,7 @@ pub(crate) struct Types<'a> {
     pub resolutions: UnorderedMap<&'a Ident, Resolution<'a>>,
     pub struct_improper_ctypes: UnorderedSet<&'a Ident>,
     pub toposorted_structs: Vec<&'a Struct>,
+    pub structs_with_constructors: UnorderedSet<&'a Ident>,
 }
 
 impl<'a> Types<'a> {
@@ -38,6 +39,7 @@ impl<'a> Types<'a> {
         let mut untrusted = UnorderedMap::new();
         let mut impls = OrderedMap::new();
         let mut resolutions = UnorderedMap::new();
+        let mut structs_with_constructors = UnorderedSet::new();
         let struct_improper_ctypes = UnorderedSet::new();
         let toposorted_structs = Vec::new();
 
@@ -151,6 +153,9 @@ impl<'a> Types<'a> {
                     if let Some(ret) = &efn.ret {
                         visit(&mut all, ret);
                     }
+                    if efn.sig.constructor {
+                        structs_with_constructors.insert(efn.self_type.as_ref().unwrap());
+                    }
                 }
                 Api::TypeAlias(alias) => {
                     let ident = &alias.name.rust;
@@ -209,6 +214,7 @@ impl<'a> Types<'a> {
             resolutions,
             struct_improper_ctypes,
             toposorted_structs,
+            structs_with_constructors,
         };
 
         types.toposorted_structs = toposort::sort(cx, apis, &types);

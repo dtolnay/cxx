@@ -29,6 +29,10 @@ pub mod ffi {
         z: usize,
     }
 
+    struct SharedWithConstructor {
+        z: usize,
+    }
+
     #[derive(PartialEq, PartialOrd)]
     struct SharedString {
         msg: String,
@@ -223,6 +227,11 @@ pub mod ffi {
 
         #[Self = "C"]
         fn c_static_method() -> usize;
+
+        #[Self = "SharedWithConstructor"]
+        fn c_new(x: usize, y: usize) -> Self;
+
+        fn c_return_shared_with_constructor() -> SharedWithConstructor;
     }
 
     extern "C++" {
@@ -326,6 +335,11 @@ pub mod ffi {
 
         #[Self = "R"]
         fn r_static_method() -> usize;
+
+        #[Self = "SharedWithConstructor"]
+        fn new(x: usize, y: usize, z: usize) -> Self;
+
+        fn r_return_shared_with_constructor() -> SharedWithConstructor;
     }
 
     struct Dag0 {
@@ -434,6 +448,12 @@ impl ffi::Shared {
     }
 }
 
+impl ffi::SharedWithConstructor {
+    fn new(x: usize, y: usize, z: usize) -> Self {
+        Self { z: x + y - z }
+    }
+}
+
 impl ffi::Array {
     pub fn r_get_array_sum(&self) -> i32 {
         self.a.iter().sum()
@@ -466,6 +486,12 @@ fn r_return_primitive() -> usize {
 
 fn r_return_shared() -> ffi::Shared {
     ffi::Shared { z: 2020 }
+}
+
+fn r_return_shared_with_constructor() -> ffi::SharedWithConstructor {
+    ffi::SharedWithConstructor {
+        z: 2020,
+    }
 }
 
 fn r_return_box() -> Box<R> {

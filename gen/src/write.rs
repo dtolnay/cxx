@@ -271,6 +271,13 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
 
     out.next_section();
 
+    // default move constructors/assignments for trivially copyable types
+    // used for indirect return
+    if out.types.structs_with_constructors.contains(&strct.name.rust) {
+        writeln!(out, "  {0}({0}&&) noexcept = default;", strct.name.cxx);
+        writeln!(out, "  {0}& operator=({0}&&) noexcept = default;", strct.name.cxx);
+    }
+
     for method in methods {
         if !method.doc.is_empty() {
             out.next_section();
@@ -278,9 +285,12 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
         write_doc(out, "  ", &method.doc);
         write!(out, "  ");
         let sig = &method.sig;
-        let local_name = method.name.cxx.to_string();
+        let local_name = match (&method.self_type, sig.constructor) {
+            (Some(self_type), true) => out.types.resolve(self_type).name.cxx.to_string(),
+            _ => method.name.cxx.to_string(),
+        };
         let indirect_call = false;
-        if method.self_type.is_some() {
+        if method.self_type.is_some() && !method.sig.constructor {
             write!(out, "static ");
         }
         write_rust_function_shim_decl(out, &local_name, sig, &None, indirect_call);
@@ -375,7 +385,7 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
         let sig = &method.sig;
         let local_name = method.name.cxx.to_string();
         let indirect_call = false;
-        if method.self_type.is_some() {
+        if method.self_type.is_some() && !method.sig.constructor {
             write!(out, "static ");
         }
         write_rust_function_shim_decl(out, &local_name, sig, &None, indirect_call);
@@ -754,51 +764,61 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         if !efn.args.is_empty() || efn.receiver.is_some() {
             write!(out, ", ");
         }
-        write_indirect_return_type_space(out, efn.ret.as_ref().unwrap());
+        if efn.sig.constructor {
+            write!(
+                out,
+                "{} ",
+                out.types.resolve(efn.self_type.as_ref().unwrap()).name.cxx
+            );
+        } else {
+            write_indirect_return_type_space(out, efn.ret.as_ref().unwrap());
+        }
         write!(out, "*return$");
     }
     writeln!(out, ") noexcept {{");
-    write!(out, "  ");
-    write_return_type(out, &efn.ret);
-    match &efn.receiver {
-        None => write!(out, "(*{}$)(", efn.name.rust),
-        Some(receiver) => write!(
-            out,
-            "({}::*{}$)(",
-            out.types.resolve(&receiver.ty).name.to_fully_qualified(),
-            efn.name.rust,
-        ),
-    }
-    for (i, arg) in efn.args.iter().enumerate() {
-        if i > 0 {
-            write!(out, ", ");
+    if !efn.sig.constructor {
+        write!(out, "  ");
+        write_return_type(out, &efn.ret);
+        match &efn.receiver {
+            None => write!(out, "(*{}$)(", efn.name.rust),
+            Some(receiver) => write!(
+                out,
+                "({}::*{}$)(",
+                out.types.resolve(&receiver.ty).name.to_fully_qualified(),
+                efn.name.rust,
+            ),
         }
-        write_type(out, &arg.ty);
-    }
-    write!(out, ")");
-    if let Some(receiver) = &efn.receiver {
-        if !receiver.mutable {
-            write!(out, " const");
+        for (i, arg) in efn.args.iter().enumerate() {
+            if i > 0 {
+                write!(out, ", ");
+            }
+            write_type(out, &arg.ty);
         }
+        write!(out, ")");
+        if let Some(receiver) = &efn.receiver {
+            if !receiver.mutable {
+                write!(out, " const");
+            }
+        }
+        write!(out, " = ");
+        match (&efn.receiver, &efn.self_type) {
+            (None, None) => write!(out, "{}", efn.name.to_fully_qualified()),
+            (Some(receiver), None) => write!(
+                out,
+                "&{}::{}",
+                out.types.resolve(&receiver.ty).name.to_fully_qualified(),
+                efn.name.cxx,
+            ),
+            (None, Some(self_type)) => write!(
+                out,
+                "&{}::{}",
+                out.types.resolve(self_type).name.to_fully_qualified(),
+                efn.name.cxx,
+            ),
+            _ => unreachable!("receiver and self_type are mutually exclusive"),
+        }
+        writeln!(out, ";");
     }
-    write!(out, " = ");
-    match (&efn.receiver, &efn.self_type) {
-        (None, None) => write!(out, "{}", efn.name.to_fully_qualified()),
-        (Some(receiver), None) => write!(
-            out,
-            "&{}::{}",
-            out.types.resolve(&receiver.ty).name.to_fully_qualified(),
-            efn.name.cxx,
-        ),
-        (None, Some(self_type)) => write!(
-            out,
-            "&{}::{}",
-            out.types.resolve(self_type).name.to_fully_qualified(),
-            efn.name.cxx,
-        ),
-        _ => unreachable!("receiver and self_type are mutually exclusive"),
-    }
-    writeln!(out, ";");
     write!(out, "  ");
     if efn.throws {
         out.builtin.ptr_len = true;
@@ -811,28 +831,38 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     if indirect_return {
         out.include.new = true;
         write!(out, "new (return$) ");
-        write_indirect_return_type(out, efn.ret.as_ref().unwrap());
+        if efn.sig.constructor {
+            write!(
+                out,
+                "{}",
+                out.types.resolve(efn.self_type.as_ref().unwrap()).name.cxx
+            );
+        } else {
+            write_indirect_return_type(out, efn.ret.as_ref().unwrap());
+        }
         write!(out, "(");
     } else if efn.ret.is_some() {
         write!(out, "return ");
     }
-    match &efn.ret {
-        Some(Type::Ref(_)) => write!(out, "&"),
-        Some(Type::Str(_)) if !indirect_return => {
-            out.builtin.rust_str_repr = true;
-            write!(out, "::rust::impl<::rust::Str>::repr(");
+    if !efn.sig.constructor {
+        match &efn.ret {
+            Some(Type::Ref(_)) => write!(out, "&"),
+            Some(Type::Str(_)) if !indirect_return => {
+                out.builtin.rust_str_repr = true;
+                write!(out, "::rust::impl<::rust::Str>::repr(");
+            }
+            Some(ty @ Type::SliceRef(_)) if !indirect_return => {
+                out.builtin.rust_slice_repr = true;
+                write!(out, "::rust::impl<");
+                write_type(out, ty);
+                write!(out, ">::repr(");
+            }
+            _ => {}
         }
-        Some(ty @ Type::SliceRef(_)) if !indirect_return => {
-            out.builtin.rust_slice_repr = true;
-            write!(out, "::rust::impl<");
-            write_type(out, ty);
-            write!(out, ">::repr(");
+        match &efn.receiver {
+            None => write!(out, "{}$(", efn.name.rust),
+            Some(_) => write!(out, "(self.*{}$)(", efn.name.rust),
         }
-        _ => {}
-    }
-    match &efn.receiver {
-        None => write!(out, "{}$(", efn.name.rust),
-        Some(_) => write!(out, "(self.*{}$)(", efn.name.rust),
     }
     for (i, arg) in efn.args.iter().enumerate() {
         if i > 0 {
@@ -862,7 +892,9 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
             write!(out, "{}", arg.name.cxx);
         }
     }
-    write!(out, ")");
+    if !efn.sig.constructor {
+        write!(out, ")");
+    }
     match &efn.ret {
         Some(Type::RustBox(_)) => write!(out, ".into_raw()"),
         Some(Type::UniquePtr(_)) => write!(out, ".release()"),
@@ -892,12 +924,20 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
 fn write_function_pointer_trampoline(out: &mut OutFile, efn: &ExternFn, var: &Pair, f: &Signature) {
     let r_trampoline = mangle::r_trampoline(efn, var, out.types);
     let indirect_call = true;
-    write_rust_function_decl_impl(out, &r_trampoline, f, indirect_call);
+    write_rust_function_decl_impl(out, &r_trampoline, f, &efn.self_type, indirect_call);
 
     out.next_section();
     let c_trampoline = mangle::c_trampoline(efn, var, out.types).to_string();
     let doc = Doc::new();
-    write_rust_function_shim_impl(out, &c_trampoline, f, &efn.self_type, &doc, &r_trampoline, indirect_call);
+    write_rust_function_shim_impl(
+        out,
+        &c_trampoline,
+        f,
+        &efn.self_type,
+        &doc,
+        &r_trampoline,
+        indirect_call,
+    );
 }
 
 fn write_rust_function_decl<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
@@ -905,7 +945,7 @@ fn write_rust_function_decl<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     out.begin_block(Block::ExternC);
     let link_name = mangle::extern_fn(efn, out.types);
     let indirect_call = false;
-    write_rust_function_decl_impl(out, &link_name, efn, indirect_call);
+    write_rust_function_decl_impl(out, &link_name, efn, &efn.self_type, indirect_call);
     out.end_block(Block::ExternC);
 }
 
@@ -913,6 +953,7 @@ fn write_rust_function_decl_impl(
     out: &mut OutFile,
     link_name: &Symbol,
     sig: &Signature,
+    self_type: &Option<Ident>,
     indirect_call: bool,
 ) {
     out.next_section();
@@ -947,15 +988,23 @@ fn write_rust_function_decl_impl(
         if needs_comma {
             write!(out, ", ");
         }
-        match sig.ret.as_ref().unwrap() {
-            Type::Ref(ret) => {
-                write_type_space(out, &ret.inner);
-                if !ret.mutable {
-                    write!(out, "const ");
+        if sig.constructor {
+            write!(
+                out,
+                "{} ",
+                out.types.resolve(self_type.as_ref().unwrap()).name.cxx
+            );
+        } else {
+            match sig.ret.as_ref().unwrap() {
+                Type::Ref(ret) => {
+                    write_type_space(out, &ret.inner);
+                    if !ret.mutable {
+                        write!(out, "const ");
+                    }
+                    write!(out, "*");
                 }
-                write!(out, "*");
+                ret => write_type_space(out, ret),
             }
-            ret => write_type_space(out, ret),
         }
         write!(out, "*return$");
         needs_comma = true;
@@ -982,7 +1031,15 @@ fn write_rust_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     let doc = &efn.doc;
     let invoke = mangle::extern_fn(efn, out.types);
     let indirect_call = false;
-    write_rust_function_shim_impl(out, &local_name, efn, &efn.self_type, doc, &invoke, indirect_call);
+    write_rust_function_shim_impl(
+        out,
+        &local_name,
+        efn,
+        &efn.self_type,
+        doc,
+        &invoke,
+        indirect_call,
+    );
 }
 
 fn write_rust_function_shim_decl(
@@ -993,12 +1050,18 @@ fn write_rust_function_shim_decl(
     indirect_call: bool,
 ) {
     begin_function_definition(out);
-    write_return_type(out, &sig.ret);
+    if !sig.constructor {
+        write_return_type(out, &sig.ret);
+    }
     if let Some(self_type) = self_type {
-        write!(out, "{}::{}(", out.types.resolve(self_type).name.cxx, local_name);
+        let cxx_name = &out.types.resolve(self_type).name.cxx;
+        if sig.constructor {
+            write!(out, "{}::{}(", cxx_name, cxx_name);
+        } else {
+            write!(out, "{}::{}(", cxx_name, local_name);
+        }
     } else {
         write!(out, "{}(", local_name);
-
     }
     for (i, arg) in sig.args.iter().enumerate() {
         if i > 0 {
@@ -1059,20 +1122,22 @@ fn write_rust_function_shim_impl(
     write!(out, "  ");
     let indirect_return = indirect_return(sig, out.types);
     if indirect_return {
-        out.builtin.maybe_uninit = true;
-        write!(out, "::rust::MaybeUninit<");
-        match sig.ret.as_ref().unwrap() {
-            Type::Ref(ret) => {
-                write_type_space(out, &ret.inner);
-                if !ret.mutable {
-                    write!(out, "const ");
+        if !sig.constructor {
+            out.builtin.maybe_uninit = true;
+            write!(out, "::rust::MaybeUninit<");
+            match sig.ret.as_ref().unwrap() {
+                Type::Ref(ret) => {
+                    write_type_space(out, &ret.inner);
+                    if !ret.mutable {
+                        write!(out, "const ");
+                    }
+                    write!(out, "*");
                 }
-                write!(out, "*");
+                ret => write_type(out, ret),
             }
-            ret => write_type(out, ret),
+            writeln!(out, "> return$;");
+            write!(out, "  ");
         }
-        writeln!(out, "> return$;");
-        write!(out, "  ");
     } else if let Some(ret) = &sig.ret {
         write!(out, "return ");
         match ret {
@@ -1128,7 +1193,11 @@ fn write_rust_function_shim_impl(
         if needs_comma {
             write!(out, ", ");
         }
-        write!(out, "&return$.value");
+        if sig.constructor {
+            write!(out, "this");
+        } else {
+            write!(out, "&return$.value");
+        }
         needs_comma = true;
     }
     if indirect_call {
@@ -1152,7 +1221,7 @@ fn write_rust_function_shim_impl(
         writeln!(out, "    throw ::rust::impl<::rust::Error>::error(error$);");
         writeln!(out, "  }}");
     }
-    if indirect_return {
+    if indirect_return && !sig.constructor {
         write!(out, "  return ");
         match sig.ret.as_ref().unwrap() {
             Type::Ref(_) => write!(out, "*return$.value"),
@@ -1174,9 +1243,11 @@ fn write_return_type(out: &mut OutFile, ty: &Option<Type>) {
 }
 
 fn indirect_return(sig: &Signature, types: &Types) -> bool {
-    sig.ret
-        .as_ref()
-        .is_some_and(|ret| sig.throws || types.needs_indirect_abi(ret))
+    sig.constructor
+        || sig
+            .ret
+            .as_ref()
+            .is_some_and(|ret| sig.throws || types.needs_indirect_abi(ret))
 }
 
 fn write_indirect_return_type(out: &mut OutFile, ty: &Type) {

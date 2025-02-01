@@ -660,7 +660,19 @@ fn parse_extern_fn(
     }
 
     let mut throws_tokens = None;
-    let ret = parse_return_type(&foreign_fn.sig.output, &mut throws_tokens)?;
+    let mut constructor = false;
+    let ret = match parse_return_type(&foreign_fn.sig.output, &mut throws_tokens)? {
+        Some(Type::Ident(ident)) => {
+            if ident.rust == "Self" {
+                constructor = true;
+                None
+            } else {
+                Some(Type::Ident(ident))
+            }
+        }
+        Some(ty) => Some(ty),
+        None => None,
+    };
     let throws = throws_tokens.is_some();
     let asyncness = foreign_fn.sig.asyncness;
     let unsafety = foreign_fn.sig.unsafety;
@@ -693,6 +705,7 @@ fn parse_extern_fn(
             throws,
             paren_token,
             throws_tokens,
+            constructor,
         },
         semi_token,
         trusted,
@@ -1433,6 +1446,7 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
         throws,
         paren_token,
         throws_tokens,
+        constructor: false,
     })))
 }
 
