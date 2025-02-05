@@ -136,16 +136,16 @@ impl CxxString {
         unsafe { string_data(self) }
     }
 
-    /// Validates that the C++ string contains UTF-8 data and produces a view of
-    /// it as a Rust &amp;str, otherwise an error.
-    pub fn to_str(&self) -> Result<&str, Utf8Error> {
-        str::from_utf8(self.as_bytes())
-    }
-
     /// Produces a `&CStr` view of the string without additional allocations.
     pub fn as_c_str(&self) -> &CStr {
         // Since C++11, string[string.size()] is guaranteed to be \0.
         unsafe { CStr::from_ptr(self.as_ptr().cast::<c_char>()) }
+    }
+
+    /// Validates that the C++ string contains UTF-8 data and produces a view of
+    /// it as a Rust &amp;str, otherwise an error.
+    pub fn to_str(&self) -> Result<&str, Utf8Error> {
+        str::from_utf8(self.as_bytes())
     }
 
     /// If the contents of the C++ string are valid UTF-8, this function returns
