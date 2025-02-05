@@ -21,8 +21,6 @@ extern "C" {
     fn string_destroy(this: &mut MaybeUninit<CxxString>);
     #[link_name = "cxxbridge1$cxx_string$data"]
     fn string_data(this: &CxxString) -> *const u8;
-    #[link_name = "cxxbridge1$cxx_string$c_str"]
-    fn string_c_str(this: &CxxString) -> *const c_char;
     #[link_name = "cxxbridge1$cxx_string$length"]
     fn string_length(this: &CxxString) -> usize;
     #[link_name = "cxxbridge1$cxx_string$clear"]
@@ -146,7 +144,8 @@ impl CxxString {
 
     /// Produces a `&CStr` view of the string without additional allocations.
     pub fn as_c_str(&self) -> &CStr {
-        unsafe { CStr::from_ptr(string_c_str(self)) }
+        // Since C++11, string[string.size()] is guaranteed to be \0.
+        unsafe { CStr::from_ptr(self.as_ptr().cast::<c_char>()) }
     }
 
     /// If the contents of the C++ string are valid UTF-8, this function returns
