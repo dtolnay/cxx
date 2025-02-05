@@ -136,7 +136,15 @@ impl CxxString {
         unsafe { string_data(self) }
     }
 
-    /// Produces a `&CStr` view of the string without additional allocations.
+    /// Produces a nul-terminated string view of this string's contents.
+    ///
+    /// Matches the behavior of C++ [std::string::c_str][c_str].
+    ///
+    /// If this string contains no internal '\0' bytes, then
+    /// `self.as_c_str().count_bytes() == self.len()`. But if it does, the CStr
+    /// only refers to the part of the string up to the first nul byte.
+    ///
+    /// [c_str]: https://en.cppreference.com/w/cpp/string/basic_string/c_str
     pub fn as_c_str(&self) -> &CStr {
         // Since C++11, string[string.size()] is guaranteed to be \0.
         unsafe { CStr::from_ptr(self.as_ptr().cast::<c_char>()) }
