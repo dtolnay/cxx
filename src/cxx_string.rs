@@ -130,6 +130,8 @@ impl CxxString {
     /// internal null bytes. As such, the returned pointer only makes sense as a
     /// string in combination with the length returned by [`len()`][len].
     ///
+    /// Modifying the string data through this pointer has undefined behavior.
+    ///
     /// [data]: https://en.cppreference.com/w/cpp/string/basic_string/data
     /// [len]: #method.len
     pub fn as_ptr(&self) -> *const u8 {
