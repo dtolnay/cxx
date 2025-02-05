@@ -55,7 +55,10 @@ fn test_c_return() {
     assert_eq!("Hello \u{fffd}World", ffi::c_return_rust_string_lossy());
     assert_eq!("2020", ffi::c_return_unique_ptr_string().to_str().unwrap());
     // TODO: Use C-string literal c"2020" once MSRV is v1.77+
-    assert_eq!(CString::new("2020").unwrap().as_c_str(), ffi::c_return_unique_ptr_string().as_c_str());
+    assert_eq!(
+        CString::new("2020").unwrap().as_c_str(),
+        ffi::c_return_unique_ptr_string().as_c_str(),
+    );
     assert_eq!(4, ffi::c_return_unique_ptr_vector_u8().len());
     assert_eq!(
         200_u8,
