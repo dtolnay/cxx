@@ -145,8 +145,8 @@ impl CxxString {
     }
 
     /// Produces a `&CStr` view of the string without additional allocations.
-    pub fn as_c_str(&self) -> &std::ffi::CStr {
-        unsafe { std::ffi::CStr::from_ptr(string_c_str(self)) }
+    pub fn as_c_str(&self) -> &core::ffi::CStr {
+        unsafe { core::ffi::CStr::from_ptr(string_c_str(self)) }
     }
 
     /// If the contents of the C++ string are valid UTF-8, this function returns
