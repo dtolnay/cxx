@@ -5,6 +5,7 @@ use alloc::borrow::Cow;
 #[cfg(feature = "alloc")]
 use alloc::string::String;
 use core::cmp::Ordering;
+use core::ffi::c_char;
 use core::fmt::{self, Debug, Display};
 use core::hash::{Hash, Hasher};
 use core::marker::{PhantomData, PhantomPinned};
@@ -20,6 +21,8 @@ extern "C" {
     fn string_destroy(this: &mut MaybeUninit<CxxString>);
     #[link_name = "cxxbridge1$cxx_string$data"]
     fn string_data(this: &CxxString) -> *const u8;
+    #[link_name = "cxxbridge1$cxx_string$c_str"]
+    fn string_c_str(this: &CxxString) -> *const c_char;
     #[link_name = "cxxbridge1$cxx_string$length"]
     fn string_length(this: &CxxString) -> usize;
     #[link_name = "cxxbridge1$cxx_string$clear"]
@@ -139,6 +142,11 @@ impl CxxString {
     /// it as a Rust &amp;str, otherwise an error.
     pub fn to_str(&self) -> Result<&str, Utf8Error> {
         str::from_utf8(self.as_bytes())
+    }
+
+    /// Produces a `&CStr` view of the string without additional allocations.
+    pub fn as_c_str(&self) -> &std::ffi::CStr {
+        unsafe { std::ffi::CStr::from_ptr(string_c_str(self)) }
     }
 
     /// If the contents of the C++ string are valid UTF-8, this function returns

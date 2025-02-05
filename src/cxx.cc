@@ -19,6 +19,10 @@ const char *cxxbridge1$cxx_string$data(const std::string &s) noexcept {
   return s.data();
 }
 
+const char *cxxbridge1$cxx_string$c_str(const std::string &s) noexcept {
+  return s.c_str();
+}
+
 std::size_t cxxbridge1$cxx_string$length(const std::string &s) noexcept {
   return s.length();
 }
