@@ -32,26 +32,26 @@ filegroup(
 
 # Workspace Member Dependencies
 alias(
-    name = "cc-1.2.10",
-    actual = "@vendor__cc-1.2.10//:cc",
+    name = "cc-1.2.12",
+    actual = "@vendor__cc-1.2.12//:cc",
     tags = ["manual"],
 )
 
 alias(
     name = "cc",
-    actual = "@vendor__cc-1.2.10//:cc",
+    actual = "@vendor__cc-1.2.12//:cc",
     tags = ["manual"],
 )
 
 alias(
-    name = "clap-4.5.26",
-    actual = "@vendor__clap-4.5.26//:clap",
+    name = "clap-4.5.28",
+    actual = "@vendor__clap-4.5.28//:clap",
     tags = ["manual"],
 )
 
 alias(
     name = "clap",
-    actual = "@vendor__clap-4.5.26//:clap",
+    actual = "@vendor__clap-4.5.28//:clap",
     tags = ["manual"],
 )
 
@@ -128,13 +128,13 @@ alias(
 )
 
 alias(
-    name = "syn-2.0.96",
-    actual = "@vendor__syn-2.0.96//:syn",
+    name = "syn-2.0.98",
+    actual = "@vendor__syn-2.0.98//:syn",
     tags = ["manual"],
 )
 
 alias(
     name = "syn",
-    actual = "@vendor__syn-2.0.96//:syn",
+    actual = "@vendor__syn-2.0.98//:syn",
     tags = ["manual"],
 )
