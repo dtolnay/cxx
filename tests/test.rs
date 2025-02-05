@@ -12,7 +12,7 @@ use cxx::{SharedPtr, UniquePtr};
 use cxx_test_suite::module::ffi2;
 use cxx_test_suite::{cast, ffi, R};
 use std::cell::Cell;
-use std::ffi::{CStr, CString};
+use std::ffi::CStr;
 use std::panic::{self, RefUnwindSafe, UnwindSafe};
 
 thread_local! {
@@ -56,7 +56,7 @@ fn test_c_return() {
     assert_eq!("2020", ffi::c_return_unique_ptr_string().to_str().unwrap());
     // TODO: Use C-string literal c"2020" once MSRV is v1.77+
     assert_eq!(
-        CString::new("2020").unwrap().as_c_str(),
+        CStr::from_bytes_with_nul(b"2020\0").unwrap(),
         ffi::c_return_unique_ptr_string().as_c_str(),
     );
     assert_eq!(4, ffi::c_return_unique_ptr_vector_u8().len());

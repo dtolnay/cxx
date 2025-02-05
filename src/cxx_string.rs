@@ -5,7 +5,7 @@ use alloc::borrow::Cow;
 #[cfg(feature = "alloc")]
 use alloc::string::String;
 use core::cmp::Ordering;
-use core::ffi::c_char;
+use core::ffi::{c_char, CStr};
 use core::fmt::{self, Debug, Display};
 use core::hash::{Hash, Hasher};
 use core::marker::{PhantomData, PhantomPinned};
@@ -145,8 +145,8 @@ impl CxxString {
     }
 
     /// Produces a `&CStr` view of the string without additional allocations.
-    pub fn as_c_str(&self) -> &core::ffi::CStr {
-        unsafe { core::ffi::CStr::from_ptr(string_c_str(self)) }
+    pub fn as_c_str(&self) -> &CStr {
+        unsafe { CStr::from_ptr(string_c_str(self)) }
     }
 
     /// If the contents of the C++ string are valid UTF-8, this function returns
