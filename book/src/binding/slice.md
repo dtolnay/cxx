@@ -50,7 +50,11 @@ public:
 ...template <typename T>
 ...class Slice<T>::iterator final {
 ...public:
+...#if __cplusplus >= 202002L
+...  using iterator_category = std::contiguous_iterator_tag;
+...#else
 ...  using iterator_category = std::random_access_iterator_tag;
+...#endif
 ...  using value_type = T;
 ...  using pointer = T *;
 ...  using reference = T &;
