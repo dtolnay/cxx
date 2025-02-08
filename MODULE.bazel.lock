@@ -145,7 +145,7 @@
   "moduleExtensions": {
     "//tools/bazel:extension.bzl%crate_repositories": {
       "general": {
-        "bzlTransitiveDigest": "GO8VfGIYxZ0ciBIks3CA6UekxwpD5G9OFgiuJIYKecE=",
+        "bzlTransitiveDigest": "UFy78Dlkl9obLfwUmXrJnOC4X7HwdIRs0KONODuFNKQ=",
         "usagesDigest": "YBItjer1JIu5HatNhG5RFjMV+91FPeCgNI30zNDcWkA=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -163,16 +163,16 @@
               "build_file": "@@//third-party/bazel:BUILD.anstyle-1.0.10.bazel"
             }
           },
-          "vendor__cc-1.2.12": {
+          "vendor__cc-1.2.13": {
             "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
             "attributes": {
-              "sha256": "755717a7de9ec452bf7f3f1a3099085deabd7f2962b861dae91ecd7a365903d2",
+              "sha256": "c7777341816418c02e033934a09f20dc0ccaf65a5201ef8a450ae0105a573fda",
               "type": "tar.gz",
               "urls": [
-                "https://static.crates.io/crates/cc/1.2.12/download"
+                "https://static.crates.io/crates/cc/1.2.13/download"
               ],
-              "strip_prefix": "cc-1.2.12",
-              "build_file": "@@//third-party/bazel:BUILD.cc-1.2.12.bazel"
+              "strip_prefix": "cc-1.2.13",
+              "build_file": "@@//third-party/bazel:BUILD.cc-1.2.13.bazel"
             }
           },
           "vendor__clap-4.5.28": {

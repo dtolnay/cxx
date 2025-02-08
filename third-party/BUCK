@@ -26,23 +26,23 @@ cargo.rust_library(
 
 alias(
     name = "cc",
-    actual = ":cc-1.2.12",
+    actual = ":cc-1.2.13",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "cc-1.2.12.crate",
-    sha256 = "755717a7de9ec452bf7f3f1a3099085deabd7f2962b861dae91ecd7a365903d2",
-    strip_prefix = "cc-1.2.12",
-    urls = ["https://static.crates.io/crates/cc/1.2.12/download"],
+    name = "cc-1.2.13.crate",
+    sha256 = "c7777341816418c02e033934a09f20dc0ccaf65a5201ef8a450ae0105a573fda",
+    strip_prefix = "cc-1.2.13",
+    urls = ["https://static.crates.io/crates/cc/1.2.13/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "cc-1.2.12",
-    srcs = [":cc-1.2.12.crate"],
+    name = "cc-1.2.13",
+    srcs = [":cc-1.2.13.crate"],
     crate = "cc",
-    crate_root = "cc-1.2.12.crate/src/lib.rs",
+    crate_root = "cc-1.2.13.crate/src/lib.rs",
     edition = "2018",
     visibility = [],
     deps = [":shlex-1.3.0"],

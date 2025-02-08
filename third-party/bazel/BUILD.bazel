@@ -32,14 +32,14 @@ filegroup(
 
 # Workspace Member Dependencies
 alias(
-    name = "cc-1.2.12",
-    actual = "@vendor__cc-1.2.12//:cc",
+    name = "cc-1.2.13",
+    actual = "@vendor__cc-1.2.13//:cc",
     tags = ["manual"],
 )
 
 alias(
     name = "cc",
-    actual = "@vendor__cc-1.2.12//:cc",
+    actual = "@vendor__cc-1.2.13//:cc",
     tags = ["manual"],
 )
 
