@@ -186,7 +186,7 @@ String String::lossy(const char16_t *s, std::size_t len) noexcept {
   return String(lossy_t{}, s, len);
 }
 
-String &String::operator=(const String &other) &noexcept {
+String &String::operator=(const String &other) & noexcept {
   if (this != &other) {
     cxxbridge1$string$drop(this);
     cxxbridge1$string$clone(this, other);
@@ -194,7 +194,7 @@ String &String::operator=(const String &other) &noexcept {
   return *this;
 }
 
-String &String::operator=(String &&other) &noexcept {
+String &String::operator=(String &&other) & noexcept {
   cxxbridge1$string$drop(this);
   this->repr = other.repr;
   cxxbridge1$string$new(&other);
@@ -487,7 +487,7 @@ Error &Error::operator=(const Error &other) & {
   return *this;
 }
 
-Error &Error::operator=(Error &&other) &noexcept {
+Error &Error::operator=(Error &&other) & noexcept {
   std::exception::operator=(std::move(other));
   delete[] this->msg;
   this->msg = other.msg;
