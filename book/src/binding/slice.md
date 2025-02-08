@@ -26,8 +26,8 @@ public:
   template <typename C>
   explicit Slice(C &c) : Slice(c.data(), c.size());
 
-  Slice &operator=(Slice<T> &&) noexcept;
-  Slice &operator=(const Slice<T> &) noexcept
+  Slice &operator=(Slice<T> &&) & noexcept;
+  Slice &operator=(const Slice<T> &) & noexcept
     requires std::is_const_v<T>;
 
   T *data() const noexcept;

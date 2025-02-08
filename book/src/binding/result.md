@@ -66,8 +66,8 @@ public:
   Error(Error &&) noexcept;
   ~Error() noexcept;
 
-  Error &operator=(const Error &);
-  Error &operator=(Error &&) noexcept;
+  Error &operator=(const Error &) &;
+  Error &operator=(Error &&) & noexcept;
 
   const char *what() const noexcept override;
 };

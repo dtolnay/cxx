@@ -24,7 +24,7 @@ public:
   explicit Box(const T &);
   explicit Box(T &&);
 
-  Box &operator=(Box &&) noexcept;
+  Box &operator=(Box &&) & noexcept;
 
   const T *operator->() const noexcept;
   const T &operator*() const noexcept;

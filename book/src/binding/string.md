@@ -36,8 +36,8 @@ public:
   static String lossy(const char16_t *) noexcept;
   static String lossy(const char16_t *, size_t) noexcept;
 
-  String &operator=(const String &) noexcept;
-  String &operator=(String &&) noexcept;
+  String &operator=(const String &) & noexcept;
+  String &operator=(String &&) & noexcept;
 
   explicit operator std::string() const;
 

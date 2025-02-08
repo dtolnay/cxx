@@ -22,7 +22,7 @@ public:
   Str(const char *);
   Str(const char *, size_t);
 
-  Str &operator=(const Str &) noexcept;
+  Str &operator=(const Str &) & noexcept;
 
   explicit operator std::string() const;
 
