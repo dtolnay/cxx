@@ -177,7 +177,7 @@ public:
   Slice(T *, std::size_t count) noexcept;
 
   template <typename C>
-  explicit Slice(C& c) : Slice(c.data(), c.size()) {}
+  explicit Slice(C &c) : Slice(c.data(), c.size()) {}
 
   Slice &operator=(const Slice<T> &) &noexcept = default;
   Slice &operator=(Slice<T> &&) &noexcept = default;
