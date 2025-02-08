@@ -23,8 +23,8 @@ public:
   Vec(Vec &&) noexcept;
   ~Vec() noexcept;
 
-  Vec &operator=(Vec &&) noexcept;
-  Vec &operator=(const Vec &);
+  Vec &operator=(Vec &&) & noexcept;
+  Vec &operator=(const Vec &) &;
 
   size_t size() const noexcept;
   bool empty() const noexcept;
