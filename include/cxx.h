@@ -46,9 +46,8 @@ public:
   String(const char16_t *);
   String(const char16_t *, std::size_t);
 #if __cplusplus >= 202002L
-  String(const char8_t *s) : String(reinterpret_cast<const char *>(s)) {}
-  String(const char8_t *s, std::size_t len)
-      : String(reinterpret_cast<const char *>(s), len) {}
+  String(const char8_t *s);
+  String(const char8_t *s, std::size_t len);
 #endif
 
   // Replace invalid Unicode data with the replacement character (U+FFFD).

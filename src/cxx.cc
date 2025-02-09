@@ -130,6 +130,13 @@ String::String(const char *s, std::size_t len) {
              len);
 }
 
+#if __cplusplus >= 202002L
+String::String(const char8_t *s) : String(reinterpret_cast<const char *>(s)) {}
+
+String::String(const char8_t *s, std::size_t len)
+    : String(reinterpret_cast<const char *>(s), len) {}
+#endif
+
 String::String(const char16_t *s) {
   assert(s != nullptr);
   assert(is_aligned<char16_t>(s));
