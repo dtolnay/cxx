@@ -22,6 +22,8 @@ public:
   String(const std::string &);
   String(const char *);
   String(const char *, size_t);
+  String(const char8_t *);
+  String(const char8_t *, size_t);
 
   // Replaces invalid UTF-8 data with the replacement character (U+FFFD).
   static String lossy(const std::string &) noexcept;
