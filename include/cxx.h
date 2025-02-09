@@ -243,7 +243,7 @@ public:
   iterator &operator+=(difference_type) noexcept;
   iterator &operator-=(difference_type) noexcept;
   iterator operator+(difference_type) const noexcept;
-  friend inline iterator operator+(difference_type lhs, iterator rhs) {
+  friend inline iterator operator+(difference_type lhs, iterator rhs) noexcept {
     return rhs + lhs;
   }
   iterator operator-(difference_type) const noexcept;
