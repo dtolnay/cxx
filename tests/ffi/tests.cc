@@ -878,8 +878,7 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(cstr == "foo");
   ASSERT(other_cstr == "test");
 
-  // u8"foo" is `const char*` before, and `const char8_t*` after C++20, so using
-  // `auto`.
+  // Auto because u8"..." is `const char*` before C++20, and `const char8_t*` since.
   const auto *utf8_literal = u8"Test string";
   const char16_t *utf16_literal = u"Test string";
   rust::String utf8_rstring = utf8_literal;
