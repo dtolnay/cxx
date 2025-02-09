@@ -31,6 +31,22 @@ jobs:
             rust: nightly-x86_64-pc-windows-msvc
             os: windows
             flags: /EHsc
+          - name: C++11
+            rust: nightly
+            os: ubuntu
+            flags: -std=c++11
+          - name: C++14
+            rust: nightly
+            os: ubuntu
+            flags: -std=c++14
+          - name: C++17
+            rust: nightly
+            os: ubuntu
+            flags: -std=c++17
+          - name: C++20
+            rust: nightly
+            os: ubuntu
+            flags: -std=c++20
     env:
       CXXFLAGS: ${{matrix.flags}}
       RUSTFLAGS: --cfg deny_warnings -Dwarnings
