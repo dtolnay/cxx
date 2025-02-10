@@ -42,9 +42,6 @@ trybuild = { version = "1.0.81", features = ["diff"] }
 [target.'cfg(any())'.build-dependencies]
 cxxbridge-cmd = { version = "=1.0.140", path = "gen/cmd" }
 
-[lib]
-doc-scrape-examples = false
-
 [workspace]
 members = ["demo", "flags", "gen/build", "gen/cmd", "gen/lib", "macro", "tests/ffi"]
 
