@@ -33,6 +33,7 @@ pub(crate) struct Includes<'a> {
     pub iterator: bool,
     pub memory: bool,
     pub new: bool,
+    pub ranges: bool,
     pub stdexcept: bool,
     pub string: bool,
     pub type_traits: bool,
@@ -94,6 +95,7 @@ pub(super) fn write(out: &mut OutFile) {
         iterator,
         memory,
         new,
+        ranges,
         stdexcept,
         string,
         type_traits,
@@ -154,6 +156,11 @@ pub(super) fn write(out: &mut OutFile) {
     }
     if vector && !cxx_header {
         writeln!(out, "#include <vector>");
+    }
+    if ranges {
+        writeln!(out, "#if __cplusplus >= 202002L");
+        writeln!(out, "#include <ranges>");
+        writeln!(out, "#endif");
     }
     if basetsd && !cxx_header {
         writeln!(out, "#if defined(_WIN32)");
