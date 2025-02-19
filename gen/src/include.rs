@@ -157,7 +157,7 @@ pub(super) fn write(out: &mut OutFile) {
     if vector && !cxx_header {
         writeln!(out, "#include <vector>");
     }
-    if ranges {
+    if ranges && !cxx_header {
         writeln!(out, "#if __cplusplus >= 202002L");
         writeln!(out, "#include <ranges>");
         writeln!(out, "#endif");

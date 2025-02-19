@@ -9,6 +9,9 @@
 #include <iosfwd>
 #include <iterator>
 #include <new>
+#if __cplusplus >= 202002L
+#include <ranges>
+#endif
 #include <stdexcept>
 #include <string>
 #include <type_traits>
