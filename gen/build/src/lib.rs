@@ -110,7 +110,7 @@ pub use crate::cfg::{Cfg, CFG};
 /// additional source files or compiler flags, and lastly call its [`compile`]
 /// method to execute the C++ build.
 ///
-/// [`compile`]: https://docs.rs/cc/1.0.49/cc/struct.Build.html#method.compile
+/// [`compile`]: cc::Build::compile
 #[must_use]
 pub fn bridge(rust_source_file: impl AsRef<Path>) -> Build {
     bridges(iter::once(rust_source_file))

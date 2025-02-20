@@ -163,7 +163,7 @@ impl CxxString {
     /// sequences with the U+FFFD [replacement character] and returns a
     /// Cow::Owned String.
     ///
-    /// [replacement character]: https://doc.rust-lang.org/std/char/constant.REPLACEMENT_CHARACTER.html
+    /// [replacement character]: char::REPLACEMENT_CHARACTER
     #[cfg(feature = "alloc")]
     #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     pub fn to_string_lossy(&self) -> Cow<str> {
