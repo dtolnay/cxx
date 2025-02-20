@@ -13,11 +13,12 @@ impl<'a> Types<'a> {
                         CxxString | RustString => false,
                     }
                 } else if let Some(strct) = self.structs.get(ident) {
-                    derive::contains(&strct.derives, Trait::Copy)
+                    (derive::contains(&strct.derives, Trait::Copy)
                         || strct
                             .fields
                             .iter()
-                            .all(|field| self.is_guaranteed_pod(&field.ty))
+                            .all(|field| self.is_guaranteed_pod(&field.ty)))
+                        && !self.structs_with_constructors.contains(ident)
                 } else {
                     self.enums.contains_key(ident)
                 }
