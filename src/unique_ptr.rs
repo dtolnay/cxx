@@ -205,6 +205,19 @@ where
     }
 }
 
+impl<T> PartialEq for UniquePtr<T>
+where
+    T: PartialEq + UniquePtrTarget,
+{
+    fn eq(&self, other: &Self) -> bool {
+        match (self.as_ref(), other.as_ref()) {
+            (None, None) => true,
+            (Some(this), Some(other)) => this == other,
+            _ => false,
+        }
+    }
+}
+
 /// Forwarding `Read` trait implementation in a manner similar to `Box<T>`.
 ///
 /// Note that the implementation will panic for null `UniquePtr<T>`.
