@@ -210,11 +210,7 @@ where
     T: PartialEq + UniquePtrTarget,
 {
     fn eq(&self, other: &Self) -> bool {
-        match (self.as_ref(), other.as_ref()) {
-            (None, None) => true,
-            (Some(this), Some(other)) => this == other,
-            _ => false,
-        }
+        self.as_ref() == other.as_ref()
     }
 }
 
