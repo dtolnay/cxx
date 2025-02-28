@@ -943,19 +943,19 @@ extern "C" const char *cxx_run_test() noexcept {
   }
 #ifdef __cpp_lib_span
   {
-    // std::array<T> -> Slice<T>
+    // std::span<T> -> Slice<T>
     std::array<int, 3> cpp_array{1, 2, 3};
     std::span<int> cpp_span(cpp_array);
-    auto auto_slice_of_cpp_array = rust::Slice(cpp_span);
+    auto auto_slice_of_cpp_span = rust::Slice(cpp_span);
     static_assert(
-        std::is_same_v<decltype(auto_slice_of_cpp_array), rust::Slice<int>>);
+        std::is_same_v<decltype(auto_slice_of_cpp_span), rust::Slice<int>>);
   }
   {
-    // const std::array<T> -> Slice<const T>
+    // std::span<const T> -> Slice<const T>
     const std::array<int, 3> cpp_array{1, 2, 3};
     std::span<const int> cpp_span(cpp_array);
-    auto auto_slice_of_cpp_array = rust::Slice(cpp_span);
-    static_assert(std::is_same_v<decltype(auto_slice_of_cpp_array),
+    auto auto_slice_of_cpp_span = rust::Slice(cpp_span);
+    static_assert(std::is_same_v<decltype(auto_slice_of_cpp_span),
                                  rust::Slice<const int>>);
   }
 #endif // __cpp_lib_span
