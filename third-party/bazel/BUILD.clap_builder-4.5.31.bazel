@@ -85,7 +85,7 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "4.5.30",
+    version = "4.5.31",
     deps = [
         "@vendor__anstyle-1.0.10//:anstyle",
         "@vendor__clap_lex-0.7.4//:clap_lex",
