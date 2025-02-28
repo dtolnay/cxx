@@ -1,10 +1,14 @@
 #include "tests/ffi/tests.h"
 #include "tests/ffi/lib.rs.h"
+#include <array>
 #include <cstdlib>
 #include <cstring>
 #include <iterator>
 #include <memory>
 #include <numeric>
+#ifdef __cpp_lib_span
+#include <span>
+#endif // __cpp_lib_span
 #include <stdexcept>
 #include <string>
 #include <tuple>
@@ -891,11 +895,71 @@ extern "C" const char *cxx_run_test() noexcept {
   rust::String bad_utf16_rstring = rust::String::lossy(bad_utf16_literal);
   ASSERT(bad_utf8_rstring == bad_utf16_rstring);
 
-  std::vector<int> cpp_vec{1, 2, 3};
-  rust::Slice<int> slice_of_cpp_vec(cpp_vec);
-  ASSERT(slice_of_cpp_vec.data() == cpp_vec.data());
-  ASSERT(slice_of_cpp_vec.size() == cpp_vec.size());
-  ASSERT(slice_of_cpp_vec[0] == 1);
+  // Test Slice<T> explicit constructor from container
+  {
+    std::vector<int> cpp_vec{1, 2, 3};
+    rust::Slice<int> slice_of_cpp_vec(cpp_vec);
+    ASSERT(slice_of_cpp_vec.data() == cpp_vec.data());
+    ASSERT(slice_of_cpp_vec.size() == cpp_vec.size());
+    ASSERT(slice_of_cpp_vec[0] == 1);
+  }
+
+  // Test Slice<T> template deduction guides
+#ifdef __cpp_deduction_guides
+  {
+    // std::array<T> -> Slice<T>
+    std::array<int, 3> cpp_array{1, 2, 3};
+    auto auto_slice_of_cpp_array = rust::Slice(cpp_array);
+    static_assert(
+        std::is_same_v<decltype(auto_slice_of_cpp_array), rust::Slice<int>>);
+  }
+  {
+    // const std::array<T> -> Slice<const T>
+    const std::array<int, 3> cpp_array{1, 2, 3};
+    auto auto_slice_of_cpp_array = rust::Slice(cpp_array);
+    static_assert(std::is_same_v<decltype(auto_slice_of_cpp_array),
+                                 rust::Slice<const int>>);
+  }
+  {
+    // std::array<const T> -> Slice<const T>
+    std::array<const int, 3> cpp_array{1, 2, 3};
+    auto auto_slice_of_cpp_array = rust::Slice(cpp_array);
+    static_assert(std::is_same_v<decltype(auto_slice_of_cpp_array),
+                                 rust::Slice<const int>>);
+  }
+  {
+    // std::vector<T> -> Slice<T>
+    std::vector<int> cpp_vec{1, 2, 3};
+    auto auto_slice_of_cpp_vec = rust::Slice(cpp_vec);
+    static_assert(
+        std::is_same_v<decltype(auto_slice_of_cpp_vec), rust::Slice<int>>);
+  }
+  {
+    // const std::vector<T> -> Slice<const T>
+    const std::vector<int> cpp_vec{1, 2, 3};
+    auto auto_slice_of_cpp_vec = rust::Slice(cpp_vec);
+    static_assert(std::is_same_v<decltype(auto_slice_of_cpp_vec),
+                                 rust::Slice<const int>>);
+  }
+#ifdef __cpp_lib_span
+  {
+    // std::array<T> -> Slice<T>
+    std::array<int, 3> cpp_array{1, 2, 3};
+    std::span<int> cpp_span(cpp_array);
+    auto auto_slice_of_cpp_array = rust::Slice(cpp_span);
+    static_assert(
+        std::is_same_v<decltype(auto_slice_of_cpp_array), rust::Slice<int>>);
+  }
+  {
+    // const std::array<T> -> Slice<const T>
+    const std::array<int, 3> cpp_array{1, 2, 3};
+    std::span<const int> cpp_span(cpp_array);
+    auto auto_slice_of_cpp_array = rust::Slice(cpp_span);
+    static_assert(std::is_same_v<decltype(auto_slice_of_cpp_array),
+                                 rust::Slice<const int>>);
+  }
+#endif // __cpp_lib_span
+#endif // __cpp_deduction_guides
 
   rust::Vec<int> vec1{1, 2};
   rust::Vec<int> vec2{3, 4};
