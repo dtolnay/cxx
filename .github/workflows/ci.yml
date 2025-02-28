@@ -179,7 +179,9 @@ jobs:
         with:
           components: clippy, rust-src
       - run: cargo clippy --workspace --tests --exclude demo -- -Dclippy::all -Dclippy::pedantic
+        continue-on-error: true  # https://github.com/rust-lang/rust/issues/137640
       - run: cargo clippy --manifest-path demo/Cargo.toml -- -Dclippy::all
+        continue-on-error: true  # https://github.com/rust-lang/rust/issues/137640
 
   clang-tidy:
     name: Clang Tidy
