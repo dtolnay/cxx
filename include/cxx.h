@@ -393,6 +393,87 @@ private:
 };
 #endif // CXXBRIDGE1_RUST_VEC
 
+#ifndef CXXBRIDGE1_RUST_OPTION
+// https://cxx.rs/binding/option.html <-- TODO
+template <typename T>
+class Option final {
+};
+
+template <typename T>
+class Option<rust::Box<T>> final {
+public:
+  using value_type = T;
+
+  Option() noexcept;
+  // TODO: a constructor for the Some variant?
+  Option(const Option &) = delete;
+  Option(Option &&) noexcept;
+  ~Option() noexcept;
+
+  Option &operator=(Option &&) & noexcept;
+  Option &operator=(const Option &) & = delete;
+
+  T *operator*() & noexcept;
+
+  bool is_none() const noexcept;
+  bool is_some() const noexcept;
+
+  /*
+  std::size_t size() const noexcept;
+  bool empty() const noexcept;
+  const T *data() const noexcept;
+  T *data() noexcept;
+  std::size_t capacity() const noexcept;
+
+  const T &operator[](std::size_t n) const noexcept;
+  const T &at(std::size_t n) const;
+  const T &front() const noexcept;
+  const T &back() const noexcept;
+
+  T &operator[](std::size_t n) noexcept;
+  T &at(std::size_t n);
+  T &front() noexcept;
+  T &back() noexcept;
+
+  void reserve(std::size_t new_cap);
+  void push_back(const T &value);
+  void push_back(T &&value);
+  template <typename... Args>
+  void emplace_back(Args &&...args);
+  void truncate(std::size_t len);
+  void clear();
+
+  using iterator = typename Slice<T>::iterator;
+  iterator begin() noexcept;
+  iterator end() noexcept;
+
+  using const_iterator = typename Slice<const T>::iterator;
+  const_iterator begin() const noexcept;
+  const_iterator end() const noexcept;
+  const_iterator cbegin() const noexcept;
+  const_iterator cend() const noexcept;
+
+  void swap(Option &) noexcept;
+
+  // Internal API only intended for the cxxbridge code generator.
+  Vec(unsafe_bitcopy_t, const Vec &) noexcept;
+
+private:
+  void reserve_total(std::size_t new_cap) noexcept;
+  void set_len(std::size_t len) noexcept;
+
+  friend void swap(Vec &lhs, Vec &rhs) noexcept { lhs.swap(rhs); }
+  */
+
+  void drop() noexcept;
+
+  // NPO dictates that the size of Option<Box<T>> is the same as Box<T>,
+  // which is the same as *T.
+  T *repr;
+};
+#endif // CXXBRIDGE1_RUST_OPTION
+// TODO: impl
+
 #ifndef CXXBRIDGE1_RUST_FN
 // https://cxx.rs/binding/fn.html
 template <typename Signature>
@@ -1031,6 +1112,55 @@ void Vec<T>::swap(Vec &rhs) noexcept {
 template <typename T>
 Vec<T>::Vec(unsafe_bitcopy_t, const Vec &bits) noexcept : repr(bits.repr) {}
 #endif // CXXBRIDGE1_RUST_VEC
+
+#ifndef CXXBRIDGE1_RUST_OPTION
+#define CXXBRIDGE1_RUST_OPTION
+template <typename T>
+Option<rust::Box<T>>::Option() noexcept : repr(0) {
+}
+
+template <typename T>
+Option<rust::Box<T>>::Option(Option &&other) noexcept : repr(other.repr) {
+  new (&other) Option();
+}
+
+template <typename T>
+Option<rust::Box<T>>::~Option() noexcept {
+  this->drop();
+}
+
+template <typename T>
+Option<Box<T>> &Option<Box<T>>::operator=(Option &&other) & noexcept {
+  this->drop();
+  this->repr = other.repr;
+  new (&other) Option();
+  return *this;
+}
+
+template <typename T>
+T *Option<Box<T>>::operator*() & noexcept {
+  assert(this->repr != nullptr);
+  return this->repr;
+}
+
+template <typename T>
+bool Option<Box<T>>::is_none() const noexcept {
+  return repr == nullptr;
+}
+
+template <typename T>
+bool Option<Box<T>>::is_some() const noexcept {
+  return repr != nullptr;
+}
+
+template <typename T>
+void Option<Box<T>>::drop() noexcept {
+  if (repr != 0) {
+    rust::Box<T>::from_raw(repr);
+    repr = nullptr;
+  }
+}
+#endif // CXXBRIDGE1_RUST_OPTION
 
 #ifndef CXXBRIDGE1_IS_COMPLETE
 #define CXXBRIDGE1_IS_COMPLETE

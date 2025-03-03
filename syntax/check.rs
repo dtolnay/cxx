@@ -47,6 +47,7 @@ fn do_typecheck(cx: &mut Check) {
             Type::Ident(ident) => check_type_ident(cx, ident),
             Type::RustBox(ptr) => check_type_box(cx, ptr),
             Type::RustVec(ty) => check_type_rust_vec(cx, ty),
+            Type::RustOption(ty) => check_type_rust_option(cx, ty),
             Type::UniquePtr(ptr) => check_type_unique_ptr(cx, ptr),
             Type::SharedPtr(ptr) => check_type_shared_ptr(cx, ptr),
             Type::WeakPtr(ptr) => check_type_weak_ptr(cx, ptr),
@@ -136,6 +137,15 @@ fn check_type_rust_vec(cx: &mut Check, ty: &Ty1) {
     }
 
     cx.error(ty, "unsupported element type of Vec");
+}
+
+fn check_type_rust_option(cx: &mut Check, ty: &Ty1) {
+    match &ty.inner {
+        Type::RustBox(_) => return,
+        _ => {}
+    }
+
+    cx.error(ty, "unsupported element type of Option");
 }
 
 fn check_type_unique_ptr(cx: &mut Check, ptr: &Ty1) {
@@ -650,6 +660,7 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
         Type::CxxVector(_) | Type::Fn(_) | Type::Void(_) => true,
         Type::RustBox(_)
         | Type::RustVec(_)
+        | Type::RustOption(_)
         | Type::UniquePtr(_)
         | Type::SharedPtr(_)
         | Type::WeakPtr(_)
@@ -724,6 +735,7 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         }
         Type::RustBox(_) => "Box".to_owned(),
         Type::RustVec(_) => "Vec".to_owned(),
+        Type::RustOption(_) => "Option".to_owned(),
         Type::UniquePtr(_) => "unique_ptr".to_owned(),
         Type::SharedPtr(_) => "shared_ptr".to_owned(),
         Type::WeakPtr(_) => "weak_ptr".to_owned(),

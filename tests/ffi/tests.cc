@@ -449,6 +449,18 @@ void c_take_rust_vec_shared_sort(rust::Vec<Shared> v) {
   }
 }
 
+void c_take_rust_option_boxed(rust::Option<rust::Box<Shared>> v, bool some) {
+  if (some) {
+    if (v.is_some() && (*v)->z == 13) {
+      cxx_test_suite_set_correct();
+    }
+  } else {
+    if (v.is_none()) {
+      cxx_test_suite_set_correct();
+    }
+  }
+}
+
 void c_take_rust_vec_shared_index(rust::Vec<Shared> v) {
   if (v[0].z == 1010 && v.at(0).z == 1010 && v.front().z == 1010 &&
       v[1].z == 1011 && v.at(1).z == 1011 && v.back().z == 1011) {

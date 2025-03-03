@@ -160,6 +160,8 @@ pub mod ffi {
         fn c_take_rust_vec_shared_clear(v: Vec<Shared>);
         fn c_take_rust_vec_shared_forward_iterator(v: Vec<Shared>);
         fn c_take_rust_vec_shared_sort(v: Vec<Shared>);
+    // TODO: move down
+        fn c_take_rust_option_boxed(v: Option<Box<Shared>>, some: bool);
         fn c_take_ref_rust_vec(v: &Vec<u8>);
         fn c_take_ref_rust_vec_string(v: &Vec<String>);
         fn c_take_ref_rust_vec_index(v: &Vec<u8>);
@@ -279,6 +281,7 @@ pub mod ffi {
         fn r_return_rust_vec_extern_struct() -> Vec<Job>;
         fn r_return_ref_rust_vec(shared: &Shared) -> &Vec<u8>;
         fn r_return_mut_rust_vec(shared: &mut Shared) -> &mut Vec<u8>;
+        fn r_return_rust_option_box() -> Option<Box<R>>;
         fn r_return_identity(_: usize) -> usize;
         fn r_return_sum(_: usize, _: usize) -> usize;
         fn r_return_enum(n: u32) -> Enum;
@@ -534,6 +537,10 @@ fn r_return_ref_rust_vec(shared: &ffi::Shared) -> &Vec<u8> {
 
 fn r_return_mut_rust_vec(shared: &mut ffi::Shared) -> &mut Vec<u8> {
     let _ = shared;
+    unimplemented!()
+}
+
+fn r_return_rust_option_box() -> Option<Box<R>> {
     unimplemented!()
 }
 
