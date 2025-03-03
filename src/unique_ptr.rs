@@ -7,8 +7,10 @@ use crate::ExternType;
 use alloc::string::String;
 #[cfg(feature = "std")]
 use alloc::vec::Vec;
+use core::cmp::Ordering;
 use core::ffi::c_void;
 use core::fmt::{self, Debug, Display};
+use core::hash::{Hash, Hasher};
 use core::marker::PhantomData;
 use core::mem::{self, MaybeUninit};
 use core::ops::{Deref, DerefMut};
@@ -211,6 +213,38 @@ where
 {
     fn eq(&self, other: &Self) -> bool {
         self.as_ref() == other.as_ref()
+    }
+}
+
+impl<T> Eq for UniquePtr<T> where T: Eq + UniquePtrTarget {}
+
+impl<T> PartialOrd for UniquePtr<T>
+where
+    T: PartialOrd + UniquePtrTarget,
+{
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        PartialOrd::partial_cmp(&self.as_ref(), &other.as_ref())
+    }
+}
+
+impl<T> Ord for UniquePtr<T>
+where
+    T: Ord + UniquePtrTarget,
+{
+    fn cmp(&self, other: &Self) -> Ordering {
+        Ord::cmp(&self.as_ref(), &other.as_ref())
+    }
+}
+
+impl<T> Hash for UniquePtr<T>
+where
+    T: Hash + UniquePtrTarget,
+{
+    fn hash<H>(&self, hasher: &mut H)
+    where
+        H: Hasher,
+    {
+        self.as_ref().hash(hasher);
     }
 }
 
