@@ -33,6 +33,7 @@ fn main() {
             println!("cargo:rustc-check-cfg=cfg(compile_error_if_std)");
             println!("cargo:rustc-check-cfg=cfg(cxx_experimental_no_alloc)");
             println!("cargo:rustc-check-cfg=cfg(error_in_core)");
+            println!("cargo:rustc-check-cfg=cfg(seek_relative)");
             println!("cargo:rustc-check-cfg=cfg(skip_ui_tests)");
         }
 
@@ -42,6 +43,11 @@ fn main() {
                 "cargo:warning=You appear to be building with: {}",
                 rustc.version,
             );
+        }
+
+        if rustc.minor >= 80 {
+            // std::io::Seek::seek_relative
+            println!("cargo:rustc-cfg=seek_relative");
         }
 
         if rustc.minor >= 81 {
