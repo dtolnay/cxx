@@ -3,8 +3,10 @@ use crate::kind::Trivial;
 use crate::string::CxxString;
 use crate::weak_ptr::{WeakPtr, WeakPtrTarget};
 use crate::ExternType;
+use core::cmp::Ordering;
 use core::ffi::c_void;
 use core::fmt::{self, Debug, Display};
+use core::hash::{Hash, Hasher};
 use core::marker::PhantomData;
 use core::mem::MaybeUninit;
 use core::ops::Deref;
@@ -153,6 +155,47 @@ where
             None => formatter.write_str("nullptr"),
             Some(value) => Display::fmt(value, formatter),
         }
+    }
+}
+
+impl<T> PartialEq for SharedPtr<T>
+where
+    T: PartialEq + SharedPtrTarget,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.as_ref() == other.as_ref()
+    }
+}
+
+impl<T> Eq for SharedPtr<T> where T: Eq + SharedPtrTarget {}
+
+impl<T> PartialOrd for SharedPtr<T>
+where
+    T: PartialOrd + SharedPtrTarget,
+{
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        PartialOrd::partial_cmp(&self.as_ref(), &other.as_ref())
+    }
+}
+
+impl<T> Ord for SharedPtr<T>
+where
+    T: Ord + SharedPtrTarget,
+{
+    fn cmp(&self, other: &Self) -> Ordering {
+        Ord::cmp(&self.as_ref(), &other.as_ref())
+    }
+}
+
+impl<T> Hash for SharedPtr<T>
+where
+    T: Hash + SharedPtrTarget,
+{
+    fn hash<H>(&self, hasher: &mut H)
+    where
+        H: Hasher,
+    {
+        self.as_ref().hash(hasher);
     }
 }
 
