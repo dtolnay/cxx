@@ -39,9 +39,9 @@ impl Display for Error {
             Error::Fs(err) => err.fmt(f),
             Error::ExportedDirNotAbsolute(path) => write!(
                 f,
-                "element of {} must be absolute path, but was: {:?}",
+                "element of {} must be absolute path, but was: `{}`",
                 expr!(CFG.exported_header_dirs),
-                path,
+                path.display(),
             ),
             Error::ExportedEmptyPrefix => write!(
                 f,
