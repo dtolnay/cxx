@@ -14,6 +14,7 @@
 #![allow(
     clippy::cast_sign_loss,
     clippy::default_trait_access,
+    clippy::elidable_lifetime_names,
     clippy::enum_glob_use,
     clippy::inherent_to_string,
     clippy::items_after_statements,
