@@ -14,7 +14,7 @@ use core::mem::{self, MaybeUninit};
 use core::ops::{Deref, DerefMut};
 use core::pin::Pin;
 #[cfg(feature = "std")]
-use std::io::{self, IoSlice, Read, Write};
+use std::io::{self, IoSlice, Read, Seek, SeekFrom, Write};
 
 /// Binding to C++ `std::unique_ptr<T, std::default_delete<T>>`.
 #[repr(C)]
@@ -236,6 +236,35 @@ where
 
     // TODO: Foward other `Read` trait methods when they get stabilized (e.g.
     // `read_buf` and/or `is_read_vectored`).
+}
+
+/// Forwarding `Seek` trait implementation in a manner similar to `Box<T>`.
+///
+/// Note that the implementation will panic for null `UniquePtr<T>`.
+#[cfg(feature = "std")]
+impl<T> Seek for UniquePtr<T>
+where
+    for<'a> Pin<&'a mut T>: Seek,
+    T: UniquePtrTarget,
+{
+    #[inline]
+    fn seek(&mut self, pos: SeekFrom) -> io::Result<u64> {
+        self.pin_mut().seek(pos)
+    }
+
+    #[inline]
+    fn rewind(&mut self) -> io::Result<()> {
+        self.pin_mut().rewind()
+    }
+
+    #[inline]
+    fn stream_position(&mut self) -> io::Result<u64> {
+        self.pin_mut().stream_position()
+    }
+
+    // TODO: Foward other `Seek` trait methods if/when possible:
+    // * `seek_relative`: Once MSRV >= 1.80.0
+    // * `stream_len`: If/when stabilized
 }
 
 /// Forwarding `Write` trait implementation in a manner similar to `Box<T>`.
