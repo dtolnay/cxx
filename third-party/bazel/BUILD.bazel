@@ -32,14 +32,14 @@ filegroup(
 
 # Workspace Member Dependencies
 alias(
-    name = "cc-1.2.15",
-    actual = "@vendor__cc-1.2.15//:cc",
+    name = "cc-1.2.16",
+    actual = "@vendor__cc-1.2.16//:cc",
     tags = ["manual"],
 )
 
 alias(
     name = "cc",
-    actual = "@vendor__cc-1.2.15//:cc",
+    actual = "@vendor__cc-1.2.16//:cc",
     tags = ["manual"],
 )
 
@@ -80,26 +80,26 @@ alias(
 )
 
 alias(
-    name = "proc-macro2-1.0.93",
-    actual = "@vendor__proc-macro2-1.0.93//:proc_macro2",
+    name = "proc-macro2-1.0.94",
+    actual = "@vendor__proc-macro2-1.0.94//:proc_macro2",
     tags = ["manual"],
 )
 
 alias(
     name = "proc-macro2",
-    actual = "@vendor__proc-macro2-1.0.93//:proc_macro2",
+    actual = "@vendor__proc-macro2-1.0.94//:proc_macro2",
     tags = ["manual"],
 )
 
 alias(
-    name = "quote-1.0.38",
-    actual = "@vendor__quote-1.0.38//:quote",
+    name = "quote-1.0.39",
+    actual = "@vendor__quote-1.0.39//:quote",
     tags = ["manual"],
 )
 
 alias(
     name = "quote",
-    actual = "@vendor__quote-1.0.38//:quote",
+    actual = "@vendor__quote-1.0.39//:quote",
     tags = ["manual"],
 )
 
@@ -128,13 +128,13 @@ alias(
 )
 
 alias(
-    name = "syn-2.0.98",
-    actual = "@vendor__syn-2.0.98//:syn",
+    name = "syn-2.0.99",
+    actual = "@vendor__syn-2.0.99//:syn",
     tags = ["manual"],
 )
 
 alias(
     name = "syn",
-    actual = "@vendor__syn-2.0.98//:syn",
+    actual = "@vendor__syn-2.0.99//:syn",
     tags = ["manual"],
 )
