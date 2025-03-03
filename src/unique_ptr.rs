@@ -263,6 +263,7 @@ where
     }
 
     #[cfg(seek_relative)]
+    #[allow(clippy::incompatible_msrv)]
     #[inline]
     fn seek_relative(&mut self, offset: i64) -> io::Result<()> {
         self.pin_mut().seek_relative(offset)
