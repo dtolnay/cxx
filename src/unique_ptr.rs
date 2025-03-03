@@ -262,8 +262,13 @@ where
         self.pin_mut().stream_position()
     }
 
+    #[cfg(seek_relative)]
+    #[inline]
+    fn seek_relative(&mut self, offset: i64) -> io::Result<()> {
+        self.pin_mut().seek_relative(offset)
+    }
+
     // TODO: Foward other `Seek` trait methods if/when possible:
-    // * `seek_relative`: Once MSRV >= 1.80.0
     // * `stream_len`: If/when stabilized
 }
 
