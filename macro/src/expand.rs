@@ -487,8 +487,13 @@ fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
     };
     let mut outparam = None;
     if indirect_return(efn, types) {
-        let ret = expand_extern_type(efn.ret.as_ref().unwrap(), types, true);
-        outparam = Some(quote!(__return: *mut #ret));
+        if efn.sig.constructor {
+            let self_type = expand_extern_type(&types.resolve(efn.self_type.as_ref().unwrap()).into(), types, true);
+            outparam = Some(quote!(__return: *mut #self_type));
+        } else {
+            let ret = expand_extern_type(efn.ret.as_ref().unwrap(), types, true);
+            outparam = Some(quote!(__return: *mut #ret));
+        }
     }
     let link_name = mangle::extern_fn(efn, types);
     let local_name = format_ident!("__{}", efn.name.rust);
@@ -523,6 +528,8 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
             None => quote!(()),
         };
         quote!(-> ::cxx::core::result::Result<#ok, ::cxx::Exception>)
+    } else if efn.sig.constructor {
+        quote!(-> Self)
     } else {
         expand_return_type(&efn.ret)
     };
@@ -626,10 +633,17 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let local_name = format_ident!("__{}", efn.name.rust);
     let span = efn.semi_token.span;
     let call = if indirect_return {
-        let ret = expand_extern_type(efn.ret.as_ref().unwrap(), types, true);
-        setup.extend(quote_spanned! {span=>
-            let mut __return = ::cxx::core::mem::MaybeUninit::<#ret>::uninit();
-        });
+        if efn.sig.constructor {
+            let self_type = expand_extern_type(&types.resolve(efn.self_type.as_ref().unwrap()).into(), types, true);
+            setup.extend(quote_spanned! {span=>
+                let mut __return = ::cxx::core::mem::MaybeUninit::<#self_type>::uninit();
+            });
+        } else {
+            let ret = expand_extern_type(efn.ret.as_ref().unwrap(), types, true);
+            setup.extend(quote_spanned! {span=>
+                let mut __return = ::cxx::core::mem::MaybeUninit::<#ret>::uninit();
+            });
+        }
         setup.extend(if efn.throws {
             quote_spanned! {span=>
                 #local_name(#(#vars,)* __return.as_mut_ptr()).exception()?;
@@ -741,15 +755,15 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         #trampolines
         #dispatch
     });
-    match &efn.receiver {
-        None => {
+    match (&efn.receiver, &efn.self_type) {
+        (None, None) => {
             quote! {
                 #doc
                 #attrs
                 #visibility #unsafety #fn_token #ident #generics #arg_list #ret #fn_body
             }
         }
-        Some(receiver) => {
+        (Some(receiver), None) => {
             let elided_generics;
             let receiver_ident = &receiver.ty.rust;
             let resolve = types.resolve(&receiver.ty);
@@ -781,6 +795,39 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                 }
             }
         }
+        (None, Some(self_type)) => {
+            let elided_generics;
+            let resolve = types.resolve(self_type);
+            let self_type_ident = &resolve.name.rust;
+            let self_type_generics = if resolve.generics.lt_token.is_some() {
+                &resolve.generics
+            } else {
+                elided_generics = Lifetimes {
+                    lt_token: resolve.generics.lt_token,
+                    lifetimes: resolve
+                        .generics
+                        .lifetimes
+                        .pairs()
+                        .map(|pair| {
+                            let lifetime = Lifetime::new("'_", pair.value().apostrophe);
+                            let punct = pair.punct().map(|&&comma| comma);
+                            punctuated::Pair::new(lifetime, punct)
+                        })
+                        .collect(),
+                    gt_token: resolve.generics.gt_token,
+                };
+                &elided_generics
+            };
+            quote_spanned! {ident.span()=>
+                #[automatically_derived]
+                impl #generics #self_type_ident #self_type_generics {
+                    #doc
+                    #attrs
+                    #visibility #unsafety #fn_token #ident #arg_list #ret #fn_body
+                }
+            }
+        }
+        _ => unreachable!("receiver and self_type are mutually exclusive"),
     }
 }
 
@@ -797,6 +844,7 @@ fn expand_function_pointer_trampoline(
     let body_span = efn.semi_token.span;
     let shim = expand_rust_function_shim_impl(
         sig,
+        &efn.self_type,
         types,
         &r_trampoline,
         local_name,
@@ -940,18 +988,33 @@ fn expand_forbid(impls: TokenStream) -> TokenStream {
 
 fn expand_rust_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let link_name = mangle::extern_fn(efn, types);
-    let local_name = match &efn.receiver {
-        None => format_ident!("__{}", efn.name.rust),
-        Some(receiver) => format_ident!("__{}__{}", receiver.ty.rust, efn.name.rust),
+    let local_name = match (&efn.receiver, &efn.self_type) {
+        (None, None) => format_ident!("__{}", efn.name.rust),
+        (Some(receiver), None) => format_ident!("__{}__{}", receiver.ty.rust, efn.name.rust),
+        (None, Some(self_type)) => format_ident!(
+            "__{}__{}",
+            types.resolve(self_type).name.rust,
+            efn.name.rust
+        ),
+        _ => unreachable!("receiver and self_type are mutually exclusive"),
     };
-    let prevent_unwind_label = match &efn.receiver {
-        None => format!("::{}", efn.name.rust),
-        Some(receiver) => format!("::{}::{}", receiver.ty.rust, efn.name.rust),
+    let prevent_unwind_label = match (&efn.receiver, &efn.self_type) {
+        (None, None) => format!("::{}", efn.name.rust),
+        (Some(receiver), None) => format!("::{}::{}", receiver.ty.rust, efn.name.rust),
+        (None, Some(self_type)) => {
+            format!(
+                "::{}::{}",
+                types.resolve(self_type).name.rust,
+                efn.name.rust
+            )
+        }
+        _ => unreachable!("receiver and self_type are mutually exclusive"),
     };
     let invoke = Some(&efn.name.rust);
     let body_span = efn.semi_token.span;
     expand_rust_function_shim_impl(
         efn,
+        &efn.self_type,
         types,
         &link_name,
         local_name,
@@ -965,6 +1028,7 @@ fn expand_rust_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
 
 fn expand_rust_function_shim_impl(
     sig: &Signature,
+    self_type: &Option<Ident>,
     types: &Types,
     link_name: &Symbol,
     local_name: Ident,
@@ -1057,7 +1121,8 @@ fn expand_rust_function_shim_impl(
     });
     let vars: Vec<_> = receiver_var.into_iter().chain(arg_vars).collect();
 
-    let wrap_super = invoke.map(|invoke| expand_rust_function_shim_super(sig, &local_name, invoke));
+    let wrap_super = invoke
+        .map(|invoke| expand_rust_function_shim_super(sig, self_type, types, &local_name, invoke));
 
     let mut requires_closure;
     let mut call = match invoke {
@@ -1126,8 +1191,13 @@ fn expand_rust_function_shim_impl(
     let mut outparam = None;
     let indirect_return = indirect_return(sig, types);
     if indirect_return {
-        let ret = expand_extern_type(sig.ret.as_ref().unwrap(), types, false);
-        outparam = Some(quote_spanned!(span=> __return: *mut #ret,));
+        if sig.constructor {
+            let self_type  = expand_extern_type(&types.resolve(self_type.as_ref().unwrap()).into(), types, false);
+            outparam = Some(quote_spanned!(span=> __return: *mut #self_type,));
+        } else {
+            let ret = expand_extern_type(sig.ret.as_ref().unwrap(), types, false);
+            outparam = Some(quote_spanned!(span=> __return: *mut #ret,));
+        }
     }
     if sig.throws {
         let out = match sig.ret {
@@ -1182,6 +1252,8 @@ fn expand_rust_function_shim_impl(
 // accurate unsafety declaration and no problematic elided lifetimes.
 fn expand_rust_function_shim_super(
     sig: &Signature,
+    self_type: &Option<Ident>,
+    types: &Types,
     local_name: &Ident,
     invoke: &Ident,
 ) -> TokenStream {
@@ -1214,6 +1286,8 @@ fn expand_rust_function_shim_super(
             quote_spanned!(rangle.span=> ::cxx::core::fmt::Display>)
         };
         quote!(-> #result_begin #result_end)
+    } else if sig.constructor {
+        expand_return_type(&Some(types.resolve(self_type.as_ref().unwrap()).into()))
     } else {
         expand_return_type(&sig.ret)
     };
@@ -1222,12 +1296,17 @@ fn expand_rust_function_shim_super(
     let vars = receiver_var.iter().chain(arg_vars);
 
     let span = invoke.span();
-    let call = match &sig.receiver {
-        None => quote_spanned!(span=> super::#invoke),
-        Some(receiver) => {
+    let call = match (&sig.receiver, &self_type) {
+        (None, None) => quote_spanned!(span=> super::#invoke),
+        (Some(receiver), None) => {
             let receiver_type = &receiver.ty.rust;
             quote_spanned!(span=> #receiver_type::#invoke)
         }
+        (None, Some(self_type)) => {
+            let self_type = &types.resolve(self_type).name.rust;
+            quote_spanned!(span=> #self_type::#invoke)
+        }
+        _ => unreachable!("receiver and self_type are mutually exclusive"),
     };
 
     let mut body = quote_spanned!(span=> #call(#(#vars,)*));
@@ -1854,9 +1933,11 @@ fn expand_return_type(ret: &Option<Type>) -> TokenStream {
 }
 
 fn indirect_return(sig: &Signature, types: &Types) -> bool {
-    sig.ret
-        .as_ref()
-        .is_some_and(|ret| sig.throws || types.needs_indirect_abi(ret))
+    sig.constructor
+        || sig
+            .ret
+            .as_ref()
+            .is_some_and(|ret| sig.throws || types.needs_indirect_abi(ret))
 }
 
 fn expand_extern_type(ty: &Type, types: &Types, proper: bool) -> TokenStream {

@@ -162,6 +162,7 @@ pub(crate) struct ExternFn {
     pub sig: Signature,
     pub semi_token: Token![;],
     pub trusted: bool,
+    pub self_type: Option<Ident>,
 }
 
 pub(crate) struct TypeAlias {
@@ -217,6 +218,7 @@ pub(crate) struct Signature {
     pub throws: bool,
     pub paren_token: Paren,
     pub throws_tokens: Option<(kw::Result, Token![<], Token![>])>,
+    pub constructor: bool,
 }
 
 pub(crate) struct Var {
