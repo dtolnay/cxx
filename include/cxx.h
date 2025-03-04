@@ -48,7 +48,7 @@ public:
   String(const char *, std::size_t);
   String(const char16_t *);
   String(const char16_t *, std::size_t);
-#if __cplusplus >= 202002L
+#ifdef __cpp_char8_t
   String(const char8_t *s);
   String(const char8_t *s, std::size_t len);
 #endif

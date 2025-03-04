@@ -130,7 +130,7 @@ String::String(const char *s, std::size_t len) {
              len);
 }
 
-#if __cplusplus >= 202002L
+#ifdef __cpp_char8_t
 String::String(const char8_t *s) : String(reinterpret_cast<const char *>(s)) {}
 
 String::String(const char8_t *s, std::size_t len)
