@@ -24,6 +24,7 @@ impl<'a> Types<'a> {
             }
             Type::RustBox(_)
             | Type::RustVec(_)
+            | Type::RustOption(_)
             | Type::Str(_)
             | Type::Fn(_)
             | Type::Void(_)

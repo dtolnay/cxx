@@ -214,6 +214,7 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
             },
             Type::RustBox(_) => out.builtin.rust_box = true,
             Type::RustVec(_) => out.builtin.rust_vec = true,
+            Type::RustOption(_) => out.builtin.rust_option = true,
             Type::UniquePtr(_) => out.include.memory = true,
             Type::SharedPtr(_) | Type::WeakPtr(_) => out.include.memory = true,
             Type::Str(_) => out.builtin.rust_str = true,
@@ -1235,6 +1236,11 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write_type(out, &ty.inner);
             write!(out, ">");
         }
+        Type::RustOption(ty) => {
+            write!(out, "::rust::Option<");
+            write_type(out, &ty.inner);
+            write!(out, ">");
+        }
         Type::UniquePtr(ptr) => {
             write!(out, "::std::unique_ptr<");
             write_type(out, &ptr.inner);
@@ -1340,6 +1346,7 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
         | Type::Str(_)
         | Type::CxxVector(_)
         | Type::RustVec(_)
+        | Type::RustOption(_)
         | Type::SliceRef(_)
         | Type::Fn(_)
         | Type::Array(_) => write!(out, " "),
