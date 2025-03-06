@@ -14,12 +14,12 @@
 //! // build.rs
 //!
 //! fn main() {
+//!     cxx_build::CFG.change_detection = true;
 //!     cxx_build::bridge("src/main.rs")
 //!         .file("src/demo.cc")
 //!         .std("c++11")
 //!         .compile("cxxbridge-demo");
 //!
-//!     println!("cargo:rerun-if-changed=src/main.rs");
 //!     println!("cargo:rerun-if-changed=src/demo.cc");
 //!     println!("cargo:rerun-if-changed=include/demo.h");
 //! }
@@ -397,6 +397,9 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
         doxygen: CFG.doxygen,
         ..Opt::default()
     };
+    if CFG.change_detection {
+        println!("cargo:rerun-if-changed={}", rust_source_file.display());
+    }
     let generated = gen::generate_from_path(rust_source_file, &opt);
     let ref rel_path = paths::local_relative_path(rust_source_file);
 
