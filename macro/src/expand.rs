@@ -1264,6 +1264,7 @@ fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
 }
 
 fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
+    let attrs = &alias.attrs;
     let ident = &alias.name.rust;
     let type_id = type_id(&alias.name);
     let begin_span = alias.type_token.span;
@@ -1272,12 +1273,14 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
     let end = quote_spanned!(end_span=> >);
 
     let mut verify = quote! {
+        #attrs
         const _: fn() = #begin #ident, #type_id #end;
     };
 
     if types.required_trivial.contains_key(&alias.name.rust) {
         let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_kind::<);
         verify.extend(quote! {
+            #attrs
             const _: fn() = #begin #ident, ::cxx::kind::Trivial #end;
         });
     }
