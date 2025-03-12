@@ -80,9 +80,9 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "1.0.7",
+    version = "1.0.8",
     deps = [
-        "@vendor__scratch-1.0.7//:build_script_build",
+        "@vendor__scratch-1.0.8//:build_script_build",
     ],
 )
 
@@ -131,7 +131,7 @@ cargo_build_script(
         "noclippy",
         "norustfmt",
     ],
-    version = "1.0.7",
+    version = "1.0.8",
     visibility = ["//visibility:private"],
 )
 

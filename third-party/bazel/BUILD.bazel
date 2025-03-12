@@ -44,14 +44,14 @@ alias(
 )
 
 alias(
-    name = "clap-4.5.31",
-    actual = "@vendor__clap-4.5.31//:clap",
+    name = "clap-4.5.32",
+    actual = "@vendor__clap-4.5.32//:clap",
     tags = ["manual"],
 )
 
 alias(
     name = "clap",
-    actual = "@vendor__clap-4.5.31//:clap",
+    actual = "@vendor__clap-4.5.32//:clap",
     tags = ["manual"],
 )
 
@@ -92,49 +92,49 @@ alias(
 )
 
 alias(
-    name = "quote-1.0.39",
-    actual = "@vendor__quote-1.0.39//:quote",
+    name = "quote-1.0.40",
+    actual = "@vendor__quote-1.0.40//:quote",
     tags = ["manual"],
 )
 
 alias(
     name = "quote",
-    actual = "@vendor__quote-1.0.39//:quote",
+    actual = "@vendor__quote-1.0.40//:quote",
     tags = ["manual"],
 )
 
 alias(
-    name = "rustversion-1.0.19",
-    actual = "@vendor__rustversion-1.0.19//:rustversion",
+    name = "rustversion-1.0.20",
+    actual = "@vendor__rustversion-1.0.20//:rustversion",
     tags = ["manual"],
 )
 
 alias(
     name = "rustversion",
-    actual = "@vendor__rustversion-1.0.19//:rustversion",
+    actual = "@vendor__rustversion-1.0.20//:rustversion",
     tags = ["manual"],
 )
 
 alias(
-    name = "scratch-1.0.7",
-    actual = "@vendor__scratch-1.0.7//:scratch",
+    name = "scratch-1.0.8",
+    actual = "@vendor__scratch-1.0.8//:scratch",
     tags = ["manual"],
 )
 
 alias(
     name = "scratch",
-    actual = "@vendor__scratch-1.0.7//:scratch",
+    actual = "@vendor__scratch-1.0.8//:scratch",
     tags = ["manual"],
 )
 
 alias(
-    name = "syn-2.0.99",
-    actual = "@vendor__syn-2.0.99//:syn",
+    name = "syn-2.0.100",
+    actual = "@vendor__syn-2.0.100//:syn",
     tags = ["manual"],
 )
 
 alias(
     name = "syn",
-    actual = "@vendor__syn-2.0.99//:syn",
+    actual = "@vendor__syn-2.0.100//:syn",
     tags = ["manual"],
 )
