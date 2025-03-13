@@ -1,4 +1,6 @@
-load("//third-party/bazel:defs.bzl", _crate_repositories = "crate_repositories")
+"""CXX bzlmod extensions"""
+
+load("//third-party/bazel:crates.bzl", _crate_repositories = "crate_repositories")
 
 def _crates_vendor_remote_repository_impl(repository_ctx):
     repository_ctx.symlink(repository_ctx.attr.build_file, "BUILD.bazel")
