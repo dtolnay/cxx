@@ -1,6 +1,6 @@
 module(
     name = "cxx.rs",
-    version = "1.0.145",
+    version = "0.0.0",
     bazel_compatibility = [">=7.2.1"],
     compatibility_level = 1,
 )
