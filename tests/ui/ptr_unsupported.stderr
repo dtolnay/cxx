@@ -1,5 +1,5 @@
 error: C++ does not allow pointer to reference as a type
- --> tests/ui/ptr_unsupported.rs:6:38
+ --> tests/ui/ptr_unsupported.rs:6:42
   |
 6 |         fn get_ptr_to_reference<'a>() -> *mut &'a C;
   |                                          ^^^^^^^^^^
