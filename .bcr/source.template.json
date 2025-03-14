@@ -1,5 +1,5 @@
 {
   "integrity": "**leave this alone**",
-  "strip_prefix": "",
+  "strip_prefix": "cxx-{VERSION}",
   "url": "https://github.com/{OWNER}/{REPO}/archive/refs/tags/{VERSION}.zip"
 }
