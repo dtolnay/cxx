@@ -44,10 +44,7 @@ pub(crate) fn load(cx: &mut Errors, apis: &mut [Api]) {
     let ast_dump_path = match env::var_os(CXX_CLANG_AST) {
         Some(ast_dump_path) => PathBuf::from(ast_dump_path),
         None => {
-            let msg = format!(
-                "environment variable ${} has not been provided",
-                CXX_CLANG_AST,
-            );
+            let msg = format!("environment variable ${CXX_CLANG_AST} has not been provided");
             return cx.error(span, msg);
         }
     };
@@ -89,7 +86,7 @@ pub(crate) fn load(cx: &mut Errors, apis: &mut [Api]) {
         if enm.variants.is_empty() {
             let span = &enm.variants_from_header_attr;
             let name = CxxName(&enm.name);
-            let msg = format!("failed to find any C++ definition of enum {}", name);
+            let msg = format!("failed to find any C++ definition of enum {name}");
             cx.error(span, msg);
         }
     }
@@ -121,7 +118,7 @@ fn traverse<'a>(
                     if !enm.variants.is_empty() {
                         let span = &enm.variants_from_header_attr;
                         let qual_name = CxxName(&enm.name);
-                        let msg = format!("found multiple C++ definitions of enum {}", qual_name);
+                        let msg = format!("found multiple C++ definitions of enum {qual_name}");
                         cx.error(span, msg);
                         return;
                     }
@@ -130,8 +127,7 @@ fn traverse<'a>(
                         let name = &enm.name.cxx;
                         let qual_name = CxxName(&enm.name);
                         let msg = format!(
-                            "implicit implementation-defined repr for enum {} is not supported yet; consider changing its C++ definition to `enum {}: int {{...}}",
-                            qual_name, name,
+                            "implicit implementation-defined repr for enum {qual_name} is not supported yet; consider changing its C++ definition to `enum {name}: int {{...}}",
                         );
                         cx.error(span, msg);
                         return;
@@ -239,10 +235,7 @@ fn translate_qual_type(cx: &mut Errors, enm: &Enum, qual_type: &str) -> Path {
         unsupported => {
             let span = &enm.variants_from_header_attr;
             let qual_name = CxxName(&enm.name);
-            let msg = format!(
-                "unsupported underlying type for {}: {}",
-                qual_name, unsupported,
-            );
+            let msg = format!("unsupported underlying type for {qual_name}: {unsupported}");
             cx.error(span, msg);
             "c_int"
         }
@@ -302,7 +295,7 @@ struct CxxName<'a>(&'a Pair);
 impl<'a> Display for CxxName<'a> {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         for namespace in &self.0.namespace {
-            write!(formatter, "{}::", namespace)?;
+            write!(formatter, "{namespace}::")?;
         }
         write!(formatter, "{}", self.0.cxx)
     }

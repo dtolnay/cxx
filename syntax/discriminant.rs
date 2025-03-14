@@ -44,8 +44,7 @@ impl DiscriminantSet {
                             continue;
                         }
                         let msg = format!(
-                            "discriminant value `{}` is outside the limits of {}",
-                            past, new_repr,
+                            "discriminant value `{past}` is outside the limits of {new_repr}",
                         );
                         return Err(Error::new(Span::call_site(), msg));
                     }
@@ -53,7 +52,7 @@ impl DiscriminantSet {
                 self.repr = Some(new_repr);
             }
             (Some(prev), Some(repr)) if prev != repr => {
-                let msg = format!("expected {}, found {}", prev, repr);
+                let msg = format!("expected {prev}, found {repr}");
                 return Err(Error::new(Span::call_site(), msg));
             }
             _ => {}
@@ -136,8 +135,7 @@ fn insert(set: &mut DiscriminantSet, discriminant: Discriminant) -> Result<Discr
         if let Some(limits) = Limits::of(expected_repr) {
             if discriminant < limits.min || limits.max < discriminant {
                 let msg = format!(
-                    "discriminant value `{}` is outside the limits of {}",
-                    discriminant, expected_repr,
+                    "discriminant value `{discriminant}` is outside the limits of {expected_repr}",
                 );
                 return Err(Error::new(Span::call_site(), msg));
             }
@@ -269,7 +267,7 @@ fn parse_int_suffix(suffix: &str) -> Result<Option<Atom>> {
             _ => {}
         }
     }
-    let msg = format!("unrecognized integer suffix: `{}`", suffix);
+    let msg = format!("unrecognized integer suffix: `{suffix}`");
     Err(Error::new(Span::call_site(), msg))
 }
 

@@ -87,7 +87,7 @@ fn check_type_ident(cx: &mut Check, name: &NamedType) {
         && !cx.types.cxx.contains(ident)
         && !cx.types.rust.contains(ident)
     {
-        let msg = format!("unsupported type: {}", ident);
+        let msg = format!("unsupported type: {ident}");
         cx.error(ident, msg);
     }
 }
@@ -237,8 +237,7 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
             cx.error(
                 ty,
                 format!(
-                    "mutable reference to C++ type requires a pin -- use Pin<&mut {}>",
-                    requires_pin,
+                    "mutable reference to C++ type requires a pin -- use Pin<&mut {requires_pin}>",
                 ),
             );
         }
@@ -280,7 +279,7 @@ fn check_type_slice_ref(cx: &mut Check, ty: &SliceRef) {
 
     if !supported {
         let mutable = if ty.mutable { "mut " } else { "" };
-        let mut msg = format!("unsupported &{}[T] element type", mutable);
+        let mut msg = format!("unsupported &{mutable}[T] element type");
         if let Type::Ident(ident) = &ty.inner {
             if is_opaque_cxx(cx, &ident.rust) {
                 msg += ": opaque C++ type is not supported yet";
@@ -334,7 +333,7 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
 
     for derive in &strct.derives {
         if derive.what == Trait::ExternType {
-            let msg = format!("derive({}) on shared struct is not supported", derive);
+            let msg = format!("derive({derive}) on shared struct is not supported");
             cx.error(derive, msg);
         }
     }
@@ -347,7 +346,7 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
             );
         } else if is_unsized(cx, &field.ty) {
             let desc = describe(cx, &field.ty);
-            let msg = format!("using {} by value is not supported", desc);
+            let msg = format!("using {desc} by value is not supported");
             cx.error(field, msg);
         }
     }
@@ -367,7 +366,7 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
 
     for derive in &enm.derives {
         if derive.what == Trait::Default || derive.what == Trait::ExternType {
-            let msg = format!("derive({}) on shared enum is not supported", derive);
+            let msg = format!("derive({derive}) on shared enum is not supported");
             cx.error(derive, msg);
         }
     }
@@ -385,10 +384,7 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
             Lang::Rust => "Rust",
             Lang::Cxx => "C++",
         };
-        let msg = format!(
-            "derive({}) on opaque {} type is not supported yet",
-            derive, lang,
-        );
+        let msg = format!("derive({derive}) on opaque {lang} type is not supported yet");
         cx.error(derive, msg);
     }
 
@@ -480,7 +476,7 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
             }
         } else if is_unsized(cx, &arg.ty) {
             let desc = describe(cx, &arg.ty);
-            let msg = format!("passing {} by value is not supported", desc);
+            let msg = format!("passing {desc} by value is not supported");
             cx.error(arg, msg);
         }
     }
@@ -490,7 +486,7 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
             cx.error(ty, "returning a function pointer is not implemented yet");
         } else if is_unsized(cx, ty) {
             let desc = describe(cx, ty);
-            let msg = format!("returning {} by value is not supported", desc);
+            let msg = format!("returning {desc} by value is not supported");
             cx.error(ty, msg);
         }
     }
@@ -504,7 +500,7 @@ fn check_api_type_alias(cx: &mut Check, alias: &TypeAlias) {
     check_lifetimes(cx, &alias.generics);
 
     for derive in &alias.derives {
-        let msg = format!("derive({}) on extern type alias is not supported", derive);
+        let msg = format!("derive({derive}) on extern type alias is not supported");
         cx.error(derive, msg);
     }
 }

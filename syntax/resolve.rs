@@ -13,7 +13,7 @@ impl<'a> Types<'a> {
         let ident = ident.ident();
         match self.try_resolve(ident) {
             Some(resolution) => resolution,
-            None => panic!("Unable to resolve type `{}`", ident),
+            None => panic!("Unable to resolve type `{ident}`"),
         }
     }
 

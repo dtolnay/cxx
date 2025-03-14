@@ -262,7 +262,7 @@ fn enum_debug(enm: &Enum, span: Span) -> TokenStream {
             #ident::#variant => formatter.write_str(#name),
         }
     });
-    let fallback = format!("{}({{}})", ident);
+    let fallback = format!("{ident}({{}})");
 
     quote_spanned! {span=>
         #[automatically_derived]

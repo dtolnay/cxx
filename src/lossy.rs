@@ -56,7 +56,7 @@ pub(crate) fn debug(mut bytes: &[u8], f: &mut fmt::Formatter) -> fmt::Result {
                     bytes.len()
                 };
                 for b in &bytes[valid.len()..end_of_broken] {
-                    write!(f, "\\x{:02x}", b)?;
+                    write!(f, "\\x{b:02x}")?;
                 }
                 bytes = &bytes[end_of_broken..];
             }

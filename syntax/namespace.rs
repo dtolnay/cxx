@@ -84,7 +84,7 @@ impl Parse for Namespace {
 impl Display for Namespace {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for segment in self {
-            write!(f, "{}$", segment)?;
+            write!(f, "{segment}$")?;
         }
         Ok(())
     }

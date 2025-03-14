@@ -26,7 +26,7 @@ impl Symbol {
         if !self.0.is_empty() {
             self.0.push('$');
         }
-        self.0.write_fmt(format_args!("{}", segment)).unwrap();
+        self.0.write_fmt(format_args!("{segment}")).unwrap();
         assert!(self.0.len() > len_before);
     }
 

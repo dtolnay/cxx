@@ -333,7 +333,7 @@ where
 /// {
 ///     println!("the vector elements are:");
 ///     for element in vector {
-///         println!("  • {}", element);
+///         println!("  • {element}");
 ///     }
 /// }
 /// ```

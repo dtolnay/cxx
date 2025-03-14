@@ -280,6 +280,6 @@ impl<'t, 'a> IntoIterator for &'t Types<'a> {
 }
 
 fn duplicate_name(cx: &mut Errors, sp: impl ToTokens, ident: &Ident) {
-    let msg = format!("the name `{}` is defined multiple times", ident);
+    let msg = format!("the name `{ident}` is defined multiple times");
     cx.error(sp, msg);
 }

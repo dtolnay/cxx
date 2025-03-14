@@ -271,12 +271,12 @@ pub(crate) fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl 
                     desc,
                     set,
                 } => {
-                    write!(f, "{} ", desc)?;
+                    write!(f, "{desc} ")?;
                     for (i, ident) in set.iter().take(3).enumerate() {
                         if i > 0 {
                             write!(f, ", ")?;
                         }
-                        write!(f, "`{}`", ident)?;
+                        write!(f, "`{ident}`")?;
                     }
                     Ok(())
                 }
@@ -292,7 +292,7 @@ pub(crate) fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl 
                     mutable,
                     param,
                 } => {
-                    write!(f, "{} ", desc)?;
+                    write!(f, "{desc} ")?;
                     if *shared {
                         write!(f, "&[{}]", param.rust)?;
                     }

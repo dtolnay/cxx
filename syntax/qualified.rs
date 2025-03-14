@@ -43,8 +43,7 @@ fn parse_unquoted(input: ParseStream, allow_raw: bool) -> Result<QualifiedName> 
         if let Some(unraw) = ident.to_string().strip_prefix("r#") {
             if !allow_raw {
                 let msg = format!(
-                    "raw identifier `{}` is not allowed in a quoted namespace; use `{}`, or remove quotes",
-                    ident, unraw,
+                    "raw identifier `{ident}` is not allowed in a quoted namespace; use `{unraw}`, or remove quotes",
                 );
                 return Err(Error::new(ident.span(), msg));
             }

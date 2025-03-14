@@ -1301,9 +1301,9 @@ fn expand_rust_box(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
     let ident = key.rust;
     let resolve = types.resolve(ident);
     let link_prefix = format!("cxxbridge1$box${}$", resolve.name.to_symbol());
-    let link_alloc = format!("{}alloc", link_prefix);
-    let link_dealloc = format!("{}dealloc", link_prefix);
-    let link_drop = format!("{}drop", link_prefix);
+    let link_alloc = format!("{link_prefix}alloc");
+    let link_dealloc = format!("{link_prefix}dealloc");
+    let link_drop = format!("{link_prefix}drop");
 
     let local_prefix = format_ident!("{}__box_", ident);
     let local_alloc = format_ident!("{}alloc", local_prefix);
@@ -1315,7 +1315,7 @@ fn expand_rust_box(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
     let begin_span = explicit_impl.map_or(key.begin_span, |explicit| explicit.impl_token.span);
     let end_span = explicit_impl.map_or(key.end_span, |explicit| explicit.brace_token.span.join());
     let unsafe_token = format_ident!("unsafe", span = begin_span);
-    let prevent_unwind_drop_label = format!("::{} as Drop>::drop", ident);
+    let prevent_unwind_drop_label = format!("::{ident} as Drop>::drop");
 
     quote_spanned! {end_span=>
         #[automatically_derived]
@@ -1350,14 +1350,14 @@ fn expand_rust_vec(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
     let elem = key.rust;
     let resolve = types.resolve(elem);
     let link_prefix = format!("cxxbridge1$rust_vec${}$", resolve.name.to_symbol());
-    let link_new = format!("{}new", link_prefix);
-    let link_drop = format!("{}drop", link_prefix);
-    let link_len = format!("{}len", link_prefix);
-    let link_capacity = format!("{}capacity", link_prefix);
-    let link_data = format!("{}data", link_prefix);
-    let link_reserve_total = format!("{}reserve_total", link_prefix);
-    let link_set_len = format!("{}set_len", link_prefix);
-    let link_truncate = format!("{}truncate", link_prefix);
+    let link_new = format!("{link_prefix}new");
+    let link_drop = format!("{link_prefix}drop");
+    let link_len = format!("{link_prefix}len");
+    let link_capacity = format!("{link_prefix}capacity");
+    let link_data = format!("{link_prefix}data");
+    let link_reserve_total = format!("{link_prefix}reserve_total");
+    let link_set_len = format!("{link_prefix}set_len");
+    let link_truncate = format!("{link_prefix}truncate");
 
     let local_prefix = format_ident!("{}__vec_", elem);
     let local_new = format_ident!("{}new", local_prefix);
@@ -1374,7 +1374,7 @@ fn expand_rust_vec(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
     let begin_span = explicit_impl.map_or(key.begin_span, |explicit| explicit.impl_token.span);
     let end_span = explicit_impl.map_or(key.end_span, |explicit| explicit.brace_token.span.join());
     let unsafe_token = format_ident!("unsafe", span = begin_span);
-    let prevent_unwind_drop_label = format!("::{} as Drop>::drop", elem);
+    let prevent_unwind_drop_label = format!("::{elem} as Drop>::drop");
 
     quote_spanned! {end_span=>
         #[automatically_derived]
@@ -1452,12 +1452,12 @@ fn expand_unique_ptr(
     let name = ident.to_string();
     let resolve = types.resolve(ident);
     let prefix = format!("cxxbridge1$unique_ptr${}$", resolve.name.to_symbol());
-    let link_null = format!("{}null", prefix);
-    let link_uninit = format!("{}uninit", prefix);
-    let link_raw = format!("{}raw", prefix);
-    let link_get = format!("{}get", prefix);
-    let link_release = format!("{}release", prefix);
-    let link_drop = format!("{}drop", prefix);
+    let link_null = format!("{prefix}null");
+    let link_uninit = format!("{prefix}uninit");
+    let link_raw = format!("{prefix}raw");
+    let link_get = format!("{prefix}get");
+    let link_release = format!("{prefix}release");
+    let link_drop = format!("{prefix}drop");
 
     let (impl_generics, ty_generics) = generics::split_for_impl(key, explicit_impl, resolve);
 
@@ -1549,11 +1549,11 @@ fn expand_shared_ptr(
     let name = ident.to_string();
     let resolve = types.resolve(ident);
     let prefix = format!("cxxbridge1$shared_ptr${}$", resolve.name.to_symbol());
-    let link_null = format!("{}null", prefix);
-    let link_uninit = format!("{}uninit", prefix);
-    let link_clone = format!("{}clone", prefix);
-    let link_get = format!("{}get", prefix);
-    let link_drop = format!("{}drop", prefix);
+    let link_null = format!("{prefix}null");
+    let link_uninit = format!("{prefix}uninit");
+    let link_clone = format!("{prefix}clone");
+    let link_get = format!("{prefix}get");
+    let link_drop = format!("{prefix}drop");
 
     let (impl_generics, ty_generics) = generics::split_for_impl(key, explicit_impl, resolve);
 
@@ -1628,11 +1628,11 @@ fn expand_weak_ptr(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
     let name = ident.to_string();
     let resolve = types.resolve(ident);
     let prefix = format!("cxxbridge1$weak_ptr${}$", resolve.name.to_symbol());
-    let link_null = format!("{}null", prefix);
-    let link_clone = format!("{}clone", prefix);
-    let link_downgrade = format!("{}downgrade", prefix);
-    let link_upgrade = format!("{}upgrade", prefix);
-    let link_drop = format!("{}drop", prefix);
+    let link_null = format!("{prefix}null");
+    let link_clone = format!("{prefix}clone");
+    let link_downgrade = format!("{prefix}downgrade");
+    let link_upgrade = format!("{prefix}upgrade");
+    let link_drop = format!("{prefix}drop");
 
     let (impl_generics, ty_generics) = generics::split_for_impl(key, explicit_impl, resolve);
 
@@ -1704,20 +1704,20 @@ fn expand_cxx_vector(
     let name = elem.to_string();
     let resolve = types.resolve(elem);
     let prefix = format!("cxxbridge1$std$vector${}$", resolve.name.to_symbol());
-    let link_new = format!("{}new", prefix);
-    let link_size = format!("{}size", prefix);
-    let link_get_unchecked = format!("{}get_unchecked", prefix);
-    let link_push_back = format!("{}push_back", prefix);
-    let link_pop_back = format!("{}pop_back", prefix);
+    let link_new = format!("{prefix}new");
+    let link_size = format!("{prefix}size");
+    let link_get_unchecked = format!("{prefix}get_unchecked");
+    let link_push_back = format!("{prefix}push_back");
+    let link_pop_back = format!("{prefix}pop_back");
     let unique_ptr_prefix = format!(
         "cxxbridge1$unique_ptr$std$vector${}$",
         resolve.name.to_symbol(),
     );
-    let link_unique_ptr_null = format!("{}null", unique_ptr_prefix);
-    let link_unique_ptr_raw = format!("{}raw", unique_ptr_prefix);
-    let link_unique_ptr_get = format!("{}get", unique_ptr_prefix);
-    let link_unique_ptr_release = format!("{}release", unique_ptr_prefix);
-    let link_unique_ptr_drop = format!("{}drop", unique_ptr_prefix);
+    let link_unique_ptr_null = format!("{unique_ptr_prefix}null");
+    let link_unique_ptr_raw = format!("{unique_ptr_prefix}raw");
+    let link_unique_ptr_get = format!("{unique_ptr_prefix}get");
+    let link_unique_ptr_release = format!("{unique_ptr_prefix}release");
+    let link_unique_ptr_drop = format!("{unique_ptr_prefix}drop");
 
     let (impl_generics, ty_generics) = generics::split_for_impl(key, explicit_impl, resolve);
 
