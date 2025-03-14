@@ -120,10 +120,9 @@ jobs:
       - name: Install lld
         run: sudo apt-get install lld
         if: matrix.os == 'ubuntu'
-      - name: Setup Bazelrc (Windows)
-        run: |
-          echo "startup --output_user_root=D:/bzl" > ./user.bazelrc
-        if: startswith(runner.os, 'Windows')
+      - name: Set bazelrc for Windows
+        run: echo "startup --output_user_root=D:/bzl" > user.bazelrc
+        if: matrix.os == 'windows'
       - run: bazel --version
       - run: bazel run demo --verbose_failures --noshow_progress ${{matrix.os == 'macos' && '--xcode_version_config=tools/bazel:github_actions_xcodes' || ''}}
       - run: bazel test ... --verbose_failures --noshow_progress ${{matrix.os == 'macos' && '--xcode_version_config=tools/bazel:github_actions_xcodes' || ''}}
