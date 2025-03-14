@@ -3,6 +3,7 @@
 /bazel-cxx
 /bazel-out
 /bazel-testlogs
+/user.bazelrc
 /buck-out
 /expand.cc
 /expand.rs
