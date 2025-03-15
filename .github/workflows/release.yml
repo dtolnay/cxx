@@ -1,0 +1,20 @@
+name: Release
+
+on:
+  release:
+    types: [released]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Upload Release Archive
+        run: |
+          export ASSET_NAME=${{github.event.repository.name}}-${{github.ref_name}}.tar.gz
+          git ls-tree -r --name-only HEAD | xargs tar --transform "s#^#${{github.event.repository.name}}-${{github.event.release.tag_name}}/#" -czf $ASSET_NAME
+          gh release upload ${{github.ref_name}} $ASSET_NAME
