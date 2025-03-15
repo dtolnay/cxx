@@ -15,8 +15,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Upload Release Archive
         run: |
-          git ls-tree -r --name-only HEAD | xargs tar --transform "s#^#${{github.event.repository.name}}-${{github.event.release.tag_name}}/#" -czf $ASSET_NAME
-          gh release upload ${{github.ref_name}} $ASSET_NAME
+          git ls-tree -r --name-only HEAD | xargs tar --transform "s#^#${{github.event.repository.name}}-${{github.event.release.tag_name}}/#" -czf ${{github.event.repository.name}}-${{github.ref_name}}.tar.gz
+          gh release upload ${{github.ref_name}} ${{github.event.repository.name}}-${{github.ref_name}}.tar.gz
         env:
-          ASSET_NAME: ${{github.event.repository.name}}-${{github.ref_name}}.tar.gz
           GH_TOKEN: ${{github.token}}
