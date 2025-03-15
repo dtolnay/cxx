@@ -10,6 +10,6 @@ tasks:
     platform: ${{ platform }}
     bazel: ${{ bazel }}
     build_targets:
-      - '//...'
+      - '@cxx.rs//...'
     test_targets:
-      - '//...'
+      - '@cxx.rs//...'
