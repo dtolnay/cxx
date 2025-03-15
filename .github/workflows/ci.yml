@@ -128,7 +128,6 @@ jobs:
       - run: bazel test ... --verbose_failures --noshow_progress ${{matrix.os == 'macos' && '--xcode_version_config=tools/bazel:github_actions_xcodes' || ''}}
       - name: Check MODULE.bazel.lock up to date
         run: git diff --exit-code
-        if: matrix.os == 'ubuntu' || matrix.os == 'macos'
       - run: bazel run //third-party:vendor
         if: matrix.os == 'ubuntu' || matrix.os == 'macos'
       - name: Check third-party/bazel up to date
