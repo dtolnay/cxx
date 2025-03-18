@@ -151,23 +151,23 @@ cargo.rust_library(
 
 alias(
     name = "foldhash",
-    actual = ":foldhash-0.1.4",
+    actual = ":foldhash-0.1.5",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "foldhash-0.1.4.crate",
-    sha256 = "a0d2fde1f7b3d48b8395d5f2de76c18a528bd6a9cdde438df747bfcba3e05d6f",
-    strip_prefix = "foldhash-0.1.4",
-    urls = ["https://static.crates.io/crates/foldhash/0.1.4/download"],
+    name = "foldhash-0.1.5.crate",
+    sha256 = "d9c4f5dac5e15c24eb999c26181a6ca40b39fe946cbe4c263c7209467bc83af2",
+    strip_prefix = "foldhash-0.1.5",
+    urls = ["https://static.crates.io/crates/foldhash/0.1.5/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "foldhash-0.1.4",
-    srcs = [":foldhash-0.1.4.crate"],
+    name = "foldhash-0.1.5",
+    srcs = [":foldhash-0.1.5.crate"],
     crate = "foldhash",
-    crate_root = "foldhash-0.1.4.crate/src/lib.rs",
+    crate_root = "foldhash-0.1.5.crate/src/lib.rs",
     edition = "2021",
     features = [
         "default",

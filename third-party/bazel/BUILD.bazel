@@ -68,14 +68,14 @@ alias(
 )
 
 alias(
-    name = "foldhash-0.1.4",
-    actual = "@vendor__foldhash-0.1.4//:foldhash",
+    name = "foldhash-0.1.5",
+    actual = "@vendor__foldhash-0.1.5//:foldhash",
     tags = ["manual"],
 )
 
 alias(
     name = "foldhash",
-    actual = "@vendor__foldhash-0.1.4//:foldhash",
+    actual = "@vendor__foldhash-0.1.5//:foldhash",
     tags = ["manual"],
 )
 
