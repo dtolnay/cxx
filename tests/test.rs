@@ -199,6 +199,9 @@ fn test_c_take() {
         nested_ns_shared_test_vec
     ));
 
+    check!(ffi::c_take_rust_option_boxed(None, false));
+    check!(ffi::c_take_rust_option_boxed(Some(Box::new(ffi::Shared { z: 13 })), true));
+
     check!(ffi::c_take_enum(ffi::Enum::AVal));
     check!(ffi::c_take_ns_enum(ffi::AEnum::AAVal));
     check!(ffi::c_take_nested_ns_enum(ffi::ABEnum::ABAVal));

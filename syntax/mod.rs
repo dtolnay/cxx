@@ -264,6 +264,7 @@ pub(crate) enum Type {
     Ident(NamedType),
     RustBox(Box<Ty1>),
     RustVec(Box<Ty1>),
+    RustOption(Box<Ty1>),
     UniquePtr(Box<Ty1>),
     SharedPtr(Box<Ty1>),
     WeakPtr(Box<Ty1>),
