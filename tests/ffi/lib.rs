@@ -30,6 +30,10 @@ pub mod ffi {
         z: usize,
     }
 
+    struct SharedWithConstructor {
+        z: usize,
+    }
+
     #[derive(PartialEq, PartialOrd)]
     struct SharedString {
         msg: String,
@@ -204,6 +208,8 @@ pub mod ffi {
         fn c_method_on_shared(self: &Shared) -> usize;
         fn c_method_ref_on_shared(self: &Shared) -> &usize;
         fn c_method_mut_on_shared(self: &mut Shared) -> &mut usize;
+        #[Self = "Shared"]
+        fn c_static_method_on_shared() -> usize;
         fn c_set_array(self: &mut Array, value: i32);
 
         fn c_get_use_count(weak: &WeakPtr<C>) -> usize;
@@ -219,6 +225,14 @@ pub mod ffi {
 
         #[namespace = "other"]
         fn ns_c_take_ns_shared(shared: AShared);
+
+        #[Self = "C"]
+        fn c_static_method() -> usize;
+
+        #[Self = "SharedWithConstructor"]
+        fn c_new(x: usize, y: usize) -> Self;
+
+        fn c_return_shared_with_constructor() -> SharedWithConstructor;
     }
 
     extern "C++" {
@@ -316,6 +330,17 @@ pub mod ffi {
 
         #[cxx_name = "rAliasedFunction"]
         fn r_aliased_function(x: i32) -> String;
+
+        #[Self = "Shared"]
+        fn r_static_method_on_shared() -> usize;
+
+        #[Self = "R"]
+        fn r_static_method() -> usize;
+
+        #[Self = "SharedWithConstructor"]
+        fn new(x: usize, y: usize, z: usize) -> Self;
+
+        fn r_return_shared_with_constructor() -> SharedWithConstructor;
     }
 
     struct Dag0 {
@@ -407,6 +432,10 @@ impl R {
         self.0 = n;
         n
     }
+
+    fn r_static_method() -> usize {
+        2024
+    }
 }
 
 pub struct Reference<'a>(pub &'a String);
@@ -414,6 +443,15 @@ pub struct Reference<'a>(pub &'a String);
 impl ffi::Shared {
     fn r_method_on_shared(&self) -> String {
         "2020".to_owned()
+    }
+    fn r_static_method_on_shared() -> usize {
+        2023
+    }
+}
+
+impl ffi::SharedWithConstructor {
+    fn new(x: usize, y: usize, z: usize) -> Self {
+        Self { z: x + y - z }
     }
 }
 
@@ -449,6 +487,12 @@ fn r_return_primitive() -> usize {
 
 fn r_return_shared() -> ffi::Shared {
     ffi::Shared { z: 2020 }
+}
+
+fn r_return_shared_with_constructor() -> ffi::SharedWithConstructor {
+    ffi::SharedWithConstructor {
+        z: 2020,
+    }
 }
 
 fn r_return_box() -> Box<R> {

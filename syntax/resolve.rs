@@ -1,5 +1,5 @@
 use crate::syntax::instantiate::NamedImplKey;
-use crate::syntax::{Lifetimes, NamedType, Pair, Types};
+use crate::syntax::{Lifetimes, NamedType, Pair, Type, Types};
 use proc_macro2::Ident;
 
 #[derive(Copy, Clone)]
@@ -20,6 +20,15 @@ impl<'a> Types<'a> {
     pub(crate) fn try_resolve(&self, ident: &impl UnresolvedName) -> Option<Resolution<'a>> {
         let ident = ident.ident();
         self.resolutions.get(ident).copied()
+    }
+}
+
+impl Into<Type> for Resolution<'_> {
+    fn into(self) -> Type {
+        Type::Ident(NamedType {
+            rust: self.name.rust.clone(),
+            generics: self.generics.clone(),
+        })
     }
 }
 

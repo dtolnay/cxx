@@ -42,11 +42,15 @@ size_t C::get_fail() { throw std::runtime_error("unimplemented"); }
 
 size_t Shared::c_method_on_shared() const noexcept { return 2021; }
 
+SharedWithConstructor::SharedWithConstructor(size_t x, size_t y) noexcept : z(x + y) {}
+
 const size_t &Shared::c_method_ref_on_shared() const noexcept {
   return this->z;
 }
 
 size_t &Shared::c_method_mut_on_shared() noexcept { return this->z; }
+
+size_t Shared::c_static_method_on_shared() noexcept { return 2025; }
 
 void Array::c_set_array(int32_t val) noexcept {
   this->a = {val, val, val, val};
@@ -59,6 +63,8 @@ std::vector<uint8_t> &C::get_v() { return this->v; }
 size_t c_return_primitive() { return 2020; }
 
 Shared c_return_shared() { return Shared{2020}; }
+
+SharedWithConstructor c_return_shared_with_constructor() { return SharedWithConstructor{2019, 1}; }
 
 ::A::AShared c_return_ns_shared() { return ::A::AShared{2020}; }
 
@@ -631,6 +637,8 @@ rust::String cOverloadedFunction(rust::Str x) {
   return rust::String(std::string(x));
 }
 
+size_t C::c_static_method() { return 2026; }
+
 void c_take_trivial_ptr(std::unique_ptr<D> d) {
   if (d->d == 30) {
     cxx_test_suite_set_correct();
@@ -790,6 +798,9 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(r_return_enum(0) == Enum::AVal);
   ASSERT(r_return_enum(1) == Enum::BVal);
   ASSERT(r_return_enum(2021) == Enum::CVal);
+  ASSERT(Shared::r_static_method_on_shared() == 2023);
+  ASSERT(R::r_static_method() == 2024);
+  ASSERT(SharedWithConstructor(2023, 2, 1).z == 2024);
 
   r_take_primitive(2020);
   r_take_shared(Shared{2020});

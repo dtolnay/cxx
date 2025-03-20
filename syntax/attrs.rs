@@ -35,6 +35,7 @@ pub(crate) struct Parser<'a> {
     pub namespace: Option<&'a mut Namespace>,
     pub cxx_name: Option<&'a mut Option<ForeignName>>,
     pub rust_name: Option<&'a mut Option<Ident>>,
+    pub self_type: Option<&'a mut Option<Ident>>,
     pub variants_from_header: Option<&'a mut Option<Attribute>>,
     pub ignore_unrecognized: bool,
 
@@ -121,6 +122,19 @@ pub(crate) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) 
                 Ok(attr) => {
                     if let Some(rust_name) = &mut parser.rust_name {
                         **rust_name = Some(attr);
+                        continue;
+                    }
+                }
+                Err(err) => {
+                    cx.push(err);
+                    break;
+                }
+            }
+        } else if attr_path.is_ident("Self") {
+            match parse_rust_name_attribute(&attr.meta) {
+                Ok(attr) => {
+                    if let Some(namespace) = &mut parser.self_type {
+                        **namespace = Some(attr);
                         continue;
                     }
                 }
