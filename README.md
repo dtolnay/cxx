@@ -242,12 +242,12 @@ cxx-build = "1.0"
 // build.rs
 
 fn main() {
+    cxx_build::CFG.change_detection = true;
     cxx_build::bridge("src/main.rs")  // returns a cc::Build
         .file("src/demo.cc")
         .std("c++11")
         .compile("cxxbridge-demo");
 
-    println!("cargo:rerun-if-changed=src/main.rs");
     println!("cargo:rerun-if-changed=src/demo.cc");
     println!("cargo:rerun-if-changed=include/demo.h");
 }
