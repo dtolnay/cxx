@@ -612,9 +612,17 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
       const std::vector<CXX_TYPE> &s) noexcept {                               \
     return s.size();                                                           \
   }                                                                            \
+  std::size_t cxxbridge1$std$vector$##RUST_TYPE##$capacity(                    \
+      const std::vector<CXX_TYPE> &s) noexcept {                               \
+    return s.capacity();                                                       \
+  }                                                                            \
   CXX_TYPE *cxxbridge1$std$vector$##RUST_TYPE##$get_unchecked(                 \
       std::vector<CXX_TYPE> *s, std::size_t pos) noexcept {                    \
     return &(*s)[pos];                                                         \
+  }                                                                            \
+  void cxxbridge1$std$vector$##RUST_TYPE##$reserve(                            \
+      std::vector<CXX_TYPE> *s, std::size_t new_cap) noexcept {                \
+    s->reserve(new_cap);                                                       \
   }                                                                            \
   void cxxbridge1$unique_ptr$std$vector$##RUST_TYPE##$null(                    \
       std::unique_ptr<std::vector<CXX_TYPE>> *ptr) noexcept {                  \
