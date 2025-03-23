@@ -124,24 +124,29 @@ cargo.rust_library(
 
 alias(
     name = "codespan-reporting",
-    actual = ":codespan-reporting-0.11.1",
+    actual = ":codespan-reporting-0.12.0",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "codespan-reporting-0.11.1.crate",
-    sha256 = "3538270d33cc669650c4b093848450d380def10c331d38c768e34cac80576e6e",
-    strip_prefix = "codespan-reporting-0.11.1",
-    urls = ["https://static.crates.io/crates/codespan-reporting/0.11.1/download"],
+    name = "codespan-reporting-0.12.0.crate",
+    sha256 = "fe6d2e5af09e8c8ad56c969f2157a3d4238cebc7c55f0a517728c38f7b200f81",
+    strip_prefix = "codespan-reporting-0.12.0",
+    urls = ["https://static.crates.io/crates/codespan-reporting/0.12.0/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "codespan-reporting-0.11.1",
-    srcs = [":codespan-reporting-0.11.1.crate"],
+    name = "codespan-reporting-0.12.0",
+    srcs = [":codespan-reporting-0.12.0.crate"],
     crate = "codespan_reporting",
-    crate_root = "codespan-reporting-0.11.1.crate/src/lib.rs",
-    edition = "2018",
+    crate_root = "codespan-reporting-0.12.0.crate/src/lib.rs",
+    edition = "2021",
+    features = [
+        "default",
+        "std",
+        "termcolor",
+    ],
     visibility = [],
     deps = [
         ":termcolor-1.4.1",
