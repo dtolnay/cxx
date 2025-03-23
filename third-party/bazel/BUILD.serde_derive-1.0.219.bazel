@@ -7,7 +7,7 @@
 ###############################################################################
 
 load("@rules_rust//cargo:defs.bzl", "cargo_toml_env_vars")
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@rules_rust//rust:defs.bzl", "rust_proc_macro")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -16,8 +16,8 @@ cargo_toml_env_vars(
     src = "Cargo.toml",
 )
 
-rust_library(
-    name = "codespan_reporting",
+rust_proc_macro(
+    name = "serde_derive",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = True,
@@ -35,7 +35,7 @@ rust_library(
         ],
     ),
     crate_root = "src/lib.rs",
-    edition = "2018",
+    edition = "2015",
     rustc_env_files = [
         ":cargo_toml_env_vars",
     ],
@@ -44,7 +44,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=codespan-reporting",
+        "crate-name=serde_derive",
         "manual",
         "noclippy",
         "norustfmt",
@@ -88,9 +88,10 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "0.11.1",
+    version = "1.0.219",
     deps = [
-        "@vendor__termcolor-1.4.1//:termcolor",
-        "@vendor__unicode-width-0.1.14//:unicode_width",
+        "@vendor__proc-macro2-1.0.94//:proc_macro2",
+        "@vendor__quote-1.0.40//:quote",
+        "@vendor__syn-2.0.100//:syn",
     ],
 )
