@@ -295,7 +295,7 @@ def aliases(
 _NORMAL_DEPENDENCIES = {
     "third-party": {
         _COMMON_CONDITION: {
-            "cc": Label("@vendor//:cc-1.2.16"),
+            "cc": Label("@vendor//:cc-1.2.17"),
             "clap": Label("@vendor//:clap-4.5.32"),
             "codespan-reporting": Label("@vendor//:codespan-reporting-0.12.0"),
             "foldhash": Label("@vendor//:foldhash-0.1.5"),
@@ -436,12 +436,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__cc-1.2.16",
-        sha256 = "be714c154be609ec7f5dad223a33bf1482fff90472de28f7362806e6d4832b8c",
+        name = "vendor__cc-1.2.17",
+        sha256 = "1fcb57c740ae1daf453ae85f16e37396f672b039e00d9d866e07ddb24e328e3a",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/cc/1.2.16/download"],
-        strip_prefix = "cc-1.2.16",
-        build_file = Label("//third-party/bazel:BUILD.cc-1.2.16.bazel"),
+        urls = ["https://static.crates.io/crates/cc/1.2.17/download"],
+        strip_prefix = "cc-1.2.17",
+        build_file = Label("//third-party/bazel:BUILD.cc-1.2.17.bazel"),
     )
 
     maybe(
@@ -596,12 +596,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__unicode-width-0.1.14",
-        sha256 = "7dd6e30e90baa6f72411720665d41d89b9a3d039dc45b8faea1ddd07f617f6af",
+        name = "vendor__unicode-width-0.2.0",
+        sha256 = "1fc81956842c57dac11422a97c3b8195a1ff727f06e85c84ed2e8aa277c9a0fd",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/unicode-width/0.1.14/download"],
-        strip_prefix = "unicode-width-0.1.14",
-        build_file = Label("//third-party/bazel:BUILD.unicode-width-0.1.14.bazel"),
+        urls = ["https://static.crates.io/crates/unicode-width/0.2.0/download"],
+        strip_prefix = "unicode-width-0.2.0",
+        build_file = Label("//third-party/bazel:BUILD.unicode-width-0.2.0.bazel"),
     )
 
     maybe(
@@ -715,7 +715,7 @@ def crate_repositories():
     )
 
     return [
-        struct(repo = "vendor__cc-1.2.16", is_dev_dep = False),
+        struct(repo = "vendor__cc-1.2.17", is_dev_dep = False),
         struct(repo = "vendor__clap-4.5.32", is_dev_dep = False),
         struct(repo = "vendor__codespan-reporting-0.12.0", is_dev_dep = False),
         struct(repo = "vendor__foldhash-0.1.5", is_dev_dep = False),
