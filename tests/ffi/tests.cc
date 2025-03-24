@@ -874,6 +874,11 @@ extern "C" const char *cxx_run_test() noexcept {
     rust::Str out_param;
     r_return_str_via_out_param(Shared{2020}, out_param);
     ASSERT(out_param == "2020");
+
+#if __cplusplus >= 201703L
+    std::string_view out_param_as_string_view{out_param};
+    ASSERT(out_param_as_string_view == "2020");
+#endif
   }
 
   rust::Str cstr = "test";
