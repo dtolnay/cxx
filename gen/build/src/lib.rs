@@ -64,6 +64,7 @@
     clippy::needless_pass_by_value,
     clippy::nonminimal_bool,
     clippy::redundant_else,
+    clippy::ref_as_ptr,
     clippy::ref_option,
     clippy::similar_names,
     clippy::single_match_else,

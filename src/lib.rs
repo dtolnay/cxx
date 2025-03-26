@@ -392,6 +392,7 @@
     clippy::new_without_default,
     clippy::ptr_as_ptr,
     clippy::ptr_cast_constness,
+    clippy::ref_as_ptr,
     clippy::uninlined_format_args
 )]
 
