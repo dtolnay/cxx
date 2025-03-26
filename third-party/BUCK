@@ -50,23 +50,23 @@ cargo.rust_library(
 
 alias(
     name = "clap",
-    actual = ":clap-4.5.32",
+    actual = ":clap-4.5.33",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "clap-4.5.32.crate",
-    sha256 = "6088f3ae8c3608d19260cd7445411865a485688711b78b5be70d78cd96136f83",
-    strip_prefix = "clap-4.5.32",
-    urls = ["https://static.crates.io/crates/clap/4.5.32/download"],
+    name = "clap-4.5.33.crate",
+    sha256 = "e2c80cae4c3350dd8f1272c73e83baff9a6ba550b8bfbe651b3c45b78cd1751e",
+    strip_prefix = "clap-4.5.33",
+    urls = ["https://static.crates.io/crates/clap/4.5.33/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "clap-4.5.32",
-    srcs = [":clap-4.5.32.crate"],
+    name = "clap-4.5.33",
+    srcs = [":clap-4.5.33.crate"],
     crate = "clap",
-    crate_root = "clap-4.5.32.crate/src/lib.rs",
+    crate_root = "clap-4.5.33.crate/src/lib.rs",
     edition = "2021",
     features = [
         "error-context",
@@ -75,22 +75,22 @@ cargo.rust_library(
         "usage",
     ],
     visibility = [],
-    deps = [":clap_builder-4.5.32"],
+    deps = [":clap_builder-4.5.33"],
 )
 
 http_archive(
-    name = "clap_builder-4.5.32.crate",
-    sha256 = "22a7ef7f676155edfb82daa97f99441f3ebf4a58d5e32f295a56259f1b6facc8",
-    strip_prefix = "clap_builder-4.5.32",
-    urls = ["https://static.crates.io/crates/clap_builder/4.5.32/download"],
+    name = "clap_builder-4.5.33.crate",
+    sha256 = "0123e386f691c90aa228219b5b1ee72d465e8e231c79e9c82324f016a62a741c",
+    strip_prefix = "clap_builder-4.5.33",
+    urls = ["https://static.crates.io/crates/clap_builder/4.5.33/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "clap_builder-4.5.32",
-    srcs = [":clap_builder-4.5.32.crate"],
+    name = "clap_builder-4.5.33",
+    srcs = [":clap_builder-4.5.33.crate"],
     crate = "clap_builder",
-    crate_root = "clap_builder-4.5.32.crate/src/lib.rs",
+    crate_root = "clap_builder-4.5.33.crate/src/lib.rs",
     edition = "2021",
     features = [
         "error-context",
