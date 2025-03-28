@@ -1,3 +1,7 @@
+**This project is a fork of an excellent [cxx](https://crates.io/crates/cxx) crate for
+workerd/edgeworker projects. See [PATCHES.md](PATCHES.md) for the list of changes***
+
+
 CXX &mdash; safe FFI between Rust and C++
 =========================================
 
