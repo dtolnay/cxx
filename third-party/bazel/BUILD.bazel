@@ -44,14 +44,14 @@ alias(
 )
 
 alias(
-    name = "clap-4.5.33",
-    actual = "@vendor__clap-4.5.33//:clap",
+    name = "clap-4.5.34",
+    actual = "@vendor__clap-4.5.34//:clap",
     tags = ["manual"],
 )
 
 alias(
     name = "clap",
-    actual = "@vendor__clap-4.5.33//:clap",
+    actual = "@vendor__clap-4.5.34//:clap",
     tags = ["manual"],
 )
 
