@@ -265,6 +265,9 @@ fn test_c_method_calls() {
     assert_eq!(2021, ffi::Shared { z: 0 }.c_method_on_shared());
     assert_eq!(2022, *ffi::Shared { z: 2022 }.c_method_ref_on_shared());
     assert_eq!(2023, *ffi::Shared { z: 2023 }.c_method_mut_on_shared());
+    assert_eq!(2025, ffi::Shared::c_static_method_on_shared());
+    assert_eq!(2026, ffi::C::c_static_method());
+    assert_eq!(2027, ffi::SharedWithConstructor::c_new(2026, 1).z);
 
     let val = 42;
     let mut array = ffi::Array {
