@@ -178,6 +178,7 @@ pub(crate) struct TypeAlias {
     pub ty: RustType,
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
     pub semi_token: Token![;],
+    pub trusted: bool,
 }
 
 pub(crate) struct Impl {

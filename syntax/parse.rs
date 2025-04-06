@@ -791,6 +791,7 @@ fn parse_extern_verbatim_type(
             lifetimes,
             input,
             lang,
+            trusted,
             extern_block_cfg,
             namespace,
             attrs,
@@ -871,6 +872,7 @@ fn parse_type_alias(
     generics: Lifetimes,
     input: ParseStream,
     lang: Lang,
+    trusted: bool,
     extern_block_cfg: &CfgExpr,
     namespace: &Namespace,
     attrs: &OtherAttrs,
@@ -921,6 +923,7 @@ fn parse_type_alias(
         eq_token,
         ty,
         semi_token,
+        trusted,
     }))
 }
 

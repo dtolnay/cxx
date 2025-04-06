@@ -1,4 +1,5 @@
-use crate::syntax::{derive, Enum, Struct};
+use crate::expand::UnsafeExtern;
+use crate::syntax::{derive, mangle, Enum, Struct, TypeAlias};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, quote_spanned, ToTokens};
 
@@ -19,13 +20,13 @@ pub(crate) fn expand_struct(
             Trait::Debug => expanded.extend(struct_debug(strct, span)),
             Trait::Default => expanded.extend(struct_default(strct, span)),
             Trait::Eq => traits.push(quote_spanned!(span=> ::cxx::core::cmp::Eq)),
-            Trait::ExternType => unreachable!(),
             Trait::Hash => traits.push(quote_spanned!(span=> ::cxx::core::hash::Hash)),
             Trait::Ord => expanded.extend(struct_ord(strct, span)),
             Trait::PartialEq => traits.push(quote_spanned!(span=> ::cxx::core::cmp::PartialEq)),
             Trait::PartialOrd => expanded.extend(struct_partial_ord(strct, span)),
             Trait::Serialize => traits.push(quote_spanned!(span=> ::serde::Serialize)),
             Trait::Deserialize => traits.push(quote_spanned!(span=> ::serde::Deserialize)),
+            Trait::Drop | Trait::ExternType => unreachable!(),
         }
     }
 
@@ -58,12 +59,10 @@ pub(crate) fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) 
                 has_clone = true;
             }
             Trait::Debug => expanded.extend(enum_debug(enm, span)),
-            Trait::Default => unreachable!(),
             Trait::Eq => {
                 traits.push(quote_spanned!(span=> ::cxx::core::cmp::Eq));
                 has_eq = true;
             }
-            Trait::ExternType => unreachable!(),
             Trait::Hash => traits.push(quote_spanned!(span=> ::cxx::core::hash::Hash)),
             Trait::Ord => expanded.extend(enum_ord(enm, span)),
             Trait::PartialEq => {
@@ -73,6 +72,7 @@ pub(crate) fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) 
             Trait::PartialOrd => expanded.extend(enum_partial_ord(enm, span)),
             Trait::Serialize => traits.push(quote_spanned!(span=> ::serde::Serialize)),
             Trait::Deserialize => traits.push(quote_spanned!(span=> ::serde::Deserialize)),
+            Trait::Default | Trait::Drop | Trait::ExternType => unreachable!(),
         }
     }
 
@@ -93,6 +93,31 @@ pub(crate) fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) 
     }
 
     *actual_derives = Some(quote!(#[derive(#(#traits),*)]));
+
+    expanded
+}
+
+pub(crate) fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
+    let mut expanded = TokenStream::new();
+
+    for derive in &alias.derives {
+        let span = derive.span;
+        match derive.what {
+            Trait::Drop => expanded.extend(type_alias_drop(alias, span)),
+            Trait::Clone
+            | Trait::Copy
+            | Trait::Debug
+            | Trait::Default
+            | Trait::Eq
+            | Trait::ExternType
+            | Trait::Hash
+            | Trait::Ord
+            | Trait::PartialEq
+            | Trait::PartialOrd
+            | Trait::Serialize
+            | Trait::Deserialize => unreachable!(),
+        }
+    }
 
     expanded
 }
@@ -300,6 +325,27 @@ fn enum_partial_ord(enm: &Enum, span: Span) -> TokenStream {
             #[allow(renamed_and_removed_lints, clippy::incorrect_partial_ord_impl_on_ord_type)] // Rust 1.73 and older
             fn partial_cmp(&self, other: &Self) -> ::cxx::core::option::Option<::cxx::core::cmp::Ordering> {
                 ::cxx::core::cmp::PartialOrd::partial_cmp(&self.repr, &other.repr)
+            }
+        }
+    }
+}
+
+fn type_alias_drop(alias: &TypeAlias, span: Span) -> TokenStream {
+    let ident = &alias.name.rust;
+    let generics = &alias.generics;
+    let link_name = mangle::operator(&alias.name, "drop");
+
+    quote_spanned! {span=>
+        #[automatically_derived]
+        impl #generics ::cxx::core::ops::Drop for #ident #generics {
+            fn drop(&mut self) {
+                #UnsafeExtern extern "C" {
+                    #[link_name = #link_name]
+                    fn __drop(this: *mut ::cxx::core::ffi::c_void);
+                }
+                unsafe {
+                    __drop(self as *mut #ident #generics as *mut ::cxx::core::ffi::c_void);
+                }
             }
         }
     }

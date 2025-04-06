@@ -333,7 +333,21 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
     }
 
     for derive in &strct.derives {
-        if derive.what == Trait::ExternType {
+        let ok = match derive.what {
+            Trait::Clone
+            | Trait::Copy
+            | Trait::Debug
+            | Trait::Default
+            | Trait::Eq
+            | Trait::Hash
+            | Trait::Ord
+            | Trait::PartialEq
+            | Trait::PartialOrd
+            | Trait::Serialize
+            | Trait::Deserialize => true,
+            Trait::Drop | Trait::ExternType => false,
+        };
+        if !ok {
             let msg = format!("derive({}) on shared struct is not supported", derive);
             cx.error(derive, msg);
         }
@@ -366,7 +380,20 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
     }
 
     for derive in &enm.derives {
-        if derive.what == Trait::Default || derive.what == Trait::ExternType {
+        let ok = match derive.what {
+            Trait::Clone
+            | Trait::Copy
+            | Trait::Debug
+            | Trait::Eq
+            | Trait::Hash
+            | Trait::Ord
+            | Trait::PartialEq
+            | Trait::PartialOrd
+            | Trait::Serialize
+            | Trait::Deserialize => true,
+            Trait::Default | Trait::Drop | Trait::ExternType => false,
+        };
+        if !ok {
             let msg = format!("derive({}) on shared enum is not supported", derive);
             cx.error(derive, msg);
         }
@@ -378,18 +405,21 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
     check_lifetimes(cx, &ety.generics);
 
     for derive in &ety.derives {
-        if derive.what == Trait::ExternType && ety.lang == Lang::Rust {
-            continue;
-        }
-        let lang = match ety.lang {
-            Lang::Rust => "Rust",
-            Lang::Cxx | Lang::CxxUnwind => "C++",
+        let ok = match derive.what {
+            Trait::ExternType => ety.lang == Lang::Rust,
+            _ => false,
         };
-        let msg = format!(
-            "derive({}) on opaque {} type is not supported yet",
-            derive, lang,
-        );
-        cx.error(derive, msg);
+        if !ok {
+            let lang = match ety.lang {
+                Lang::Rust => "Rust",
+                Lang::Cxx | Lang::CxxUnwind => "C++",
+            };
+            let msg = format!(
+                "derive({}) on opaque {} type is not supported yet",
+                derive, lang,
+            );
+            cx.error(derive, msg);
+        }
     }
 
     if !ety.bounds.is_empty() {
@@ -520,8 +550,14 @@ fn check_api_type_alias(cx: &mut Check, alias: &TypeAlias) {
     check_lifetimes(cx, &alias.generics);
 
     for derive in &alias.derives {
-        let msg = format!("derive({}) on extern type alias is not supported", derive);
-        cx.error(derive, msg);
+        if derive.what == Trait::Drop {
+            if !alias.trusted {
+                cx.error(alias, "type alias with derive(Drop) must be declared in `unsafe extern \"C++\"` block");
+            }
+        } else {
+            let msg = format!("derive({}) on extern type alias is not supported", derive);
+            cx.error(derive, msg);
+        }
     }
 }
 

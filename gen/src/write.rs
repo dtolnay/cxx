@@ -169,6 +169,7 @@ fn write_functions<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
                 Api::RustType(ety) => write_opaque_type_layout_decls(out, ety),
                 Api::CxxFunction(efn) => write_cxx_function_shim(out, efn),
                 Api::RustFunction(efn) => write_rust_function_decl(out, efn),
+                Api::TypeAlias(alias) => write_type_alias(out, alias),
                 _ => {}
             }
         }
@@ -731,6 +732,32 @@ fn write_opaque_type_layout<'a>(out: &mut OutFile<'a>, ety: &'a ExternType) {
     );
     writeln!(out, "  return {}();", link_name);
     writeln!(out, "}}");
+}
+
+fn write_type_alias<'a>(out: &mut OutFile<'a>, alias: &'a TypeAlias) {
+    if out.header {
+        return;
+    }
+
+    out.next_section();
+    out.set_namespace(&alias.name.namespace);
+    out.begin_block(Block::ExternC);
+
+    if derive::contains(&alias.derives, Trait::Drop) {
+        out.builtin.destroy = true;
+        let link_name = mangle::operator(&alias.name, "drop");
+        begin_function_definition(out);
+        writeln!(
+            out,
+            "void {}({} *self) {{",
+            link_name,
+            alias.name.to_fully_qualified(),
+        );
+        writeln!(out, "  ::rust::destroy(self);");
+        writeln!(out, "}}");
+    }
+
+    out.end_block(Block::ExternC);
 }
 
 fn begin_function_definition(out: &mut OutFile) {

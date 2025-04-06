@@ -1260,10 +1260,14 @@ fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
     let ty = &alias.ty;
     let semi_token = alias.semi_token;
 
+    let derived_traits = derive::expand_type_alias(alias);
+
     quote! {
         #doc
         #attrs
         #visibility #type_token #ident #generics #eq_token #ty #semi_token
+
+        #derived_traits
     }
 }
 
@@ -2004,7 +2008,7 @@ fn expand_extern_return_type(ret: &Option<Type>, types: &Types, proper: bool) ->
 
 // #UnsafeExtern extern "C" {...}
 // https://blog.rust-lang.org/2024/10/17/Rust-1.82.0.html#safe-items-with-unsafe-extern
-struct UnsafeExtern;
+pub(crate) struct UnsafeExtern;
 
 impl ToTokens for UnsafeExtern {
     fn to_tokens(&self, tokens: &mut TokenStream) {
