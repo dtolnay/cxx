@@ -42,6 +42,7 @@ fn write_forward_declarations(out: &mut OutFile, apis: &[Api]) {
     let apis_by_namespace =
         NamespaceEntries::new(apis.iter().filter(needs_forward_declaration).collect());
 
+    out.next_section();
     write(out, &apis_by_namespace, 0);
 
     fn write(out: &mut OutFile, ns_entries: &NamespaceEntries, indent: usize) {
