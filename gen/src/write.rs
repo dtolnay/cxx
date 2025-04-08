@@ -1,11 +1,11 @@
 use crate::gen::block::Block;
 use crate::gen::nested::NamespaceEntries;
 use crate::gen::out::OutFile;
-use crate::gen::primitive::{self, PrimitiveKind};
 use crate::gen::{builtin, include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::instantiate::{ImplKey, NamedImplKey};
 use crate::syntax::map::UnorderedMap as Map;
+use crate::syntax::primitive::{self, PrimitiveKind};
 use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::{self, Symbol};
 use crate::syntax::trivial::{self, TrivialReason};

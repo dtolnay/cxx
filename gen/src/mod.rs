@@ -14,7 +14,6 @@ mod names;
 mod namespace;
 mod nested;
 pub(super) mod out;
-mod primitive;
 mod write;
 
 use self::cfg::UnsupportedCfgEvaluator;
