@@ -721,8 +721,10 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         if efn.throws {
             expr = quote_spanned!(span=> ::cxx::core::result::Result::Ok(#expr));
         }
-    } else {
+    } else if efn.throws {
         expr = call;
+    } else {
+        expr = quote! { #call; };
     }
     let dispatch = quote_spanned!(span=> unsafe { #setup #expr });
     let visibility = efn.visibility;
