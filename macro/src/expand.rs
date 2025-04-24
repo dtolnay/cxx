@@ -650,82 +650,79 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         }
     };
     let mut expr;
-    if efn.throws && efn.ret.is_none() {
-        expr = call;
-    } else {
-        expr = match &efn.ret {
-            None => call,
-            Some(ret) => match ret {
-                Type::Ident(ident) if ident.rust == RustString => {
-                    quote_spanned!(span=> #call.into_string())
+    if let Some(ret) = &efn.ret {
+        expr = match ret {
+            Type::Ident(ident) if ident.rust == RustString => {
+                quote_spanned!(span=> #call.into_string())
+            }
+            Type::RustBox(ty) => {
+                if types.is_considered_improper_ctype(&ty.inner) {
+                    quote_spanned!(span=> ::cxx::alloc::boxed::Box::from_raw(#call.cast()))
+                } else {
+                    quote_spanned!(span=> ::cxx::alloc::boxed::Box::from_raw(#call))
                 }
-                Type::RustBox(ty) => {
-                    if types.is_considered_improper_ctype(&ty.inner) {
-                        quote_spanned!(span=> ::cxx::alloc::boxed::Box::from_raw(#call.cast()))
-                    } else {
-                        quote_spanned!(span=> ::cxx::alloc::boxed::Box::from_raw(#call))
-                    }
+            }
+            Type::RustVec(vec) => {
+                if vec.inner == RustString {
+                    quote_spanned!(span=> #call.into_vec_string())
+                } else {
+                    quote_spanned!(span=> #call.into_vec())
                 }
-                Type::RustVec(vec) => {
-                    if vec.inner == RustString {
-                        quote_spanned!(span=> #call.into_vec_string())
-                    } else {
-                        quote_spanned!(span=> #call.into_vec())
-                    }
+            }
+            Type::UniquePtr(ty) => {
+                if types.is_considered_improper_ctype(&ty.inner) {
+                    quote_spanned!(span=> ::cxx::UniquePtr::from_raw(#call.cast()))
+                } else {
+                    quote_spanned!(span=> ::cxx::UniquePtr::from_raw(#call))
                 }
-                Type::UniquePtr(ty) => {
-                    if types.is_considered_improper_ctype(&ty.inner) {
-                        quote_spanned!(span=> ::cxx::UniquePtr::from_raw(#call.cast()))
-                    } else {
-                        quote_spanned!(span=> ::cxx::UniquePtr::from_raw(#call))
-                    }
-                }
-                Type::Ref(ty) => match &ty.inner {
-                    Type::Ident(ident) if ident.rust == RustString => match ty.mutable {
-                        false => quote_spanned!(span=> #call.as_string()),
-                        true => quote_spanned!(span=> #call.as_mut_string()),
-                    },
-                    Type::RustVec(vec) if vec.inner == RustString => match ty.mutable {
-                        false => quote_spanned!(span=> #call.as_vec_string()),
-                        true => quote_spanned!(span=> #call.as_mut_vec_string()),
-                    },
-                    Type::RustVec(_) => match ty.mutable {
-                        false => quote_spanned!(span=> #call.as_vec()),
-                        true => quote_spanned!(span=> #call.as_mut_vec()),
-                    },
-                    inner if types.is_considered_improper_ctype(inner) => {
-                        let mutability = ty.mutability;
-                        let deref_mut = quote_spanned!(span=> &#mutability *#call.cast());
-                        match ty.pinned {
-                            false => deref_mut,
-                            true => {
-                                quote_spanned!(span=> ::cxx::core::pin::Pin::new_unchecked(#deref_mut))
-                            }
-                        }
-                    }
-                    _ => call,
+            }
+            Type::Ref(ty) => match &ty.inner {
+                Type::Ident(ident) if ident.rust == RustString => match ty.mutable {
+                    false => quote_spanned!(span=> #call.as_string()),
+                    true => quote_spanned!(span=> #call.as_mut_string()),
                 },
-                Type::Ptr(ty) => {
-                    if types.is_considered_improper_ctype(&ty.inner) {
-                        quote_spanned!(span=> #call.cast())
-                    } else {
-                        call
-                    }
-                }
-                Type::Str(_) => quote_spanned!(span=> #call.as_str()),
-                Type::SliceRef(slice) => {
-                    let inner = &slice.inner;
-                    match slice.mutable {
-                        false => quote_spanned!(span=> #call.as_slice::<#inner>()),
-                        true => quote_spanned!(span=> #call.as_mut_slice::<#inner>()),
+                Type::RustVec(vec) if vec.inner == RustString => match ty.mutable {
+                    false => quote_spanned!(span=> #call.as_vec_string()),
+                    true => quote_spanned!(span=> #call.as_mut_vec_string()),
+                },
+                Type::RustVec(_) => match ty.mutable {
+                    false => quote_spanned!(span=> #call.as_vec()),
+                    true => quote_spanned!(span=> #call.as_mut_vec()),
+                },
+                inner if types.is_considered_improper_ctype(inner) => {
+                    let mutability = ty.mutability;
+                    let deref_mut = quote_spanned!(span=> &#mutability *#call.cast());
+                    match ty.pinned {
+                        false => deref_mut,
+                        true => {
+                            quote_spanned!(span=> ::cxx::core::pin::Pin::new_unchecked(#deref_mut))
+                        }
                     }
                 }
                 _ => call,
             },
+            Type::Ptr(ty) => {
+                if types.is_considered_improper_ctype(&ty.inner) {
+                    quote_spanned!(span=> #call.cast())
+                } else {
+                    call
+                }
+            }
+            Type::Str(_) => quote_spanned!(span=> #call.as_str()),
+            Type::SliceRef(slice) => {
+                let inner = &slice.inner;
+                match slice.mutable {
+                    false => quote_spanned!(span=> #call.as_slice::<#inner>()),
+                    true => quote_spanned!(span=> #call.as_mut_slice::<#inner>()),
+                }
+            }
+            _ => call,
         };
         if efn.throws {
             expr = quote_spanned!(span=> ::cxx::core::result::Result::Ok(#expr));
         }
+    } else {
+        expr = call;
     }
     let dispatch = quote_spanned!(span=> unsafe { #setup #expr });
     let visibility = efn.visibility;
