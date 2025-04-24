@@ -1,0 +1,305 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Bazel, Buck2 — Rust ♡ C++</title>
+
+
+        <!-- Custom HTML head -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DG41MK6DDN"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-DG41MK6DDN', {anonymize_ip: true, cookie_domain: 'cxx.rs', cookie_flags: 'samesite=strict;secure'});
+        </script>
+
+        <meta name="description" content="CXX — safe interop between Rust and C++ by David Tolnay. This library provides a safe mechanism for calling C++ code from Rust and Rust code from C++.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../css/cxx.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    <meta property="og:image" content="https://cxx.rs/cxx.png"><meta property="og:site_name" content="CXX"><meta property="og:title" content="CXX — safe interop between Rust and C++"><meta name="twitter:image:src" content="https://cxx.rs/cxx.png"><meta name="twitter:site" content="@davidtolnay"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="CXX — safe interop between Rust and C++"></head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>const html = document.documentElement;
+html.classList.add('js');</script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list" style="display:none">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/dtolnay/cxx" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="bazel-buck2-potentially-other-similar-environments"><a class="header" href="#bazel-buck2-potentially-other-similar-environments">Bazel, Buck2, potentially other similar environments</a></h2>
+<p>Starlark-based build systems with the ability to compile a code generator and
+invoke it as a <code class="hljs">genrule</code> will run CXX's C++ code generator via its <code class="hljs">cxxbridge</code>
+command line interface.</p>
+<p>The tool is packaged as the <code class="hljs">cxxbridge-cmd</code> crate on crates.io or can be built
+from the <em>gen/cmd/</em> directory of the CXX GitHub repo.</p>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-meta">$</span><span class="bash">  cargo install cxxbridge-cmd</span>
+<span class="hljs-meta">
+$</span><span class="bash">  cxxbridge src/bridge.rs --header &gt; path/to/bridge.rs.h</span>
+<span class="hljs-meta">$</span><span class="bash">  cxxbridge src/bridge.rs &gt; path/to/bridge.rs.cc</span>
+</code></pre>
+<div class="warning">
+<p><strong>Important:</strong> The version number of <code class="hljs">cxxbridge-cmd</code> used for the C++ side of
+the binding must always be identical to the version number of <code class="hljs">cxx</code> used for the
+Rust side. You must use some form of lockfile or version pinning to ensure that
+this is the case.</p>
+</div>
+<p>The CXX repo maintains working <a href="https://bazel.build">Bazel</a> <code class="hljs">BUILD.bazel</code> and <a href="https://buck2.build">Buck2</a> <code class="hljs">BUCK</code> targets
+for the complete blobstore tutorial (chapter 3) for your reference, tested in
+CI. These aren't meant to be directly what you use in your codebase, but serve
+as an illustration of one possible working pattern.</p>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-comment"># tools/bazel/rust_cxx_bridge.bzl</span>
+
+load(<span class="hljs-string">&quot;@bazel_skylib//rules:run_binary.bzl&quot;</span>, <span class="hljs-string">&quot;run_binary&quot;</span>)
+load(<span class="hljs-string">&quot;@rules_cc//cc:defs.bzl&quot;</span>, <span class="hljs-string">&quot;cc_library&quot;</span>)
+
+<span class="hljs-function"><span class="hljs-keyword">def</span> <span class="hljs-title">rust_cxx_bridge</span>(<span class="hljs-params">name, src, deps = []</span>):</span>
+    native.alias(
+        name = <span class="hljs-string">&quot;%s/header&quot;</span> % name,
+        actual = src + <span class="hljs-string">&quot;.h&quot;</span>,
+    )
+
+    native.alias(
+        name = <span class="hljs-string">&quot;%s/source&quot;</span> % name,
+        actual = src + <span class="hljs-string">&quot;.cc&quot;</span>,
+    )
+
+    run_binary(
+        name = <span class="hljs-string">&quot;%s/generated&quot;</span> % name,
+        srcs = [src],
+        outs = [
+            src + <span class="hljs-string">&quot;.h&quot;</span>,
+            src + <span class="hljs-string">&quot;.cc&quot;</span>,
+        ],
+        args = [
+            <span class="hljs-string">&quot;$(location %s)&quot;</span> % src,
+            <span class="hljs-string">&quot;-o&quot;</span>,
+            <span class="hljs-string">&quot;$(location %s.h)&quot;</span> % src,
+            <span class="hljs-string">&quot;-o&quot;</span>,
+            <span class="hljs-string">&quot;$(location %s.cc)&quot;</span> % src,
+        ],
+        tool = <span class="hljs-string">&quot;//:codegen&quot;</span>,
+    )
+
+    cc_library(
+        name = name,
+        srcs = [src + <span class="hljs-string">&quot;.cc&quot;</span>],
+        deps = deps + [<span class="hljs-string">&quot;:%s/include&quot;</span> % name],
+    )
+
+    cc_library(
+        name = <span class="hljs-string">&quot;%s/include&quot;</span> % name,
+        hdrs = [src + <span class="hljs-string">&quot;.h&quot;</span>],
+    )
+</code></pre>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-comment"># demo/BUILD.bazel</span>
+
+load(<span class="hljs-string">&quot;@rules_cc//cc:defs.bzl&quot;</span>, <span class="hljs-string">&quot;cc_library&quot;</span>)
+load(<span class="hljs-string">&quot;@rules_rust//rust:defs.bzl&quot;</span>, <span class="hljs-string">&quot;rust_binary&quot;</span>)
+load(<span class="hljs-string">&quot;//tools/bazel:rust_cxx_bridge.bzl&quot;</span>, <span class="hljs-string">&quot;rust_cxx_bridge&quot;</span>)
+
+rust_binary(
+    name = <span class="hljs-string">&quot;demo&quot;</span>,
+    srcs = glob([<span class="hljs-string">&quot;src/**/*.rs&quot;</span>]),
+    deps = [
+        <span class="hljs-string">&quot;:blobstore-sys&quot;</span>,
+        <span class="hljs-string">&quot;:bridge&quot;</span>,
+        <span class="hljs-string">&quot;//:cxx&quot;</span>,
+    ],
+)
+
+rust_cxx_bridge(
+    name = <span class="hljs-string">&quot;bridge&quot;</span>,
+    src = <span class="hljs-string">&quot;src/main.rs&quot;</span>,
+    deps = [<span class="hljs-string">&quot;:blobstore-include&quot;</span>],
+)
+
+cc_library(
+    name = <span class="hljs-string">&quot;blobstore-sys&quot;</span>,
+    srcs = [<span class="hljs-string">&quot;src/blobstore.cc&quot;</span>],
+    deps = [
+        <span class="hljs-string">&quot;:blobstore-include&quot;</span>,
+        <span class="hljs-string">&quot;:bridge/include&quot;</span>,
+    ],
+)
+
+cc_library(
+    name = <span class="hljs-string">&quot;blobstore-include&quot;</span>,
+    hdrs = [<span class="hljs-string">&quot;include/blobstore.h&quot;</span>],
+    deps = [<span class="hljs-string">&quot;//:core&quot;</span>],
+)
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../build/cargo.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../build/cmake.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../build/cargo.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../build/cmake.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
