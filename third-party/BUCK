@@ -50,23 +50,23 @@ cargo.rust_library(
 
 alias(
     name = "clap",
-    actual = ":clap-4.5.36",
+    actual = ":clap-4.5.37",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "clap-4.5.36.crate",
-    sha256 = "2df961d8c8a0d08aa9945718ccf584145eee3f3aa06cddbeac12933781102e04",
-    strip_prefix = "clap-4.5.36",
-    urls = ["https://static.crates.io/crates/clap/4.5.36/download"],
+    name = "clap-4.5.37.crate",
+    sha256 = "eccb054f56cbd38340b380d4a8e69ef1f02f1af43db2f0cc817a4774d80ae071",
+    strip_prefix = "clap-4.5.37",
+    urls = ["https://static.crates.io/crates/clap/4.5.37/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "clap-4.5.36",
-    srcs = [":clap-4.5.36.crate"],
+    name = "clap-4.5.37",
+    srcs = [":clap-4.5.37.crate"],
     crate = "clap",
-    crate_root = "clap-4.5.36.crate/src/lib.rs",
+    crate_root = "clap-4.5.37.crate/src/lib.rs",
     edition = "2021",
     features = [
         "error-context",
@@ -75,22 +75,22 @@ cargo.rust_library(
         "usage",
     ],
     visibility = [],
-    deps = [":clap_builder-4.5.36"],
+    deps = [":clap_builder-4.5.37"],
 )
 
 http_archive(
-    name = "clap_builder-4.5.36.crate",
-    sha256 = "132dbda40fb6753878316a489d5a1242a8ef2f0d9e47ba01c951ea8aa7d013a5",
-    strip_prefix = "clap_builder-4.5.36",
-    urls = ["https://static.crates.io/crates/clap_builder/4.5.36/download"],
+    name = "clap_builder-4.5.37.crate",
+    sha256 = "efd9466fac8543255d3b1fcad4762c5e116ffe808c8a3043d4263cd4fd4862a2",
+    strip_prefix = "clap_builder-4.5.37",
+    urls = ["https://static.crates.io/crates/clap_builder/4.5.37/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "clap_builder-4.5.36",
-    srcs = [":clap_builder-4.5.36.crate"],
+    name = "clap_builder-4.5.37",
+    srcs = [":clap_builder-4.5.37.crate"],
     crate = "clap_builder",
-    crate_root = "clap_builder-4.5.36.crate/src/lib.rs",
+    crate_root = "clap_builder-4.5.37.crate/src/lib.rs",
     edition = "2021",
     features = [
         "error-context",
@@ -183,39 +183,39 @@ cargo.rust_library(
 
 alias(
     name = "proc-macro2",
-    actual = ":proc-macro2-1.0.94",
+    actual = ":proc-macro2-1.0.95",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "proc-macro2-1.0.94.crate",
-    sha256 = "a31971752e70b8b2686d7e46ec17fb38dad4051d94024c88df49b667caea9c84",
-    strip_prefix = "proc-macro2-1.0.94",
-    urls = ["https://static.crates.io/crates/proc-macro2/1.0.94/download"],
+    name = "proc-macro2-1.0.95.crate",
+    sha256 = "02b3e5e68a3a1a02aad3ec490a98007cbc13c37cbe84a3cd7b8e406d76e7f778",
+    strip_prefix = "proc-macro2-1.0.95",
+    urls = ["https://static.crates.io/crates/proc-macro2/1.0.95/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "proc-macro2-1.0.94",
-    srcs = [":proc-macro2-1.0.94.crate"],
+    name = "proc-macro2-1.0.95",
+    srcs = [":proc-macro2-1.0.95.crate"],
     crate = "proc_macro2",
-    crate_root = "proc-macro2-1.0.94.crate/src/lib.rs",
+    crate_root = "proc-macro2-1.0.95.crate/src/lib.rs",
     edition = "2021",
     features = [
         "default",
         "proc-macro",
         "span-locations",
     ],
-    rustc_flags = ["@$(location :proc-macro2-1.0.94-build-script-run[rustc_flags])"],
+    rustc_flags = ["@$(location :proc-macro2-1.0.95-build-script-run[rustc_flags])"],
     visibility = [],
     deps = [":unicode-ident-1.0.18"],
 )
 
 cargo.rust_binary(
-    name = "proc-macro2-1.0.94-build-script-build",
-    srcs = [":proc-macro2-1.0.94.crate"],
+    name = "proc-macro2-1.0.95-build-script-build",
+    srcs = [":proc-macro2-1.0.95.crate"],
     crate = "build_script_build",
-    crate_root = "proc-macro2-1.0.94.crate/build.rs",
+    crate_root = "proc-macro2-1.0.95.crate/build.rs",
     edition = "2021",
     features = [
         "default",
@@ -226,15 +226,15 @@ cargo.rust_binary(
 )
 
 buildscript_run(
-    name = "proc-macro2-1.0.94-build-script-run",
+    name = "proc-macro2-1.0.95-build-script-run",
     package_name = "proc-macro2",
-    buildscript_rule = ":proc-macro2-1.0.94-build-script-build",
+    buildscript_rule = ":proc-macro2-1.0.95-build-script-build",
     features = [
         "default",
         "proc-macro",
         "span-locations",
     ],
-    version = "1.0.94",
+    version = "1.0.95",
 )
 
 alias(
@@ -262,7 +262,7 @@ cargo.rust_library(
         "proc-macro",
     ],
     visibility = [],
-    deps = [":proc-macro2-1.0.94"],
+    deps = [":proc-macro2-1.0.95"],
 )
 
 alias(
@@ -402,7 +402,7 @@ cargo.rust_library(
     ],
     visibility = [],
     deps = [
-        ":proc-macro2-1.0.94",
+        ":proc-macro2-1.0.95",
         ":quote-1.0.40",
         ":unicode-ident-1.0.18",
     ],

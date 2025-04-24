@@ -44,14 +44,14 @@ alias(
 )
 
 alias(
-    name = "clap-4.5.36",
-    actual = "@vendor__clap-4.5.36//:clap",
+    name = "clap-4.5.37",
+    actual = "@vendor__clap-4.5.37//:clap",
     tags = ["manual"],
 )
 
 alias(
     name = "clap",
-    actual = "@vendor__clap-4.5.36//:clap",
+    actual = "@vendor__clap-4.5.37//:clap",
     tags = ["manual"],
 )
 
@@ -80,14 +80,14 @@ alias(
 )
 
 alias(
-    name = "proc-macro2-1.0.94",
-    actual = "@vendor__proc-macro2-1.0.94//:proc_macro2",
+    name = "proc-macro2-1.0.95",
+    actual = "@vendor__proc-macro2-1.0.95//:proc_macro2",
     tags = ["manual"],
 )
 
 alias(
     name = "proc-macro2",
-    actual = "@vendor__proc-macro2-1.0.94//:proc_macro2",
+    actual = "@vendor__proc-macro2-1.0.95//:proc_macro2",
     tags = ["manual"],
 )
 
