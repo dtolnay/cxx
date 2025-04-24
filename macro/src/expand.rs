@@ -138,7 +138,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
         #doc
         #attrs
         #[deny(improper_ctypes, improper_ctypes_definitions)]
-        #[allow(clippy::unknown_clippy_lints)]
+        #[allow(clippy::unknown_lints)]
         #[allow(
             non_camel_case_types,
             non_snake_case,
