@@ -650,7 +650,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         }
     };
     let mut expr;
-    if efn.throws && efn.sig.ret.is_none() {
+    if efn.throws && efn.ret.is_none() {
         expr = call;
     } else {
         expr = match &efn.ret {
@@ -729,11 +729,11 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     }
     let dispatch = quote_spanned!(span=> unsafe { #setup #expr });
     let visibility = efn.visibility;
-    let unsafety = &efn.sig.unsafety;
-    let fn_token = efn.sig.fn_token;
+    let unsafety = &efn.unsafety;
+    let fn_token = efn.fn_token;
     let ident = &efn.name.rust;
     let generics = &efn.generics;
-    let arg_list = quote_spanned!(efn.sig.paren_token.span=> (#(#all_args,)*));
+    let arg_list = quote_spanned!(efn.paren_token.span=> (#(#all_args,)*));
     let fn_body = quote_spanned!(span=> {
         #UnsafeExtern extern "C" {
             #decl
