@@ -6,7 +6,7 @@ use core::fmt::{self, Display};
 #[cfg(error_in_core)]
 use core::error::Error as StdError;
 #[cfg(all(feature = "std", not(error_in_core)))]
-use std::error::Error as StdError;
+use core::error::Error as StdError;
 
 /// Exception thrown from an `extern "C++"` function.
 #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]

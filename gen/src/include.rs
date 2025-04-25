@@ -3,7 +3,7 @@ use crate::syntax::{self, IncludeKind};
 use std::ops::{Deref, DerefMut};
 
 /// The complete contents of the "rust/cxx.h" header.
-pub static HEADER: &str = include_str!("include/cxx.h");
+pub static HEADER: &str = include_str!("../../include/cxx.h");
 
 /// A header to #include.
 ///

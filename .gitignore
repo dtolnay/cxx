@@ -1,8 +1,5 @@
 /.buckd
-/bazel-bin
-/bazel-cxx
-/bazel-out
-/bazel-testlogs
+/bazel-*
 /user.bazelrc
 /buck-out
 /expand.cc
