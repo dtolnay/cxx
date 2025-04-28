@@ -149,6 +149,60 @@
   },
   "selectedYankedVersions": {},
   "moduleExtensions": {
+    "//:capnp_cpp.bzl%capnp_cpp": {
+      "general": {
+        "bzlTransitiveDigest": "Tj5FLYNsR+Tywz1pVhZ0g0QfUj7lg76n299YmeqXLYw=",
+        "usagesDigest": "XliM5BardqrKF1HT7E/dBfa1bZ5PAVLIRm8umnsZ0Cs=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "capnp-cpp": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "url": "https://github.com/capnproto/capnproto/tarball/ff191c66c2bbff428c10923b5d4032087b592fe0",
+              "strip_prefix": "capnproto-capnproto-ff191c6/c++",
+              "type": "tgz",
+              "sha256": "0d332fb8ce5909fa605b6ed0e5b97705f163a649f11b5d136c27efb4943ebc9f"
+            }
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "",
+            "bazel_tools",
+            "bazel_tools"
+          ]
+        ]
+      }
+    },
+    "//:kj_rs.bzl%kj_rs": {
+      "general": {
+        "bzlTransitiveDigest": "lOTr0Q8I5jSA0+OQznPezP/5M/TfXZUsli5BTrJcra8=",
+        "usagesDigest": "uLeU2k4k2uLVh8cRqEpiPvsJfRe1GibeSJ53ljcSRXM=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "kj-rs": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "url": "https://github.com/capnproto/kj-rs/tarball/df8a25bb2c4d3c4e361d84011a6eac640b278b92",
+              "strip_prefix": "capnproto-kj-rs-df8a25b",
+              "type": "tgz",
+              "sha256": "d38626cbae30443fef4d009f18c5dad1af3da342f8275a6e833c1691bbb090cc"
+            }
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "",
+            "bazel_tools",
+            "bazel_tools"
+          ]
+        ]
+      }
+    },
     "@@apple_support+//crosstool:setup.bzl%apple_cc_configure_extension": {
       "general": {
         "bzlTransitiveDigest": "xcBTf2+GaloFpg7YEh/Bv+1yAczRkiCt3DGws4K7kSk=",

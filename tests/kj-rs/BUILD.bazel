@@ -1,0 +1,12 @@
+load("@rules_rust//rust:defs.bzl", "rust_test")
+
+rust_test(
+    name = "test",
+    size = "small",
+    srcs = glob(["*.rs"]),
+    edition = "2021",
+    deps = [
+        "@capnp-cpp//src/kj:kj-async",
+        "@kj-rs//:kj-rs",
+    ],
+)
