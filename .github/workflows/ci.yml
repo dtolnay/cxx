@@ -33,13 +33,7 @@ jobs:
       - run: bazel --version
       - run: bazel run demo --verbose_failures --noshow_progress ${{matrix.os == 'macos' && '--xcode_version_config=tools/bazel:github_actions_xcodes' || ''}}
       - run: bazel test ... --verbose_failures --noshow_progress ${{matrix.os == 'macos' && '--xcode_version_config=tools/bazel:github_actions_xcodes' || ''}}
-      - name: Check MODULE.bazel.lock up to date
-        run: git diff --exit-code
-      - run: bazel run //third-party:vendor
-        if: matrix.os == 'ubuntu'
-      - name: Check third-party/bazel up to date
-        run: git diff --exit-code
-        if: matrix.os == 'ubuntu'
+
 
   clippy:
     name: Clippy

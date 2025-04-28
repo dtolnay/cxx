@@ -35,10 +35,8 @@ rust_library(
         ],
     ),
     crate_features = [
-        "error-context",
         "help",
         "std",
-        "usage",
     ],
     crate_root = "src/lib.rs",
     edition = "2021",

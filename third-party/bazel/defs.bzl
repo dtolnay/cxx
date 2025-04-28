@@ -293,9 +293,9 @@ def aliases(
 ###############################################################################
 
 _NORMAL_DEPENDENCIES = {
-    "third-party": {
+    "": {
         _COMMON_CONDITION: {
-            "cc": Label("@vendor//:cc-1.2.17"),
+            "cc": Label("@vendor//:cc-1.2.20"),
             "clap": Label("@vendor//:clap-4.5.33"),
             "codespan-reporting": Label("@vendor//:codespan-reporting-0.12.0"),
             "foldhash": Label("@vendor//:foldhash-0.1.5"),
@@ -308,24 +308,24 @@ _NORMAL_DEPENDENCIES = {
 }
 
 _NORMAL_ALIASES = {
-    "third-party": {
+    "": {
         _COMMON_CONDITION: {
         },
     },
 }
 
 _NORMAL_DEV_DEPENDENCIES = {
-    "third-party": {
+    "": {
     },
 }
 
 _NORMAL_DEV_ALIASES = {
-    "third-party": {
+    "": {
     },
 }
 
 _PROC_MACRO_DEPENDENCIES = {
-    "third-party": {
+    "": {
         _COMMON_CONDITION: {
             "rustversion": Label("@vendor//:rustversion-1.0.20"),
         },
@@ -333,37 +333,37 @@ _PROC_MACRO_DEPENDENCIES = {
 }
 
 _PROC_MACRO_ALIASES = {
-    "third-party": {
+    "": {
     },
 }
 
 _PROC_MACRO_DEV_DEPENDENCIES = {
-    "third-party": {
+    "": {
     },
 }
 
 _PROC_MACRO_DEV_ALIASES = {
-    "third-party": {
+    "": {
     },
 }
 
 _BUILD_DEPENDENCIES = {
-    "third-party": {
+    "": {
     },
 }
 
 _BUILD_ALIASES = {
-    "third-party": {
+    "": {
     },
 }
 
 _BUILD_PROC_MACRO_DEPENDENCIES = {
-    "third-party": {
+    "": {
     },
 }
 
 _BUILD_PROC_MACRO_ALIASES = {
-    "third-party": {
+    "": {
     },
 }
 
@@ -436,12 +436,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__cc-1.2.17",
-        sha256 = "1fcb57c740ae1daf453ae85f16e37396f672b039e00d9d866e07ddb24e328e3a",
+        name = "vendor__cc-1.2.20",
+        sha256 = "04da6a0d40b948dfc4fa8f5bbf402b0fc1a64a28dbf7d12ffd683550f2c1b63a",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/cc/1.2.17/download"],
-        strip_prefix = "cc-1.2.17",
-        build_file = Label("//third-party/bazel:BUILD.cc-1.2.17.bazel"),
+        urls = ["https://static.crates.io/crates/cc/1.2.20/download"],
+        strip_prefix = "cc-1.2.20",
+        build_file = Label("//third-party/bazel:BUILD.cc-1.2.20.bazel"),
     )
 
     maybe(
@@ -462,6 +462,16 @@ def crate_repositories():
         urls = ["https://static.crates.io/crates/clap_builder/4.5.33/download"],
         strip_prefix = "clap_builder-4.5.33",
         build_file = Label("//third-party/bazel:BUILD.clap_builder-4.5.33.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "vendor__clap_derive-4.5.32",
+        sha256 = "09176aae279615badda0765c0c0b3f6ed53f4709118af73cf4655d85d1530cd7",
+        type = "tar.gz",
+        urls = ["https://static.crates.io/crates/clap_derive/4.5.32/download"],
+        strip_prefix = "clap_derive-4.5.32",
+        build_file = Label("//third-party/bazel:BUILD.clap_derive-4.5.32.bazel"),
     )
 
     maybe(
@@ -492,6 +502,16 @@ def crate_repositories():
         urls = ["https://static.crates.io/crates/foldhash/0.1.5/download"],
         strip_prefix = "foldhash-0.1.5",
         build_file = Label("//third-party/bazel:BUILD.foldhash-0.1.5.bazel"),
+    )
+
+    maybe(
+        http_archive,
+        name = "vendor__heck-0.5.0",
+        sha256 = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea",
+        type = "tar.gz",
+        urls = ["https://static.crates.io/crates/heck/0.5.0/download"],
+        strip_prefix = "heck-0.5.0",
+        build_file = Label("//third-party/bazel:BUILD.heck-0.5.0.bazel"),
     )
 
     maybe(
@@ -715,7 +735,7 @@ def crate_repositories():
     )
 
     return [
-        struct(repo = "vendor__cc-1.2.17", is_dev_dep = False),
+        struct(repo = "vendor__cc-1.2.20", is_dev_dep = False),
         struct(repo = "vendor__clap-4.5.33", is_dev_dep = False),
         struct(repo = "vendor__codespan-reporting-0.12.0", is_dev_dep = False),
         struct(repo = "vendor__foldhash-0.1.5", is_dev_dep = False),
