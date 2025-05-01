@@ -10,29 +10,33 @@ permissions:
   contents: read
 
 jobs:
-  pre_ci:
-    uses: dtolnay/.github/.github/workflows/pre_ci.yml@master
-
   bazel:
-    name: Bazel on ${{matrix.os == 'ubuntu' && 'Linux' || matrix.os == 'macos' && 'macOS' || matrix.os == 'windows' && 'Windows' || '???'}}
-    runs-on: ${{matrix.os}}-latest
+    name: Bazel on ${{matrix.os.name}}
+    runs-on: ${{matrix.os.image}}
     if: github.event_name != 'pull_request'
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu, macos, windows]
+        os: [ 
+          { name: linux, image: ubuntu-24.04 },
+          { name: macOS, image: macos-15 },
+          { name: windows, image: windows-2025 },
+        ]
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-      - name: Install lld
+      - name: Setup Linux
+        if: matrix.os.name == 'linux'
         run: sudo apt-get install lld
-        if: matrix.os == 'ubuntu'
-      - name: Set bazelrc for Windows
+      - name: Setup Windows
+        if: matrix.os.name == 'windows'
         run: echo "startup --output_user_root=D:/bzl" > user.bazelrc
-        if: matrix.os == 'windows'
+      - name: Setup Mac
+        if: matrix.os.name == 'macos'
+        run: sudo xcode-select -s "/Applications/Xcode_16.3.app"
       - run: bazel --version
-      - run: bazel run demo --verbose_failures --noshow_progress ${{matrix.os == 'macos' && '--xcode_version_config=tools/bazel:github_actions_xcodes' || ''}}
-      - run: bazel test ... --verbose_failures --noshow_progress ${{matrix.os == 'macos' && '--xcode_version_config=tools/bazel:github_actions_xcodes' || ''}}
+      - run: bazel test ... --verbose_failures ${{matrix.os.name == 'macos' && '--xcode_version_config=tools/bazel:github_actions_xcodes' || ''}}
+      - run: bazel run demo --verbose_failures ${{matrix.os.name == 'macos' && '--xcode_version_config=tools/bazel:github_actions_xcodes' || ''}}
 
 
   clippy:
@@ -43,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt-get install lld
-      - run: bazel build --config=clippy ... --verbose_failures --noshow_progress
+      - run: bazel build --config=clippy ... --verbose_failures
 
   clang-tidy:
     name: Clang Tidy

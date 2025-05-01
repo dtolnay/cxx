@@ -7,13 +7,13 @@ bzl_library(
 )
 
 xcode_version(
-    name = "github_actions_xcode_14_2_0",
-    default_macos_sdk_version = "13.1",
-    version = "14.2",
+    name = "github_actions_xcode_16_3_0",
+    default_macos_sdk_version = "14.5",
+    version = "16.3",
 )
 
 xcode_config(
     name = "github_actions_xcodes",
-    default = ":github_actions_xcode_14_2_0",
-    versions = [":github_actions_xcode_14_2_0"],
+    default = ":github_actions_xcode_16_3_0",
+    versions = [":github_actions_xcode_16_3_0"],
 )

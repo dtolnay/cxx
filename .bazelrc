@@ -5,10 +5,27 @@
 ## https://bazel.build/docs/best-practices#bazelrc-file
 ###############################################################################
 
+## Platform specific settings
+
 build --enable_platform_specific_config
-build:linux --@rules_rust//:extra_rustc_flags=-Clink-arg=-fuse-ld=lld
-build:linux --cxxopt=-std=c++17
-build:macos --cxxopt=-std=c++17
+
+build:linux --action_env=CC=clang --action_env=CXX=clang++
+build:linux --cxxopt=-std=c++20 --host_cxxopt=-std=c++20
+
+build:macos --action_env=CC=clang --action_env=CXX=clang++
+build:macos --cxxopt=-std=c++20 --host_cxxopt=-std=c++20
+
+startup --windows_enable_symlinks
+build:windows --enable_runfiles
+build:windows --extra_toolchains=@local_config_cc//:cc-toolchain-x64_windows-clang-cl
+build:windows --extra_execution_platforms=//:x64_windows-clang-cl
+build:windows --cxxopt='/std:c++20' --host_cxxopt='/std:c++20'
+build:windows --copt='/D_CRT_USE_BUILTIN_OFFSETOF' --host_copt='/D_CRT_USE_BUILTIN_OFFSETOF'
+build:windows --copt='/DWIN32_LEAN_AND_MEAN' --host_copt='/DWIN32_LEAN_AND_MEAN'
+build:windows --cxxopt='/Zc:__cplusplus' --host_cxxopt='/Zc:__cplusplus'
+build:windows --copt='/Zc:dllexportInlines-' --host_copt='/Zc:dllexportInlines-'
+
+## Top-level configurations
 
 build:clippy --aspects=@rules_rust//rust:defs.bzl%rust_clippy_aspect
 build:clippy --output_groups=+clippy_checks

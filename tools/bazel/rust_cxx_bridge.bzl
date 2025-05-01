@@ -38,7 +38,7 @@ def rust_cxx_bridge(name, src, deps = [], linkstatic = True, **kwargs):
             "-o",
             "$(execpath %s.cc)" % src,
         ],
-        tool = "@cxx.rs//:codegen",
+        tool = "@workerd-cxx//:codegen",
         **kwargs
     )
 
