@@ -201,6 +201,9 @@ cargo.rust_library(
     crate = "proc_macro2",
     crate_root = "proc-macro2-1.0.95.crate/src/lib.rs",
     edition = "2021",
+    env = {
+        "OUT_DIR": "$(location :proc-macro2-1.0.95-build-script-run[out_dir])",
+    },
     features = [
         "default",
         "proc-macro",
@@ -289,6 +292,7 @@ cargo.rust_library(
         "OUT_DIR": "$(location :rustversion-1.0.20-build-script-run[out_dir])",
     },
     proc_macro = True,
+    rustc_flags = ["@$(location :rustversion-1.0.20-build-script-run[rustc_flags])"],
     visibility = [],
 )
 
@@ -331,6 +335,7 @@ cargo.rust_library(
     env = {
         "OUT_DIR": "$(location :scratch-1.0.8-build-script-run[out_dir])",
     },
+    rustc_flags = ["@$(location :scratch-1.0.8-build-script-run[rustc_flags])"],
     visibility = [],
 )
 

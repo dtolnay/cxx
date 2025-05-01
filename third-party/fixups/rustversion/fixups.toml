@@ -1,2 +1,1 @@
-[[buildscript]]
-[buildscript.gen_srcs]
+buildscript.run = true
