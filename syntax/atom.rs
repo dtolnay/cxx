@@ -20,6 +20,7 @@ pub(crate) enum Atom {
     F64,
     CxxString,
     RustString,
+    Cvoid,
 }
 
 impl Atom {
@@ -46,6 +47,7 @@ impl Atom {
             "f64" => Some(F64),
             "CxxString" => Some(CxxString),
             "String" => Some(RustString),
+            "c_void" => Some(Cvoid),
             _ => None,
         }
     }
@@ -77,6 +79,7 @@ impl AsRef<str> for Atom {
             F64 => "f64",
             CxxString => "CxxString",
             RustString => "String",
+            Cvoid => "c_void",
         }
     }
 }
