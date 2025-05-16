@@ -275,6 +275,7 @@ pub(crate) enum Type {
     Void(Span),
     SliceRef(Box<SliceRef>),
     Array(Box<Array>),
+    Future(Box<Future>),
 }
 
 pub(crate) struct Ty1 {
@@ -317,6 +318,10 @@ pub(crate) struct Array {
     pub semi_token: Token![;],
     pub len: usize,
     pub len_token: LitInt,
+}
+
+pub(crate) struct Future {
+    pub output: Type,
 }
 
 #[derive(Copy, Clone, PartialEq)]

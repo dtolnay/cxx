@@ -1,5 +1,6 @@
 use crate::syntax::{
-    Array, ExternFn, Include, Lifetimes, Ptr, Receiver, Ref, Signature, SliceRef, Ty1, Type, Var,
+    Array, ExternFn, Future, Include, Lifetimes, Ptr, Receiver, Ref, Signature, SliceRef, Ty1,
+    Type, Var,
 };
 use std::hash::{Hash, Hasher};
 use std::mem;
@@ -57,6 +58,7 @@ impl Hash for Type {
             Type::SliceRef(t) => t.hash(state),
             Type::Array(t) => t.hash(state),
             Type::Void(_) => {}
+            Type::Future(t) => t.hash(state),
         }
     }
 }
@@ -78,6 +80,7 @@ impl PartialEq for Type {
             (Type::Fn(lhs), Type::Fn(rhs)) => lhs == rhs,
             (Type::SliceRef(lhs), Type::SliceRef(rhs)) => lhs == rhs,
             (Type::Void(_), Type::Void(_)) => true,
+            (Type::Future(lhs), Type::Future(rhs)) => lhs == rhs,
             (_, _) => false,
         }
     }
@@ -290,6 +293,12 @@ impl PartialEq for Array {
     }
 }
 
+impl PartialEq for Future {
+    fn eq(&self, other: &Self) -> bool {
+        self.output == other.output
+    }
+}
+
 impl Hash for Array {
     fn hash<H: Hasher>(&self, state: &mut H) {
         let Array {
@@ -301,6 +310,12 @@ impl Hash for Array {
         } = self;
         inner.hash(state);
         len.hash(state);
+    }
+}
+
+impl Hash for Future {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.output.hash(state);
     }
 }
 

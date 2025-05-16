@@ -43,6 +43,7 @@ pub(crate) struct Includes<'a> {
     pub basetsd: bool,
     pub sys_types: bool,
     pub content: Content<'a>,
+    pub kj_rs: bool,
 }
 
 impl<'a> Includes<'a> {
@@ -105,6 +106,7 @@ pub(super) fn write(out: &mut OutFile) {
         vector,
         basetsd,
         sys_types,
+        kj_rs,
         content: _,
     } = *include;
 
@@ -185,6 +187,9 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "#if __cplusplus >= 202002L");
         writeln!(out, "#include <ranges>");
         writeln!(out, "#endif");
+    }
+    if kj_rs && !cxx_header {
+        writeln!(out, "#include <kj-rs/promise.h>");
     }
 }
 

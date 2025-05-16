@@ -3,7 +3,7 @@ use crate::syntax::report::Errors;
 use crate::syntax::visit::{self, Visit};
 use crate::syntax::{
     error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Lifetimes,
-    NamedType, Ptr, Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
+    NamedType, Ptr, Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types, Future
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
@@ -43,21 +43,7 @@ fn do_typecheck(cx: &mut Check) {
     ident::check_all(cx, cx.apis);
 
     for ty in cx.types {
-        match ty {
-            Type::Ident(ident) => check_type_ident(cx, ident),
-            Type::RustBox(ptr) => check_type_box(cx, ptr),
-            Type::RustVec(ty) => check_type_rust_vec(cx, ty),
-            Type::UniquePtr(ptr) => check_type_unique_ptr(cx, ptr),
-            Type::SharedPtr(ptr) => check_type_shared_ptr(cx, ptr),
-            Type::WeakPtr(ptr) => check_type_weak_ptr(cx, ptr),
-            Type::CxxVector(ptr) => check_type_cxx_vector(cx, ptr),
-            Type::Ref(ty) => check_type_ref(cx, ty),
-            Type::Ptr(ty) => check_type_ptr(cx, ty),
-            Type::Array(array) => check_type_array(cx, array),
-            Type::Fn(ty) => check_type_fn(cx, ty),
-            Type::SliceRef(ty) => check_type_slice_ref(cx, ty),
-            Type::Str(_) | Type::Void(_) => {}
-        }
+        check_type(cx, ty);
     }
 
     for api in cx.apis {
@@ -76,6 +62,25 @@ fn do_typecheck(cx: &mut Check) {
 impl Check<'_> {
     pub(crate) fn error(&mut self, sp: impl ToTokens, msg: impl Display) {
         self.errors.error(sp, msg);
+    }
+}
+
+fn check_type(cx: &mut Check, ty: &Type) {
+    match ty {
+        Type::Ident(ident) => check_type_ident(cx, ident),
+        Type::RustBox(ptr) => check_type_box(cx, ptr),
+        Type::RustVec(ty) => check_type_rust_vec(cx, ty),
+        Type::UniquePtr(ptr) => check_type_unique_ptr(cx, ptr),
+        Type::SharedPtr(ptr) => check_type_shared_ptr(cx, ptr),
+        Type::WeakPtr(ptr) => check_type_weak_ptr(cx, ptr),
+        Type::CxxVector(ptr) => check_type_cxx_vector(cx, ptr),
+        Type::Ref(ty) => check_type_ref(cx, ty),
+        Type::Ptr(ty) => check_type_ptr(cx, ty),
+        Type::Array(array) => check_type_array(cx, array),
+        Type::Fn(ty) => check_type_fn(cx, ty),
+        Type::SliceRef(ty) => check_type_slice_ref(cx, ty),
+        Type::Str(_) | Type::Void(_) => {}
+        Type::Future(ty) => check_type_future(cx, ty),
     }
 }
 
@@ -640,6 +645,10 @@ fn check_generics(cx: &mut Check, generics: &Generics) {
     }
 }
 
+fn check_type_future(cx: &mut Check, f: &Future) {
+    check_type(cx, &f.output);
+}
+
 fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
     match ty {
         Type::Ident(ident) => {
@@ -657,6 +666,7 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
         | Type::Ptr(_)
         | Type::Str(_)
         | Type::SliceRef(_) => false,
+        Type::Future(_) => false,
     }
 }
 
@@ -735,5 +745,6 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         Type::Fn(_) => "function pointer".to_owned(),
         Type::Void(_) => "()".to_owned(),
         Type::Array(_) => "array".to_owned(),
+        Type::Future(f) => format!("Future<Output = {}>", describe(cx, &f.output)),
     }
 }

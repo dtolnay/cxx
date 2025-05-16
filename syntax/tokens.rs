@@ -1,10 +1,11 @@
 use crate::syntax::atom::Atom::*;
 use crate::syntax::{
-    Array, Atom, Derive, Enum, EnumRepr, ExternFn, ExternType, Impl, Lifetimes, NamedType, Ptr,
-    Ref, Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var,
+    Array, Atom, Derive, Enum, EnumRepr, ExternFn, ExternType, Future, Impl, Lifetimes, NamedType,
+    Ptr, Ref, Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote_spanned, ToTokens};
+use syn::spanned::Spanned;
 use syn::{token, Token};
 
 impl ToTokens for Type {
@@ -35,6 +36,7 @@ impl ToTokens for Type {
             Type::Fn(f) => f.to_tokens(tokens),
             Type::Void(span) => tokens.extend(quote_spanned!(*span=> ())),
             Type::SliceRef(r) => r.to_tokens(tokens),
+            Type::Future(f) => f.to_tokens(tokens),
         }
     }
 }
@@ -215,6 +217,15 @@ impl ToTokens for ExternFn {
         self.unsafety.to_tokens(tokens);
         self.sig.fn_token.to_tokens(tokens);
         self.semi_token.to_tokens(tokens);
+    }
+}
+
+impl ToTokens for Future {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let output = &self.output;
+        tokens.extend(
+            quote_spanned!(self.output.span()=> impl ::std::future::Future<Output = ::std::result::Result<#output, ::cxx::Exception>>),
+        );
     }
 }
 

@@ -1,4 +1,5 @@
 load("@rules_rust//rust:defs.bzl", "rust_test")
+load("//tools/bazel:rust_cxx_bridge.bzl", "rust_cxx_bridge")
 
 rust_test(
     name = "test",
@@ -6,7 +7,20 @@ rust_test(
     srcs = glob(["*.rs"]),
     edition = "2021",
     deps = [
+        ":bridge",
         ":tests",
+        "//:cxx",
+        "@kj-rs//:kj-rs",
+    ],
+)
+
+rust_cxx_bridge(
+    name = "bridge",
+    testonly = True,
+    src = "lib.rs",
+    hdrs = ["tests.h"],
+    deps = [
+        "@kj-rs//:kj-rs",
     ],
 )
 
@@ -20,5 +34,6 @@ cc_library(
     deps = [
         "@capnp-cpp//src/kj:kj-async",
         "@kj-rs//:kj-rs",
+        ":bridge",
     ],
 )

@@ -5,9 +5,9 @@ use crate::syntax::file::{Item, ItemForeignMod};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
-    attrs, error, Api, Array, Derive, Doc, Enum, EnumRepr, ExternFn, ExternType, ForeignName, Impl,
-    Include, IncludeKind, Lang, Lifetimes, NamedType, Namespace, Pair, Ptr, Receiver, Ref,
-    Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var, Variant,
+    attrs, error, Api, Array, Derive, Doc, Enum, EnumRepr, ExternFn, ExternType, ForeignName,
+    Future, Impl, Include, IncludeKind, Lang, Lifetimes, NamedType, Namespace, Pair, Ptr, Receiver,
+    Ref, Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
 use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
@@ -18,8 +18,8 @@ use syn::{
     Abi, Attribute, Error, Expr, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
     GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lit, LitStr,
     Pat, PathArguments, Result, ReturnType, Signature as RustSignature, Token, TraitBound,
-    TraitBoundModifier, Type as RustType, TypeArray, TypeBareFn, TypeParamBound, TypePath, TypePtr,
-    TypeReference, Variant as RustVariant, Visibility,
+    TraitBoundModifier, Type as RustType, TypeArray, TypeBareFn, TypeParamBound,
+    TypePath, TypePtr, TypeReference, Variant as RustVariant, Visibility,
 };
 
 pub(crate) mod kw {
@@ -559,16 +559,6 @@ fn parse_extern_fn(
         ));
     }
 
-    if foreign_fn.sig.asyncness.is_some() && !cfg!(feature = "experimental-async-fn") {
-        return Err(Error::new_spanned(
-            foreign_fn,
-            "async function is not directly supported yet, but see https://cxx.rs/async.html \
-            for a working approach, and https://github.com/pcwalton/cxx-async for some helpers; \
-            eventually what you wrote will work but it isn't integrated into the cxx::bridge \
-            macro yet",
-        ));
-    }
-
     if foreign_fn.sig.constness.is_some() {
         return Err(Error::new_spanned(
             foreign_fn,
@@ -661,6 +651,11 @@ fn parse_extern_fn(
     let ret = parse_return_type(&foreign_fn.sig.output, &mut throws_tokens)?;
     let throws = throws_tokens.is_some();
     let asyncness = foreign_fn.sig.asyncness;
+    let ret = if asyncness.is_some() {
+        Some(Type::Future(Box::new(Future{ output: ret.unwrap_or(Type::Void(foreign_fn.sig.fn_token.span)) })))
+    } else {
+        ret
+    };
     let unsafety = foreign_fn.sig.unsafety;
     let fn_token = foreign_fn.sig.fn_token;
     let inherited_span = unsafety.map_or(fn_token.span, |unsafety| unsafety.span);
@@ -1075,6 +1070,7 @@ fn parse_impl(cx: &mut Errors, imp: ItemImpl) -> Result<Api> {
         | Type::Void(_)
         | Type::SliceRef(_)
         | Type::Array(_) => Lifetimes::default(),
+        Type::Future(_) => todo!("file a workerd-cxx ticket"),
     };
 
     let negative = negative_token.is_some();
@@ -1472,7 +1468,6 @@ fn parse_return_type(
         }
     }
 }
-
 fn has_references_without_lifetime(ty: &Type) -> bool {
     match ty {
         Type::Fn(_) | Type::Ident(_) | Type::Str(_) | Type::Void(_) => false,
@@ -1486,6 +1481,7 @@ fn has_references_without_lifetime(ty: &Type) -> bool {
         Type::Array(t) => has_references_without_lifetime(&t.inner),
         Type::SliceRef(t) => t.lifetime.is_none(),
         Type::Ref(t) => t.lifetime.is_none(),
+        Type::Future(t) => has_references_without_lifetime(&t.output),
     }
 }
 

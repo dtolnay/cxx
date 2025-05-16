@@ -14,6 +14,7 @@ use crate::type_id::Crate;
 use crate::{derive, generics};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
+use syn::spanned::Spanned;
 use std::mem;
 use syn::{parse_quote, punctuated, Generics, Lifetime, Result, Token};
 
@@ -77,6 +78,9 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
                 }
             }
             Api::CxxFunction(efn) => {
+                if efn.asyncness.is_some() {
+                    // todo!("expand_cxx_function_shim\n{}", expand_cxx_function_shim(efn, types).to_string());
+                }
                 expanded.extend(expand_cxx_function_shim(efn, types));
             }
             Api::RustType(ety) => {
@@ -719,7 +723,10 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                         false => quote_spanned!(span=> #call.as_slice::<#inner>()),
                         true => quote_spanned!(span=> #call.as_mut_slice::<#inner>()),
                     }
-                }
+                },
+                Type::Future(_) => {
+                    quote_spanned!(span=> ::kj_rs::new_callbacks_promise_future(#call))
+                },
                 _ => call,
             },
         };
@@ -1931,6 +1938,10 @@ fn expand_extern_type(ty: &Type, types: &Types, proper: bool) -> TokenStream {
             let span = ty.ampersand.span;
             let rust_slice = Ident::new("RustSlice", ty.bracket.span.join());
             quote_spanned!(span=> ::cxx::private::#rust_slice)
+        }
+        Type::Future(ty) => {
+            let span = ty.span();
+            quote_spanned!(span=> ::kj_rs::KjPromiseNodeImpl)
         }
         _ => quote!(#ty),
     }

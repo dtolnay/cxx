@@ -223,6 +223,7 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
             Type::SliceRef(_) => out.builtin.rust_slice = true,
             Type::Array(_) => out.include.array = true,
             Type::Ref(_) | Type::Void(_) | Type::Ptr(_) => {}
+            Type::Future(_) => out.include.kj_rs = true,
         }
     }
 }
@@ -1146,6 +1147,7 @@ fn write_indirect_return_type(out: &mut OutFile, ty: &Type) {
             }
             write!(out, "*");
         }
+        Type::Future(_) => write!(out, "kj_rs::repr::KjPromiseNodeImpl"),
         _ => write_type(out, ty),
     }
 }
@@ -1280,7 +1282,12 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write_type(out, &a.inner);
             write!(out, ", {}>", &a.len);
         }
-        Type::Void(_) => unreachable!(),
+        Type::Void(_) => write!(out, "void"),
+        Type::Future(ty) => {
+            write!(out, "kj::Promise<");
+            write_type(out, &ty.output);
+            write!(out, ">");
+        }
     }
 }
 
@@ -1325,6 +1332,7 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
         | Type::Array(_) => write!(out, " "),
         Type::Ref(_) | Type::Ptr(_) => {}
         Type::Void(_) => unreachable!(),
+        Type::Future(_) => write!(out, " "),
     }
 }
 

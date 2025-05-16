@@ -30,5 +30,6 @@ where
                 visitor.visit_type(&arg.ty);
             }
         }
+        Type::Future(f) => visitor.visit_type(&f.output),
     }
 }
