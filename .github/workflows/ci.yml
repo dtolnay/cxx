@@ -30,7 +30,7 @@ jobs:
         run: sudo apt-get install lld
       - name: Setup Windows
         if: matrix.os.name == 'windows'
-        run: echo "startup --output_user_root=D:/bzl" > user.bazelrc
+        run: echo "startup --output_user_root=C:/bzl" > user.bazelrc
       - name: Setup Mac
         if: matrix.os.name == 'macos'
         run: sudo xcode-select -s "/Applications/Xcode_16.3.app"
