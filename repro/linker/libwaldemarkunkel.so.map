@@ -1,0 +1,7 @@
+{
+  global:
+    function1;
+
+  local:
+    *;
+};
