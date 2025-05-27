@@ -128,6 +128,18 @@ alias(
 )
 
 alias(
+    name = "static_assertions-1.1.0",
+    actual = "@vendor__static_assertions-1.1.0//:static_assertions",
+    tags = ["manual"],
+)
+
+alias(
+    name = "static_assertions",
+    actual = "@vendor__static_assertions-1.1.0//:static_assertions",
+    tags = ["manual"],
+)
+
+alias(
     name = "syn-2.0.100",
     actual = "@vendor__syn-2.0.100//:syn",
     tags = ["manual"],

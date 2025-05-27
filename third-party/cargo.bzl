@@ -10,5 +10,6 @@ PACKAGES = {
     "quote": crate.spec(version = "1"),
     "rustversion": crate.spec(version = "1"),
     "scratch": crate.spec(version = "1"),
+    "static_assertions": crate.spec(version = "1"),
     "syn": crate.spec(features = ["full"], version = "2"),
 }
