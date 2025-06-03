@@ -941,6 +941,9 @@ fn write_rust_function_decl_impl(
                 }
                 write!(out, "*");
             }
+            Type::Future(_) => {
+                write!(out, "::kj_rs::repr::RustFuture ");
+            }
             ret => write_type_space(out, ret),
         }
         write!(out, "*return$");
@@ -1049,6 +1052,9 @@ fn write_rust_function_shim_impl(
                     write!(out, "const ");
                 }
                 write!(out, "*");
+            }
+            Type::Future(_) => {
+                write!(out, "::kj_rs::repr::RustFuture");
             }
             ret => write_type(out, ret),
         }

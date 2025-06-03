@@ -18,8 +18,8 @@ use syn::{
     Abi, Attribute, Error, Expr, Fields, FnArg, ForeignItem, ForeignItemFn, ForeignItemType,
     GenericArgument, GenericParam, Generics, Ident, ItemEnum, ItemImpl, ItemStruct, Lit, LitStr,
     Pat, PathArguments, Result, ReturnType, Signature as RustSignature, Token, TraitBound,
-    TraitBoundModifier, Type as RustType, TypeArray, TypeBareFn, TypeParamBound,
-    TypePath, TypePtr, TypeReference, Variant as RustVariant, Visibility,
+    TraitBoundModifier, Type as RustType, TypeArray, TypeBareFn, TypeParamBound, TypePath, TypePtr,
+    TypeReference, Variant as RustVariant, Visibility,
 };
 
 pub(crate) mod kw {
@@ -649,13 +649,19 @@ fn parse_extern_fn(
 
     let mut throws_tokens = None;
     let ret = parse_return_type(&foreign_fn.sig.output, &mut throws_tokens)?;
-    let throws = throws_tokens.is_some();
     let asyncness = foreign_fn.sig.asyncness;
-    let ret = if asyncness.is_some() {
-        Some(Type::Future(Box::new(Future{ output: ret.unwrap_or(Type::Void(foreign_fn.sig.fn_token.span)) })))
+    let (ret, throws_tokens) = if asyncness.is_some() {
+        (
+            Some(Type::Future(Box::new(Future {
+                output: ret.unwrap_or(Type::Void(foreign_fn.sig.fn_token.span)),
+                throws_tokens,
+            }))),
+            None,
+        )
     } else {
-        ret
+        (ret, throws_tokens)
     };
+    let throws = throws_tokens.is_some();
     let unsafety = foreign_fn.sig.unsafety;
     let fn_token = foreign_fn.sig.fn_token;
     let inherited_span = unsafety.map_or(fn_token.span, |unsafety| unsafety.span);
