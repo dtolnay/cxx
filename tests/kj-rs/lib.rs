@@ -18,13 +18,11 @@ pub mod ffi {
     }
 
     extern "Rust" {
-        // todo(soon): enable once kj-rs side is landed.
-        //
-        // async fn rust_async_void_fn();
-        // async fn rust_async_int_fn() -> i64;
+        async fn rust_async_void_fn();
+        async fn rust_async_int_fn() -> i64;
 
-        // async fn rust_async_void_result_fn() -> Result<()>;
-        // async fn rust_async_int_result_fn() -> Result<i64>;
+        async fn rust_async_void_result_fn() -> Result<()>;
+        async fn rust_async_int_result_fn() -> Result<i64>;
     }
 }
 
