@@ -395,6 +395,7 @@
     clippy::ref_as_ptr,
     clippy::uninlined_format_args
 )]
+#![allow(unknown_lints, mismatched_lifetime_syntaxes)]
 
 #[cfg(built_with_cargo)]
 extern crate link_cplusplus;

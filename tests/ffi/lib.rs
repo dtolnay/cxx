@@ -239,6 +239,7 @@ pub mod ffi {
         fn c_return_borrow<'a>(s: &'a CxxString) -> UniquePtr<Borrow<'a>>;
 
         #[rust_name = "c_return_borrow_elided"]
+        #[allow(unknown_lints, mismatched_lifetime_syntaxes)]
         fn c_return_borrow(s: &CxxString) -> UniquePtr<Borrow>;
 
         fn const_member(self: &Borrow);

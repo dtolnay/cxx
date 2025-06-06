@@ -75,6 +75,7 @@
     clippy::uninlined_format_args,
     clippy::upper_case_acronyms
 )]
+#![allow(unknown_lints, mismatched_lifetime_syntaxes)]
 
 mod cargo;
 mod cfg;
