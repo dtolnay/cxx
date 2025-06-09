@@ -189,7 +189,7 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "#endif");
     }
     if kj_rs && !cxx_header {
-        writeln!(out, "#include <kj-rs/kj-rs.h>");
+        writeln!(out, "#include \"kj-rs/kj-rs.h\"");
     }
 }
 

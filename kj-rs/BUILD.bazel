@@ -1,0 +1,56 @@
+load("//tools/bazel:rust_cxx_bridge.bzl", "rust_cxx_bridge")
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+cc_library(
+    name = "kj-rs-lib",
+    srcs = glob(["*.c++"]),
+    hdrs = glob(["*.h"]),
+    include_prefix = "kj-rs",
+    linkstatic = select({
+        "@platforms//os:windows": True,
+        "//conditions:default": False,
+    }),
+    deps = [
+        ":bridge",
+    ],
+)
+
+rust_library(
+    name = "kj-rs",
+    srcs = glob(["*.rs"]),
+    compile_data = glob(["*.h"]),
+    edition = "2024",
+    visibility = ["//visibility:public"],
+    deps = [
+        ":bridge",
+        ":kj-rs-lib",
+        "@workerd-cxx//:cxx",
+        "@crates.io//:static_assertions",
+    ],
+)
+
+rust_cxx_bridge(
+    name = "bridge",
+    src = "lib.rs",
+    hdrs = glob(["*.h"]),
+    include_prefix = "kj-rs",
+    deps = [
+        ":cxx",
+        "@capnp-cpp//src/kj:kj",
+        "@capnp-cpp//src/kj:kj-async",
+        "@workerd-cxx//:cxx",
+    ],
+)
+
+genrule(
+    name = "cxx/generated",
+    outs = ["cxx.h"],
+    cmd = "$(location @workerd-cxx//:codegen) --header > \"$@\"",
+    tools = ["@workerd-cxx//:codegen"],
+)
+
+cc_library(
+    name = "cxx",
+    hdrs = ["cxx.h"],
+    include_prefix = "rust",
+)

@@ -28,6 +28,3 @@ use_repo(crate_repositories, "crates.io", "vendor")
 
 capnp_cpp = use_extension("//:capnp_cpp.bzl", "capnp_cpp")
 use_repo(capnp_cpp, "capnp-cpp")
-
-kj_rs = use_extension("//:kj_rs.bzl", "kj_rs")
-use_repo(kj_rs, "kj-rs")

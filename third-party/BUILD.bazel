@@ -1,5 +1,7 @@
 load("@rules_rust//crate_universe:defs.bzl", "crates_vendor")
 load("//third-party:cargo.bzl", "PACKAGES")
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
+load("@rules_rust//rust:defs.bzl", "rust_static_library")
 
 crates_vendor(
     name = "vendor",
@@ -9,4 +11,35 @@ crates_vendor(
     packages = PACKAGES,
     tags = ["manual"],
     vendor_path = "bazel",
+)
+
+# Windows build fixes due to rust libraries missing symbols:
+# https://github.com/bazelbuild/rules_rust/blob/144d34fd/ffi/cc/global_allocator_library/BUILD.bazel#L3
+# `empty_lib` static library will bring all the symbols in.
+cc_library(
+    name = "runtime",
+    linkopts = select({
+        "@platforms//os:windows": [
+            "ntdll.lib",
+        ],
+        "//conditions:default": [],
+    }),
+    visibility = ["//visibility:public"],
+    deps = select({
+        "@platforms//os:windows": [":empty_lib"],
+        "//conditions:default": [],
+    }),
+)
+
+write_file(
+    name = "lib_rs",
+    out = "lib.rs",
+    tags = ["manual"],
+)
+
+rust_static_library(
+    name = "empty_lib",
+    srcs = [":lib.rs"],
+    edition = "2021",
+    tags = ["manual"],
 )

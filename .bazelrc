@@ -31,6 +31,21 @@ build:clippy --aspects=@rules_rust//rust:defs.bzl%rust_clippy_aspect
 build:clippy --output_groups=+clippy_checks
 build:clippy  --@rules_rust//:clippy_flags=-Dclippy::all,-Dclippy::pedantic
 
+## Sanitizers
+
+build:sanitizer-common --copt="-fsanitize-link-c++-runtime" --linkopt="-fsanitize-link-c++-runtime"
+build:sanitizer-common --copt="-Og"
+build:sanitizer-common --copt="-g" --strip=never
+build:sanitizer-common --copt="-fno-optimize-sibling-calls"
+build:sanitizer-common --copt="-fno-omit-frame-pointer" --copt="-mno-omit-leaf-frame-pointer"
+
+# Address sanitizer (https://github.com/google/sanitizers/wiki/AddressSanitizer)
+build:asan --config=sanitizer-common
+build:asan --copt="-fsanitize=address" --linkopt="-fsanitize=address"
+build:asan --test_env=ASAN_OPTIONS=abort_on_error=true
+build:asan --test_env=LSAN_OPTIONS=report_objects=1
+build:asan --test_env=KJ_CLEAN_SHUTDOWN=1
+
 ###############################################################################
 ## Custom user flags
 ##

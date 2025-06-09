@@ -176,33 +176,6 @@
         ]
       }
     },
-    "//:kj_rs.bzl%kj_rs": {
-      "general": {
-        "bzlTransitiveDigest": "lfcyBbCwMt16aH1olsNZk9SXfECPrkE3UwRZf5xPmcA=",
-        "usagesDigest": "i4qPUkFCBnVGxO5z1YTkKwFHEUEo7PY7LZjorEsd52k=",
-        "recordedFileInputs": {},
-        "recordedDirentsInputs": {},
-        "envVariables": {},
-        "generatedRepoSpecs": {
-          "kj-rs": {
-            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
-            "attributes": {
-              "url": "https://github.com/capnproto/kj-rs/tarball/d0c6021c76841905150649e308fc03b85753f775",
-              "strip_prefix": "capnproto-kj-rs-d0c6021",
-              "type": "tgz",
-              "sha256": "d7d6f750d9e12cb66ff04fd1fcf56657d16589b9b8e21f45dc1da856d0a251d6"
-            }
-          }
-        },
-        "recordedRepoMappingEntries": [
-          [
-            "",
-            "bazel_tools",
-            "bazel_tools"
-          ]
-        ]
-      }
-    },
     "@@apple_support+//crosstool:setup.bzl%apple_cc_configure_extension": {
       "general": {
         "bzlTransitiveDigest": "xcBTf2+GaloFpg7YEh/Bv+1yAczRkiCt3DGws4K7kSk=",

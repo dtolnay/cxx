@@ -49,6 +49,16 @@ jobs:
       - run: sudo apt-get install lld
       - run: bazel build --config=clippy ... --verbose_failures
 
+  asan:
+    name: Address Sanitizer
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get install lld
+      - run: bazel test --config=asan ... --verbose_failures
+
   clang-tidy:
     name: Clang Tidy
     runs-on: ubuntu-latest

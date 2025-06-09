@@ -1,0 +1,71 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_rust//rust:defs.bzl", "rust_library")
+load("//tools/bazel:rust_cxx_bridge.bzl", "rust_cxx_bridge")
+
+# https://bazel.build/configure/windows#clang
+platform(
+    name = "x64_windows-clang-cl",
+    constraint_values = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:windows",
+        "@bazel_tools//tools/cpp:clang-cl",
+    ],
+)
+
+rust_library(
+    name = "awaitables-rust",
+    srcs = glob(["*.rs"]),
+    edition = "2024",
+    deps = [
+        ":bridge",
+        # TODO(now): Why isn't :cxx transitive?
+        "@workerd-cxx//:cxx",
+        "//kj-rs",
+    ],
+)
+
+rust_cxx_bridge(
+    name = "bridge",
+    src = "lib.rs",
+    hdrs = [
+        "test-promises.h",
+    ],
+    include_prefix = "kj-rs-demo",
+    deps = [
+        "//kj-rs",
+    ],
+)
+
+cc_library(
+    name = "test-promises",
+    srcs = [
+        "test-promises.c++",
+    ],
+    linkstatic = select({
+        "@platforms//os:windows": True,
+        "//conditions:default": False,
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
+        ":bridge",
+    ],
+)
+
+cc_test(
+    name = "awaitables-cc-test",
+    size = "medium",
+    srcs = [
+        "awaitables-cc-test.c++",
+    ],
+    linkstatic = select({
+        "@platforms//os:windows": True,
+        "//conditions:default": False,
+    }),
+    deps = [
+        ":awaitables-rust",
+        ":bridge",
+        ":test-promises",
+        "//third-party:runtime",
+        "@capnp-cpp//src/kj:kj-test",
+    ],
+)

@@ -1146,9 +1146,9 @@ fn expand_rust_function_shim_impl(
             let span = sig.ret.span();
             let output = &fut.output;
             if fut.throws_tokens.is_some() {
-                quote_spanned!(span=>::kj_rs::repr::RustFuture::<#output>)
+                quote_spanned!(span=> ::kj_rs::repr::RustFuture::<#output>)
             } else {
-                quote_spanned!(span=>::kj_rs::repr::RustInfallibleFuture::<#output>)
+                quote_spanned!(span=> ::kj_rs::repr::RustInfallibleFuture::<#output>)
             }
         } else {
             expand_extern_type(ret, types, false)
