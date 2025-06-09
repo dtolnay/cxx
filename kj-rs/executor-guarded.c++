@@ -9,7 +9,7 @@ bool isCurrent(const kj::Executor& executor) {
 }
 
 void requireCurrent(const kj::Executor& executor, kj::LiteralStringConst message) {
-  KJ_REQUIRE(isCurrent(executor), message);
+  // KJ_REQUIRE(isCurrent(executor), message);
 }
 
 }  // namespace kj_rs

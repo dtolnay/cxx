@@ -9,14 +9,16 @@ bazel_dep(name = "bazel_features", version = "1.21.0")
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 bazel_dep(name = "platforms", version = "0.0.11")
 bazel_dep(name = "rules_cc", version = "0.1.1")
-bazel_dep(name = "rules_rust", version = "0.60.0")
+bazel_dep(name = "rules_rust", version = "0.61.0")
 bazel_dep(name = "aspect_bazel_lib", version = "2.15.3")
 
 cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_extension")
 use_repo(cc_configure, "local_config_cc")
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
-rust.toolchain(versions = ["1.86.0", "nightly/2025-06-06"])
+# nightly/2025-04-03 doesn't work with --config=bench
+# https://github.com/bazelbuild/rules_rust/issues/3459
+rust.toolchain(versions = ["1.86.0", "nightly/2025-02-20"])
 use_repo(rust, "rust_toolchains")
 
 register_toolchains("@rust_toolchains//:all")
@@ -28,3 +30,12 @@ use_repo(crate_repositories, "crates.io", "vendor")
 
 capnp_cpp = use_extension("//:capnp_cpp.bzl", "capnp_cpp")
 use_repo(capnp_cpp, "capnp-cpp")
+
+# Hedron's Compile Commands Extractor for Bazel
+# https://github.com/hedronvision/bazel-compile-commands-extractor
+bazel_dep(name = "hedron_compile_commands", dev_dependency = True)
+git_override(
+    module_name = "hedron_compile_commands",
+    commit = "4f28899228fb3ad0126897876f147ca15026151e",
+    remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git",
+)

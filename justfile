@@ -31,7 +31,11 @@ clang-format:
 
 compile-commands:
     bazel run @hedron_compile_commands//:refresh_all
-    
+
+profile-async-stream-test:
+    bazel build --config=bench //kj-rs/tests:async-stream-test && perf record -F max --call-graph lbr ./bazel-bin/kj-rs/tests/async-stream-test
+    perf script report flamegraph
+
 # called by rust-analyzer discoverConfig (quiet recipe with no output)
 @_rust-analyzer:
   rm -rf ./rust-project.json

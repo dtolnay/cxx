@@ -1,10 +1,12 @@
 #pragma once
 
-#include "kj-rs-demo/lib.rs.h"
-
+#include <cstdint>
 #include <kj/async.h>
 
+
 namespace kj_rs_demo {
+
+struct Shared;
 
 kj::Promise<void> new_ready_promise_void();
 kj::Promise<void> new_pending_promise_void();

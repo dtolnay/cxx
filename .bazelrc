@@ -46,6 +46,19 @@ build:asan --test_env=ASAN_OPTIONS=abort_on_error=true
 build:asan --test_env=LSAN_OPTIONS=report_objects=1
 build:asan --test_env=KJ_CLEAN_SHUTDOWN=1
 
+# Benchmarking configuration
+
+build:bench -c opt
+build:bench --copt="-O3"
+build:bench --copt="-DNDEBUG"
+build:bench --@capnp-cpp//src/capnp:capnp_no_inline_accessors=False
+build:bench --copt="-flto=thin" --linkopt="-flto=thin"
+build:bench --@rules_rust//rust/toolchain/channel=nightly
+build:bench --@rules_rust//:extra_rustc_flag=-Zdylib-lto
+build:bench --@rules_rust//:extra_rustc_flag=-Cembed-bitcode
+build:bench --@rules_rust//:extra_rustc_flag=-Clto=thin
+build:bench --@rules_rust//:extra_rustc_flag=-Ccodegen-units=1
+
 ###############################################################################
 ## Custom user flags
 ##

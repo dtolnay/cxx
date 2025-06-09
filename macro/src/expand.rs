@@ -90,7 +90,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
                 hidden.extend(expand_rust_type_layout(ety, types));
             }
             Api::RustFunction(efn) => {
-                if efn.asyncness.is_some() {
+                if efn.sig.asyncness.is_some() && &efn.name.cxx == "read" {
                     // todo!("expand_rust_function_shim\n{}", expand_rust_function_shim(efn, types).to_string());
                 }
                 hidden.extend(expand_rust_function_shim(efn, types));

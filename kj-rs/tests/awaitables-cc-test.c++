@@ -7,6 +7,7 @@
 #include "kj-rs/waker.h"
 
 #include <kj/test.h>
+#include "kj-rs-demo/lib.rs.h"
 
 namespace kj_rs_demo {
 namespace {

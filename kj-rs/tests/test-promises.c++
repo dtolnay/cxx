@@ -1,5 +1,6 @@
 #include <kj-rs-demo/test-promises.h>
 
+#include <kj-rs-demo/lib.rs.h>
 #include <kj/debug.h>
 
 namespace kj_rs_demo {
