@@ -1,3 +1,7 @@
+#![allow(clippy::needless_lifetimes)]
+#![allow(clippy::missing_errors_doc)]
+#![allow(clippy::unused_async)]
+
 mod test_futures;
 
 use test_futures::{
@@ -59,4 +63,17 @@ mod ffi {
         async fn new_awaiting_future_i32() -> Result<()>;
         async fn new_ready_future_i32(value: i32) -> Result<i32>;
     }
+
+    // these are used to check compilation only
+    extern "Rust" {
+
+        async unsafe fn lifetime_arg_void<'a>(buf: &'a [u8]);
+        async unsafe fn lifetime_arg_result<'a>(buf: &'a [u8]) -> Result<()>;
+    }
+}
+
+pub async fn lifetime_arg_void<'a>(_buf: &'a [u8]) {}
+
+pub async fn lifetime_arg_result<'a>(_buf: &'a [u8]) -> Result<()> {
+    Ok(())
 }

@@ -38,22 +38,22 @@ pub(crate) mod repr {
 
     type DropCallback = unsafe extern "C" fn(fut: *mut c_void);
 
-    type FuturePtr<T> = *mut (dyn Future<Output = Result<T, String>> + Send);
+    type FuturePtr<'a, T> = *mut (dyn Future<Output = Result<T, String>> + Send + 'a);
 
     /// Represents a `dyn Future<Output = Result<T, String>>` + Send.
     #[repr(C)]
-    pub struct RustFuture<T> {
-        pub fut: FuturePtr<T>,
+    pub struct RustFuture<'a, T> {
+        pub fut: FuturePtr<'a, T>,
         pub poll: PollCallback,
         pub drop: DropCallback,
     }
 
-    type InfallibleFuturePtr<T> = *mut (dyn Future<Output = T> + Send);
+    type InfallibleFuturePtr<'a, T> = *mut (dyn Future<Output = T> + Send + 'a);
 
     /// Represents a `dyn Future<Output = T> + Send` where T is not a Result.
     #[repr(C)]
-    pub struct RustInfallibleFuture<T> {
-        pub fut: InfallibleFuturePtr<T>,
+    pub struct RustInfallibleFuture<'a, T> {
+        pub fut: InfallibleFuturePtr<'a, T>,
         pub poll: PollCallback,
         pub drop: DropCallback,
     }
@@ -65,7 +65,7 @@ pub(crate) mod repr {
     assert_eq_size!(RustFuture<()>, [*mut c_void; 4]);
     assert_eq_size!(RustInfallibleFuture<()>, [*mut c_void; 4]);
 
-    impl<T: Unpin> RustFuture<T> {
+    impl<T: Unpin> RustFuture<'_, T> {
         pub(crate) unsafe extern "C" fn poll(
             fut: *mut c_void,
             waker: *const c_void,
@@ -97,7 +97,7 @@ pub(crate) mod repr {
         }
     }
 
-    impl<T: Unpin> RustInfallibleFuture<T> {
+    impl<T: Unpin> RustInfallibleFuture<'_, T> {
         pub(crate) unsafe extern "C" fn poll(
             fut: *mut c_void,
             waker: *const c_void,
@@ -126,9 +126,9 @@ pub(crate) mod repr {
     }
 
     #[must_use]
-    pub fn future<T: Unpin>(
-        fut: Pin<Box<dyn Future<Output = Result<T, String>> + Send>>,
-    ) -> RustFuture<T> {
+    pub fn future<'a, T: Unpin>(
+        fut: Pin<Box<dyn Future<Output = Result<T, String>> + Send + 'a>>,
+    ) -> RustFuture<'a, T> {
         let fut = Box::into_raw(unsafe { Pin::into_inner_unchecked(fut) });
         let poll = RustFuture::<T>::poll;
         let drop = RustFuture::<T>::drop_in_place;
@@ -136,9 +136,9 @@ pub(crate) mod repr {
     }
 
     #[must_use]
-    pub fn infallible_future<T: Unpin>(
-        fut: Pin<Box<dyn Future<Output = T> + Send>>,
-    ) -> RustInfallibleFuture<T> {
+    pub fn infallible_future<'a, T: Unpin>(
+        fut: Pin<Box<dyn Future<Output = T> + Send + 'a>>,
+    ) -> RustInfallibleFuture<'a, T> {
         let fut = Box::into_raw(unsafe { Pin::into_inner_unchecked(fut) });
         let poll = RustInfallibleFuture::<T>::poll;
         let drop = RustInfallibleFuture::<T>::drop_in_place;

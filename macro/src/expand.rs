@@ -1145,10 +1145,17 @@ fn expand_rust_function_shim_impl(
         let ret = if let Type::Future(fut) = ret {
             let span = sig.ret.span();
             let output = &fut.output;
-            if fut.throws_tokens.is_some() {
-                quote_spanned!(span=> ::kj_rs::repr::RustFuture::<#output>)
+            let lifetimes: Vec<_> = sig.generics.lifetimes().map(|lt| quote!(#lt)).collect();
+            let lifetimes = if lifetimes.is_empty() {
+                quote!()
             } else {
-                quote_spanned!(span=> ::kj_rs::repr::RustInfallibleFuture::<#output>)
+                assert_eq!(lifetimes.len(), 1, "workerd-cxx: expected single lifetime (todo: do we need to support multiple?)");
+                quote!(#(#lifetimes),*, )
+            };
+            if fut.throws_tokens.is_some() {
+                quote_spanned!(span=> ::kj_rs::repr::RustFuture::<#lifetimes #output>)
+            } else {
+                quote_spanned!(span=> ::kj_rs::repr::RustInfallibleFuture::<#lifetimes #output>)
             }
         } else {
             expand_extern_type(ret, types, false)
@@ -1245,10 +1252,17 @@ fn expand_rust_function_shim_super(
         quote!(-> #result_begin #result_end)
     } else if let Some(Type::Future(fut)) = &sig.ret {
         let output = &fut.output;
-        if fut.throws_tokens.is_some() {
-            quote!(-> std::pin::Pin<Box<dyn ::std::future::Future<Output = ::std::result::Result<#output, String>> + Send>>)
+        let lifetimes: Vec<_> = sig.generics.lifetimes().map(|lt| quote!(#lt)).collect();
+        let lifetimes = if lifetimes.is_empty() {
+            quote!()
         } else {
-            quote!(-> std::pin::Pin<Box<dyn ::std::future::Future<Output = #output> + Send>>)
+            quote!( + #(#lifetimes)+* )
+        };
+        
+        if fut.throws_tokens.is_some() {
+            quote!(-> std::pin::Pin<Box<dyn ::std::future::Future<Output = ::std::result::Result<#output, String>> + Send #lifetimes>>)
+        } else {
+            quote!(-> std::pin::Pin<Box<dyn ::std::future::Future<Output = #output> + Send #lifetimes>>)
         }
     } else {
         expand_return_type(&sig.ret)
