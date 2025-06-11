@@ -322,6 +322,7 @@ pub(crate) struct Array {
 
 pub(crate) struct Future {
     pub output: Type,
+    #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
     pub throws_tokens: Option<(kw::Result, Token![<], Token![>])>,
 }
 
