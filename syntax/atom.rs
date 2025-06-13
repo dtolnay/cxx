@@ -1,9 +1,9 @@
-use crate::syntax::Type;
+use crate::Type;
 use proc_macro2::Ident;
 use std::fmt::{self, Display};
 
 #[derive(Copy, Clone, PartialEq)]
-pub(crate) enum Atom {
+pub enum Atom {
     Bool,
     Char, // C char, not Rust char
     U8,
@@ -23,11 +23,11 @@ pub(crate) enum Atom {
 }
 
 impl Atom {
-    pub(crate) fn from(ident: &Ident) -> Option<Self> {
+    pub fn from(ident: &Ident) -> Option<Self> {
         Self::from_str(ident.to_string().as_str())
     }
 
-    pub(crate) fn from_str(s: &str) -> Option<Self> {
+    pub fn from_str(s: &str) -> Option<Self> {
         use self::Atom::*;
         match s {
             "bool" => Some(Bool),

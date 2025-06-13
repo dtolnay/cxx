@@ -1,5 +1,5 @@
-use crate::syntax::symbol::Segment;
-use crate::syntax::{Lifetimes, NamedType, Pair, Symbol};
+use crate::symbol::Segment;
+use crate::{Lifetimes, NamedType, Pair, Symbol};
 use proc_macro2::{Ident, Span};
 use std::fmt::{self, Display};
 use std::iter;
@@ -8,12 +8,12 @@ use syn::parse::{Error, Parser, Result};
 use syn::punctuated::Punctuated;
 
 #[derive(Clone)]
-pub(crate) struct ForeignName {
+pub struct ForeignName {
     text: String,
 }
 
 impl Pair {
-    pub(crate) fn to_symbol(&self) -> Symbol {
+    pub fn to_symbol(&self) -> Symbol {
         let segments = self
             .namespace
             .iter()
@@ -21,10 +21,21 @@ impl Pair {
             .chain(iter::once(&self.cxx as &dyn Segment));
         Symbol::from_idents(segments)
     }
+
+    pub fn to_fully_qualified(&self) -> String {
+        let mut fully_qualified = String::new();
+        for segment in &self.namespace {
+            fully_qualified += "::";
+            fully_qualified += &segment.to_string();
+        }
+        fully_qualified += "::";
+        fully_qualified += &self.cxx.to_string();
+        fully_qualified
+    }
 }
 
 impl NamedType {
-    pub(crate) fn new(rust: Ident) -> Self {
+    pub fn new(rust: Ident) -> Self {
         let generics = Lifetimes {
             lt_token: None,
             lifetimes: Punctuated::new(),
@@ -35,7 +46,7 @@ impl NamedType {
 }
 
 impl ForeignName {
-    pub(crate) fn parse(text: &str, span: Span) -> Result<Self> {
+    pub fn parse(text: &str, span: Span) -> Result<Self> {
         // TODO: support C++ names containing whitespace (`unsigned int`) or
         // non-alphanumeric characters (`operator++`).
         match Ident::parse_any.parse_str(text) {

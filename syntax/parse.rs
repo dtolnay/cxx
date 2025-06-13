@@ -1,10 +1,10 @@
-use crate::syntax::attrs::OtherAttrs;
-use crate::syntax::cfg::CfgExpr;
-use crate::syntax::discriminant::DiscriminantSet;
-use crate::syntax::file::{Item, ItemForeignMod};
-use crate::syntax::report::Errors;
-use crate::syntax::Atom::*;
-use crate::syntax::{
+use crate::attrs::OtherAttrs;
+use crate::cfg::CfgExpr;
+use crate::discriminant::DiscriminantSet;
+use crate::file::{Item, ItemForeignMod};
+use crate::report::Errors;
+use crate::Atom::*;
+use crate::{
     attrs, error, Api, Array, Derive, Doc, Enum, EnumRepr, ExternFn, ExternType, ForeignName,
     Future, Impl, Include, IncludeKind, Lang, Lifetimes, NamedType, Namespace, Pair, Ptr, Receiver,
     Ref, Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var, Variant,
@@ -22,12 +22,12 @@ use syn::{
     TypeReference, Variant as RustVariant, Visibility,
 };
 
-pub(crate) mod kw {
+pub mod kw {
     syn::custom_keyword!(Pin);
     syn::custom_keyword!(Result);
 }
 
-pub(crate) fn parse_items(
+pub fn parse_items(
     cx: &mut Errors,
     items: Vec<Item>,
     trusted: bool,

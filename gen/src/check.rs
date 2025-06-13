@@ -1,12 +1,12 @@
-use crate::gen::Opt;
-use crate::syntax::report::Errors;
-use crate::syntax::{error, Api};
+use crate::Opt;
+use syntax::report::Errors;
+use syntax::{error, Api};
 use quote::{quote, quote_spanned};
 use std::path::{Component, Path};
 
-pub(super) use crate::syntax::check::{typecheck, Generator};
+pub use syntax::check::{typecheck, Generator};
 
-pub(super) fn precheck(cx: &mut Errors, apis: &[Api], opt: &Opt) {
+pub fn precheck(cx: &mut Errors, apis: &[Api], opt: &Opt) {
     if !opt.allow_dot_includes {
         check_dot_includes(cx, apis);
     }

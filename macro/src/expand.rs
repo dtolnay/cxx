@@ -1,12 +1,12 @@
-use crate::syntax::atom::Atom::*;
-use crate::syntax::attrs::{self, OtherAttrs};
-use crate::syntax::cfg::CfgExpr;
-use crate::syntax::file::Module;
-use crate::syntax::instantiate::{ImplKey, NamedImplKey};
-use crate::syntax::qualified::QualifiedName;
-use crate::syntax::report::Errors;
-use crate::syntax::symbol::Symbol;
-use crate::syntax::{
+use syntax::atom::Atom::*;
+use syntax::attrs::{self, OtherAttrs};
+use syntax::cfg::CfgExpr;
+use syntax::file::Module;
+use syntax::instantiate::{ImplKey, NamedImplKey};
+use syntax::qualified::QualifiedName;
+use syntax::report::Errors;
+use syntax::symbol::Symbol;
+use syntax::{
     self, check, mangle, Api, Doc, Enum, ExternFn, ExternType, Impl, Lifetimes, Pair, Signature,
     Struct, Trait, Type, TypeAlias, Types,
 };
@@ -17,6 +17,8 @@ use quote::{format_ident, quote, quote_spanned, ToTokens};
 use std::mem;
 use syn::spanned::Spanned;
 use syn::{parse_quote, punctuated, Generics, Lifetime, Result, Token};
+use crate::generics::to_underscore_lifetimes;
+use crate::tokens::{ReceiverType, ReceiverTypeSelf};
 
 pub(crate) fn bridge(mut ffi: Module) -> Result<TokenStream> {
     let ref mut errors = Errors::new();
@@ -433,7 +435,7 @@ fn expand_cxx_type_assert_pinned(ety: &ExternType, types: &Types) -> TokenStream
     let infer = Token![_](ident.span());
 
     let resolve = types.resolve(ident);
-    let lifetimes = resolve.generics.to_underscore_lifetimes();
+    let lifetimes = to_underscore_lifetimes(resolve.generics);
 
     quote! {
         let _: fn() = {
@@ -469,7 +471,7 @@ fn expand_cxx_type_assert_pinned(ety: &ExternType, types: &Types) -> TokenStream
 fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
     let generics = &efn.generics;
     let receiver = efn.receiver.iter().map(|receiver| {
-        let receiver_type = receiver.ty();
+        let receiver_type = ReceiverType(receiver);
         quote!(_: #receiver_type)
     });
     let args = efn.args.iter().map(|arg| {
@@ -515,7 +517,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         let var = receiver.var;
         if receiver.pinned {
             let colon = receiver.colon_token;
-            let ty = receiver.ty_self();
+            let ty = ReceiverTypeSelf(receiver);
             quote!(#var #colon #ty)
         } else {
             let ampersand = receiver.ampersand;
@@ -883,7 +885,7 @@ fn expand_rust_type_assert_unpin(ety: &ExternType, types: &Types) -> TokenStream
     };
 
     let resolve = types.resolve(ident);
-    let lifetimes = resolve.generics.to_underscore_lifetimes();
+    let lifetimes = to_underscore_lifetimes(resolve.generics);
 
     quote_spanned! {ident.span()=>
         let _ = {
@@ -915,7 +917,7 @@ fn expand_rust_type_layout(ety: &ExternType, types: &Types) -> TokenStream {
     let local_alignof = format_ident!("__alignof_{}", ety.name.rust);
 
     let resolve = types.resolve(ident);
-    let lifetimes = resolve.generics.to_underscore_lifetimes();
+    let lifetimes = to_underscore_lifetimes(resolve.generics);
 
     quote_spanned! {ident.span()=>
         {
@@ -993,7 +995,7 @@ fn expand_rust_function_shim_impl(
         .map(|receiver| quote_spanned!(receiver.var.span=> __self));
     let receiver = sig.receiver.as_ref().map(|receiver| {
         let colon = receiver.colon_token;
-        let receiver_type = receiver.ty();
+        let receiver_type = ReceiverType(receiver);
         quote!(#receiver_var #colon #receiver_type)
     });
     let args = sig.args.iter().map(|arg| {
@@ -1229,7 +1231,7 @@ fn expand_rust_function_shim_super(
         .as_ref()
         .map(|receiver| Ident::new("__self", receiver.var.span));
     let receiver = sig.receiver.iter().map(|receiver| {
-        let receiver_type = receiver.ty();
+        let receiver_type = ReceiverType(receiver);
         quote!(#receiver_var: #receiver_type)
     });
     let args = sig.args.iter().map(|arg| quote!(#arg));

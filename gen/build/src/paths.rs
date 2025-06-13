@@ -1,5 +1,5 @@
 use crate::error::Result;
-use crate::gen::fs;
+use gen::fs;
 use std::ffi::OsStr;
 use std::path::{Component, Path, PathBuf};
 

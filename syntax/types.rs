@@ -1,18 +1,18 @@
-use crate::syntax::improper::ImproperCtype;
-use crate::syntax::instantiate::ImplKey;
-use crate::syntax::map::{OrderedMap, UnorderedMap};
-use crate::syntax::report::Errors;
-use crate::syntax::resolve::Resolution;
-use crate::syntax::set::{OrderedSet, UnorderedSet};
-use crate::syntax::trivial::{self, TrivialReason};
-use crate::syntax::visit::{self, Visit};
-use crate::syntax::{
+use crate::improper::ImproperCtype;
+use crate::instantiate::ImplKey;
+use crate::map::{OrderedMap, UnorderedMap};
+use crate::report::Errors;
+use crate::resolve::Resolution;
+use crate::set::{OrderedSet, UnorderedSet};
+use crate::trivial::{self, TrivialReason};
+use crate::visit::{self, Visit};
+use crate::{
     toposort, Api, Atom, Enum, EnumRepr, ExternType, Impl, Lifetimes, Pair, Struct, Type, TypeAlias,
 };
 use proc_macro2::Ident;
 use quote::ToTokens;
 
-pub(crate) struct Types<'a> {
+pub struct Types<'a> {
     pub all: OrderedSet<&'a Type>,
     pub structs: UnorderedMap<&'a Ident, &'a Struct>,
     pub enums: UnorderedMap<&'a Ident, &'a Enum>,
@@ -28,7 +28,7 @@ pub(crate) struct Types<'a> {
 }
 
 impl<'a> Types<'a> {
-    pub(crate) fn collect(cx: &mut Errors, apis: &'a [Api]) -> Self {
+    pub fn collect(cx: &mut Errors, apis: &'a [Api]) -> Self {
         let mut all = OrderedSet::new();
         let mut structs = UnorderedMap::new();
         let mut enums = UnorderedMap::new();
@@ -240,7 +240,7 @@ impl<'a> Types<'a> {
         types
     }
 
-    pub(crate) fn needs_indirect_abi(&self, ty: &Type) -> bool {
+    pub fn needs_indirect_abi(&self, ty: &Type) -> bool {
         match ty {
             Type::RustBox(_) | Type::UniquePtr(_) => false,
             Type::Array(_) => true,
@@ -256,7 +256,7 @@ impl<'a> Types<'a> {
     // Rust String, even though C could easily have obtained that pointer
     // legitimately from a Rust call.
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
-    pub(crate) fn is_considered_improper_ctype(&self, ty: &Type) -> bool {
+    pub fn is_considered_improper_ctype(&self, ty: &Type) -> bool {
         match self.determine_improper_ctype(ty) {
             ImproperCtype::Definite(improper) => improper,
             ImproperCtype::Depends(ident) => self.struct_improper_ctypes.contains(ident),
@@ -265,7 +265,7 @@ impl<'a> Types<'a> {
 
     // Types which we need to assume could possibly exist by value on the Rust
     // side.
-    pub(crate) fn is_maybe_trivial(&self, ty: &Ident) -> bool {
+    pub fn is_maybe_trivial(&self, ty: &Ident) -> bool {
         self.structs.contains_key(ty)
             || self.enums.contains_key(ty)
             || self.aliases.contains_key(ty)
@@ -274,7 +274,7 @@ impl<'a> Types<'a> {
 
 impl<'t, 'a> IntoIterator for &'t Types<'a> {
     type Item = &'a Type;
-    type IntoIter = crate::syntax::set::Iter<'t, 'a, Type>;
+    type IntoIter = crate::set::Iter<'t, 'a, Type>;
     fn into_iter(self) -> Self::IntoIter {
         self.all.into_iter()
     }

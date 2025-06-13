@@ -1,5 +1,5 @@
-use crate::syntax::check::Check;
-use crate::syntax::{error, Api, Pair};
+use crate::check::Check;
+use crate::{error, Api, Pair};
 
 fn check(cx: &mut Check, name: &Pair) {
     for segment in &name.namespace {
@@ -24,7 +24,7 @@ fn check(cx: &mut Check, name: &Pair) {
     }
 }
 
-pub(crate) fn check_all(cx: &mut Check, apis: &[Api]) {
+pub fn check_all(cx: &mut Check, apis: &[Api]) {
     for api in apis {
         match api {
             Api::Include(_) | Api::Impl(_) => {}

@@ -1,8 +1,8 @@
-use crate::syntax::{derive, Enum, Struct};
+use syntax::{derive, Enum, Struct};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{quote, quote_spanned, ToTokens};
 
-pub(crate) use crate::syntax::derive::*;
+pub(crate) use syntax::derive::*;
 
 pub(crate) fn expand_struct(
     strct: &Struct,

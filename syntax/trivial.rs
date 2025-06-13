@@ -1,11 +1,11 @@
-use crate::syntax::map::UnorderedMap;
-use crate::syntax::set::{OrderedSet as Set, UnorderedSet};
-use crate::syntax::{Api, Enum, ExternFn, NamedType, Pair, Struct, Type};
+use crate::map::UnorderedMap;
+use crate::set::{OrderedSet as Set, UnorderedSet};
+use crate::{Api, Enum, ExternFn, NamedType, Pair, Struct, Type};
 use proc_macro2::Ident;
 use std::fmt::{self, Display};
 
 #[derive(Copy, Clone)]
-pub(crate) enum TrivialReason<'a> {
+pub enum TrivialReason<'a> {
     StructField(&'a Struct),
     FunctionArgument(&'a ExternFn),
     FunctionReturn(&'a ExternFn),
@@ -15,7 +15,7 @@ pub(crate) enum TrivialReason<'a> {
     UnpinnedMut(&'a ExternFn),
 }
 
-pub(crate) fn required_trivial_reasons<'a>(
+pub fn required_trivial_reasons<'a>(
     apis: &'a [Api],
     all: &Set<&'a Type>,
     structs: &UnorderedMap<&'a Ident, &'a Struct>,
@@ -124,7 +124,7 @@ pub(crate) fn required_trivial_reasons<'a>(
 // Context:
 // "type {type} should be trivially move constructible and trivially destructible in C++ to be used as {what} in Rust"
 // "needs a cxx::ExternType impl in order to be used as {what}"
-pub(crate) fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl Display + 'a {
+pub fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl Display + 'a {
     struct Description<'a> {
         name: &'a Pair,
         reasons: &'a [TrivialReason<'a>],

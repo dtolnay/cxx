@@ -1,7 +1,5 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_proc_macro")
-load("@bazel_skylib//lib:paths.bzl", "paths")
-load(":copy_srcs.bzl", "copy_srcs")
 
 rust_library(
     name = "cxx",
@@ -27,17 +25,41 @@ alias(
     visibility = ["//visibility:public"],
 )
 
-copy_srcs(
-    name = "cxxbridge-cmd-srcs",
-    srcs = glob(["gen/cmd/src/*.rs"])
+rust_library(
+    name = "syntax",
+    srcs = glob(["syntax/*.rs"]),
+    crate_root = "syntax/mod.rs",
+    edition = "2021",
+    deps = [
+        "@crates.io//:proc-macro2",
+        "@crates.io//:quote",
+        "@crates.io//:syn",
+    ],
+)
+
+rust_library(
+    name = "gen",
+    srcs = glob(["gen/src/*.rs"]),
+    compile_data = ["include/cxx.h"],
+    crate_root = "gen/src/mod.rs",
+    edition = "2021",
+    deps = [
+        ":syntax",
+        "@crates.io//:codespan-reporting",
+        "@crates.io//:proc-macro2",
+        "@crates.io//:quote",
+        "@crates.io//:syn",
+    ],
 )
 
 rust_binary(
     name = "cxxbridge",
-    srcs = [":cxxbridge-cmd-srcs"],
+    srcs = glob(["gen/cmd/src/*.rs"]),
     compile_data = ["include/cxx.h"],
     edition = "2021",
     deps = [
+        ":gen",
+        ":syntax",
         "@crates.io//:clap",
         "@crates.io//:codespan-reporting",
         "@crates.io//:proc-macro2",
@@ -61,38 +83,32 @@ cc_library(
     linkstatic = True,
 )
 
-copy_srcs(
-    name = "cxxbridge-macro-srcs",
-    srcs = glob(["macro/src/*.rs"])
-)
-
 rust_proc_macro(
     name = "cxxbridge-macro",
-    srcs = [":cxxbridge-macro-srcs"],
+    srcs = glob(["macro/src/*.rs"]),
     edition = "2021",
     proc_macro_deps = [
         "@crates.io//:rustversion",
     ],
     deps = [
+        ":gen",
+        ":syntax",
         "@crates.io//:proc-macro2",
         "@crates.io//:quote",
         "@crates.io//:syn",
     ],
 )
 
-copy_srcs(
-    name = "cxx-build-srcs",
-    srcs = glob(["gen/build/src/*.rs"])
-)
-
 rust_library(
     name = "cxx-build",
-    srcs = [":cxx-build-srcs"],
+    srcs = glob(["gen/build/src/*.rs"]),
     compile_data = [
         "include/cxx.h",
     ],
     edition = "2021",
     deps = [
+        ":gen",
+        ":syntax",
         "@crates.io//:cc",
         "@crates.io//:codespan-reporting",
         "@crates.io//:proc-macro2",
@@ -102,20 +118,16 @@ rust_library(
     ],
 )
 
-copy_srcs(
-    name = "cxx-gen-srcs",
-    srcs = glob(["gen/lib/src/*.rs"])
-)
-
 rust_library(
     name = "cxx-gen",
-    srcs = [":cxx-gen-srcs"],
+    srcs = glob(["gen/lib/src/*.rs"]),
     compile_data = ["include/cxx.h"],
     edition = "2021",
     visibility = ["//visibility:public"],
     deps = [
+        ":gen",
+        ":syntax",
         "@crates.io//:cc",
-        "@crates.io//:codespan-reporting",
         "@crates.io//:proc-macro2",
         "@crates.io//:quote",
         "@crates.io//:syn",

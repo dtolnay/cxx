@@ -1,7 +1,7 @@
-use crate::gen::include::HEADER;
-use crate::gen::out::Content;
+use crate::include::HEADER;
+use crate::out::Content;
 
-pub(super) fn write(out: &mut Content, needed: bool, guard: &str) {
+pub fn write(out: &mut Content, needed: bool, guard: &str) {
     let ifndef = format!("#ifndef {}", guard);
     let define = format!("#define {}", guard);
     let endif = format!("#endif // {}", guard);

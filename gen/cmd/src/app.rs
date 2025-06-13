@@ -4,8 +4,8 @@ mod test;
 
 use super::{Opt, Output};
 use crate::cfg::{self, CfgValue};
-use crate::gen::include::Include;
-use crate::syntax::IncludeKind;
+use gen::include::Include;
+use syntax::IncludeKind;
 use clap::builder::{ArgAction, ValueParser};
 use clap::{Arg, Command};
 use std::collections::{BTreeMap as Map, BTreeSet as Set};

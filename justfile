@@ -3,7 +3,7 @@ alias b := build
 alias t := test
 
 watch +WATCH_TARGET='test':
-    watchexec -rc -w tests -w src -w gen -w macro -w syntax -w kj-rs -- just {{WATCH_TARGET}}
+    watchexec -rc -w BUILD.bazel -w tests -w src -w gen -w macro -w syntax -w kj-rs -- just {{WATCH_TARGET}}
 
 build:
     bazel build //...

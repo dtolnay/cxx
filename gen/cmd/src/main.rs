@@ -2,7 +2,6 @@
 #![allow(
     clippy::cast_sign_loss,
     clippy::default_trait_access,
-    clippy::elidable_lifetime_names,
     clippy::enum_glob_use,
     clippy::inherent_to_string,
     clippy::items_after_statements,
@@ -27,14 +26,12 @@
 
 mod app;
 mod cfg;
-mod gen;
 mod output;
-mod syntax;
 
 use crate::cfg::{CfgValue, FlagsCfgEvaluator};
-use crate::gen::error::{report, Result};
-use crate::gen::fs;
-use crate::gen::include::{self, Include};
+use gen::error::{report, Result};
+use gen::fs;
+use gen::include::{self, Include};
 use crate::output::Output;
 use std::collections::{BTreeMap as Map, BTreeSet as Set};
 use std::io::{self, Write};

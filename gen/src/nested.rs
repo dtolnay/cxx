@@ -1,22 +1,23 @@
-use crate::syntax::map::UnorderedMap as Map;
-use crate::syntax::Api;
+use syntax::map::UnorderedMap as Map;
+use syntax::Api;
 use proc_macro2::Ident;
+use crate::namespace::namespace;
 
-pub(crate) struct NamespaceEntries<'a> {
+pub struct NamespaceEntries<'a> {
     direct: Vec<&'a Api>,
     nested: Vec<(&'a Ident, NamespaceEntries<'a>)>,
 }
 
 impl<'a> NamespaceEntries<'a> {
-    pub(crate) fn new(apis: Vec<&'a Api>) -> Self {
+    pub fn new(apis: Vec<&'a Api>) -> Self {
         sort_by_inner_namespace(apis, 0)
     }
 
-    pub(crate) fn direct_content(&self) -> &[&'a Api] {
+    pub fn direct_content(&self) -> &[&'a Api] {
         &self.direct
     }
 
-    pub(crate) fn nested_content(
+    pub fn nested_content(
         &self,
     ) -> impl Iterator<Item = (&'a Ident, &NamespaceEntries<'a>)> {
         self.nested.iter().map(|(k, entries)| (*k, entries))
@@ -29,7 +30,7 @@ fn sort_by_inner_namespace(apis: Vec<&Api>, depth: usize) -> NamespaceEntries {
     let mut index_of_namespace = Map::new();
 
     for api in &apis {
-        if let Some(first_ns_elem) = api.namespace().iter().nth(depth) {
+        if let Some(first_ns_elem) = namespace(api).iter().nth(depth) {
             match index_of_namespace.get(first_ns_elem) {
                 None => {
                     index_of_namespace.insert(first_ns_elem, nested_namespaces.len());
@@ -53,10 +54,10 @@ fn sort_by_inner_namespace(apis: Vec<&Api>, depth: usize) -> NamespaceEntries {
 #[cfg(test)]
 mod tests {
     use super::NamespaceEntries;
-    use crate::syntax::attrs::OtherAttrs;
-    use crate::syntax::cfg::CfgExpr;
-    use crate::syntax::namespace::Namespace;
-    use crate::syntax::{Api, Doc, ExternType, ForeignName, Lang, Lifetimes, Pair};
+    use syntax::attrs::OtherAttrs;
+    use syntax::cfg::CfgExpr;
+    use syntax::namespace::Namespace;
+    use syntax::{Api, Doc, ExternType, ForeignName, Lang, Lifetimes, Pair};
     use proc_macro2::{Ident, Span};
     use syn::punctuated::Punctuated;
     use syn::Token;

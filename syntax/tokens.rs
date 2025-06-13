@@ -1,5 +1,5 @@
-use crate::syntax::atom::Atom::*;
-use crate::syntax::{
+use crate::atom::Atom::*;
+use crate::{
     Array, Atom, Derive, Enum, EnumRepr, ExternFn, ExternType, Future, Impl, Lifetimes, NamedType,
     Ptr, Ref, Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var,
 };

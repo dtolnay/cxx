@@ -1,7 +1,7 @@
-use crate::syntax::atom::Atom::{self, *};
-use crate::syntax::report::Errors;
-use crate::syntax::visit::{self, Visit};
-use crate::syntax::{
+use crate::atom::Atom::{self, *};
+use crate::report::Errors;
+use crate::visit::{self, Visit};
+use crate::{
     error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Lifetimes,
     NamedType, Ptr, Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types, Future
 };
@@ -10,14 +10,14 @@ use quote::{quote, ToTokens};
 use std::fmt::Display;
 use syn::{GenericParam, Generics, Lifetime};
 
-pub(crate) struct Check<'a> {
+pub struct Check<'a> {
     apis: &'a [Api],
     types: &'a Types<'a>,
     errors: &'a mut Errors,
     generator: Generator,
 }
 
-pub(crate) enum Generator {
+pub enum Generator {
     // cxx-build crate, cxxbridge cli, cxx-gen.
     #[allow(dead_code)]
     Build,
@@ -30,7 +30,7 @@ pub(crate) enum Generator {
     Macro,
 }
 
-pub(crate) fn typecheck(cx: &mut Errors, apis: &[Api], types: &Types, generator: Generator) {
+pub fn typecheck(cx: &mut Errors, apis: &[Api], types: &Types, generator: Generator) {
     do_typecheck(&mut Check {
         apis,
         types,
@@ -60,7 +60,7 @@ fn do_typecheck(cx: &mut Check) {
 }
 
 impl Check<'_> {
-    pub(crate) fn error(&mut self, sp: impl ToTokens, msg: impl Display) {
+    pub fn error(&mut self, sp: impl ToTokens, msg: impl Display) {
         self.errors.error(sp, msg);
     }
 }

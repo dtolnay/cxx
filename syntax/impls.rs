@@ -1,4 +1,4 @@
-use crate::syntax::{
+use crate::{
     Array, ExternFn, Future, Include, Lifetimes, Ptr, Receiver, Ref, Signature, SliceRef, Ty1,
     Type, Var,
 };

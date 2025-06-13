@@ -1,9 +1,9 @@
-use crate::gen::block::Block;
-use crate::gen::ifndef;
-use crate::gen::out::{Content, OutFile};
+use crate::block::Block;
+use crate::ifndef;
+use crate::out::{Content, OutFile};
 
 #[derive(Default, PartialEq)]
-pub(crate) struct Builtins<'a> {
+pub struct Builtins<'a> {
     pub panic: bool,
     pub rust_string: bool,
     pub rust_str: bool,
@@ -36,12 +36,12 @@ pub(crate) struct Builtins<'a> {
 }
 
 impl<'a> Builtins<'a> {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Builtins::default()
     }
 }
 
-pub(super) fn write(out: &mut OutFile) {
+pub fn write(out: &mut OutFile) {
     if out.builtin == Default::default() {
         return;
     }

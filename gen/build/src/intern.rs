@@ -1,4 +1,4 @@
-use crate::syntax::set::UnorderedSet as Set;
+use syntax::set::UnorderedSet as Set;
 use std::sync::{Mutex, OnceLock, PoisonError};
 
 #[derive(Copy, Clone, Default)]

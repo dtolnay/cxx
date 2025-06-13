@@ -1,21 +1,21 @@
-use crate::gen::block::Block;
-use crate::gen::nested::NamespaceEntries;
-use crate::gen::out::OutFile;
-use crate::gen::{builtin, include, Opt};
-use crate::syntax::atom::Atom::{self, *};
-use crate::syntax::instantiate::{ImplKey, NamedImplKey};
-use crate::syntax::map::UnorderedMap as Map;
-use crate::syntax::set::UnorderedSet;
-use crate::syntax::symbol::{self, Symbol};
-use crate::syntax::trivial::{self, TrivialReason};
-use crate::syntax::Lang;
-use crate::syntax::{
+use crate::block::Block;
+use crate::nested::NamespaceEntries;
+use crate::out::OutFile;
+use crate::{builtin, include, Opt};
+use syntax::atom::Atom::{self, *};
+use syntax::instantiate::{ImplKey, NamedImplKey};
+use syntax::map::UnorderedMap as Map;
+use syntax::set::UnorderedSet;
+use syntax::symbol::{self, Symbol};
+use syntax::trivial::{self, TrivialReason};
+use syntax::Lang;
+use syntax::{
     derive, mangle, Api, Doc, Enum, EnumRepr, ExternFn, ExternType, Pair, Signature, Struct, Trait,
     Type, TypeAlias, Types, Var,
 };
 use proc_macro2::Ident;
 
-pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u8> {
+pub fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u8> {
     let mut out_file = OutFile::new(header, opt, types);
     let out = &mut out_file;
 

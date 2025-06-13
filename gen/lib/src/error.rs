@@ -7,21 +7,21 @@ use std::iter;
 
 #[allow(missing_docs)]
 pub struct Error {
-    pub(crate) err: crate::gen::Error,
+    pub(crate) err: gen::Error,
 }
 
 impl Error {
     /// Returns the span of the error, if available.
     pub fn span(&self) -> Option<proc_macro2::Span> {
         match &self.err {
-            crate::gen::Error::Syn(err) => Some(err.span()),
+            gen::Error::Syn(err) => Some(err.span()),
             _ => None,
         }
     }
 }
 
-impl From<crate::gen::Error> for Error {
-    fn from(err: crate::gen::Error) -> Self {
+impl From<gen::Error> for Error {
+    fn from(err: gen::Error) -> Self {
         Error { err }
     }
 }
@@ -50,7 +50,7 @@ impl IntoIterator for Error {
 
     fn into_iter(self) -> Self::IntoIter {
         match self.err {
-            crate::gen::Error::Syn(err) => IntoIter::Syn(err.into_iter()),
+            gen::Error::Syn(err) => IntoIter::Syn(err.into_iter()),
             _ => IntoIter::Other(iter::once(self)),
         }
     }
@@ -68,7 +68,7 @@ impl Iterator for IntoIter {
         match self {
             IntoIter::Syn(iter) => iter
                 .next()
-                .map(|syn_err| Error::from(crate::gen::Error::Syn(syn_err))),
+                .map(|syn_err| Error::from(gen::Error::Syn(syn_err))),
             IntoIter::Other(iter) => iter.next(),
         }
     }

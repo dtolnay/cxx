@@ -1,4 +1,4 @@
-use crate::syntax::qualified::QualifiedName;
+use crate::qualified::QualifiedName;
 use quote::IdentFragment;
 use std::fmt::{self, Display};
 use std::slice::Iter;
@@ -10,20 +10,20 @@ mod kw {
 }
 
 #[derive(Clone, Default)]
-pub(crate) struct Namespace {
+pub struct Namespace {
     segments: Vec<Ident>,
 }
 
 impl Namespace {
-    pub(crate) const ROOT: Self = Namespace {
+    pub const ROOT: Self = Namespace {
         segments: Vec::new(),
     };
 
-    pub(crate) fn iter(&self) -> Iter<Ident> {
+    pub fn iter(&self) -> Iter<Ident> {
         self.segments.iter()
     }
 
-    pub(crate) fn parse_bridge_attr_namespace(input: ParseStream) -> Result<Self> {
+    pub fn parse_bridge_attr_namespace(input: ParseStream) -> Result<Self> {
         if input.is_empty() {
             return Ok(Namespace::ROOT);
         }
@@ -35,7 +35,7 @@ impl Namespace {
         Ok(namespace)
     }
 
-    pub(crate) fn parse_meta(meta: &Meta) -> Result<Self> {
+    pub fn parse_meta(meta: &Meta) -> Result<Self> {
         if let Meta::NameValue(meta) = meta {
             match &meta.value {
                 Expr::Lit(expr) => {

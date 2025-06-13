@@ -1,6 +1,5 @@
 #![allow(
     clippy::boxed_local,
-    clippy::elidable_lifetime_names,
     clippy::missing_errors_doc,
     clippy::missing_safety_doc,
     clippy::must_use_candidate,

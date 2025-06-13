@@ -381,7 +381,6 @@
 #![allow(
     clippy::cast_possible_truncation,
     clippy::doc_markdown,
-    clippy::elidable_lifetime_names,
     clippy::items_after_statements,
     clippy::len_without_is_empty,
     clippy::missing_errors_doc,

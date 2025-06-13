@@ -1,10 +1,10 @@
-use crate::syntax::{NamedType, Ty1, Type};
+use crate::{NamedType, Ty1, Type};
 use proc_macro2::{Ident, Span};
 use std::hash::{Hash, Hasher};
 use syn::Token;
 
 #[derive(Copy, Clone, PartialEq, Eq, Hash)]
-pub(crate) enum ImplKey<'a> {
+pub enum ImplKey<'a> {
     RustBox(NamedImplKey<'a>),
     RustVec(NamedImplKey<'a>),
     UniquePtr(NamedImplKey<'a>),
@@ -14,7 +14,7 @@ pub(crate) enum ImplKey<'a> {
 }
 
 #[derive(Copy, Clone)]
-pub(crate) struct NamedImplKey<'a> {
+pub struct NamedImplKey<'a> {
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
     pub begin_span: Span,
     pub rust: &'a Ident,
@@ -27,7 +27,7 @@ pub(crate) struct NamedImplKey<'a> {
 }
 
 impl Type {
-    pub(crate) fn impl_key(&self) -> Option<ImplKey> {
+    pub fn impl_key(&self) -> Option<ImplKey> {
         if let Type::RustBox(ty) = self {
             if let Type::Ident(ident) = &ty.inner {
                 return Some(ImplKey::RustBox(NamedImplKey::new(ty, ident)));

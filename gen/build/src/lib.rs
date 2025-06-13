@@ -81,21 +81,19 @@ mod cargo;
 mod cfg;
 mod deps;
 mod error;
-mod gen;
 mod intern;
 mod out;
 mod paths;
-mod syntax;
 mod target;
 mod vec;
 
 use crate::cargo::CargoEnvCfgEvaluator;
 use crate::deps::{Crate, HeaderDir};
 use crate::error::{Error, Result};
-use crate::gen::error::report;
-use crate::gen::Opt;
+use gen::error::report;
+use gen::Opt;
 use crate::paths::PathExt;
-use crate::syntax::map::{Entry, UnorderedMap};
+use syntax::map::{Entry, UnorderedMap};
 use crate::target::TargetDir;
 use cc::Build;
 use std::collections::BTreeSet;
@@ -425,7 +423,7 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
 }
 
 fn best_effort_copy_headers(src: &Path, dst: &Path, max_depth: usize) {
-    // Not using crate::gen::fs because we aren't reporting the errors.
+    // Not using gen::fs because we aren't reporting the errors.
     use std::fs;
 
     let mut dst_created = false;

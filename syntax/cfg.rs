@@ -4,7 +4,7 @@ use syn::parse::{Error, ParseStream, Result};
 use syn::{parenthesized, token, Attribute, LitStr, Token};
 
 #[derive(Clone)]
-pub(crate) enum CfgExpr {
+pub enum CfgExpr {
     Unconditional,
     #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
     Eq(Ident, Option<LitStr>),
@@ -16,7 +16,7 @@ pub(crate) enum CfgExpr {
 }
 
 impl CfgExpr {
-    pub(crate) fn merge(&mut self, expr: CfgExpr) {
+    pub fn merge(&mut self, expr: CfgExpr) {
         if let CfgExpr::Unconditional = self {
             *self = expr;
         } else if let CfgExpr::All(list) = self {
@@ -28,7 +28,7 @@ impl CfgExpr {
     }
 }
 
-pub(crate) fn parse_attribute(attr: &Attribute) -> Result<CfgExpr> {
+pub fn parse_attribute(attr: &Attribute) -> Result<CfgExpr> {
     attr.parse_args_with(|input: ParseStream| {
         let cfg_expr = input.call(parse_single)?;
         input.parse::<Option<Token![,]>>()?;

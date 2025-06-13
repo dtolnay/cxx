@@ -1,8 +1,8 @@
-use crate::syntax::atom::Atom::{self, *};
-use crate::syntax::{derive, Trait, Type, Types};
+use crate::atom::Atom::{self, *};
+use crate::{derive, Trait, Type, Types};
 
 impl<'a> Types<'a> {
-    pub(crate) fn is_guaranteed_pod(&self, ty: &Type) -> bool {
+    pub fn is_guaranteed_pod(&self, ty: &Type) -> bool {
         match ty {
             Type::Ident(ident) => {
                 let ident = &ident.rust;

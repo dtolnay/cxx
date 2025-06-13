@@ -1,6 +1,6 @@
-use crate::syntax::instantiate::NamedImplKey;
-use crate::syntax::resolve::Resolution;
-use crate::syntax::{Impl, Lifetimes};
+use syntax::instantiate::NamedImplKey;
+use syntax::resolve::Resolution;
+use syntax::{Impl, Lifetimes};
 use proc_macro2::TokenStream;
 use quote::ToTokens;
 use syn::{Lifetime, Token};
@@ -66,10 +66,8 @@ pub(crate) struct UnderscoreLifetimes<'a> {
     generics: &'a Lifetimes,
 }
 
-impl Lifetimes {
-    pub(crate) fn to_underscore_lifetimes(&self) -> UnderscoreLifetimes {
-        UnderscoreLifetimes { generics: self }
-    }
+pub(crate) fn to_underscore_lifetimes(generics: &Lifetimes) -> UnderscoreLifetimes {
+    UnderscoreLifetimes { generics }
 }
 
 impl<'a> ToTokens for UnderscoreLifetimes<'a> {

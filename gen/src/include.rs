@@ -1,5 +1,5 @@
-use crate::gen::out::{Content, OutFile};
-use crate::syntax::{self, IncludeKind};
+use crate::out::{Content, OutFile};
+use syntax::{self, IncludeKind};
 use std::ops::{Deref, DerefMut};
 
 /// The complete contents of the "rust/cxx.h" header.
@@ -19,7 +19,7 @@ pub struct Include {
 }
 
 #[derive(Default, PartialEq)]
-pub(crate) struct Includes<'a> {
+pub struct Includes<'a> {
     pub custom: Vec<Include>,
     pub algorithm: bool,
     pub array: bool,
@@ -47,22 +47,22 @@ pub(crate) struct Includes<'a> {
 }
 
 impl<'a> Includes<'a> {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Includes::default()
     }
 
-    pub(crate) fn insert(&mut self, include: impl Into<Include>) {
+    pub fn insert(&mut self, include: impl Into<Include>) {
         self.custom.push(include.into());
     }
 
-    pub(crate) fn has_cxx_header(&self) -> bool {
+    pub fn has_cxx_header(&self) -> bool {
         self.custom
             .iter()
             .any(|header| header.path == "rust/cxx.h" || header.path == "rust\\cxx.h")
     }
 }
 
-pub(super) fn write(out: &mut OutFile) {
+pub fn write(out: &mut OutFile) {
     let header = out.header;
     let include = &mut out.include;
     let cxx_header = include.has_cxx_header();

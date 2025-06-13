@@ -1,4 +1,4 @@
-use crate::gen::fs;
+use crate::fs;
 use crate::syntax;
 use codespan_reporting::diagnostic::{Diagnostic, Label};
 use codespan_reporting::files::SimpleFiles;
@@ -13,10 +13,10 @@ use std::path::{Path, PathBuf};
 use std::process;
 use std::str::Utf8Error;
 
-pub(crate) type Result<T, E = Error> = std::result::Result<T, E>;
+pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 #[derive(Debug)]
-pub(crate) enum Error {
+pub enum Error {
     NoBridgeMod,
     Fs(fs::Error),
     Utf8(PathBuf, Utf8Error),
@@ -57,7 +57,7 @@ impl From<syn::Error> for Error {
     }
 }
 
-pub(super) fn format_err(path: &Path, source: &str, error: Error) -> ! {
+pub fn format_err(path: &Path, source: &str, error: Error) -> ! {
     match error {
         Error::Syn(syn_error) => {
             let syn_error = sort_syn_errors(syn_error);
@@ -82,7 +82,7 @@ pub(super) fn format_err(path: &Path, source: &str, error: Error) -> ! {
     process::exit(1);
 }
 
-pub(crate) fn report(error: impl StdError) -> impl Display {
+pub fn report(error: impl StdError) -> impl Display {
     struct Report<E>(E);
 
     impl<E: StdError> Display for Report<E> {

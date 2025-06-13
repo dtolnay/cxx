@@ -1,5 +1,5 @@
-use crate::syntax::cfg::CfgExpr;
-use crate::syntax::namespace::Namespace;
+use crate::cfg::CfgExpr;
+use crate::namespace::Namespace;
 use quote::quote;
 use syn::parse::{Error, Parse, ParseStream, Result};
 use syn::{
@@ -7,7 +7,7 @@ use syn::{
     ItemStruct, ItemUse, LitStr, Token, Visibility,
 };
 
-pub(crate) struct Module {
+pub struct Module {
     #[allow(dead_code)]
     pub cfg: CfgExpr,
     pub namespace: Namespace,
@@ -24,7 +24,7 @@ pub(crate) struct Module {
     pub content: Vec<Item>,
 }
 
-pub(crate) enum Item {
+pub enum Item {
     Struct(ItemStruct),
     Enum(ItemEnum),
     ForeignMod(ItemForeignMod),
@@ -33,7 +33,7 @@ pub(crate) enum Item {
     Other(RustItem),
 }
 
-pub(crate) struct ItemForeignMod {
+pub struct ItemForeignMod {
     pub attrs: Vec<Attribute>,
     pub unsafety: Option<Token![unsafe]>,
     pub abi: Abi,

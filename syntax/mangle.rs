@@ -73,8 +73,8 @@
 //             - CXXBRIDGE1_STRUCT_org$rust$Struct
 //             - CXXBRIDGE1_ENUM_Enabled
 
-use crate::syntax::symbol::{self, Symbol};
-use crate::syntax::{ExternFn, Pair, Types};
+use crate::symbol::{self, Symbol};
+use crate::{ExternFn, Pair, Types};
 
 const CXXBRIDGE: &str = "cxxbridge1";
 
@@ -84,7 +84,7 @@ macro_rules! join {
     };
 }
 
-pub(crate) fn extern_fn(efn: &ExternFn, types: &Types) -> Symbol {
+pub fn extern_fn(efn: &ExternFn, types: &Types) -> Symbol {
     match &efn.receiver {
         Some(receiver) => {
             let receiver_ident = types.resolve(&receiver.ty);
@@ -99,7 +99,7 @@ pub(crate) fn extern_fn(efn: &ExternFn, types: &Types) -> Symbol {
     }
 }
 
-pub(crate) fn operator(receiver: &Pair, operator: &'static str) -> Symbol {
+pub fn operator(receiver: &Pair, operator: &'static str) -> Symbol {
     join!(
         receiver.namespace,
         CXXBRIDGE,
@@ -110,11 +110,11 @@ pub(crate) fn operator(receiver: &Pair, operator: &'static str) -> Symbol {
 }
 
 // The C half of a function pointer trampoline.
-pub(crate) fn c_trampoline(efn: &ExternFn, var: &Pair, types: &Types) -> Symbol {
+pub fn c_trampoline(efn: &ExternFn, var: &Pair, types: &Types) -> Symbol {
     join!(extern_fn(efn, types), var.rust, 0)
 }
 
 // The Rust half of a function pointer trampoline.
-pub(crate) fn r_trampoline(efn: &ExternFn, var: &Pair, types: &Types) -> Symbol {
+pub fn r_trampoline(efn: &ExternFn, var: &Pair, types: &Types) -> Symbol {
     join!(extern_fn(efn, types), var.rust, 1)
 }

@@ -1,22 +1,10 @@
-use crate::syntax::Receiver;
+use syntax::Receiver;
 use proc_macro2::TokenStream;
 use quote::{quote_spanned, ToTokens};
 use syn::Token;
 
-pub(crate) struct ReceiverType<'a>(&'a Receiver);
-pub(crate) struct ReceiverTypeSelf<'a>(&'a Receiver);
-
-impl Receiver {
-    // &TheType
-    pub(crate) fn ty(&self) -> ReceiverType {
-        ReceiverType(self)
-    }
-
-    // &Self
-    pub(crate) fn ty_self(&self) -> ReceiverTypeSelf {
-        ReceiverTypeSelf(self)
-    }
-}
+pub struct ReceiverType<'a>(pub &'a Receiver);
+pub struct ReceiverTypeSelf<'a>(pub &'a Receiver);
 
 impl ToTokens for ReceiverType<'_> {
     fn to_tokens(&self, tokens: &mut TokenStream) {

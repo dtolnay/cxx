@@ -2,30 +2,30 @@ use proc_macro2::TokenStream;
 use quote::{quote, ToTokens};
 use syn::LitStr;
 
-pub(crate) struct Doc {
+pub struct Doc {
     pub hidden: bool,
     fragments: Vec<LitStr>,
 }
 
 impl Doc {
-    pub(crate) fn new() -> Self {
+    pub fn new() -> Self {
         Doc {
             hidden: false,
             fragments: Vec::new(),
         }
     }
 
-    pub(crate) fn push(&mut self, lit: LitStr) {
+    pub fn push(&mut self, lit: LitStr) {
         self.fragments.push(lit);
     }
 
     #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
-    pub(crate) fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.fragments.is_empty()
     }
 
     #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
-    pub(crate) fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String {
         let mut doc = String::new();
         for lit in &self.fragments {
             doc += &lit.value();

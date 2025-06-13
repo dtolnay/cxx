@@ -1,8 +1,8 @@
-use crate::syntax::cfg::CfgExpr;
-use crate::syntax::namespace::Namespace;
-use crate::syntax::report::Errors;
-use crate::syntax::Atom::{self, *};
-use crate::syntax::{cfg, Derive, Doc, ForeignName};
+use crate::cfg::CfgExpr;
+use crate::namespace::Namespace;
+use crate::report::Errors;
+use crate::Atom::{self, *};
+use crate::{cfg, Derive, Doc, ForeignName};
 use proc_macro2::{Ident, TokenStream};
 use quote::ToTokens;
 use syn::parse::ParseStream;
@@ -27,7 +27,7 @@ use syn::{Attribute, Error, Expr, Lit, LitStr, Meta, Path, Result, Token};
 //     );
 //
 #[derive(Default)]
-pub(crate) struct Parser<'a> {
+pub struct Parser<'a> {
     pub cfg: Option<&'a mut CfgExpr>,
     pub doc: Option<&'a mut Doc>,
     pub derives: Option<&'a mut Vec<Derive>>,
@@ -41,10 +41,10 @@ pub(crate) struct Parser<'a> {
     // Suppress clippy needless_update lint ("struct update has no effect, all
     // the fields in the struct have already been specified") when preemptively
     // writing `..Default::default()`.
-    pub(crate) _more: (),
+    pub _more: (),
 }
 
-pub(crate) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> OtherAttrs {
+pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> OtherAttrs {
     let mut passthrough_attrs = Vec::new();
     for attr in attrs {
         let attr_path = attr.path();
@@ -283,14 +283,14 @@ fn parse_rust_name_attribute(meta: &Meta) -> Result<Ident> {
 }
 
 #[derive(Clone)]
-pub(crate) struct OtherAttrs(Vec<Attribute>);
+pub struct OtherAttrs(Vec<Attribute>);
 
 impl OtherAttrs {
-    pub(crate) fn none() -> Self {
+    pub fn none() -> Self {
         OtherAttrs(Vec::new())
     }
 
-    pub(crate) fn extend(&mut self, other: Self) {
+    pub fn extend(&mut self, other: Self) {
         self.0.extend(other.0);
     }
 }

@@ -1,5 +1,5 @@
 use crate::cfg::CFG;
-use crate::gen::fs;
+use gen::fs;
 use std::error::Error as StdError;
 use std::ffi::OsString;
 use std::fmt::{self, Display};

@@ -14,7 +14,6 @@
 #![allow(
     clippy::cast_sign_loss,
     clippy::default_trait_access,
-    clippy::elidable_lifetime_names,
     clippy::enum_glob_use,
     clippy::inherent_to_string,
     clippy::items_after_statements,
@@ -39,20 +38,18 @@
 )]
 
 mod error;
-mod gen;
-mod syntax;
 
 pub use crate::error::Error;
-pub use crate::gen::include::{Include, HEADER};
-pub use crate::gen::{CfgEvaluator, CfgResult, GeneratedCode, Opt};
-pub use crate::syntax::IncludeKind;
+pub use gen::include::{Include, HEADER};
+pub use gen::{CfgEvaluator, CfgResult, GeneratedCode, Opt};
+pub use syntax::IncludeKind;
 use proc_macro2::TokenStream;
 
 /// Generate C++ bindings code from a Rust token stream. This should be a Rust
 /// token stream which somewhere contains a `#[cxx::bridge] mod {}`.
 pub fn generate_header_and_cc(rust_source: TokenStream, opt: &Opt) -> Result<GeneratedCode, Error> {
     let syntax = syn::parse2(rust_source)
-        .map_err(crate::gen::Error::from)
+        .map_err(gen::Error::from)
         .map_err(Error::from)?;
     gen::generate(syntax, opt).map_err(Error::from)
 }

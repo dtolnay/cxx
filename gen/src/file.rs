@@ -1,10 +1,10 @@
-use crate::syntax::file::Module;
-use crate::syntax::namespace::Namespace;
+use syntax::file::Module;
+use syntax::namespace::Namespace;
 use syn::parse::discouraged::Speculative;
 use syn::parse::{Error, Parse, ParseStream, Result};
 use syn::{braced, Attribute, Ident, Item, Meta, Token, Visibility};
 
-pub(crate) struct File {
+pub struct File {
     pub modules: Vec<Module>,
 }
 

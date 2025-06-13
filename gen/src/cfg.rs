@@ -1,12 +1,12 @@
-use crate::gen::{CfgEvaluator, CfgResult};
-use crate::syntax::cfg::CfgExpr;
-use crate::syntax::report::Errors;
-use crate::syntax::Api;
+use crate::{CfgEvaluator, CfgResult};
+use syntax::cfg::CfgExpr;
+use syntax::report::Errors;
+use syntax::Api;
 use quote::quote;
 use std::collections::BTreeSet as Set;
 use syn::{Error, LitStr};
 
-pub(super) struct UnsupportedCfgEvaluator;
+pub struct UnsupportedCfgEvaluator;
 
 impl CfgEvaluator for UnsupportedCfgEvaluator {
     fn eval(&self, name: &str, value: Option<&str>) -> CfgResult {
@@ -17,13 +17,13 @@ impl CfgEvaluator for UnsupportedCfgEvaluator {
     }
 }
 
-pub(super) fn strip(
+pub fn strip(
     cx: &mut Errors,
     cfg_errors: &mut Set<String>,
     cfg_evaluator: &dyn CfgEvaluator,
     apis: &mut Vec<Api>,
 ) {
-    apis.retain(|api| eval(cx, cfg_errors, cfg_evaluator, api.cfg()));
+    apis.retain(|api| eval(cx, cfg_errors, cfg_evaluator, cfg(api)));
     for api in apis {
         match api {
             Api::Struct(strct) => strct
@@ -37,7 +37,7 @@ pub(super) fn strip(
     }
 }
 
-pub(super) fn eval(
+pub fn eval(
     cx: &mut Errors,
     cfg_errors: &mut Set<String>,
     cfg_evaluator: &dyn CfgEvaluator,
@@ -108,17 +108,15 @@ fn try_eval(cfg_evaluator: &dyn CfgEvaluator, expr: &CfgExpr) -> Result<bool, Ve
     }
 }
 
-impl Api {
-    fn cfg(&self) -> &CfgExpr {
-        match self {
-            Api::Include(include) => &include.cfg,
-            Api::Struct(strct) => &strct.cfg,
-            Api::Enum(enm) => &enm.cfg,
-            Api::CxxType(ety) | Api::RustType(ety) => &ety.cfg,
-            Api::CxxFunction(efn) | Api::RustFunction(efn) => &efn.cfg,
-            Api::TypeAlias(alias) => &alias.cfg,
-            Api::Impl(imp) => &imp.cfg,
-        }
+pub fn cfg(api: &Api) -> &CfgExpr {
+    match api {
+        Api::Include(include) => &include.cfg,
+        Api::Struct(strct) => &strct.cfg,
+        Api::Enum(enm) => &enm.cfg,
+        Api::CxxType(ety) | Api::RustType(ety) => &ety.cfg,
+        Api::CxxFunction(efn) | Api::RustFunction(efn) => &efn.cfg,
+        Api::TypeAlias(alias) => &alias.cfg,
+        Api::Impl(imp) => &imp.cfg,
     }
 }
 

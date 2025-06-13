@@ -1,12 +1,12 @@
-use crate::syntax::Type;
+use crate::Type;
 
-pub(crate) trait Visit<'a> {
+pub trait Visit<'a> {
     fn visit_type(&mut self, ty: &'a Type) {
         visit_type(self, ty);
     }
 }
 
-pub(crate) fn visit_type<'a, V>(visitor: &mut V, ty: &'a Type)
+pub fn visit_type<'a, V>(visitor: &mut V, ty: &'a Type)
 where
     V: Visit<'a> + ?Sized,
 {

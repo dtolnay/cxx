@@ -1,9 +1,9 @@
 use crate::clang::{Clang, Node};
-use crate::syntax::attrs::OtherAttrs;
-use crate::syntax::cfg::CfgExpr;
-use crate::syntax::namespace::Namespace;
-use crate::syntax::report::Errors;
-use crate::syntax::{Api, Discriminant, Doc, Enum, EnumRepr, ForeignName, Pair, Variant};
+use syntax::attrs::OtherAttrs;
+use syntax::cfg::CfgExpr;
+use syntax::namespace::Namespace;
+use syntax::report::Errors;
+use syntax::{Api, Discriminant, Doc, Enum, EnumRepr, ForeignName, Pair, Variant};
 use flate2::write::GzDecoder;
 use memmap::Mmap;
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};

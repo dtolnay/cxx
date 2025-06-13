@@ -1,14 +1,14 @@
 use std::fmt::{self, Debug};
 use std::slice;
 
-pub(crate) use self::ordered::OrderedSet;
-pub(crate) use self::unordered::UnorderedSet;
+pub use self::ordered::OrderedSet;
+pub use self::unordered::UnorderedSet;
 
 mod ordered {
     use super::{Iter, UnorderedSet};
     use std::hash::Hash;
 
-    pub(crate) struct OrderedSet<T> {
+    pub struct OrderedSet<T> {
         set: UnorderedSet<T>,
         vec: Vec<T>,
     }
@@ -17,14 +17,14 @@ mod ordered {
     where
         T: Hash + Eq,
     {
-        pub(crate) fn new() -> Self {
+        pub fn new() -> Self {
             OrderedSet {
                 set: UnorderedSet::new(),
                 vec: Vec::new(),
             }
         }
 
-        pub(crate) fn insert(&mut self, value: &'a T) -> bool {
+        pub fn insert(&mut self, value: &'a T) -> bool {
             let new = self.set.insert(value);
             if new {
                 self.vec.push(value);
@@ -34,11 +34,11 @@ mod ordered {
     }
 
     impl<'a, T> OrderedSet<&'a T> {
-        pub(crate) fn is_empty(&self) -> bool {
+        pub fn is_empty(&self) -> bool {
             self.vec.is_empty()
         }
 
-        pub(crate) fn iter(&self) -> Iter<'_, 'a, T> {
+        pub fn iter(&self) -> Iter<'_, 'a, T> {
             Iter(self.vec.iter())
         }
     }
@@ -59,21 +59,21 @@ mod unordered {
 
     // Wrapper prohibits accidentally introducing iteration over the set, which
     // could lead to nondeterministic generated code.
-    pub(crate) struct UnorderedSet<T>(HashSet<T>);
+    pub struct UnorderedSet<T>(HashSet<T>);
 
     impl<T> UnorderedSet<T>
     where
         T: Hash + Eq,
     {
-        pub(crate) fn new() -> Self {
+        pub fn new() -> Self {
             UnorderedSet(HashSet::new())
         }
 
-        pub(crate) fn insert(&mut self, value: T) -> bool {
+        pub fn insert(&mut self, value: T) -> bool {
             self.0.insert(value)
         }
 
-        pub(crate) fn contains<Q>(&self, value: &Q) -> bool
+        pub fn contains<Q>(&self, value: &Q) -> bool
         where
             T: Borrow<Q>,
             Q: ?Sized + Hash + Eq,
@@ -82,7 +82,7 @@ mod unordered {
         }
 
         #[allow(dead_code)] // only used by cxx-build, not cxxbridge-cmd
-        pub(crate) fn get<Q>(&self, value: &Q) -> Option<&T>
+        pub fn get<Q>(&self, value: &Q) -> Option<&T>
         where
             T: Borrow<Q>,
             Q: ?Sized + Hash + Eq,
@@ -90,13 +90,13 @@ mod unordered {
             self.0.get(value)
         }
 
-        pub(crate) fn retain(&mut self, f: impl FnMut(&T) -> bool) {
+        pub fn retain(&mut self, f: impl FnMut(&T) -> bool) {
             self.0.retain(f);
         }
     }
 }
 
-pub(crate) struct Iter<'s, 'a, T>(slice::Iter<'s, &'a T>);
+pub struct Iter<'s, 'a, T>(slice::Iter<'s, &'a T>);
 
 impl<'s, 'a, T> Iterator for Iter<'s, 'a, T> {
     type Item = &'a T;

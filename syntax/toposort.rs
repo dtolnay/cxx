@@ -1,13 +1,13 @@
-use crate::syntax::map::{Entry, UnorderedMap as Map};
-use crate::syntax::report::Errors;
-use crate::syntax::{Api, Struct, Type, Types};
+use crate::map::{Entry, UnorderedMap as Map};
+use crate::report::Errors;
+use crate::{Api, Struct, Type, Types};
 
 enum Mark {
     Visiting,
     Visited,
 }
 
-pub(crate) fn sort<'a>(cx: &mut Errors, apis: &'a [Api], types: &Types<'a>) -> Vec<&'a Struct> {
+pub fn sort<'a>(cx: &mut Errors, apis: &'a [Api], types: &Types<'a>) -> Vec<&'a Struct> {
     let mut sorted = Vec::new();
     let ref mut marks = Map::new();
     for api in apis {

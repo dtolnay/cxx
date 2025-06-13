@@ -1,7 +1,6 @@
 #![allow(
     clippy::cast_sign_loss,
     clippy::doc_markdown,
-    clippy::elidable_lifetime_names,
     clippy::enum_glob_use,
     clippy::inherent_to_string,
     clippy::items_after_statements,
@@ -23,7 +22,6 @@
 mod derive;
 mod expand;
 mod generics;
-mod syntax;
 mod tokens;
 mod type_id;
 
@@ -32,9 +30,9 @@ mod clang;
 #[cfg(feature = "experimental-enum-variants-from-header")]
 mod load;
 
-use crate::syntax::file::Module;
-use crate::syntax::namespace::Namespace;
-use crate::syntax::qualified::QualifiedName;
+use syntax::file::Module;
+use syntax::namespace::Namespace;
+use syntax::qualified::QualifiedName;
 use crate::type_id::Crate;
 use proc_macro::TokenStream;
 use syn::parse::{Parse, ParseStream, Parser, Result};
