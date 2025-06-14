@@ -2,6 +2,8 @@ name: CI
 
 on:
   push:
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
   # schedule: [cron: "40 1 * * *"]
@@ -13,7 +15,6 @@ jobs:
   bazel:
     name: Bazel on ${{matrix.os.name}}
     runs-on: ${{matrix.os.image}}
-    if: github.event_name != 'pull_request'
     strategy:
       fail-fast: false
       matrix:
@@ -42,7 +43,6 @@ jobs:
   clippy:
     name: Clippy
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
@@ -52,7 +52,6 @@ jobs:
   asan:
     name: Address Sanitizer
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
@@ -62,7 +61,6 @@ jobs:
   clang-tidy:
     name: Clang Tidy
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
@@ -74,7 +72,6 @@ jobs:
   eslint:
     name: ESLint
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
