@@ -57,5 +57,6 @@ def rust_cxx_bridge(name, src, deps = [], hdrs = [], linkstatic = True, include_
         hdrs = [src + ".h"] + hdrs,
         include_prefix = include_prefix,
         strip_include_prefix = strip_include_prefix,
+        deps = deps,
         **kwargs
     )

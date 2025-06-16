@@ -49,12 +49,19 @@ rust_cxx_bridge(
     name = "bridge",
     testonly = True,
     src = "ffi/lib.rs",
-    deps = [":impl"],
+    hdrs = ["ffi/tests.h"],
+    deps = [
+        "//:core",
+        ":module",
+    ]
 )
 
 rust_cxx_bridge(
     name = "module",
     testonly = True,
     src = "ffi/module.rs",
-    deps = [":impl"],
+    hdrs = ["ffi/tests.h"],
+    deps = [
+        "//:core",
+    ]
 )
