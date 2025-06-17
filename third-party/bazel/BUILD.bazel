@@ -80,6 +80,18 @@ alias(
 )
 
 alias(
+    name = "futures-0.3.31",
+    actual = "@vendor__futures-0.3.31//:futures",
+    tags = ["manual"],
+)
+
+alias(
+    name = "futures",
+    actual = "@vendor__futures-0.3.31//:futures",
+    tags = ["manual"],
+)
+
+alias(
     name = "proc-macro2-1.0.94",
     actual = "@vendor__proc-macro2-1.0.94//:proc_macro2",
     tags = ["manual"],
