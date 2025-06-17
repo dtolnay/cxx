@@ -1,5 +1,5 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test", "rust_unpretty")
 load("//tools/bazel:rust_cxx_bridge.bzl", "rust_cxx_bridge")
 
 # https://bazel.build/configure/windows#clang
@@ -22,6 +22,14 @@ rust_library(
         "@workerd-cxx//:cxx",
         "//kj-rs",
     ],
+)
+
+rust_unpretty(
+    name = "expand-rust_test",
+    testonly = True,
+    deps = [
+        ":awaitables-rust_test"
+    ]
 )
 
 rust_test(
