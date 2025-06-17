@@ -28,4 +28,6 @@ kj::Promise<void> new_errored_promise_void() {
   return KJ_EXCEPTION(FAILED, "test error");
 }
 
+kj::Promise<Shared> new_ready_promise_shared_type() { return Shared{42}; }
+
 }  // namespace kj_rs_demo

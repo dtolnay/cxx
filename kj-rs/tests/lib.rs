@@ -16,10 +16,10 @@ type Error = std::io::Error;
 
 #[cxx::bridge(namespace = "kj_rs_demo")]
 mod ffi {
-    // -----------------------------------------------------
-    // Test functions
+    struct Shared {
+        i: i64,
+    }
 
-    // Helper functions to create Promises for testing purposes.
     unsafe extern "C++" {
         include!("kj-rs-demo/test-promises.h");
 
@@ -29,6 +29,7 @@ mod ffi {
 
         async fn new_errored_promise_void();
         async fn new_ready_promise_i32(value: i32) -> i32;
+        async fn new_ready_promise_shared_type() -> Shared;
     }
 
     enum CloningAction {
@@ -50,6 +51,7 @@ mod ffi {
     extern "Rust" {
         async fn new_pending_future_void();
         async fn new_ready_future_void();
+        async fn new_ready_future_shared_type() -> Shared;
         async fn new_waking_future_void(cloning_action: CloningAction, waking_action: WakingAction);
         async fn new_threaded_delay_future_void();
         async fn new_layered_ready_future_void() -> Result<()>;
@@ -62,6 +64,7 @@ mod ffi {
 
         async fn new_awaiting_future_i32() -> Result<()>;
         async fn new_ready_future_i32(value: i32) -> Result<i32>;
+        async fn new_pass_through_feature_shared() -> Shared;
     }
 
     // these are used to check compilation only
@@ -76,4 +79,28 @@ pub async fn lifetime_arg_void<'a>(_buf: &'a [u8]) {}
 
 pub async fn lifetime_arg_result<'a>(_buf: &'a [u8]) -> Result<()> {
     Ok(())
+}
+
+/// # Panics
+/// - if c++ side throws exception
+pub async fn new_pass_through_feature_shared() -> ffi::Shared {
+    ffi::new_ready_promise_shared_type().await.unwrap()
+}
+
+async fn new_ready_future_shared_type() -> ffi::Shared {
+    ffi::Shared { i: 42 }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::ffi;
+
+    #[allow(clippy::let_underscore_future)]
+    #[test]
+    fn compilation() {
+        // these promises can't be driven by rust side, just check that everything compiles.
+        let _ = ffi::new_ready_promise_void();
+        let _ = ffi::new_ready_promise_i32(42);
+        let _ = ffi::new_ready_promise_shared_type();
+    }
 }
