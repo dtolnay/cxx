@@ -14,6 +14,8 @@ pub struct Cfg<'a> {
     pub exported_header_links: Vec<&'a str>,
     /// See [`CFG.doxygen`][CFG#cfgdoxygen].
     pub doxygen: bool,
+    /// See [`CFG.change_detection`][CFG#cfgchange_detection].
+    pub change_detection: bool,
     marker: PhantomData<*const ()>, // !Send + !Sync
 }
 
@@ -312,6 +314,7 @@ pub static mut CFG: Cfg = Cfg {
     exported_header_prefixes: Vec::new(),
     exported_header_links: Vec::new(),
     doxygen: false,
+    change_detection: false,
     marker: PhantomData,
 };
 
@@ -323,6 +326,7 @@ impl<'a> Debug for Cfg<'a> {
             exported_header_prefixes,
             exported_header_links,
             doxygen,
+            change_detection,
             marker: _,
         } = self;
         formatter
@@ -332,6 +336,7 @@ impl<'a> Debug for Cfg<'a> {
             .field("exported_header_prefixes", exported_header_prefixes)
             .field("exported_header_links", exported_header_links)
             .field("doxygen", doxygen)
+            .field("change_detection", change_detection)
             .finish()
     }
 }
@@ -356,6 +361,7 @@ mod r#impl {
         exported_header_prefixes: Vec<InternedString>,
         exported_header_links: Vec<InternedString>,
         doxygen: bool,
+        change_detection: bool,
     }
 
     impl CurrentCfg {
@@ -367,12 +373,14 @@ mod r#impl {
             let exported_header_prefixes = Vec::new();
             let exported_header_links = Vec::new();
             let doxygen = false;
+            let change_detection = false;
             CurrentCfg {
                 include_prefix,
                 exported_header_dirs,
                 exported_header_prefixes,
                 exported_header_links,
                 doxygen,
+                change_detection,
             }
         }
     }
@@ -409,12 +417,14 @@ mod r#impl {
             let exported_header_prefixes = current.exported_header_prefixes.vec();
             let exported_header_links = current.exported_header_links.vec();
             let doxygen = current.doxygen;
+            let change_detection = current.change_detection;
             super::Cfg {
                 include_prefix,
                 exported_header_dirs,
                 exported_header_prefixes,
                 exported_header_links,
                 doxygen,
+                change_detection,
                 marker: PhantomData,
             }
         }
@@ -481,6 +491,7 @@ mod r#impl {
                     exported_header_prefixes,
                     exported_header_links,
                     doxygen,
+                    change_detection,
                     marker: _,
                 } = cfg;
                 let mut current = current().write().unwrap_or_else(PoisonError::into_inner);
@@ -489,6 +500,7 @@ mod r#impl {
                 current.exported_header_prefixes = vec::intern(exported_header_prefixes);
                 current.exported_header_links = vec::intern(exported_header_links);
                 current.doxygen = *doxygen;
+                current.change_detection = *change_detection;
             } else {
                 CONST_DEREFS.with(|derefs| derefs.borrow_mut().remove(&self.handle()));
             }
