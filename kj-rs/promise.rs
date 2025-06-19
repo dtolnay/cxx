@@ -19,15 +19,6 @@ type CxxResult<T> = std::result::Result<T, cxx::Exception>;
 #[repr(transparent)]
 pub struct OwnPromiseNode(*mut c_void /* kj::_::PromiseNode* */);
 
-// Safety: KJ Promises are not associated with threads, but with event loops at construction time.
-// Therefore, they can be polled from any thread, as long as that thread has the correct event loop
-// active at the time of the call to `poll()`. If the correct event loop is not active, the
-// OwnPromiseNode's API will typically panic, undefined behavior could be possible. However, Rust
-// doesn't have direct access to OwnPromiseNode's API. Instead, it can only use the Promise by
-// having GuardedRustPromiseAwaiter consume it, and GuardedRustPromiseAwaiter implements the
-// correct-executor guarantee.
-unsafe impl Send for OwnPromiseNode {}
-
 // Note: drop is not the only way for OwnPromiseNode to be destroyed.
 // It is forgotten using `MaybeUninit` and its ownership passed over to c++ in `unwrap`.
 impl Drop for OwnPromiseNode {
@@ -151,5 +142,3 @@ impl<T> KjPromise for CallbacksFuture<T> {
         Ok(unsafe { ret.assume_init() })
     }
 }
-
-unsafe impl<T: Send> Send for CallbacksFuture<T> {}

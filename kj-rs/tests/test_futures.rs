@@ -149,10 +149,7 @@ pub async fn new_layered_ready_future_void() -> Result<()> {
 }
 
 // From example at https://doc.rust-lang.org/std/future/fn.poll_fn.html#capturing-a-pinned-state
-async fn naive_select<T>(
-    a: impl Future<Output = T> + Send,
-    b: impl Future<Output = T> + Send,
-) -> T {
+async fn naive_select<T>(a: impl Future<Output = T>, b: impl Future<Output = T>) -> T {
     let (mut a, mut b) = (pin!(a), pin!(b));
     future::poll_fn(move |cx| {
         if let Poll::Ready(r) = a.as_mut().poll(cx) {

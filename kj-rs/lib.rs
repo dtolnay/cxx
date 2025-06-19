@@ -26,10 +26,10 @@ pub type Error = std::io::Error;
 #[allow(clippy::needless_lifetimes)]
 mod ffi {
 
-    /// Representation of a `GuardedRustPromiseAwaiter` in C++. The size of the blob should match.
+    /// Representation of a `RustPromiseAwaiter` in C++. The size of the blob should match.
     #[derive(Debug)]
-    pub struct GuardedRustPromiseAwaiterRepr {
-        _bindgen_opaque_blob: [u64; 15usize],
+    pub struct RustPromiseAwaiterRepr {
+        _bindgen_opaque_blob: [u64; 14usize],
     }
 
     extern "Rust" {
@@ -73,22 +73,22 @@ mod ffi {
     unsafe extern "C++" {
         include!("kj-rs/awaiter.h");
 
-        type GuardedRustPromiseAwaiter;
+        type RustPromiseAwaiter;
 
-        unsafe fn guarded_rust_promise_awaiter_new_in_place(
-            ptr: *mut GuardedRustPromiseAwaiter,
+        unsafe fn rust_promise_awaiter_new_in_place(
+            ptr: *mut RustPromiseAwaiter,
             rust_waker_ptr: *mut OptionWaker,
             node: OwnPromiseNode,
         );
-        unsafe fn guarded_rust_promise_awaiter_drop_in_place(ptr: *mut GuardedRustPromiseAwaiter);
+        unsafe fn rust_promise_awaiter_drop_in_place(ptr: *mut RustPromiseAwaiter);
 
         unsafe fn poll(
-            self: Pin<&mut GuardedRustPromiseAwaiter>,
+            self: Pin<&mut RustPromiseAwaiter>,
             waker: &WakerRef,
             maybe_kj_waker: *const KjWaker,
         ) -> bool;
 
         #[must_use]
-        fn take_own_promise_node(self: Pin<&mut GuardedRustPromiseAwaiter>) -> OwnPromiseNode;
+        fn take_own_promise_node(self: Pin<&mut RustPromiseAwaiter>) -> OwnPromiseNode;
     }
 }
