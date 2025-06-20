@@ -1,9 +1,7 @@
 use awaiter::OptionWaker;
-use awaiter::PtrGuardedRustPromiseAwaiter;
 use awaiter::WakerRef;
 
 pub use crate::ffi::KjWaker;
-pub use awaiter::GuardedRustPromiseAwaiter;
 pub use awaiter::PromiseAwaiter;
 pub use future::FuturePollStatus;
 pub use promise::KjPromise;
@@ -14,7 +12,6 @@ pub use promise::new_callbacks_promise_future;
 
 mod awaiter;
 mod future;
-mod lazy_pin_init;
 mod promise;
 mod waker;
 
@@ -28,6 +25,13 @@ pub type Error = std::io::Error;
 #[cxx::bridge(namespace = "kj_rs")]
 #[allow(clippy::needless_lifetimes)]
 mod ffi {
+
+    /// Representation of a `GuardedRustPromiseAwaiter` in C++. The size of the blob should match.
+    #[derive(Debug)]
+    pub struct GuardedRustPromiseAwaiterRepr {
+        _bindgen_opaque_blob: [u64; 15usize],
+    }
+
     extern "Rust" {
         type WakerRef<'a>;
     }
@@ -69,15 +73,14 @@ mod ffi {
     unsafe extern "C++" {
         include!("kj-rs/awaiter.h");
 
-        type GuardedRustPromiseAwaiter = crate::GuardedRustPromiseAwaiter;
-        type PtrGuardedRustPromiseAwaiter = crate::PtrGuardedRustPromiseAwaiter;
+        type GuardedRustPromiseAwaiter;
 
         unsafe fn guarded_rust_promise_awaiter_new_in_place(
-            ptr: PtrGuardedRustPromiseAwaiter,
+            ptr: *mut GuardedRustPromiseAwaiter,
             rust_waker_ptr: *mut OptionWaker,
             node: OwnPromiseNode,
         );
-        unsafe fn guarded_rust_promise_awaiter_drop_in_place(ptr: PtrGuardedRustPromiseAwaiter);
+        unsafe fn guarded_rust_promise_awaiter_drop_in_place(ptr: *mut GuardedRustPromiseAwaiter);
 
         unsafe fn poll(
             self: Pin<&mut GuardedRustPromiseAwaiter>,

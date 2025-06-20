@@ -121,11 +121,9 @@ struct GuardedRustPromiseAwaiter: ExecutorGuarded<RustPromiseAwaiter> {
   }
 };
 
-using PtrGuardedRustPromiseAwaiter = GuardedRustPromiseAwaiter*;
-
 void guarded_rust_promise_awaiter_new_in_place(
-    PtrGuardedRustPromiseAwaiter, OptionWaker*, OwnPromiseNode);
-void guarded_rust_promise_awaiter_drop_in_place(PtrGuardedRustPromiseAwaiter);
+    GuardedRustPromiseAwaiter*, OptionWaker*, OwnPromiseNode);
+void guarded_rust_promise_awaiter_drop_in_place(GuardedRustPromiseAwaiter*);
 
 // =======================================================================================
 // FuturePollEvent
