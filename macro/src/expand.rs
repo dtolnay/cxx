@@ -1268,9 +1268,9 @@ fn expand_rust_function_shim_super(
         };
 
         if fut.throws_tokens.is_some() {
-            quote!(-> std::pin::Pin<Box<dyn ::std::future::Future<Output = ::std::result::Result<#output, String>> #lifetimes>>)
+            quote!(-> std::pin::Pin<Box<dyn ::std::future::Future<Output = ::std::result::Result<#output, String>> + Send #lifetimes>>)
         } else {
-            quote!(-> std::pin::Pin<Box<dyn ::std::future::Future<Output = #output> #lifetimes>>)
+            quote!(-> std::pin::Pin<Box<dyn ::std::future::Future<Output = #output> + Send #lifetimes>>)
         }
     } else {
         expand_return_type(&sig.ret)

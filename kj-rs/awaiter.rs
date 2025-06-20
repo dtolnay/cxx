@@ -2,8 +2,18 @@ use std::mem::MaybeUninit;
 use std::pin::Pin;
 use std::task::Context;
 
-use crate::ffi::{RustPromiseAwaiter, RustPromiseAwaiterRepr};
+use crate::ffi::{GuardedRustPromiseAwaiter, GuardedRustPromiseAwaiterRepr};
 use crate::waker::try_into_kj_waker_ptr;
+
+// =======================================================================================
+// GuardedRustPromiseAwaiter
+
+// Safety: KJ Promises are not associated with threads, but with event loops at construction time.
+// Therefore, they can be polled from any thread, as long as that thread has the correct event loop
+// active at the time of the call to `poll()`. If the correct event loop is not active,
+// GuardedRustPromiseAwaiter's API will panic. (The Guarded- prefix refers to the C++ class template
+// ExecutorGuarded, which enforces the correct event loop requirement.)
+unsafe impl Send for GuardedRustPromiseAwaiter {}
 
 // =======================================================================================
 // Await syntax for OwnPromiseNode
@@ -13,7 +23,7 @@ use crate::OwnPromiseNode;
 pub struct PromiseAwaiter<Data: std::marker::Unpin> {
     node: Option<OwnPromiseNode>,
     pub(crate) data: Data,
-    awaiter: MaybeUninit<RustPromiseAwaiterRepr>,
+    awaiter: MaybeUninit<GuardedRustPromiseAwaiterRepr>,
     awaiter_initialized: bool,
     // Safety: `option_waker` must be declared after `awaiter`, because `awaiter` contains a reference
     // to `option_waker`. This ensures `option_waker` will be dropped after `awaiter`.
@@ -35,19 +45,19 @@ impl<Data: std::marker::Unpin> PromiseAwaiter<Data> {
     ///
     /// Panics if `node` is None.
     #[must_use]
-    pub fn get_awaiter(mut self: Pin<&mut Self>) -> Pin<&mut RustPromiseAwaiter> {
+    pub fn get_awaiter(mut self: Pin<&mut Self>) -> Pin<&mut GuardedRustPromiseAwaiter> {
         // Safety: We never move out of `this`.
         let this = unsafe { Pin::into_inner_unchecked(self.as_mut()) };
 
         // Initialize the awaiter if not already done
         if !this.awaiter_initialized {
             // On our first invocation, `node` will be Some, and `get_awaiter` will forward its
-            // contents into RustPromiseAwaiter's constructor. On all subsequent invocations, `node`
+            // contents into GuardedRustPromiseAwaiter's constructor. On all subsequent invocations, `node`
             // will be None and the constructor will not run.
             let node = this.node.take();
 
             // Safety: `awaiter` stores `rust_waker_ptr` and uses it to call `wake()`. Note that
-            // `awaiter` is `this.awaiter`, which lives before `this.option_waker`.
+            // `awaiter` is `this.awaiter`, which lives before `this.option_waker`. 
             // Since we drop awaiter manually, the `rust_waker_ptr` that `awaiter` stores will always
             // be valid during its lifetime.
             //
@@ -58,8 +68,8 @@ impl<Data: std::marker::Unpin> PromiseAwaiter<Data> {
 
             // Safety: The memory slot is valid and this type ensures that it will stay pinned.
             unsafe {
-                crate::ffi::rust_promise_awaiter_new_in_place(
-                    this.awaiter.as_mut_ptr().cast::<RustPromiseAwaiter>(),
+                crate::ffi::guarded_rust_promise_awaiter_new_in_place(
+                    this.awaiter.as_mut_ptr().cast::<GuardedRustPromiseAwaiter>(),
                     rust_waker_ptr,
                     node.expect("node should be Some in call to init()"),
                 );
@@ -69,8 +79,8 @@ impl<Data: std::marker::Unpin> PromiseAwaiter<Data> {
 
         // Safety: `this.awaiter` is pinned since `self` is pinned.
         unsafe {
-            let raw = this.awaiter.assume_init_mut() as *mut RustPromiseAwaiterRepr;
-            let raw = raw.cast::<RustPromiseAwaiter>();
+            let raw = this.awaiter.assume_init_mut() as *mut GuardedRustPromiseAwaiterRepr;
+            let raw = raw.cast::<GuardedRustPromiseAwaiter>();
             Pin::new_unchecked(&mut *raw)
         }
     }
@@ -87,8 +97,8 @@ impl<Data: std::marker::Unpin> Drop for PromiseAwaiter<Data> {
     fn drop(&mut self) {
         if self.awaiter_initialized {
             unsafe {
-                crate::ffi::rust_promise_awaiter_drop_in_place(
-                    self.awaiter.as_mut_ptr().cast::<RustPromiseAwaiter>(),
+                crate::ffi::guarded_rust_promise_awaiter_drop_in_place(
+                    self.awaiter.as_mut_ptr().cast::<GuardedRustPromiseAwaiter>()
                 );
             }
         }

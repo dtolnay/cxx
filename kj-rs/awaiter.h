@@ -106,8 +106,24 @@ class RustPromiseAwaiter final: public kj::_::Event,
   OwnPromiseNode node;
 };
 
-void rust_promise_awaiter_new_in_place(RustPromiseAwaiter*, OptionWaker*, OwnPromiseNode);
-void rust_promise_awaiter_drop_in_place(RustPromiseAwaiter*);
+// We force Rust to call our `poll()` overloads using this ExecutorGuarded wrapper around the actual
+// RustPromiseAwaiter class. This allows us to assume all calls that reach RustPromiseAwaiter itself
+// are on the correct thread.
+struct GuardedRustPromiseAwaiter: ExecutorGuarded<RustPromiseAwaiter> {
+  // We need to inherit constructors or else placement-new will try to aggregate-initialize us.
+  using ExecutorGuarded<RustPromiseAwaiter>::ExecutorGuarded;
+
+  bool poll(const WakerRef& waker, const KjWaker* maybeKjWaker) {
+    return get().poll(waker, maybeKjWaker);
+  }
+  OwnPromiseNode take_own_promise_node() {
+    return get().take_own_promise_node();
+  }
+};
+
+void guarded_rust_promise_awaiter_new_in_place(
+    GuardedRustPromiseAwaiter*, OptionWaker*, OwnPromiseNode);
+void guarded_rust_promise_awaiter_drop_in_place(GuardedRustPromiseAwaiter*);
 
 // =======================================================================================
 // FuturePollEvent
@@ -171,7 +187,10 @@ class FuturePollEvent::PollScope: public LazyArcWaker {
   kj::Maybe<FuturePollEvent&> tryGetFuturePollEvent() const override;
 
  private:
-  FuturePollEvent& event;
+  struct FuturePollEventHolder {
+    FuturePollEvent& futurePollEvent;
+  };
+  ExecutorGuarded<FuturePollEventHolder> holder;
 };
 
 // =======================================================================================

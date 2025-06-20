@@ -13,10 +13,10 @@ namespace kj_rs {
 // that end, we use bindgen to generate an opaque FFI type of known size for RustPromiseAwaiter in
 // awaiter.h.rs.
 //
-static_assert(sizeof(RustPromiseAwaiter) == sizeof(RustPromiseAwaiterRepr),
-    "RustPromiseAwaiter size changed, you must update lib.rs ffi");
-static_assert(alignof(RustPromiseAwaiter) == alignof(RustPromiseAwaiterRepr),
-    "RustPromiseAwaiter alignment changed, you must update lib.rs ffi");
+static_assert(sizeof(GuardedRustPromiseAwaiter) == sizeof(GuardedRustPromiseAwaiterRepr),
+    "GuardedRustPromiseAwaiter size changed, you must update lib.rs ffi");
+static_assert(alignof(GuardedRustPromiseAwaiter) == alignof(GuardedRustPromiseAwaiterRepr),
+    "GuardedRustPromiseAwaiter alignment changed, you must update lib.rs ffi");
 
 RustPromiseAwaiter::RustPromiseAwaiter(
     OptionWaker& optionWaker, OwnPromiseNode nodeParam, kj::SourceLocation location)
@@ -132,11 +132,11 @@ OwnPromiseNode RustPromiseAwaiter::take_own_promise_node() {
   return kj::mv(node);
 }
 
-void rust_promise_awaiter_new_in_place(
-    RustPromiseAwaiter* ptr, OptionWaker* optionWaker, OwnPromiseNode node) {
+void guarded_rust_promise_awaiter_new_in_place(
+    GuardedRustPromiseAwaiter* ptr, OptionWaker* optionWaker, OwnPromiseNode node) {
   kj::ctor(*ptr, *optionWaker, kj::mv(node));
 }
-void rust_promise_awaiter_drop_in_place(RustPromiseAwaiter* ptr) {
+void guarded_rust_promise_awaiter_drop_in_place(GuardedRustPromiseAwaiter* ptr) {
   kj::dtor(*ptr);
 }
 
@@ -204,16 +204,20 @@ void FuturePollEvent::tracePromise(kj::_::TraceBuilder& builder, bool stopAtNext
   }
 }
 
-FuturePollEvent::PollScope::PollScope(FuturePollEvent& futurePollEvent): event(futurePollEvent) {
+FuturePollEvent::PollScope::PollScope(FuturePollEvent& futurePollEvent): holder(futurePollEvent) {
   futurePollEvent.enterPollScope();
 }
 
 FuturePollEvent::PollScope::~PollScope() noexcept(false) {
-  event.exitPollScope(reset());
+  holder.get().futurePollEvent.exitPollScope(reset());
 }
 
 kj::Maybe<FuturePollEvent&> FuturePollEvent::PollScope::tryGetFuturePollEvent() const {
-  return event;
+  KJ_IF_SOME(h, holder.tryGet()) {
+    return h.futurePollEvent;
+  } else {
+    return kj::none;
+  }
 }
 
 }  // namespace kj_rs
