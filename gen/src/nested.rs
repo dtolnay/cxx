@@ -1,7 +1,7 @@
+use crate::namespace::namespace;
+use proc_macro2::Ident;
 use syntax::map::UnorderedMap as Map;
 use syntax::Api;
-use proc_macro2::Ident;
-use crate::namespace::namespace;
 
 pub struct NamespaceEntries<'a> {
     direct: Vec<&'a Api>,
@@ -17,9 +17,7 @@ impl<'a> NamespaceEntries<'a> {
         &self.direct
     }
 
-    pub fn nested_content(
-        &self,
-    ) -> impl Iterator<Item = (&'a Ident, &NamespaceEntries<'a>)> {
+    pub fn nested_content(&self) -> impl Iterator<Item = (&'a Ident, &NamespaceEntries<'a>)> {
         self.nested.iter().map(|(k, entries)| (*k, entries))
     }
 }
@@ -54,13 +52,13 @@ fn sort_by_inner_namespace(apis: Vec<&Api>, depth: usize) -> NamespaceEntries {
 #[cfg(test)]
 mod tests {
     use super::NamespaceEntries;
+    use proc_macro2::{Ident, Span};
+    use syn::punctuated::Punctuated;
+    use syn::Token;
     use syntax::attrs::OtherAttrs;
     use syntax::cfg::CfgExpr;
     use syntax::namespace::Namespace;
     use syntax::{Api, Doc, ExternType, ForeignName, Lang, Lifetimes, Pair};
-    use proc_macro2::{Ident, Span};
-    use syn::punctuated::Punctuated;
-    use syn::Token;
 
     #[test]
     fn test_ns_entries_sort() {

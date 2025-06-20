@@ -19,7 +19,7 @@
     clippy::struct_excessive_bools,
     clippy::too_many_lines,
     clippy::toplevel_ref_arg,
-    clippy::uninlined_format_args,
+    clippy::uninlined_format_args
 )]
 
 mod block;
@@ -41,11 +41,11 @@ use self::cfg::UnsupportedCfgEvaluator;
 use self::error::{format_err, Result};
 use self::file::File;
 use self::include::Include;
+use std::collections::BTreeSet as Set;
+use std::path::Path;
 use syntax::cfg::CfgExpr;
 use syntax::report::Errors;
 use syntax::{self, attrs, Types};
-use std::collections::BTreeSet as Set;
-use std::path::Path;
 
 pub use self::error::Error;
 

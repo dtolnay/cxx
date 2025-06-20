@@ -90,12 +90,11 @@ mod vec;
 use crate::cargo::CargoEnvCfgEvaluator;
 use crate::deps::{Crate, HeaderDir};
 use crate::error::{Error, Result};
-use gen::error::report;
-use gen::Opt;
 use crate::paths::PathExt;
-use syntax::map::{Entry, UnorderedMap};
 use crate::target::TargetDir;
 use cc::Build;
+use gen::error::report;
+use gen::Opt;
 use std::collections::BTreeSet;
 use std::env;
 use std::ffi::{OsStr, OsString};
@@ -103,6 +102,7 @@ use std::io::{self, Write};
 use std::iter;
 use std::path::{Path, PathBuf};
 use std::process;
+use syntax::map::{Entry, UnorderedMap};
 
 pub use crate::cfg::{Cfg, CFG};
 

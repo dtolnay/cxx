@@ -1,10 +1,10 @@
 use crate::{CfgEvaluator, CfgResult};
-use syntax::cfg::CfgExpr;
-use syntax::report::Errors;
-use syntax::Api;
 use quote::quote;
 use std::collections::BTreeSet as Set;
 use syn::{Error, LitStr};
+use syntax::cfg::CfgExpr;
+use syntax::report::Errors;
+use syntax::Api;
 
 pub struct UnsupportedCfgEvaluator;
 

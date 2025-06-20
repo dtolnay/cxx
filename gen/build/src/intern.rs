@@ -1,5 +1,5 @@
-use syntax::set::UnorderedSet as Set;
 use std::sync::{Mutex, OnceLock, PoisonError};
+use syntax::set::UnorderedSet as Set;
 
 #[derive(Copy, Clone, Default)]
 pub(crate) struct InternedString(&'static str);

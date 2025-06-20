@@ -1,8 +1,8 @@
 use crate::Opt;
-use syntax::report::Errors;
-use syntax::{error, Api};
 use quote::{quote, quote_spanned};
 use std::path::{Component, Path};
+use syntax::report::Errors;
+use syntax::{error, Api};
 
 pub use syntax::check::{typecheck, Generator};
 

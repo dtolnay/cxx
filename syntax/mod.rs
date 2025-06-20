@@ -23,7 +23,7 @@
     clippy::too_many_arguments,
     clippy::too_many_lines,
     clippy::toplevel_ref_arg,
-    clippy::uninlined_format_args,
+    clippy::uninlined_format_args
 )]
 
 pub mod atom;

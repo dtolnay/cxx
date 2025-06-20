@@ -2,10 +2,10 @@ use crate::block::Block;
 use crate::builtin::Builtins;
 use crate::include::Includes;
 use crate::Opt;
-use syntax::namespace::Namespace;
-use syntax::Types;
 use std::cell::RefCell;
 use std::fmt::{self, Arguments, Write};
+use syntax::namespace::Namespace;
+use syntax::Types;
 
 pub struct OutFile<'a> {
     pub header: bool,

@@ -2,8 +2,8 @@ use crate::atom::Atom::{self, *};
 use crate::report::Errors;
 use crate::visit::{self, Visit};
 use crate::{
-    error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, Impl, Lang, Lifetimes,
-    NamedType, Ptr, Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types, Future
+    error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, Future, Impl, Lang, Lifetimes,
+    NamedType, Ptr, Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};

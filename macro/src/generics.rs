@@ -1,9 +1,9 @@
-use syntax::instantiate::NamedImplKey;
-use syntax::resolve::Resolution;
-use syntax::{Impl, Lifetimes};
 use proc_macro2::TokenStream;
 use quote::ToTokens;
 use syn::{Lifetime, Token};
+use syntax::instantiate::NamedImplKey;
+use syntax::resolve::Resolution;
+use syntax::{Impl, Lifetimes};
 
 pub(crate) struct ImplGenerics<'a> {
     explicit_impl: Option<&'a Impl>,

@@ -100,7 +100,7 @@ impl<Data: std::marker::Unpin> PromiseAwaiter<Data> {
     }
 
     /// # Panics
-    /// 
+    ///
     /// Panics if `node` is None.
     #[must_use]
     pub fn get_awaiter(mut self: Pin<&mut Self>) -> Pin<&mut GuardedRustPromiseAwaiter> {

@@ -101,8 +101,8 @@ const KjWaker* LazyArcWaker::clone() const {
 void LazyArcWaker::wake() const {
   // LazyArcWakers are only exposed to Rust by const borrow, meaning Rust can never arrange to call
   // `wake()`, which drops `self`, on this object.
-  KJ_UNIMPLEMENTED(
-      "Rust user code should never have possess a consumable reference to LazyArcWaker");
+  KJ_UNIMPLEMENTED("Rust user code should never have possess a consumable "
+                   "reference to LazyArcWaker");
 }
 
 void LazyArcWaker::wake_by_ref() const {

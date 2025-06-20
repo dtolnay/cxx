@@ -19,7 +19,10 @@ unsafe impl Sync for KjWaker {}
 
 impl From<&KjWaker> for Waker {
     fn from(waker: &KjWaker) -> Self {
-        let waker = RawWaker::new(std::ptr::from_ref::<KjWaker>(waker).cast::<()>(), &KJ_WAKER_VTABLE);
+        let waker = RawWaker::new(
+            std::ptr::from_ref::<KjWaker>(waker).cast::<()>(),
+            &KJ_WAKER_VTABLE,
+        );
         // Safety: KjWaker's Rust-exposed interface is Send and Sync and its RawWakerVTable
         // implementation functions are all thread-safe.
         //

@@ -42,8 +42,8 @@ mod error;
 pub use crate::error::Error;
 pub use gen::include::{Include, HEADER};
 pub use gen::{CfgEvaluator, CfgResult, GeneratedCode, Opt};
-pub use syntax::IncludeKind;
 use proc_macro2::TokenStream;
+pub use syntax::IncludeKind;
 
 /// Generate C++ bindings code from a Rust token stream. This should be a Rust
 /// token stream which somewhere contains a `#[cxx::bridge] mod {}`.

@@ -4,15 +4,15 @@ mod test;
 
 use super::{Opt, Output};
 use crate::cfg::{self, CfgValue};
-use gen::include::Include;
-use syntax::IncludeKind;
 use clap::builder::{ArgAction, ValueParser};
 use clap::{Arg, Command};
+use gen::include::Include;
 use std::collections::{BTreeMap as Map, BTreeSet as Set};
 use std::path::PathBuf;
 use std::process;
 use std::sync::{Arc, Mutex, PoisonError};
 use syn::parse::Parser;
+use syntax::IncludeKind;
 
 const USAGE: &str = "\
     cxxbridge <input>.rs              Emit .cc file for bridge to stdout

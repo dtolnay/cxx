@@ -2,6 +2,7 @@ use crate::block::Block;
 use crate::nested::NamespaceEntries;
 use crate::out::OutFile;
 use crate::{builtin, include, Opt};
+use proc_macro2::Ident;
 use syntax::atom::Atom::{self, *};
 use syntax::instantiate::{ImplKey, NamedImplKey};
 use syntax::map::UnorderedMap as Map;
@@ -13,7 +14,6 @@ use syntax::{
     derive, mangle, Api, Doc, Enum, EnumRepr, ExternFn, ExternType, Pair, Signature, Struct, Trait,
     Type, TypeAlias, Types, Var,
 };
-use proc_macro2::Ident;
 
 pub fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u8> {
     let mut out_file = OutFile::new(header, opt, types);

@@ -71,7 +71,8 @@ KJ_TEST("RustPromiseAwaiter: Rust can .await KJ promises under a co_await") {
   []() -> kj::Promise<void> { co_await new_layered_ready_future_void(); }().wait(waitScope);
 }
 
-KJ_TEST("RustPromiseAwaiter: Rust can poll() multiple promises under a single co_await") {
+KJ_TEST("RustPromiseAwaiter: Rust can poll() multiple promises under a single "
+        "co_await") {
   kj::EventLoop loop;
   kj::WaitScope waitScope(loop);
 

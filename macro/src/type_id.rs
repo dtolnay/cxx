@@ -1,7 +1,7 @@
-use syntax::qualified::QualifiedName;
 use proc_macro2::{TokenStream, TokenTree};
 use quote::{format_ident, quote, ToTokens};
 use syn::ext::IdentExt;
+use syntax::qualified::QualifiedName;
 
 pub(crate) enum Crate {
     Cxx,

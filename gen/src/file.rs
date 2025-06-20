@@ -1,8 +1,8 @@
-use syntax::file::Module;
-use syntax::namespace::Namespace;
 use syn::parse::discouraged::Speculative;
 use syn::parse::{Error, Parse, ParseStream, Result};
 use syn::{braced, Attribute, Ident, Item, Meta, Token, Visibility};
+use syntax::file::Module;
+use syntax::namespace::Namespace;
 
 pub struct File {
     pub modules: Vec<Module>,

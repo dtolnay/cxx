@@ -1,7 +1,7 @@
-use syntax::Receiver;
 use proc_macro2::TokenStream;
 use quote::{quote_spanned, ToTokens};
 use syn::Token;
+use syntax::Receiver;
 
 pub struct ReceiverType<'a>(pub &'a Receiver);
 pub struct ReceiverTypeSelf<'a>(pub &'a Receiver);

@@ -52,7 +52,6 @@ where
     }
 }
 
-
 /// Run the error-returning `foreign_call`, intercepting panics and converting them to errors.
 #[cfg(feature = "std")]
 pub fn try_unwind<F>(label: &'static str, foreign_call: F) -> ::cxx::private::Result
@@ -66,7 +65,10 @@ where
 }
 
 #[cfg(feature = "std")]
-fn panic_result(label: &'static str, err: &alloc::boxed::Box<dyn core::any::Any + Send>) -> ::cxx::private::Result {
+fn panic_result(
+    label: &'static str,
+    err: &alloc::boxed::Box<dyn core::any::Any + Send>,
+) -> ::cxx::private::Result {
     if let Some(err) = err.downcast_ref::<alloc::string::String>() {
         return ::cxx::private::Result::error(std::format!("panic in {label}: {err}"));
     }

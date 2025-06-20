@@ -29,10 +29,10 @@ mod cfg;
 mod output;
 
 use crate::cfg::{CfgValue, FlagsCfgEvaluator};
+use crate::output::Output;
 use gen::error::{report, Result};
 use gen::fs;
 use gen::include::{self, Include};
-use crate::output::Output;
 use std::collections::{BTreeMap as Map, BTreeSet as Set};
 use std::io::{self, Write};
 use std::path::PathBuf;

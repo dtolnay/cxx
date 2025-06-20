@@ -1,9 +1,4 @@
 use crate::clang::{Clang, Node};
-use syntax::attrs::OtherAttrs;
-use syntax::cfg::CfgExpr;
-use syntax::namespace::Namespace;
-use syntax::report::Errors;
-use syntax::{Api, Discriminant, Doc, Enum, EnumRepr, ForeignName, Pair, Variant};
 use flate2::write::GzDecoder;
 use memmap::Mmap;
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
@@ -15,6 +10,11 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::str::FromStr;
 use syn::{parse_quote, Path};
+use syntax::attrs::OtherAttrs;
+use syntax::cfg::CfgExpr;
+use syntax::namespace::Namespace;
+use syntax::report::Errors;
+use syntax::{Api, Discriminant, Doc, Enum, EnumRepr, ForeignName, Pair, Variant};
 
 const CXX_CLANG_AST: &str = "CXX_CLANG_AST";
 

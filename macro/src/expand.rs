@@ -1,3 +1,12 @@
+use crate::generics::to_underscore_lifetimes;
+use crate::tokens::{ReceiverType, ReceiverTypeSelf};
+use crate::type_id::Crate;
+use crate::{derive, generics};
+use proc_macro2::{Ident, Span, TokenStream};
+use quote::{format_ident, quote, quote_spanned, ToTokens};
+use std::mem;
+use syn::spanned::Spanned;
+use syn::{parse_quote, punctuated, Generics, Lifetime, Result, Token};
 use syntax::atom::Atom::*;
 use syntax::attrs::{self, OtherAttrs};
 use syntax::cfg::CfgExpr;
@@ -10,15 +19,6 @@ use syntax::{
     self, check, mangle, Api, Doc, Enum, ExternFn, ExternType, Impl, Lifetimes, Pair, Signature,
     Struct, Trait, Type, TypeAlias, Types,
 };
-use crate::type_id::Crate;
-use crate::{derive, generics};
-use proc_macro2::{Ident, Span, TokenStream};
-use quote::{format_ident, quote, quote_spanned, ToTokens};
-use std::mem;
-use syn::spanned::Spanned;
-use syn::{parse_quote, punctuated, Generics, Lifetime, Result, Token};
-use crate::generics::to_underscore_lifetimes;
-use crate::tokens::{ReceiverType, ReceiverTypeSelf};
 
 pub(crate) fn bridge(mut ffi: Module) -> Result<TokenStream> {
     let ref mut errors = Errors::new();
@@ -1122,11 +1122,13 @@ fn expand_rust_function_shim_impl(
             false => Some(quote_spanned!(span=> ::cxx::private::RustSlice::from_ref)),
             true => Some(quote_spanned!(span=> ::cxx::private::RustSlice::from_mut)),
         },
-        Type::Future(fut) => if fut.throws_tokens.is_some() {
-            Some(quote_spanned!(span=> ::kj_rs::repr::future))
-        } else {
-            Some(quote_spanned!(span=> ::kj_rs::repr::infallible_future))
-        },
+        Type::Future(fut) => {
+            if fut.throws_tokens.is_some() {
+                Some(quote_spanned!(span=> ::kj_rs::repr::future))
+            } else {
+                Some(quote_spanned!(span=> ::kj_rs::repr::infallible_future))
+            }
+        }
         _ => None,
     });
 
@@ -1151,7 +1153,11 @@ fn expand_rust_function_shim_impl(
             let lifetimes = if lifetimes.is_empty() {
                 quote!()
             } else {
-                assert_eq!(lifetimes.len(), 1, "workerd-cxx: expected single lifetime (todo: do we need to support multiple?)");
+                assert_eq!(
+                    lifetimes.len(),
+                    1,
+                    "workerd-cxx: expected single lifetime (todo: do we need to support multiple?)"
+                );
                 quote!(#(#lifetimes),*, )
             };
             if fut.throws_tokens.is_some() {
@@ -1260,7 +1266,7 @@ fn expand_rust_function_shim_super(
         } else {
             quote!( + #(#lifetimes)+* )
         };
-        
+
         if fut.throws_tokens.is_some() {
             quote!(-> std::pin::Pin<Box<dyn ::std::future::Future<Output = ::std::result::Result<#output, String>> + Send #lifetimes>>)
         } else {

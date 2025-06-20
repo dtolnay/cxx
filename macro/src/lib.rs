@@ -30,13 +30,13 @@ mod clang;
 #[cfg(feature = "experimental-enum-variants-from-header")]
 mod load;
 
-use syntax::file::Module;
-use syntax::namespace::Namespace;
-use syntax::qualified::QualifiedName;
 use crate::type_id::Crate;
 use proc_macro::TokenStream;
 use syn::parse::{Parse, ParseStream, Parser, Result};
 use syn::parse_macro_input;
+use syntax::file::Module;
+use syntax::namespace::Namespace;
+use syntax::qualified::QualifiedName;
 
 /// `#[cxx::bridge] mod ffi { ... }`
 ///

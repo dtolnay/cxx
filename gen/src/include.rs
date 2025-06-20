@@ -1,6 +1,6 @@
 use crate::out::{Content, OutFile};
-use syntax::{self, IncludeKind};
 use std::ops::{Deref, DerefMut};
+use syntax::{self, IncludeKind};
 
 /// The complete contents of the "rust/cxx.h" header.
 pub static HEADER: &str = include_str!("../../include/cxx.h");

@@ -185,7 +185,8 @@ bool RustPromiseAwaiter::poll(const WakerRef& waker, const KjWaker* maybeKjWaker
 
 OwnPromiseNode RustPromiseAwaiter::take_own_promise_node() {
   KJ_ASSERT(maybeOptionWaker == kj::none,
-      "take_own_promise_node() should only be called after poll() returns true");
+      "take_own_promise_node() should only be called after poll() "
+      "returns true");
   KJ_ASSERT(node.get() != nullptr, "take_own_promise_node() should only be called once");
   return kj::mv(node);
 }
