@@ -1440,7 +1440,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
     out.begin_block(Block::ExternC);
     for impl_key in out.types.impls.keys() {
         out.next_section();
-        match *impl_key {
+        match impl_key {
             ImplKey::RustBox(ident) => write_rust_box_extern(out, ident),
             ImplKey::RustVec(ident) => write_rust_vec_extern(out, ident),
             ImplKey::UniquePtr(ident) => write_unique_ptr(out, ident),
@@ -1454,7 +1454,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
     out.begin_block(Block::Namespace("rust"));
     out.begin_block(Block::InlineNamespace("cxxbridge1"));
     for impl_key in out.types.impls.keys() {
-        match *impl_key {
+        match impl_key {
             ImplKey::RustBox(ident) => write_rust_box_impl(out, ident),
             ImplKey::RustVec(ident) => write_rust_vec_impl(out, ident),
             _ => {}
@@ -1464,8 +1464,8 @@ fn write_generic_instantiations(out: &mut OutFile) {
     out.end_block(Block::Namespace("rust"));
 }
 
-fn write_rust_box_extern(out: &mut OutFile, key: NamedImplKey) {
-    let resolve = out.types.resolve(&key);
+fn write_rust_box_extern(out: &mut OutFile, key: &NamedImplKey) {
+    let resolve = out.types.resolve(key);
     let inner = resolve.name.to_fully_qualified();
     let instance = resolve.name.to_symbol();
 
@@ -1486,7 +1486,7 @@ fn write_rust_box_extern(out: &mut OutFile, key: NamedImplKey) {
     );
 }
 
-fn write_rust_vec_extern(out: &mut OutFile, key: NamedImplKey) {
+fn write_rust_vec_extern(out: &mut OutFile, key: &NamedImplKey) {
     let element = key.rust;
     let inner = element.to_typename(out.types);
     let instance = element.to_mangled(out.types);
@@ -1535,8 +1535,8 @@ fn write_rust_vec_extern(out: &mut OutFile, key: NamedImplKey) {
     );
 }
 
-fn write_rust_box_impl(out: &mut OutFile, key: NamedImplKey) {
-    let resolve = out.types.resolve(&key);
+fn write_rust_box_impl(out: &mut OutFile, key: &NamedImplKey) {
+    let resolve = out.types.resolve(key);
     let inner = resolve.name.to_fully_qualified();
     let instance = resolve.name.to_symbol();
 
@@ -1567,7 +1567,7 @@ fn write_rust_box_impl(out: &mut OutFile, key: NamedImplKey) {
     writeln!(out, "}}");
 }
 
-fn write_rust_vec_impl(out: &mut OutFile, key: NamedImplKey) {
+fn write_rust_vec_impl(out: &mut OutFile, key: &NamedImplKey) {
     let element = key.rust;
     let inner = element.to_typename(out.types);
     let instance = element.to_mangled(out.types);
@@ -1655,7 +1655,7 @@ fn write_rust_vec_impl(out: &mut OutFile, key: NamedImplKey) {
     writeln!(out, "}}");
 }
 
-fn write_unique_ptr(out: &mut OutFile, key: NamedImplKey) {
+fn write_unique_ptr(out: &mut OutFile, key: &NamedImplKey) {
     let ty = UniquePtr::Ident(key.rust);
     write_unique_ptr_common(out, ty);
 }
@@ -1779,7 +1779,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     writeln!(out, "}}");
 }
 
-fn write_shared_ptr(out: &mut OutFile, key: NamedImplKey) {
+fn write_shared_ptr(out: &mut OutFile, key: &NamedImplKey) {
     let ident = key.rust;
     let resolve = out.types.resolve(ident);
     let inner = resolve.name.to_fully_qualified();
@@ -1860,8 +1860,8 @@ fn write_shared_ptr(out: &mut OutFile, key: NamedImplKey) {
     writeln!(out, "}}");
 }
 
-fn write_weak_ptr(out: &mut OutFile, key: NamedImplKey) {
-    let resolve = out.types.resolve(&key);
+fn write_weak_ptr(out: &mut OutFile, key: &NamedImplKey) {
+    let resolve = out.types.resolve(key);
     let inner = resolve.name.to_fully_qualified();
     let instance = resolve.name.to_symbol();
 
@@ -1929,7 +1929,7 @@ fn write_weak_ptr(out: &mut OutFile, key: NamedImplKey) {
     writeln!(out, "}}");
 }
 
-fn write_cxx_vector(out: &mut OutFile, key: NamedImplKey) {
+fn write_cxx_vector(out: &mut OutFile, key: &NamedImplKey) {
     let element = key.rust;
     let inner = element.to_typename(out.types);
     let instance = element.to_mangled(out.types);
