@@ -11,6 +11,7 @@ cc = "1.0.83"
 clap = { version = "4", default-features = false, features = ["error-context", "help", "std", "usage"] }
 codespan-reporting = "0.12"
 foldhash = "0.1"
+indexmap = "2.9.0"
 proc-macro2 = { version = "1.0.58", features = ["span-locations"] }
 quote = "1.0.4"
 rustversion = "1"

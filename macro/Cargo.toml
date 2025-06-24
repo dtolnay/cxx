@@ -21,6 +21,7 @@ experimental-async-fn = []
 experimental-enum-variants-from-header = ["clang-ast", "flate2", "memmap", "serde", "serde_derive", "serde_json"]
 
 [dependencies]
+indexmap = "2.9.0"
 proc-macro2 = "1.0.74"
 quote = "1.0.35"
 rustversion = "1"

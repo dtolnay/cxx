@@ -21,6 +21,7 @@ experimental-async-fn = []
 [dependencies]
 cc = "1.0.83"
 codespan-reporting = "0.12"
+indexmap = "2.9.0"
 proc-macro2 = { version = "1.0.74", default-features = false, features = ["span-locations"] }
 quote = { version = "1.0.35", default-features = false }
 scratch = "1.0.5"

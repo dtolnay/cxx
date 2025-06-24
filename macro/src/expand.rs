@@ -92,7 +92,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
     }
 
     for (impl_key, &explicit_impl) in &types.impls {
-        match *impl_key {
+        match impl_key {
             ImplKey::RustBox(ident) => {
                 hidden.extend(expand_rust_box(ident, types, explicit_impl));
             }
@@ -1296,7 +1296,7 @@ fn type_id(name: &Pair) -> TokenStream {
     crate::type_id::expand(Crate::Cxx, qualified)
 }
 
-fn expand_rust_box(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
+fn expand_rust_box(key: &NamedImplKey, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
     let ident = key.rust;
     let resolve = types.resolve(ident);
     let link_prefix = format!("cxxbridge1$box${}$", resolve.name.to_symbol());
@@ -1345,7 +1345,7 @@ fn expand_rust_box(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
     }
 }
 
-fn expand_rust_vec(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
+fn expand_rust_vec(key: &NamedImplKey, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
     let elem = key.rust;
     let resolve = types.resolve(elem);
     let link_prefix = format!("cxxbridge1$rust_vec${}$", resolve.name.to_symbol());
@@ -1443,7 +1443,7 @@ fn expand_rust_vec(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
 }
 
 fn expand_unique_ptr(
-    key: NamedImplKey,
+    key: &NamedImplKey,
     types: &Types,
     explicit_impl: Option<&Impl>,
 ) -> TokenStream {
@@ -1555,7 +1555,7 @@ fn expand_unique_ptr(
 }
 
 fn expand_shared_ptr(
-    key: NamedImplKey,
+    key: &NamedImplKey,
     types: &Types,
     explicit_impl: Option<&Impl>,
 ) -> TokenStream {
@@ -1637,7 +1637,7 @@ fn expand_shared_ptr(
     }
 }
 
-fn expand_weak_ptr(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
+fn expand_weak_ptr(key: &NamedImplKey, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
     let ident = key.rust;
     let name = ident.to_string();
     let resolve = types.resolve(ident);
@@ -1710,7 +1710,7 @@ fn expand_weak_ptr(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
 }
 
 fn expand_cxx_vector(
-    key: NamedImplKey,
+    key: &NamedImplKey,
     explicit_impl: Option<&Impl>,
     types: &Types,
 ) -> TokenStream {

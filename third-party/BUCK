@@ -154,6 +154,23 @@ cargo.rust_library(
     ],
 )
 
+http_archive(
+    name = "equivalent-1.0.2.crate",
+    sha256 = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f",
+    strip_prefix = "equivalent-1.0.2",
+    urls = ["https://static.crates.io/crates/equivalent/1.0.2/download"],
+    visibility = [],
+)
+
+cargo.rust_library(
+    name = "equivalent-1.0.2",
+    srcs = [":equivalent-1.0.2.crate"],
+    crate = "equivalent",
+    crate_root = "equivalent-1.0.2.crate/src/lib.rs",
+    edition = "2015",
+    visibility = [],
+)
+
 alias(
     name = "foldhash",
     actual = ":foldhash-0.1.5",
@@ -179,6 +196,54 @@ cargo.rust_library(
         "std",
     ],
     visibility = [],
+)
+
+http_archive(
+    name = "hashbrown-0.15.4.crate",
+    sha256 = "5971ac85611da7067dbfcabef3c70ebb5606018acd9e2a3903a0da507521e0d5",
+    strip_prefix = "hashbrown-0.15.4",
+    urls = ["https://static.crates.io/crates/hashbrown/0.15.4/download"],
+    visibility = [],
+)
+
+cargo.rust_library(
+    name = "hashbrown-0.15.4",
+    srcs = [":hashbrown-0.15.4.crate"],
+    crate = "hashbrown",
+    crate_root = "hashbrown-0.15.4.crate/src/lib.rs",
+    edition = "2021",
+    visibility = [],
+)
+
+alias(
+    name = "indexmap",
+    actual = ":indexmap-2.9.0",
+    visibility = ["PUBLIC"],
+)
+
+http_archive(
+    name = "indexmap-2.9.0.crate",
+    sha256 = "cea70ddb795996207ad57735b50c5982d8844f38ba9ee5f1aedcfb708a2aa11e",
+    strip_prefix = "indexmap-2.9.0",
+    urls = ["https://static.crates.io/crates/indexmap/2.9.0/download"],
+    visibility = [],
+)
+
+cargo.rust_library(
+    name = "indexmap-2.9.0",
+    srcs = [":indexmap-2.9.0.crate"],
+    crate = "indexmap",
+    crate_root = "indexmap-2.9.0.crate/src/lib.rs",
+    edition = "2021",
+    features = [
+        "default",
+        "std",
+    ],
+    visibility = [],
+    deps = [
+        ":equivalent-1.0.2",
+        ":hashbrown-0.15.4",
+    ],
 )
 
 alias(

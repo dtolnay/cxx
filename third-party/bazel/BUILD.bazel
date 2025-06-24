@@ -80,6 +80,18 @@ alias(
 )
 
 alias(
+    name = "indexmap-2.9.0",
+    actual = "@vendor__indexmap-2.9.0//:indexmap",
+    tags = ["manual"],
+)
+
+alias(
+    name = "indexmap",
+    actual = "@vendor__indexmap-2.9.0//:indexmap",
+    tags = ["manual"],
+)
+
+alias(
     name = "proc-macro2-1.0.95",
     actual = "@vendor__proc-macro2-1.0.95//:proc_macro2",
     tags = ["manual"],
