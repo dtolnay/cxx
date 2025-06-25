@@ -733,8 +733,13 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let ident = &efn.name.rust;
     let generics = &efn.generics;
     let arg_list = quote_spanned!(efn.paren_token.span=> (#(#all_args,)*));
+    let calling_conv = if let syntax::Lang::CxxUnwind = efn.lang {
+        quote_spanned!(span => extern "C-unwind")
+    } else {
+        quote_spanned!(span => extern "C")
+    };
     let fn_body = quote_spanned!(span=> {
-        #UnsafeExtern extern "C" {
+        #UnsafeExtern #calling_conv {
             #decl
         }
         #trampolines
@@ -806,11 +811,16 @@ fn expand_function_pointer_trampoline(
         body_span,
     );
     let var = &var.rust;
+    let calling_conv = if let syntax::Lang::CxxUnwind = efn.lang {
+        quote!(extern "C-unwind")
+    } else {
+        quote!(extern "C")
+    };
 
     quote! {
         let #var = ::cxx::private::FatFunction {
             trampoline: {
-                #UnsafeExtern extern "C" {
+                #UnsafeExtern #calling_conv {
                     #[link_name = #c_trampoline]
                     fn trampoline();
                 }
