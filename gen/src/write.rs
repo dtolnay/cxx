@@ -1409,95 +1409,110 @@ fn write_extern_arg(out: &mut OutFile, arg: &Var) {
 }
 
 fn write_type(out: &mut OutFile, ty: &Type) {
+    write!(out, "{}", stringify_type(ty, out.types));
+}
+
+fn stringify_type(ty: &Type, types: &Types) -> String {
+    let mut s = String::new();
+    write_type_to_generic_writer(&mut s, ty, types).unwrap();
+    s
+}
+
+fn write_type_to_generic_writer(
+    out: &mut impl std::fmt::Write,
+    ty: &Type,
+    types: &Types,
+) -> std::fmt::Result {
     match ty {
         Type::Ident(ident) => match Atom::from(&ident.rust) {
-            Some(atom) => write_atom(out, atom),
-            None => write!(
-                out,
-                "{}",
-                out.types.resolve(ident).name.to_fully_qualified(),
-            ),
+            Some(atom) => write_atom_to_generic_writer(out, atom),
+            None => write!(out, "{}", types.resolve(ident).name.to_fully_qualified()),
         },
         Type::RustBox(ty) => {
-            write!(out, "::rust::Box<");
-            write_type(out, &ty.inner);
-            write!(out, ">");
+            write!(out, "::rust::Box<")?;
+            write_type_to_generic_writer(out, &ty.inner, types)?;
+            write!(out, ">")
         }
         Type::RustVec(ty) => {
-            write!(out, "::rust::Vec<");
-            write_type(out, &ty.inner);
-            write!(out, ">");
+            write!(out, "::rust::Vec<")?;
+            write_type_to_generic_writer(out, &ty.inner, types)?;
+            write!(out, ">")
         }
         Type::UniquePtr(ptr) => {
-            write!(out, "::std::unique_ptr<");
-            write_type(out, &ptr.inner);
-            write!(out, ">");
+            write!(out, "::std::unique_ptr<")?;
+            write_type_to_generic_writer(out, &ptr.inner, types)?;
+            write!(out, ">")
         }
         Type::SharedPtr(ptr) => {
-            write!(out, "::std::shared_ptr<");
-            write_type(out, &ptr.inner);
-            write!(out, ">");
+            write!(out, "::std::shared_ptr<")?;
+            write_type_to_generic_writer(out, &ptr.inner, types)?;
+            write!(out, ">")
         }
         Type::WeakPtr(ptr) => {
-            write!(out, "::std::weak_ptr<");
-            write_type(out, &ptr.inner);
-            write!(out, ">");
+            write!(out, "::std::weak_ptr<")?;
+            write_type_to_generic_writer(out, &ptr.inner, types)?;
+            write!(out, ">")
         }
         Type::CxxVector(ty) => {
-            write!(out, "::std::vector<");
-            write_type(out, &ty.inner);
-            write!(out, ">");
+            write!(out, "::std::vector<")?;
+            write_type_to_generic_writer(out, &ty.inner, types)?;
+            write!(out, ">")
         }
         Type::Ref(r) => {
-            write_type_space(out, &r.inner);
+            write_type_space_to_generic_writer(out, &r.inner, types)?;
             if !r.mutable {
-                write!(out, "const ");
+                write!(out, "const ")?;
             }
-            write!(out, "&");
+            write!(out, "&")
         }
         Type::Ptr(p) => {
-            write_type_space(out, &p.inner);
+            write_type_space_to_generic_writer(out, &p.inner, types)?;
             if !p.mutable {
-                write!(out, "const ");
+                write!(out, "const ")?;
             }
-            write!(out, "*");
+            write!(out, "*")
         }
         Type::Str(_) => {
-            write!(out, "::rust::Str");
+            write!(out, "::rust::Str")
         }
         Type::SliceRef(slice) => {
-            write!(out, "::rust::Slice<");
-            write_type_space(out, &slice.inner);
+            write!(out, "::rust::Slice<")?;
+            write_type_space_to_generic_writer(out, &slice.inner, types)?;
             if slice.mutability.is_none() {
-                write!(out, "const");
+                write!(out, "const")?;
             }
-            write!(out, ">");
+            write!(out, ">")
         }
         Type::Fn(f) => {
-            write!(out, "::rust::Fn<");
+            write!(out, "::rust::Fn<")?;
             match &f.ret {
-                Some(ret) => write_type(out, ret),
-                None => write!(out, "void"),
+                Some(ret) => write_type_to_generic_writer(out, ret, types)?,
+                None => write!(out, "void")?,
             }
-            write!(out, "(");
+            write!(out, "(")?;
             for (i, arg) in f.args.iter().enumerate() {
                 if i > 0 {
-                    write!(out, ", ");
+                    write!(out, ", ")?;
                 }
-                write_type(out, &arg.ty);
+                write_type_to_generic_writer(out, &arg.ty, types)?;
             }
-            write!(out, ")>");
+            write!(out, ")>")
         }
         Type::Array(a) => {
-            write!(out, "::std::array<");
-            write_type(out, &a.inner);
-            write!(out, ", {}>", &a.len);
+            write!(out, "::std::array<")?;
+            write_type_to_generic_writer(out, &a.inner, types)?;
+            write!(out, ", {}>", &a.len)
         }
         Type::Void(_) => unreachable!(),
     }
 }
 
 fn write_atom(out: &mut OutFile, atom: Atom) {
+    // `unwrap`, because `OutFile`'s impl of `fmt::Write` is infallible.
+    write_atom_to_generic_writer(out, atom).unwrap();
+}
+
+fn write_atom_to_generic_writer(out: &mut impl std::fmt::Write, atom: Atom) -> std::fmt::Result {
     match atom {
         Bool => write!(out, "bool"),
         Char => write!(out, "char"),
@@ -1523,7 +1538,24 @@ fn write_type_space(out: &mut OutFile, ty: &Type) {
     write_space_after_type(out, ty);
 }
 
+fn write_type_space_to_generic_writer(
+    out: &mut impl std::fmt::Write,
+    ty: &Type,
+    types: &Types,
+) -> std::fmt::Result {
+    write_type_to_generic_writer(out, ty, types)?;
+    write_space_after_type_to_generic_writer(out, ty)
+}
+
 fn write_space_after_type(out: &mut OutFile, ty: &Type) {
+    // `unwrap`, because `OutFile`'s impl of `fmt::Write` is infallible.
+    write_space_after_type_to_generic_writer(out, ty).unwrap();
+}
+
+fn write_space_after_type_to_generic_writer(
+    out: &mut impl std::fmt::Write,
+    ty: &Type,
+) -> std::fmt::Result {
     match ty {
         Type::Ident(_)
         | Type::RustBox(_)
@@ -1536,7 +1568,7 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
         | Type::SliceRef(_)
         | Type::Fn(_)
         | Type::Array(_) => write!(out, " "),
-        Type::Ref(_) | Type::Ptr(_) => {}
+        Type::Ref(_) | Type::Ptr(_) => Ok(()),
         Type::Void(_) => unreachable!(),
     }
 }
@@ -1547,7 +1579,10 @@ enum UniquePtr<'a> {
     CxxVector(&'a Ident),
 }
 
+// TODO(@anforowicz): Replace `trait ToTypename` with `stringify_type`.
 trait ToTypename {
+    /// Formats `self` using C++ syntax.  For example, if `self` represents `UniquePtr<u32>`,
+    /// then it will be formatted as `::std::unique_ptr<uint32_t>`.
     fn to_typename(&self, types: &Types) -> String;
 }
 
