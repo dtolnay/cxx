@@ -10,8 +10,8 @@ use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::{self, Symbol};
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::{
-    derive, mangle, Api, Doc, Enum, EnumRepr, ExternFn, ExternType, Pair, Signature, Struct, Trait,
-    Type, TypeAlias, Types, Var,
+    derive, mangle, Api, Doc, Enum, EnumRepr, ExternFn, ExternType, Lang, Pair, Signature, Struct,
+    Trait, Type, TypeAlias, Types, Var,
 };
 use proc_macro2::Ident;
 
@@ -779,7 +779,11 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         write_indirect_return_type_space(out, efn.ret.as_ref().unwrap());
         write!(out, "*return$");
     }
-    writeln!(out, ") noexcept {{");
+    if efn.lang == Lang::CxxUnwind {
+        writeln!(out, ") {{");
+    } else {
+        writeln!(out, ") noexcept {{");
+    }
     write!(out, "  ");
     write_return_type(out, &efn.ret);
     match &efn.receiver {
