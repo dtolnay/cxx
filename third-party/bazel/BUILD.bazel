@@ -32,26 +32,26 @@ filegroup(
 
 # Workspace Member Dependencies
 alias(
-    name = "cc-1.2.19",
-    actual = "@vendor__cc-1.2.19//:cc",
+    name = "cc-1.2.27",
+    actual = "@vendor__cc-1.2.27//:cc",
     tags = ["manual"],
 )
 
 alias(
     name = "cc",
-    actual = "@vendor__cc-1.2.19//:cc",
+    actual = "@vendor__cc-1.2.27//:cc",
     tags = ["manual"],
 )
 
 alias(
-    name = "clap-4.5.37",
-    actual = "@vendor__clap-4.5.37//:clap",
+    name = "clap-4.5.40",
+    actual = "@vendor__clap-4.5.40//:clap",
     tags = ["manual"],
 )
 
 alias(
     name = "clap",
-    actual = "@vendor__clap-4.5.37//:clap",
+    actual = "@vendor__clap-4.5.40//:clap",
     tags = ["manual"],
 )
 
@@ -116,14 +116,14 @@ alias(
 )
 
 alias(
-    name = "rustversion-1.0.20",
-    actual = "@vendor__rustversion-1.0.20//:rustversion",
+    name = "rustversion-1.0.21",
+    actual = "@vendor__rustversion-1.0.21//:rustversion",
     tags = ["manual"],
 )
 
 alias(
     name = "rustversion",
-    actual = "@vendor__rustversion-1.0.20//:rustversion",
+    actual = "@vendor__rustversion-1.0.21//:rustversion",
     tags = ["manual"],
 )
 
@@ -140,13 +140,13 @@ alias(
 )
 
 alias(
-    name = "syn-2.0.100",
-    actual = "@vendor__syn-2.0.100//:syn",
+    name = "syn-2.0.104",
+    actual = "@vendor__syn-2.0.104//:syn",
     tags = ["manual"],
 )
 
 alias(
     name = "syn",
-    actual = "@vendor__syn-2.0.100//:syn",
+    actual = "@vendor__syn-2.0.104//:syn",
     tags = ["manual"],
 )
