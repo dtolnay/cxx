@@ -779,11 +779,13 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         write_indirect_return_type_space(out, efn.ret.as_ref().unwrap());
         write!(out, "*return$");
     }
-    if efn.lang == Lang::CxxUnwind {
-        writeln!(out, ") {{");
-    } else {
-        writeln!(out, ") noexcept {{");
+    write!(out, ")");
+    match efn.lang {
+        Lang::Cxx => write!(out, " noexcept"),
+        Lang::CxxUnwind => {}
+        Lang::Rust => unreachable!(),
     }
+    writeln!(out, " {{");
     write!(out, "  ");
     write_return_type(out, &efn.ret);
     match &efn.receiver {

@@ -7,8 +7,8 @@ use crate::syntax::qualified::QualifiedName;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    self, check, mangle, Api, Doc, Enum, ExternFn, ExternType, Impl, Lifetimes, Pair, Signature,
-    Struct, Trait, Type, TypeAlias, Types,
+    self, check, mangle, Api, Doc, Enum, ExternFn, ExternType, Impl, Lang, Lifetimes, Pair,
+    Signature, Struct, Trait, Type, TypeAlias, Types,
 };
 use crate::type_id::Crate;
 use crate::{derive, generics};
@@ -733,13 +733,13 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let ident = &efn.name.rust;
     let generics = &efn.generics;
     let arg_list = quote_spanned!(efn.paren_token.span=> (#(#all_args,)*));
-    let calling_conv = if let syntax::Lang::CxxUnwind = efn.lang {
-        quote_spanned!(span => extern "C-unwind")
-    } else {
-        quote_spanned!(span => extern "C")
+    let calling_conv = match efn.lang {
+        Lang::Cxx => quote_spanned!(span=> "C"),
+        Lang::CxxUnwind => quote_spanned!(span=> "C-unwind"),
+        Lang::Rust => unreachable!(),
     };
     let fn_body = quote_spanned!(span=> {
-        #UnsafeExtern #calling_conv {
+        #UnsafeExtern extern #calling_conv {
             #decl
         }
         #trampolines
@@ -810,17 +810,17 @@ fn expand_function_pointer_trampoline(
         &efn.attrs,
         body_span,
     );
-    let var = &var.rust;
-    let calling_conv = if let syntax::Lang::CxxUnwind = efn.lang {
-        quote!(extern "C-unwind")
-    } else {
-        quote!(extern "C")
+    let calling_conv = match efn.lang {
+        Lang::Cxx => "C",
+        Lang::CxxUnwind => "C-unwind",
+        Lang::Rust => unreachable!(),
     };
+    let var = &var.rust;
 
     quote! {
         let #var = ::cxx::private::FatFunction {
             trampoline: {
-                #UnsafeExtern #calling_conv {
+                #UnsafeExtern extern #calling_conv {
                     #[link_name = #c_trampoline]
                     fn trampoline();
                 }
