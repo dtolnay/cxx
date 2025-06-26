@@ -299,7 +299,7 @@ _NORMAL_DEPENDENCIES = {
             "clap": Label("@vendor//:clap-4.5.40"),
             "codespan-reporting": Label("@vendor//:codespan-reporting-0.12.0"),
             "foldhash": Label("@vendor//:foldhash-0.1.5"),
-            "indexmap": Label("@vendor//:indexmap-2.9.0"),
+            "indexmap": Label("@vendor//:indexmap-2.10.0"),
             "proc-macro2": Label("@vendor//:proc-macro2-1.0.95"),
             "quote": Label("@vendor//:quote-1.0.40"),
             "scratch": Label("@vendor//:scratch-1.0.8"),
@@ -517,12 +517,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__indexmap-2.9.0",
-        sha256 = "cea70ddb795996207ad57735b50c5982d8844f38ba9ee5f1aedcfb708a2aa11e",
+        name = "vendor__indexmap-2.10.0",
+        sha256 = "fe4cd85333e22411419a0bcae1297d25e58c9443848b11dc6a86fefe8c78a661",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/indexmap/2.9.0/download"],
-        strip_prefix = "indexmap-2.9.0",
-        build_file = Label("//third-party/bazel:BUILD.indexmap-2.9.0.bazel"),
+        urls = ["https://static.crates.io/crates/indexmap/2.10.0/download"],
+        strip_prefix = "indexmap-2.10.0",
+        build_file = Label("//third-party/bazel:BUILD.indexmap-2.10.0.bazel"),
     )
 
     maybe(
@@ -750,7 +750,7 @@ def crate_repositories():
         struct(repo = "vendor__clap-4.5.40", is_dev_dep = False),
         struct(repo = "vendor__codespan-reporting-0.12.0", is_dev_dep = False),
         struct(repo = "vendor__foldhash-0.1.5", is_dev_dep = False),
-        struct(repo = "vendor__indexmap-2.9.0", is_dev_dep = False),
+        struct(repo = "vendor__indexmap-2.10.0", is_dev_dep = False),
         struct(repo = "vendor__proc-macro2-1.0.95", is_dev_dep = False),
         struct(repo = "vendor__quote-1.0.40", is_dev_dep = False),
         struct(repo = "vendor__rustversion-1.0.21", is_dev_dep = False),

@@ -80,14 +80,14 @@ alias(
 )
 
 alias(
-    name = "indexmap-2.9.0",
-    actual = "@vendor__indexmap-2.9.0//:indexmap",
+    name = "indexmap-2.10.0",
+    actual = "@vendor__indexmap-2.10.0//:indexmap",
     tags = ["manual"],
 )
 
 alias(
     name = "indexmap",
-    actual = "@vendor__indexmap-2.9.0//:indexmap",
+    actual = "@vendor__indexmap-2.10.0//:indexmap",
     tags = ["manual"],
 )
 
