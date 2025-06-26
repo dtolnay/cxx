@@ -5,6 +5,7 @@ use crate::gen::{builtin, include, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::instantiate::{ImplKey, NamedImplKey};
 use crate::syntax::map::UnorderedMap as Map;
+use crate::syntax::namespace::Namespace;
 use crate::syntax::primitive::{self, PrimitiveKind};
 use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::{self, Symbol};
@@ -308,7 +309,8 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
         let sig = &method.sig;
         let local_name = method.name.cxx.to_string();
         let indirect_call = false;
-        write_rust_function_shim_decl(out, &local_name, sig, indirect_call);
+        let main = false;
+        write_rust_function_shim_decl(out, &local_name, sig, indirect_call, main);
         writeln!(out, ";");
         if !method.doc.is_empty() {
             out.next_section();
@@ -400,7 +402,8 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
         let sig = &method.sig;
         let local_name = method.name.cxx.to_string();
         let indirect_call = false;
-        write_rust_function_shim_decl(out, &local_name, sig, indirect_call);
+        let main = false;
+        write_rust_function_shim_decl(out, &local_name, sig, indirect_call, main);
         writeln!(out, ";");
         if !method.doc.is_empty() {
             out.next_section();
@@ -918,7 +921,16 @@ fn write_function_pointer_trampoline(out: &mut OutFile, efn: &ExternFn, var: &Pa
     out.next_section();
     let c_trampoline = mangle::c_trampoline(efn, var, out.types).to_string();
     let doc = Doc::new();
-    write_rust_function_shim_impl(out, &c_trampoline, f, &doc, &r_trampoline, indirect_call);
+    let main = false;
+    write_rust_function_shim_impl(
+        out,
+        &c_trampoline,
+        f,
+        &doc,
+        &r_trampoline,
+        indirect_call,
+        main,
+    );
 }
 
 fn write_rust_function_decl<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
@@ -1003,7 +1015,14 @@ fn write_rust_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     let doc = &efn.doc;
     let invoke = mangle::extern_fn(efn, out.types);
     let indirect_call = false;
-    write_rust_function_shim_impl(out, &local_name, efn, doc, &invoke, indirect_call);
+    let main = efn.name.cxx == *"main"
+        && efn.name.namespace == Namespace::ROOT
+        && efn.sig.asyncness.is_none()
+        && efn.sig.receiver.is_none()
+        && efn.sig.args.is_empty()
+        && efn.sig.ret.is_none()
+        && !efn.sig.throws;
+    write_rust_function_shim_impl(out, &local_name, efn, doc, &invoke, indirect_call, main);
 }
 
 fn write_rust_function_shim_decl(
@@ -1011,9 +1030,14 @@ fn write_rust_function_shim_decl(
     local_name: &str,
     sig: &Signature,
     indirect_call: bool,
+    main: bool,
 ) {
     begin_function_definition(out);
-    write_return_type(out, &sig.ret);
+    if main {
+        write!(out, "int ");
+    } else {
+        write_return_type(out, &sig.ret);
+    }
     write!(out, "{}(", local_name);
     for (i, arg) in sig.args.iter().enumerate() {
         if i > 0 {
@@ -1046,6 +1070,7 @@ fn write_rust_function_shim_impl(
     doc: &Doc,
     invoke: &Symbol,
     indirect_call: bool,
+    main: bool,
 ) {
     if out.header && sig.receiver.is_some() {
         // We've already defined this inside the struct.
@@ -1055,7 +1080,7 @@ fn write_rust_function_shim_impl(
         // Member functions already documented at their declaration.
         write_doc(out, "", doc);
     }
-    write_rust_function_shim_decl(out, local_name, sig, indirect_call);
+    write_rust_function_shim_decl(out, local_name, sig, indirect_call, main);
     if out.header {
         writeln!(out, ";");
         return;
