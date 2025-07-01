@@ -555,15 +555,8 @@ cargo.rust_library(
     crate = "winapi_util",
     crate_root = "winapi-util-0.1.9.crate/src/lib.rs",
     edition = "2021",
-    platform = {
-        "windows-gnu": dict(
-            deps = [":windows-sys-0.59.0"],
-        ),
-        "windows-msvc": dict(
-            deps = [":windows-sys-0.59.0"],
-        ),
-    },
     visibility = [],
+    deps = [":windows-sys-0.59.0"],
 )
 
 http_archive(
