@@ -271,11 +271,11 @@ FuturePollEvent::PollScope::~PollScope() noexcept(false) {
 }
 
 kj::Maybe<FuturePollEvent&> FuturePollEvent::PollScope::tryGetFuturePollEvent() const {
-  KJ_IF_SOME(h, holder.tryGet()) {
-    return h.futurePollEvent;
-  } else {
-    return kj::none;
-  }
+//  KJ_IF_SOME(h, holder.tryGet()) {
+//    return h.futurePollEvent;
+//  } else {
+      return kj::none;
+//  }
 }
 
 }  // namespace kj_rs

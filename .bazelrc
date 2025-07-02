@@ -48,6 +48,9 @@ build:asan --test_env=KJ_CLEAN_SHUTDOWN=1
 
 # Benchmarking configuration
 
+build:bench --action_env=CC=clang-18 --action_env=CXX=clang++-18
+build:bench --cxxopt=-std=c++20 --host_cxxopt=-std=c++20
+
 build:bench -c opt
 build:bench --copt="-O3"
 build:bench --copt="-DNDEBUG"

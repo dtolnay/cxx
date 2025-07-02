@@ -1,3 +1,6 @@
+use crate::ffi::new_ready_promise_void;
+use crate::Error;
+
 type Result<T> = std::io::Result<T>;
 
 /// Async stream of zeros of a given size
@@ -13,6 +16,7 @@ impl ZeroStream {
             }
             n += k;
         }
+        let _ = new_ready_promise_void().await.map_err(Error::other)?;
         Ok(n)
     }
 }
@@ -34,7 +38,6 @@ impl futures::io::AsyncRead for ZeroStream {
         std::task::Poll::Ready(Ok(n))
     }
 }
-
 
 #[cfg(test)]
 mod tests {
