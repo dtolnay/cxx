@@ -85,3 +85,20 @@ cc_test(
         "@capnp-cpp//src/kj:kj-test",
     ],
 )
+
+cc_test(
+    name = "kj-test",
+    size = "small",
+    srcs = [
+        "convert.c++",
+    ],
+    linkstatic = select({
+        "@platforms//os:windows": True,
+        "//conditions:default": False,
+    }),
+    deps = [
+        "//kj-rs",
+        "//third-party:runtime",
+        "@capnp-cpp//src/kj:kj-test",
+    ],
+)
