@@ -14,6 +14,7 @@ where
         Type::Ident(_) | Type::Str(_) | Type::Void(_) => {}
         Type::RustBox(ty)
         | Type::UniquePtr(ty)
+        | Type::Own(ty)
         | Type::SharedPtr(ty)
         | Type::WeakPtr(ty)
         | Type::CxxVector(ty)

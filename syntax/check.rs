@@ -71,6 +71,7 @@ fn check_type(cx: &mut Check, ty: &Type) {
         Type::RustBox(ptr) => check_type_box(cx, ptr),
         Type::RustVec(ty) => check_type_rust_vec(cx, ty),
         Type::UniquePtr(ptr) => check_type_unique_ptr(cx, ptr),
+        Type::Own(ptr) => check_type_kj_own(cx, ptr),
         Type::SharedPtr(ptr) => check_type_shared_ptr(cx, ptr),
         Type::WeakPtr(ptr) => check_type_weak_ptr(cx, ptr),
         Type::CxxVector(ptr) => check_type_cxx_vector(cx, ptr),
@@ -159,6 +160,27 @@ fn check_type_unique_ptr(cx: &mut Check, ptr: &Ty1) {
     }
 
     cx.error(ptr, "unsupported unique_ptr target type");
+}
+
+fn check_type_kj_own(cx: &mut Check, ptr: &Ty1) {
+    if let Type::Ident(ident) = &ptr.inner {
+        if cx.types.rust.contains(&ident.rust) {
+            cx.error(ptr, "kj::Own of a Rust type is not supported yet, use a Box instead");
+            return;
+        }
+
+        match Atom::from(&ident.rust) {
+            None => return,
+            Some(
+                Bool | U8 | U16 | U32 | U64 | Usize | I8 | I16 | I32 | I64 | Isize | F32 | F64
+            ) => {
+                return;
+            }
+            _ => {}
+        }
+    }
+
+    cx.error(ptr, "unsupported kj::Own target type");
 }
 
 fn check_type_shared_ptr(cx: &mut Check, ptr: &Ty1) {
@@ -529,6 +551,7 @@ fn check_api_impl(cx: &mut Check, imp: &Impl) {
         Type::RustBox(ty)
         | Type::RustVec(ty)
         | Type::UniquePtr(ty)
+        | Type::Own(ty)
         | Type::SharedPtr(ty)
         | Type::WeakPtr(ty)
         | Type::CxxVector(ty) => {
@@ -609,6 +632,7 @@ fn check_mut_return_restriction(cx: &mut Check, efn: &ExternFn) {
 fn check_reserved_name(cx: &mut Check, ident: &Ident) {
     if ident == "Box"
         || ident == "UniquePtr"
+        || ident == "Own"
         || ident == "SharedPtr"
         || ident == "WeakPtr"
         || ident == "Vec"
@@ -660,6 +684,7 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
         Type::RustBox(_)
         | Type::RustVec(_)
         | Type::UniquePtr(_)
+        | Type::Own(_)
         | Type::SharedPtr(_)
         | Type::WeakPtr(_)
         | Type::Ref(_)
@@ -735,6 +760,7 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         Type::RustBox(_) => "Box".to_owned(),
         Type::RustVec(_) => "Vec".to_owned(),
         Type::UniquePtr(_) => "unique_ptr".to_owned(),
+        Type::Own(_) => "kj::Own".to_owned(),
         Type::SharedPtr(_) => "shared_ptr".to_owned(),
         Type::WeakPtr(_) => "weak_ptr".to_owned(),
         Type::Ref(_) => "reference".to_owned(),

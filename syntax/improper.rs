@@ -28,13 +28,14 @@ impl<'a> Types<'a> {
             | Type::Fn(_)
             | Type::Void(_)
             | Type::SliceRef(_) => Definite(true),
-            Type::UniquePtr(_) | Type::SharedPtr(_) | Type::WeakPtr(_) | Type::CxxVector(_) => {
+            Type::UniquePtr(_)
+            | Type::SharedPtr(_) | Type::WeakPtr(_) | Type::CxxVector(_) => {
                 Definite(false)
             }
             Type::Ref(ty) => self.determine_improper_ctype(&ty.inner),
             Type::Ptr(ty) => self.determine_improper_ctype(&ty.inner),
             Type::Array(ty) => self.determine_improper_ctype(&ty.inner),
-            Type::Future(_) => todo!("file a workerd-cxx ticket"),
+            Type::Future(_) | Type::Own(_) => todo!("file a workerd-cxx ticket"),
         }
     }
 }

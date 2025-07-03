@@ -291,6 +291,7 @@ pub enum Type {
     RustBox(Box<Ty1>),
     RustVec(Box<Ty1>),
     UniquePtr(Box<Ty1>),
+    Own(Box<Ty1>),
     SharedPtr(Box<Ty1>),
     WeakPtr(Box<Ty1>),
     Ref(Box<Ref>),
