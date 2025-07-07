@@ -163,3 +163,48 @@ mod ffi {
 
 Bounds on a lifetime (like `<'a, 'b: 'a>`) are not currently supported. Nor are
 type parameters or where-clauses.
+
+## Type equivalence across bridges
+
+Similar to type aliases for C++ types, it is possible to create type aliases for
+previously-exported types via the `extern "Rust"` block in another bridge.
+However, current support is very limited:
+
+- The type name must be the same as that of the target type.
+- If the target is in a different C++ namespace, then the namespace must be
+  explicitly specified on the alias, otherwise C++ won't consider the types as
+  equivalent.
+
+Basically, this is enough to import the type from another bridge and nothing more.
+
+In the first module `crate::mod1`, you export the type:
+
+```rust,noplayground
+pub struct MyType {
+    ...
+}
+
+#[cxx::bridge(namespace = "mod1")]
+mod ffi {
+    extern "Rust" {
+        type MyType;
+    }
+}
+```
+
+And in another crate/module `mod2`, you can now import the type and use it as
+a parameter or a return value in C++ and Rust functions:
+
+```rust,noplayground
+#[cxx::bridge(namespace = "mod2")]
+mod ffi {
+    extern "Rust" {
+        #[namespace = "mod1"]
+        type MyType = crate::mod1::MyType;
+    }
+
+    extern "C++" {
+        fn c_func(param: &MyType);
+    }
+}
+```

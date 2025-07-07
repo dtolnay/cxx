@@ -202,6 +202,7 @@ pub struct TypeAlias {
     pub visibility: Token![pub],
     pub type_token: Token![type],
     pub name: Pair,
+    pub lang: Lang,
     pub generics: Lifetimes,
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
     pub eq_token: Token![=],
