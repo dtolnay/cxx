@@ -106,7 +106,7 @@ pub mod tests {
     #[test]
     #[should_panic]
     fn test_null() {
-        let null_own = ffi::null_kj_own();
+        let _null_own = ffi::null_kj_own();
     }
 
     #[test]
@@ -119,7 +119,7 @@ pub mod tests {
     #[test]
     fn null_exception_test() {
         assert!(ffi::null_exception_test_driver_1().contains("Cannot pass a null Own to Rust"));
-        assert!(ffi::null_exception_test_driver_2().contains("panic in awaitables_rust::ffi::get_null"));
+        assert!(ffi::null_exception_test_driver_2().contains("panic in tests::ffi::get_null"));
     }
 
     #[test]

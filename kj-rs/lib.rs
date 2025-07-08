@@ -12,9 +12,9 @@ pub use promise::new_callbacks_promise_future;
 
 mod awaiter;
 mod future;
+mod own;
 mod promise;
 mod waker;
-mod own;
 
 pub mod repr {
     pub use crate::future::repr::*;

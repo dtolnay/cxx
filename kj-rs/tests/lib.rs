@@ -49,17 +49,26 @@ mod ffi {
         #[cxx_name = "setData"]
         fn set_data(self: Pin<&mut OpaqueCxxClass>, val: u64);
 
+        #[allow(dead_code)]
         fn cxx_kj_own() -> Own<OpaqueCxxClass>;
         fn null_kj_own() -> Own<OpaqueCxxClass>;
+        #[allow(dead_code)]
         fn give_own_back(own: Own<OpaqueCxxClass>);
+        #[allow(dead_code)]
         fn modify_own_return_test();
+        #[allow(dead_code)]
         fn breaking_things() -> Own<OpaqueCxxClass>;
 
+        #[allow(dead_code)]
         fn own_integer() -> Own<i64>;
+        #[allow(dead_code)]
         fn own_integer_attached() -> Own<i64>;
 
+        #[allow(dead_code)]
         fn null_exception_test_driver_1() -> String;
+        #[allow(dead_code)]
         fn null_exception_test_driver_2() -> String;
+        #[allow(dead_code)]
         fn rust_take_own_driver();
     }
 

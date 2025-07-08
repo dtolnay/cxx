@@ -155,12 +155,12 @@ where
     }
 
     /// Returns an iterator over elements of type `&T`.
-    pub fn iter(&self) -> Iter<T> {
+    pub fn iter(&self) -> Iter<'_, T> {
         Iter { v: self, index: 0 }
     }
 
     /// Returns an iterator over elements of type `Pin<&mut T>`.
-    pub fn iter_mut(self: Pin<&mut Self>) -> IterMut<T> {
+    pub fn iter_mut(self: Pin<&mut Self>) -> IterMut<'_, T> {
         IterMut { v: self, index: 0 }
     }
 

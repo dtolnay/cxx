@@ -1030,11 +1030,15 @@ fn write_rust_function_shim_impl(
         return;
     }
     writeln!(out, " {{");
-    sig.args.iter()
-        .filter(|arg| {
-            matches!(arg.ty, Type::Own(_))
-        }).for_each(|arg_own| {
-            writeln!(out, "  KJ_ASSERT({}.get() != nullptr, \"Cannot pass a null Own to Rust\");", arg_own.name.cxx);
+    sig.args
+        .iter()
+        .filter(|arg| matches!(arg.ty, Type::Own(_)))
+        .for_each(|arg_own| {
+            writeln!(
+                out,
+                "  KJ_ASSERT({}.get() != nullptr, \"Cannot pass a null Own to Rust\");",
+                arg_own.name.cxx
+            );
         });
     for arg in &sig.args {
         if arg.ty != RustString && out.types.needs_indirect_abi(&arg.ty) {
@@ -1633,8 +1637,7 @@ fn write_kj_own(out: &mut OutFile, key: NamedImplKey) {
     let ident = key.rust;
     let resolve = out.types.resolve(ident);
     let inner = resolve.name.to_fully_qualified();
-    let instance = resolve.name.to_symbol();
-    
+
     out.include.utility = true;
     out.include.kj_rs = true;
 

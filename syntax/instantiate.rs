@@ -28,7 +28,7 @@ pub struct NamedImplKey<'a> {
 }
 
 impl Type {
-    pub fn impl_key(&self) -> Option<ImplKey> {
+    pub fn impl_key(&self) -> Option<ImplKey<'_>> {
         if let Type::RustBox(ty) = self {
             if let Type::Ident(ident) = &ty.inner {
                 return Some(ImplKey::RustBox(NamedImplKey::new(ty, ident)));

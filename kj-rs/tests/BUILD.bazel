@@ -13,7 +13,7 @@ platform(
 )
 
 rust_library(
-    name = "awaitables-rust",
+    name = "tests",
     srcs = glob(["*.rs"]),
     edition = "2024",
     deps = [
@@ -28,13 +28,13 @@ rust_unpretty(
     name = "expand-rust_test",
     testonly = True,
     deps = [
-        ":awaitables-rust_test"
+        ":rust_tests"
     ]
 )
 
 rust_test(
-    name = "awaitables-rust_test",
-    crate = "awaitables-rust",
+    name = "rust_tests",
+    crate = "tests",
     deps = [
         ":test-promises",
     ],
@@ -80,7 +80,7 @@ cc_test(
         "//conditions:default": False,
     }),
     deps = [
-        ":awaitables-rust",
+        ":tests",
         ":bridge",
         ":test-promises",
         "//third-party:runtime",

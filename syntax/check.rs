@@ -165,14 +165,17 @@ fn check_type_unique_ptr(cx: &mut Check, ptr: &Ty1) {
 fn check_type_kj_own(cx: &mut Check, ptr: &Ty1) {
     if let Type::Ident(ident) = &ptr.inner {
         if cx.types.rust.contains(&ident.rust) {
-            cx.error(ptr, "kj::Own of a Rust type is not supported yet, use a Box instead");
+            cx.error(
+                ptr,
+                "kj::Own of a Rust type is not supported yet, use a Box instead",
+            );
             return;
         }
 
         match Atom::from(&ident.rust) {
             None => return,
             Some(
-                Bool | U8 | U16 | U32 | U64 | Usize | I8 | I16 | I32 | I64 | Isize | F32 | F64
+                Bool | U8 | U16 | U32 | U64 | Usize | I8 | I16 | I32 | I64 | Isize | F32 | F64,
             ) => {
                 return;
             }

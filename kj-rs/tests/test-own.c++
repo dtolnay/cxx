@@ -1,15 +1,17 @@
 #include "test-own.h"
+
 #include "kj/string.h"
+
 #include <exception>
 
 namespace kj_rs_demo {
 
-kj::Own<OpaqueCxxClass> cxx_kj_own() { 
-  return kj::heap<OpaqueCxxClass>(42); 
+kj::Own<OpaqueCxxClass> cxx_kj_own() {
+  return kj::heap<OpaqueCxxClass>(42);
 }
 
-kj::Own<OpaqueCxxClass> null_kj_own() { 
-  return kj::Own<OpaqueCxxClass>(); 
+kj::Own<OpaqueCxxClass> null_kj_own() {
+  return kj::Own<OpaqueCxxClass>();
 }
 
 void give_own_back(kj::Own<OpaqueCxxClass> own) {
@@ -42,19 +44,19 @@ kj::Own<int64_t> own_integer_attached() {
 
 rust::string null_exception_test_driver_1() {
   try {
-      auto _ = modify_own_return(null_kj_own());
-      return rust::string("");
-  } catch (const std::exception &e) {
-      return rust::string(e.what());
+    auto _ = modify_own_return(null_kj_own());
+    return rust::string("");
+  } catch (const std::exception& e) {
+    return rust::string(e.what());
   }
 }
 
 rust::string null_exception_test_driver_2() {
   try {
-      auto _ = get_null();
-      return rust::string("");
-  } catch (const std::exception &e) {
-      return rust::string(e.what());
+    auto _ = get_null();
+    return rust::string("");
+  } catch (const std::exception& e) {
+    return rust::string(e.what());
   }
 }
 
@@ -63,4 +65,4 @@ void rust_take_own_driver() {
   take_own(kj::mv(own));
 }
 
-} // namespace kj_rs_demo
+}  // namespace kj_rs_demo

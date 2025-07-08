@@ -51,7 +51,6 @@
     clippy::cast_sign_loss,
     clippy::default_trait_access,
     clippy::doc_markdown,
-    clippy::elidable_lifetime_names,
     clippy::enum_glob_use,
     clippy::explicit_auto_deref,
     clippy::inherent_to_string,

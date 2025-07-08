@@ -733,7 +733,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                         true => quote_spanned!(span=> #call.as_mut_slice::<#inner>()),
                     }
                 }
-                Type::Own(_) => quote_spanned!{span=>
+                Type::Own(_) => quote_spanned! {span=>
                     let __temp = #call;
                     assert!(!__temp.as_ptr().is_null(), "Returning a Null kj::Own to Rust is not valid");
                     __temp

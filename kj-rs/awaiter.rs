@@ -57,7 +57,7 @@ impl<Data: std::marker::Unpin> PromiseAwaiter<Data> {
             let node = this.node.take();
 
             // Safety: `awaiter` stores `rust_waker_ptr` and uses it to call `wake()`. Note that
-            // `awaiter` is `this.awaiter`, which lives before `this.option_waker`. 
+            // `awaiter` is `this.awaiter`, which lives before `this.option_waker`.
             // Since we drop awaiter manually, the `rust_waker_ptr` that `awaiter` stores will always
             // be valid during its lifetime.
             //
@@ -69,7 +69,9 @@ impl<Data: std::marker::Unpin> PromiseAwaiter<Data> {
             // Safety: The memory slot is valid and this type ensures that it will stay pinned.
             unsafe {
                 crate::ffi::guarded_rust_promise_awaiter_new_in_place(
-                    this.awaiter.as_mut_ptr().cast::<GuardedRustPromiseAwaiter>(),
+                    this.awaiter
+                        .as_mut_ptr()
+                        .cast::<GuardedRustPromiseAwaiter>(),
                     rust_waker_ptr,
                     node.expect("node should be Some in call to init()"),
                 );
@@ -98,7 +100,9 @@ impl<Data: std::marker::Unpin> Drop for PromiseAwaiter<Data> {
         if self.awaiter_initialized {
             unsafe {
                 crate::ffi::guarded_rust_promise_awaiter_drop_in_place(
-                    self.awaiter.as_mut_ptr().cast::<GuardedRustPromiseAwaiter>()
+                    self.awaiter
+                        .as_mut_ptr()
+                        .cast::<GuardedRustPromiseAwaiter>(),
                 );
             }
         }

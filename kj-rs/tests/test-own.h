@@ -1,21 +1,27 @@
 #pragma once
 
 #include "kj/memory.h"
-#include <cstdint>
-#include <kj/debug.h>
+
 #include <rust/cxx.h>
+
+#include <kj/debug.h>
+
 #include <cstdint>
 
 namespace kj_rs_demo {
 
 class OpaqueCxxClass {
-public:
-  OpaqueCxxClass(uint64_t data) : data(data) {}
+ public:
+  OpaqueCxxClass(uint64_t data): data(data) {}
   ~OpaqueCxxClass() {}
-  uint64_t getData() const { return this->data; }
-  void setData(uint64_t val) { this->data = val; }
+  uint64_t getData() const {
+    return this->data;
+  }
+  void setData(uint64_t val) {
+    this->data = val;
+  }
 
-private:
+ private:
   uint64_t data;
 };
 
@@ -41,4 +47,4 @@ kj::Own<OpaqueCxxClass> breaking_things();
 kj::Own<int64_t> own_integer();
 kj::Own<int64_t> own_integer_attached();
 
-} // namespace kj_rs_demo
+}  // namespace kj_rs_demo

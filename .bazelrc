@@ -29,7 +29,10 @@ build:windows --copt='/Zc:dllexportInlines-' --host_copt='/Zc:dllexportInlines-'
 
 build:clippy --aspects=@rules_rust//rust:defs.bzl%rust_clippy_aspect
 build:clippy --output_groups=+clippy_checks
-build:clippy  --@rules_rust//:clippy_flags=-Dclippy::all,-Dclippy::pedantic
+build:clippy --@rules_rust//:clippy_flags=-Dclippy::all,-Dclippy::pedantic,-Dwarnings
+build:clippy --aspects=@rules_rust//rust:defs.bzl%rustfmt_aspect
+build:clippy --output_groups=+rustfmt_checks
+build:clippy --@rules_rust//:extra_rustc_flag=-Dwarnings
 
 ## Sanitizers
 
