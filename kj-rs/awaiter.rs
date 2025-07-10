@@ -6,16 +6,6 @@ use crate::ffi::{GuardedRustPromiseAwaiter, GuardedRustPromiseAwaiterRepr};
 use crate::waker::try_into_kj_waker_ptr;
 
 // =======================================================================================
-// GuardedRustPromiseAwaiter
-
-// Safety: KJ Promises are not associated with threads, but with event loops at construction time.
-// Therefore, they can be polled from any thread, as long as that thread has the correct event loop
-// active at the time of the call to `poll()`. If the correct event loop is not active,
-// GuardedRustPromiseAwaiter's API will panic. (The Guarded- prefix refers to the C++ class template
-// ExecutorGuarded, which enforces the correct event loop requirement.)
-unsafe impl Send for GuardedRustPromiseAwaiter {}
-
-// =======================================================================================
 // Await syntax for OwnPromiseNode
 
 use crate::OwnPromiseNode;
