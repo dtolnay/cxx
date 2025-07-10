@@ -1664,7 +1664,7 @@ fn write_kj_own(out: &mut OutFile, key: NamedImplKey) {
     );
     writeln!(
         out,
-        "static_assert(!::std::is_base_of<::kj::Refcounted, {}>::value, \"Value must not inherit from kj::Refcounted\");",
+        "static_assert(!::kj::_::IsRefcounted<{}>, \"Value must not inherit from kj::Refcounted\");",
         inner
     );
 }

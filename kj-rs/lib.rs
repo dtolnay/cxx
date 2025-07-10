@@ -4,6 +4,7 @@ use awaiter::WakerRef;
 pub use crate::ffi::KjWaker;
 pub use awaiter::PromiseAwaiter;
 pub use future::FuturePollStatus;
+pub use own::repr::Own;
 pub use promise::KjPromise;
 pub use promise::KjPromiseNodeImpl;
 pub use promise::OwnPromiseNode;
