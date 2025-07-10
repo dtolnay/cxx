@@ -95,10 +95,16 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
                 }
                 hidden.extend(expand_rust_function_shim(efn, types));
             }
-            Api::TypeAlias(alias) => {
-                expanded.extend(expand_type_alias(alias));
-                hidden.extend(expand_type_alias_verify(alias, types));
-            }
+            Api::TypeAlias(alias) => match alias.lang {
+                syntax::Lang::Cxx => {
+                    expanded.extend(expand_type_alias(alias));
+                    hidden.extend(expand_type_alias_verify(alias, types));
+                }
+                syntax::Lang::Rust => {
+                    expanded.extend(expand_type_alias_rust(alias));
+                    hidden.extend(expand_type_alias_verify_rust(alias));
+                }
+            },
         }
     }
 
@@ -1336,6 +1342,21 @@ fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
     }
 }
 
+fn expand_type_alias_rust(alias: &TypeAlias) -> TokenStream {
+    let doc = &alias.doc;
+    let attrs = &alias.attrs;
+    let visibility = alias.visibility;
+    let ident = &alias.name.rust;
+    let ty = &alias.ty;
+    let semi_token = alias.semi_token;
+
+    quote! {
+        #doc
+        #attrs
+        #visibility use #ty as #ident #semi_token
+    }
+}
+
 fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
     let attrs = &alias.attrs;
     let ident = &alias.name.rust;
@@ -1359,6 +1380,15 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
     }
 
     verify
+}
+
+fn expand_type_alias_verify_rust(alias: &TypeAlias) -> TokenStream {
+    let mut ident = alias.name.rust.clone();
+    let span = alias.ty.span();
+    ident.set_span(span);
+    quote_spanned! {span=>
+        const _: fn() = ::cxx::private::verify_rust_type::< #ident >;
+    }
 }
 
 fn type_id(name: &Pair) -> TokenStream {

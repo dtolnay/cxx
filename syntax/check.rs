@@ -3,7 +3,8 @@ use crate::report::Errors;
 use crate::visit::{self, Visit};
 use crate::{
     error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, Future, Impl, Lang, Lifetimes,
-    NamedType, Ptr, Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
+    NamedType, Ptr, Receiver, Ref, RustType, Signature, SliceRef, Struct, Trait, Ty1, Type,
+    TypeAlias, Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
@@ -536,6 +537,25 @@ fn check_api_type_alias(cx: &mut Check, alias: &TypeAlias) {
     for derive in &alias.derives {
         let msg = format!("derive({}) on extern type alias is not supported", derive);
         cx.error(derive, msg);
+    }
+
+    if alias.lang == Lang::Rust {
+        let ty = &alias.ty;
+        if let RustType::Path(path) = &ty {
+            // OK, we support path
+            if let Some(last) = path.path.segments.last() {
+                if last.ident != alias.name.rust {
+                    cx.error(
+                        &alias.name.rust,
+                        "`extern \"Rust\"` alias must have the same name as the target type",
+                    );
+                }
+            } else {
+                cx.error(ty, "unsupported `extern \"Rust\"` alias target type");
+            }
+        } else {
+            cx.error(ty, "unsupported `extern \"Rust\"` alias target");
+        }
     }
 }
 

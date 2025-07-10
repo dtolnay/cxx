@@ -1,0 +1,5 @@
+error: unsupported `extern "Rust"` alias target
+ --> tests/ui/type_alias_rust3.rs:7:23
+  |
+7 |         type Source = &crate::Type;
+  |                       ^^^^^^^^^^^^
