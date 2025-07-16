@@ -6,7 +6,9 @@ used by the `cxx` project.
 ## Errors from proc macro
 
 In some situations, we want to verify that the `#[cxx::bridge]` macro reports
-expected error messages when invoked by `rustc`.  Such verification is handled
+expected error messages when invoked by `rustc`.
+
+Such verification is handled
 by test cases underneath `tests/ui` directory and driven by
 `tests/compiletest.rs`.  The test cases consist of a pair of files:
 
@@ -23,10 +25,7 @@ when compiled by a C++ compiler.
 (Errors from unsuccessful invocations of the `cxxbridge-cmd` command
 should have test coverage provided by the `tests/ui` test suite.)
 
-TODO: Implement such verification (e.g.
-https://github.com/dtolnay/cxx/commit/534627667 improves an error message for
-`UniquePtr<ForwardDeclaredType>`, but this currently doesn't have a
-corresponding regression test).
+Such verification is covered by `tests/cpp_ui_tests_harness.rs`.
 
 ## End-to-end functionality
 
