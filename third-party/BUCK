@@ -555,6 +555,7 @@ cargo.rust_library(
     crate = "winapi_util",
     crate_root = "winapi-util-0.1.9.crate/src/lib.rs",
     edition = "2021",
+    target_compatible_with = ["prelude//os:windows"],
     visibility = [],
     deps = [":windows-sys-0.59.0"],
 )
@@ -583,6 +584,7 @@ cargo.rust_library(
         "Win32_System_SystemInformation",
         "default",
     ],
+    target_compatible_with = ["prelude//os:windows"],
     visibility = [],
     deps = [":windows-targets-0.52.6"],
 )
@@ -602,5 +604,6 @@ cargo.rust_library(
     crate_root = "windows-targets-0.52.6.crate/src/lib.rs",
     edition = "2021",
     rustc_flags = ["--cfg=windows_raw_dylib"],
+    target_compatible_with = ["prelude//os:windows"],
     visibility = [],
 )

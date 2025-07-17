@@ -1,3 +1,4 @@
+target_compatible_with = ["prelude//os:windows"]
 omit_deps = [
     "windows_aarch64_gnullvm",
     "windows_aarch64_msvc",
