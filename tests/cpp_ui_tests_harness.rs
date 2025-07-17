@@ -252,6 +252,3 @@ mod test {
         let _ = test.compile().expect_single_error();
     }
 }
-
-// TODO(@anforowicz): Add a regression test for
-// https://github.com/dtolnay/cxx/commit/534627667
