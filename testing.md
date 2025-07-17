@@ -25,7 +25,7 @@ when compiled by a C++ compiler.
 (Errors from unsuccessful invocations of the `cxxbridge-cmd` command
 should have test coverage provided by the `tests/ui` test suite.)
 
-Such verification is covered by `tests/cpp_ui_tests_harness.rs`.
+Such verification is covered by `tests/cpp_ui_tests.rs`.
 
 ## End-to-end functionality
 
