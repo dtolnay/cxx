@@ -19,5 +19,5 @@ fn test_unique_ptr_of_incomplete_foward_declared_pointee() {
     });
     test.write_file("include.h", "class ForwardDeclaredType;");
     let err_msg = test.compile().expect_single_error();
-    assert!(err_msg.contains("definition of ForwardDeclaredType is required"));
+    assert!(err_msg.contains("definition of `::ForwardDeclaredType` is required"));
 }
