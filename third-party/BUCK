@@ -601,13 +601,6 @@ cargo.rust_library(
     crate = "windows_targets",
     crate_root = "windows-targets-0.52.6.crate/src/lib.rs",
     edition = "2021",
-    platform = {
-        "windows-gnu": dict(
-            rustc_flags = ["--cfg=windows_raw_dylib"],
-        ),
-        "windows-msvc": dict(
-            rustc_flags = ["--cfg=windows_raw_dylib"],
-        ),
-    },
+    rustc_flags = ["--cfg=windows_raw_dylib"],
     visibility = [],
 )
