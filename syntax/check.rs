@@ -95,7 +95,7 @@ fn check_type_ident(cx: &mut Check, name: &NamedType) {
 fn check_type_box(cx: &mut Check, ptr: &Ty1) {
     if let Type::Ident(ident) = &ptr.inner {
         if cx.types.cxx.contains(&ident.rust)
-            && !cx.types.aliases.contains_key(&ident.rust)
+            && !cx.types.cxx_aliases.contains_key(&ident.rust)
             && !cx.types.structs.contains_key(&ident.rust)
             && !cx.types.enums.contains_key(&ident.rust)
         {
@@ -114,7 +114,7 @@ fn check_type_rust_vec(cx: &mut Check, ty: &Ty1) {
     match &ty.inner {
         Type::Ident(ident) => {
             if cx.types.cxx.contains(&ident.rust)
-                && !cx.types.aliases.contains_key(&ident.rust)
+                && !cx.types.cxx_aliases.contains_key(&ident.rust)
                 && !cx.types.structs.contains_key(&ident.rust)
                 && !cx.types.enums.contains_key(&ident.rust)
             {
@@ -273,7 +273,8 @@ fn check_type_slice_ref(cx: &mut Check, ty: &SliceRef) {
     let supported = !is_unsized(cx, &ty.inner)
         || match &ty.inner {
             Type::Ident(ident) => {
-                cx.types.rust.contains(&ident.rust) || cx.types.aliases.contains_key(&ident.rust)
+                cx.types.rust.contains(&ident.rust)
+                    || cx.types.cxx_aliases.contains_key(&ident.rust)
             }
             _ => false,
         };
@@ -680,7 +681,7 @@ fn is_opaque_cxx(cx: &mut Check, ty: &Ident) -> bool {
     cx.types.cxx.contains(ty)
         && !cx.types.structs.contains_key(ty)
         && !cx.types.enums.contains_key(ty)
-        && !(cx.types.aliases.contains_key(ty) && cx.types.required_trivial.contains_key(ty))
+        && !(cx.types.cxx_aliases.contains_key(ty) && cx.types.required_trivial.contains_key(ty))
 }
 
 fn span_for_struct_error(strct: &Struct) -> TokenStream {
@@ -724,7 +725,7 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
                 "struct".to_owned()
             } else if cx.types.enums.contains_key(&ident.rust) {
                 "enum".to_owned()
-            } else if cx.types.aliases.contains_key(&ident.rust) {
+            } else if cx.types.cxx_aliases.contains_key(&ident.rust) {
                 "C++ type".to_owned()
             } else if cx.types.cxx.contains(&ident.rust) {
                 "opaque C++ type".to_owned()

@@ -19,7 +19,7 @@ impl<'a> Types<'a> {
                 } else if let Some(strct) = self.structs.get(ident) {
                     Depends(&strct.name.rust) // iterate to fixed-point
                 } else {
-                    Definite(self.rust.contains(ident) || self.aliases.contains_key(ident))
+                    Definite(self.rust.contains(ident) || self.cxx_aliases.contains_key(ident))
                 }
             }
             Type::RustBox(_)

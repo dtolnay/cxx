@@ -18,7 +18,8 @@ pub(crate) struct Types<'a> {
     pub enums: UnorderedMap<&'a Ident, &'a Enum>,
     pub cxx: UnorderedSet<&'a Ident>,
     pub rust: UnorderedSet<&'a Ident>,
-    pub aliases: UnorderedMap<&'a Ident, &'a TypeAlias>,
+    /// Type aliases defined in the `extern "C++"` section of `#[cxx::bridge]`.
+    pub cxx_aliases: UnorderedMap<&'a Ident, &'a TypeAlias>,
     pub untrusted: UnorderedMap<&'a Ident, &'a ExternType>,
     pub required_trivial: UnorderedMap<&'a Ident, Vec<TrivialReason<'a>>>,
     pub impls: OrderedMap<ImplKey<'a>, Option<&'a Impl>>,
@@ -34,7 +35,7 @@ impl<'a> Types<'a> {
         let mut enums = UnorderedMap::new();
         let mut cxx = UnorderedSet::new();
         let mut rust = UnorderedSet::new();
-        let mut aliases = UnorderedMap::new();
+        let mut cxx_aliases = UnorderedMap::new();
         let mut untrusted = UnorderedMap::new();
         let mut impls = OrderedMap::new();
         let mut resolutions = UnorderedMap::new();
@@ -150,7 +151,7 @@ impl<'a> Types<'a> {
                         duplicate_name(cx, alias, ItemName::Type(ident));
                     }
                     cxx.insert(ident);
-                    aliases.insert(ident, alias);
+                    cxx_aliases.insert(ident, alias);
                     add_resolution(&alias.name, &alias.generics);
                 }
                 Api::Impl(imp) => {
@@ -173,7 +174,7 @@ impl<'a> Types<'a> {
                 | ImplKey::SharedPtr(ident)
                 | ImplKey::WeakPtr(ident)
                 | ImplKey::CxxVector(ident) => {
-                    Atom::from(ident.rust).is_none() && !aliases.contains_key(ident.rust)
+                    Atom::from(ident.rust).is_none() && !cxx_aliases.contains_key(ident.rust)
                 }
             };
             if implicit_impl && !impls.contains_key(&impl_key) {
@@ -194,7 +195,7 @@ impl<'a> Types<'a> {
             enums,
             cxx,
             rust,
-            aliases,
+            cxx_aliases,
             untrusted,
             required_trivial,
             impls,
@@ -265,7 +266,7 @@ impl<'a> Types<'a> {
     pub(crate) fn is_maybe_trivial(&self, ty: &Ident) -> bool {
         self.structs.contains_key(ty)
             || self.enums.contains_key(ty)
-            || self.aliases.contains_key(ty)
+            || self.cxx_aliases.contains_key(ty)
     }
 }
 
@@ -311,6 +312,6 @@ mod test {
         })
         .unwrap();
         let types = collect_types(&apis).unwrap();
-        assert!(types.aliases.contains_key(&format_ident!("Alias")));
+        assert!(types.cxx_aliases.contains_key(&format_ident!("Alias")));
     }
 }
