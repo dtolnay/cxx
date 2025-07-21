@@ -369,6 +369,11 @@ pub mod ffi {
     impl SharedPtr<Undefined> {}
     impl SharedPtr<Private> {}
     impl UniquePtr<Array> {}
+
+    extern "Rust" {
+        type CrossModuleRustType = crate::module::CrossModuleRustType;
+        fn r_get_value_from_cross_module_rust_type(value: &CrossModuleRustType) -> i32;
+    }
 }
 
 mod other {
@@ -700,4 +705,8 @@ fn r_try_return_mutsliceu8(slice: &mut [u8]) -> Result<&mut [u8], Error> {
 
 fn r_aliased_function(x: i32) -> String {
     x.to_string()
+}
+
+fn r_get_value_from_cross_module_rust_type(value: &crate::module::CrossModuleRustType) -> i32 {
+    value.0
 }

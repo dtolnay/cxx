@@ -899,17 +899,12 @@ fn parse_type_alias(
         },
     ));
 
-    if lang == Lang::Rust {
-        let span = quote!(#type_token #semi_token);
-        let msg = "type alias in extern \"Rust\" block is not supported";
-        return Err(Error::new_spanned(span, msg));
-    }
-
     let visibility = visibility_pub(&visibility, type_token.span);
     let name = pair(namespace, &ident, cxx_name, rust_name);
 
     Ok(Api::TypeAlias(TypeAlias {
         cfg,
+        lang,
         doc,
         derives,
         attrs,

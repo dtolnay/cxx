@@ -7,7 +7,7 @@ use crate::syntax::set::{OrderedSet, UnorderedSet};
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::visit::{self, Visit};
 use crate::syntax::{
-    toposort, Api, Atom, Enum, ExternType, Impl, Lifetimes, Pair, Struct, Type, TypeAlias,
+    toposort, Api, Atom, Enum, ExternType, Impl, Lang, Lifetimes, Pair, Struct, Type, TypeAlias,
 };
 use proc_macro2::Ident;
 use quote::ToTokens;
@@ -20,6 +20,8 @@ pub(crate) struct Types<'a> {
     pub rust: UnorderedSet<&'a Ident>,
     /// Type aliases defined in the `extern "C++"` section of `#[cxx::bridge]`.
     pub cxx_aliases: UnorderedMap<&'a Ident, &'a TypeAlias>,
+    /// Type aliases defined in the `extern "Rust"` section of `#[cxx::bridge]`.
+    pub rust_aliases: UnorderedMap<&'a Ident, &'a TypeAlias>,
     pub untrusted: UnorderedMap<&'a Ident, &'a ExternType>,
     pub required_trivial: UnorderedMap<&'a Ident, Vec<TrivialReason<'a>>>,
     pub impls: OrderedMap<ImplKey<'a>, Option<&'a Impl>>,
@@ -36,6 +38,7 @@ impl<'a> Types<'a> {
         let mut cxx = UnorderedSet::new();
         let mut rust = UnorderedSet::new();
         let mut cxx_aliases = UnorderedMap::new();
+        let mut rust_aliases = UnorderedMap::new();
         let mut untrusted = UnorderedMap::new();
         let mut impls = OrderedMap::new();
         let mut resolutions = UnorderedMap::new();
@@ -150,8 +153,16 @@ impl<'a> Types<'a> {
                     if !type_names.insert(ident) {
                         duplicate_name(cx, alias, ItemName::Type(ident));
                     }
-                    cxx.insert(ident);
-                    cxx_aliases.insert(ident, alias);
+                    match alias.lang {
+                        Lang::Cxx | Lang::CxxUnwind => {
+                            cxx.insert(ident);
+                            cxx_aliases.insert(ident, alias);
+                        }
+                        Lang::Rust => {
+                            rust.insert(ident);
+                            rust_aliases.insert(ident, alias);
+                        }
+                    }
                     add_resolution(&alias.name, &alias.generics);
                 }
                 Api::Impl(imp) => {
@@ -174,7 +185,9 @@ impl<'a> Types<'a> {
                 | ImplKey::SharedPtr(ident)
                 | ImplKey::WeakPtr(ident)
                 | ImplKey::CxxVector(ident) => {
-                    Atom::from(ident.rust).is_none() && !cxx_aliases.contains_key(ident.rust)
+                    Atom::from(ident.rust).is_none()
+                        && !cxx_aliases.contains_key(ident.rust)
+                        && !rust_aliases.contains_key(ident.rust)
                 }
             };
             if implicit_impl && !impls.contains_key(&impl_key) {
@@ -196,6 +209,7 @@ impl<'a> Types<'a> {
             cxx,
             rust,
             cxx_aliases,
+            rust_aliases,
             untrusted,
             required_trivial,
             impls,
@@ -313,5 +327,20 @@ mod test {
         .unwrap();
         let types = collect_types(&apis).unwrap();
         assert!(types.cxx_aliases.contains_key(&format_ident!("Alias")));
+    }
+
+    #[test]
+    fn test_parsing_of_rust_type_aliases() {
+        let apis = parse_apis(quote! {
+            #[cxx::bridge]
+            mod ffi {
+                extern "Rust" {
+                    type Alias = crate::another_module::Foo;
+                }
+            }
+        })
+        .unwrap();
+        let types = collect_types(&apis).unwrap();
+        assert!(types.rust_aliases.contains_key(&format_ident!("Alias")));
     }
 }

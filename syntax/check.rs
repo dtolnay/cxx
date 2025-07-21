@@ -726,7 +726,9 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
             } else if cx.types.enums.contains_key(&ident.rust) {
                 "enum".to_owned()
             } else if cx.types.cxx_aliases.contains_key(&ident.rust) {
-                "C++ type".to_owned()
+                "aliased C++ type".to_owned()
+            } else if cx.types.rust_aliases.contains_key(&ident.rust) {
+                "aliased Rust type".to_owned()
             } else if cx.types.cxx.contains(&ident.rust) {
                 "opaque C++ type".to_owned()
             } else if cx.types.rust.contains(&ident.rust) {

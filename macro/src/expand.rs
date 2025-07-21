@@ -1339,26 +1339,37 @@ fn expand_type_alias(alias: &TypeAlias) -> TokenStream {
 fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
     let attrs = &alias.attrs;
     let ident = &alias.name.rust;
-    let type_id = type_id(&alias.name);
     let begin_span = alias.type_token.span;
     let end_span = alias.semi_token.span;
-    let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_type::<);
     let end = quote_spanned!(end_span=> >);
 
-    let mut verify = quote! {
-        #attrs
-        const _: fn() = #begin #ident, #type_id #end;
-    };
+    match alias.lang {
+        Lang::Cxx | Lang::CxxUnwind => {
+            let type_id = type_id(&alias.name);
+            let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_type::<);
+            let mut verify = quote! {
+                #attrs
+                const _: fn() = #begin #ident, #type_id #end;
+            };
 
-    if types.required_trivial.contains_key(&alias.name.rust) {
-        let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_kind::<);
-        verify.extend(quote! {
-            #attrs
-            const _: fn() = #begin #ident, ::cxx::kind::Trivial #end;
-        });
+            if types.required_trivial.contains_key(&alias.name.rust) {
+                let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_kind::<);
+                verify.extend(quote! {
+                    #attrs
+                    const _: fn() = #begin #ident, ::cxx::kind::Trivial #end;
+                });
+            }
+
+            verify
+        }
+        Lang::Rust => {
+            let begin = quote_spanned!(begin_span=> ::cxx::private::verify_rust_type::<);
+            quote! {
+                #attrs
+                const _: fn() = #begin #ident #end;
+            }
+        }
     }
-
-    verify
 }
 
 fn type_id(name: &Pair) -> TokenStream {

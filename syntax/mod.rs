@@ -164,6 +164,7 @@ pub(crate) struct ExternFn {
 pub(crate) struct TypeAlias {
     #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
     pub cfg: CfgExpr,
+    pub lang: Lang,
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
     pub doc: Doc,
     pub derives: Vec<Derive>,
