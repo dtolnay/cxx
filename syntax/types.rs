@@ -293,3 +293,24 @@ fn duplicate_name(cx: &mut Errors, sp: impl ToTokens, name: ItemName) {
     let msg = format!("the {} is defined multiple times", description);
     cx.error(sp, msg);
 }
+
+#[cfg(test)]
+mod test {
+    use crate::syntax::test_support::{collect_types, parse_apis};
+    use quote::{format_ident, quote};
+
+    #[test]
+    fn test_parsing_of_cxx_type_aliases() {
+        let apis = parse_apis(quote! {
+            #[cxx::bridge]
+            mod ffi {
+                extern "C++" {
+                    type Alias = crate::another_module::Foo;
+                }
+            }
+        })
+        .unwrap();
+        let types = collect_types(&apis).unwrap();
+        assert!(types.aliases.contains_key(&format_ident!("Alias")));
+    }
+}
