@@ -1,7 +1,7 @@
 use crate::syntax::attrs::OtherAttrs;
 use crate::syntax::cfg::CfgExpr;
 use crate::syntax::discriminant::DiscriminantSet;
-use crate::syntax::file::{Item, ItemForeignMod};
+use crate::syntax::file::{Item, ItemForeignMod, Module};
 use crate::syntax::report::Errors;
 use crate::syntax::repr::Repr;
 use crate::syntax::Atom::*;
@@ -28,12 +28,11 @@ pub(crate) mod kw {
     syn::custom_keyword!(Result);
 }
 
-pub(crate) fn parse_items(
-    cx: &mut Errors,
-    items: Vec<Item>,
-    trusted: bool,
-    namespace: &Namespace,
-) -> Vec<Api> {
+pub(crate) fn parse_items(cx: &mut Errors, bridge: &mut Module) -> Vec<Api> {
+    let items = mem::take(&mut bridge.content);
+    let ref namespace = bridge.namespace;
+    let trusted = bridge.unsafety.is_some();
+
     let mut apis = Vec::new();
     for item in items {
         match item {
