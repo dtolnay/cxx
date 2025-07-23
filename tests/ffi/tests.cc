@@ -812,6 +812,8 @@ extern "C" const char *cxx_run_test() noexcept {
   ASSERT(r_return_enum(2021) == Enum::CVal);
   ASSERT(Shared::r_static_method_on_shared() == 2023);
   ASSERT(R::r_static_method() == 2024);
+  ASSERT(r_return_rust_vec_box()[0]->get() == 2020);
+  ASSERT(r_return_rust_vec_box_other_module_type().size() == 1);
 
   r_take_primitive(2020);
   r_take_shared(Shared{2020});
