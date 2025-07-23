@@ -77,6 +77,7 @@ fn check_type(cx: &mut Check, ty: &Type) {
         Type::WeakPtr(ptr) => check_type_weak_ptr(cx, ptr),
         Type::CxxVector(ptr) => check_type_cxx_vector(cx, ptr),
         Type::Ref(ty) => check_type_ref(cx, ty),
+        Type::Maybe(ty) => check_type_kj_maybe(cx, ty),
         Type::Ptr(ty) => check_type_ptr(cx, ty),
         Type::Array(array) => check_type_array(cx, array),
         Type::Fn(ty) => check_type_fn(cx, ty),
@@ -231,6 +232,45 @@ fn check_type_weak_ptr(cx: &mut Check, ptr: &Ty1) {
     }
 
     cx.error(ptr, "unsupported weak_ptr target type");
+}
+
+fn check_type_kj_maybe(cx: &mut Check, ptr: &Ty1) {
+    match &ptr.inner {
+        Type::Ident(ident) => {
+            if cx.types.rust.contains(&ident.rust) {
+                cx.error(
+                    ptr,
+                    "kj::Maybe of a non-primitive Rust type is not supported yet",
+                );
+                return;
+            }
+
+            match Atom::from(&ident.rust) {
+                None
+                | Some(
+                    Bool | U8 | U16 | U32 | U64 | Usize | I8 | I16 | I32 | I64 | Isize | F32 | F64,
+                ) => return,
+                Some(_) => {}
+            }
+        }
+        Type::Ptr(_) => {
+            cx.error(
+                ptr,
+                "kj::Maybe<*T> is not allowed. Use Maybe<&T> or Maybe<Maybe<&T>> instead",
+            );
+            return; // Return ensures the LSP error is the more helpful error
+        }
+        Type::Ref(refr) => {
+            check_type_ref(cx, refr);
+            return;
+        }
+        Type::Own(own) => {
+            check_type_kj_own(cx, own);
+            return;
+        }
+        _ => (),
+    }
+    cx.error(ptr, "unsupported kj::Maybe target type");
 }
 
 fn check_type_cxx_vector(cx: &mut Check, ptr: &Ty1) {
@@ -575,6 +615,7 @@ fn check_api_impl(cx: &mut Check, imp: &Impl) {
         | Type::RustVec(ty)
         | Type::UniquePtr(ty)
         | Type::Own(ty)
+        | Type::Maybe(ty)
         | Type::SharedPtr(ty)
         | Type::WeakPtr(ty)
         | Type::CxxVector(ty) => {
@@ -710,6 +751,7 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
         | Type::Own(_)
         | Type::SharedPtr(_)
         | Type::WeakPtr(_)
+        | Type::Maybe(_)
         | Type::Ref(_)
         | Type::Ptr(_)
         | Type::Str(_)
@@ -786,6 +828,7 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         Type::Own(_) => "kj::Own".to_owned(),
         Type::SharedPtr(_) => "shared_ptr".to_owned(),
         Type::WeakPtr(_) => "weak_ptr".to_owned(),
+        Type::Maybe(_) => "kj::Maybe".to_owned(),
         Type::Ref(_) => "reference".to_owned(),
         Type::Ptr(_) => "raw pointer".to_owned(),
         Type::Str(_) => "&str".to_owned(),

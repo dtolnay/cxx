@@ -52,6 +52,7 @@ impl Hash for Type {
             Type::WeakPtr(t) => t.hash(state),
             Type::Ref(t) => t.hash(state),
             Type::Ptr(t) => t.hash(state),
+            Type::Maybe(t) => t.hash(state),
             Type::Str(t) => t.hash(state),
             Type::RustVec(t) => t.hash(state),
             Type::CxxVector(t) => t.hash(state),

@@ -1060,6 +1060,7 @@ fn parse_impl(cx: &mut Errors, imp: ItemImpl) -> Result<Api> {
         | Type::Own(ty)
         | Type::SharedPtr(ty)
         | Type::WeakPtr(ty)
+        | Type::Maybe(ty)
         | Type::CxxVector(ty) => match &ty.inner {
             Type::Ident(ident) => ident.generics.clone(),
             _ => Lifetimes::default(),
@@ -1270,6 +1271,16 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
                         let inner = parse_type(arg)?;
                         return Ok(Type::RustBox(Box::new(Ty1 {
+                            name: ident,
+                            langle: generic.lt_token,
+                            inner,
+                            rangle: generic.gt_token,
+                        })));
+                    }
+                } else if ident == "Maybe" && generic.args.len() == 1 {
+                    if let GenericArgument::Type(arg) = &generic.args[0] {
+                        let inner = parse_type(arg)?;
+                        return Ok(Type::Maybe(Box::new(Ty1 {
                             name: ident,
                             langle: generic.lt_token,
                             inner,
@@ -1489,6 +1500,7 @@ fn has_references_without_lifetime(ty: &Type) -> bool {
         | Type::Own(t)
         | Type::SharedPtr(t)
         | Type::WeakPtr(t)
+        | Type::Maybe(t)
         | Type::CxxVector(t) => has_references_without_lifetime(&t.inner),
         Type::Ptr(t) => has_references_without_lifetime(&t.inner),
         Type::Array(t) => has_references_without_lifetime(&t.inner),

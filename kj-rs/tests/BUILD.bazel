@@ -37,6 +37,7 @@ rust_test(
     crate = "tests",
     deps = [
         ":test-promises",
+        ":test-maybe",
     ],
 )
 
@@ -45,7 +46,9 @@ rust_cxx_bridge(
     src = "lib.rs",
     hdrs = [
         "test-promises.h",
-        "test-own.h"
+        "test-maybe.h",
+        "test-own.h",
+        "shared.h"
     ],
     include_prefix = "kj-rs-demo",
     deps = [
@@ -58,6 +61,21 @@ cc_library(
     srcs = [
         "test-promises.c++",
         "test-own.c++"
+    ],
+    linkstatic = select({
+        "@platforms//os:windows": True,
+        "//conditions:default": False,
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
+        ":bridge",
+    ],
+)
+
+cc_library(
+    name = "test-maybe",
+    srcs = [
+        "test-maybe.c++",
     ],
     linkstatic = select({
         "@platforms//os:windows": True,
@@ -83,6 +101,7 @@ cc_test(
         ":tests",
         ":bridge",
         ":test-promises",
+        ":test-maybe",
         "//third-party:runtime",
         "@capnp-cpp//src/kj:kj-test",
     ],

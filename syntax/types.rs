@@ -181,6 +181,7 @@ impl<'a> Types<'a> {
                 | ImplKey::Own(ident)
                 | ImplKey::SharedPtr(ident)
                 | ImplKey::WeakPtr(ident)
+                | ImplKey::Maybe(ident)
                 | ImplKey::CxxVector(ident) => {
                     Atom::from(ident.rust).is_none() && !aliases.contains_key(ident.rust)
                 }
@@ -245,7 +246,7 @@ impl<'a> Types<'a> {
         match ty {
             Type::RustBox(_) | Type::UniquePtr(_) => false,
             Type::Array(_) => true,
-            Type::Future(_) | Type::Own(_) => true,
+            Type::Future(_) | Type::Maybe(_) | Type::Own(_) => true,
             _ => !self.is_guaranteed_pod(ty),
         }
     }

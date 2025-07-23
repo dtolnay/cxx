@@ -9,6 +9,7 @@ pub enum ImplKey<'a> {
     RustVec(NamedImplKey<'a>),
     UniquePtr(NamedImplKey<'a>),
     Own(NamedImplKey<'a>),
+    Maybe(NamedImplKey<'a>),
     SharedPtr(NamedImplKey<'a>),
     WeakPtr(NamedImplKey<'a>),
     CxxVector(NamedImplKey<'a>),
@@ -44,6 +45,10 @@ impl Type {
         } else if let Type::Own(ty) = self {
             if let Type::Ident(ident) = &ty.inner {
                 return Some(ImplKey::Own(NamedImplKey::new(ty, ident)));
+            }
+        } else if let Type::Maybe(ty) = self {
+            if let Type::Ident(ident) = &ty.inner {
+                return Some(ImplKey::Maybe(NamedImplKey::new(ty, ident)));
             }
         } else if let Type::SharedPtr(ty) = self {
             if let Type::Ident(ident) = &ty.inner {

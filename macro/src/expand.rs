@@ -128,7 +128,10 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
             ImplKey::CxxVector(ident) => {
                 expanded.extend(expand_cxx_vector(ident, explicit_impl, types));
             }
-            // We do not need to generate code on the rust side for [`kj_rs::Own`]
+            ImplKey::Maybe(ident) => {
+                expanded.extend(expand_kj_maybe(ident, explicit_impl, types));
+            }
+            // We do not yet need to generate code on the rust side for [`kj_rs::Own`]
             ImplKey::Own(_) => (),
         }
     }
@@ -1792,6 +1795,49 @@ fn expand_weak_ptr(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl
                 }
                 unsafe {
                     __drop(this);
+                }
+            }
+        }
+    }
+}
+
+fn expand_kj_maybe(key: NamedImplKey, explicit_impl: Option<&Impl>, types: &Types) -> TokenStream {
+    let elem = key.rust;
+    let resolve = types.resolve(elem);
+
+    let (_, ty_generics) = generics::split_for_impl(key, explicit_impl, resolve);
+
+    let begin_span = explicit_impl.map_or(key.begin_span, |explicit| explicit.impl_token.span);
+    let end_span = explicit_impl.map_or(key.end_span, |explicit| explicit.brace_token.span.join());
+    let unsafe_token = format_ident!("unsafe", span = begin_span);
+
+    quote_spanned! {end_span =>
+        #[automatically_derived]
+        #unsafe_token impl ::kj_rs::maybe::MaybeItem for #elem #ty_generics {
+            type Discriminant = bool;
+
+            fn is_some(value: &::kj_rs::Maybe<Self>) -> bool {
+                unsafe {
+                    value.is_set()
+                }
+            }
+
+            fn is_none(value: &::kj_rs::Maybe<Self>) -> bool {
+                unsafe {
+                    !value.is_set()
+                }
+            }
+
+            const NONE: ::kj_rs::Maybe<Self> = unsafe {
+                ::kj_rs::Maybe::from_parts_unchecked(false, ::std::mem::MaybeUninit::uninit())
+            };
+
+            fn some(value: Self) -> ::kj_rs::Maybe<Self> {
+                unsafe {
+                    ::kj_rs::Maybe::from_parts_unchecked(
+                        true,
+                        ::std::mem::MaybeUninit::new(value)
+                    )
                 }
             }
         }

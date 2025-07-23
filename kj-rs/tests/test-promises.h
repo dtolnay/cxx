@@ -1,8 +1,10 @@
 #pragma once
 
-#include "kj-rs-demo/lib.rs.h"
+#include "shared.h"
 
 #include <kj/async.h>
+
+#include <cstdint>
 
 namespace kj_rs_demo {
 

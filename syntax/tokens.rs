@@ -30,6 +30,7 @@ impl ToTokens for Type {
             | Type::SharedPtr(ty)
             | Type::WeakPtr(ty)
             | Type::CxxVector(ty)
+            | Type::Maybe(ty)
             | Type::RustVec(ty) => ty.to_tokens(tokens),
             Type::Ref(r) | Type::Str(r) => r.to_tokens(tokens),
             Type::Ptr(p) => p.to_tokens(tokens),
@@ -77,6 +78,9 @@ impl ToTokens for Ty1 {
             }
             "Box" => {
                 tokens.extend(quote_spanned!(span=> ::cxx::alloc::boxed::));
+            }
+            "Maybe" => {
+                tokens.extend(quote_spanned!(span=> ::kj_rs::repr::));
             }
             "Vec" => {
                 tokens.extend(quote_spanned!(span=> ::cxx::alloc::vec::));

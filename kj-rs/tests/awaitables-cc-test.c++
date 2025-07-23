@@ -4,6 +4,7 @@
 #include "kj-rs-demo/test-promises.h"
 #include "kj-rs/awaiter.h"
 #include "kj-rs/future.h"
+#include "kj-rs/tests/lib.rs.h"
 #include "kj-rs/waker.h"
 
 #include <kj/test.h>

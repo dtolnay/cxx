@@ -18,6 +18,7 @@ where
         | Type::SharedPtr(ty)
         | Type::WeakPtr(ty)
         | Type::CxxVector(ty)
+        | Type::Maybe(ty)
         | Type::RustVec(ty) => visitor.visit_type(&ty.inner),
         Type::Ref(r) => visitor.visit_type(&r.inner),
         Type::Ptr(p) => visitor.visit_type(&p.inner),

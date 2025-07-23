@@ -5,8 +5,13 @@
 #![allow(clippy::cast_possible_truncation)]
 #![allow(clippy::should_panic_without_expect)]
 #![allow(clippy::missing_panics_doc)]
+#![allow(clippy::must_use_candidate)]
+#![allow(clippy::cast_possible_truncation)]
+#![allow(clippy::should_panic_without_expect)]
+#![allow(clippy::missing_panics_doc)]
 
 mod test_futures;
+mod test_maybe;
 mod test_own;
 
 use test_futures::{
@@ -14,6 +19,11 @@ use test_futures::{
     new_layered_ready_future_void, new_naive_select_future_void, new_pending_future_void,
     new_ready_future_i32, new_ready_future_void, new_threaded_delay_future_void,
     new_waking_future_void, new_wrapped_waker_future_void,
+};
+
+use test_maybe::{
+    take_maybe_own, take_maybe_own_ret, take_maybe_ref, take_maybe_ref_ret, take_maybe_shared,
+    take_maybe_shared_ret,
 };
 
 use kj_rs::repr::Own;
@@ -77,6 +87,107 @@ mod ffi {
         fn modify_own_return(cpp_own: Own<OpaqueCxxClass>) -> Own<OpaqueCxxClass>;
         fn take_own(cpp_own: Own<OpaqueCxxClass>);
         fn get_null() -> Own<OpaqueCxxClass>;
+    }
+
+    unsafe extern "C++" {
+        include!("kj-rs-demo/test-maybe.h");
+
+        #[allow(dead_code)]
+        fn test_maybe_reference_shared_own_driver();
+
+        #[allow(dead_code)]
+        fn return_maybe() -> Maybe<i64>;
+        #[allow(dead_code)]
+        fn return_maybe_none() -> Maybe<i64>;
+        #[allow(dead_code)]
+        fn return_maybe_ref_some<'a>() -> Maybe<&'a i64>;
+        #[allow(dead_code)]
+        fn return_maybe_ref_none<'a>() -> Maybe<&'a i64>;
+        #[allow(dead_code)]
+        fn return_maybe_shared_some() -> Maybe<Shared>;
+        #[allow(dead_code)]
+        fn return_maybe_shared_none() -> Maybe<Shared>;
+        #[allow(dead_code)]
+        fn return_maybe_own_some() -> Maybe<Own<OpaqueCxxClass>>;
+        #[allow(dead_code)]
+        fn return_maybe_own_none() -> Maybe<Own<OpaqueCxxClass>>;
+        #[allow(dead_code)]
+        fn take_maybe_own_cxx(own: Maybe<Own<OpaqueCxxClass>>);
+
+        #[allow(dead_code)]
+        fn cxx_take_maybe_shared_some(maybe: Maybe<Shared>);
+        #[allow(dead_code)]
+        fn cxx_take_maybe_shared_none(maybe: Maybe<Shared>);
+        #[allow(dead_code)]
+        fn cxx_take_maybe_ref_shared_some(maybe: Maybe<&Shared>);
+        #[allow(dead_code)]
+        fn cxx_take_maybe_ref_shared_none(maybe: Maybe<&Shared>);
+    }
+
+    unsafe extern "C++" {
+        include!("kj-rs-demo/test-maybe.h");
+
+        #[allow(dead_code)]
+        fn test_maybe_u8_some() -> Maybe<u8>;
+        #[allow(dead_code)]
+        fn test_maybe_u16_some() -> Maybe<u16>;
+        #[allow(dead_code)]
+        fn test_maybe_u32_some() -> Maybe<u32>;
+        #[allow(dead_code)]
+        fn test_maybe_u64_some() -> Maybe<u64>;
+        #[allow(dead_code)]
+        fn test_maybe_usize_some() -> Maybe<usize>;
+        #[allow(dead_code)]
+        fn test_maybe_i8_some() -> Maybe<i8>;
+        #[allow(dead_code)]
+        fn test_maybe_i16_some() -> Maybe<i16>;
+        #[allow(dead_code)]
+        fn test_maybe_i32_some() -> Maybe<i32>;
+        #[allow(dead_code)]
+        fn test_maybe_i64_some() -> Maybe<i64>;
+        #[allow(dead_code)]
+        fn test_maybe_isize_some() -> Maybe<isize>;
+        #[allow(dead_code)]
+        fn test_maybe_f32_some() -> Maybe<f32>;
+        #[allow(dead_code)]
+        fn test_maybe_f64_some() -> Maybe<f64>;
+        #[allow(dead_code)]
+        fn test_maybe_bool_some() -> Maybe<bool>;
+        #[allow(dead_code)]
+        fn test_maybe_u8_none() -> Maybe<u8>;
+        #[allow(dead_code)]
+        fn test_maybe_u16_none() -> Maybe<u16>;
+        #[allow(dead_code)]
+        fn test_maybe_u32_none() -> Maybe<u32>;
+        #[allow(dead_code)]
+        fn test_maybe_u64_none() -> Maybe<u64>;
+        #[allow(dead_code)]
+        fn test_maybe_usize_none() -> Maybe<usize>;
+        #[allow(dead_code)]
+        fn test_maybe_i8_none() -> Maybe<i8>;
+        #[allow(dead_code)]
+        fn test_maybe_i16_none() -> Maybe<i16>;
+        #[allow(dead_code)]
+        fn test_maybe_i32_none() -> Maybe<i32>;
+        #[allow(dead_code)]
+        fn test_maybe_i64_none() -> Maybe<i64>;
+        #[allow(dead_code)]
+        fn test_maybe_isize_none() -> Maybe<isize>;
+        #[allow(dead_code)]
+        fn test_maybe_f32_none() -> Maybe<f32>;
+        #[allow(dead_code)]
+        fn test_maybe_f64_none() -> Maybe<f64>;
+        #[allow(dead_code)]
+        fn test_maybe_bool_none() -> Maybe<bool>;
+    }
+
+    extern "Rust" {
+        fn take_maybe_own_ret(val: Maybe<Own<OpaqueCxxClass>>) -> Maybe<Own<OpaqueCxxClass>>;
+        fn take_maybe_own(val: Maybe<Own<OpaqueCxxClass>>);
+        unsafe fn take_maybe_ref_ret<'a>(val: Maybe<&'a u64>) -> Maybe<&'a u64>;
+        fn take_maybe_ref(val: Maybe<&u64>);
+        fn take_maybe_shared_ret(val: Maybe<Shared>) -> Maybe<Shared>;
+        fn take_maybe_shared(val: Maybe<Shared>);
     }
 
     enum CloningAction {

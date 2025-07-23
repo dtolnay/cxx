@@ -233,7 +233,7 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
             Type::SliceRef(_) => out.builtin.rust_slice = true,
             Type::Array(_) => out.include.array = true,
             Type::Ref(_) | Type::Void(_) | Type::Ptr(_) => {}
-            Type::Future(_) | Type::Own(_) => out.include.kj_rs = true,
+            Type::Future(_) | Type::Maybe(_) | Type::Own(_) => out.include.kj_rs = true,
         }
     }
 }
@@ -1263,6 +1263,11 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write_type(out, &ptr.inner);
             write!(out, ">");
         }
+        Type::Maybe(ptr) => {
+            write!(out, "::kj::Maybe<");
+            write_type(out, &ptr.inner);
+            write!(out, ">");
+        }
         Type::CxxVector(ty) => {
             write!(out, "::std::vector<");
             write_type(out, &ty.inner);
@@ -1357,6 +1362,7 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
         | Type::SharedPtr(_)
         | Type::WeakPtr(_)
         | Type::Str(_)
+        | Type::Maybe(_)
         | Type::CxxVector(_)
         | Type::RustVec(_)
         | Type::SliceRef(_)
@@ -1431,6 +1437,7 @@ fn write_generic_instantiations(out: &mut OutFile) {
             ImplKey::RustVec(ident) => write_rust_vec_extern(out, ident),
             ImplKey::UniquePtr(ident) => write_unique_ptr(out, ident),
             ImplKey::Own(ident) => write_kj_own(out, ident),
+            ImplKey::Maybe(ident) => write_kj_maybe(out, ident),
             ImplKey::SharedPtr(ident) => write_shared_ptr(out, ident),
             ImplKey::WeakPtr(ident) => write_weak_ptr(out, ident),
             ImplKey::CxxVector(ident) => write_cxx_vector(out, ident),
@@ -1667,6 +1674,17 @@ fn write_kj_own(out: &mut OutFile, key: NamedImplKey) {
         "static_assert(!::kj::_::IsRefcounted<{}>, \"Value must not inherit from kj::Refcounted\");",
         inner
     );
+}
+
+// Writes static assertions for Maybe
+fn write_kj_maybe(out: &mut OutFile, key: NamedImplKey) {
+    let ident = key.rust;
+    let resolve = out.types.resolve(ident);
+    let inner = resolve.name.to_fully_qualified();
+
+    out.include.utility = true;
+    out.include.kj_rs = true;
+    writeln!(out, "static_assert(!::std::is_pointer<{}>::value, \"Maybe<T*> is not allowed in workerd-cxx. Use Maybe<T&> or Maybe<Maybe<T&>> instead.\");", inner);
 }
 
 fn write_unique_ptr(out: &mut OutFile, key: NamedImplKey) {
