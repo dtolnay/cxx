@@ -331,19 +331,19 @@ fn test_shared_ptr_from_raw() {
 }
 
 #[test]
-#[should_panic = "tests::Undefined is not destructible"]
+#[should_panic = "cxx_test_suite::ffi::Undefined provides bindings to a C++ type that is not destructible"]
 fn test_shared_ptr_from_raw_undefined() {
     unsafe { SharedPtr::<ffi::Undefined>::from_raw(ptr::null_mut()) };
 }
 
 #[test]
-#[should_panic = "tests::Private is not destructible"]
+#[should_panic = "cxx_test_suite::ffi::Private provides bindings to a C++ type that is not destructible"]
 fn test_shared_ptr_from_raw_private() {
     unsafe { SharedPtr::<ffi::Private>::from_raw(ptr::null_mut()) };
 }
 
 #[test]
-#[should_panic = "tests::Unmovable is not move constructible"]
+#[should_panic = "cxx_test_suite::ffi::Unmovable provides bindings to a C++ type that is not move constructible"]
 fn test_vector_reserve_unmovable() {
     let mut vector = CxxVector::<ffi::Unmovable>::new();
     vector.pin_mut().reserve(10);
