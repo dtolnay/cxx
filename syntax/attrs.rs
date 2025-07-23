@@ -159,6 +159,7 @@ pub fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) -> Othe
             || attr_path.is_ident("forbid")
             || attr_path.is_ident("deprecated")
             || attr_path.is_ident("must_use")
+            || attr_path.is_ident("expect")
         {
             // https://doc.rust-lang.org/reference/attributes/diagnostics.html
             passthrough_attrs.push(attr);
