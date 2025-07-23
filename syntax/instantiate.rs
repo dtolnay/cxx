@@ -1,8 +1,7 @@
 use crate::syntax::types::Types;
-use crate::syntax::{NamedType, Ty1, Type};
-use proc_macro2::{Ident, Span};
+use crate::syntax::{mangle, Symbol, Ty1, Type};
+use proc_macro2::Span;
 use std::hash::{Hash, Hasher};
-use syn::Token;
 
 #[derive(PartialEq, Eq, Hash)]
 pub(crate) enum ImplKey<'a> {
@@ -33,63 +32,56 @@ impl<'a> ImplKey<'a> {
     ///   don't necessarily need to follow the orphan rule, but we conservatively also
     ///   only generate implicit impls if `T` is a local type.  TODO: revisit?
     pub(crate) fn is_implicit_impl_ok(&self, types: &Types) -> bool {
-        match self {
-            ImplKey::RustBox(ident)
-            | ImplKey::RustVec(ident)
-            | ImplKey::UniquePtr(ident)
-            | ImplKey::SharedPtr(ident)
-            | ImplKey::WeakPtr(ident)
-            | ImplKey::CxxVector(ident) => types.is_local(ident.rust),
-        }
+        // TODO: relax this for Rust generics to allow Vec<Vec<T>> etc.
+        types.is_local(self.inner())
+    }
+
+    /// Returns the generic type parameter `T` associated with `self`.
+    /// For example, if `self` represents `UniquePtr<u32>` then this will return `u32`.
+    pub(crate) fn inner(&self) -> &'a Type {
+        let named_impl_key = match self {
+            ImplKey::RustBox(key)
+            | ImplKey::RustVec(key)
+            | ImplKey::UniquePtr(key)
+            | ImplKey::SharedPtr(key)
+            | ImplKey::WeakPtr(key)
+            | ImplKey::CxxVector(key) => key,
+        };
+        named_impl_key.inner
     }
 }
 
 pub(crate) struct NamedImplKey<'a> {
     #[cfg_attr(not(proc_macro), expect(dead_code))]
     pub begin_span: Span,
-    pub rust: &'a Ident,
-    #[cfg_attr(not(proc_macro), expect(dead_code))]
-    pub lt_token: Option<Token![<]>,
-    #[cfg_attr(not(proc_macro), expect(dead_code))]
-    pub gt_token: Option<Token![>]>,
-    #[cfg_attr(not(proc_macro), expect(dead_code))]
+    /// Mangled form of the `outer` type.
+    pub symbol: Symbol,
+    /// Generic type - e.g. `UniquePtr<u8>`.
+    #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
+    pub outer: &'a Type,
+    /// Generic type argument - e.g. `u8` from `UniquePtr<u8>`.
+    pub inner: &'a Type,
+    #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
     pub end_span: Span,
 }
 
 impl Type {
     pub(crate) fn impl_key(&self) -> Option<ImplKey> {
-        if let Type::RustBox(ty) = self {
-            if let Type::Ident(ident) = &ty.inner {
-                return Some(ImplKey::RustBox(NamedImplKey::new(ty, ident)));
-            }
-        } else if let Type::RustVec(ty) = self {
-            if let Type::Ident(ident) = &ty.inner {
-                return Some(ImplKey::RustVec(NamedImplKey::new(ty, ident)));
-            }
-        } else if let Type::UniquePtr(ty) = self {
-            if let Type::Ident(ident) = &ty.inner {
-                return Some(ImplKey::UniquePtr(NamedImplKey::new(ty, ident)));
-            }
-        } else if let Type::SharedPtr(ty) = self {
-            if let Type::Ident(ident) = &ty.inner {
-                return Some(ImplKey::SharedPtr(NamedImplKey::new(ty, ident)));
-            }
-        } else if let Type::WeakPtr(ty) = self {
-            if let Type::Ident(ident) = &ty.inner {
-                return Some(ImplKey::WeakPtr(NamedImplKey::new(ty, ident)));
-            }
-        } else if let Type::CxxVector(ty) = self {
-            if let Type::Ident(ident) = &ty.inner {
-                return Some(ImplKey::CxxVector(NamedImplKey::new(ty, ident)));
-            }
+        match self {
+            Type::RustBox(ty) => Some(ImplKey::RustBox(NamedImplKey::new(self, ty)?)),
+            Type::RustVec(ty) => Some(ImplKey::RustVec(NamedImplKey::new(self, ty)?)),
+            Type::UniquePtr(ty) => Some(ImplKey::UniquePtr(NamedImplKey::new(self, ty)?)),
+            Type::SharedPtr(ty) => Some(ImplKey::SharedPtr(NamedImplKey::new(self, ty)?)),
+            Type::WeakPtr(ty) => Some(ImplKey::WeakPtr(NamedImplKey::new(self, ty)?)),
+            Type::CxxVector(ty) => Some(ImplKey::CxxVector(NamedImplKey::new(self, ty)?)),
+            _ => None,
         }
-        None
     }
 }
 
 impl<'a> PartialEq for NamedImplKey<'a> {
     fn eq(&self, other: &Self) -> bool {
-        PartialEq::eq(self.rust, other.rust)
+        PartialEq::eq(&self.symbol, &other.symbol)
     }
 }
 
@@ -97,18 +89,19 @@ impl<'a> Eq for NamedImplKey<'a> {}
 
 impl<'a> Hash for NamedImplKey<'a> {
     fn hash<H: Hasher>(&self, hasher: &mut H) {
-        self.rust.hash(hasher);
+        self.symbol.hash(hasher);
     }
 }
 
 impl<'a> NamedImplKey<'a> {
-    fn new(outer: &Ty1, inner: &'a NamedType) -> Self {
-        NamedImplKey {
-            begin_span: outer.name.span(),
-            rust: &inner.rust,
-            lt_token: inner.generics.lt_token,
-            gt_token: inner.generics.gt_token,
-            end_span: outer.rangle.span,
-        }
+    fn new(outer: &'a Type, ty1: &'a Ty1) -> Option<Self> {
+        let inner = &ty1.inner;
+        Some(NamedImplKey {
+            symbol: mangle::type_(inner)?,
+            begin_span: ty1.name.span(),
+            outer,
+            inner,
+            end_span: ty1.rangle.span,
+        })
     }
 }

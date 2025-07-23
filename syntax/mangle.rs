@@ -74,7 +74,7 @@
 //             - CXXBRIDGE1_ENUM_Enabled
 
 use crate::syntax::symbol::{self, Symbol};
-use crate::syntax::{ExternFn, Pair, Types};
+use crate::syntax::{ExternFn, Pair, Type, Types};
 
 const CXXBRIDGE: &str = "cxxbridge1";
 
@@ -117,4 +117,26 @@ pub(crate) fn c_trampoline(efn: &ExternFn, var: &Pair, types: &Types) -> Symbol 
 // The Rust half of a function pointer trampoline.
 pub(crate) fn r_trampoline(efn: &ExternFn, var: &Pair, types: &Types) -> Symbol {
     join!(extern_fn(efn, types), var.rust, 1)
+}
+
+/// Attempts to mangle the type `t` (e.g. representing `Box<org::rust::Struct>`)
+/// into a symbol (e.g. `box$org$rust$Struct`)
+/// that can be used as a **part** of monomorphized/instantiated thunk names
+/// (e.g. `cxxbridge1$box$org$rust$Struct$alloc`).
+///
+/// Not all type names can be mangled at this point - `None` will be returned if
+/// mangling fails.  We have to gracefully handle non-manglable types, because
+/// some callers (e.g. `Type`'s `impl_key` method) call into `mangle::type_`
+/// before `syntax/check.rs` has rejected unsupported generic type parameters.
+pub(crate) fn type_(t: &Type) -> Option<Symbol> {
+    match t {
+        Type::Ident(named_type) => Some(join!(named_type.rust)),
+        Type::RustBox(ty1) => type_(&ty1.inner).map(|s| join!("box", s)),
+        Type::RustVec(ty1) => type_(&ty1.inner).map(|s| join!("rust_vec", s)),
+        Type::UniquePtr(ty1) => type_(&ty1.inner).map(|s| join!("unique_ptr", s)),
+        Type::SharedPtr(ty1) => type_(&ty1.inner).map(|s| join!("shared_ptr", s)),
+        Type::WeakPtr(ty1) => type_(&ty1.inner).map(|s| join!("weak_ptr", s)),
+        Type::CxxVector(ty1) => type_(&ty1.inner).map(|s| join!("std", "vector", s)),
+        _ => None,
+    }
 }
