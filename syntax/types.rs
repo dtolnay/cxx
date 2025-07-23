@@ -317,10 +317,17 @@ impl<'a> Types<'a> {
 
     // Types which we need to assume could possibly exist by value on the Rust
     // side.
-    pub(crate) fn is_maybe_trivial(&self, ty: &Ident) -> bool {
-        self.structs.contains_key(ty)
-            || self.enums.contains_key(ty)
-            || self.aliases.contains_key(ty)
+    pub(crate) fn is_maybe_trivial(&self, ty: &Type) -> bool {
+        match ty {
+            Type::Ident(named_type) => {
+                let ident = &named_type.rust;
+                self.structs.contains_key(ident)
+                    || self.enums.contains_key(ident)
+                    || self.aliases.contains_key(ident)
+            }
+            Type::CxxVector(_) => false,
+            _ => unreachable!("syntax/check.rs should reject other types"),
+        }
     }
 
     pub(crate) fn contains_elided_lifetime(&self, ty: &Type) -> bool {
@@ -345,9 +352,30 @@ impl<'a> Types<'a> {
         }
     }
 
-    /// Returns `true` if `ident` is defined or declared within the current `#[cxx::bridge]`.
-    pub(crate) fn is_local(&self, ident: &Ident) -> bool {
-        Atom::from(ident).is_none() && !self.aliases.contains_key(ident)
+    /// Returns `true` if `ty` is a defined or declared within the current `#[cxx::bridge]`.
+    pub(crate) fn is_local(&self, ty: &Type) -> bool {
+        match ty {
+            Type::Ident(ident) => {
+                Atom::from(&ident.rust).is_none() && !self.aliases.contains_key(&ident.rust)
+            }
+            Type::RustBox(_) => {
+                // TODO: We should treat Box<LocalType> as local to match
+                // https://doc.rust-lang.org/reference/items/implementations.html#r-items.impl.trait.fundamental
+                false
+            }
+            Type::Array(_)
+            | Type::CxxVector(_)
+            | Type::Fn(_)
+            | Type::Void(_)
+            | Type::RustVec(_)
+            | Type::UniquePtr(_)
+            | Type::SharedPtr(_)
+            | Type::WeakPtr(_)
+            | Type::Ref(_)
+            | Type::Ptr(_)
+            | Type::Str(_)
+            | Type::SliceRef(_) => false,
+        }
     }
 }
 
