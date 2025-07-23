@@ -156,3 +156,26 @@ fn test_original_lifetimes_used_in_impls() {
     // Verify which lifetime name ('sess, 'srv, 'clt) gets used for this impl.
     assert!(rs.contains("impl<'sess> ::cxx::memory::UniquePtrTarget for Context<'sess> {"));
 }
+
+/// This test covers implicit impl of `Vec<Box<T>>`.
+#[test]
+fn test_vec_of_box() {
+    let rs = bridge(quote! {
+        mod ffi {
+            extern "Rust" {
+                type R;
+                fn foo() -> Vec<Box<R>>;
+            }
+        }
+    });
+    assert!(rs.contains("unsafe impl ::cxx::private::ImplBox for R {}"));
+    assert!(rs.contains("export_name = \"cxxbridge1$box$R$drop\""));
+
+    assert!(rs.contains("unsafe impl ::cxx::private::ImplVec for ::cxx::alloc::boxed::Box<R> {}"),);
+    assert!(rs.contains("export_name = \"cxxbridge1$rust_vec$box$R$set_len\""));
+
+    // Covering these lines, because an early WIP incorrectly said
+    // `RustVec<*mut R>` instead of `RustVec<Box<R>>` in *some* of these lines.
+    assert!(rs.contains("__return: *mut ::cxx::private::RustVec<::cxx::alloc::boxed::Box<R>>"));
+    assert!(rs.contains("fn __foo() -> ::cxx::alloc::vec::Vec<::cxx::alloc::boxed::Box<R>>"));
+}
