@@ -14,7 +14,7 @@ rust_library(
     ],
     visibility = ["//visibility:public"],
     deps = [
-        ":core-lib",
+        ":core",
         "@crates.io//:foldhash",
     ],
 )
@@ -70,17 +70,12 @@ rust_binary(
 
 cc_library(
     name = "core",
-    hdrs = ["include/cxx.h"],
-    include_prefix = "rust",
-    strip_include_prefix = "include",
-    visibility = ["//visibility:public"],
-)
-
-cc_library(
-    name = "core-lib",
     srcs = ["src/cxx.cc"],
     hdrs = ["include/cxx.h"],
+    include_prefix = "rust",
     linkstatic = True,
+    strip_include_prefix = "include",
+    visibility = ["//visibility:public"],
 )
 
 rust_proc_macro(

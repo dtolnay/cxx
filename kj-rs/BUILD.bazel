@@ -35,22 +35,8 @@ rust_cxx_bridge(
     hdrs = glob(["*.h"]),
     include_prefix = "kj-rs",
     deps = [
-        ":cxx",
         "@capnp-cpp//src/kj:kj",
         "@capnp-cpp//src/kj:kj-async",
-        "@workerd-cxx//:cxx",
+        "@workerd-cxx//:core",
     ],
-)
-
-genrule(
-    name = "cxx/generated",
-    outs = ["cxx.h"],
-    cmd = "$(location @workerd-cxx//:codegen) --header > \"$@\"",
-    tools = ["@workerd-cxx//:codegen"],
-)
-
-cc_library(
-    name = "cxx",
-    hdrs = ["cxx.h"],
-    include_prefix = "rust",
 )
