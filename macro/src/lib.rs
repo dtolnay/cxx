@@ -62,7 +62,7 @@ use syn::parse_macro_input;
 pub fn bridge(args: TokenStream, input: TokenStream) -> TokenStream {
     let _ = syntax::error::ERRORS;
 
-    let namespace = match Namespace::parse_bridge_attr_namespace.parse(args) {
+    let namespace = match Namespace::parse_stream.parse(args) {
         Ok(namespace) => namespace,
         Err(err) => return err.to_compile_error().into(),
     };
