@@ -29,7 +29,7 @@ rustfmt:
     bazel run @rules_rust//:rustfmt
 
 clang-format:
-    clang-format -i kj-rs/*.h kj-rs/*.c++ kj-rs/tests/*.h kj-rs/tests/*.c++
+    clang-format -i include/*.h src/*.cc tests/**/*.h tests/**/*.cc kj-rs/*.h kj-rs/*.c++ kj-rs/tests/*.h kj-rs/tests/*.c++
 
 
 compile-commands:

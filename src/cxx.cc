@@ -631,14 +631,14 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
       std::vector<CXX_TYPE> *raw) noexcept {                                   \
     new (ptr) std::unique_ptr<std::vector<CXX_TYPE>>(raw);                     \
   }                                                                            \
-  const std::vector<CXX_TYPE>                                                  \
-      *cxxbridge1$unique_ptr$std$vector$##RUST_TYPE##$get(                     \
-          const std::unique_ptr<std::vector<CXX_TYPE>> &ptr) noexcept {        \
+  const std::vector<CXX_TYPE> *                                                \
+  cxxbridge1$unique_ptr$std$vector$##RUST_TYPE##$get(                          \
+      const std::unique_ptr<std::vector<CXX_TYPE>> &ptr) noexcept {            \
     return ptr.get();                                                          \
   }                                                                            \
-  std::vector<CXX_TYPE>                                                        \
-      *cxxbridge1$unique_ptr$std$vector$##RUST_TYPE##$release(                 \
-          std::unique_ptr<std::vector<CXX_TYPE>> &ptr) noexcept {              \
+  std::vector<CXX_TYPE> *                                                      \
+  cxxbridge1$unique_ptr$std$vector$##RUST_TYPE##$release(                      \
+      std::unique_ptr<std::vector<CXX_TYPE>> &ptr) noexcept {                  \
     return ptr.release();                                                      \
   }                                                                            \
   void cxxbridge1$unique_ptr$std$vector$##RUST_TYPE##$drop(                    \
