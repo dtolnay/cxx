@@ -10,6 +10,8 @@ pub enum ImplKey<'a> {
     UniquePtr(NamedImplKey<'a>),
     Own(NamedImplKey<'a>),
     Maybe(NamedImplKey<'a>),
+    KjRc(NamedImplKey<'a>),
+    KjArc(NamedImplKey<'a>),
     SharedPtr(NamedImplKey<'a>),
     WeakPtr(NamedImplKey<'a>),
     CxxVector(NamedImplKey<'a>),
@@ -49,6 +51,14 @@ impl Type {
         } else if let Type::Maybe(ty) = self {
             if let Type::Ident(ident) = &ty.inner {
                 return Some(ImplKey::Maybe(NamedImplKey::new(ty, ident)));
+            }
+        } else if let Type::KjRc(ty) = self {
+            if let Type::Ident(ident) = &ty.inner {
+                return Some(ImplKey::KjRc(NamedImplKey::new(ty, ident)));
+            }
+        } else if let Type::KjArc(ty) = self {
+            if let Type::Ident(ident) = &ty.inner {
+                return Some(ImplKey::KjArc(NamedImplKey::new(ty, ident)));
             }
         } else if let Type::SharedPtr(ty) = self {
             if let Type::Ident(ident) = &ty.inner {

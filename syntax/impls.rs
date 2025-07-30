@@ -48,6 +48,8 @@ impl Hash for Type {
             Type::RustBox(t) => t.hash(state),
             Type::UniquePtr(t) => t.hash(state),
             Type::Own(t) => t.hash(state),
+            Type::KjRc(t) => t.hash(state),
+            Type::KjArc(t) => t.hash(state),
             Type::SharedPtr(t) => t.hash(state),
             Type::WeakPtr(t) => t.hash(state),
             Type::Ref(t) => t.hash(state),

@@ -73,6 +73,8 @@ fn check_type(cx: &mut Check, ty: &Type) {
         Type::RustVec(ty) => check_type_rust_vec(cx, ty),
         Type::UniquePtr(ptr) => check_type_unique_ptr(cx, ptr),
         Type::Own(ptr) => check_type_kj_own(cx, ptr),
+        Type::KjRc(ptr) => check_type_kj_rc(cx, ptr),
+        Type::KjArc(ptr) => check_type_kj_arc(cx, ptr),
         Type::SharedPtr(ptr) => check_type_shared_ptr(cx, ptr),
         Type::WeakPtr(ptr) => check_type_weak_ptr(cx, ptr),
         Type::CxxVector(ptr) => check_type_cxx_vector(cx, ptr),
@@ -186,6 +188,41 @@ fn check_type_kj_own(cx: &mut Check, ptr: &Ty1) {
     }
 
     cx.error(ptr, "unsupported kj::Own target type");
+}
+fn check_type_kj_rc(cx: &mut Check, ptr: &Ty1) {
+    if let Type::Ident(ident) = &ptr.inner {
+        if cx.types.rust.contains(&ident.rust) {
+            cx.error(
+                ptr,
+                "kj::Rc of a Rust type is not supported yet, use a Box instead",
+            );
+            return;
+        }
+
+        if Atom::from(&ident.rust).is_none() {
+            return;
+        }
+    }
+
+    cx.error(ptr, "unsupported KjRc target type");
+}
+
+fn check_type_kj_arc(cx: &mut Check, ptr: &Ty1) {
+    if let Type::Ident(ident) = &ptr.inner {
+        if cx.types.rust.contains(&ident.rust) {
+            cx.error(
+                ptr,
+                "kj::Arc of a Rust type is not supported yet, use a Box instead",
+            );
+            return;
+        }
+
+        if Atom::from(&ident.rust).is_none() {
+            return;
+        }
+    }
+
+    cx.error(ptr, "unsupported KjArc target type");
 }
 
 fn check_type_shared_ptr(cx: &mut Check, ptr: &Ty1) {
@@ -749,6 +786,8 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
         | Type::RustVec(_)
         | Type::UniquePtr(_)
         | Type::Own(_)
+        | Type::KjRc(_)
+        | Type::KjArc(_)
         | Type::SharedPtr(_)
         | Type::WeakPtr(_)
         | Type::Maybe(_)
@@ -826,6 +865,8 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         Type::RustVec(_) => "Vec".to_owned(),
         Type::UniquePtr(_) => "unique_ptr".to_owned(),
         Type::Own(_) => "kj::Own".to_owned(),
+        Type::KjRc(_) => "kj::Rc".to_owned(),
+        Type::KjArc(_) => "kj::Arc".to_owned(),
         Type::SharedPtr(_) => "shared_ptr".to_owned(),
         Type::WeakPtr(_) => "weak_ptr".to_owned(),
         Type::Maybe(_) => "kj::Maybe".to_owned(),

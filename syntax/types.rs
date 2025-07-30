@@ -179,6 +179,8 @@ impl<'a> Types<'a> {
                 | ImplKey::RustVec(ident)
                 | ImplKey::UniquePtr(ident)
                 | ImplKey::Own(ident)
+                | ImplKey::KjRc(ident)
+                | ImplKey::KjArc(ident)
                 | ImplKey::SharedPtr(ident)
                 | ImplKey::WeakPtr(ident)
                 | ImplKey::Maybe(ident)

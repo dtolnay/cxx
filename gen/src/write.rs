@@ -233,7 +233,9 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
             Type::SliceRef(_) => out.builtin.rust_slice = true,
             Type::Array(_) => out.include.array = true,
             Type::Ref(_) | Type::Void(_) | Type::Ptr(_) => {}
-            Type::Future(_) | Type::Maybe(_) | Type::Own(_) => out.include.kj_rs = true,
+            Type::Future(_) | Type::Maybe(_) | Type::Own(_) | Type::KjRc(_) | Type::KjArc(_) => {
+                out.include.kj_rs = true;
+            }
         }
     }
 }
@@ -1253,6 +1255,16 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write_type(out, &ptr.inner);
             write!(out, ">");
         }
+        Type::KjRc(ptr) => {
+            write!(out, "::kj::Rc<");
+            write_type(out, &ptr.inner);
+            write!(out, ">");
+        }
+        Type::KjArc(ptr) => {
+            write!(out, "::kj::Arc<");
+            write_type(out, &ptr.inner);
+            write!(out, ">");
+        }
         Type::SharedPtr(ptr) => {
             write!(out, "::std::shared_ptr<");
             write_type(out, &ptr.inner);
@@ -1359,6 +1371,8 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
         | Type::RustBox(_)
         | Type::UniquePtr(_)
         | Type::Own(_)
+        | Type::KjRc(_)
+        | Type::KjArc(_)
         | Type::SharedPtr(_)
         | Type::WeakPtr(_)
         | Type::Str(_)
@@ -1438,6 +1452,8 @@ fn write_generic_instantiations(out: &mut OutFile) {
             ImplKey::UniquePtr(ident) => write_unique_ptr(out, ident),
             ImplKey::Own(ident) => write_kj_own(out, ident),
             ImplKey::Maybe(ident) => write_kj_maybe(out, ident),
+            ImplKey::KjRc(ident) => write_kj_rc(out, ident),
+            ImplKey::KjArc(ident) => write_kj_arc(out, ident),
             ImplKey::SharedPtr(ident) => write_shared_ptr(out, ident),
             ImplKey::WeakPtr(ident) => write_weak_ptr(out, ident),
             ImplKey::CxxVector(ident) => write_cxx_vector(out, ident),
@@ -1685,6 +1701,100 @@ fn write_kj_maybe(out: &mut OutFile, key: NamedImplKey) {
     out.include.utility = true;
     out.include.kj_rs = true;
     writeln!(out, "static_assert(!::std::is_pointer<{}>::value, \"Maybe<T*> is not allowed in workerd-cxx. Use Maybe<T&> or Maybe<Maybe<T&>> instead.\");", inner);
+}
+
+// Writes assertions to make sure the internal Own is valid and writes fucntions to support
+// necessary refcounted behavior
+fn write_kj_rc(out: &mut OutFile, key: NamedImplKey) {
+    let ident = key.rust;
+    let resolve = out.types.resolve(ident);
+    let inner = resolve.name.to_fully_qualified();
+    let instance = resolve.name.to_symbol();
+
+    out.include.utility = true;
+    out.include.kj_rs = true;
+
+    // Static disposers are not supported, only Owns containing 2 pointers are allowed
+    writeln!(
+        out,
+        "static_assert(sizeof(::kj::Rc<{}>) == 2 * sizeof(void *), \"Static disposers for Own are not supported in workerd-cxx\");",
+        inner,
+    );
+    writeln!(
+        out,
+        "static_assert(alignof(::kj::Rc<{}>) == sizeof(void *), \"Static disposers for Own are not supported in workerd-cxx\");",
+        inner,
+    );
+    writeln!(
+        out,
+        "static_assert(::std::is_base_of<::kj::Refcounted, {}>::value, \"Value must inherit kj::Refcounted\");",
+        inner
+    );
+
+    begin_function_definition(out);
+    writeln!(
+        out,
+        "void cxxbridge1$kj_rs$rc${}$is_shared(::kj::Refcounted *ptr, bool *ret) noexcept {{",
+        instance,
+    );
+    writeln!(out, "  *ret = ptr->isShared();");
+    writeln!(out, "}}");
+
+    begin_function_definition(out);
+    writeln!(
+        out,
+        "void cxxbridge1$kj_rs$rc${}$add_ref(::kj::Rc<{}> *ptr, ::kj::Rc<{}> *ret) noexcept {{",
+        instance, inner, inner
+    );
+    writeln!(out, "  ::new (ret) ::kj::Rc<{}>(ptr->addRef());", inner);
+    writeln!(out, "}}");
+}
+
+// Writes assertions to make sure the internal Own is valid and writes fucntions to support
+// necessary refcounted behavior
+fn write_kj_arc(out: &mut OutFile, key: NamedImplKey) {
+    let ident = key.rust;
+    let resolve = out.types.resolve(ident);
+    let inner = resolve.name.to_fully_qualified();
+    let instance = resolve.name.to_symbol();
+
+    out.include.utility = true;
+    out.include.kj_rs = true;
+
+    // Static disposers are not supported, only Owns containing 2 pointers are allowed
+    writeln!(
+        out,
+        "static_assert(sizeof(::kj::Arc<{}>) == 2 * sizeof(void *), \"Static disposers for Own are not supported in workerd-cxx\");",
+        inner,
+    );
+    writeln!(
+        out,
+        "static_assert(alignof(::kj::Arc<{}>) == sizeof(void *), \"Static disposers for Own are not supported in workerd-cxx\");",
+        inner,
+    );
+    writeln!(
+        out,
+        "static_assert(::std::is_base_of<::kj::AtomicRefcounted, {}>::value, \"Value must inherit kj::AtomicRefcounted\");",
+        inner
+    );
+
+    begin_function_definition(out);
+    writeln!(
+        out,
+        "void cxxbridge1$kj_rs$arc${}$is_shared(::kj::AtomicRefcounted *ptr, bool *ret) noexcept {{",
+        instance,
+    );
+    writeln!(out, "  *ret = ptr->isShared();");
+    writeln!(out, "}}");
+
+    begin_function_definition(out);
+    writeln!(
+        out,
+        "void cxxbridge1$kj_rs$arc${}$add_ref(::kj::Arc<{}> *ptr, ::kj::Arc<{}> *ret) noexcept {{",
+        instance, inner, inner
+    );
+    writeln!(out, "  ::new (ret) ::kj::Arc<{}>(ptr->addRef());", inner);
+    writeln!(out, "}}");
 }
 
 fn write_unique_ptr(out: &mut OutFile, key: NamedImplKey) {

@@ -11,18 +11,21 @@ pub use promise::KjPromiseNodeImpl;
 pub use promise::OwnPromiseNode;
 pub use promise::PromiseFuture;
 pub use promise::new_callbacks_promise_future;
+pub use repr::{KjArc, KjRc};
 
 mod awaiter;
 mod future;
 pub mod maybe;
 mod own;
 mod promise;
+pub mod refcount;
 mod waker;
 
 pub mod repr {
     pub use crate::future::repr::*;
     pub use crate::maybe::repr::*;
     pub use crate::own::repr::*;
+    pub use crate::refcount::repr::*;
 }
 
 pub type Result<T> = std::io::Result<T>;

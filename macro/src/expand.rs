@@ -131,6 +131,8 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
             ImplKey::Maybe(ident) => {
                 expanded.extend(expand_kj_maybe(ident, explicit_impl, types));
             }
+            ImplKey::KjRc(ident) => expanded.extend(expand_kj_rc(ident, types, explicit_impl)),
+            ImplKey::KjArc(ident) => expanded.extend(expand_kj_arc(ident, types, explicit_impl)),
             // We do not yet need to generate code on the rust side for [`kj_rs::Own`]
             ImplKey::Own(_) => (),
         }
@@ -1723,6 +1725,86 @@ fn expand_shared_ptr(
                 }
                 unsafe {
                     __drop(this);
+                }
+            }
+        }
+    }
+}
+
+fn expand_kj_rc(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
+    let ident = key.rust;
+    let resolve = types.resolve(ident);
+    let prefix = format!("cxxbridge1$kj_rs$rc${}$", resolve.name.to_symbol());
+    let is_shared = format!("{}is_shared", prefix);
+    let add_ref = format!("{}add_ref", prefix);
+
+    let begin_span = explicit_impl.map_or(key.begin_span, |explicit| explicit.impl_token.span);
+    let end_span = explicit_impl.map_or(key.end_span, |explicit| explicit.brace_token.span.join());
+    let unsafe_token = format_ident!("unsafe", span = begin_span);
+
+    quote_spanned! {end_span=>
+        #[automatically_derived]
+        #unsafe_token impl ::kj_rs::repr::Refcounted for #ident {
+            fn is_shared(&self) -> bool {
+                #UnsafeExtern extern "C" {
+                    #[link_name = #is_shared]
+                    fn __is_shared(ptr: *const #ident, ret: *mut bool);
+                }
+                let mut ret = ::cxx::core::mem::MaybeUninit::uninit();
+                unsafe {
+                    __is_shared(self as *const #ident, ret.as_mut_ptr());
+                    ret.assume_init()
+                }
+            }
+            unsafe fn add_ref(rc: &::kj_rs::repr::KjRc<#ident>) -> ::kj_rs::repr::KjRc<#ident> {
+                #UnsafeExtern extern "C" {
+                    #[link_name = #add_ref]
+                    fn __add_ref(refcounted: *const ::kj_rs::repr::KjRc<#ident>, ptr: *const ::kj_rs::repr::KjRc<#ident>);
+                }
+                let mut ret = ::cxx::core::mem::MaybeUninit::uninit();
+                unsafe {
+                    __add_ref(rc as *const ::kj_rs::repr::KjRc<#ident>, ret.as_mut_ptr());
+                    ret.assume_init()
+                }
+            }
+        }
+    }
+}
+
+fn expand_kj_arc(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
+    let ident = key.rust;
+    let resolve = types.resolve(ident);
+    let prefix = format!("cxxbridge1$kj_rs$arc${}$", resolve.name.to_symbol());
+    let is_shared = format!("{}is_shared", prefix);
+    let add_ref = format!("{}add_ref", prefix);
+
+    let begin_span = explicit_impl.map_or(key.begin_span, |explicit| explicit.impl_token.span);
+    let end_span = explicit_impl.map_or(key.end_span, |explicit| explicit.brace_token.span.join());
+    let unsafe_token = format_ident!("unsafe", span = begin_span);
+
+    quote_spanned! {end_span=>
+        #[automatically_derived]
+        #unsafe_token impl ::kj_rs::repr::AtomicRefcounted for #ident {
+            fn is_shared(&self) -> bool {
+                #UnsafeExtern extern "C" {
+                    #[link_name = #is_shared]
+                    fn __is_shared(ptr: *const #ident, ret: *mut bool);
+                }
+                let mut ret = ::cxx::core::mem::MaybeUninit::uninit();
+                unsafe {
+                    __is_shared(self as *const #ident, ret.as_mut_ptr());
+                    ret.assume_init()
+                }
+            }
+            unsafe fn add_ref(arc: &::kj_rs::repr::KjArc<#ident>) -> ::kj_rs::repr::KjArc<#ident> {
+                #UnsafeExtern extern "C" {
+                    #[link_name = #add_ref]
+                    fn __add_ref(refcounted: *const ::kj_rs::repr::KjArc<#ident>, ptr: *const ::kj_rs::repr::KjArc<#ident>);
+                }
+                let mut ret = ::cxx::core::mem::MaybeUninit::uninit();
+                unsafe {
+                    __add_ref(arc as *const ::kj_rs::repr::KjArc<#ident>, ret.as_mut_ptr());
+                    ret.assume_init()
                 }
             }
         }

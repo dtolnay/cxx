@@ -10,7 +10,7 @@ assert_eq_align!(repr::Own<()>, *const ());
 /// in direct `Own<T>`, not Maybe<Own<T>>, and using a [`NonNull`] in `Own`
 /// but allowing Nulls for Niche Value Optimization is undefined behavior.
 #[repr(transparent)]
-pub(crate) struct NonNullExceptMaybe<T>(pub(crate) *mut T, PhantomData<T>);
+pub(crate) struct NonNullExceptMaybe<T: ?Sized>(pub(crate) *mut T, PhantomData<T>);
 
 impl<T> NonNullExceptMaybe<T> {
     pub fn as_ptr(&self) -> *const T {
@@ -54,7 +54,7 @@ pub mod repr {
     /// - Currently, it is runtime asserted in the bridge macro that no null Own can be passed
     ///   to Rust
     #[repr(C)]
-    pub struct Own<T> {
+    pub struct Own<T: ?Sized> {
         pub(crate) disposer: *const c_void,
         pub(crate) ptr: NonNullExceptMaybe<T>,
     }
@@ -95,7 +95,7 @@ pub mod repr {
         /// Returns a raw const pointer to the object owned by this [`Own`]
         #[must_use]
         pub fn as_ptr(&self) -> *const T {
-            self.ptr.as_ptr().cast()
+            self.ptr.as_ptr()
         }
     }
 
@@ -186,7 +186,7 @@ pub mod repr {
         }
     }
 
-    impl<T> Drop for Own<T> {
+    impl<T: ?Sized> Drop for Own<T> {
         fn drop(&mut self) {
             unsafe extern "C" {
                 #[link_name = "cxxbridge$kjrs$own$drop"]

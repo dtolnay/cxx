@@ -48,7 +48,8 @@ rust_cxx_bridge(
         "test-promises.h",
         "test-maybe.h",
         "test-own.h",
-        "shared.h"
+        "shared.h",
+        "test-refcount.h"
     ],
     include_prefix = "kj-rs-demo",
     deps = [
@@ -60,7 +61,8 @@ cc_library(
     name = "test-promises",
     srcs = [
         "test-promises.c++",
-        "test-own.c++"
+        "test-own.c++",
+        "test-refcount.c++"
     ],
     linkstatic = select({
         "@platforms//os:windows": True,

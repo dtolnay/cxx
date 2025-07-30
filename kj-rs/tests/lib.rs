@@ -13,6 +13,7 @@
 mod test_futures;
 mod test_maybe;
 mod test_own;
+mod test_refcount;
 
 use test_futures::{
     new_awaiting_future_i32, new_error_handling_future_void_infallible, new_errored_future_void,
@@ -25,6 +26,8 @@ use test_maybe::{
     take_maybe_own, take_maybe_own_ret, take_maybe_ref, take_maybe_ref_ret, take_maybe_shared,
     take_maybe_shared_ret,
 };
+
+use test_refcount::{modify_own_ret_arc, modify_own_ret_rc};
 
 use kj_rs::repr::Own;
 
@@ -80,6 +83,50 @@ mod ffi {
         fn null_exception_test_driver_2() -> String;
         #[allow(dead_code)]
         fn rust_take_own_driver();
+    }
+
+    unsafe extern "C++" {
+        include!("kj-rs-demo/test-refcount.h");
+
+        type OpaqueRefcountedClass;
+
+        #[allow(dead_code)]
+        fn get_rc() -> KjRc<OpaqueRefcountedClass>;
+        #[allow(dead_code)]
+        #[cxx_name = "getData"]
+        fn get_data(&self) -> u64;
+        #[allow(dead_code)]
+        #[cxx_name = "setData"]
+        fn set_data(self: Pin<&mut OpaqueRefcountedClass>, data: u64);
+
+        #[allow(dead_code)]
+        fn give_rc_back(rc: KjRc<OpaqueRefcountedClass>);
+    }
+
+    unsafe extern "C++" {
+        include!("kj-rs-demo/test-refcount.h");
+
+        type OpaqueAtomicRefcountedClass;
+
+        #[allow(dead_code)]
+        fn get_arc() -> KjArc<OpaqueAtomicRefcountedClass>;
+
+        #[allow(dead_code)]
+        #[cxx_name = "getData"]
+        fn get_data(&self) -> u64;
+        #[allow(dead_code)]
+        #[cxx_name = "setData"]
+        fn set_data(self: Pin<&mut OpaqueAtomicRefcountedClass>, data: u64);
+
+        #[allow(dead_code)]
+        fn give_arc_back(arc: KjArc<OpaqueAtomicRefcountedClass>);
+    }
+
+    extern "Rust" {
+        fn modify_own_ret_rc(rc: KjRc<OpaqueRefcountedClass>) -> KjRc<OpaqueRefcountedClass>;
+        fn modify_own_ret_arc(
+            arc: KjArc<OpaqueAtomicRefcountedClass>,
+        ) -> KjArc<OpaqueAtomicRefcountedClass>;
     }
 
     // Helper function to test moving `Own` to C++
@@ -232,6 +279,9 @@ mod ffi {
         async unsafe fn lifetime_arg_result<'a>(buf: &'a [u8]) -> Result<()>;
     }
 }
+
+unsafe impl Send for ffi::OpaqueAtomicRefcountedClass {}
+unsafe impl Sync for ffi::OpaqueAtomicRefcountedClass {}
 
 pub fn modify_own_return(mut own: Own<ffi::OpaqueCxxClass>) -> Own<ffi::OpaqueCxxClass> {
     own.pin_mut().set_data(72);

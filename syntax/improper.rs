@@ -35,7 +35,9 @@ impl<'a> Types<'a> {
             Type::Ptr(ty) => self.determine_improper_ctype(&ty.inner),
             Type::Array(ty) => self.determine_improper_ctype(&ty.inner),
             Type::Maybe(ty) => self.determine_improper_ctype(&ty.inner),
-            Type::Future(_) | Type::Own(_) => todo!("file a workerd-cxx ticket"),
+            Type::Future(_) | Type::Own(_) | Type::KjRc(_) | Type::KjArc(_) => {
+                todo!("file a workerd-cxx ticket")
+            }
         }
     }
 }

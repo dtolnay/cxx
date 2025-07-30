@@ -15,6 +15,8 @@ where
         Type::RustBox(ty)
         | Type::UniquePtr(ty)
         | Type::Own(ty)
+        | Type::KjRc(ty)
+        | Type::KjArc(ty)
         | Type::SharedPtr(ty)
         | Type::WeakPtr(ty)
         | Type::CxxVector(ty)
