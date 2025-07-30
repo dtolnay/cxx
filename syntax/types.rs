@@ -7,7 +7,8 @@ use crate::syntax::set::{OrderedSet, UnorderedSet};
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::visit::{self, Visit};
 use crate::syntax::{
-    toposort, Api, Atom, Enum, EnumRepr, ExternType, Impl, Lifetimes, Pair, Struct, Type, TypeAlias,
+    toposort, Api, Atom, Enum, EnumRepr, ExternType, Impl, Lang, Lifetimes, Pair, Struct, Type,
+    TypeAlias,
 };
 use proc_macro2::Ident;
 use quote::ToTokens;
@@ -18,7 +19,10 @@ pub(crate) struct Types<'a> {
     pub enums: UnorderedMap<&'a Ident, &'a Enum>,
     pub cxx: UnorderedSet<&'a Ident>,
     pub rust: UnorderedSet<&'a Ident>,
-    pub aliases: UnorderedMap<&'a Ident, &'a TypeAlias>,
+    /// Type aliases defined in the `extern "C++"` section of `#[cxx::bridge]`.
+    pub cxx_aliases: UnorderedMap<&'a Ident, &'a TypeAlias>,
+    /// Type aliases defined in the `extern "Rust"` section of `#[cxx::bridge]`.
+    pub rust_aliases: UnorderedMap<&'a Ident, &'a TypeAlias>,
     pub untrusted: UnorderedMap<&'a Ident, &'a ExternType>,
     pub required_trivial: UnorderedMap<&'a Ident, Vec<TrivialReason<'a>>>,
     pub impls: OrderedMap<ImplKey<'a>, Option<&'a Impl>>,
@@ -34,7 +38,8 @@ impl<'a> Types<'a> {
         let mut enums = UnorderedMap::new();
         let mut cxx = UnorderedSet::new();
         let mut rust = UnorderedSet::new();
-        let mut aliases = UnorderedMap::new();
+        let mut cxx_aliases = UnorderedMap::new();
+        let mut rust_aliases = UnorderedMap::new();
         let mut untrusted = UnorderedMap::new();
         let mut impls = OrderedMap::new();
         let mut resolutions = UnorderedMap::new();
@@ -157,8 +162,16 @@ impl<'a> Types<'a> {
                     if !type_names.insert(ident) {
                         duplicate_name(cx, alias, ident);
                     }
-                    cxx.insert(ident);
-                    aliases.insert(ident, alias);
+                    match alias.lang {
+                        Lang::Cxx | Lang::CxxUnwind => {
+                            cxx.insert(ident);
+                            cxx_aliases.insert(ident, alias);
+                        }
+                        Lang::Rust => {
+                            rust.insert(ident);
+                            rust_aliases.insert(ident, alias);
+                        }
+                    }
                     add_resolution(&alias.name, &alias.generics);
                 }
                 Api::Impl(imp) => {
@@ -181,7 +194,9 @@ impl<'a> Types<'a> {
                 | ImplKey::SharedPtr(ident)
                 | ImplKey::WeakPtr(ident)
                 | ImplKey::CxxVector(ident) => {
-                    Atom::from(ident.rust).is_none() && !aliases.contains_key(ident.rust)
+                    Atom::from(ident.rust).is_none()
+                        && !cxx_aliases.contains_key(ident.rust)
+                        && !rust_aliases.contains_key(ident.rust)
                 }
             };
             if implicit_impl && !impls.contains_key(&impl_key) {
@@ -202,7 +217,8 @@ impl<'a> Types<'a> {
             enums,
             cxx,
             rust,
-            aliases,
+            cxx_aliases,
+            rust_aliases,
             untrusted,
             required_trivial,
             impls,
@@ -273,7 +289,7 @@ impl<'a> Types<'a> {
     pub(crate) fn is_maybe_trivial(&self, ty: &Ident) -> bool {
         self.structs.contains_key(ty)
             || self.enums.contains_key(ty)
-            || self.aliases.contains_key(ty)
+            || self.cxx_aliases.contains_key(ty)
     }
 }
 
@@ -288,4 +304,40 @@ impl<'t, 'a> IntoIterator for &'t Types<'a> {
 fn duplicate_name(cx: &mut Errors, sp: impl ToTokens, ident: &Ident) {
     let msg = format!("the name `{}` is defined multiple times", ident);
     cx.error(sp, msg);
+}
+
+#[cfg(test)]
+mod test {
+    use crate::syntax::test_support::{collect_types, parse_apis};
+    use quote::{format_ident, quote};
+
+    #[test]
+    fn test_parsing_of_cxx_type_aliases() {
+        let apis = parse_apis(quote! {
+            #[cxx::bridge]
+            mod ffi {
+                extern "C++" {
+                    type Alias = crate::another_module::Foo;
+                }
+            }
+        })
+        .unwrap();
+        let types = collect_types(&apis).unwrap();
+        assert!(types.cxx_aliases.contains_key(&format_ident!("Alias")));
+    }
+
+    #[test]
+    fn test_parsing_of_rust_type_aliases() {
+        let apis = parse_apis(quote! {
+            #[cxx::bridge]
+            mod ffi {
+                extern "Rust" {
+                    type Alias = crate::another_module::Foo;
+                }
+            }
+        })
+        .unwrap();
+        let types = collect_types(&apis).unwrap();
+        assert!(types.rust_aliases.contains_key(&format_ident!("Alias")));
+    }
 }

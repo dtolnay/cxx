@@ -25,6 +25,8 @@ pub(crate) mod report;
 pub(crate) mod resolve;
 pub(crate) mod set;
 pub(crate) mod symbol;
+#[cfg(test)]
+pub(crate) mod test_support;
 mod tokens;
 mod toposort;
 pub(crate) mod trivial;
@@ -168,6 +170,7 @@ pub(crate) struct ExternFn {
 pub(crate) struct TypeAlias {
     #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
     pub cfg: CfgExpr,
+    pub lang: Lang,
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
     pub doc: Doc,
     pub derives: Vec<Derive>,

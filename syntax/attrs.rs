@@ -310,3 +310,15 @@ impl ToTokens for OtherAttrs {
         }
     }
 }
+
+/// This finds `#[cxx::bridge]` attribute if it has been spelled in exactly this way.  This means
+/// that it is appropriate to use from `gen/...` and tests, but not from `macro/...` (it seems
+/// somewhat prudent for the latter to handle the case where the attribute was imported under a
+/// different name).
+#[allow(dead_code)] // Only used from tests and cxx-build, but not from cxxbridge-macro
+pub(crate) fn find_cxx_bridge_attr(attrs: &[Attribute]) -> Option<&Attribute> {
+    attrs.iter().find(|attr| {
+        let path = &attr.path().segments;
+        path.len() == 2 && path[0].ident == "cxx" && path[1].ident == "bridge"
+    })
+}
