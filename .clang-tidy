@@ -17,4 +17,8 @@ Checks:
   -modernize-use-default-member-init,
   -modernize-use-equals-default,
   -modernize-use-trailing-return-type,
-HeaderFilterRegex: cxx\.h
+  -modernize-concat-nested-namespaces,
+  -modernize-type-traits,
+  -modernize-use-ranges,
+  -modernize-use-constraints,
+  -modernize-use-nodiscard,

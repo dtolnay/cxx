@@ -66,9 +66,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install clang-tidy
-        run: sudo apt-get install clang-tidy-18
+        run: sudo apt-get install clang-tidy-19 lld just
+      - name: Bazel Build
+        run: just build
+
+      - name: Generate compile.json
+        run: just compile-commands
+
       - name: Run clang-tidy
-        run: clang-tidy-18 src/cxx.cc --warnings-as-errors=*
+        run: just clang-tidy
 
   eslint:
     name: ESLint

@@ -2,6 +2,8 @@ alias w := watch
 alias b := build
 alias t := test
 
+CLANG_TIDY := "clang-tidy-19"
+
 watch +WATCH_TARGET='test':
     watchexec -rc -w BUILD.bazel -w tests -w src -w gen -w macro -w syntax -w kj-rs -w include -- just {{WATCH_TARGET}}
 
@@ -31,6 +33,8 @@ rustfmt:
 clang-format:
     clang-format -i include/*.h src/*.cc tests/**/*.h tests/**/*.cc kj-rs/*.h kj-rs/*.c++ kj-rs/tests/*.h kj-rs/tests/*.c++
 
+clang-tidy:
+    {{CLANG_TIDY}} -p . src/cxx.cc include/cxx.h -warnings-as-errors="*"
 
 compile-commands:
     bazel run @hedron_compile_commands//:refresh_all
