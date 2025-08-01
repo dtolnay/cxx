@@ -1,4 +1,5 @@
 #include "../include/cxx.h"
+
 #include <cstdio>
 #include <cstring>
 #include <iostream>
@@ -462,55 +463,29 @@ static_assert(!std::is_same<Vec<std::uint8_t>::const_iterator,
                             Vec<std::uint8_t>::iterator>::value,
               "Vec<T>::const_iterator != Vec<T>::iterator");
 
-static const char *errorCopy(const char *ptr, std::size_t len) {
-  char *copy = new char[len];
-  std::memcpy(copy, ptr, len);
-  return copy;
-}
-
+// kj::Exception bridge
 extern "C" {
-const char *cxxbridge1$error(const char *ptr, std::size_t len) noexcept {
-  return errorCopy(ptr, len);
+
+// create new kj::Exception
+kj::Exception *cxxbridge1$kjException$new(const char *ptr, std::size_t len,
+                                          const char *file, std::size_t fileLen,
+                                          int32_t line) noexcept {
+  return new kj::Exception(kj::Exception::Type::FAILED,
+                           kj::str(kj::ArrayPtr(file, fileLen)), line,
+                           kj::str(kj::ArrayPtr(ptr, len)));
 }
+
+// get description of kj::Exception
+const char *cxxbridge1$kjException$getDescription(kj::Exception *err) noexcept {
+  return err->getDescription().cStr();
+}
+
+// delete kj::Exception allocated by new.
+void cxxbridge1$kjException$dropInPlace(kj::Exception *err) noexcept {
+  delete err;
+}
+
 } // extern "C"
-
-Error::Error(const Error &other)
-    : std::exception(other),
-      msg(other.msg ? errorCopy(other.msg, other.len) : nullptr),
-      len(other.len) {}
-
-Error::Error(Error &&other) noexcept
-    : std::exception(std::move(other)), msg(other.msg), len(other.len) {
-  other.msg = nullptr;
-  other.len = 0;
-}
-
-Error::~Error() noexcept { delete[] this->msg; }
-
-Error &Error::operator=(const Error &other) & {
-  if (this != &other) {
-    std::exception::operator=(other);
-    delete[] this->msg;
-    this->msg = nullptr;
-    if (other.msg) {
-      this->msg = errorCopy(other.msg, other.len);
-      this->len = other.len;
-    }
-  }
-  return *this;
-}
-
-Error &Error::operator=(Error &&other) & noexcept {
-  std::exception::operator=(std::move(other));
-  delete[] this->msg;
-  this->msg = other.msg;
-  this->len = other.len;
-  other.msg = nullptr;
-  other.len = 0;
-  return *this;
-}
-
-const char *Error::what() const noexcept { return this->msg; }
 
 namespace {
 template <typename T>
@@ -520,17 +495,6 @@ union MaybeUninit {
   ~MaybeUninit() {}
 };
 } // namespace
-
-namespace repr {
-struct PtrLen final {
-  void *ptr;
-  std::size_t len;
-};
-} // namespace repr
-
-extern "C" {
-repr::PtrLen cxxbridge1$exception(const char *, std::size_t len) noexcept;
-}
 
 namespace detail {
 // On some platforms size_t is the same C++ type as one of the sized integer
@@ -551,22 +515,6 @@ using char_if_unique =
                                   std::is_same<char, int8_t>::value,
                               struct char_ignore, char>::type;
 
-class Fail final {
-  repr::PtrLen &throw$;
-
-public:
-  Fail(repr::PtrLen &throw$) noexcept : throw$(throw$) {}
-  void operator()(const char *) noexcept;
-  void operator()(const std::string &) noexcept;
-};
-
-void Fail::operator()(const char *catch$) noexcept {
-  throw$ = cxxbridge1$exception(catch$, std::strlen(catch$));
-}
-
-void Fail::operator()(const std::string &catch$) noexcept {
-  throw$ = cxxbridge1$exception(catch$.data(), catch$.length());
-}
 } // namespace detail
 
 } // namespace cxxbridge1

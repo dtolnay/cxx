@@ -1,8 +1,12 @@
 #include "test-own.h"
 
+#include "kj-rs/convert.h"
+#include "kj-rs/kj-rs.h"
 #include "kj/string.h"
 
 #include <exception>
+
+using namespace kj_rs;
 
 namespace kj_rs_demo {
 
@@ -45,18 +49,18 @@ kj::Own<int64_t> own_integer_attached() {
 rust::string null_exception_test_driver_1() {
   try {
     auto _ = modify_own_return(null_kj_own());
-    return rust::string("");
-  } catch (const std::exception& e) {
-    return rust::string(e.what());
+    return ""_kj.as<RustCopy>();
+  } catch (...) {
+    return kj::getCaughtExceptionAsKj().getDescription().as<RustCopy>();
   }
 }
 
 rust::string null_exception_test_driver_2() {
   try {
     auto _ = get_null();
-    return rust::string("");
-  } catch (const std::exception& e) {
-    return rust::string(e.what());
+    return ""_kj.as<RustCopy>();
+  } catch (...) {
+    return kj::getCaughtExceptionAsKj().getDescription().as<RustCopy>();
   }
 }
 

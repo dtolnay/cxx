@@ -188,7 +188,6 @@ pub fn write(out: &mut OutFile) {
         ifndef::write(out, builtin.unsafe_bitcopy, "CXXBRIDGE1_RUST_BITCOPY");
         ifndef::write(out, builtin.rust_vec, "CXXBRIDGE1_RUST_VEC");
         ifndef::write(out, builtin.rust_fn, "CXXBRIDGE1_RUST_FN");
-        ifndef::write(out, builtin.rust_error, "CXXBRIDGE1_RUST_ERROR");
         ifndef::write(out, builtin.rust_isize, "CXXBRIDGE1_RUST_ISIZE");
         ifndef::write(out, builtin.opaque, "CXXBRIDGE1_RUST_OPAQUE");
         ifndef::write(out, builtin.is_complete, "CXXBRIDGE1_IS_COMPLETE");
@@ -219,15 +218,6 @@ pub fn write(out: &mut OutFile) {
         writeln!(out, "using Fat = ::std::array<::std::uintptr_t, 2>;");
     }
 
-    if builtin.ptr_len {
-        include.cstddef = true;
-        out.next_section();
-        writeln!(out, "struct PtrLen final {{");
-        writeln!(out, "  void *ptr;");
-        writeln!(out, "  ::std::size_t len;");
-        writeln!(out, "}};");
-    }
-
     out.end_block(Block::Namespace("repr"));
 
     out.begin_block(Block::Namespace("detail"));
@@ -253,21 +243,6 @@ pub fn write(out: &mut OutFile) {
             out,
             "  void *operator()(::std::size_t sz) {{ return T::operator new(sz); }}",
         );
-        writeln!(out, "}};");
-    }
-
-    if builtin.trycatch {
-        include.string = true;
-        out.next_section();
-        writeln!(out, "class Fail final {{");
-        writeln!(out, "  ::rust::repr::PtrLen &throw$;");
-        writeln!(out, "public:");
-        writeln!(
-            out,
-            "  Fail(::rust::repr::PtrLen &throw$) noexcept : throw$(throw$) {{}}",
-        );
-        writeln!(out, "  void operator()(char const *) noexcept;");
-        writeln!(out, "  void operator()(std::string const &) noexcept;");
         writeln!(out, "}};");
     }
 
@@ -347,20 +322,6 @@ pub fn write(out: &mut OutFile) {
         writeln!(out, "}};");
     }
 
-    if builtin.rust_error {
-        out.next_section();
-        writeln!(out, "template <>");
-        writeln!(out, "class impl<Error> final {{");
-        writeln!(out, "public:");
-        writeln!(out, "  static Error error(repr::PtrLen repr) noexcept {{");
-        writeln!(out, "    Error error;");
-        writeln!(out, "    error.msg = static_cast<char const *>(repr.ptr);");
-        writeln!(out, "    error.len = repr.len;");
-        writeln!(out, "    return error;");
-        writeln!(out, "  }}");
-        writeln!(out, "}};");
-    }
-
     if builtin.destroy {
         out.next_section();
         writeln!(out, "template <typename T>");
@@ -396,29 +357,6 @@ pub fn write(out: &mut OutFile) {
 
     out.end_block(Block::AnonymousNamespace);
     out.end_block(Block::InlineNamespace("cxxbridge1"));
-
-    if builtin.trycatch {
-        out.begin_block(Block::Namespace("behavior"));
-        include.exception = true;
-        include.type_traits = true;
-        include.utility = true;
-        writeln!(out, "class missing {{}};");
-        writeln!(out, "missing trycatch(...);");
-        writeln!(out);
-        writeln!(out, "template <typename Try, typename Fail>");
-        writeln!(out, "static typename ::std::enable_if<");
-        writeln!(
-            out,
-            "    ::std::is_same<decltype(trycatch(::std::declval<Try>(), ::std::declval<Fail>())),",
-        );
-        writeln!(out, "                 missing>::value>::type");
-        writeln!(out, "trycatch(Try &&func, Fail &&fail) noexcept try {{");
-        writeln!(out, "  func();");
-        writeln!(out, "}} catch (::std::exception const &e) {{");
-        writeln!(out, "  fail(e.what());");
-        writeln!(out, "}}");
-        out.end_block(Block::Namespace("behavior"));
-    }
 
     out.end_block(Block::Namespace("rust"));
 }

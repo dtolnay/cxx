@@ -32,6 +32,8 @@
 #define __WORKERD_CXX__
 #endif
 
+#include <kj/exception.h>
+
 namespace rust {
 inline namespace cxxbridge1 {
 
@@ -41,6 +43,45 @@ namespace {
 template <typename T>
 class impl;
 }
+
+namespace repr {
+
+// corresponds to `result::Result` in Rust.
+struct Result final {
+  // nullptr or fully owned pointer to kj::Exception allocated with new.
+  kj::Exception *exc;
+
+  inline void check() {
+    if (exc == nullptr)
+      return;
+
+    KJ_DEFER({
+      delete exc;
+      exc = nullptr;
+    });
+    // throw copies the object to a temporary location,
+    // do not copy to stack to be just copied elsewhere: throw "from the heap".
+    throw *exc;
+  }
+
+  static Result ok() { return {nullptr}; }
+
+  static Result error(kj::Exception &&e) {
+    // move data to the heap, since e is most likely a catch-scoped object.
+    return {new kj::Exception(std::move(e))};
+  }
+
+  template <typename Func>
+  inline static Result run(Func &&func) {
+    // TODO(soon): runCatchingException re-throws CancelledException, which wouldn't work across ffi.
+    KJ_IF_SOME(e, kj::runCatchingExceptions(std::forward<Func>(func))) {
+      return error(std::move(e));
+    }
+    return ok();
+  }
+};
+
+} // namespace repr
 
 #ifndef CXXBRIDGE1_RUST_STRING
 #define CXXBRIDGE1_RUST_STRING
@@ -422,28 +463,6 @@ private:
 };
 #endif // CXXBRIDGE1_RUST_FN
 
-#ifndef CXXBRIDGE1_RUST_ERROR
-#define CXXBRIDGE1_RUST_ERROR
-// https://cxx.rs/binding/result.html
-class Error final : public std::exception {
-public:
-  Error(const Error &);
-  Error(Error &&) noexcept;
-  ~Error() noexcept override;
-
-  Error &operator=(const Error &) &;
-  Error &operator=(Error &&) & noexcept;
-
-  const char *what() const noexcept override;
-
-private:
-  Error() noexcept = default;
-  friend impl<Error>;
-  const char *msg;
-  std::size_t len;
-};
-#endif // CXXBRIDGE1_RUST_ERROR
-
 #ifndef CXXBRIDGE1_RUST_ISIZE
 #define CXXBRIDGE1_RUST_ISIZE
 #if defined(_WIN32)
@@ -514,13 +533,10 @@ template <typename T>
 using box = Box<T>;
 template <typename T>
 using vec = Vec<T>;
-using error = Error;
 template <typename Signature>
 using fn = Fn<Signature>;
 template <typename T>
 using is_relocatable = IsRelocatable<T>;
-
-
 
 ////////////////////////////////////////////////////////////////////////////////
 /// end public API, begin implementation details

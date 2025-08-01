@@ -1196,7 +1196,7 @@ fn expand_rust_function_shim_impl(
     if sig.throws {
         requires_closure = true;
         requires_unsafe = true;
-        expr = quote_spanned!(span=> ::cxx::private::r#try(#out, #expr));
+        expr = quote_spanned!(span=> ::cxx::private::r#try(#out, #expr, file!(), line!()));
     } else if indirect_return {
         requires_closure = true;
         requires_unsafe = true;

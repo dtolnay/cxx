@@ -1,5 +1,6 @@
 #pragma once
 #include "rust/cxx.h"
+
 #include <memory>
 #include <string>
 
@@ -178,6 +179,7 @@ size_t c_take_mut_ptr(C *c);
 void c_try_return_void();
 size_t c_try_return_primitive();
 size_t c_fail_return_primitive();
+size_t c_fail_kj_exception_return_primitive();
 rust::Box<R> c_try_return_box();
 const rust::String &c_try_return_ref(const rust::String &);
 rust::Str c_try_return_str(rust::Str);

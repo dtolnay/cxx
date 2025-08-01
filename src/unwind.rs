@@ -70,7 +70,11 @@ fn panic_result(
     err: &alloc::boxed::Box<dyn core::any::Any + Send>,
 ) -> ::cxx::private::Result {
     if let Some(err) = err.downcast_ref::<alloc::string::String>() {
-        return ::cxx::private::Result::error(std::format!("panic in {label}: {err}"));
+        return ::cxx::private::Result::error(
+            &std::format!("panic in {label}: {err}"),
+            file!(),
+            line!(),
+        );
     }
-    ::cxx::private::Result::error(std::format!("panic in {label}"))
+    ::cxx::private::Result::error(&std::format!("panic in {label}"), file!(), line!())
 }

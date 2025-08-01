@@ -722,7 +722,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     begin_function_definition(out);
     if efn.throws {
         out.builtin.ptr_len = true;
-        write!(out, "::rust::repr::PtrLen ");
+        write!(out, "::rust::repr::Result ");
     } else {
         write_extern_return_type_space(out, &efn.ret);
     }
@@ -800,9 +800,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     if efn.throws {
         out.builtin.ptr_len = true;
         out.builtin.trycatch = true;
-        writeln!(out, "::rust::repr::PtrLen throw$;");
-        writeln!(out, "  ::rust::behavior::trycatch(");
-        writeln!(out, "      [&] {{");
+        writeln!(out, "return ::rust::repr::Result::run([&] {{");
         write!(out, "        ");
     }
     if indirect_return {
@@ -871,10 +869,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     }
     writeln!(out, ";");
     if efn.throws {
-        writeln!(out, "        throw$.ptr = nullptr;");
-        writeln!(out, "      }},");
-        writeln!(out, "      ::rust::detail::Fail(throw$));");
-        writeln!(out, "  return throw$;");
+        writeln!(out, "  }});");
     }
     writeln!(out, "}}");
     for arg in &efn.args {
@@ -916,7 +911,7 @@ fn write_rust_function_decl_impl(
 
     // rust functions always throw because of panic
     out.builtin.ptr_len = true;
-    write!(out, "::rust::repr::PtrLen ");
+    write!(out, "::rust::repr::Result ");
 
     write!(out, "{}(", link_name);
     let mut needs_comma = false;
@@ -1084,7 +1079,7 @@ fn write_rust_function_shim_impl(
         write!(out, "  ");
     }
     out.builtin.ptr_len = true;
-    write!(out, "::rust::repr::PtrLen error$ = ");
+    write!(out, "::rust::repr::Result error$ = ");
 
     write!(out, "{}(", invoke);
     let mut needs_comma = false;
@@ -1131,9 +1126,7 @@ fn write_rust_function_shim_impl(
     }
     writeln!(out, ";");
     out.builtin.rust_error = true;
-    writeln!(out, "  if (error$.ptr) {{");
-    writeln!(out, "    throw ::rust::impl<::rust::Error>::error(error$);");
-    writeln!(out, "  }}");
+    writeln!(out, "  error$.check();");
 
     if indirect_return {
         write!(out, "  return ");

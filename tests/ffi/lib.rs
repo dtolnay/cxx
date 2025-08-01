@@ -182,6 +182,8 @@ pub mod ffi {
         fn c_try_return_void() -> Result<()>;
         fn c_try_return_primitive() -> Result<usize>;
         fn c_fail_return_primitive() -> Result<usize>;
+        fn c_fail_kj_exception_return_primitive() -> Result<usize>;
+
         fn c_try_return_box() -> Result<Box<R>>;
         unsafe fn c_try_return_ref<'a>(s: &'a String) -> Result<&'a String>;
         unsafe fn c_try_return_str<'a>(s: &'a str) -> Result<&'a str>;

@@ -106,9 +106,11 @@ fn test_c_try_return() {
     assert_eq!((), ffi::c_try_return_void().unwrap());
     assert_eq!(2020, ffi::c_try_return_primitive().unwrap());
     assert_eq!(
-        "logic error",
+        "std::exception: logic error",
         ffi::c_fail_return_primitive().unwrap_err().what(),
     );
+    let err = ffi::c_fail_kj_exception_return_primitive().unwrap_err();
+    assert_eq!("logic error", err.what());
     assert_eq!(2020, ffi::c_try_return_box().unwrap().0);
     assert_eq!(
         "2020",

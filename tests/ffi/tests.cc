@@ -1,14 +1,18 @@
 #include "tests/ffi/tests.h"
+
 #include "tests/ffi/lib.rs.h"
+
 #include <array>
 #include <cstdlib>
 #include <cstring>
+#include <exception>
 #include <iterator>
 #include <memory>
 #include <numeric>
 #ifdef __cpp_lib_span
 #include <span>
 #endif // __cpp_lib_span
+#include <kj/debug.h>
 #include <stdexcept>
 #include <string>
 #include <tuple>
@@ -566,6 +570,9 @@ void c_try_return_void() {}
 size_t c_try_return_primitive() { return 2020; }
 
 size_t c_fail_return_primitive() { throw std::logic_error("logic error"); }
+size_t c_fail_kj_exception_return_primitive() {
+  kj::throwFatalException(KJ_EXCEPTION(FAILED, "logic error"));
+}
 
 rust::Box<R> c_try_return_box() { return c_return_box(); }
 
@@ -814,8 +821,9 @@ extern "C" const char *cxx_run_test() noexcept {
   try {
     r_fail_return_primitive();
     ASSERT(false);
-  } catch (const rust::Error &e) {
-    ASSERT(std::strcmp(e.what(), "rust error") == 0);
+  } catch (const kj::Exception &e) {
+    KJ_ASSERT(e.getDescription() == "rust error"_kj);
+    KJ_ASSERT(e.getFile() == "tests/ffi/lib.rs"_kj);
   }
 
   auto r = r_return_box();
@@ -985,8 +993,8 @@ extern "C" const char *cxx_run_test() noexcept {
   try {
     r_panic("foobar");
     ASSERT(false);
-  } catch (const rust::Error &e) {
-    ASSERT(std::strcmp(e.what(),
+  } catch (const kj::Exception &e) {
+    ASSERT(std::strcmp(e.getDescription().cStr(),
                        "panic in cxx_test_suite::ffi::r_panic: foobar") == 0);
   }
 

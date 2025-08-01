@@ -17,27 +17,11 @@ namespace repr {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wreturn-type-c-linkage"
 
-// ::cxx::private::PtrLen
-struct PtrLen final {
-  void* ptr = nullptr;
-  std::size_t len = 0;
-};
-
-extern "C" {
-repr::PtrLen cxxbridge1$exception(const char*, std::size_t len) noexcept;
-}
-
-// ::cxx::private::Result
-struct Result final {
-  PtrLen err = {};
-  inline static Result ok() {
-    return {};
-  }
-  inline static Result error(kj::Exception& e);
-};
+using Result = ::rust::repr::Result;
 
 // ::kj_rs::promise::UnwrapCallback
 using UnwrapCallback = Result (*)(void /* kj::_::PromiseNode */* node, void /* T */* ret);
+
 // ::kj_rs::promise::KjPromiseNodeImpl
 struct KjPromiseNodeImpl {
   template <typename T>
@@ -63,7 +47,7 @@ repr::Result unwrapCallback(void* nodePtr, void* ret) noexcept {
   }
 
   KJ_IF_SOME(e, result.exception) {
-    return repr::Result::error(e);
+    return repr::Result::error(kj::mv(e));
   } else {
     if constexpr (!kj::isSameType<T, void>()) {
       new (reinterpret_cast<T*>(ret)) T(::kj::mv(KJ_ASSERT_NONNULL(result.value)));
@@ -74,13 +58,6 @@ repr::Result unwrapCallback(void* nodePtr, void* ret) noexcept {
 }  // namespace _
 
 namespace repr {
-
-inline Result Result::error(kj::Exception& e) {
-  auto description = e.getDescription();
-  // will malloc a copy
-  auto err = cxxbridge1$exception(description.cStr(), description.size());
-  return {err};
-}
 
 template <typename T>
 inline KjPromiseNodeImpl::KjPromiseNodeImpl(kj::Promise<T>&& p)

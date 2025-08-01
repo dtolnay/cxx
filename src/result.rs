@@ -1,39 +1,40 @@
 #![cfg(feature = "alloc")]
 #![allow(missing_docs)]
 
+use crate::exception::repr;
 use crate::exception::Exception;
-use alloc::boxed::Box;
-use alloc::string::{String, ToString};
+use alloc::string::ToString;
 use core::fmt::Display;
 use core::ptr::{self, NonNull};
 use core::result::Result as StdResult;
-use core::slice;
-use core::str;
 
 #[repr(C)]
-#[derive(Copy, Clone)]
-pub(crate) struct PtrLen {
-    pub ptr: NonNull<u8>,
-    pub len: usize,
-}
-
-#[repr(C)]
-pub union Result {
-    err: PtrLen,
-    ok: *const u8, // null
+pub struct Result {
+    err: *mut repr::KjException,
 }
 
 impl Result {
     pub(crate) fn ok() -> Self {
-        Result { ok: ptr::null() }
+        Result {
+            err: ptr::null_mut(),
+        }
     }
 
-    pub(crate) fn error<E: Display>(err: E) -> Self {
-        unsafe { to_c_error(err.to_string()) }
+    pub(crate) fn error(msg: &str, file: &str, line: u32) -> Self {
+        let err = unsafe {
+            repr::new(
+                msg.as_ptr(),
+                msg.len(),
+                file.as_ptr(),
+                file.len(),
+                line.try_into().unwrap_or_default(),
+            )
+        };
+        Self { err }
     }
 }
 
-pub unsafe fn r#try<T, E>(ret: *mut T, result: StdResult<T, E>) -> Result
+pub unsafe fn r#try<T, E>(ret: *mut T, result: StdResult<T, E>, file: &str, line: u32) -> Result
 where
     E: Display,
 {
@@ -42,39 +43,23 @@ where
             unsafe { ptr::write(ret, ok) }
             Result::ok()
         }
-        Err(err) => Result::error(err),
+        Err(err) => Result::error(&err.to_string(), file, line),
     }
-}
-
-unsafe fn to_c_error(msg: String) -> Result {
-    let mut msg = msg;
-    unsafe { msg.as_mut_vec() }.push(b'\0');
-    let ptr = msg.as_ptr();
-    let len = msg.len();
-
-    extern "C" {
-        #[link_name = "cxxbridge1$error"]
-        fn error(ptr: *const u8, len: usize) -> NonNull<u8>;
-    }
-
-    let copy = unsafe { error(ptr, len) };
-    let err = PtrLen { ptr: copy, len };
-    Result { err }
 }
 
 impl Result {
     pub unsafe fn exception(self) -> StdResult<(), Exception> {
-        unsafe {
-            if self.ok.is_null() {
-                Ok(())
-            } else {
-                let err = self.err;
-                let slice = slice::from_raw_parts_mut(err.ptr.as_ptr(), err.len);
-                let s = str::from_utf8_unchecked_mut(slice);
-                Err(Exception {
-                    what: Box::from_raw(s),
-                })
-            }
+        let err = self.err;
+        core::mem::forget(self);
+        match NonNull::new(err) {
+            Some(err) => Err(Exception { err }),
+            None => Ok(()),
         }
+    }
+}
+
+impl Drop for Result {
+    fn drop(&mut self) {
+        unsafe { repr::drop_in_place(self.err) }
     }
 }
