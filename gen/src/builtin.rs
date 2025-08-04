@@ -142,14 +142,13 @@ pub fn write(out: &mut OutFile) {
     if builtin.trycatch {
         builtin.ptr_len = true;
     }
+    writeln!(out, "#include \"rust/cxx.h\"");
 
     out.begin_block(Block::Namespace("rust"));
     out.begin_block(Block::InlineNamespace("cxxbridge1"));
 
     let cxx_header = include.has_cxx_header();
     if !cxx_header {
-        writeln!(out, "// #include \"rust/cxx.h\"");
-
         ifndef::write(out, builtin.panic, "CXXBRIDGE1_PANIC");
 
         if builtin.rust_string {
