@@ -11,6 +11,8 @@ use core::error::Error as StdError;
 
 // Representation for kj::Exception* and functions to manipulated it,
 pub(crate) mod repr {
+    use core::ffi::c_char;
+
     #[repr(C)]
     pub(crate) struct KjException {
         data: (),
@@ -27,7 +29,7 @@ pub(crate) mod repr {
         ) -> *mut KjException;
 
         #[link_name = "cxxbridge1$kjException$getDescription"]
-        pub fn description(err: *mut KjException) -> *const i8;
+        pub fn description(err: *mut KjException) -> *const c_char;
 
         #[link_name = "cxxbridge1$kjException$dropInPlace"]
         pub fn drop_in_place(err: *mut KjException);
