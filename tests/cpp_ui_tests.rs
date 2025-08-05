@@ -1,5 +1,4 @@
-mod cpp_ui_tests_harness;
-use cpp_ui_tests_harness::Test;
+mod cpp_compile;
 
 use quote::quote;
 
@@ -7,7 +6,7 @@ use quote::quote;
 /// which we started to emit in <https://github.com/dtolnay/cxx/commit/534627667>
 #[test]
 fn test_unique_ptr_of_incomplete_foward_declared_pointee() {
-    let test = Test::new(quote! {
+    let test = cpp_compile::Test::new(quote! {
         #[cxx::bridge]
         mod ffi {
             unsafe extern "C++" {
