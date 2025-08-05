@@ -41,7 +41,6 @@ impl Drop for Guard {
 }
 
 /// Run the void `foreign_call`, intercepting panics and converting them to errors.
-#[cfg(feature = "std")]
 pub fn catch_unwind<F>(label: &'static str, foreign_call: F) -> ::cxx::result::Result
 where
     F: FnOnce(),
@@ -53,7 +52,6 @@ where
 }
 
 /// Run the error-returning `foreign_call`, intercepting panics and converting them to errors.
-#[cfg(feature = "std")]
 pub fn try_unwind<F>(label: &'static str, foreign_call: F) -> ::cxx::private::Result
 where
     F: FnOnce() -> ::cxx::private::Result,
@@ -64,7 +62,6 @@ where
     }
 }
 
-#[cfg(feature = "std")]
 fn panic_result(
     label: &'static str,
     err: &alloc::boxed::Box<dyn core::any::Any + Send>,

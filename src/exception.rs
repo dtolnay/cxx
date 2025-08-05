@@ -4,9 +4,6 @@ use core::{
     ptr::NonNull,
 };
 
-#[cfg(error_in_core)]
-use core::error::Error as StdError;
-#[cfg(all(feature = "std", not(error_in_core)))]
 use core::error::Error as StdError;
 
 // Representation for kj::Exception* and functions to manipulated it,
@@ -37,7 +34,6 @@ pub(crate) mod repr {
 }
 
 /// Exception thrown from an `extern "C++"` function.
-#[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 #[derive(Debug)]
 pub struct Exception {
     pub(crate) err: NonNull<repr::KjException>,
@@ -52,7 +48,6 @@ impl Display for Exception {
     }
 }
 
-#[cfg(any(error_in_core, feature = "std"))]
 impl StdError for Exception {}
 
 impl Exception {

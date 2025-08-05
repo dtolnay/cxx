@@ -3,9 +3,9 @@ use crate::fmt::display;
 use crate::kind::Trivial;
 use crate::string::CxxString;
 use crate::ExternType;
-#[cfg(feature = "std")]
+
 use alloc::string::String;
-#[cfg(feature = "std")]
+
 use alloc::vec::Vec;
 use core::cmp::Ordering;
 use core::ffi::c_void;
@@ -15,7 +15,7 @@ use core::marker::PhantomData;
 use core::mem::{self, MaybeUninit};
 use core::ops::{Deref, DerefMut};
 use core::pin::Pin;
-#[cfg(feature = "std")]
+
 use std::io::{self, IoSlice, Read, Seek, SeekFrom, Write};
 
 /// Binding to C++ `std::unique_ptr<T, std::default_delete<T>>`.
@@ -251,7 +251,6 @@ where
 /// Forwarding `Read` trait implementation in a manner similar to `Box<T>`.
 ///
 /// Note that the implementation will panic for null `UniquePtr<T>`.
-#[cfg(feature = "std")]
 impl<T> Read for UniquePtr<T>
 where
     for<'a> Pin<&'a mut T>: Read,
@@ -284,7 +283,6 @@ where
 /// Forwarding `Seek` trait implementation in a manner similar to `Box<T>`.
 ///
 /// Note that the implementation will panic for null `UniquePtr<T>`.
-#[cfg(feature = "std")]
 impl<T> Seek for UniquePtr<T>
 where
     for<'a> Pin<&'a mut T>: Seek,
@@ -319,7 +317,6 @@ where
 /// Forwarding `Write` trait implementation in a manner similar to `Box<T>`.
 ///
 /// Note that the implementation will panic for null `UniquePtr<T>`.
-#[cfg(feature = "std")]
 impl<T> Write for UniquePtr<T>
 where
     for<'a> Pin<&'a mut T>: Write,

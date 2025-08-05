@@ -1,4 +1,3 @@
-#[cfg(feature = "alloc")]
 use alloc::string::String;
 use core::mem::MaybeUninit;
 use core::ptr;
@@ -11,7 +10,6 @@ unsafe extern "C" fn str_new(this: &mut MaybeUninit<&str>) {
     unsafe { ptr::write(this, "") }
 }
 
-#[cfg(feature = "alloc")]
 #[export_name = "cxxbridge1$str$ref"]
 unsafe extern "C" fn str_ref<'a>(this: &mut MaybeUninit<&'a str>, string: &'a String) {
     let this = this.as_mut_ptr();

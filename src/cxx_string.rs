@@ -1,8 +1,8 @@
 use crate::actually_private::Private;
 use crate::lossy;
-#[cfg(feature = "alloc")]
+
 use alloc::borrow::Cow;
-#[cfg(feature = "alloc")]
+
 use alloc::string::String;
 use core::cmp::Ordering;
 use core::ffi::{c_char, CStr};
@@ -164,8 +164,6 @@ impl CxxString {
     /// Cow::Owned String.
     ///
     /// [replacement character]: char::REPLACEMENT_CHARACTER
-    #[cfg(feature = "alloc")]
-    #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
     pub fn to_string_lossy(&self) -> Cow<'_, str> {
         String::from_utf8_lossy(self.as_bytes())
     }
@@ -281,7 +279,6 @@ impl fmt::Write for Pin<&mut CxxString> {
     }
 }
 
-#[cfg(feature = "std")]
 impl std::io::Write for Pin<&mut CxxString> {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
         self.as_mut().push_bytes(buf);

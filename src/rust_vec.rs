@@ -1,4 +1,3 @@
-#![cfg(feature = "alloc")]
 #![allow(missing_docs)]
 
 use crate::rust_string::RustString;
