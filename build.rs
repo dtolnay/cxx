@@ -2,6 +2,7 @@
 #![allow(unexpected_cfgs)]
 
 use std::env;
+use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -99,8 +100,6 @@ fn persist_target_triple() {
     let Ok(target) = env::var("TARGET") else {
         return;
     };
-    println!("cargo:rerun-if-env-changed=TARGET");
-
     let out_dir = Path::new(&out_dir);
-    let _ = std::fs::write(out_dir.join("target_triple.txt"), target);
+    let _ = fs::write(out_dir.join("target_triple.txt"), target);
 }
