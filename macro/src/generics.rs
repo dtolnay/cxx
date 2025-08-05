@@ -66,7 +66,7 @@ pub(crate) struct UnderscoreLifetimes<'a> {
     generics: &'a Lifetimes,
 }
 
-pub(crate) fn to_underscore_lifetimes(generics: &Lifetimes) -> UnderscoreLifetimes {
+pub(crate) fn to_underscore_lifetimes(generics: &Lifetimes) -> UnderscoreLifetimes<'_> {
     UnderscoreLifetimes { generics }
 }
 

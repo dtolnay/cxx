@@ -22,7 +22,7 @@ impl<'a> NamespaceEntries<'a> {
     }
 }
 
-fn sort_by_inner_namespace(apis: Vec<&Api>, depth: usize) -> NamespaceEntries {
+fn sort_by_inner_namespace(apis: Vec<&Api>, depth: usize) -> NamespaceEntries<'_> {
     let mut direct = Vec::new();
     let mut nested_namespaces = Vec::new();
     let mut index_of_namespace = Map::new();
