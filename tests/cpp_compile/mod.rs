@@ -189,7 +189,6 @@ impl CompilationResult {
     }
 }
 
-#[cfg(test)]
 mod test {
     use super::Test;
     use quote::quote;
