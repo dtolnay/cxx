@@ -1,5 +1,6 @@
 mod cpp_compile;
 
+use indoc::indoc;
 use quote::quote;
 
 /// This is a regression test for `static_assert(::rust::is_complete...)`
@@ -16,7 +17,12 @@ fn test_unique_ptr_of_incomplete_foward_declared_pointee() {
             impl UniquePtr<ForwardDeclaredType> {}
         }
     });
-    test.write_file("include.h", "class ForwardDeclaredType;");
+    test.write_file(
+        "include.h",
+        indoc! {"
+            class ForwardDeclaredType;
+        "},
+    );
     let err_msg = test.compile().expect_single_error();
     assert!(err_msg.contains("definition of `::ForwardDeclaredType` is required"));
 }
