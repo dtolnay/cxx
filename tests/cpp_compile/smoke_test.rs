@@ -2,7 +2,7 @@ use crate::cpp_compile;
 use quote::quote;
 
 #[test]
-fn test_success_smoke_test() {
+fn test_success() {
     let test = cpp_compile::Test::new(quote! {
         #[cxx::bridge]
         mod ffi {
@@ -17,7 +17,7 @@ fn test_success_smoke_test() {
 }
 
 #[test]
-fn test_failure_smoke_test() {
+fn test_failure() {
     let test = cpp_compile::Test::new(quote! {
         #[cxx::bridge]
         mod ffi {
@@ -38,7 +38,7 @@ fn test_failure_smoke_test() {
 
 #[test]
 #[should_panic = "Unexpectedly more than 1 error line was present"]
-fn test_failure_with_unexpected_extra_error_line() {
+fn test_unexpected_extra_error() {
     let test = cpp_compile::Test::new(quote! {
         #[cxx::bridge]
         mod ffi {
