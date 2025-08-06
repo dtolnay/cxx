@@ -306,8 +306,8 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
         }
         write_doc(out, "  ", &method.doc);
         write!(out, "  ");
-        let sig = &method.sig;
         let local_name = method.name.cxx.to_string();
+        let sig = &method.sig;
         let indirect_call = false;
         let main = false;
         write_rust_function_shim_decl(out, &local_name, sig, indirect_call, main);
@@ -394,8 +394,8 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
         }
         write_doc(out, "  ", &method.doc);
         write!(out, "  ");
-        let sig = &method.sig;
         let local_name = method.name.cxx.to_string();
+        let sig = &method.sig;
         let indirect_call = false;
         let main = false;
         write_rust_function_shim_decl(out, &local_name, sig, indirect_call, main);
