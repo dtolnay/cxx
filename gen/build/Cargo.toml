@@ -15,8 +15,6 @@ rust-version = "1.73"
 
 [features]
 parallel = ["cc/parallel"]
-# incomplete features that are not covered by a compatibility guarantee:
-experimental-async-fn = []
 
 [dependencies]
 cc = "1.0.83"

@@ -560,7 +560,7 @@ fn parse_extern_fn(
         ));
     }
 
-    if foreign_fn.sig.asyncness.is_some() && !cfg!(feature = "experimental-async-fn") {
+    if foreign_fn.sig.asyncness.is_some() {
         return Err(Error::new_spanned(
             foreign_fn,
             "async function is not directly supported yet, but see https://cxx.rs/async.html \

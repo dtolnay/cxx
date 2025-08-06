@@ -16,10 +16,6 @@ rust-version = "1.73"
 name = "cxxbridge"
 path = "src/main.rs"
 
-[features]
-# incomplete features that are not covered by a compatibility guarantee:
-experimental-async-fn = []
-
 [dependencies]
 clap = { version = "4.3.11", default-features = false, features = ["error-context", "help", "std", "suggestions", "usage"] }
 codespan-reporting = "0.12"

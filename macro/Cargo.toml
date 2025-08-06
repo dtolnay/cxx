@@ -17,7 +17,6 @@ proc-macro = true
 
 [features]
 # incomplete features that are not covered by a compatibility guarantee:
-experimental-async-fn = []
 experimental-enum-variants-from-header = ["clang-ast", "flate2", "memmap", "serde", "serde_derive", "serde_json"]
 
 [dependencies]
