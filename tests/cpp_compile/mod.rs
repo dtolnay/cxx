@@ -8,7 +8,7 @@ use std::borrow::Cow;
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{self, Stdio};
-use tempdir::TempDir;
+use tempfile::TempDir;
 
 mod smoke_test;
 
@@ -46,7 +46,8 @@ impl Test {
     /// the `cxx_bridge`.
     #[must_use]
     pub fn new(cxx_bridge: TokenStream) -> Self {
-        let temp_dir = TempDir::new(env!("CARGO_CRATE_NAME")).unwrap();
+        let prefix = concat!(env!("CARGO_CRATE_NAME"), "-");
+        let temp_dir = TempDir::with_prefix(prefix).unwrap();
         let generated_h = temp_dir.path().join("cxx_bridge.generated.h");
         let generated_cc = temp_dir.path().join("cxx_bridge.generated.cc");
 
