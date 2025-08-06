@@ -40,6 +40,7 @@ indoc = "2"
 proc-macro2 = "1.0.95"
 quote = "1.0.40"
 rustversion = "1.0.13"
+target-triple = "0.1"
 tempdir = "0.3.7"
 trybuild = { version = "1.0.81", features = ["diff"] }
 

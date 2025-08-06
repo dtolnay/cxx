@@ -92,8 +92,14 @@ impl Test {
         build.std("c++20");
 
         // Set info required by the `cc` crate.
-        let target = include_str!(concat!(env!("OUT_DIR"), "/target_triple.txt"));
-        build.opt_level(3).host(target).target(target);
+        //
+        // The correct host triple during execution of this test is the target
+        // triple from the Rust compilation of this test -- not the Rust host
+        // triple.
+        build
+            .opt_level(3)
+            .host(target_triple::TARGET)
+            .target(target_triple::TARGET);
 
         // The `cc` crate does not currently expose the `Command` for building a
         // single C++ source file. Work around that by passing `-c <file.cc>`.
