@@ -313,8 +313,7 @@ impl PartialEq for Signature {
             unsafety,
             fn_token: _,
             generics: _,
-            receiver,
-            self_type,
+            kind,
             args,
             ret,
             throws,
@@ -326,8 +325,7 @@ impl PartialEq for Signature {
             unsafety: unsafety2,
             fn_token: _,
             generics: _,
-            receiver: receiver2,
-            self_type: self_type2,
+            kind: kind2,
             args: args2,
             ret: ret2,
             throws: throws2,
@@ -336,8 +334,7 @@ impl PartialEq for Signature {
         } = other;
         asyncness.is_some() == asyncness2.is_some()
             && unsafety.is_some() == unsafety2.is_some()
-            && receiver == receiver2
-            && self_type == self_type2
+            && kind == kind2
             && ret == ret2
             && throws == throws2
             && args.len() == args2.len()
@@ -372,8 +369,7 @@ impl Hash for Signature {
             unsafety,
             fn_token: _,
             generics: _,
-            receiver,
-            self_type,
+            kind,
             args,
             ret,
             throws,
@@ -382,8 +378,7 @@ impl Hash for Signature {
         } = self;
         asyncness.is_some().hash(state);
         unsafety.is_some().hash(state);
-        receiver.hash(state);
-        self_type.hash(state);
+        kind.hash(state);
         for arg in args {
             let Var {
                 cfg: _,

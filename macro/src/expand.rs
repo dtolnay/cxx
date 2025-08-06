@@ -7,7 +7,7 @@ use crate::syntax::qualified::QualifiedName;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    self, check, mangle, Api, Doc, Enum, ExternFn, ExternType, Impl, Lang, Lifetimes, Pair,
+    self, check, mangle, Api, Doc, Enum, ExternFn, ExternType, FnKind, Impl, Lang, Lifetimes, Pair,
     Signature, Struct, Trait, Type, TypeAlias, Types,
 };
 use crate::type_id::Crate;
@@ -456,7 +456,7 @@ fn expand_cxx_type_assert_pinned(ety: &ExternType, types: &Types) -> TokenStream
 
 fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
     let generics = &efn.generics;
-    let receiver = efn.receiver.iter().map(|receiver| {
+    let receiver = efn.receiver().into_iter().map(|receiver| {
         let receiver_type = receiver.ty();
         quote!(_: #receiver_type)
     });
@@ -499,7 +499,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let doc = &efn.doc;
     let attrs = &efn.attrs;
     let decl = expand_cxx_function_decl(efn, types);
-    let receiver = efn.receiver.iter().map(|receiver| {
+    let receiver = efn.receiver().into_iter().map(|receiver| {
         let var = receiver.var;
         if receiver.pinned {
             let colon = receiver.colon_token;
@@ -525,8 +525,8 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     };
     let indirect_return = indirect_return(efn, types);
     let receiver_var = efn
-        .receiver
-        .iter()
+        .receiver()
+        .into_iter()
         .map(|receiver| receiver.var.to_token_stream());
     let arg_vars = efn.args.iter().map(|arg| {
         let var = &arg.name.rust;
@@ -742,15 +742,15 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         #trampolines
         #dispatch
     });
-    match (&efn.receiver, &efn.self_type) {
-        (None, None) => {
+    match &efn.kind {
+        FnKind::Free => {
             quote! {
                 #doc
                 #attrs
                 #visibility #unsafety #fn_token #ident #generics #arg_list #ret #fn_body
             }
         }
-        (Some(receiver), None) => {
+        FnKind::Method(receiver) => {
             let elided_generics;
             let receiver_ident = &receiver.ty.rust;
             let resolve = types.resolve(&receiver.ty);
@@ -781,7 +781,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                 }
             }
         }
-        (None, Some(self_type)) => {
+        FnKind::Assoc(self_type) => {
             let elided_generics;
             let resolve = types.resolve(self_type);
             let self_type_generics = if resolve.generics.lt_token.is_some() {
@@ -811,7 +811,6 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                 }
             }
         }
-        _ => unreachable!("receiver and self_type are mutually exclusive"),
     }
 }
 
@@ -976,17 +975,15 @@ fn expand_forbid(impls: TokenStream) -> TokenStream {
 
 fn expand_rust_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let link_name = mangle::extern_fn(efn, types);
-    let local_name = match (&efn.receiver, &efn.self_type) {
-        (None, None) => format_ident!("__{}", efn.name.rust),
-        (Some(receiver), None) => format_ident!("__{}__{}", receiver.ty.rust, efn.name.rust),
-        (None, Some(self_type)) => format_ident!("__{}__{}", self_type, efn.name.rust),
-        _ => unreachable!("receiver and self_type are mutually exclusive"),
+    let local_name = match &efn.kind {
+        FnKind::Free => format_ident!("__{}", efn.name.rust),
+        FnKind::Method(receiver) => format_ident!("__{}__{}", receiver.ty.rust, efn.name.rust),
+        FnKind::Assoc(self_type) => format_ident!("__{}__{}", self_type, efn.name.rust),
     };
-    let prevent_unwind_label = match (&efn.receiver, &efn.self_type) {
-        (None, None) => format!("::{}", efn.name.rust),
-        (Some(receiver), None) => format!("::{}::{}", receiver.ty.rust, efn.name.rust),
-        (None, Some(self_type)) => format!("::{}::{}", self_type, efn.name.rust),
-        _ => unreachable!("receiver and self_type are mutually exclusive"),
+    let prevent_unwind_label = match &efn.kind {
+        FnKind::Free => format!("::{}", efn.name.rust),
+        FnKind::Method(receiver) => format!("::{}::{}", receiver.ty.rust, efn.name.rust),
+        FnKind::Assoc(self_type) => format!("::{}::{}", self_type, efn.name.rust),
     };
     let invoke = Some(&efn.name.rust);
     let body_span = efn.semi_token.span;
@@ -1016,10 +1013,9 @@ fn expand_rust_function_shim_impl(
 ) -> TokenStream {
     let generics = outer_generics.unwrap_or(&sig.generics);
     let receiver_var = sig
-        .receiver
-        .as_ref()
+        .receiver()
         .map(|receiver| quote_spanned!(receiver.var.span=> __self));
-    let receiver = sig.receiver.as_ref().map(|receiver| {
+    let receiver = sig.receiver().map(|receiver| {
         let colon = receiver.colon_token;
         let receiver_type = receiver.ty();
         quote!(#receiver_var #colon #receiver_type)
@@ -1229,10 +1225,9 @@ fn expand_rust_function_shim_super(
     let generics = &sig.generics;
 
     let receiver_var = sig
-        .receiver
-        .as_ref()
+        .receiver()
         .map(|receiver| Ident::new("__self", receiver.var.span));
-    let receiver = sig.receiver.iter().map(|receiver| {
+    let receiver = sig.receiver().into_iter().map(|receiver| {
         let receiver_type = receiver.ty();
         quote!(#receiver_var: #receiver_type)
     });
@@ -1262,16 +1257,15 @@ fn expand_rust_function_shim_super(
     let vars = receiver_var.iter().chain(arg_vars);
 
     let span = invoke.span();
-    let call = match (&sig.receiver, &sig.self_type) {
-        (None, None) => quote_spanned!(span=> super::#invoke),
-        (Some(receiver), None) => {
+    let call = match &sig.kind {
+        FnKind::Free => quote_spanned!(span=> super::#invoke),
+        FnKind::Method(receiver) => {
             let receiver_type = &receiver.ty.rust;
             quote_spanned!(span=> #receiver_type::#invoke)
         }
-        (None, Some(self_type)) => {
+        FnKind::Assoc(self_type) => {
             quote_spanned!(span=> #self_type::#invoke)
         }
-        _ => unreachable!("receiver and self_type are mutually exclusive"),
     };
 
     let mut body = quote_spanned!(span=> #call(#(#vars,)*));

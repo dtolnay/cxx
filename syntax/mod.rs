@@ -24,6 +24,7 @@ pub(crate) mod qualified;
 pub(crate) mod report;
 pub(crate) mod resolve;
 pub(crate) mod set;
+mod signature;
 pub(crate) mod symbol;
 mod tokens;
 mod toposort;
@@ -203,13 +204,22 @@ pub(crate) struct Signature {
     pub unsafety: Option<Token![unsafe]>,
     pub fn_token: Token![fn],
     pub generics: Generics,
-    pub receiver: Option<Receiver>,
-    pub self_type: Option<Ident>,
+    pub kind: FnKind,
     pub args: Punctuated<Var, Token![,]>,
     pub ret: Option<Type>,
     pub throws: bool,
     pub paren_token: Paren,
     pub throws_tokens: Option<(kw::Result, Token![<], Token![>])>,
+}
+
+#[derive(PartialEq, Hash)]
+pub(crate) enum FnKind {
+    /// Rust method or C++ non-static member function.
+    Method(Receiver),
+    /// Rust associated function or C++ static member function.
+    Assoc(Ident),
+    /// Non-member function.
+    Free,
 }
 
 pub(crate) struct Var {

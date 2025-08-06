@@ -1,5 +1,5 @@
-error: self type and receiver are mutually exclusive
- --> tests/ui/self_type_and_receiver.rs:7:9
+error: function with Self type must not have a `self` argument
+ --> tests/ui/self_type_and_receiver.rs:6:18
   |
-7 |         fn method(self: &T);
-  |         ^^^^^^^^^^^^^^^^^^^^
+6 |         #[Self = "T"]
+  |                  ^^^
