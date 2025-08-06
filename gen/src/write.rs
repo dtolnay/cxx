@@ -312,15 +312,12 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
         }
         write_doc(out, "  ", &method.doc);
         write!(out, "  ");
-        if method.self_type.is_some() {
-            write!(out, "static ");
-        }
         let local_name = method.name.cxx.to_string();
         let sig = &method.sig;
-        let self_type = None;
+        let in_class = true;
         let indirect_call = false;
         let main = false;
-        write_rust_function_shim_decl(out, &local_name, sig, self_type, indirect_call, main);
+        write_rust_function_shim_decl(out, &local_name, sig, in_class, indirect_call, main);
         writeln!(out, ";");
         if !method.doc.is_empty() {
             out.next_section();
@@ -404,15 +401,12 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
         }
         write_doc(out, "  ", &method.doc);
         write!(out, "  ");
-        if method.self_type.is_some() {
-            write!(out, "static ");
-        }
         let local_name = method.name.cxx.to_string();
         let sig = &method.sig;
-        let self_type = None;
+        let in_class = true;
         let indirect_call = false;
         let main = false;
-        write_rust_function_shim_decl(out, &local_name, sig, self_type, indirect_call, main);
+        write_rust_function_shim_decl(out, &local_name, sig, in_class, indirect_call, main);
         writeln!(out, ";");
         if !method.doc.is_empty() {
             out.next_section();
@@ -932,7 +926,6 @@ fn write_function_pointer_trampoline(out: &mut OutFile, efn: &ExternFn, var: &Pa
         out,
         &c_trampoline,
         f,
-        efn.self_type.as_ref(),
         &doc,
         &r_trampoline,
         indirect_call,
@@ -1029,33 +1022,27 @@ fn write_rust_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         && efn.sig.args.is_empty()
         && efn.sig.ret.is_none()
         && !efn.sig.throws;
-    write_rust_function_shim_impl(
-        out,
-        &local_name,
-        efn,
-        efn.self_type.as_ref(),
-        doc,
-        &invoke,
-        indirect_call,
-        main,
-    );
+    write_rust_function_shim_impl(out, &local_name, efn, doc, &invoke, indirect_call, main);
 }
 
 fn write_rust_function_shim_decl(
     out: &mut OutFile,
     local_name: &str,
     sig: &Signature,
-    self_type: Option<&Ident>,
+    in_class: bool,
     indirect_call: bool,
     main: bool,
 ) {
     begin_function_definition(out);
+    if sig.self_type.is_some() && in_class {
+        write!(out, "static ");
+    }
     if main {
         write!(out, "int ");
     } else {
         write_return_type(out, &sig.ret);
     }
-    if let Some(self_type) = self_type {
+    if let (Some(self_type), false) = (&sig.self_type, in_class) {
         write!(out, "{}::", out.types.resolve(self_type).name.cxx);
     }
     write!(out, "{}(", local_name);
@@ -1087,13 +1074,12 @@ fn write_rust_function_shim_impl(
     out: &mut OutFile,
     local_name: &str,
     sig: &Signature,
-    self_type: Option<&Ident>,
     doc: &Doc,
     invoke: &Symbol,
     indirect_call: bool,
     main: bool,
 ) {
-    if out.header && (sig.receiver.is_some() || self_type.is_some()) {
+    if out.header && (sig.receiver.is_some() || sig.self_type.is_some()) {
         // We've already defined this inside the struct.
         return;
     }
@@ -1101,7 +1087,8 @@ fn write_rust_function_shim_impl(
         // Member functions already documented at their declaration.
         write_doc(out, "", doc);
     }
-    write_rust_function_shim_decl(out, local_name, sig, self_type, indirect_call, main);
+    let in_class = false;
+    write_rust_function_shim_decl(out, local_name, sig, in_class, indirect_call, main);
     if out.header {
         writeln!(out, ";");
         return;
