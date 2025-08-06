@@ -3,7 +3,7 @@ use quote::IdentFragment;
 use std::fmt::{self, Display};
 use std::slice::Iter;
 use syn::parse::{Error, Parse, ParseStream, Result};
-use syn::{Expr, Ident, Lit, Meta, Token};
+use syn::{Attribute, Expr, Ident, Lit, Meta, Token};
 
 mod kw {
     syn::custom_keyword!(namespace);
@@ -23,7 +23,20 @@ impl Namespace {
         self.segments.iter()
     }
 
-    pub(crate) fn parse_bridge_attr_namespace(input: ParseStream) -> Result<Self> {
+    /// Parses `namespace = ...` (if present) from `attr`.
+    /// Typically `attr` represents `#[cxx::bridge(...)]` attribute.
+    #[allow(dead_code)] // Only used from tests and cxx-build, but not from cxxbridge-macro
+    pub(crate) fn parse_attr(attr: &Attribute) -> Result<Namespace> {
+        if let Meta::Path(_) = attr.meta {
+            Ok(Namespace::ROOT)
+        } else {
+            attr.parse_args_with(Namespace::parse_stream)
+        }
+    }
+
+    /// Parses `namespace = ...` (if present) from `input`.
+    /// Typically `inputs` represents the "body" of a `#[cxx::bridge(...)]` attribute.
+    pub(crate) fn parse_stream(input: ParseStream) -> Result<Self> {
         if input.is_empty() {
             return Ok(Namespace::ROOT);
         }
@@ -111,5 +124,29 @@ impl<'a> FromIterator<&'a Ident> for Namespace {
     {
         let segments = idents.into_iter().cloned().collect();
         Namespace { segments }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::syntax::test_support::parse_apis;
+    use crate::syntax::Api;
+    use quote::quote;
+
+    #[test]
+    fn test_top_level_namespace() {
+        let apis = parse_apis(quote! {
+            #[cxx::bridge(namespace = "top_level_namespace")]
+            mod ffi {
+                unsafe extern "C++" {
+                    fn foo();
+                }
+            }
+        })
+        .unwrap();
+        let [Api::CxxFunction(f)] = &apis[..] else {
+            panic!("Got unexpected apis");
+        };
+        assert_eq!("top_level_namespace$foo", f.name.to_symbol().to_string());
     }
 }

@@ -78,3 +78,24 @@ pub mod ffi2 {
     impl UniquePtr<F> {}
     impl UniquePtr<G> {}
 }
+
+#[cxx::bridge(namespace = "tests")]
+pub mod ffi3 {
+    extern "Rust" {
+        type CrossModuleRustType;
+
+        #[allow(clippy::unnecessary_box_returns)]
+        fn r_boxed_cross_module_rust_type(
+            value: i32,
+        ) -> Box<CrossModuleRustType>;
+    }
+}
+
+pub struct CrossModuleRustType(pub i32);
+
+#[allow(clippy::unnecessary_box_returns)]
+fn r_boxed_cross_module_rust_type(
+    value: i32,
+) -> Box<CrossModuleRustType> {
+    Box::new(CrossModuleRustType(value))
+}

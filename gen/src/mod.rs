@@ -148,11 +148,11 @@ pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
     let ref mut apis = Vec::new();
     let ref mut errors = Errors::new();
     let ref mut cfg_errors = Set::new();
-    for bridge in syntax.modules {
+    for mut bridge in syntax.modules {
         let mut cfg = CfgExpr::Unconditional;
         attrs::parse(
             errors,
-            bridge.attrs,
+            std::mem::take(&mut bridge.attrs),
             attrs::Parser {
                 cfg: Some(&mut cfg),
                 ignore_unrecognized: true,
@@ -160,14 +160,7 @@ pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
             },
         );
         if cfg::eval(errors, cfg_errors, opt.cfg_evaluator.as_ref(), &cfg) {
-            let ref namespace = bridge.namespace;
-            let trusted = bridge.unsafety.is_some();
-            apis.extend(syntax::parse_items(
-                errors,
-                bridge.content,
-                trusted,
-                namespace,
-            ));
+            apis.extend(syntax::parse_items(errors, &mut bridge));
         }
     }
 

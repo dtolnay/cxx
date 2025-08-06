@@ -163,3 +163,46 @@ mod ffi {
 
 Bounds on a lifetime (like `<'a, 'b: 'a>`) are not currently supported. Nor are
 type parameters or where-clauses.
+
+## Reusing existing binding types
+
+Extern Rust types support a syntax for declaring that a C++ binding of the
+given Rust type already exists outside of the current bridge module. This
+avoids generating a separate binding which would clash with the first one
+(e.g. one possible error is: "conflicting implementations of trait `RustType`").
+
+The snippet below illustrates how to unify references to a Rust type
+across bridges:
+
+```rs
+// file1.rs
+#[cxx::bridge(namespace = "example")]
+pub mod ffi {
+    extern "Rust" {
+        type Demo;
+
+        fn create_demo() -> Box<Demo>;
+    }
+}
+
+pub struct Demo;
+
+pub fn create_demo() -> Box<Demo> { todo!() }
+```
+
+```rs
+// file2.rs
+#[cxx::bridge(namespace = "example")]
+pub mod ffi {
+    extern "C++" {
+        include!("file1.rs.h");
+    }
+    extern "Rust" {
+        type Demo = crate::file1::Demo;
+
+        fn take_ref_demo(demo: &Demo);
+    }
+}
+
+pub fn take_ref_demo(demo: &crate::file1::Demo) { todo!() }
+```

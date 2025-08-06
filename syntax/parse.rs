@@ -1,7 +1,7 @@
 use crate::syntax::attrs::OtherAttrs;
 use crate::syntax::cfg::CfgExpr;
 use crate::syntax::discriminant::DiscriminantSet;
-use crate::syntax::file::{Item, ItemForeignMod};
+use crate::syntax::file::{Item, ItemForeignMod, Module};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
@@ -27,12 +27,11 @@ pub(crate) mod kw {
     syn::custom_keyword!(Result);
 }
 
-pub(crate) fn parse_items(
-    cx: &mut Errors,
-    items: Vec<Item>,
-    trusted: bool,
-    namespace: &Namespace,
-) -> Vec<Api> {
+pub(crate) fn parse_items(cx: &mut Errors, bridge: &mut Module) -> Vec<Api> {
+    let items = mem::take(&mut bridge.content);
+    let ref namespace = bridge.namespace;
+    let trusted = bridge.unsafety.is_some();
+
     let mut apis = Vec::new();
     for item in items {
         match item {
@@ -871,17 +870,12 @@ fn parse_type_alias(
         },
     ));
 
-    if lang == Lang::Rust {
-        let span = quote!(#type_token #semi_token);
-        let msg = "type alias in extern \"Rust\" block is not supported";
-        return Err(Error::new_spanned(span, msg));
-    }
-
     let visibility = visibility_pub(&visibility, type_token.span);
     let name = pair(namespace, &ident, cxx_name, rust_name);
 
     Ok(Api::TypeAlias(TypeAlias {
         cfg,
+        lang,
         doc,
         derives,
         attrs,
