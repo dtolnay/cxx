@@ -291,11 +291,8 @@ impl ToTokens for Signature {
 
 impl ToTokens for EnumRepr {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        match self {
-            EnumRepr::Native { atom, repr_type: _ } => atom.to_tokens(tokens),
-            #[cfg(feature = "experimental-enum-variants-from-header")]
-            EnumRepr::Foreign { rust_type } => rust_type.to_tokens(tokens),
-        }
+        let EnumRepr { atom, repr_type: _ } = self;
+        atom.to_tokens(tokens);
     }
 }
 

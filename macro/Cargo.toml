@@ -15,10 +15,6 @@ rust-version = "1.73"
 [lib]
 proc-macro = true
 
-[features]
-# incomplete features that are not covered by a compatibility guarantee:
-experimental-enum-variants-from-header = ["clang-ast", "flate2", "memmap", "serde", "serde_derive", "serde_json"]
-
 [dependencies]
 indexmap = "2.9.0"
 proc-macro2 = "1.0.74"

@@ -39,7 +39,7 @@ use self::symbol::Symbol;
 use proc_macro2::{Ident, Span};
 use syn::punctuated::Punctuated;
 use syn::token::{Brace, Bracket, Paren};
-use syn::{Attribute, Expr, Generics, Lifetime, LitInt, Token, Type as RustType};
+use syn::{Expr, Generics, Lifetime, LitInt, Token, Type as RustType};
 
 pub(crate) use self::atom::Atom;
 pub(crate) use self::derive::{Derive, Trait};
@@ -132,22 +132,13 @@ pub(crate) struct Enum {
     pub generics: Lifetimes,
     pub brace_token: Brace,
     pub variants: Vec<Variant>,
-    pub variants_from_header: bool,
-    #[allow(dead_code)]
-    pub variants_from_header_attr: Option<Attribute>,
     pub repr: EnumRepr,
     pub explicit_repr: bool,
 }
 
-pub(crate) enum EnumRepr {
-    Native {
-        atom: Atom,
-        repr_type: Type,
-    },
-    #[cfg(feature = "experimental-enum-variants-from-header")]
-    Foreign {
-        rust_type: syn::Path,
-    },
+pub(crate) struct EnumRepr {
+    pub atom: Atom,
+    pub repr_type: Type,
 }
 
 pub(crate) struct ExternFn {
