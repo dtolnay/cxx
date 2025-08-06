@@ -46,7 +46,7 @@ impl Test {
     /// the `cxx_bridge`.
     #[must_use]
     pub fn new(cxx_bridge: TokenStream) -> Self {
-        let temp_dir = TempDir::new("cxx--cpp_ui_tests").unwrap();
+        let temp_dir = TempDir::new(env!("CARGO_CRATE_NAME")).unwrap();
         let generated_h = temp_dir.path().join("cxx_bridge.generated.h");
         let generated_cc = temp_dir.path().join("cxx_bridge.generated.cc");
 
