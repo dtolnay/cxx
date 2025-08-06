@@ -784,7 +784,6 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         (None, Some(self_type)) => {
             let elided_generics;
             let resolve = types.resolve(self_type);
-            let self_type_ident = &resolve.name.rust;
             let self_type_generics = if resolve.generics.lt_token.is_some() {
                 &resolve.generics
             } else {
@@ -805,7 +804,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                 &elided_generics
             };
             quote_spanned! {ident.span()=>
-                impl #generics #self_type_ident #self_type_generics {
+                impl #generics #self_type #self_type_generics {
                     #doc
                     #attrs
                     #visibility #unsafety #fn_token #ident #arg_list #ret #fn_body
@@ -981,23 +980,13 @@ fn expand_rust_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let local_name = match (&efn.receiver, &efn.self_type) {
         (None, None) => format_ident!("__{}", efn.name.rust),
         (Some(receiver), None) => format_ident!("__{}__{}", receiver.ty.rust, efn.name.rust),
-        (None, Some(self_type)) => format_ident!(
-            "__{}__{}",
-            types.resolve(self_type).name.rust,
-            efn.name.rust
-        ),
+        (None, Some(self_type)) => format_ident!("__{}__{}", self_type, efn.name.rust),
         _ => unreachable!("receiver and self_type are mutually exclusive"),
     };
     let prevent_unwind_label = match (&efn.receiver, &efn.self_type) {
         (None, None) => format!("::{}", efn.name.rust),
         (Some(receiver), None) => format!("::{}::{}", receiver.ty.rust, efn.name.rust),
-        (None, Some(self_type)) => {
-            format!(
-                "::{}::{}",
-                types.resolve(self_type).name.rust,
-                efn.name.rust
-            )
-        }
+        (None, Some(self_type)) => format!("::{}::{}", self_type, efn.name.rust),
         _ => unreachable!("receiver and self_type are mutually exclusive"),
     };
     let invoke = Some(&efn.name.rust);
@@ -1111,8 +1100,8 @@ fn expand_rust_function_shim_impl(
     });
     let vars: Vec<_> = receiver_var.into_iter().chain(arg_vars).collect();
 
-    let wrap_super = invoke
-        .map(|invoke| expand_rust_function_shim_super(sig, self_type, types, &local_name, invoke));
+    let wrap_super =
+        invoke.map(|invoke| expand_rust_function_shim_super(sig, self_type, &local_name, invoke));
 
     let mut requires_closure;
     let mut call = match invoke {
@@ -1238,7 +1227,6 @@ fn expand_rust_function_shim_impl(
 fn expand_rust_function_shim_super(
     sig: &Signature,
     self_type: &Option<Ident>,
-    types: &Types,
     local_name: &Ident,
     invoke: &Ident,
 ) -> TokenStream {
@@ -1286,7 +1274,6 @@ fn expand_rust_function_shim_super(
             quote_spanned!(span=> #receiver_type::#invoke)
         }
         (None, Some(self_type)) => {
-            let self_type = &types.resolve(self_type).name.rust;
             quote_spanned!(span=> #self_type::#invoke)
         }
         _ => unreachable!("receiver and self_type are mutually exclusive"),

@@ -104,7 +104,7 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
             }
             if let Some(self_type) = &efn.self_type {
                 methods_for_type
-                    .entry(&out.types.resolve(self_type).name.rust)
+                    .entry(self_type)
                     .or_insert_with(Vec::new)
                     .push(efn);
             }
