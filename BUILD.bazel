@@ -1,5 +1,5 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
-load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_proc_macro")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_proc_macro", "rust_test")
 
 rust_library(
     name = "cxx",
@@ -13,6 +13,11 @@ rust_library(
         ":core",
         "@crates.io//:foldhash",
     ],
+)
+
+rust_test(
+    name = "cxx_tests",
+    crate = ":cxx",
 )
 
 alias(

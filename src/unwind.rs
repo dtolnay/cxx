@@ -4,6 +4,8 @@
 use core::mem;
 use std::panic;
 
+use crate::{result::Result, CanceledException, KjError, KjExceptionType};
+
 pub fn prevent_unwind<F, R>(label: &'static str, foreign_call: F) -> R
 where
     F: FnOnce() -> R,
@@ -41,37 +43,44 @@ impl Drop for Guard {
 }
 
 /// Run the void `foreign_call`, intercepting panics and converting them to errors.
-pub fn catch_unwind<F>(label: &'static str, foreign_call: F) -> ::cxx::result::Result
+pub fn catch_unwind<F>(label: &'static str, foreign_call: F) -> Result
 where
     F: FnOnce(),
 {
     match panic::catch_unwind(panic::AssertUnwindSafe(foreign_call)) {
-        Ok(()) => ::cxx::private::Result::ok(),
-        Err(err) => panic_result(label, &err),
+        Ok(()) => Result::ok(),
+        Err(err) => panic_result(label, err),
     }
 }
 
 /// Run the error-returning `foreign_call`, intercepting panics and converting them to errors.
-pub fn try_unwind<F>(label: &'static str, foreign_call: F) -> ::cxx::private::Result
+pub fn try_unwind<F>(label: &'static str, foreign_call: F) -> Result
 where
-    F: FnOnce() -> ::cxx::private::Result,
+    F: FnOnce() -> Result,
 {
     match panic::catch_unwind(panic::AssertUnwindSafe(foreign_call)) {
         Ok(r) => r,
-        Err(err) => panic_result(label, &err),
+        Err(err) => panic_result(label, err),
     }
 }
 
-fn panic_result(
-    label: &'static str,
-    err: &alloc::boxed::Box<dyn core::any::Any + Send>,
-) -> ::cxx::private::Result {
+fn panic_result(label: &'static str, err: alloc::boxed::Box<dyn core::any::Any + Send>) -> Result {
     if let Some(err) = err.downcast_ref::<alloc::string::String>() {
-        return ::cxx::private::Result::error(
-            &std::format!("panic in {label}: {err}"),
+        return Result::error(
+            KjError::new(
+                KjExceptionType::Failed,
+                std::format!("panic in {label}: {err}"),
+            ),
             file!(),
             line!(),
         );
+    } else if err.downcast::<CanceledException>().is_ok() {
+        return Result::canceled();
     }
-    ::cxx::private::Result::error(&std::format!("panic in {label}"), file!(), line!())
+
+    Result::error(
+        KjError::new(KjExceptionType::Failed, std::format!("panic in {label}")),
+        file!(),
+        line!(),
+    )
 }

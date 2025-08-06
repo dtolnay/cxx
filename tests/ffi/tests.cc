@@ -574,6 +574,40 @@ size_t c_fail_kj_exception_return_primitive() {
   kj::throwFatalException(KJ_EXCEPTION(FAILED, "logic error"));
 }
 
+size_t c_fail_kj_exception_disconnected_return_primitive() {
+  kj::throwFatalException(KJ_EXCEPTION(DISCONNECTED, "connection lost"));
+}
+
+// User-defined literal to create kj::ArrayPtr<const kj::byte> from string literal
+kj::ArrayPtr<const kj::byte> operator""_kjb(const char *str, size_t len) {
+  return kj::ArrayPtr<const kj::byte>(reinterpret_cast<const kj::byte *>(str),
+                                      len);
+}
+
+size_t c_fail_kj_exception_with_details_return_primitive() {
+  auto ex = KJ_EXCEPTION(FAILED, "test exception with details");
+  // Add some test details - these will be type_id + data pairs
+  ex.setDetail(42, kj::heapArray("test detail 1"_kjb));
+  ex.setDetail(999, kj::heapArray("another detail"_kjb));
+  kj::throwFatalException(kj::mv(ex));
+}
+
+size_t c_cancel_return_primitive() { throw kj::CanceledException{}; }
+
+// Call Rust function that panics with CanceledException
+// This will be caught and re-thrown as kj::CanceledException
+size_t c_cancel_via_rust_return_primitive() {
+  r_cancel_panic_test();
+  return 2020; // Should not reach here
+}
+
+// Test C++->Rust->C++ cancellation roundtrip
+// Call Rust function that calls C++ function that throws CanceledException
+size_t c_cancel_roundtrip_return_primitive() {
+  r_call_c_cancel_return_primitive();
+  return 2020; // Should not reach here
+}
+
 rust::Box<R> c_try_return_box() { return c_return_box(); }
 
 const rust::String &c_try_return_ref(const rust::String &s) { return s; }
@@ -826,6 +860,49 @@ extern "C" const char *cxx_run_test() noexcept {
     KJ_ASSERT(e.getFile() == "tests/ffi/lib.rs"_kj);
   }
 
+  KJ_ASSERT(r_result_kj_exception_return_primitive() == 2020);
+  try {
+    r_result_kj_exception_fail_return_primitive();
+    KJ_ASSERT(false);
+  } catch (const kj::Exception &e) {
+    KJ_ASSERT(e.getDescription() == "test kj exception"_kj);
+    KJ_ASSERT(e.getFile() == "tests/ffi/lib.rs"_kj);
+  }
+
+  // Test Rust->C++ DISCONNECTED exception passing
+  try {
+    r_result_kj_exception_disconnected_return_primitive();
+    KJ_ASSERT(false);
+  } catch (const kj::Exception &e) {
+    KJ_ASSERT(e.getType() == kj::Exception::Type::DISCONNECTED);
+    KJ_ASSERT(e.getDescription() == "connection lost from rust"_kj);
+    KJ_ASSERT(e.getFile() == "tests/ffi/lib.rs"_kj);
+  }
+
+  // Test Rust->C++ exception with details
+  try {
+    r_result_kj_exception_with_details_return_primitive();
+    KJ_ASSERT(false);
+  } catch (const kj::Exception &e) {
+    KJ_ASSERT(e.getType() == kj::Exception::Type::FAILED);
+    KJ_ASSERT(e.getDescription() == "rust exception with details"_kj);
+    KJ_ASSERT(e.getFile() == "tests/ffi/lib.rs"_kj);
+
+    // Check details
+    auto details = e.getDetails();
+    KJ_ASSERT(details.size() == 2, "expected 2 details");
+
+    // Check first detail
+    KJ_ASSERT(details[0].id == 123);
+    KJ_ASSERT(details[0].value.size() == 13);
+    KJ_ASSERT(memcmp(details[0].value.begin(), "rust detail 1", 13) == 0);
+
+    // Check second detail
+    KJ_ASSERT(details[1].id == 456);
+    KJ_ASSERT(details[1].value.size() == 13);
+    KJ_ASSERT(memcmp(details[1].value.begin(), "rust detail 2", 13) == 0);
+  }
+
   auto r = r_return_box();
   ASSERT(r->get() == 2020);
   ASSERT(r->set(2021) == 2021);
@@ -996,6 +1073,27 @@ extern "C" const char *cxx_run_test() noexcept {
   } catch (const kj::Exception &e) {
     ASSERT(std::strcmp(e.getDescription().cStr(),
                        "panic in cxx_test_suite::ffi::r_panic: foobar") == 0);
+  }
+
+  // Test C++->Rust CanceledException roundtrip
+  try {
+    c_cancel_via_rust_return_primitive();
+    ASSERT(false); // Should not reach here
+  } catch (const kj::CanceledException &) {
+    // Expected: CanceledException should propagate through Rust panic back to C++
+  } catch (...) {
+    KJ_FAIL_ASSERT("Unexpected exception", kj::getCaughtExceptionAsKj());
+  }
+
+  // Test C++->Rust->C++ CanceledException roundtrip
+  try {
+    r_call_c_cancel_return_primitive();
+    ASSERT(false); // Should not reach here
+  } catch (const kj::CanceledException &) {
+    // Expected: CanceledException should propagate from C++ through Rust back to C++
+  } catch (...) {
+    KJ_FAIL_ASSERT("Unexpected exception in roundtrip test",
+                   kj::getCaughtExceptionAsKj());
   }
 
   cxx_test_suite_set_correct();

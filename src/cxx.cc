@@ -1,5 +1,6 @@
 #include "../include/cxx.h"
 
+#include <cstddef>
 #include <cstdio>
 #include <cstring>
 #include <iostream>
@@ -463,16 +464,48 @@ static_assert(!std::is_same<Vec<std::uint8_t>::const_iterator,
                             Vec<std::uint8_t>::iterator>::value,
               "Vec<T>::const_iterator != Vec<T>::iterator");
 
+static_assert(sizeof(repr::Result) == sizeof(std::size_t));
+static_assert(alignof(repr::Result) == alignof(std::size_t));
+// assert that 0x1 is not a valid kj::Exception* (repr::Result::canceled)
+static_assert(alignof(kj::Exception) >= alignof(std::size_t));
+
 // kj::Exception bridge
 extern "C" {
 
-// create new kj::Exception
-kj::Exception *cxxbridge1$kjException$new(const char *ptr, std::size_t len,
+// Detail structure matching Rust's KjExceptionDetail
+struct ExceptionDetail {
+  uint64_t type_id;
+  size_t data_len;
+  const uint8_t *data_ptr;
+};
+
+static_assert(
+    sizeof(ExceptionDetail) ==
+        24, // NOLINT(cppcoreguidelines-avoid-magic-numbers)
+    "ExceptionDetail size must be 24 bytes to match Rust KjExceptionDetail");
+
+// create new kj::Exception with optional details
+kj::Exception *cxxbridge1$kjException$new(int32_t exceptionType,
+                                          const char *ptr, std::size_t len,
                                           const char *file, std::size_t fileLen,
-                                          int32_t line) noexcept {
-  return new kj::Exception(kj::Exception::Type::FAILED,
-                           kj::str(kj::ArrayPtr(file, fileLen)), line,
-                           kj::str(kj::ArrayPtr(ptr, len)));
+                                          int32_t line,
+                                          const ExceptionDetail *details,
+                                          std::size_t detailsCount) noexcept {
+  auto type = static_cast<kj::Exception::Type>(exceptionType);
+  auto exception = new kj::Exception(type, kj::str(kj::ArrayPtr(file, fileLen)),
+                                     line, kj::str(kj::ArrayPtr(ptr, len)));
+
+  // Add details to the exception if provided
+  if (details != nullptr && detailsCount > 0) {
+    for (size_t i = 0; i < detailsCount; ++i) {
+      const auto &detail = details[i];
+      auto data = kj::heapArray<kj::byte>(detail.data_len);
+      data.asPtr().copyFrom(kj::arrayPtr(detail.data_ptr, detail.data_len));
+      exception->setDetail(detail.type_id, kj::mv(data));
+    }
+  }
+
+  return exception;
 }
 
 // get description of kj::Exception
@@ -480,8 +513,44 @@ const char *cxxbridge1$kjException$getDescription(kj::Exception *err) noexcept {
   return err->getDescription().cStr();
 }
 
+// get type of kj::Exception
+int32_t cxxbridge1$kjException$getType(kj::Exception *err) noexcept {
+  return static_cast<int32_t>(err->getType());
+}
+
+// get details count of kj::Exception
+size_t cxxbridge1$kjException$getDetailsCount(kj::Exception *err) noexcept {
+  return err->getDetails().size();
+}
+
+// get details of kj::Exception
+void cxxbridge1$kjException$getDetails(kj::Exception *err,
+                                       ExceptionDetail *output,
+                                       size_t maxCount) noexcept {
+  auto details = err->getDetails();
+  auto count = std::min(maxCount, details.size());
+
+  for (size_t i = 0; i < count; ++i) {
+    const auto &detail = details[i];
+    output[i].type_id = detail.id;
+    output[i].data_len = detail.value.size();
+    output[i].data_ptr = detail.value.begin();
+  }
+}
+
 // delete kj::Exception allocated by new.
 void cxxbridge1$kjException$dropInPlace(kj::Exception *err) noexcept {
+  delete err;
+}
+
+// create new kj::CanceledException
+kj::CanceledException *cxxbridge1$kjCanceledException$new() noexcept {
+  return new kj::CanceledException{};
+}
+
+// delete kj::CanceledException allocated by new.
+void cxxbridge1$kjCanceledException$dropInPlace(
+    kj::CanceledException *err) noexcept {
   delete err;
 }
 

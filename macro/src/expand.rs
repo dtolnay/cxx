@@ -546,7 +546,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
             Some(ret) => quote!(#ret),
             None => quote!(()),
         };
-        quote!(-> ::cxx::core::result::Result<#ok, ::cxx::Exception>)
+        quote!(-> ::cxx::core::result::Result<#ok, ::cxx::KjException>)
     } else {
         expand_return_type(&efn.ret)
     };
@@ -656,7 +656,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         });
         setup.extend(if efn.throws {
             quote_spanned! {span=>
-                #local_name(#(#vars,)* __return.as_mut_ptr()).exception()?;
+                #local_name(#(#vars,)* __return.as_mut_ptr()).into_result()?;
             }
         } else {
             quote_spanned! {span=>
@@ -666,7 +666,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         quote_spanned!(span=> __return.assume_init())
     } else if efn.throws {
         quote_spanned! {span=>
-            #local_name(#(#vars),*).exception()
+            #local_name(#(#vars),*).into_result()
         }
     } else {
         quote_spanned! {span=>
@@ -1261,21 +1261,12 @@ fn expand_rust_function_shim_super(
     let args = sig.args.iter().map(|arg| quote!(#arg));
     let all_args = receiver.chain(args);
 
-    let ret = if let Some((result, _langle, rangle)) = sig.throws_tokens {
+    let ret = if sig.throws_tokens.is_some() {
         let ok = match &sig.ret {
             Some(ret) => quote!(#ret),
             None => quote!(()),
         };
-        // Set spans that result in the `Result<...>` written by the user being
-        // highlighted as the cause if their error type has no Display impl.
-        let result_begin = quote_spanned!(result.span=> ::cxx::core::result::Result<#ok, impl);
-        let result_end = if rustversion::cfg!(since(1.82)) {
-            // https://blog.rust-lang.org/2024/10/17/Rust-1.82.0.html#precise-capturing-use-syntax
-            quote_spanned!(rangle.span=> ::cxx::core::fmt::Display + use<>>)
-        } else {
-            quote_spanned!(rangle.span=> ::cxx::core::fmt::Display>)
-        };
-        quote!(-> #result_begin #result_end)
+        quote!(-> ::cxx::core::result::Result<#ok, impl ::cxx::IntoKjException + use<>>)
     } else if let Some(Type::Future(fut)) = &sig.ret {
         let output = &fut.output;
         let lifetimes: Vec<_> = sig.generics.lifetimes().map(|lt| quote!(#lt)).collect();

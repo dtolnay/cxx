@@ -438,7 +438,8 @@ pub mod vector;
 mod weak_ptr;
 
 pub use crate::cxx_vector::CxxVector;
-pub use crate::exception::Exception;
+pub use crate::exception::repr::KjExceptionType;
+pub use crate::exception::{CanceledException, IntoKjException, KjError, KjException};
 pub use crate::extern_type::{kind, ExternType};
 pub use crate::shared_ptr::SharedPtr;
 pub use crate::string::CxxString;
@@ -468,8 +469,8 @@ pub mod private {
     pub use crate::function::FatFunction;
     pub use crate::hash::hash;
     pub use crate::opaque::Opaque;
-
-    pub use crate::result::{r#try, Result};
+    pub use crate::result::r#try;
+    pub use crate::result::repr::Result;
     pub use crate::rust_slice::RustSlice;
     pub use crate::rust_str::RustStr;
 

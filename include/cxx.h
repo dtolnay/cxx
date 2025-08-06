@@ -48,36 +48,61 @@ namespace repr {
 
 // corresponds to `result::Result` in Rust.
 struct Result final {
-  // nullptr or fully owned pointer to kj::Exception allocated with new.
-  kj::Exception *exc;
+  // Tagged pointer: nullptr=None, 0x1=Canceled, other=KjException*
+  kj::Exception *exception;
 
+  // always called at the end of Result lifecycle by generated code.
   inline void check() {
-    if (exc == nullptr)
+    auto ptr = reinterpret_cast<uintptr_t>(exception);
+    if (ptr == 0) {
+      // None
       return;
-
-    KJ_DEFER({
-      delete exc;
-      exc = nullptr;
-    });
-    // throw copies the object to a temporary location,
-    // do not copy to stack to be just copied elsewhere: throw "from the heap".
-    throw *exc;
+    } else if (ptr == 1) {
+      // Canceled
+      throw kj::CanceledException();
+    } else {
+      // KjException
+      auto e = exception;
+      KJ_DEFER({
+        delete e;
+        exception = nullptr;
+      });
+      // throw copies the object to a temporary location,
+      // do not copy to stack to be just copied elsewhere: throw "from the heap".
+      throw *e;
+    }
   }
 
-  static Result ok() { return {nullptr}; }
+  static Result ok() { return {.exception = nullptr}; }
 
   static Result error(kj::Exception &&e) {
     // move data to the heap, since e is most likely a catch-scoped object.
-    return {new kj::Exception(std::move(e))};
+    return {.exception = new kj::Exception(std::move(e))};
+  }
+
+  static Result canceled() {
+    return {.exception = reinterpret_cast<kj::Exception *>(0x1)};
   }
 
   template <typename Func>
-  inline static Result run(Func &&func) {
-    // TODO(soon): runCatchingException re-throws CancelledException, which wouldn't work across ffi.
-    KJ_IF_SOME(e, kj::runCatchingExceptions(std::forward<Func>(func))) {
-      return error(std::move(e));
+  inline static Result run(Func func) {
+    // This is a version of kj::runCatchingExceptions that doesn't rethrow CanceledException
+    // but return it properly.
+    try {
+      func();
+      return ok();
+    } catch (kj::Exception &e) {
+      e.truncateCommonTrace();
+      return error(kj::mv(e));
+    } catch (kj::CanceledException &) {
+      return canceled();
+    } catch (std::exception &e) {
+      return error(kj::Exception(kj::Exception::Type::FAILED, "(unknown)", -1,
+                                 kj::str("std::exception: ", e.what())));
+    } catch (...) {
+      return error(kj::Exception(kj::Exception::Type::FAILED, "(unknown)", -1,
+                                 kj::str("unknown non-KJ exception")));
     }
-    return ok();
   }
 };
 

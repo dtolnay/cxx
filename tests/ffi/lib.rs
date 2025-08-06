@@ -17,8 +17,11 @@
 pub mod cast;
 pub mod module;
 
-use cxx::{type_id, CxxString, CxxVector, ExternType, SharedPtr, UniquePtr};
-use std::fmt::{self, Display};
+use core::fmt;
+use cxx::{
+    type_id, CxxString, CxxVector, ExternType, KjError, KjExceptionType, SharedPtr, UniquePtr,
+};
+use std::fmt::Display;
 use std::mem::MaybeUninit;
 use std::os::raw::c_char;
 
@@ -183,6 +186,11 @@ pub mod ffi {
         fn c_try_return_primitive() -> Result<usize>;
         fn c_fail_return_primitive() -> Result<usize>;
         fn c_fail_kj_exception_return_primitive() -> Result<usize>;
+        fn c_fail_kj_exception_disconnected_return_primitive() -> Result<usize>;
+        fn c_fail_kj_exception_with_details_return_primitive() -> Result<usize>;
+        fn c_cancel_return_primitive() -> Result<usize>;
+        fn c_cancel_via_rust_return_primitive() -> Result<usize>;
+        fn c_cancel_roundtrip_return_primitive() -> Result<usize>;
 
         fn c_try_return_box() -> Result<Box<R>>;
         unsafe fn c_try_return_ref<'a>(s: &'a String) -> Result<&'a String>;
@@ -308,6 +316,16 @@ pub mod ffi {
         fn r_try_return_primitive() -> Result<usize>;
         fn r_try_return_box() -> Result<Box<R>>;
         fn r_fail_return_primitive() -> Result<usize>;
+
+        fn r_result_kj_exception_return_primitive() -> Result<usize>;
+        fn r_result_kj_exception_fail_return_primitive() -> Result<usize>;
+        fn r_result_kj_exception_disconnected_return_primitive() -> Result<usize>;
+        fn r_result_kj_exception_with_details_return_primitive() -> Result<usize>;
+        fn r_cancel_panic_test();
+        fn r_call_c_cancel_return_primitive();
+        fn r_cancel_via_cpp_return_primitive() -> Result<usize>;
+        fn r_cancel_roundtrip_return_primitive() -> Result<usize>;
+
         unsafe fn r_try_return_sliceu8<'a>(s: &'a [u8]) -> Result<&'a [u8]>;
         unsafe fn r_try_return_mutsliceu8<'a>(s: &'a mut [u8]) -> Result<&'a mut [u8]>;
 
@@ -649,6 +667,68 @@ fn r_try_return_box() -> Result<Box<R>, Error> {
 
 fn r_fail_return_primitive() -> Result<usize, Error> {
     Err(Error)
+}
+
+fn r_result_kj_exception_return_primitive() -> Result<usize, KjError> {
+    Ok(2020)
+}
+
+fn r_result_kj_exception_fail_return_primitive() -> Result<usize, KjError> {
+    Err(KjError::new(
+        KjExceptionType::Disconnected,
+        "test kj exception".to_owned(),
+    ))
+}
+
+fn r_result_kj_exception_disconnected_return_primitive() -> Result<usize, KjError> {
+    Err(KjError::new(
+        KjExceptionType::Disconnected,
+        "connection lost from rust".to_owned(),
+    )
+    .with_location("tests/ffi/lib.rs", 675))
+}
+
+fn r_result_kj_exception_with_details_return_primitive() -> Result<usize, KjError> {
+    // Create test details
+    let details = vec![
+        (123u64, b"rust detail 1".to_vec()),
+        (456u64, b"rust detail 2".to_vec()),
+    ];
+
+    Err(KjError::new(
+        KjExceptionType::Failed,
+        "rust exception with details".to_owned(),
+    )
+    .with_location("tests/ffi/lib.rs", 685)
+    .with_details(details))
+}
+
+// Panic with CanceledException to simulate cancellation
+fn r_cancel_panic_test() {
+    cxx::CanceledException::panic()
+}
+
+// Test calling C++ function that throws CanceledException
+// This should result in a panic that propagates back
+fn r_call_c_cancel_return_primitive() {
+    let _result = ffi::c_cancel_return_primitive();
+    unreachable!();
+}
+
+fn r_cancel_via_cpp_return_primitive() -> Result<usize, Error> {
+    // Call C++ function that throws CanceledException
+    match std::panic::catch_unwind(ffi::c_cancel_return_primitive) {
+        Ok(result) => result.map_err(|_| Error),
+        Err(_) => Err(Error), // Panic caught, likely CanceledException
+    }
+}
+
+fn r_cancel_roundtrip_return_primitive() -> Result<usize, Error> {
+    // Test Rust->C++->Rust cancellation roundtrip
+    match std::panic::catch_unwind(ffi::c_cancel_roundtrip_return_primitive) {
+        Ok(result) => result.map_err(|_| Error),
+        Err(_) => Err(Error), // Panic caught, likely CanceledException
+    }
 }
 
 fn r_try_return_sliceu8(slice: &[u8]) -> Result<&[u8], Error> {

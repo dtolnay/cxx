@@ -12,7 +12,7 @@ use std::pin::Pin;
 use std::task::Context;
 use std::task::Poll;
 
-type CxxResult<T> = std::result::Result<T, cxx::Exception>;
+type CxxResult<T> = std::result::Result<T, cxx::KjException>;
 
 // The inner pointer is never read on Rust's side, so Rust thinks it's dead code.
 #[allow(dead_code)]
@@ -138,7 +138,7 @@ impl<T> KjPromise for CallbacksFuture<T> {
         // unwrap will take over node ownership
         let node = ManuallyDrop::new(node);
 
-        unsafe { (callbacks.unwrap)(node.0, ret.as_mut_ptr().cast::<c_void>()).exception() }?;
+        unsafe { (callbacks.unwrap)(node.0, ret.as_mut_ptr().cast::<c_void>()).into_result() }?;
         Ok(unsafe { ret.assume_init() })
     }
 }

@@ -1,64 +1,93 @@
-#![allow(missing_docs)]
+use crate::exception::IntoKjException;
 
-use crate::exception::repr;
-use crate::exception::Exception;
-use alloc::string::ToString;
-use core::fmt::Display;
-use core::ptr::{self, NonNull};
-use core::result::Result as StdResult;
+pub use repr::Result;
 
-#[repr(C)]
-pub struct Result {
-    err: *mut repr::KjException,
-}
+pub(crate) mod repr {
+    use core::ptr::NonNull;
 
-impl Result {
-    pub(crate) fn ok() -> Self {
-        Result {
-            err: ptr::null_mut(),
+    use crate::{exception::repr::KjException, CanceledException, IntoKjException, KjError};
+
+    #[repr(C)]
+    /// Optional C++ exception. Represents results of calls to C++/rust functions across ffi
+    /// boundaries. Uses pointer tagging: nullptr=None, 0x1=Canceled, other=KjException*
+    pub struct Result {
+        pub(crate) exception: *mut KjException,
+    }
+    const_assert_eq!(core::mem::size_of::<Result>(), 8);
+    const_assert_eq!(core::mem::align_of::<Result>(), 8);
+
+    impl Result {
+        pub(crate) fn ok() -> Result {
+            Self {
+                exception: core::ptr::null_mut(),
+            }
+        }
+
+        pub(crate) unsafe fn exception(exception: *mut KjException) -> Result {
+            Self { exception }
+        }
+
+        pub(crate) fn error(error: KjError, file: &str, line: u32) -> Result {
+            error.into_kj_exception(file, line).into()
+        }
+
+        pub(crate) fn canceled() -> Result {
+            Self {
+                exception: 0x1 as *mut KjException,
+            }
+        }
+
+        /// Convert into a `Result`.
+        ///
+        /// # Panics
+        ///
+        /// Panics if the result is a `CanceledException`.
+        pub fn into_result(self) -> core::result::Result<(), crate::KjException> {
+            let ptr = self.exception as usize;
+            if ptr == 0 {
+                // None
+                Ok(())
+            } else if ptr == 1 {
+                // Canceled
+                CanceledException::panic()
+            } else {
+                // KjException
+                Err(crate::KjException {
+                    err: unsafe { NonNull::new_unchecked(self.exception.cast()) },
+                })
+            }
         }
     }
 
-    pub(crate) fn error(msg: &str, file: &str, line: u32) -> Self {
-        let err = unsafe {
-            repr::new(
-                msg.as_ptr(),
-                msg.len(),
-                file.as_ptr(),
-                file.len(),
-                line.try_into().unwrap_or_default(),
-            )
-        };
-        Self { err }
+    impl From<CanceledException> for Result {
+        fn from(_val: CanceledException) -> Self {
+            Result::canceled()
+        }
+    }
+
+    impl From<crate::KjException> for Result {
+        fn from(val: crate::KjException) -> Self {
+            let val = core::mem::ManuallyDrop::new(val);
+            unsafe { Result::exception(val.err.as_ptr()) }
+        }
     }
 }
 
-pub unsafe fn r#try<T, E>(ret: *mut T, result: StdResult<T, E>, file: &str, line: u32) -> Result
+/// Convert a Rust result into a `repr::Result` writing the value into ret if it is Ok.
+pub unsafe fn r#try<T, E>(
+    ret: *mut T,
+    result: core::result::Result<T, E>,
+    file: &str,
+    line: u32,
+) -> repr::Result
 where
-    E: Display,
+    E: IntoKjException,
 {
     match result {
         Ok(ok) => {
-            unsafe { ptr::write(ret, ok) }
-            Result::ok()
+            unsafe { core::ptr::write(ret, ok) }
+            repr::Result::ok()
         }
-        Err(err) => Result::error(&err.to_string(), file, line),
-    }
-}
-
-impl Result {
-    pub unsafe fn exception(self) -> StdResult<(), Exception> {
-        let err = self.err;
-        core::mem::forget(self);
-        match NonNull::new(err) {
-            Some(err) => Err(Exception { err }),
-            None => Ok(()),
-        }
-    }
-}
-
-impl Drop for Result {
-    fn drop(&mut self) {
-        unsafe { repr::drop_in_place(self.err) }
+        Err(err) => err.into_kj_exception(file, line).into(),
     }
 }

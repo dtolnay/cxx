@@ -111,6 +111,17 @@ fn test_c_try_return() {
     );
     let err = ffi::c_fail_kj_exception_return_primitive().unwrap_err();
     assert_eq!("logic error", err.what());
+    assert_eq!(cxx::KjExceptionType::Failed, err.r#type());
+
+    // Test C++->Rust DISCONNECTED exception passing
+    let err = ffi::c_fail_kj_exception_disconnected_return_primitive().unwrap_err();
+    assert_eq!("connection lost", err.what());
+    assert_eq!(cxx::KjExceptionType::Disconnected, err.r#type());
+
+    // Test C++->Rust exception with details passing
+    let err = ffi::c_fail_kj_exception_with_details_return_primitive().unwrap_err();
+    assert_eq!("test exception with details", err.what());
+    assert_eq!(cxx::KjExceptionType::Failed, err.r#type());
     assert_eq!(2020, ffi::c_try_return_box().unwrap().0);
     assert_eq!(
         "2020",
@@ -411,4 +422,74 @@ fn test_unwind_safe() {
 
     fn require_ref_unwind_safe<T: RefUnwindSafe>() {}
     require_ref_unwind_safe::<ffi::C>();
+}
+
+#[test]
+fn test_rust_to_cpp_cancellation() {
+    // Test Rust->C++ cancellation: Rust calls C++ function that throws CanceledException
+    let result = panic::catch_unwind(|| {
+        let _ = ffi::c_cancel_return_primitive();
+    });
+
+    // Should panic with CanceledException
+    assert!(
+        result.is_err(),
+        "Expected CanceledException panic from C++ function"
+    );
+
+    // Verify it's specifically a CanceledException
+    if let Err(panic_payload) = result {
+        assert!(
+            panic_payload
+                .downcast_ref::<cxx::CanceledException>()
+                .is_some(),
+            "Expected panic payload to be CanceledException"
+        );
+    }
+}
+
+#[test]
+fn test_kj_exception_with_details() {
+    // Test C++->Rust KjException with details
+    let err = ffi::c_fail_kj_exception_with_details_return_primitive().unwrap_err();
+    assert_eq!("test exception with details", err.what());
+    assert_eq!(cxx::KjExceptionType::Failed, err.r#type());
+
+    // Check details
+    let details = err.details();
+    assert!(details.is_some(), "Expected details to be present");
+    let details = details.unwrap();
+    assert_eq!(2, details.len(), "Expected 2 details");
+
+    // Check first detail
+    assert_eq!(42, details[0].0);
+    assert_eq!(b"test detail 1", details[0].1.as_slice());
+
+    // Check second detail
+    assert_eq!(999, details[1].0);
+    assert_eq!(b"another detail", details[1].1.as_slice());
+}
+
+#[test]
+fn test_rust_to_cpp_to_rust_cancellation() {
+    // Test Rust->C++->Rust cancellation roundtrip
+    let result = panic::catch_unwind(|| {
+        let _ = ffi::c_cancel_roundtrip_return_primitive();
+    });
+
+    // Should panic with CanceledException
+    assert!(
+        result.is_err(),
+        "Expected CanceledException panic from roundtrip"
+    );
+
+    // Verify it's specifically a CanceledException
+    if let Err(panic_payload) = result {
+        assert!(
+            panic_payload
+                .downcast_ref::<cxx::CanceledException>()
+                .is_some(),
+            "Expected panic payload to be CanceledException"
+        );
+    }
 }
