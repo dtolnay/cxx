@@ -463,6 +463,18 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
         }
     }
 
+    if let Some(self_type) = &efn.self_type {
+        if !cx.types.structs.contains_key(self_type)
+            && !cx.types.cxx.contains(self_type)
+            && !cx.types.rust.contains(self_type)
+        {
+            cx.error(self_type, "unrecognized self type");
+        }
+        if efn.receiver.is_some() {
+            cx.error(efn, "self type and receiver are mutually exclusive");
+        }
+    }
+
     for arg in &efn.args {
         if let Type::Fn(_) = arg.ty {
             if efn.lang == Lang::Rust {
@@ -497,19 +509,6 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
 
     if efn.lang == Lang::Cxx {
         check_mut_return_restriction(cx, efn);
-    }
-
-    if let Some(self_type) = &efn.self_type {
-        if !cx.types.structs.contains_key(self_type)
-            && !cx.types.cxx.contains(self_type)
-            && !cx.types.rust.contains(self_type)
-        {
-            let msg = format!("unrecognized self type: {}", self_type);
-            cx.error(self_type, msg);
-        }
-        if efn.receiver.is_some() {
-            cx.error(efn, "self type and receiver are mutually exclusive");
-        }
     }
 }
 

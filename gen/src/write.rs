@@ -312,14 +312,15 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
         }
         write_doc(out, "  ", &method.doc);
         write!(out, "  ");
-        let local_name = method.name.cxx.to_string();
-        let sig = &method.sig;
-        let indirect_call = false;
-        let main = false;
         if method.self_type.is_some() {
             write!(out, "static ");
         }
-        write_rust_function_shim_decl(out, &local_name, sig, &None, indirect_call, main);
+        let local_name = method.name.cxx.to_string();
+        let sig = &method.sig;
+        let self_type = None;
+        let indirect_call = false;
+        let main = false;
+        write_rust_function_shim_decl(out, &local_name, sig, self_type, indirect_call, main);
         writeln!(out, ";");
         if !method.doc.is_empty() {
             out.next_section();
@@ -403,14 +404,15 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
         }
         write_doc(out, "  ", &method.doc);
         write!(out, "  ");
-        let local_name = method.name.cxx.to_string();
-        let sig = &method.sig;
-        let indirect_call = false;
-        let main = false;
         if method.self_type.is_some() {
             write!(out, "static ");
         }
-        write_rust_function_shim_decl(out, &local_name, sig, &None, indirect_call, main);
+        let local_name = method.name.cxx.to_string();
+        let sig = &method.sig;
+        let self_type = None;
+        let indirect_call = false;
+        let main = false;
+        write_rust_function_shim_decl(out, &local_name, sig, self_type, indirect_call, main);
         writeln!(out, ";");
         if !method.doc.is_empty() {
             out.next_section();
@@ -930,7 +932,7 @@ fn write_function_pointer_trampoline(out: &mut OutFile, efn: &ExternFn, var: &Pa
         out,
         &c_trampoline,
         f,
-        &efn.self_type,
+        efn.self_type.as_ref(),
         &doc,
         &r_trampoline,
         indirect_call,
@@ -1031,7 +1033,7 @@ fn write_rust_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         out,
         &local_name,
         efn,
-        &efn.self_type,
+        efn.self_type.as_ref(),
         doc,
         &invoke,
         indirect_call,
@@ -1043,7 +1045,7 @@ fn write_rust_function_shim_decl(
     out: &mut OutFile,
     local_name: &str,
     sig: &Signature,
-    self_type: &Option<Ident>,
+    self_type: Option<&Ident>,
     indirect_call: bool,
     main: bool,
 ) {
@@ -1054,15 +1056,9 @@ fn write_rust_function_shim_decl(
         write_return_type(out, &sig.ret);
     }
     if let Some(self_type) = self_type {
-        write!(
-            out,
-            "{}::{}(",
-            out.types.resolve(self_type).name.cxx,
-            local_name,
-        );
-    } else {
-        write!(out, "{}(", local_name);
+        write!(out, "{}::", out.types.resolve(self_type).name.cxx);
     }
+    write!(out, "{}(", local_name);
     for (i, arg) in sig.args.iter().enumerate() {
         if i > 0 {
             write!(out, ", ");
@@ -1091,7 +1087,7 @@ fn write_rust_function_shim_impl(
     out: &mut OutFile,
     local_name: &str,
     sig: &Signature,
-    self_type: &Option<Ident>,
+    self_type: Option<&Ident>,
     doc: &Doc,
     invoke: &Symbol,
     indirect_call: bool,

@@ -431,6 +431,7 @@ impl ffi::Shared {
     fn r_method_on_shared(&self) -> String {
         "2020".to_owned()
     }
+
     fn r_static_method_on_shared() -> usize {
         2023
     }

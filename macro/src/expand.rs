@@ -785,7 +785,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
             let elided_generics;
             let resolve = types.resolve(self_type);
             let self_type_generics = if resolve.generics.lt_token.is_some() {
-                &resolve.generics
+                resolve.generics
             } else {
                 elided_generics = Lifetimes {
                     lt_token: resolve.generics.lt_token,
@@ -828,7 +828,7 @@ fn expand_function_pointer_trampoline(
     let body_span = efn.semi_token.span;
     let shim = expand_rust_function_shim_impl(
         sig,
-        &efn.self_type,
+        efn.self_type.as_ref(),
         types,
         &r_trampoline,
         local_name,
@@ -993,7 +993,7 @@ fn expand_rust_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let body_span = efn.semi_token.span;
     expand_rust_function_shim_impl(
         efn,
-        &efn.self_type,
+        efn.self_type.as_ref(),
         types,
         &link_name,
         local_name,
@@ -1007,7 +1007,7 @@ fn expand_rust_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
 
 fn expand_rust_function_shim_impl(
     sig: &Signature,
-    self_type: &Option<Ident>,
+    self_type: Option<&Ident>,
     types: &Types,
     link_name: &Symbol,
     local_name: Ident,
@@ -1226,7 +1226,7 @@ fn expand_rust_function_shim_impl(
 // accurate unsafety declaration and no problematic elided lifetimes.
 fn expand_rust_function_shim_super(
     sig: &Signature,
-    self_type: &Option<Ident>,
+    self_type: Option<&Ident>,
     local_name: &Ident,
     invoke: &Ident,
 ) -> TokenStream {
@@ -1267,7 +1267,7 @@ fn expand_rust_function_shim_super(
     let vars = receiver_var.iter().chain(arg_vars);
 
     let span = invoke.span();
-    let call = match (&sig.receiver, &self_type) {
+    let call = match (&sig.receiver, self_type) {
         (None, None) => quote_spanned!(span=> super::#invoke),
         (Some(receiver), None) => {
             let receiver_type = &receiver.ty.rust;

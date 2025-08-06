@@ -53,8 +53,8 @@ public:
   std::vector<uint8_t> &get_v();
   rust::String cOverloadedMethod(int32_t x) const;
   rust::String cOverloadedMethod(rust::Str x) const;
-
   static size_t c_static_method();
+
 private:
   size_t n;
   std::vector<uint8_t> v;
