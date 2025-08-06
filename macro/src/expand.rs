@@ -36,8 +36,6 @@ pub(crate) fn bridge(mut ffi: Module) -> Result<TokenStream> {
     let trusted = ffi.unsafety.is_some();
     let namespace = &ffi.namespace;
     let ref mut apis = syntax::parse_items(errors, content, trusted, namespace);
-    #[cfg(feature = "experimental-enum-variants-from-header")]
-    crate::load::load(errors, apis);
     let ref types = Types::collect(errors, apis);
     errors.propagate()?;
 

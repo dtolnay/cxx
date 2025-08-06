@@ -357,7 +357,7 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
     check_reserved_name(cx, &enm.name.rust);
     check_lifetimes(cx, &enm.generics);
 
-    if enm.variants.is_empty() && !enm.explicit_repr && !enm.variants_from_header {
+    if enm.variants.is_empty() && !enm.explicit_repr {
         let span = span_for_enum_error(enm);
         cx.error(
             span,

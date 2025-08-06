@@ -35,7 +35,6 @@ pub(crate) struct Parser<'a> {
     pub namespace: Option<&'a mut Namespace>,
     pub cxx_name: Option<&'a mut Option<ForeignName>>,
     pub rust_name: Option<&'a mut Option<Ident>>,
-    pub variants_from_header: Option<&'a mut Option<Attribute>>,
     pub ignore_unrecognized: bool,
 
     // Suppress clippy needless_update lint ("struct update has no effect, all
@@ -142,16 +141,6 @@ pub(crate) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) 
                     cx.push(err);
                     break;
                 }
-            }
-        } else if attr_path.is_ident("variants_from_header")
-            && cfg!(feature = "experimental-enum-variants-from-header")
-        {
-            if let Err(err) = attr.meta.require_path_only() {
-                cx.push(err);
-            }
-            if let Some(variants_from_header) = &mut parser.variants_from_header {
-                **variants_from_header = Some(attr);
-                continue;
             }
         } else if attr_path.is_ident("allow")
             || attr_path.is_ident("warn")
