@@ -683,6 +683,7 @@ fn parse_extern_fn(
             fn_token,
             generics,
             receiver,
+            self_type,
             args,
             ret,
             throws,
@@ -691,7 +692,6 @@ fn parse_extern_fn(
         },
         semi_token,
         trusted,
-        self_type,
     }))
 }
 
@@ -1415,6 +1415,7 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
     let fn_token = ty.fn_token;
     let generics = Generics::default();
     let receiver = None;
+    let self_type = None;
     let paren_token = ty.paren_token;
 
     Ok(Type::Fn(Box::new(Signature {
@@ -1423,6 +1424,7 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
         fn_token,
         generics,
         receiver,
+        self_type,
         args,
         ret,
         throws,
