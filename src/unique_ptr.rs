@@ -305,7 +305,7 @@ where
         self.pin_mut().stream_position()
     }
 
-    #[cfg(seek_relative)]
+    #[cfg(not(no_seek_relative))]
     #[allow(clippy::incompatible_msrv)]
     #[inline]
     fn seek_relative(&mut self, offset: i64) -> io::Result<()> {
