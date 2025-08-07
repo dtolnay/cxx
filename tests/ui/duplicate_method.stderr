@@ -1,0 +1,5 @@
+error: the name `t_method` is defined multiple times
+ --> tests/ui/duplicate_method.rs:6:9
+  |
+6 |         fn t_method(&self);
+  |         ^^^^^^^^^^^^^^^^^^^
