@@ -464,7 +464,12 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
     }
 
     if let Some(self_type) = &efn.self_type {
-        if !cx.types.structs.contains_key(self_type)
+        if cx.types.enums.contains_key(self_type) {
+            cx.error(
+                self_type,
+                "unsupported self type; C++ does not allow member functions on enums",
+            );
+        } else if !cx.types.structs.contains_key(self_type)
             && !cx.types.cxx.contains(self_type)
             && !cx.types.rust.contains(self_type)
         {

@@ -1,4 +1,4 @@
-error: unrecognized self type
+error: unsupported self type; C++ does not allow member functions on enums
  --> tests/ui/enum_assoc.rs:7:18
   |
 7 |         #[Self = "Enum"]
