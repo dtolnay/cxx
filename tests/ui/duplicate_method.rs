@@ -7,4 +7,13 @@ mod ffi {
     }
 }
 
+#[cxx::bridge]
+mod ffi {
+    extern "Rust" {
+        type U;
+        fn u_method(&self);
+        fn u_method(&mut self);
+    }
+}
+
 fn main() {}
