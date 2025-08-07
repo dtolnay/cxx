@@ -1083,7 +1083,7 @@ fn write_rust_function_shim_impl(
         // We've already defined this inside the struct.
         return;
     }
-    if sig.receiver.is_none() {
+    if sig.receiver.is_none() && sig.self_type.is_none() {
         // Member functions already documented at their declaration.
         write_doc(out, "", doc);
     }
