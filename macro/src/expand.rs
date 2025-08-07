@@ -828,7 +828,6 @@ fn expand_function_pointer_trampoline(
     let body_span = efn.semi_token.span;
     let shim = expand_rust_function_shim_impl(
         sig,
-        efn.self_type.as_ref(),
         types,
         &r_trampoline,
         local_name,
@@ -993,7 +992,6 @@ fn expand_rust_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let body_span = efn.semi_token.span;
     expand_rust_function_shim_impl(
         efn,
-        efn.self_type.as_ref(),
         types,
         &link_name,
         local_name,
@@ -1007,7 +1005,6 @@ fn expand_rust_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
 
 fn expand_rust_function_shim_impl(
     sig: &Signature,
-    self_type: Option<&Ident>,
     types: &Types,
     link_name: &Symbol,
     local_name: Ident,
@@ -1100,8 +1097,7 @@ fn expand_rust_function_shim_impl(
     });
     let vars: Vec<_> = receiver_var.into_iter().chain(arg_vars).collect();
 
-    let wrap_super =
-        invoke.map(|invoke| expand_rust_function_shim_super(sig, self_type, &local_name, invoke));
+    let wrap_super = invoke.map(|invoke| expand_rust_function_shim_super(sig, &local_name, invoke));
 
     let mut requires_closure;
     let mut call = match invoke {
@@ -1226,7 +1222,6 @@ fn expand_rust_function_shim_impl(
 // accurate unsafety declaration and no problematic elided lifetimes.
 fn expand_rust_function_shim_super(
     sig: &Signature,
-    self_type: Option<&Ident>,
     local_name: &Ident,
     invoke: &Ident,
 ) -> TokenStream {
@@ -1267,7 +1262,7 @@ fn expand_rust_function_shim_super(
     let vars = receiver_var.iter().chain(arg_vars);
 
     let span = invoke.span();
-    let call = match (&sig.receiver, self_type) {
+    let call = match (&sig.receiver, &sig.self_type) {
         (None, None) => quote_spanned!(span=> super::#invoke),
         (Some(receiver), None) => {
             let receiver_type = &receiver.ty.rust;
