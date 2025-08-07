@@ -742,66 +742,38 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         #trampolines
         #dispatch
     });
-    match &efn.kind {
-        FnKind::Free => {
+    match efn.self_type() {
+        None => {
             quote! {
                 #doc
                 #attrs
                 #visibility #unsafety #fn_token #ident #generics #arg_list #ret #fn_body
             }
         }
-        FnKind::Method(receiver) => {
-            let elided_generics;
-            let receiver_ident = &receiver.ty.rust;
-            let resolve = types.resolve(&receiver.ty);
-            let receiver_generics = if receiver.ty.generics.lt_token.is_some() {
-                &receiver.ty.generics
-            } else {
-                elided_generics = Lifetimes {
-                    lt_token: resolve.generics.lt_token,
-                    lifetimes: resolve
-                        .generics
-                        .lifetimes
-                        .pairs()
-                        .map(|pair| {
-                            let lifetime = Lifetime::new("'_", pair.value().apostrophe);
-                            let punct = pair.punct().map(|&&comma| comma);
-                            punctuated::Pair::new(lifetime, punct)
-                        })
-                        .collect(),
-                    gt_token: resolve.generics.gt_token,
-                };
-                &elided_generics
-            };
-            quote_spanned! {ident.span()=>
-                impl #generics #receiver_ident #receiver_generics {
-                    #doc
-                    #attrs
-                    #visibility #unsafety #fn_token #ident #arg_list #ret #fn_body
-                }
-            }
-        }
-        FnKind::Assoc(self_type) => {
+        Some(self_type) => {
             let elided_generics;
             let resolve = types.resolve(self_type);
-            let self_type_generics = if resolve.generics.lt_token.is_some() {
-                resolve.generics
-            } else {
-                elided_generics = Lifetimes {
-                    lt_token: resolve.generics.lt_token,
-                    lifetimes: resolve
-                        .generics
-                        .lifetimes
-                        .pairs()
-                        .map(|pair| {
-                            let lifetime = Lifetime::new("'_", pair.value().apostrophe);
-                            let punct = pair.punct().map(|&&comma| comma);
-                            punctuated::Pair::new(lifetime, punct)
-                        })
-                        .collect(),
-                    gt_token: resolve.generics.gt_token,
-                };
-                &elided_generics
+            let self_type_generics = match &efn.kind {
+                FnKind::Method(receiver) if receiver.ty.generics.lt_token.is_some() => {
+                    &receiver.ty.generics
+                }
+                _ => {
+                    elided_generics = Lifetimes {
+                        lt_token: resolve.generics.lt_token,
+                        lifetimes: resolve
+                            .generics
+                            .lifetimes
+                            .pairs()
+                            .map(|pair| {
+                                let lifetime = Lifetime::new("'_", pair.value().apostrophe);
+                                let punct = pair.punct().map(|&&comma| comma);
+                                punctuated::Pair::new(lifetime, punct)
+                            })
+                            .collect(),
+                        gt_token: resolve.generics.gt_token,
+                    };
+                    &elided_generics
+                }
             };
             quote_spanned! {ident.span()=>
                 impl #generics #self_type #self_type_generics {
@@ -975,15 +947,13 @@ fn expand_forbid(impls: TokenStream) -> TokenStream {
 
 fn expand_rust_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let link_name = mangle::extern_fn(efn, types);
-    let local_name = match &efn.kind {
-        FnKind::Free => format_ident!("__{}", efn.name.rust),
-        FnKind::Method(receiver) => format_ident!("__{}__{}", receiver.ty.rust, efn.name.rust),
-        FnKind::Assoc(self_type) => format_ident!("__{}__{}", self_type, efn.name.rust),
+    let local_name = match efn.self_type() {
+        None => format_ident!("__{}", efn.name.rust),
+        Some(self_type) => format_ident!("__{}__{}", self_type, efn.name.rust),
     };
-    let prevent_unwind_label = match &efn.kind {
-        FnKind::Free => format!("::{}", efn.name.rust),
-        FnKind::Method(receiver) => format!("::{}::{}", receiver.ty.rust, efn.name.rust),
-        FnKind::Assoc(self_type) => format!("::{}::{}", self_type, efn.name.rust),
+    let prevent_unwind_label = match efn.self_type() {
+        None => format!("::{}", efn.name.rust),
+        Some(self_type) => format!("::{}::{}", self_type, efn.name.rust),
     };
     let invoke = Some(&efn.name.rust);
     let body_span = efn.semi_token.span;
@@ -1257,15 +1227,9 @@ fn expand_rust_function_shim_super(
     let vars = receiver_var.iter().chain(arg_vars);
 
     let span = invoke.span();
-    let call = match &sig.kind {
-        FnKind::Free => quote_spanned!(span=> super::#invoke),
-        FnKind::Method(receiver) => {
-            let receiver_type = &receiver.ty.rust;
-            quote_spanned!(span=> #receiver_type::#invoke)
-        }
-        FnKind::Assoc(self_type) => {
-            quote_spanned!(span=> #self_type::#invoke)
-        }
+    let call = match sig.self_type() {
+        None => quote_spanned!(span=> super::#invoke),
+        Some(self_type) => quote_spanned!(span=> #self_type::#invoke),
     };
 
     let mut body = quote_spanned!(span=> #call(#(#vars,)*));

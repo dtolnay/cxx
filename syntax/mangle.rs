@@ -74,7 +74,7 @@
 //             - CXXBRIDGE1_ENUM_Enabled
 
 use crate::syntax::symbol::{self, Symbol};
-use crate::syntax::{ExternFn, FnKind, Pair, Types};
+use crate::syntax::{ExternFn, Pair, Types};
 
 const CXXBRIDGE: &str = "cxxbridge1";
 
@@ -85,17 +85,8 @@ macro_rules! join {
 }
 
 pub(crate) fn extern_fn(efn: &ExternFn, types: &Types) -> Symbol {
-    match &efn.kind {
-        FnKind::Method(receiver) => {
-            let receiver_ident = types.resolve(&receiver.ty);
-            join!(
-                efn.name.namespace,
-                CXXBRIDGE,
-                receiver_ident.name.cxx,
-                efn.name.rust,
-            )
-        }
-        FnKind::Assoc(self_type) => {
+    match efn.self_type() {
+        Some(self_type) => {
             let self_type_ident = types.resolve(self_type);
             join!(
                 efn.name.namespace,
@@ -104,7 +95,7 @@ pub(crate) fn extern_fn(efn: &ExternFn, types: &Types) -> Symbol {
                 efn.name.rust,
             )
         }
-        FnKind::Free => join!(efn.name.namespace, CXXBRIDGE, efn.name.rust),
+        None => join!(efn.name.namespace, CXXBRIDGE, efn.name.rust),
     }
 }
 

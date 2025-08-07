@@ -96,20 +96,11 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
     let mut methods_for_type = Map::new();
     for api in apis {
         if let Api::CxxFunction(efn) | Api::RustFunction(efn) = api {
-            match &efn.kind {
-                FnKind::Free => {}
-                FnKind::Method(receiver) => {
-                    methods_for_type
-                        .entry(&receiver.ty.rust)
-                        .or_insert_with(Vec::new)
-                        .push(efn);
-                }
-                FnKind::Assoc(self_type) => {
-                    methods_for_type
-                        .entry(self_type)
-                        .or_insert_with(Vec::new)
-                        .push(efn);
-                }
+            if let Some(self_type) = efn.self_type() {
+                methods_for_type
+                    .entry(self_type)
+                    .or_insert_with(Vec::new)
+                    .push(efn);
             }
         }
     }
@@ -809,15 +800,9 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         }
     }
     write!(out, " = ");
-    match &efn.kind {
-        FnKind::Free => write!(out, "{}", efn.name.to_fully_qualified()),
-        FnKind::Method(receiver) => write!(
-            out,
-            "&{}::{}",
-            out.types.resolve(&receiver.ty).name.to_fully_qualified(),
-            efn.name.cxx,
-        ),
-        FnKind::Assoc(self_type) => write!(
+    match efn.self_type() {
+        None => write!(out, "{}", efn.name.to_fully_qualified()),
+        Some(self_type) => write!(
             out,
             "&{}::{}",
             out.types.resolve(self_type).name.to_fully_qualified(),
@@ -1006,14 +991,9 @@ fn write_rust_function_decl_impl(
 
 fn write_rust_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     out.set_namespace(&efn.name.namespace);
-    let local_name = match &efn.kind {
-        FnKind::Free => efn.name.cxx.to_string(),
-        FnKind::Method(receiver) => format!(
-            "{}::{}",
-            out.types.resolve(&receiver.ty).name.cxx,
-            efn.name.cxx,
-        ),
-        FnKind::Assoc(self_type) => format!(
+    let local_name = match efn.self_type() {
+        None => efn.name.cxx.to_string(),
+        Some(self_type) => format!(
             "{}::{}",
             out.types.resolve(self_type).name.cxx,
             efn.name.cxx,
