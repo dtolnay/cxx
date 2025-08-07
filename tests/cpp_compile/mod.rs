@@ -47,7 +47,8 @@ impl Test {
     #[must_use]
     pub fn new(cxx_bridge: TokenStream) -> Self {
         let prefix = concat!(env!("CARGO_CRATE_NAME"), "-");
-        let temp_dir = TempDir::with_prefix(prefix).unwrap();
+        let scratch = scratch::path("cxx-test-suite");
+        let temp_dir = TempDir::with_prefix_in(prefix, scratch).unwrap();
         let generated_h = temp_dir.path().join("cxx_bridge.generated.h");
         let generated_cc = temp_dir.path().join("cxx_bridge.generated.cc");
 
