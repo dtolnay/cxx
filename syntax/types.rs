@@ -132,7 +132,9 @@ impl<'a> Types<'a> {
                     // Note: duplication of the C++ name is fine because C++ has
                     // function overloading.
                     let receiver = efn.receiver.as_ref().map(|receiver| &receiver.ty.rust);
-                    if !function_names.insert((receiver, &efn.name.rust)) {
+                    if !receiver.is_some_and(|receiver| receiver == "Self")
+                        && !function_names.insert((receiver, &efn.name.rust))
+                    {
                         duplicate_name(cx, efn, &efn.name.rust);
                     }
                     for arg in &efn.args {
