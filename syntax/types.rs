@@ -79,7 +79,7 @@ impl<'a> Types<'a> {
                         // If already declared as a struct or enum, or if
                         // colliding with something other than an extern C++
                         // type, then error.
-                        duplicate_name(cx, strct, ident);
+                        duplicate_name(cx, strct, ItemName::Type(ident));
                     }
                     structs.insert(&strct.name.rust, strct);
                     for field in &strct.fields {
@@ -98,7 +98,7 @@ impl<'a> Types<'a> {
                         // If already declared as a struct or enum, or if
                         // colliding with something other than an extern C++
                         // type, then error.
-                        duplicate_name(cx, enm, ident);
+                        duplicate_name(cx, enm, ItemName::Type(ident));
                     }
                     enums.insert(ident, enm);
                     add_resolution(&enm.name, &enm.generics);
@@ -112,7 +112,7 @@ impl<'a> Types<'a> {
                         // If already declared as an extern C++ type, or if
                         // colliding with something which is neither struct nor
                         // enum, then error.
-                        duplicate_name(cx, ety, ident);
+                        duplicate_name(cx, ety, ItemName::Type(ident));
                     }
                     cxx.insert(ident);
                     if !ety.trusted {
@@ -123,7 +123,7 @@ impl<'a> Types<'a> {
                 Api::RustType(ety) => {
                     let ident = &ety.name.rust;
                     if !type_names.insert(ident) {
-                        duplicate_name(cx, ety, ident);
+                        duplicate_name(cx, ety, ItemName::Type(ident));
                     }
                     rust.insert(ident);
                     add_resolution(&ety.name, &ety.generics);
@@ -135,7 +135,11 @@ impl<'a> Types<'a> {
                     if !receiver.is_some_and(|receiver| receiver == "Self")
                         && !function_names.insert((receiver, &efn.name.rust))
                     {
-                        duplicate_name(cx, efn, &efn.name.rust);
+                        let name = match receiver {
+                            Some(receiver) => ItemName::Method(receiver, &efn.name.rust),
+                            None => ItemName::Function(&efn.name.rust),
+                        };
+                        duplicate_name(cx, efn, name);
                     }
                     for arg in &efn.args {
                         visit(&mut all, &arg.ty);
@@ -147,7 +151,7 @@ impl<'a> Types<'a> {
                 Api::TypeAlias(alias) => {
                     let ident = &alias.name.rust;
                     if !type_names.insert(ident) {
-                        duplicate_name(cx, alias, ident);
+                        duplicate_name(cx, alias, ItemName::Type(ident));
                     }
                     cxx.insert(ident);
                     aliases.insert(ident, alias);
@@ -277,7 +281,18 @@ impl<'t, 'a> IntoIterator for &'t Types<'a> {
     }
 }
 
-fn duplicate_name(cx: &mut Errors, sp: impl ToTokens, ident: &Ident) {
-    let msg = format!("the name `{}` is defined multiple times", ident);
+enum ItemName<'a> {
+    Type(&'a Ident),
+    Method(&'a Ident, &'a Ident),
+    Function(&'a Ident),
+}
+
+fn duplicate_name(cx: &mut Errors, sp: impl ToTokens, name: ItemName) {
+    let description = match name {
+        ItemName::Type(name) => format!("type `{}`", name),
+        ItemName::Method(receiver, name) => format!("method `{}::{}`", receiver, name),
+        ItemName::Function(name) => format!("function `{}`", name),
+    };
+    let msg = format!("the {} is defined multiple times", description);
     cx.error(sp, msg);
 }
