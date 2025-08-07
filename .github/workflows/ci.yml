@@ -196,9 +196,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install clang-tidy
-        run: sudo apt-get install clang-tidy-18
+        run: sudo apt-get install clang-tidy-19
       - name: Run clang-tidy
-        run: clang-tidy-18 src/cxx.cc --warnings-as-errors=*
+        run: clang-tidy-19 src/cxx.cc --warnings-as-errors=*
 
   eslint:
     name: ESLint
