@@ -5,9 +5,9 @@ use crate::syntax::file::{Item, ItemForeignMod};
 use crate::syntax::report::Errors;
 use crate::syntax::Atom::*;
 use crate::syntax::{
-    attrs, error, Api, Array, Derive, Doc, Enum, EnumRepr, ExternFn, ExternType, ForeignName, Impl,
-    Include, IncludeKind, Lang, Lifetimes, NamedType, Namespace, Pair, Ptr, Receiver, Ref,
-    Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var, Variant,
+    attrs, error, Api, Array, Derive, Doc, Enum, EnumRepr, ExternFn, ExternType, FnKind,
+    ForeignName, Impl, Include, IncludeKind, Lang, Lifetimes, NamedType, Namespace, Pair, Ptr,
+    Receiver, Ref, Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
 use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree};
 use quote::{format_ident, quote, quote_spanned};
@@ -417,7 +417,7 @@ fn parse_foreign_mod(
         let single_type = single_type.clone();
         for item in &mut items {
             if let Api::CxxFunction(efn) | Api::RustFunction(efn) = item {
-                if let Some(receiver) = &mut efn.receiver {
+                if let Some(receiver) = efn.sig.receiver_mut() {
                     if receiver.ty.rust == "Self" {
                         receiver.ty.rust = single_type.rust.clone();
                     }
@@ -654,6 +654,17 @@ fn parse_extern_fn(
         }
     }
 
+    let kind = match (self_type, receiver) {
+        (None, None) => FnKind::Free,
+        (Some(self_type), None) => FnKind::Assoc(self_type),
+        (None, Some(receiver)) => FnKind::Method(receiver),
+        (Some(self_type), Some(receiver)) => {
+            let msg = "function with Self type must not have a `self` argument";
+            cx.error(self_type, msg);
+            FnKind::Method(receiver)
+        }
+    };
+
     let mut throws_tokens = None;
     let ret = parse_return_type(&foreign_fn.sig.output, &mut throws_tokens)?;
     let throws = throws_tokens.is_some();
@@ -682,7 +693,7 @@ fn parse_extern_fn(
             unsafety,
             fn_token,
             generics,
-            receiver,
+            kind,
             args,
             ret,
             throws,
@@ -691,7 +702,6 @@ fn parse_extern_fn(
         },
         semi_token,
         trusted,
-        self_type,
     }))
 }
 
@@ -1414,7 +1424,7 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
     let unsafety = ty.unsafety;
     let fn_token = ty.fn_token;
     let generics = Generics::default();
-    let receiver = None;
+    let kind = FnKind::Free;
     let paren_token = ty.paren_token;
 
     Ok(Type::Fn(Box::new(Signature {
@@ -1422,7 +1432,7 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
         unsafety,
         fn_token,
         generics,
-        receiver,
+        kind,
         args,
         ret,
         throws,

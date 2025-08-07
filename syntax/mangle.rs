@@ -85,17 +85,8 @@ macro_rules! join {
 }
 
 pub(crate) fn extern_fn(efn: &ExternFn, types: &Types) -> Symbol {
-    match (&efn.receiver, &efn.self_type) {
-        (Some(receiver), None) => {
-            let receiver_ident = types.resolve(&receiver.ty);
-            join!(
-                efn.name.namespace,
-                CXXBRIDGE,
-                receiver_ident.name.cxx,
-                efn.name.rust,
-            )
-        }
-        (None, Some(self_type)) => {
+    match efn.self_type() {
+        Some(self_type) => {
             let self_type_ident = types.resolve(self_type);
             join!(
                 efn.name.namespace,
@@ -104,8 +95,7 @@ pub(crate) fn extern_fn(efn: &ExternFn, types: &Types) -> Symbol {
                 efn.name.rust,
             )
         }
-        (None, None) => join!(efn.name.namespace, CXXBRIDGE, efn.name.rust),
-        _ => unreachable!("receiver and self_type are mutually exclusive"),
+        None => join!(efn.name.namespace, CXXBRIDGE, efn.name.rust),
     }
 }
 

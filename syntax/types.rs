@@ -131,7 +131,7 @@ impl<'a> Types<'a> {
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
                     // Note: duplication of the C++ name is fine because C++ has
                     // function overloading.
-                    let receiver = efn.receiver.as_ref().map(|receiver| &receiver.ty.rust);
+                    let receiver = efn.receiver().map(|receiver| &receiver.ty.rust);
                     if !receiver.is_some_and(|receiver| receiver == "Self")
                         && !function_names.insert((receiver, &efn.name.rust))
                     {

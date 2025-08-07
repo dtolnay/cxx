@@ -258,7 +258,7 @@ impl ToTokens for Signature {
             unsafety: _,
             fn_token,
             generics: _,
-            receiver: _,
+            kind: _,
             args,
             ret,
             throws: _,
