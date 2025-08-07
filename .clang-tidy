@@ -12,5 +12,6 @@ Checks:
   -cppcoreguidelines-pro-type-reinterpret-cast,
   -cppcoreguidelines-special-member-functions,
   -modernize-return-braced-init-list,
+  -modernize-type-traits,
   -modernize-use-trailing-return-type,
 HeaderFilterRegex: cxx\.h
