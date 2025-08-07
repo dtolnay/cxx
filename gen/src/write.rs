@@ -1004,13 +1004,19 @@ fn write_rust_function_decl_impl(
 
 fn write_rust_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     out.set_namespace(&efn.name.namespace);
-    let local_name = match &efn.receiver {
-        None => efn.name.cxx.to_string(),
-        Some(receiver) => format!(
+    let local_name = match (&efn.receiver, &efn.self_type) {
+        (None, None) => efn.name.cxx.to_string(),
+        (Some(receiver), None) => format!(
             "{}::{}",
             out.types.resolve(&receiver.ty).name.cxx,
             efn.name.cxx,
         ),
+        (None, Some(self_type)) => format!(
+            "{}::{}",
+            out.types.resolve(self_type).name.cxx,
+            efn.name.cxx,
+        ),
+        _ => unreachable!("receiver and self_type are mutually exclusive"),
     };
     let doc = &efn.doc;
     let invoke = mangle::extern_fn(efn, out.types);
@@ -1041,9 +1047,6 @@ fn write_rust_function_shim_decl(
         write!(out, "int ");
     } else {
         write_return_type(out, &sig.ret);
-    }
-    if let (Some(self_type), false) = (&sig.self_type, in_class) {
-        write!(out, "{}::", out.types.resolve(self_type).name.cxx);
     }
     write!(out, "{}(", local_name);
     for (i, arg) in sig.args.iter().enumerate() {
