@@ -102,6 +102,12 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
                     .or_insert_with(Vec::new)
                     .push(efn);
             }
+            if let Some(self_type) = &efn.self_type {
+                methods_for_type
+                    .entry(&out.types.resolve(self_type).name.rust)
+                    .or_insert_with(Vec::new)
+                    .push(efn);
+            }
         }
     }
 
@@ -310,7 +316,10 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
         let sig = &method.sig;
         let indirect_call = false;
         let main = false;
-        write_rust_function_shim_decl(out, &local_name, sig, indirect_call, main);
+        if method.self_type.is_some() {
+            write!(out, "static ");
+        }
+        write_rust_function_shim_decl(out, &local_name, sig, &None, indirect_call, main);
         writeln!(out, ";");
         if !method.doc.is_empty() {
             out.next_section();
@@ -398,7 +407,10 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
         let sig = &method.sig;
         let indirect_call = false;
         let main = false;
-        write_rust_function_shim_decl(out, &local_name, sig, indirect_call, main);
+        if method.self_type.is_some() {
+            write!(out, "static ");
+        }
+        write_rust_function_shim_decl(out, &local_name, sig, &None, indirect_call, main);
         writeln!(out, ";");
         if !method.doc.is_empty() {
             out.next_section();
@@ -798,14 +810,21 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         }
     }
     write!(out, " = ");
-    match &efn.receiver {
-        None => write!(out, "{}", efn.name.to_fully_qualified()),
-        Some(receiver) => write!(
+    match (&efn.receiver, &efn.self_type) {
+        (None, None) => write!(out, "{}", efn.name.to_fully_qualified()),
+        (Some(receiver), None) => write!(
             out,
             "&{}::{}",
             out.types.resolve(&receiver.ty).name.to_fully_qualified(),
             efn.name.cxx,
         ),
+        (None, Some(self_type)) => write!(
+            out,
+            "&{}::{}",
+            out.types.resolve(self_type).name.to_fully_qualified(),
+            efn.name.cxx,
+        ),
+        _ => unreachable!("receiver and self_type are mutually exclusive"),
     }
     writeln!(out, ";");
     write!(out, "  ");
@@ -911,6 +930,7 @@ fn write_function_pointer_trampoline(out: &mut OutFile, efn: &ExternFn, var: &Pa
         out,
         &c_trampoline,
         f,
+        &efn.self_type,
         &doc,
         &r_trampoline,
         indirect_call,
@@ -1007,13 +1027,23 @@ fn write_rust_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         && efn.sig.args.is_empty()
         && efn.sig.ret.is_none()
         && !efn.sig.throws;
-    write_rust_function_shim_impl(out, &local_name, efn, doc, &invoke, indirect_call, main);
+    write_rust_function_shim_impl(
+        out,
+        &local_name,
+        efn,
+        &efn.self_type,
+        doc,
+        &invoke,
+        indirect_call,
+        main,
+    );
 }
 
 fn write_rust_function_shim_decl(
     out: &mut OutFile,
     local_name: &str,
     sig: &Signature,
+    self_type: &Option<Ident>,
     indirect_call: bool,
     main: bool,
 ) {
@@ -1023,7 +1053,16 @@ fn write_rust_function_shim_decl(
     } else {
         write_return_type(out, &sig.ret);
     }
-    write!(out, "{}(", local_name);
+    if let Some(self_type) = self_type {
+        write!(
+            out,
+            "{}::{}(",
+            out.types.resolve(self_type).name.cxx,
+            local_name,
+        );
+    } else {
+        write!(out, "{}(", local_name);
+    }
     for (i, arg) in sig.args.iter().enumerate() {
         if i > 0 {
             write!(out, ", ");
@@ -1052,12 +1091,13 @@ fn write_rust_function_shim_impl(
     out: &mut OutFile,
     local_name: &str,
     sig: &Signature,
+    self_type: &Option<Ident>,
     doc: &Doc,
     invoke: &Symbol,
     indirect_call: bool,
     main: bool,
 ) {
-    if out.header && sig.receiver.is_some() {
+    if out.header && (sig.receiver.is_some() || self_type.is_some()) {
         // We've already defined this inside the struct.
         return;
     }
@@ -1065,7 +1105,7 @@ fn write_rust_function_shim_impl(
         // Member functions already documented at their declaration.
         write_doc(out, "", doc);
     }
-    write_rust_function_shim_decl(out, local_name, sig, indirect_call, main);
+    write_rust_function_shim_decl(out, local_name, sig, self_type, indirect_call, main);
     if out.header {
         writeln!(out, ";");
         return;

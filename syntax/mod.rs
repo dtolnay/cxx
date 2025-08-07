@@ -154,6 +154,7 @@ pub(crate) struct ExternFn {
     pub sig: Signature,
     pub semi_token: Token![;],
     pub trusted: bool,
+    pub self_type: Option<Ident>,
 }
 
 pub(crate) struct TypeAlias {

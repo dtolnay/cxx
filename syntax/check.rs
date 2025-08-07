@@ -498,6 +498,19 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
     if efn.lang == Lang::Cxx {
         check_mut_return_restriction(cx, efn);
     }
+
+    if let Some(self_type) = &efn.self_type {
+        if !cx.types.structs.contains_key(self_type)
+            && !cx.types.cxx.contains(self_type)
+            && !cx.types.rust.contains(self_type)
+        {
+            let msg = format!("unrecognized self type: {}", self_type);
+            cx.error(self_type, msg);
+        }
+        if efn.receiver.is_some() {
+            cx.error(efn, "self type and receiver are mutually exclusive");
+        }
+    }
 }
 
 fn check_api_type_alias(cx: &mut Check, alias: &TypeAlias) {
