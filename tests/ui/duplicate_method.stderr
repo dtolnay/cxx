@@ -4,18 +4,8 @@ error: the name `t_method` is defined multiple times
 6 |         fn t_method(&self);
   |         ^^^^^^^^^^^^^^^^^^^
 
-error[E0428]: the name `__U__u_method` is defined multiple times
-  --> tests/ui/duplicate_method.rs:15:31
+error: the name `u_method` is defined multiple times
+  --> tests/ui/duplicate_method.rs:15:9
    |
-14 |         fn u_method(&self);
-   |                           - previous definition of the value `__U__u_method` here
 15 |         fn u_method(&mut self);
-   |                               ^ `__U__u_method` redefined here
-   |
-   = note: `__U__u_method` must be defined only once in the value namespace of this block
-
-error[E0432]: unresolved import `super`
-  --> tests/ui/duplicate_method.rs:13:14
-   |
-13 |         type U;
-   |              ^ no `U` in the root
+   |         ^^^^^^^^^^^^^^^^^^^^^^^
