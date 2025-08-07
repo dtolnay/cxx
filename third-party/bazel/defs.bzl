@@ -296,7 +296,7 @@ _NORMAL_DEPENDENCIES = {
     "third-party": {
         _COMMON_CONDITION: {
             "cc": Label("@vendor//:cc-1.2.31"),
-            "clap": Label("@vendor//:clap-4.5.42"),
+            "clap": Label("@vendor//:clap-4.5.43"),
             "codespan-reporting": Label("@vendor//:codespan-reporting-0.12.0"),
             "foldhash": Label("@vendor//:foldhash-0.1.5"),
             "indexmap": Label("@vendor//:indexmap-2.10.0"),
@@ -447,22 +447,22 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__clap-4.5.42",
-        sha256 = "ed87a9d530bb41a67537289bafcac159cb3ee28460e0a4571123d2a778a6a882",
+        name = "vendor__clap-4.5.43",
+        sha256 = "50fd97c9dc2399518aa331917ac6f274280ec5eb34e555dd291899745c48ec6f",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/clap/4.5.42/download"],
-        strip_prefix = "clap-4.5.42",
-        build_file = Label("//third-party/bazel:BUILD.clap-4.5.42.bazel"),
+        urls = ["https://static.crates.io/crates/clap/4.5.43/download"],
+        strip_prefix = "clap-4.5.43",
+        build_file = Label("//third-party/bazel:BUILD.clap-4.5.43.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__clap_builder-4.5.42",
-        sha256 = "64f4f3f3c77c94aff3c7e9aac9a2ca1974a5adf392a8bb751e827d6d127ab966",
+        name = "vendor__clap_builder-4.5.43",
+        sha256 = "c35b5830294e1fa0462034af85cc95225a4cb07092c088c55bda3147cfcd8f65",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/clap_builder/4.5.42/download"],
-        strip_prefix = "clap_builder-4.5.42",
-        build_file = Label("//third-party/bazel:BUILD.clap_builder-4.5.42.bazel"),
+        urls = ["https://static.crates.io/crates/clap_builder/4.5.43/download"],
+        strip_prefix = "clap_builder-4.5.43",
+        build_file = Label("//third-party/bazel:BUILD.clap_builder-4.5.43.bazel"),
     )
 
     maybe(
@@ -747,7 +747,7 @@ def crate_repositories():
 
     return [
         struct(repo = "vendor__cc-1.2.31", is_dev_dep = False),
-        struct(repo = "vendor__clap-4.5.42", is_dev_dep = False),
+        struct(repo = "vendor__clap-4.5.43", is_dev_dep = False),
         struct(repo = "vendor__codespan-reporting-0.12.0", is_dev_dep = False),
         struct(repo = "vendor__foldhash-0.1.5", is_dev_dep = False),
         struct(repo = "vendor__indexmap-2.10.0", is_dev_dep = False),
