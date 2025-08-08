@@ -128,14 +128,14 @@ alias(
 )
 
 alias(
-    name = "scratch-1.0.8",
-    actual = "@vendor__scratch-1.0.8//:scratch",
+    name = "scratch-1.0.9",
+    actual = "@vendor__scratch-1.0.9//:scratch",
     tags = ["manual"],
 )
 
 alias(
     name = "scratch",
-    actual = "@vendor__scratch-1.0.8//:scratch",
+    actual = "@vendor__scratch-1.0.9//:scratch",
     tags = ["manual"],
 )
 

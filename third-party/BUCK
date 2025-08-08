@@ -199,18 +199,18 @@ cargo.rust_library(
 )
 
 http_archive(
-    name = "hashbrown-0.15.4.crate",
-    sha256 = "5971ac85611da7067dbfcabef3c70ebb5606018acd9e2a3903a0da507521e0d5",
-    strip_prefix = "hashbrown-0.15.4",
-    urls = ["https://static.crates.io/crates/hashbrown/0.15.4/download"],
+    name = "hashbrown-0.15.5.crate",
+    sha256 = "9229cfe53dfd69f0609a49f65461bd93001ea1ef889cd5529dd176593f5338a1",
+    strip_prefix = "hashbrown-0.15.5",
+    urls = ["https://static.crates.io/crates/hashbrown/0.15.5/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "hashbrown-0.15.4",
-    srcs = [":hashbrown-0.15.4.crate"],
+    name = "hashbrown-0.15.5",
+    srcs = [":hashbrown-0.15.5.crate"],
     crate = "hashbrown",
-    crate_root = "hashbrown-0.15.4.crate/src/lib.rs",
+    crate_root = "hashbrown-0.15.5.crate/src/lib.rs",
     edition = "2021",
     visibility = [],
 )
@@ -242,7 +242,7 @@ cargo.rust_library(
     visibility = [],
     deps = [
         ":equivalent-1.0.2",
-        ":hashbrown-0.15.4",
+        ":hashbrown-0.15.5",
     ],
 )
 
@@ -379,45 +379,45 @@ buildscript_run(
 
 alias(
     name = "scratch",
-    actual = ":scratch-1.0.8",
+    actual = ":scratch-1.0.9",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "scratch-1.0.8.crate",
-    sha256 = "9f6280af86e5f559536da57a45ebc84948833b3bee313a7dd25232e09c878a52",
-    strip_prefix = "scratch-1.0.8",
-    urls = ["https://static.crates.io/crates/scratch/1.0.8/download"],
+    name = "scratch-1.0.9.crate",
+    sha256 = "d68f2ec51b097e4c1a75b681a8bec621909b5e91f15bb7b840c4f2f7b01148b2",
+    strip_prefix = "scratch-1.0.9",
+    urls = ["https://static.crates.io/crates/scratch/1.0.9/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "scratch-1.0.8",
-    srcs = [":scratch-1.0.8.crate"],
+    name = "scratch-1.0.9",
+    srcs = [":scratch-1.0.9.crate"],
     crate = "scratch",
-    crate_root = "scratch-1.0.8.crate/src/lib.rs",
+    crate_root = "scratch-1.0.9.crate/src/lib.rs",
     edition = "2015",
     env = {
-        "OUT_DIR": "$(location :scratch-1.0.8-build-script-run[out_dir])",
+        "OUT_DIR": "$(location :scratch-1.0.9-build-script-run[out_dir])",
     },
-    rustc_flags = ["@$(location :scratch-1.0.8-build-script-run[rustc_flags])"],
+    rustc_flags = ["@$(location :scratch-1.0.9-build-script-run[rustc_flags])"],
     visibility = [],
 )
 
 cargo.rust_binary(
-    name = "scratch-1.0.8-build-script-build",
-    srcs = [":scratch-1.0.8.crate"],
+    name = "scratch-1.0.9-build-script-build",
+    srcs = [":scratch-1.0.9.crate"],
     crate = "build_script_build",
-    crate_root = "scratch-1.0.8.crate/build.rs",
+    crate_root = "scratch-1.0.9.crate/build.rs",
     edition = "2015",
     visibility = [],
 )
 
 buildscript_run(
-    name = "scratch-1.0.8-build-script-run",
+    name = "scratch-1.0.9-build-script-run",
     package_name = "scratch",
-    buildscript_rule = ":scratch-1.0.8-build-script-build",
-    version = "1.0.8",
+    buildscript_rule = ":scratch-1.0.9-build-script-build",
+    version = "1.0.9",
 )
 
 http_archive(

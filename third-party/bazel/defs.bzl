@@ -302,7 +302,7 @@ _NORMAL_DEPENDENCIES = {
             "indexmap": Label("@vendor//:indexmap-2.10.0"),
             "proc-macro2": Label("@vendor//:proc-macro2-1.0.95"),
             "quote": Label("@vendor//:quote-1.0.40"),
-            "scratch": Label("@vendor//:scratch-1.0.8"),
+            "scratch": Label("@vendor//:scratch-1.0.9"),
             "syn": Label("@vendor//:syn-2.0.104"),
         },
     },
@@ -507,12 +507,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__hashbrown-0.15.4",
-        sha256 = "5971ac85611da7067dbfcabef3c70ebb5606018acd9e2a3903a0da507521e0d5",
+        name = "vendor__hashbrown-0.15.5",
+        sha256 = "9229cfe53dfd69f0609a49f65461bd93001ea1ef889cd5529dd176593f5338a1",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/hashbrown/0.15.4/download"],
-        strip_prefix = "hashbrown-0.15.4",
-        build_file = Label("//third-party/bazel:BUILD.hashbrown-0.15.4.bazel"),
+        urls = ["https://static.crates.io/crates/hashbrown/0.15.5/download"],
+        strip_prefix = "hashbrown-0.15.5",
+        build_file = Label("//third-party/bazel:BUILD.hashbrown-0.15.5.bazel"),
     )
 
     maybe(
@@ -557,12 +557,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__scratch-1.0.8",
-        sha256 = "9f6280af86e5f559536da57a45ebc84948833b3bee313a7dd25232e09c878a52",
+        name = "vendor__scratch-1.0.9",
+        sha256 = "d68f2ec51b097e4c1a75b681a8bec621909b5e91f15bb7b840c4f2f7b01148b2",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/scratch/1.0.8/download"],
-        strip_prefix = "scratch-1.0.8",
-        build_file = Label("//third-party/bazel:BUILD.scratch-1.0.8.bazel"),
+        urls = ["https://static.crates.io/crates/scratch/1.0.9/download"],
+        strip_prefix = "scratch-1.0.9",
+        build_file = Label("//third-party/bazel:BUILD.scratch-1.0.9.bazel"),
     )
 
     maybe(
@@ -754,6 +754,6 @@ def crate_repositories():
         struct(repo = "vendor__proc-macro2-1.0.95", is_dev_dep = False),
         struct(repo = "vendor__quote-1.0.40", is_dev_dep = False),
         struct(repo = "vendor__rustversion-1.0.21", is_dev_dep = False),
-        struct(repo = "vendor__scratch-1.0.8", is_dev_dep = False),
+        struct(repo = "vendor__scratch-1.0.9", is_dev_dep = False),
         struct(repo = "vendor__syn-2.0.104", is_dev_dep = False),
     ]
