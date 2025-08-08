@@ -28,6 +28,16 @@
 #include <ranges>
 #endif
 
+// Most compilers set __cpp_attributes on C++11 and up, and set __cpp_exceptions
+// if the flag `-fno-exceptions` is not set. On these compilers we detect
+// `-fno-exceptions` this way.
+//
+// Some compilers never set either one. On these, rely on the user to do
+// `-DRUST_CXX_NO_EXCEPTIONS` if they are not using exceptions.
+#if defined(__cpp_attributes) && !defined(__cpp_exceptions)
+#define RUST_CXX_NO_EXCEPTIONS
+#endif
+
 namespace rust {
 inline namespace cxxbridge1 {
 

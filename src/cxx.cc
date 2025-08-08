@@ -76,9 +76,7 @@ inline namespace cxxbridge1 {
 
 template <typename Exception>
 void panic [[noreturn]] (const char *msg) {
-// Do not attempt to throw if the compiler explicitly does not support it.
-// If __cpp_attributes is not set, the compiler may not implement feature-test macros.
-#if defined(RUST_CXX_NO_EXCEPTIONS) || (defined(__cpp_attributes) && !defined(__cpp_exceptions))
+#if defined(RUST_CXX_NO_EXCEPTIONS)
   std::fprintf(stderr, "Error: %s. Aborting.\n", msg);
   std::abort();
 #else
