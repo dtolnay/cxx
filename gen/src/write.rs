@@ -11,8 +11,8 @@ use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::{self, Symbol};
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::{
-    derive, mangle, Api, Doc, Enum, ExternFn, ExternType, FnKind, Lang, Pair, Signature, Struct,
-    Trait, Type, TypeAlias, Types, Var,
+    derive, mangle, Alignment, Api, Doc, Enum, ExternFn, ExternType, FnKind, Lang, Pair, Signature,
+    Struct, Trait, Type, TypeAlias, Types, Var,
 };
 use proc_macro2::Ident;
 
@@ -280,7 +280,12 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     write_doc(out, "", &strct.doc);
-    writeln!(out, "struct {} final {{", strct.name.cxx);
+    let alignment = if let Some(Alignment::Align(x)) = strct.alignment {
+        format!("alignas({}) ", x)
+    } else {
+        String::from("")
+    };
+    writeln!(out, "struct {}{} final {{", alignment, strct.name.cxx);
 
     for field in &strct.fields {
         write_doc(out, "  ", &field.doc);

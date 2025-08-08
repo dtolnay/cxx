@@ -244,3 +244,18 @@ C++ data type:
 - `PartialOrd` produces `operator<`, `operator<=`, `operator>`, `operator>=`
 
 [hash]: https://en.cppreference.com/w/cpp/utility/hash
+
+## Alignment
+
+Enforcing minimum alignment for structs using `repr(align(x))` is supported within the
+CXX bridge module. The alignment value must be a power of two from 1 up to 2<sup>29</sup>.
+
+```rust,noplayground
+#[cxx::bridge]
+mod ffi {
+    #[repr(align(4))]
+    struct ExampleStruct {
+        b: [u8; 4],
+    }
+}
+```

@@ -19,6 +19,8 @@ extern "C" bool cxx_test_suite_r_is_correct(const tests::R *) noexcept;
 
 namespace tests {
 
+static_assert(4 == alignof(StructWithAlignment4), "expected 4 byte alignment");
+
 static constexpr char SLICE_DATA[] = "2020";
 
 C::C(size_t n) : n(n) {}

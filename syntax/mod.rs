@@ -22,6 +22,7 @@ mod pod;
 pub(crate) mod primitive;
 pub(crate) mod qualified;
 pub(crate) mod report;
+pub(crate) mod repr;
 pub(crate) mod resolve;
 pub(crate) mod set;
 mod signature;
@@ -49,6 +50,10 @@ pub(crate) use self::doc::Doc;
 pub(crate) use self::names::ForeignName;
 pub(crate) use self::parse::parse_items;
 pub(crate) use self::types::Types;
+
+pub enum Alignment {
+    Align(u32),
+}
 
 pub(crate) enum Api {
     #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
@@ -108,6 +113,7 @@ pub(crate) struct Struct {
     pub cfg: CfgExpr,
     pub doc: Doc,
     pub derives: Vec<Derive>,
+    pub alignment: Option<Alignment>,
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
     pub attrs: OtherAttrs,
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build

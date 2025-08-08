@@ -87,6 +87,11 @@ pub mod ffi {
         b: Buffer,
     }
 
+    #[repr(align(4))]
+    pub struct StructWithAlignment4 {
+        b: [u8; 4],
+    }
+
     #[derive(Copy, Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
     pub struct StructWithLifetime<'a> {
         s: &'a str,
