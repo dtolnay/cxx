@@ -38,6 +38,11 @@ jobs:
             cc: clang++
             os: ubuntu
             flags: -std=c++20 -Werror -Wall
+          - name: Clang (no exceptions)
+            rust: nightly
+            cc: clang++
+            os: ubuntu
+            flags: -std=c++20 -Werror -Wall -fno-exceptions
           - name: C++14
             rust: nightly
             os: ubuntu
@@ -83,7 +88,7 @@ jobs:
         if: matrix.os == 'macos'
       - run: cargo run --manifest-path demo/Cargo.toml
       - run: cargo test --workspace ${{steps.testsuite.outputs.exclude}}
-        if: matrix.rust != '1.73.0'
+        if: matrix.rust != '1.73.0' && !contains(matrix.flags, '-fno-exceptions')
       - run: cargo check --no-default-features --features alloc
         env:
           RUSTFLAGS: --cfg compile_error_if_std ${{env.RUSTFLAGS}}
