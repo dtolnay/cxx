@@ -17,7 +17,7 @@ jobs:
     name: ${{matrix.name || format('Rust {0}', matrix.rust)}}
     needs: pre_ci
     if: needs.pre_ci.outputs.continue
-    runs-on: ${{matrix.os}}-latest
+    runs-on: ${{matrix.runs-on || format('{0}-latest', matrix.os)}}
     strategy:
       fail-fast: false
       matrix:
@@ -78,7 +78,7 @@ jobs:
             rust: nightly
             os: macos
             flags: -std=c++20
-            fail: true
+            runs-on: macos-15
           - name: C++20 on Windows
             rust: nightly-x86_64-pc-windows-msvc
             os: windows
@@ -115,18 +115,14 @@ jobs:
         run: echo RUSTFLAGS=${RUSTFLAGS}\ -Alinker_messages >> $GITHUB_ENV
         if: matrix.os == 'macos'
       - run: cargo run --manifest-path demo/Cargo.toml
-        continue-on-error: ${{matrix.fail}}
       - run: cargo test --workspace ${{steps.testsuite.outputs.exclude}}
         if: matrix.rust != '1.73.0' && !contains(matrix.flags, '-fno-exceptions')
-        continue-on-error: ${{matrix.fail}}
       - run: cargo check --no-default-features --features alloc
         env:
           RUSTFLAGS: --cfg compile_error_if_std ${{env.RUSTFLAGS}}
-        continue-on-error: ${{matrix.fail}}
       - run: cargo check --no-default-features
         env:
           RUSTFLAGS: --cfg compile_error_if_alloc --cfg cxx_experimental_no_alloc ${{env.RUSTFLAGS}}
-        continue-on-error: ${{matrix.fail}}
       - uses: actions/upload-artifact@v4
         if: matrix.os == 'ubuntu' && matrix.rust == 'nightly' && matrix.cc == '' && matrix.flags == '' && always()
         with:
