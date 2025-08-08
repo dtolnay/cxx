@@ -23,7 +23,7 @@ jobs:
       matrix:
         rust: [nightly, beta, stable, 1.82.0, 1.81.0, 1.80.0, 1.77.0, 1.73.0]
         os: [ubuntu]
-        cc: ['']
+        cc: [g++]
         flags: ['']
         include:
           - name: Cargo on macOS
@@ -35,25 +35,28 @@ jobs:
             flags: /EHsc
           - name: Clang
             rust: nightly
-            cc: clang++
             os: ubuntu
+            cc: clang++
             flags: -std=c++20
           - name: Clang (no exceptions)
             rust: nightly
-            cc: clang++
             os: ubuntu
+            cc: clang++
             flags: -std=c++20 -fno-exceptions
           - name: C++14
             rust: nightly
             os: ubuntu
+            cc: g++
             flags: -std=c++14
           - name: C++17
             rust: nightly
             os: ubuntu
+            cc: g++
             flags: -std=c++17
           - name: C++20
             rust: nightly
             os: ubuntu
+            cc: g++
             flags: -std=c++20
     env:
       CXX: ${{matrix.cc}}
