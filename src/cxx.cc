@@ -4,6 +4,16 @@
 #include <iostream>
 #include <memory>
 
+// Most compilers set __cpp_attributes on C++11 and up, and set __cpp_exceptions
+// if the flag `-fno-exceptions` is not set. On these compilers we detect
+// `-fno-exceptions` this way.
+//
+// Some compilers never set either one. On these, rely on the user to do
+// `-DRUST_CXX_NO_EXCEPTIONS` if they are not using exceptions.
+#if defined(__cpp_attributes) && !defined(__cpp_exceptions)
+#define RUST_CXX_NO_EXCEPTIONS
+#endif
+
 extern "C" {
 void cxxbridge1$cxx_string$init(std::string *s, const std::uint8_t *ptr,
                                 std::size_t len) noexcept {
@@ -76,9 +86,7 @@ inline namespace cxxbridge1 {
 
 template <typename Exception>
 void panic [[noreturn]] (const char *msg) {
-// Do not attempt to throw if the compiler explicitly does not support it.
-// If __cpp_attributes is not set, the compiler may not implement feature-test macros.
-#if defined(RUST_CXX_NO_EXCEPTIONS) || (defined(__cpp_attributes) && !defined(__cpp_exceptions))
+#if defined(RUST_CXX_NO_EXCEPTIONS)
   std::fprintf(stderr, "Error: %s. Aborting.\n", msg);
   std::abort();
 #else
