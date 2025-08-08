@@ -57,7 +57,7 @@ jobs:
             flags: -std=c++20
     env:
       CXX: ${{matrix.cc}}
-      CXXFLAGS: ${{matrix.flags}} ${{matrix.os != 'windows' && '-Werror -Wall' || ''}}
+      CXXFLAGS: ${{matrix.flags}} ${{matrix.os == 'windows' && '/WX' || '-Werror -Wall'}}
       RUSTFLAGS: --cfg deny_warnings -Dwarnings
     timeout-minutes: 45
     steps:
