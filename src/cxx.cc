@@ -4,6 +4,10 @@
 #include <iostream>
 #include <memory>
 
+#ifdef __cpp_lib_bit_cast
+#include <bit>
+#endif
+
 // Most compilers set __cpp_attributes on C++11 and up, and set __cpp_exceptions
 // if the flag `-fno-exceptions` is not set. On these compilers we detect
 // `-fno-exceptions` this way.
@@ -433,6 +437,19 @@ static_assert(sizeof(rust::isize) == sizeof(std::intptr_t),
               "unsupported ssize_t size");
 static_assert(alignof(rust::isize) == alignof(std::intptr_t),
               "unsupported ssize_t alignment");
+
+// The C++ standard does not guarantee a particular size, alignment, or bit
+// pattern for bool. In practice on all platforms supported by Rust, it is
+// compatible with Rust's bool. The libc crate freely uses Rust bool in
+// foreign function signatures.
+static_assert(sizeof(bool) == 1, "unsupported bool size");
+static_assert(alignof(bool) == 1, "unsupported bool alignment");
+#ifdef __cpp_lib_bit_cast
+static_assert(std::bit_cast<std::uint8_t>(false) == 0,
+              "unsupported bit representation of false");
+static_assert(std::bit_cast<std::uint8_t>(true) == 1,
+              "unsupported bit representation of true");
+#endif
 
 static_assert(std::is_trivially_copy_constructible<Str>::value,
               "trivial Str(const Str &)");
