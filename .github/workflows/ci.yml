@@ -37,27 +37,27 @@ jobs:
             rust: nightly
             cc: clang++
             os: ubuntu
-            flags: -std=c++20 -Werror -Wall
+            flags: -std=c++20
           - name: Clang (no exceptions)
             rust: nightly
             cc: clang++
             os: ubuntu
-            flags: -std=c++20 -Werror -Wall -fno-exceptions
+            flags: -std=c++20 -fno-exceptions
           - name: C++14
             rust: nightly
             os: ubuntu
-            flags: -std=c++14 -Werror -Wall
+            flags: -std=c++14
           - name: C++17
             rust: nightly
             os: ubuntu
-            flags: -std=c++17 -Werror -Wall
+            flags: -std=c++17
           - name: C++20
             rust: nightly
             os: ubuntu
-            flags: -std=c++20 -Werror -Wall
+            flags: -std=c++20
     env:
       CXX: ${{matrix.cc}}
-      CXXFLAGS: ${{matrix.flags}}
+      CXXFLAGS: ${{matrix.flags}} ${{matrix.os != 'windows' && '-Werror -Wall' || ''}}
       RUSTFLAGS: --cfg deny_warnings -Dwarnings
     timeout-minutes: 45
     steps:
