@@ -118,6 +118,23 @@ KJ_TEST("co_awaiting a fallible future from C++ can throw") {
   }().wait(waitScope);
 }
 
+KJ_TEST("co_awaiting a KjError future from C++ can throw with proper exception type") {
+  kj::EventLoop loop;
+  kj::WaitScope waitScope(loop);
+
+  []() -> kj::Promise<void> {
+    kj::Maybe<kj::Exception> maybeException;
+    try {
+      co_await new_kj_errored_future_void();
+    } catch (...) {
+      maybeException = kj::getCaughtExceptionAsKj();
+    }
+    auto& exception = KJ_ASSERT_NONNULL(maybeException, "should have thrown");
+    KJ_EXPECT(exception.getDescription() == "test error");
+    KJ_EXPECT(exception.getType() == kj::Exception::Type::OVERLOADED);
+  }().wait(waitScope);
+}
+
 KJ_TEST(".awaiting a Promise<T> from Rust can produce an Err Result") {
   kj::EventLoop loop;
   kj::WaitScope waitScope(loop);

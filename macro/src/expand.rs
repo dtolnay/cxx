@@ -1277,7 +1277,7 @@ fn expand_rust_function_shim_super(
         };
 
         if fut.throws_tokens.is_some() {
-            quote!(-> std::pin::Pin<Box<dyn ::std::future::Future<Output = ::std::result::Result<#output, String>> #lifetimes>>)
+            quote!(-> std::pin::Pin<Box<dyn ::std::future::Future<Output = ::std::result::Result<#output, ::cxx::KjException>> #lifetimes>>)
         } else {
             quote!(-> std::pin::Pin<Box<dyn ::std::future::Future<Output = #output> #lifetimes>>)
         }
@@ -1299,7 +1299,7 @@ fn expand_rust_function_shim_super(
 
     let mut body = if let Some(Type::Future(fut)) = &sig.ret {
         if fut.throws_tokens.is_some() {
-            quote_spanned!(span=> Box::pin(async move {#call(#(#vars,)*).await.map_err(|e| e.to_string())}))
+            quote_spanned!(span=> Box::pin(async move {#call(#(#vars,)*).await.map_err(|e| ::cxx::IntoKjException::into_kj_exception(e, ::cxx::core::file!(), ::cxx::core::line!()))}))
         } else {
             quote_spanned!(span=> Box::pin(#call(#(#vars,)*)))
         }

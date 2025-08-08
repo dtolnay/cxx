@@ -1,6 +1,7 @@
 use core::{
     ffi::CStr,
     fmt::{self, Display},
+    mem::ManuallyDrop,
     ptr::NonNull,
 };
 
@@ -214,6 +215,13 @@ impl KjException {
         }
 
         Some(result)
+    }
+
+    /// Consumes the exception, returning the raw pointer.
+    /// # Safety
+    /// The caller must ensure that the returned pointer is eventually dropped.
+    pub unsafe fn into_raw(self) -> NonNull<repr::KjException> {
+        ManuallyDrop::new(self).err
     }
 }
 

@@ -210,6 +210,13 @@ pub async fn new_errored_future_void() -> Result<()> {
     Err(std::io::Error::new(std::io::ErrorKind::Other, "test error"))
 }
 
+pub async fn new_kj_errored_future_void() -> std::result::Result<(), cxx::KjError> {
+    Err(cxx::KjError::new(
+        cxx::KjExceptionType::Overloaded,
+        "test error".to_string(),
+    ))
+}
+
 pub async fn new_error_handling_future_void_infallible() {
     let err = crate::ffi::new_errored_promise_void()
         .await

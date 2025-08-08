@@ -40,11 +40,14 @@ class FuturePoller {
     switch (pollFunc(&result)) {
       case ::kj_rs::FuturePollStatus::Pending:
         return;
-      case ::kj_rs::FuturePollStatus::Complete:
-        output.value = toResult();
+      case ::kj_rs::FuturePollStatus::Complete: {
+        output.value = kj::mv(result);
+        kj::dtor(result);
         return;
+      }
       case ::kj_rs::FuturePollStatus::Error: {
-        output.addException(toException());
+        output.addException(kj::mv(*error));
+        delete error;
         return;
       }
     }
@@ -53,22 +56,9 @@ class FuturePoller {
   }
 
  private:
-  T toResult() {
-    auto ret = kj::mv(result);
-    kj::dtor(result);
-    return ret;
-  }
-
-  kj::Exception toException() {
-    auto description = ::kj::ArrayPtr<const char>(error.data(), error.size());
-    auto exception = KJ_EXCEPTION(FAILED, kj::str(description));
-    kj::dtor(error);
-    return exception;
-  }
-
   union {
     T result;
-    ::rust::String error;
+    kj::Exception* error;
   };
 };
 
