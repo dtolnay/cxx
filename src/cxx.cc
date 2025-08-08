@@ -10,7 +10,11 @@
 //
 // Some compilers never set either one. On these, rely on the user to do
 // `-DRUST_CXX_NO_EXCEPTIONS` if they are not using exceptions.
-#if defined(__cpp_attributes) && !defined(__cpp_exceptions)
+//
+// On MSVC, it is possible for exception throwing and catching to be enabled
+// without __cpp_exceptions being defined, so do not try to detect anything.
+#if defined(__cpp_attributes) && !defined(__cpp_exceptions) &&                 \
+    (!defined(_MSC_VER) || defined(__llvm__))
 #define RUST_CXX_NO_EXCEPTIONS
 #endif
 
