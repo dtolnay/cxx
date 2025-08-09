@@ -3,7 +3,7 @@ use syn::parse::{Error, Parse, ParseStream, Result};
 use syn::{Ident, LitInt};
 
 #[derive(Copy, Clone, PartialEq)]
-pub enum Repr {
+pub(crate) enum Repr {
     Align(u32),
     Atom(Atom),
 }
