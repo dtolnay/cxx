@@ -1,0 +1,14 @@
+error: C++ does not support custom alignment on an enum
+ --> tests/ui/repr_unsupported.rs:3:5
+  |
+3 | /     #[repr(align(2))]
+4 | |     enum EnumAlign {
+5 | |         A,
+6 | |     }
+  | |_____^
+
+error: unexpected token, expected `)`
+  --> tests/ui/repr_unsupported.rs:13:20
+   |
+13 |     #[repr(align(1 << 10))]
+   |                    ^

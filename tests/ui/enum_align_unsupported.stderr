@@ -1,8 +1,0 @@
-error: C++ does not support custom alignment on an enum
- --> tests/ui/enum_align_unsupported.rs:3:5
-  |
-3 | /     #[repr(align(2))]
-4 | |     enum Bad {
-5 | |         A,
-6 | |     }
-  | |_____^
