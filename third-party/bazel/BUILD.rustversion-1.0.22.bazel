@@ -92,9 +92,9 @@ rust_proc_macro(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "1.0.21",
+    version = "1.0.22",
     deps = [
-        "@vendor__rustversion-1.0.21//:build_script_build",
+        "@vendor__rustversion-1.0.22//:build_script_build",
     ],
 )
 
@@ -146,7 +146,7 @@ cargo_build_script(
         "noclippy",
         "norustfmt",
     ],
-    version = "1.0.21",
+    version = "1.0.22",
     visibility = ["//visibility:private"],
 )
 

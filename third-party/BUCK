@@ -26,23 +26,23 @@ cargo.rust_library(
 
 alias(
     name = "cc",
-    actual = ":cc-1.2.31",
+    actual = ":cc-1.2.32",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "cc-1.2.31.crate",
-    sha256 = "c3a42d84bb6b69d3a8b3eaacf0d88f179e1929695e1ad012b6cf64d9caaa5fd2",
-    strip_prefix = "cc-1.2.31",
-    urls = ["https://static.crates.io/crates/cc/1.2.31/download"],
+    name = "cc-1.2.32.crate",
+    sha256 = "2352e5597e9c544d5e6d9c95190d5d27738ade584fa8db0a16e130e5c2b5296e",
+    strip_prefix = "cc-1.2.32",
+    urls = ["https://static.crates.io/crates/cc/1.2.32/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "cc-1.2.31",
-    srcs = [":cc-1.2.31.crate"],
+    name = "cc-1.2.32",
+    srcs = [":cc-1.2.32.crate"],
     crate = "cc",
-    crate_root = "cc-1.2.31.crate/src/lib.rs",
+    crate_root = "cc-1.2.32.crate/src/lib.rs",
     edition = "2018",
     visibility = [],
     deps = [":shlex-1.3.0"],
@@ -335,46 +335,46 @@ cargo.rust_library(
 
 alias(
     name = "rustversion",
-    actual = ":rustversion-1.0.21",
+    actual = ":rustversion-1.0.22",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "rustversion-1.0.21.crate",
-    sha256 = "8a0d197bd2c9dc6e53b84da9556a69ba4cdfab8619eb41a8bd1cc2027a0f6b1d",
-    strip_prefix = "rustversion-1.0.21",
-    urls = ["https://static.crates.io/crates/rustversion/1.0.21/download"],
+    name = "rustversion-1.0.22.crate",
+    sha256 = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d",
+    strip_prefix = "rustversion-1.0.22",
+    urls = ["https://static.crates.io/crates/rustversion/1.0.22/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "rustversion-1.0.21",
-    srcs = [":rustversion-1.0.21.crate"],
+    name = "rustversion-1.0.22",
+    srcs = [":rustversion-1.0.22.crate"],
     crate = "rustversion",
-    crate_root = "rustversion-1.0.21.crate/src/lib.rs",
+    crate_root = "rustversion-1.0.22.crate/src/lib.rs",
     edition = "2018",
     env = {
-        "OUT_DIR": "$(location :rustversion-1.0.21-build-script-run[out_dir])",
+        "OUT_DIR": "$(location :rustversion-1.0.22-build-script-run[out_dir])",
     },
     proc_macro = True,
-    rustc_flags = ["@$(location :rustversion-1.0.21-build-script-run[rustc_flags])"],
+    rustc_flags = ["@$(location :rustversion-1.0.22-build-script-run[rustc_flags])"],
     visibility = [],
 )
 
 cargo.rust_binary(
-    name = "rustversion-1.0.21-build-script-build",
-    srcs = [":rustversion-1.0.21.crate"],
+    name = "rustversion-1.0.22-build-script-build",
+    srcs = [":rustversion-1.0.22.crate"],
     crate = "build_script_build",
-    crate_root = "rustversion-1.0.21.crate/build/build.rs",
+    crate_root = "rustversion-1.0.22.crate/build/build.rs",
     edition = "2018",
     visibility = [],
 )
 
 buildscript_run(
-    name = "rustversion-1.0.21-build-script-run",
+    name = "rustversion-1.0.22-build-script-run",
     package_name = "rustversion",
-    buildscript_rule = ":rustversion-1.0.21-build-script-build",
-    version = "1.0.21",
+    buildscript_rule = ":rustversion-1.0.22-build-script-build",
+    version = "1.0.22",
 )
 
 alias(
