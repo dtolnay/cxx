@@ -234,15 +234,26 @@ pub(super) fn write(out: &mut OutFile) {
         out.next_section();
         writeln!(out, "#ifndef CXXBRIDGE_ALIGNMAX");
         writeln!(out, "#define CXXBRIDGE_ALIGNMAX");
-        writeln!(out, "template <::std::size_t... N>");
-        // This would be cleaner as:
-        //   class alignas(N...) alignmax {};
-        // but GCC does not implement that correctly.
-        // <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=64236>
+        // This would be cleaner as the following, but GCC does not implement
+        // that correctly. <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=64236>
+        //
+        //     template <::std::size_t... N>
+        //     class alignas(N...) alignmax {};
+        //
+        // Next, it could be this, but MSVC does not implement this correctly.
+        //
+        //     template <::std::size_t... N>
+        //     class alignmax { alignas(N...) union {} members; };
+        //
+        writeln!(out, "template <::std::size_t N>");
+        writeln!(out, "class alignas(N) aligned {{}};");
+        writeln!(out, "template <typename... T>");
         writeln!(
             out,
-            "class alignmax {{ alignas(N...) union {{}} members; }};",
+            "class alignmax_t {{ alignas(T...) union {{}} members; }};",
         );
+        writeln!(out, "template <::std::size_t... N>");
+        writeln!(out, "using alignmax = alignmax_t<aligned<N>...>;");
         writeln!(out, "#endif // CXXBRIDGE_ALIGNMAX");
     }
 
