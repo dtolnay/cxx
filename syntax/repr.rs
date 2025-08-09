@@ -1,11 +1,11 @@
 use crate::syntax::Atom::{self, *};
+use proc_macro2::{Ident, Span};
 use syn::parse::{Error, Parse, ParseStream, Result};
-use syn::{Ident, LitInt};
+use syn::{parenthesized, Expr, LitInt};
 
-#[derive(Copy, Clone, PartialEq)]
 pub(crate) enum Repr {
-    Align(u32),
-    Atom(Atom),
+    Align(LitInt),
+    Atom(Atom, Span),
 }
 
 impl Parse for Repr {
@@ -15,27 +15,35 @@ impl Parse for Repr {
         if let Some(atom) = Atom::from(&ident) {
             match atom {
                 U8 | U16 | U32 | U64 | Usize | I8 | I16 | I32 | I64 | Isize if input.is_empty() => {
-                    return Ok(Repr::Atom(atom));
+                    return Ok(Repr::Atom(atom, ident.span()));
                 }
                 _ => {}
             }
         } else if ident == "align" {
             let content;
-            syn::parenthesized!(content in input);
-            let alignment: u32 = content.parse::<LitInt>()?.base10_parse()?;
-            if !alignment.is_power_of_two() {
+            parenthesized!(content in input);
+            let align_expr: Expr = content.fork().parse()?;
+            if !matches!(align_expr, Expr::Lit(_)) {
                 return Err(Error::new_spanned(
-                    begin.token_stream(),
-                    "invalid `repr(align)` attribute: not a power of two",
+                    align_expr,
+                    "invalid repr(align) attribute: an arithmetic expression is not supported",
                 ));
             }
-            if alignment > 2u32.pow(29) {
+            let align_lit: LitInt = content.parse()?;
+            let align: u32 = align_lit.base10_parse()?;
+            if !align.is_power_of_two() {
                 return Err(Error::new_spanned(
-                    begin.token_stream(),
-                    "invalid `repr(align)` attribute: larger than 2^29",
+                    align_lit,
+                    "invalid repr(align) attribute: not a power of two",
                 ));
             }
-            return Ok(Repr::Align(alignment));
+            if align > 2u32.pow(13) {
+                return Err(Error::new_spanned(
+                    align_lit,
+                    "invalid repr(align) attribute: larger than 2^13",
+                ));
+            }
+            return Ok(Repr::Align(align_lit));
         }
         Err(Error::new_spanned(
             begin.token_stream(),

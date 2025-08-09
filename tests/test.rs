@@ -307,8 +307,8 @@ fn test_enum_representations() {
 }
 
 #[test]
-fn test_struct_align_repr() {
-    assert_eq!(4, std::mem::align_of::<ffi::StructWithAlignment4>());
+fn test_struct_repr_align() {
+    assert_eq!(4, std::mem::align_of::<ffi::OveralignedStruct>());
 }
 
 #[test]

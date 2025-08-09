@@ -88,7 +88,7 @@ pub mod ffi {
     }
 
     #[repr(align(4))]
-    pub struct StructWithAlignment4 {
+    pub struct OveralignedStruct {
         b: [u8; 4],
     }
 

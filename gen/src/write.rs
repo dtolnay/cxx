@@ -11,8 +11,8 @@ use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::{self, Symbol};
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::{
-    derive, mangle, Alignment, Api, Doc, Enum, ExternFn, ExternType, FnKind, Lang, Pair, Signature,
-    Struct, Trait, Type, TypeAlias, Types, Var,
+    derive, mangle, Api, Doc, Enum, ExternFn, ExternType, FnKind, Lang, Pair, Signature, Struct,
+    Trait, Type, TypeAlias, Types, Var,
 };
 use proc_macro2::Ident;
 
@@ -280,12 +280,23 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     write_doc(out, "", &strct.doc);
-    let alignment = if let Some(Alignment::Align(x)) = strct.alignment {
-        format!("alignas({}) ", x)
-    } else {
-        String::from("")
-    };
-    writeln!(out, "struct {}{} final {{", alignment, strct.name.cxx);
+    write!(out, "struct");
+    if let Some(align) = &strct.align {
+        out.builtin.alignmax = true;
+        writeln!(out, " alignas(::rust::repr::alignmax<");
+        writeln!(out, "  {},", align.base10_parse::<u32>().unwrap());
+        for (i, field) in strct.fields.iter().enumerate() {
+            write!(out, "  alignof(");
+            write_type(out, &field.ty);
+            write!(out, ")");
+            if i + 1 != strct.fields.len() {
+                write!(out, ",");
+            }
+            writeln!(out);
+        }
+        write!(out, ">)");
+    }
+    writeln!(out, " {} final {{", strct.name.cxx);
 
     for field in &strct.fields {
         write_doc(out, "  ", &field.doc);

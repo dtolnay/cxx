@@ -6,7 +6,7 @@ use crate::syntax::report::Errors;
 use crate::syntax::repr::Repr;
 use crate::syntax::Atom::*;
 use crate::syntax::{
-    attrs, error, Alignment, Api, Array, Derive, Doc, Enum, EnumRepr, ExternFn, ExternType, FnKind,
+    attrs, error, Api, Array, Derive, Doc, Enum, EnumRepr, ExternFn, ExternType, FnKind,
     ForeignName, Impl, Include, IncludeKind, Lang, Lifetimes, NamedType, Namespace, Pair, Ptr,
     Receiver, Ref, Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
@@ -79,10 +79,13 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
         },
     );
 
-    let alignment = if let Some(Repr::Align(x)) = repr {
-        Some(Alignment::Align(x))
-    } else {
-        None
+    let align = match repr {
+        Some(Repr::Align(align)) => Some(align),
+        Some(Repr::Atom(_atom, span)) => {
+            cx.push(Error::new(span, "unsupported alignment on a struct"));
+            None
+        }
+        None => None,
     };
 
     let named_fields = match item.fields {
@@ -186,7 +189,7 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
         cfg,
         doc,
         derives,
-        alignment,
+        align,
         attrs,
         visibility,
         struct_token,
@@ -207,7 +210,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
     let mut rust_name = None;
     let attrs = attrs::parse(
         cx,
-        item.attrs.clone(),
+        item.attrs,
         attrs::Parser {
             cfg: Some(&mut cfg),
             doc: Some(&mut doc),
@@ -232,9 +235,9 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
     }
 
     let repr = match repr {
-        Some(Repr::Atom(atom)) => Some(atom),
-        Some(Repr::Align(_)) => {
-            cx.error(&item, "repr(align) on enums is not supported");
+        Some(Repr::Atom(atom, _span)) => Some(atom),
+        Some(Repr::Align(align)) => {
+            cx.error(align, "C++ does not support custom alignment on an enum");
             None
         }
         None => None,
