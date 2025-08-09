@@ -1570,7 +1570,7 @@ fn expand_shared_ptr(
     let prefix = format!("cxxbridge1$shared_ptr${}$", resolve.name.to_symbol());
     let link_null = format!("{}null", prefix);
     let link_uninit = format!("{}uninit", prefix);
-    let link_from_unmanaged = format!("{}from_unmanaged", prefix);
+    let link_raw = format!("{}raw", prefix);
     let link_clone = format!("{}clone", prefix);
     let link_get = format!("{}get", prefix);
     let link_drop = format!("{}drop", prefix);
@@ -1614,13 +1614,13 @@ fn expand_shared_ptr(
                 }
             }
             #new_method
-            unsafe fn __from_unmanaged(value: *mut Self, new: *mut ::cxx::core::ffi::c_void) {
+            unsafe fn __raw(value: *mut Self, new: *mut ::cxx::core::ffi::c_void) {
                 #UnsafeExtern extern "C" {
-                    #[link_name = #link_from_unmanaged]
-                    fn __from_unmanaged(new: *const ::cxx::core::ffi::c_void, value: *mut ::cxx::core::ffi::c_void);
+                    #[link_name = #link_raw]
+                    fn __raw(new: *const ::cxx::core::ffi::c_void, value: *mut ::cxx::core::ffi::c_void);
                 }
                 unsafe {
-                    __from_unmanaged(new, value as *mut ::cxx::core::ffi::c_void);
+                    __raw(new, value as *mut ::cxx::core::ffi::c_void);
                 }
             }
             unsafe fn __clone(this: *const ::cxx::core::ffi::c_void, new: *mut ::cxx::core::ffi::c_void) {
