@@ -78,7 +78,7 @@ pub(crate) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) 
                 }
             }
         } else if attr_path.is_ident("repr") {
-            match attr.parse_args_with(parse_repr_attribute) {
+            match attr.parse_args::<Repr>() {
                 Ok(attr) => {
                     if let Some(repr) = &mut parser.repr {
                         **repr = Some(attr);
@@ -228,10 +228,6 @@ fn parse_derive_attribute(cx: &mut Errors, input: ParseStream) -> Result<Vec<Der
         cx.error(path, "unsupported derive");
     }
     Ok(derives)
-}
-
-fn parse_repr_attribute(input: ParseStream) -> Result<Repr> {
-    input.parse::<Repr>()
 }
 
 fn parse_cxx_name_attribute(meta: &Meta) -> Result<ForeignName> {

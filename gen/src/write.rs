@@ -280,12 +280,11 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     write_doc(out, "", &strct.doc);
-    let align = if let Some(x) = strct.align {
-        format!("alignas({}) ", x)
-    } else {
-        String::from("")
-    };
-    writeln!(out, "struct {}{} final {{", align, strct.name.cxx);
+    write!(out, "struct");
+    if let Some(align) = strct.align {
+        write!(out, " alignas({})", align);
+    }
+    writeln!(out, " {} final {{", strct.name.cxx);
 
     for field in &strct.fields {
         write_doc(out, "  ", &field.doc);

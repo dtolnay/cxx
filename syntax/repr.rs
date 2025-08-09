@@ -1,8 +1,8 @@
 use crate::syntax::Atom::{self, *};
+use proc_macro2::Ident;
 use syn::parse::{Error, Parse, ParseStream, Result};
-use syn::{Ident, LitInt};
+use syn::{parenthesized, LitInt};
 
-#[derive(Copy, Clone, PartialEq)]
 pub(crate) enum Repr {
     Align(u32),
     Atom(Atom),
@@ -21,18 +21,18 @@ impl Parse for Repr {
             }
         } else if ident == "align" {
             let content;
-            syn::parenthesized!(content in input);
+            parenthesized!(content in input);
             let align: u32 = content.parse::<LitInt>()?.base10_parse()?;
             if !align.is_power_of_two() {
                 return Err(Error::new_spanned(
                     begin.token_stream(),
-                    "invalid `repr(align)` attribute: not a power of two",
+                    "invalid repr(align) attribute: not a power of two",
                 ));
             }
             if align > 2u32.pow(29) {
                 return Err(Error::new_spanned(
                     begin.token_stream(),
-                    "invalid `repr(align)` attribute: larger than 2^29",
+                    "invalid repr(align) attribute: larger than 2^29",
                 ));
             }
             return Ok(Repr::Align(align));

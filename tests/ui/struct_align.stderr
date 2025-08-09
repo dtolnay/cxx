@@ -1,10 +1,10 @@
-error: invalid `repr(align)` attribute: not a power of two
+error: invalid repr(align) attribute: not a power of two
  --> tests/ui/struct_align.rs:3:12
   |
 3 |     #[repr(align(3))]
   |            ^^^^^^^^
 
-error: invalid `repr(align)` attribute: larger than 2^29
+error: invalid repr(align) attribute: larger than 2^29
  --> tests/ui/struct_align.rs:9:12
   |
 9 |     #[repr(align(1073741824))]
