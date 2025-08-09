@@ -134,14 +134,12 @@ where
             ty: PhantomData,
         }
     }
-}
 
-impl<T> UniquePtr<T>
-where
-    T: UniquePtrTarget + SharedPtrTarget,
-{
     /// Convert this UniquePtr to a SharedPtr, analogous to constructor (13) for [`std::shared_ptr`](https://en.cppreference.com/w/cpp/memory/shared_ptr/shared_ptr)
-    pub fn to_shared(self) -> SharedPtr<T> {
+    pub fn to_shared(self) -> SharedPtr<T>
+    where
+        T: SharedPtrTarget,
+    {
         unsafe { SharedPtr::from_raw(self.into_raw()) }
     }
 }

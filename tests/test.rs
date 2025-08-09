@@ -297,7 +297,7 @@ fn test_unique_to_shared_ptr_string() {
     let ptr = &*unique as *const _;
     let shared = unique.to_shared();
     assert_eq!(&*shared as *const _, ptr);
-    assert_eq!(&*shared, "2020");
+    assert_eq!(*shared, *"2020");
 }
 
 #[test]
@@ -310,7 +310,7 @@ fn test_unique_to_shared_ptr_cpp_type() {
 
 #[test]
 fn test_unique_to_shared_ptr_null() {
-    let unique = cxx::UniquePtr::<ffi::C>::null();
+    let unique = UniquePtr::<ffi::C>::null();
     assert!(unique.is_null());
     let shared = unique.to_shared();
     assert!(shared.is_null());
