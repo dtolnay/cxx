@@ -61,7 +61,7 @@ where
     /// * Value must either be null or point to a valid instance of T
     /// * Value must not be deleted (as the `std::shared_ptr` now manages its lifetime)
     /// * Value must not be accessed after the last `std::shared_ptr` is dropped
-    pub unsafe fn from_unmanaged(value: *mut T) -> Self {
+    pub unsafe fn from_raw(value: *mut T) -> Self {
         let mut shared_ptr = MaybeUninit::<SharedPtr<T>>::uninit();
         let new = shared_ptr.as_mut_ptr().cast();
         unsafe {
