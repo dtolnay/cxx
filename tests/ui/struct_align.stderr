@@ -10,7 +10,7 @@ error: invalid repr(align) attribute: larger than 2^29
 9 |     #[repr(align(1073741824))]
   |                  ^^^^^^^^^^
 
-error: invalid digit found in string
+error: invalid repr(align) attribute: an arithmetic expression is not supported
   --> tests/ui/struct_align.rs:14:18
    |
 14 |     #[repr(align(-2))]

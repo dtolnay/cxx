@@ -1,7 +1,7 @@
 use crate::syntax::Atom::{self, *};
 use proc_macro2::{Ident, Span};
 use syn::parse::{Error, Parse, ParseStream, Result};
-use syn::{parenthesized, LitInt};
+use syn::{parenthesized, Expr, LitInt};
 
 pub(crate) enum Repr {
     Align(LitInt),
@@ -22,6 +22,13 @@ impl Parse for Repr {
         } else if ident == "align" {
             let content;
             parenthesized!(content in input);
+            let align_expr: Expr = content.fork().parse()?;
+            if !matches!(align_expr, Expr::Lit(_)) {
+                return Err(Error::new_spanned(
+                    align_expr,
+                    "invalid repr(align) attribute: an arithmetic expression is not supported",
+                ));
+            }
             let align_lit: LitInt = content.parse()?;
             let align: u32 = align_lit.base10_parse()?;
             if !align.is_power_of_two() {
