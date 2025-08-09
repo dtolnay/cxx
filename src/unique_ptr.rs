@@ -1,9 +1,8 @@
 use crate::cxx_vector::{CxxVector, VectorElement};
 use crate::fmt::display;
 use crate::kind::Trivial;
-use crate::memory::SharedPtrTarget;
 use crate::string::CxxString;
-use crate::{ExternType, SharedPtr};
+use crate::ExternType;
 #[cfg(feature = "std")]
 use alloc::string::String;
 #[cfg(feature = "std")]
@@ -133,14 +132,6 @@ where
             repr: unsafe { T::__raw(raw) },
             ty: PhantomData,
         }
-    }
-
-    /// Convert this UniquePtr to a SharedPtr, analogous to constructor (13) for [`std::shared_ptr`](https://en.cppreference.com/w/cpp/memory/shared_ptr/shared_ptr)
-    pub fn to_shared(self) -> SharedPtr<T>
-    where
-        T: SharedPtrTarget,
-    {
-        unsafe { SharedPtr::from_raw(self.into_raw()) }
     }
 }
 

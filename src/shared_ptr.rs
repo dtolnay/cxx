@@ -1,6 +1,7 @@
 use crate::fmt::display;
 use crate::kind::Trivial;
 use crate::string::CxxString;
+use crate::unique_ptr::{UniquePtr, UniquePtrTarget};
 use crate::weak_ptr::{WeakPtr, WeakPtrTarget};
 use crate::ExternType;
 use core::cmp::Ordering;
@@ -220,6 +221,15 @@ where
         H: Hasher,
     {
         self.as_ref().hash(hasher);
+    }
+}
+
+impl<T> From<UniquePtr<T>> for SharedPtr<T>
+where
+    T: UniquePtrTarget + SharedPtrTarget,
+{
+    fn from(unique: UniquePtr<T>) -> Self {
+        unsafe { SharedPtr::from_raw(UniquePtr::into_raw(unique)) }
     }
 }
 

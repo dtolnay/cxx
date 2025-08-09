@@ -295,7 +295,7 @@ fn test_shared_ptr_weak_ptr() {
 fn test_unique_to_shared_ptr_string() {
     let unique = ffi::c_return_unique_ptr_string();
     let ptr = &*unique as *const _;
-    let shared = unique.to_shared();
+    let shared = SharedPtr::from(unique);
     assert_eq!(&*shared as *const _, ptr);
     assert_eq!(*shared, *"2020");
 }
@@ -304,7 +304,7 @@ fn test_unique_to_shared_ptr_string() {
 fn test_unique_to_shared_ptr_cpp_type() {
     let unique = ffi::c_return_unique_ptr();
     let ptr = &*unique as *const _;
-    let shared = unique.to_shared();
+    let shared = SharedPtr::from(unique);
     assert_eq!(&*shared as *const _, ptr);
 }
 
@@ -312,7 +312,7 @@ fn test_unique_to_shared_ptr_cpp_type() {
 fn test_unique_to_shared_ptr_null() {
     let unique = UniquePtr::<ffi::C>::null();
     assert!(unique.is_null());
-    let shared = unique.to_shared();
+    let shared = SharedPtr::from(unique);
     assert!(shared.is_null());
 }
 
