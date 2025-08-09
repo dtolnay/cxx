@@ -96,7 +96,7 @@ where
     /// too.
     ///
     /// Matches the behavior of [std::weak_ptr\<T\>::weak_ptr(const std::shared_ptr\<T\> \&)](https://en.cppreference.com/w/cpp/memory/weak_ptr/weak_ptr).
-    pub fn downgrade(self: &SharedPtr<T>) -> WeakPtr<T>
+    pub fn downgrade(&self) -> WeakPtr<T>
     where
         T: WeakPtrTarget,
     {
