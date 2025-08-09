@@ -1614,7 +1614,7 @@ fn expand_shared_ptr(
                 }
             }
             #new_method
-            unsafe fn __raw(value: *mut Self, new: *mut ::cxx::core::ffi::c_void) {
+            unsafe fn __raw(new: *mut ::cxx::core::ffi::c_void, value: *mut Self) {
                 #UnsafeExtern extern "C" {
                     #[link_name = #link_raw]
                     fn __raw(new: *const ::cxx::core::ffi::c_void, value: *mut ::cxx::core::ffi::c_void);

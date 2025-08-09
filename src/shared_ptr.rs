@@ -65,7 +65,7 @@ where
         let mut shared_ptr = MaybeUninit::<SharedPtr<T>>::uninit();
         let new = shared_ptr.as_mut_ptr().cast();
         unsafe {
-            T::__raw(value, new);
+            T::__raw(new, value);
             shared_ptr.assume_init()
         }
     }
@@ -261,7 +261,7 @@ pub unsafe trait SharedPtrTarget {
         unreachable!()
     }
     #[doc(hidden)]
-    unsafe fn __raw(value: *mut Self, new: *mut c_void);
+    unsafe fn __raw(new: *mut c_void, value: *mut Self);
     #[doc(hidden)]
     unsafe fn __clone(this: *const c_void, new: *mut c_void);
     #[doc(hidden)]
@@ -290,7 +290,7 @@ macro_rules! impl_shared_ptr_target {
                 }
                 unsafe { __uninit(new).cast::<$ty>().write(value) }
             }
-            unsafe fn __raw(value: *mut Self, new: *mut c_void) {
+            unsafe fn __raw(new: *mut c_void, value: *mut Self) {
                 extern "C" {
                     #[link_name = concat!("cxxbridge1$std$shared_ptr$", $segment, "$raw")]
                     fn __raw(new: *mut c_void, value: *mut c_void);
