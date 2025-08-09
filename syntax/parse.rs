@@ -210,7 +210,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
     let mut rust_name = None;
     let attrs = attrs::parse(
         cx,
-        item.attrs.clone(),
+        item.attrs,
         attrs::Parser {
             cfg: Some(&mut cfg),
             doc: Some(&mut doc),
@@ -236,8 +236,8 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
 
     let repr = match repr {
         Some(Repr::Atom(atom, _span)) => Some(atom),
-        Some(Repr::Align(_)) => {
-            cx.error(&item, "C++ does not support custom alignment on an enum");
+        Some(Repr::Align(align)) => {
+            cx.error(align, "C++ does not support custom alignment on an enum");
             None
         }
         None => None,

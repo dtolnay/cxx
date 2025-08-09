@@ -1,11 +1,8 @@
 error: C++ does not support custom alignment on an enum
- --> tests/ui/repr_unsupported.rs:3:5
+ --> tests/ui/repr_unsupported.rs:3:18
   |
-3 | /     #[repr(align(2))]
-4 | |     enum EnumAlign {
-5 | |         A,
-6 | |     }
-  | |_____^
+3 |     #[repr(align(2))]
+  |                  ^
 
 error: unsupported alignment on a struct
  --> tests/ui/repr_unsupported.rs:8:12
