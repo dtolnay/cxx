@@ -1,6 +1,7 @@
 use crate::fmt::display;
 use crate::kind::Trivial;
 use crate::string::CxxString;
+use crate::unique_ptr::{UniquePtr, UniquePtrTarget};
 use crate::weak_ptr::{WeakPtr, WeakPtrTarget};
 use crate::ExternType;
 use core::cmp::Ordering;
@@ -50,22 +51,26 @@ where
         }
     }
 
-    /// Create a shared pointer from an already-allocated object
-    /// Corresponds to constructor (3) of [`std::shared_ptr`](https://en.cppreference.com/w/cpp/memory/shared_ptr/shared_ptr)
+    /// Creates a shared pointer from a C++ heap-allocated pointer.
     ///
-    /// The SharedPtr gains ownership of the pointer and will call `std::default_delete` on it when the refcount goes to zero.
-    /// The data will not be moved, so any pointers to this data elsewhere in the program continue to be valid
+    /// Matches the behavior of std::shared\_ptr's constructor `explicit shared_ptr(T*)`.
+    ///
+    /// The SharedPtr gains ownership of the pointer and will call
+    /// `std::default_delete` on it when the refcount goes to zero.
+    ///
+    /// The object pointed to by the input pointer is not relocated by this
+    /// operation, so any pointers into this data structure elsewhere in the
+    /// program continue to be valid.
     ///
     /// # Safety
     ///
-    /// * Value must either be null or point to a valid instance of T
-    /// * Value must not be deleted (as the `std::shared_ptr` now manages its lifetime)
-    /// * Value must not be accessed after the last `std::shared_ptr` is dropped
-    pub unsafe fn from_unmanaged(value: *mut T) -> Self {
+    /// Pointer must either be null or point to a valid instance of T
+    /// heap-allocated in C++ by `new`.
+    pub unsafe fn from_raw(raw: *mut T) -> Self {
         let mut shared_ptr = MaybeUninit::<SharedPtr<T>>::uninit();
         let new = shared_ptr.as_mut_ptr().cast();
         unsafe {
-            T::__from_unmanaged(value, new);
+            T::__raw(new, raw);
             shared_ptr.assume_init()
         }
     }
@@ -219,6 +224,15 @@ where
     }
 }
 
+impl<T> From<UniquePtr<T>> for SharedPtr<T>
+where
+    T: UniquePtrTarget + SharedPtrTarget,
+{
+    fn from(unique: UniquePtr<T>) -> Self {
+        unsafe { SharedPtr::from_raw(UniquePtr::into_raw(unique)) }
+    }
+}
+
 /// Trait bound for types which may be used as the `T` inside of a
 /// `SharedPtr<T>` in generic code.
 ///
@@ -261,7 +275,7 @@ pub unsafe trait SharedPtrTarget {
         unreachable!()
     }
     #[doc(hidden)]
-    unsafe fn __from_unmanaged(value: *mut Self, new: *mut c_void);
+    unsafe fn __raw(new: *mut c_void, raw: *mut Self);
     #[doc(hidden)]
     unsafe fn __clone(this: *const c_void, new: *mut c_void);
     #[doc(hidden)]
@@ -290,12 +304,12 @@ macro_rules! impl_shared_ptr_target {
                 }
                 unsafe { __uninit(new).cast::<$ty>().write(value) }
             }
-            unsafe fn __from_unmanaged(value: *mut Self, new: *mut c_void) {
+            unsafe fn __raw(new: *mut c_void, raw: *mut Self) {
                 extern "C" {
-                    #[link_name = concat!("cxxbridge1$std$shared_ptr$", $segment, "$from_unmanaged")]
-                    fn __from_unmanaged(new: *mut c_void, value: *mut c_void);
+                    #[link_name = concat!("cxxbridge1$std$shared_ptr$", $segment, "$raw")]
+                    fn __raw(new: *mut c_void, raw: *mut c_void);
                 }
-                unsafe { __from_unmanaged(new, value as *mut c_void) }
+                unsafe { __raw(new, raw as *mut c_void) }
             }
             unsafe fn __clone(this: *const c_void, new: *mut c_void) {
                 extern "C" {

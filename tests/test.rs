@@ -14,6 +14,7 @@ use cxx_test_suite::{cast, ffi, R};
 use std::cell::Cell;
 use std::ffi::CStr;
 use std::panic::{self, RefUnwindSafe, UnwindSafe};
+use std::ptr;
 
 thread_local! {
     static CORRECT: Cell<bool> = const { Cell::new(false) };
@@ -294,25 +295,25 @@ fn test_shared_ptr_weak_ptr() {
 #[test]
 fn test_unique_to_shared_ptr_string() {
     let unique = ffi::c_return_unique_ptr_string();
-    let ptr = &*unique as *const _;
-    let shared = unique.to_shared();
-    assert_eq!(&*shared as *const _, ptr);
-    assert_eq!(&*shared, "2020");
+    let ptr = ptr::addr_of!(*unique);
+    let shared = SharedPtr::from(unique);
+    assert_eq!(ptr::addr_of!(*shared), ptr);
+    assert_eq!(*shared, *"2020");
 }
 
 #[test]
 fn test_unique_to_shared_ptr_cpp_type() {
     let unique = ffi::c_return_unique_ptr();
-    let ptr = &*unique as *const _;
-    let shared = unique.to_shared();
-    assert_eq!(&*shared as *const _, ptr);
+    let ptr = ptr::addr_of!(*unique);
+    let shared = SharedPtr::from(unique);
+    assert_eq!(ptr::addr_of!(*shared), ptr);
 }
 
 #[test]
 fn test_unique_to_shared_ptr_null() {
-    let unique = cxx::UniquePtr::<ffi::C>::null();
+    let unique = UniquePtr::<ffi::C>::null();
     assert!(unique.is_null());
-    let shared = unique.to_shared();
+    let shared = SharedPtr::from(unique);
     assert!(shared.is_null());
 }
 
