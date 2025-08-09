@@ -1614,13 +1614,13 @@ fn expand_shared_ptr(
                 }
             }
             #new_method
-            unsafe fn __raw(new: *mut ::cxx::core::ffi::c_void, value: *mut Self) {
+            unsafe fn __raw(new: *mut ::cxx::core::ffi::c_void, raw: *mut Self) {
                 #UnsafeExtern extern "C" {
                     #[link_name = #link_raw]
-                    fn __raw(new: *const ::cxx::core::ffi::c_void, value: *mut ::cxx::core::ffi::c_void);
+                    fn __raw(new: *const ::cxx::core::ffi::c_void, raw: *mut ::cxx::core::ffi::c_void);
                 }
                 unsafe {
-                    __raw(new, value as *mut ::cxx::core::ffi::c_void);
+                    __raw(new, raw as *mut ::cxx::core::ffi::c_void);
                 }
             }
             unsafe fn __clone(this: *const ::cxx::core::ffi::c_void, new: *mut ::cxx::core::ffi::c_void) {

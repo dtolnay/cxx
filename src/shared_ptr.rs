@@ -61,11 +61,11 @@ where
     /// * Value must either be null or point to a valid instance of T
     /// * Value must not be deleted (as the `std::shared_ptr` now manages its lifetime)
     /// * Value must not be accessed after the last `std::shared_ptr` is dropped
-    pub unsafe fn from_raw(value: *mut T) -> Self {
+    pub unsafe fn from_raw(raw: *mut T) -> Self {
         let mut shared_ptr = MaybeUninit::<SharedPtr<T>>::uninit();
         let new = shared_ptr.as_mut_ptr().cast();
         unsafe {
-            T::__raw(new, value);
+            T::__raw(new, raw);
             shared_ptr.assume_init()
         }
     }
@@ -261,7 +261,7 @@ pub unsafe trait SharedPtrTarget {
         unreachable!()
     }
     #[doc(hidden)]
-    unsafe fn __raw(new: *mut c_void, value: *mut Self);
+    unsafe fn __raw(new: *mut c_void, raw: *mut Self);
     #[doc(hidden)]
     unsafe fn __clone(this: *const c_void, new: *mut c_void);
     #[doc(hidden)]
@@ -290,12 +290,12 @@ macro_rules! impl_shared_ptr_target {
                 }
                 unsafe { __uninit(new).cast::<$ty>().write(value) }
             }
-            unsafe fn __raw(new: *mut c_void, value: *mut Self) {
+            unsafe fn __raw(new: *mut c_void, raw: *mut Self) {
                 extern "C" {
                     #[link_name = concat!("cxxbridge1$std$shared_ptr$", $segment, "$raw")]
-                    fn __raw(new: *mut c_void, value: *mut c_void);
+                    fn __raw(new: *mut c_void, raw: *mut c_void);
                 }
-                unsafe { __raw(new, value as *mut c_void) }
+                unsafe { __raw(new, raw as *mut c_void) }
             }
             unsafe fn __clone(this: *const c_void, new: *mut c_void) {
                 extern "C" {
