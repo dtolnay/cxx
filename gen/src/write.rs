@@ -282,7 +282,19 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
     write_doc(out, "", &strct.doc);
     write!(out, "struct");
     if let Some(align) = &strct.align {
-        write!(out, " alignas({})", align.base10_parse::<u32>().unwrap());
+        out.builtin.alignmax = true;
+        writeln!(out, " alignas(::rust::repr::alignmax<");
+        writeln!(out, "  {},", align.base10_parse::<u32>().unwrap());
+        for (i, field) in strct.fields.iter().enumerate() {
+            write!(out, "  alignof(");
+            write_type(out, &field.ty);
+            write!(out, ")");
+            if i + 1 != strct.fields.len() {
+                write!(out, ",");
+            }
+            writeln!(out);
+        }
+        write!(out, ">)");
     }
     writeln!(out, " {} final {{", strct.name.cxx);
 

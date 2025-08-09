@@ -32,6 +32,7 @@ pub(crate) struct Builtins<'a> {
     pub is_complete: bool,
     pub destroy: bool,
     pub deleter_if: bool,
+    pub alignmax: bool,
     pub content: Content<'a>,
 }
 
@@ -226,6 +227,16 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "  void *ptr;");
         writeln!(out, "  ::std::size_t len;");
         writeln!(out, "}};");
+    }
+
+    if builtin.alignmax {
+        include.cstddef = true;
+        out.next_section();
+        writeln!(out, "#ifndef CXXBRIDGE_ALIGNMAX");
+        writeln!(out, "#define CXXBRIDGE_ALIGNMAX");
+        writeln!(out, "template <::std::size_t... N>");
+        writeln!(out, "class alignas(N...) alignmax {{}};");
+        writeln!(out, "#endif // CXXBRIDGE_ALIGNMAX");
     }
 
     out.end_block(Block::Namespace("repr"));
