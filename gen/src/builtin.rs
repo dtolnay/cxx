@@ -235,7 +235,14 @@ pub(super) fn write(out: &mut OutFile) {
         writeln!(out, "#ifndef CXXBRIDGE_ALIGNMAX");
         writeln!(out, "#define CXXBRIDGE_ALIGNMAX");
         writeln!(out, "template <::std::size_t... N>");
-        writeln!(out, "class alignas(N...) alignmax {{}};");
+        // This would be cleaner as:
+        //   class alignas(N...) alignmax {};
+        // but GCC does not implement that correctly.
+        // <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=64236>
+        writeln!(
+            out,
+            "class alignmax {{ alignas(N...) union {{}} members; }};",
+        );
         writeln!(out, "#endif // CXXBRIDGE_ALIGNMAX");
     }
 
