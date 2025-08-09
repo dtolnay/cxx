@@ -4,7 +4,7 @@ use syn::parse::{Error, Parse, ParseStream, Result};
 use syn::{parenthesized, LitInt};
 
 pub(crate) enum Repr {
-    Align(u32),
+    Align(LitInt),
     Atom(Atom, Span),
 }
 
@@ -36,7 +36,7 @@ impl Parse for Repr {
                     "invalid repr(align) attribute: larger than 2^29",
                 ));
             }
-            return Ok(Repr::Align(align));
+            return Ok(Repr::Align(align_lit));
         }
         Err(Error::new_spanned(
             begin.token_stream(),

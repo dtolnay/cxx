@@ -109,7 +109,7 @@ pub(crate) struct Struct {
     pub cfg: CfgExpr,
     pub doc: Doc,
     pub derives: Vec<Derive>,
-    pub align: Option<u32>,
+    pub align: Option<LitInt>,
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
     pub attrs: OtherAttrs,
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build

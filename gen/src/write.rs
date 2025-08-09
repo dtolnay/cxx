@@ -281,8 +281,8 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
     writeln!(out, "#define {}", guard);
     write_doc(out, "", &strct.doc);
     write!(out, "struct");
-    if let Some(align) = strct.align {
-        write!(out, " alignas({})", align);
+    if let Some(align) = &strct.align {
+        write!(out, " alignas({})", align.base10_parse::<u32>().unwrap());
     }
     writeln!(out, " {} final {{", strct.name.cxx);
 

@@ -12,7 +12,7 @@ use crate::syntax::{
 };
 use crate::type_id::Crate;
 use crate::{derive, generics};
-use proc_macro2::{Ident, Literal, Span, TokenStream};
+use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
 use std::mem;
 use syn::{parse_quote, punctuated, Generics, Lifetime, Result, Token};
@@ -178,10 +178,7 @@ fn expand_struct(strct: &Struct) -> TokenStream {
         }
     };
 
-    let align = strct.align.map(|align| {
-        let align = Literal::u32_unsuffixed(align);
-        quote!(, align(#align))
-    });
+    let align = strct.align.as_ref().map(|align| quote!(, align(#align)));
 
     quote! {
         #doc
