@@ -1865,7 +1865,7 @@ fn write_shared_ptr(out: &mut OutFile, key: &NamedImplKey) {
     );
     writeln!(
         out,
-        "  new (ptr) std::shared_ptr<{}>(static_cast<{} *>(data));",
+        "  ::new (ptr) ::std::shared_ptr<{}>(static_cast<{} *>(data));",
         inner, inner
     );
     writeln!(out, "}}");
