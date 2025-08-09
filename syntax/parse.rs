@@ -236,7 +236,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
         Some(Repr::Align(_)) => {
             cx.error(&item, "repr(align) on enums is not supported");
             None
-        },
+        }
         None => None,
     };
 
