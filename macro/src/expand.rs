@@ -178,19 +178,16 @@ fn expand_struct(strct: &Struct) -> TokenStream {
         }
     };
 
-    let mut repr = quote! { #[repr(C)] };
-    if let Some(align) = strct.align {
+    let align = strct.align.map(|align| {
         let align = Literal::u32_unsuffixed(align);
-        repr.extend(quote! {
-            #[repr(align(#align))]
-        });
-    }
+        quote!(, align(#align))
+    });
 
     quote! {
         #doc
         #derives
         #attrs
-        #repr
+        #[repr(C #align)]
         #struct_def
 
         #[automatically_derived]
