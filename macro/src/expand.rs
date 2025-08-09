@@ -1615,11 +1615,13 @@ fn expand_shared_ptr(
             }
             #new_method
             unsafe fn __from_unmanaged(value: *mut Self, new: *mut ::cxx::core::ffi::c_void) {
-                extern "C" {
+                #UnsafeExtern extern "C" {
                     #[link_name = #link_from_unmanaged]
                     fn __from_unmanaged(new: *const ::cxx::core::ffi::c_void, value: *mut ::cxx::core::ffi::c_void);
                 }
-                __from_unmanaged(new, value as *mut ::cxx::core::ffi::c_void);
+                unsafe {
+                    __from_unmanaged(new, value as *mut ::cxx::core::ffi::c_void);
+                }
             }
             unsafe fn __clone(this: *const ::cxx::core::ffi::c_void, new: *mut ::cxx::core::ffi::c_void) {
                 #UnsafeExtern extern "C" {
