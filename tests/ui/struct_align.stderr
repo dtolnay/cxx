@@ -4,7 +4,7 @@ error: invalid repr(align) attribute: not a power of two
 3 |     #[repr(align(3))]
   |                  ^
 
-error: invalid repr(align) attribute: larger than 2^29
+error: invalid repr(align) attribute: larger than 2^13
  --> tests/ui/struct_align.rs:9:18
   |
 9 |     #[repr(align(1073741824))]

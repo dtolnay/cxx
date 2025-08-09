@@ -249,7 +249,7 @@ C++ data type:
 
 The attribute `repr(align(…))` sets a minimum required alignment for a shared
 struct. The alignment value must be a power of two in the range 2<sup>0</sup> to
-2<sup>29</sup>.
+2<sup>13</sup>.
 
 This turns into an [`alignas`] specifier in C++.
 

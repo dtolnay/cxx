@@ -37,10 +37,10 @@ impl Parse for Repr {
                     "invalid repr(align) attribute: not a power of two",
                 ));
             }
-            if align > 2u32.pow(29) {
+            if align > 2u32.pow(13) {
                 return Err(Error::new_spanned(
                     align_lit,
-                    "invalid repr(align) attribute: larger than 2^29",
+                    "invalid repr(align) attribute: larger than 2^13",
                 ));
             }
             return Ok(Repr::Align(align_lit));
