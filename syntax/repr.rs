@@ -1,11 +1,11 @@
 use crate::syntax::Atom::{self, *};
-use proc_macro2::Ident;
+use proc_macro2::{Ident, Span};
 use syn::parse::{Error, Parse, ParseStream, Result};
 use syn::{parenthesized, LitInt};
 
 pub(crate) enum Repr {
     Align(u32),
-    Atom(Atom),
+    Atom(Atom, Span),
 }
 
 impl Parse for Repr {
@@ -15,7 +15,7 @@ impl Parse for Repr {
         if let Some(atom) = Atom::from(&ident) {
             match atom {
                 U8 | U16 | U32 | U64 | Usize | I8 | I16 | I32 | I64 | Isize if input.is_empty() => {
-                    return Ok(Repr::Atom(atom));
+                    return Ok(Repr::Atom(atom, ident.span()));
                 }
                 _ => {}
             }

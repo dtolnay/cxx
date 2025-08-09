@@ -79,10 +79,13 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
         },
     );
 
-    let align = if let Some(Repr::Align(align)) = repr {
-        Some(align)
-    } else {
-        None
+    let align = match repr {
+        Some(Repr::Align(align)) => Some(align),
+        Some(Repr::Atom(_atom, span)) => {
+            cx.push(Error::new(span, "unsupported alignment on a struct"));
+            None
+        }
+        None => None,
     };
 
     let named_fields = match item.fields {
@@ -232,7 +235,7 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
     }
 
     let repr = match repr {
-        Some(Repr::Atom(atom)) => Some(atom),
+        Some(Repr::Atom(atom, _span)) => Some(atom),
         Some(Repr::Align(_)) => {
             cx.error(&item, "C++ does not support custom alignment on an enum");
             None
