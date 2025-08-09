@@ -750,8 +750,8 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
     new (ptr) std::shared_ptr<CXX_TYPE>();                                     \
   }                                                                            \
   void cxxbridge1$std$shared_ptr$##RUST_TYPE##$raw(                            \
-      std::shared_ptr<CXX_TYPE> *ptr, void *data) noexcept {                   \
-    new (ptr) std::shared_ptr<CXX_TYPE>(static_cast<CXX_TYPE *>(data));        \
+      std::shared_ptr<CXX_TYPE> *ptr, CXX_TYPE *raw) noexcept {                \
+    new (ptr) std::shared_ptr<CXX_TYPE>(raw);                                  \
   }                                                                            \
   CXX_TYPE *cxxbridge1$std$shared_ptr$##RUST_TYPE##$uninit(                    \
       std::shared_ptr<CXX_TYPE> *ptr) noexcept {                               \
