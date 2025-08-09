@@ -7,8 +7,8 @@ use crate::syntax::qualified::QualifiedName;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::{
-    self, check, mangle, Alignment, Api, Doc, Enum, ExternFn, ExternType, FnKind, Impl, Lang,
-    Lifetimes, Pair, Signature, Struct, Trait, Type, TypeAlias, Types,
+    self, check, mangle, Api, Doc, Enum, ExternFn, ExternType, FnKind, Impl, Lang, Lifetimes, Pair,
+    Signature, Struct, Trait, Type, TypeAlias, Types,
 };
 use crate::type_id::Crate;
 use crate::{derive, generics};
@@ -180,7 +180,7 @@ fn expand_struct(strct: &Struct) -> TokenStream {
     };
 
     let mut repr = quote! { #[repr(C)] };
-    if let Some(Alignment::Align(x)) = alignment {
+    if let Some(x) = alignment {
         // Suffix isn't allowed in repr(align)
         let x = Literal::u32_unsuffixed(*x);
         repr = quote! {

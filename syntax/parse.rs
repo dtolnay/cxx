@@ -6,7 +6,7 @@ use crate::syntax::report::Errors;
 use crate::syntax::repr::Repr;
 use crate::syntax::Atom::*;
 use crate::syntax::{
-    attrs, error, Alignment, Api, Array, Derive, Doc, Enum, EnumRepr, ExternFn, ExternType, FnKind,
+    attrs, error, Api, Array, Derive, Doc, Enum, EnumRepr, ExternFn, ExternType, FnKind,
     ForeignName, Impl, Include, IncludeKind, Lang, Lifetimes, NamedType, Namespace, Pair, Ptr,
     Receiver, Ref, Signature, SliceRef, Struct, Ty1, Type, TypeAlias, Var, Variant,
 };
@@ -80,7 +80,7 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
     );
 
     let alignment = if let Some(Repr::Align(x)) = repr {
-        Some(Alignment::Align(x))
+        Some(x)
     } else {
         None
     };
