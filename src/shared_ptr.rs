@@ -50,17 +50,21 @@ where
         }
     }
 
-    /// Create a shared pointer from an already-allocated object
-    /// Corresponds to constructor (3) of [`std::shared_ptr`](https://en.cppreference.com/w/cpp/memory/shared_ptr/shared_ptr)
+    /// Creates a shared pointer from a C++ heap-allocated pointer.
     ///
-    /// The SharedPtr gains ownership of the pointer and will call `std::default_delete` on it when the refcount goes to zero.
-    /// The data will not be moved, so any pointers to this data elsewhere in the program continue to be valid
+    /// Matches the behavior of std::shared\_ptr's constructor `explicit shared_ptr(T*)`.
+    ///
+    /// The SharedPtr gains ownership of the pointer and will call
+    /// `std::default_delete` on it when the refcount goes to zero.
+    ///
+    /// The object pointed to by the input pointer is not relocated by this
+    /// operation, so any pointers into this data structure elsewhere in the
+    /// program continue to be valid.
     ///
     /// # Safety
     ///
-    /// * Value must either be null or point to a valid instance of T
-    /// * Value must not be deleted (as the `std::shared_ptr` now manages its lifetime)
-    /// * Value must not be accessed after the last `std::shared_ptr` is dropped
+    /// Pointer must either be null or point to a valid instance of T
+    /// heap-allocated in C++ by `new`.
     pub unsafe fn from_raw(raw: *mut T) -> Self {
         let mut shared_ptr = MaybeUninit::<SharedPtr<T>>::uninit();
         let new = shared_ptr.as_mut_ptr().cast();
