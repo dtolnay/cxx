@@ -155,7 +155,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
 fn expand_struct(strct: &Struct) -> TokenStream {
     let ident = &strct.name.rust;
     let doc = &strct.doc;
-    let alignment = &strct.alignment;
+    let align = &strct.align;
     let attrs = &strct.attrs;
     let generics = &strct.generics;
     let type_id = type_id(&strct.name);
@@ -180,7 +180,7 @@ fn expand_struct(strct: &Struct) -> TokenStream {
     };
 
     let mut repr = quote! { #[repr(C)] };
-    if let Some(x) = alignment {
+    if let Some(x) = align {
         // Suffix isn't allowed in repr(align)
         let x = Literal::u32_unsuffixed(*x);
         repr = quote! {

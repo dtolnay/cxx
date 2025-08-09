@@ -79,7 +79,7 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
         },
     );
 
-    let alignment = if let Some(Repr::Align(x)) = repr {
+    let align = if let Some(Repr::Align(x)) = repr {
         Some(x)
     } else {
         None
@@ -186,7 +186,7 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
         cfg,
         doc,
         derives,
-        alignment,
+        align,
         attrs,
         visibility,
         struct_token,
