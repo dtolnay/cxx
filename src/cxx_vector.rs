@@ -53,7 +53,7 @@ where
         T::__vector_size(self)
     }
 
-    /// Returns the capacity of the vector
+    /// Returns the capacity of the vector.
     ///
     /// Matches the behavior of C++ [std::vector\<T\>::capacity][capacity].
     ///
@@ -214,11 +214,11 @@ where
         }
     }
 
-    /// Reserve additional space in the vector
+    /// Reserves additional space in the vector.
     ///
-    /// Note that this follows Rust semantics of being *additional*
-    /// capacity instead of absolute capacity. Equivalent to `vec.reserve(vec.size() + additional)`
-    /// in C++
+    /// Note that this follows Rust semantics of being *additional* capacity
+    /// instead of absolute capacity. Equivalent to `vec.reserve(vec.size() +
+    /// additional)` in C++.
     pub fn reserve(self: Pin<&mut Self>, additional: usize) {
         unsafe {
             let len = self.as_ref().len();
@@ -227,16 +227,18 @@ where
     }
 }
 
-impl<A> Extend<A> for Pin<&mut CxxVector<A>>
+impl<T> Extend<T> for Pin<&mut CxxVector<T>>
 where
-    A: ExternType<Kind = Trivial>,
-    A: VectorElement,
+    T: ExternType<Kind = Trivial> + VectorElement,
 {
-    fn extend<T: IntoIterator<Item = A>>(&mut self, iter: T) {
+    fn extend<I>(&mut self, iter: I)
+    where
+        I: IntoIterator<Item = T>,
+    {
         let iter = iter.into_iter();
         self.as_mut().reserve(iter.size_hint().0);
-        for i in iter {
-            self.as_mut().push(i);
+        for element in iter {
+            self.as_mut().push(element);
         }
     }
 }
