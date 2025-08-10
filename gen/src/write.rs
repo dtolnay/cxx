@@ -2011,7 +2011,7 @@ fn write_cxx_vector(out: &mut OutFile, key: &NamedImplKey) {
     begin_function_definition(out);
     writeln!(
         out,
-        "void cxxbridge1$std$vector${}$reserve(::std::vector<{}> *s, ::std::size_t new_cap) {{",
+        "void cxxbridge1$std$vector${}$reserve(::std::vector<{}> *s, ::std::size_t new_cap) noexcept {{",
         instance, inner,
     );
     writeln!(out, "  s->reserve(new_cap);");

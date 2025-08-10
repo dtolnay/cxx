@@ -1832,7 +1832,7 @@ fn expand_cxx_vector(
                 unsafe { __vector_size(v) }
             }
             fn __vector_capacity(v: &::cxx::CxxVector<Self>) -> usize {
-                extern "C" {
+                #UnsafeExtern extern "C" {
                     #[link_name = #link_capacity]
                     fn __vector_capacity #impl_generics(_: &::cxx::CxxVector<#elem #ty_generics>) -> usize;
                 }
@@ -1849,7 +1849,7 @@ fn expand_cxx_vector(
                 unsafe { __get_unchecked(v, pos) as *mut Self }
             }
             unsafe fn __reserve(v: ::cxx::core::pin::Pin<&mut ::cxx::CxxVector<Self>>, new_cap: usize) {
-                extern "C" {
+                #UnsafeExtern extern "C" {
                     #[link_name = #link_reserve]
                     fn __reserve #impl_generics(
                         v: ::cxx::core::pin::Pin<&mut ::cxx::CxxVector<#elem #ty_generics>>,
