@@ -11,6 +11,7 @@ use core::hash::{Hash, Hasher};
 use core::marker::PhantomData;
 use core::mem::MaybeUninit;
 use core::ops::Deref;
+use core::pin::Pin;
 
 /// Binding to C++ `std::shared_ptr<T>`.
 ///
@@ -136,8 +137,66 @@ where
     ///
     /// </div>
     pub fn as_ref(&self) -> Option<&T> {
+        let ptr = self.as_ptr();
+        unsafe { ptr.as_ref() }
+    }
+
+    /// Returns a mutable pinned reference to the object pointed to by the
+    /// stored pointer.
+    ///
+    /// <div class="warning">
+    ///
+    /// The shared pointer's managed object may or may not already have been
+    /// destroyed.
+    ///
+    /// </div>
+    ///
+    /// # Panics
+    ///
+    /// Panics if the SharedPtr holds a null stored pointer.
+    ///
+    /// # Safety
+    ///
+    /// This method makes no attempt to ascertain the state of the reference
+    /// count. In particular, unlike `Arc::get_mut`, we do not enforce absence
+    /// of other SharedPtr and WeakPtr referring to the same data as this one.
+    /// As always, it is Undefined Behavior to have simultaneous references to
+    /// the same value while a Rust exclusive reference to it exists anywhere in
+    /// the program.
+    ///
+    /// For the special case of CXX [opaque C++ types], this method can be used
+    /// to safely call thread-safe non-const member functions on a C++ object
+    /// without regard for whether the reference is exclusive. This capability
+    /// applies only to opaque types `extern "C++" { type T; }`. It does not
+    /// apply to extern types defined with a non-opaque Rust representation
+    /// `extern "C++" { type T = ...; }`.
+    ///
+    /// [opaque C++ types]: https://cxx.rs/extern-c++.html#opaque-c-types
+    pub unsafe fn pin_mut_unchecked(&mut self) -> Pin<&mut T> {
+        let ptr = self.as_mut_ptr();
+        match unsafe { ptr.as_mut() } {
+            Some(target) => unsafe { Pin::new_unchecked(target) },
+            None => panic!(
+                "called pin_mut_unchecked on a null SharedPtr<{}>",
+                display(T::__typename),
+            ),
+        }
+    }
+
+    /// Returns the SharedPtr's stored pointer as a raw const pointer.
+    pub fn as_ptr(&self) -> *const T {
         let this = self as *const Self as *const c_void;
-        unsafe { T::__get(this).as_ref() }
+        unsafe { T::__get(this) }
+    }
+
+    /// Returns the SharedPtr's stored pointer as a raw mutable pointer.
+    ///
+    /// As with [std::shared_ptr\<T\>::get](https://en.cppreference.com/w/cpp/memory/shared_ptr/get),
+    /// this doesn't require that you hold an exclusive reference to the
+    /// SharedPtr. This differs from Rust norms, so extra care should be taken
+    /// in the way the pointer is used.
+    pub fn as_mut_ptr(&self) -> *mut T {
+        self.as_ptr() as *mut T
     }
 
     /// Constructs new WeakPtr as a non-owning reference to the object managed
