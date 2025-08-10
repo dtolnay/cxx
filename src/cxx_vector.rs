@@ -229,12 +229,17 @@ where
     /// length accessor we use the Rust conventional `len()` naming and not C++
     /// `size()`.
     ///
+    /// # Panics
+    ///
+    /// Panics if the new capacity overflows usize.
+    ///
     /// [reserve]: https://en.cppreference.com/w/cpp/container/vector/reserve.html
     pub fn reserve(self: Pin<&mut Self>, additional: usize) {
-        unsafe {
-            let len = self.as_ref().len();
-            T::__reserve(self, len + additional);
-        }
+        let new_cap = self
+            .len()
+            .checked_add(additional)
+            .expect("CxxVector capacity overflow");
+        unsafe { T::__reserve(self, new_cap) }
     }
 }
 
