@@ -57,6 +57,7 @@ fn test_c_return() {
     assert_eq!("2020", ffi::c_return_unique_ptr_string().to_str().unwrap());
     assert_eq!(c"2020", ffi::c_return_unique_ptr_string().as_c_str());
     assert_eq!(4, ffi::c_return_unique_ptr_vector_u8().len());
+    assert!(4 <= ffi::c_return_unique_ptr_vector_u8().capacity());
     assert_eq!(
         200_u8,
         ffi::c_return_unique_ptr_vector_u8().into_iter().sum(),
@@ -66,6 +67,7 @@ fn test_c_return() {
         ffi::c_return_unique_ptr_vector_f64().into_iter().sum(),
     );
     assert_eq!(2, ffi::c_return_unique_ptr_vector_shared().len());
+    assert!(2 <= ffi::c_return_unique_ptr_vector_shared().capacity());
     assert_eq!(
         2021_usize,
         ffi::c_return_unique_ptr_vector_shared()
@@ -160,7 +162,10 @@ fn test_c_take() {
     assert_eq!(vector.pin_mut().pop(), Some(9));
     check!(ffi::c_take_unique_ptr_vector_u8(vector));
     let mut vector = ffi::c_return_unique_ptr_vector_f64();
-    vector.pin_mut().push(9.0);
+    vector.pin_mut().extend(Some(9.0));
+    assert!(vector.pin_mut().capacity() >= 1);
+    vector.pin_mut().reserve(100);
+    assert!(vector.pin_mut().capacity() >= 101);
     check!(ffi::c_take_unique_ptr_vector_f64(vector));
     let mut vector = ffi::c_return_unique_ptr_vector_shared();
     vector.pin_mut().push(ffi::Shared { z: 9 });
