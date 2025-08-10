@@ -410,7 +410,7 @@ pub unsafe trait VectorElement: Sized {
     #[doc(hidden)]
     unsafe fn __get_unchecked(v: *mut CxxVector<Self>, pos: usize) -> *mut Self;
     #[doc(hidden)]
-    unsafe fn __reserve(v: Pin<&mut CxxVector<Self>>, new_capacity: usize);
+    unsafe fn __reserve(v: Pin<&mut CxxVector<Self>>, new_cap: usize);
     #[doc(hidden)]
     unsafe fn __push_back(v: Pin<&mut CxxVector<Self>>, value: &mut ManuallyDrop<Self>) {
         // Opaque C type vector elements do not get this method because they can
@@ -496,12 +496,12 @@ macro_rules! impl_vector_element {
                 }
                 unsafe { __get_unchecked(v, pos) }
             }
-            unsafe fn __reserve(v: Pin<&mut CxxVector<$ty>>, pos: usize) {
+            unsafe fn __reserve(v: Pin<&mut CxxVector<$ty>>, new_cap: usize) {
                 extern "C" {
                     #[link_name = concat!("cxxbridge1$std$vector$", $segment, "$reserve")]
                     fn __reserve(_: Pin<&mut CxxVector<$ty>>, _: usize);
                 }
-                unsafe { __reserve(v, pos) }
+                unsafe { __reserve(v, new_cap) }
             }
             vector_element_by_value_methods!($kind, $segment, $ty);
             fn __unique_ptr_null() -> MaybeUninit<*mut c_void> {
