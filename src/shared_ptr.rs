@@ -13,6 +13,33 @@ use core::mem::MaybeUninit;
 use core::ops::Deref;
 
 /// Binding to C++ `std::shared_ptr<T>`.
+///
+/// <div class="warning">
+///
+/// **WARNING:** Unlike Rust's `Arc<T>`, a C++ shared pointer manipulates
+/// pointers to 2 separate objects in general.
+///
+/// 1. One is the **managed** pointer, and its identity is associated with
+///    shared ownership of a strong and weak count shared by other SharedPtr and
+///    WeakPtr instances having the same managed pointer.
+///
+/// 2. The other is the **stored** pointer, which is commonly either the same as
+///    the managed pointer, or is a pointer into some member of the managed
+///    object, but can be any unrelated pointer in general.
+///
+/// The managed pointer is the one passed to a deleter upon the strong count
+/// reaching zero, but the stored pointer is the one accessed by deref
+/// operations and methods such as `is_null`.
+///
+/// A shared pointer is considered **empty** if the strong count is zero,
+/// meaning the managed pointer has been deleted or is about to be deleted. A
+/// shared pointer is considered **null** if the stored pointer is the null
+/// pointer. All combinations are possible. To be explicit, a shared pointer can
+/// be nonempty and nonnull, or nonempty and null, or empty and nonnull, or
+/// empty and null. In general all of these cases need to be considered when
+/// handling a SharedPtr.
+///
+/// </div>
 #[repr(C)]
 pub struct SharedPtr<T>
 where
@@ -26,7 +53,7 @@ impl<T> SharedPtr<T>
 where
     T: SharedPtrTarget,
 {
-    /// Makes a new SharedPtr wrapping a null pointer.
+    /// Makes a new SharedPtr that is both **empty** and **null**.
     ///
     /// Matches the behavior of default-constructing a std::shared\_ptr.
     pub fn null() -> Self {
@@ -39,6 +66,8 @@ where
     }
 
     /// Allocates memory on the heap and makes a SharedPtr owner for it.
+    ///
+    /// The shared pointer will be **nonempty** and **nonnull**.
     pub fn new(value: T) -> Self
     where
         T: ExternType<Kind = Trivial>,
@@ -62,6 +91,9 @@ where
     /// operation, so any pointers into this data structure elsewhere in the
     /// program continue to be valid.
     ///
+    /// The resulting shared pointer is **nonempty** regardless of whether the
+    /// input pointer is null, but may be either **null** or **nonnull**.
+    ///
     /// # Safety
     ///
     /// Pointer must either be null or point to a valid instance of T
@@ -75,17 +107,34 @@ where
         }
     }
 
-    /// Checks whether the SharedPtr does not own an object.
+    /// Checks whether the SharedPtr holds a null stored pointer.
     ///
     /// This is the opposite of [std::shared_ptr\<T\>::operator bool](https://en.cppreference.com/w/cpp/memory/shared_ptr/operator_bool).
+    ///
+    /// <div class="warning">
+    ///
+    /// This method is unrelated to the state of the reference count. It is
+    /// possible to have a SharedPtr that is nonnull but empty (has a refcount
+    /// of 0), typically from having been constructed using the alias
+    /// constructors in C++. Inversely, it is also possible to be null and
+    /// nonempty.
+    ///
+    /// </div>
     pub fn is_null(&self) -> bool {
         let this = self as *const Self as *const c_void;
         let ptr = unsafe { T::__get(this) };
         ptr.is_null()
     }
 
-    /// Returns a reference to the object owned by this SharedPtr if any,
-    /// otherwise None.
+    /// Returns a reference to the object pointed to by the stored pointer if
+    /// nonnull, otherwise None.
+    ///
+    /// <div class="warning">
+    ///
+    /// The shared pointer's managed object may or may not already have been
+    /// destroyed.
+    ///
+    /// </div>
     pub fn as_ref(&self) -> Option<&T> {
         let this = self as *const Self as *const c_void;
         unsafe { T::__get(this).as_ref() }
