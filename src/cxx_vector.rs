@@ -214,11 +214,22 @@ where
         }
     }
 
-    /// Reserves additional space in the vector.
+    /// Ensures that this vector's capacity is at least `additional` elements
+    /// larger than its length.
     ///
-    /// Note that this follows Rust semantics of being *additional* capacity
-    /// instead of absolute capacity. Equivalent to `vec.reserve(vec.size() +
-    /// additional)` in C++.
+    /// The capacity may be increased by more than `additional` elements if the
+    /// implementation chooses, to amortize the cost of frequent reallocations.
+    ///
+    /// **The meaning of the argument is not the same as
+    /// [std::vector\<T\>::reserve][reserve] in C++.** The C++ standard library
+    /// and Rust standard library both have a `reserve` method on vectors, but
+    /// in C++ code the argument always refers to total capacity, whereas in
+    /// Rust code it always refers to additional capacity. This API on
+    /// `CxxVector` follows the Rust convention, the same way that for the
+    /// length accessor we use the Rust conventional `len()` naming and not C++
+    /// `size()`.
+    ///
+    /// [reserve]: https://en.cppreference.com/w/cpp/container/vector/reserve.html
     pub fn reserve(self: Pin<&mut Self>, additional: usize) {
         unsafe {
             let len = self.as_ref().len();
