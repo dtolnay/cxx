@@ -1,8 +1,8 @@
 use crate::cxx_vector::{CxxVector, VectorElement};
+use crate::extern_type::ExternType;
 use crate::fmt::display;
 use crate::kind::Trivial;
 use crate::string::CxxString;
-use crate::ExternType;
 #[cfg(feature = "std")]
 use alloc::string::String;
 #[cfg(feature = "std")]

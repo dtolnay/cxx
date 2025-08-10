@@ -1,9 +1,9 @@
+use crate::extern_type::ExternType;
 use crate::fmt::display;
 use crate::kind::Trivial;
 use crate::string::CxxString;
 use crate::unique_ptr::{UniquePtr, UniquePtrTarget};
 use crate::weak_ptr::{WeakPtr, WeakPtrTarget};
-use crate::ExternType;
 use core::cmp::Ordering;
 use core::ffi::c_void;
 use core::fmt::{self, Debug, Display};
