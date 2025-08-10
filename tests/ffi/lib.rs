@@ -324,7 +324,7 @@ pub mod ffi {
         fn set(self: &mut R, n: usize) -> usize;
         fn r_method_on_shared(self: &Shared) -> String;
         fn r_get_array_sum(self: &Array) -> i32;
-        // Ensure that a Rust method can be implemented on a C++ type
+        // Ensure that a Rust method can be implemented on an opaque C++ type.
         fn r_method_on_c_get_mut(self: Pin<&mut C>) -> &mut usize;
 
         #[cxx_name = "rAliasedFunction"]
@@ -450,7 +450,7 @@ impl ffi::Array {
     }
 }
 
-// A Rust method implemented on the C++ type
+// A Rust method implemented on an opaque C++ type.
 impl ffi::C {
     pub fn r_method_on_c_get_mut(self: core::pin::Pin<&mut Self>) -> &mut usize {
         self.getMut()
