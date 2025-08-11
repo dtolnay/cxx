@@ -1199,7 +1199,19 @@ fn write_rust_function_shim_impl(
     if sig.throws {
         out.builtin.rust_error = true;
         writeln!(out, "  if (error$.ptr) {{");
+        writeln!(out, "#if defined(RUST_CXX_NO_EXCEPTIONS)");
+        writeln!(
+            out,
+            "    const auto msg = static_cast<char const *>(error$.ptr);"
+        );
+        writeln!(
+            out,
+            "    std::fprintf(stderr, \"Error: %s Aborting.\\n\", msg);"
+        );
+        writeln!(out, "    std::abort();");
+        writeln!(out, "#else");
         writeln!(out, "    throw ::rust::impl<::rust::Error>::error(error$);");
+        writeln!(out, "#endif");
         writeln!(out, "  }}");
     }
     if indirect_return {
