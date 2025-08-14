@@ -110,10 +110,10 @@ cc_test(
 )
 
 cc_test(
-    name = "kj-test",
+    name = "convert-test",
     size = "small",
     srcs = [
-        "convert.c++",
+        "convert-test.c++",
     ],
     linkstatic = select({
         "@platforms//os:windows": True,

@@ -54,6 +54,31 @@ KJ_TEST("rust::str with kj::hashCode") {
   KJ_EXPECT(rustHash == kjHash);
 }
 
+KJ_TEST("rust::Slice<const char> with kj::str") {
+  // Create a rust::Slice from a KJ string (safe for non-UTF-8)
+  kj::String kjStr = kj::str("Test slice stringify");
+  auto rustSlice = kjStr.as<Rust>();
+
+  // Test that kj::str() automatically uses our KJ_STRINGIFY function for Slice<const char>
+  auto kjStrFromSlice = kj::str(rustSlice);
+
+  KJ_EXPECT(kjStrFromSlice == "Test slice stringify");
+  KJ_EXPECT(kjStrFromSlice.size() == rustSlice.size());
+}
+
+KJ_TEST("rust::Slice<const char> with kj::hashCode") {
+  // Create equivalent data for hash comparison
+  kj::String kjStr = kj::str("hash test slice");
+  auto rustSlice = kjStr.as<Rust>();
+  kj::StringPtr kjStrPtr = "hash test slice";
+
+  // Test that kj::hashCode() automatically uses our KJ_HASHCODE function for Slice<const char>
+  auto rustSliceHash = kj::hashCode(rustSlice);
+  auto kjHash = kj::hashCode(kjStrPtr);
+
+  KJ_EXPECT(rustSliceHash == kjHash);
+}
+
 KJ_TEST("from<Rust> Vec conversion") {
   // Create a rust::Vec with some data
   ::rust::Vec<int> rustVec;
@@ -177,10 +202,10 @@ KJ_TEST("Rust string - StringPtr conversion") {
 KJ_TEST("RustCopy struct - StringPtr conversion") {
   kj::StringPtr kjStrPtr = "Copy this string";
 
-  auto rustString = kjStrPtr.as<RustCopy>();
+  auto rustVec = kjStrPtr.as<RustCopy>();
 
-  KJ_EXPECT(rustString.size() == kjStrPtr.size());
-  auto convertedBack = kj::str(rustString);
+  KJ_EXPECT(rustVec.size() == kjStrPtr.size());
+  auto convertedBack = kj::str(rustVec);
   KJ_EXPECT(convertedBack == kjStrPtr);
 }
 
@@ -240,10 +265,10 @@ KJ_TEST("kj::ConstString as<Rust> conversion") {
 KJ_TEST("kj::ConstString as<RustCopy> conversion") {
   kj::ConstString kjConstStr = "Copy ConstString test"_kjc;
 
-  auto rustString = kjConstStr.as<RustCopy>();
+  auto rustVec = kjConstStr.as<RustCopy>();
 
-  KJ_EXPECT(rustString.size() == kjConstStr.size());
-  auto convertedBack = kj::str(rustString);
+  KJ_EXPECT(rustVec.size() == kjConstStr.size());
+  auto convertedBack = kj::str(rustVec);
   KJ_EXPECT(convertedBack == kjConstStr);
 }
 
@@ -260,11 +285,64 @@ KJ_TEST("kj::LiteralStringConst as<Rust> conversion") {
 KJ_TEST("kj::LiteralStringConst as<RustCopy> conversion") {
   auto kjLiteralStr = "Copy LiteralStringConst test"_kjc;
 
-  auto rustString = kjLiteralStr.as<RustCopy>();
+  auto rustVec = kjLiteralStr.as<RustCopy>();
 
-  KJ_EXPECT(rustString.size() == kjLiteralStr.size());
-  auto convertedBack = kj::str(rustString);
+  KJ_EXPECT(rustVec.size() == kjLiteralStr.size());
+  auto convertedBack = kj::str(rustVec);
   KJ_EXPECT(convertedBack == kjLiteralStr);
+}
+
+KJ_TEST("RustUncheckedUtf8 - Valid UTF-8 conversion") {
+  // Test with valid UTF-8 strings
+  kj::String kjStr = kj::str("Valid UTF-8: 🚀 测试");
+  
+  auto rustString = kjStr.as<RustUncheckedUtf8>();
+  
+  KJ_EXPECT(rustString.size() == kjStr.size());
+  
+  // Convert back and verify
+  auto convertedBack = kj::str(rustString);
+  KJ_EXPECT(convertedBack == kjStr);
+}
+
+KJ_TEST("RustCopyUncheckedUtf8 - StringPtr conversion") {
+  kj::StringPtr kjStrPtr = "UTF-8 StringPtr: café";
+  
+  auto rustString = kjStrPtr.as<RustCopyUncheckedUtf8>();
+  
+  KJ_EXPECT(rustString.size() == kjStrPtr.size());
+  auto convertedBack = kj::str(rustString);
+  KJ_EXPECT(convertedBack == kjStrPtr);
+}
+
+KJ_TEST("RustCopyUncheckedUtf8 - ConstString conversion") {
+  kj::ConstString kjConstStr = "UTF-8 ConstString: 日本語"_kjc;
+  
+  auto rustString = kjConstStr.as<RustCopyUncheckedUtf8>();
+  
+  KJ_EXPECT(rustString.size() == kjConstStr.size());
+  auto convertedBack = kj::str(rustString);
+  KJ_EXPECT(convertedBack == kjConstStr);
+}
+
+KJ_TEST("RustUncheckedUtf8 - StringPtr conversion") {
+  kj::StringPtr kjStrPtr = "UTF-8 StringPtr: café";
+  
+  auto rustStr = kjStrPtr.as<RustUncheckedUtf8>();
+  
+  KJ_EXPECT(rustStr.size() == kjStrPtr.size());
+  auto convertedBack = kj::str(rustStr);
+  KJ_EXPECT(convertedBack == kjStrPtr);
+}
+
+KJ_TEST("RustUncheckedUtf8 - ConstString conversion") {
+  kj::ConstString kjConstStr = "UTF-8 ConstString: 日本語"_kjc;
+  
+  auto rustStr = kjConstStr.as<RustUncheckedUtf8>();
+  
+  KJ_EXPECT(rustStr.size() == kjConstStr.size());
+  auto convertedBack = kj::str(rustStr);
+  KJ_EXPECT(convertedBack == kjConstStr);
 }
 
 }  // namespace kj_rs

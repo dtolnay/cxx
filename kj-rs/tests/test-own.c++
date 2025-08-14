@@ -49,18 +49,18 @@ kj::Own<int64_t> own_integer_attached() {
 rust::string null_exception_test_driver_1() {
   try {
     auto _ = modify_own_return(null_kj_own());
-    return ""_kj.as<RustCopy>();
+    return rust::string();
   } catch (...) {
-    return kj::getCaughtExceptionAsKj().getDescription().as<RustCopy>();
+    return kj::getCaughtExceptionAsKj().getDescription().as<RustCopyUncheckedUtf8>();
   }
 }
 
 rust::string null_exception_test_driver_2() {
   try {
     auto _ = get_null();
-    return ""_kj.as<RustCopy>();
+    return rust::string();
   } catch (...) {
-    return kj::getCaughtExceptionAsKj().getDescription().as<RustCopy>();
+    return kj::getCaughtExceptionAsKj().getDescription().as<RustCopyUncheckedUtf8>();
   }
 }
 
