@@ -29,7 +29,7 @@ use test_maybe::{
 
 use test_refcount::{modify_own_ret_arc, modify_own_ret_rc};
 
-use kj_rs::repr::Own;
+use kj_rs::KjOwn;
 
 type Result<T> = std::io::Result<T>;
 type Error = std::io::Error;
@@ -52,7 +52,7 @@ mod ffi {
         async fn new_ready_promise_shared_type() -> Shared;
     }
 
-    // Helper functions to test `kj_rs::Own`
+    // Helper functions to test `kj_rs::KjOwn`
     unsafe extern "C++" {
         include!("kj-rs-demo/test-own.h");
         type OpaqueCxxClass;
@@ -63,19 +63,19 @@ mod ffi {
         fn set_data(self: Pin<&mut OpaqueCxxClass>, val: u64);
 
         #[allow(dead_code)]
-        fn cxx_kj_own() -> Own<OpaqueCxxClass>;
-        fn null_kj_own() -> Own<OpaqueCxxClass>;
+        fn cxx_kj_own() -> KjOwn<OpaqueCxxClass>;
+        fn null_kj_own() -> KjOwn<OpaqueCxxClass>;
         #[allow(dead_code)]
-        fn give_own_back(own: Own<OpaqueCxxClass>);
+        fn give_own_back(own: KjOwn<OpaqueCxxClass>);
         #[allow(dead_code)]
         fn modify_own_return_test();
         #[allow(dead_code)]
-        fn breaking_things() -> Own<OpaqueCxxClass>;
+        fn breaking_things() -> KjOwn<OpaqueCxxClass>;
 
         #[allow(dead_code)]
-        fn own_integer() -> Own<i64>;
+        fn own_integer() -> KjOwn<i64>;
         #[allow(dead_code)]
-        fn own_integer_attached() -> Own<i64>;
+        fn own_integer_attached() -> KjOwn<i64>;
 
         #[allow(dead_code)]
         fn null_exception_test_driver_1() -> String;
@@ -131,9 +131,9 @@ mod ffi {
 
     // Helper function to test moving `Own` to C++
     extern "Rust" {
-        fn modify_own_return(cpp_own: Own<OpaqueCxxClass>) -> Own<OpaqueCxxClass>;
-        fn take_own(cpp_own: Own<OpaqueCxxClass>);
-        fn get_null() -> Own<OpaqueCxxClass>;
+        fn modify_own_return(cpp_own: KjOwn<OpaqueCxxClass>) -> KjOwn<OpaqueCxxClass>;
+        fn take_own(cpp_own: KjOwn<OpaqueCxxClass>);
+        fn get_null() -> KjOwn<OpaqueCxxClass>;
     }
 
     unsafe extern "C++" {
@@ -143,98 +143,100 @@ mod ffi {
         fn test_maybe_reference_shared_own_driver();
 
         #[allow(dead_code)]
-        fn return_maybe() -> Maybe<i64>;
+        fn return_maybe() -> KjMaybe<i64>;
         #[allow(dead_code)]
-        fn return_maybe_none() -> Maybe<i64>;
+        fn return_maybe_none() -> KjMaybe<i64>;
         #[allow(dead_code)]
-        fn return_maybe_ref_some<'a>() -> Maybe<&'a i64>;
+        fn return_maybe_ref_some<'a>() -> KjMaybe<&'a i64>;
         #[allow(dead_code)]
-        fn return_maybe_ref_none<'a>() -> Maybe<&'a i64>;
+        fn return_maybe_ref_none<'a>() -> KjMaybe<&'a i64>;
         #[allow(dead_code)]
-        fn return_maybe_shared_some() -> Maybe<Shared>;
+        fn return_maybe_shared_some() -> KjMaybe<Shared>;
         #[allow(dead_code)]
-        fn return_maybe_shared_none() -> Maybe<Shared>;
+        fn return_maybe_shared_none() -> KjMaybe<Shared>;
         #[allow(dead_code)]
-        fn return_maybe_own_some() -> Maybe<Own<OpaqueCxxClass>>;
+        fn return_maybe_own_some() -> KjMaybe<KjOwn<OpaqueCxxClass>>;
         #[allow(dead_code)]
-        fn return_maybe_own_none() -> Maybe<Own<OpaqueCxxClass>>;
+        fn return_maybe_own_none() -> KjMaybe<KjOwn<OpaqueCxxClass>>;
         #[allow(dead_code)]
-        fn take_maybe_own_cxx(own: Maybe<Own<OpaqueCxxClass>>);
+        fn take_maybe_own_cxx(own: KjMaybe<KjOwn<OpaqueCxxClass>>);
 
         #[allow(dead_code)]
-        fn cxx_take_maybe_shared_some(maybe: Maybe<Shared>);
+        fn cxx_take_maybe_shared_some(maybe: KjMaybe<Shared>);
         #[allow(dead_code)]
-        fn cxx_take_maybe_shared_none(maybe: Maybe<Shared>);
+        fn cxx_take_maybe_shared_none(maybe: KjMaybe<Shared>);
         #[allow(dead_code)]
-        fn cxx_take_maybe_ref_shared_some(maybe: Maybe<&Shared>);
+        fn cxx_take_maybe_ref_shared_some(maybe: KjMaybe<&Shared>);
         #[allow(dead_code)]
-        fn cxx_take_maybe_ref_shared_none(maybe: Maybe<&Shared>);
+        fn cxx_take_maybe_ref_shared_none(maybe: KjMaybe<&Shared>);
     }
 
     unsafe extern "C++" {
         include!("kj-rs-demo/test-maybe.h");
 
         #[allow(dead_code)]
-        fn test_maybe_u8_some() -> Maybe<u8>;
+        fn test_maybe_u8_some() -> KjMaybe<u8>;
         #[allow(dead_code)]
-        fn test_maybe_u16_some() -> Maybe<u16>;
+        fn test_maybe_u16_some() -> KjMaybe<u16>;
         #[allow(dead_code)]
-        fn test_maybe_u32_some() -> Maybe<u32>;
+        fn test_maybe_u32_some() -> KjMaybe<u32>;
         #[allow(dead_code)]
-        fn test_maybe_u64_some() -> Maybe<u64>;
+        fn test_maybe_u64_some() -> KjMaybe<u64>;
         #[allow(dead_code)]
-        fn test_maybe_usize_some() -> Maybe<usize>;
+        fn test_maybe_usize_some() -> KjMaybe<usize>;
         #[allow(dead_code)]
-        fn test_maybe_i8_some() -> Maybe<i8>;
+        fn test_maybe_i8_some() -> KjMaybe<i8>;
         #[allow(dead_code)]
-        fn test_maybe_i16_some() -> Maybe<i16>;
+        fn test_maybe_i16_some() -> KjMaybe<i16>;
         #[allow(dead_code)]
-        fn test_maybe_i32_some() -> Maybe<i32>;
+        fn test_maybe_i32_some() -> KjMaybe<i32>;
         #[allow(dead_code)]
-        fn test_maybe_i64_some() -> Maybe<i64>;
+        fn test_maybe_i64_some() -> KjMaybe<i64>;
         #[allow(dead_code)]
-        fn test_maybe_isize_some() -> Maybe<isize>;
+        fn test_maybe_isize_some() -> KjMaybe<isize>;
         #[allow(dead_code)]
-        fn test_maybe_f32_some() -> Maybe<f32>;
+        fn test_maybe_f32_some() -> KjMaybe<f32>;
         #[allow(dead_code)]
-        fn test_maybe_f64_some() -> Maybe<f64>;
+        fn test_maybe_f64_some() -> KjMaybe<f64>;
         #[allow(dead_code)]
-        fn test_maybe_bool_some() -> Maybe<bool>;
+        fn test_maybe_bool_some() -> KjMaybe<bool>;
         #[allow(dead_code)]
-        fn test_maybe_u8_none() -> Maybe<u8>;
+        fn test_maybe_u8_none() -> KjMaybe<u8>;
         #[allow(dead_code)]
-        fn test_maybe_u16_none() -> Maybe<u16>;
+        fn test_maybe_u16_none() -> KjMaybe<u16>;
         #[allow(dead_code)]
-        fn test_maybe_u32_none() -> Maybe<u32>;
+        fn test_maybe_u32_none() -> KjMaybe<u32>;
         #[allow(dead_code)]
-        fn test_maybe_u64_none() -> Maybe<u64>;
+        fn test_maybe_u64_none() -> KjMaybe<u64>;
         #[allow(dead_code)]
-        fn test_maybe_usize_none() -> Maybe<usize>;
+        fn test_maybe_usize_none() -> KjMaybe<usize>;
         #[allow(dead_code)]
-        fn test_maybe_i8_none() -> Maybe<i8>;
+        fn test_maybe_i8_none() -> KjMaybe<i8>;
         #[allow(dead_code)]
-        fn test_maybe_i16_none() -> Maybe<i16>;
+        fn test_maybe_i16_none() -> KjMaybe<i16>;
         #[allow(dead_code)]
-        fn test_maybe_i32_none() -> Maybe<i32>;
+        fn test_maybe_i32_none() -> KjMaybe<i32>;
         #[allow(dead_code)]
-        fn test_maybe_i64_none() -> Maybe<i64>;
+        fn test_maybe_i64_none() -> KjMaybe<i64>;
         #[allow(dead_code)]
-        fn test_maybe_isize_none() -> Maybe<isize>;
+        fn test_maybe_isize_none() -> KjMaybe<isize>;
         #[allow(dead_code)]
-        fn test_maybe_f32_none() -> Maybe<f32>;
+        fn test_maybe_f32_none() -> KjMaybe<f32>;
         #[allow(dead_code)]
-        fn test_maybe_f64_none() -> Maybe<f64>;
+        fn test_maybe_f64_none() -> KjMaybe<f64>;
         #[allow(dead_code)]
-        fn test_maybe_bool_none() -> Maybe<bool>;
+        fn test_maybe_bool_none() -> KjMaybe<bool>;
     }
 
     extern "Rust" {
-        fn take_maybe_own_ret(val: Maybe<Own<OpaqueCxxClass>>) -> Maybe<Own<OpaqueCxxClass>>;
-        fn take_maybe_own(val: Maybe<Own<OpaqueCxxClass>>);
-        unsafe fn take_maybe_ref_ret<'a>(val: Maybe<&'a u64>) -> Maybe<&'a u64>;
-        fn take_maybe_ref(val: Maybe<&u64>);
-        fn take_maybe_shared_ret(val: Maybe<Shared>) -> Maybe<Shared>;
-        fn take_maybe_shared(val: Maybe<Shared>);
+        fn take_maybe_own_ret(
+            val: KjMaybe<KjOwn<OpaqueCxxClass>>,
+        ) -> KjMaybe<KjOwn<OpaqueCxxClass>>;
+        fn take_maybe_own(val: KjMaybe<KjOwn<OpaqueCxxClass>>);
+        unsafe fn take_maybe_ref_ret<'a>(val: KjMaybe<&'a u64>) -> KjMaybe<&'a u64>;
+        fn take_maybe_ref(val: KjMaybe<&u64>);
+        fn take_maybe_shared_ret(val: KjMaybe<Shared>) -> KjMaybe<Shared>;
+        fn take_maybe_shared(val: KjMaybe<Shared>);
     }
 
     enum CloningAction {
@@ -286,16 +288,16 @@ mod ffi {
 unsafe impl Send for ffi::OpaqueAtomicRefcountedClass {}
 unsafe impl Sync for ffi::OpaqueAtomicRefcountedClass {}
 
-pub fn modify_own_return(mut own: Own<ffi::OpaqueCxxClass>) -> Own<ffi::OpaqueCxxClass> {
+pub fn modify_own_return(mut own: KjOwn<ffi::OpaqueCxxClass>) -> KjOwn<ffi::OpaqueCxxClass> {
     own.pin_mut().set_data(72);
     own
 }
 
-pub fn get_null() -> Own<ffi::OpaqueCxxClass> {
+pub fn get_null() -> KjOwn<ffi::OpaqueCxxClass> {
     ffi::null_kj_own()
 }
 
-pub fn take_own(cpp_own: Own<ffi::OpaqueCxxClass>) {
+pub fn take_own(cpp_own: KjOwn<ffi::OpaqueCxxClass>) {
     assert_eq!(cpp_own.get_data(), 14);
     // The point of this function is to drop the [`Own`] from rust and this makes
     // it explicit, while avoiding a clippy lint

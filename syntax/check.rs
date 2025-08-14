@@ -72,14 +72,14 @@ fn check_type(cx: &mut Check, ty: &Type) {
         Type::RustBox(ptr) => check_type_box(cx, ptr),
         Type::RustVec(ty) => check_type_rust_vec(cx, ty),
         Type::UniquePtr(ptr) => check_type_unique_ptr(cx, ptr),
-        Type::Own(ptr) => check_type_kj_own(cx, ptr),
+        Type::KjOwn(ptr) => check_type_kj_own(cx, ptr),
         Type::KjRc(ptr) => check_type_kj_rc(cx, ptr),
         Type::KjArc(ptr) => check_type_kj_arc(cx, ptr),
         Type::SharedPtr(ptr) => check_type_shared_ptr(cx, ptr),
         Type::WeakPtr(ptr) => check_type_weak_ptr(cx, ptr),
         Type::CxxVector(ptr) => check_type_cxx_vector(cx, ptr),
         Type::Ref(ty) => check_type_ref(cx, ty),
-        Type::Maybe(ty) => check_type_kj_maybe(cx, ty),
+        Type::KjMaybe(ty) => check_type_kj_maybe(cx, ty),
         Type::Ptr(ty) => check_type_ptr(cx, ty),
         Type::Array(array) => check_type_array(cx, array),
         Type::Fn(ty) => check_type_fn(cx, ty),
@@ -301,7 +301,7 @@ fn check_type_kj_maybe(cx: &mut Check, ptr: &Ty1) {
             check_type_ref(cx, refr);
             return;
         }
-        Type::Own(own) => {
+        Type::KjOwn(own) => {
             check_type_kj_own(cx, own);
             return;
         }
@@ -651,8 +651,8 @@ fn check_api_impl(cx: &mut Check, imp: &Impl) {
         Type::RustBox(ty)
         | Type::RustVec(ty)
         | Type::UniquePtr(ty)
-        | Type::Own(ty)
-        | Type::Maybe(ty)
+        | Type::KjOwn(ty)
+        | Type::KjMaybe(ty)
         | Type::SharedPtr(ty)
         | Type::WeakPtr(ty)
         | Type::CxxVector(ty) => {
@@ -785,12 +785,12 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
         Type::RustBox(_)
         | Type::RustVec(_)
         | Type::UniquePtr(_)
-        | Type::Own(_)
+        | Type::KjOwn(_)
         | Type::KjRc(_)
         | Type::KjArc(_)
         | Type::SharedPtr(_)
         | Type::WeakPtr(_)
-        | Type::Maybe(_)
+        | Type::KjMaybe(_)
         | Type::Ref(_)
         | Type::Ptr(_)
         | Type::Str(_)
@@ -864,12 +864,12 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         Type::RustBox(_) => "Box".to_owned(),
         Type::RustVec(_) => "Vec".to_owned(),
         Type::UniquePtr(_) => "unique_ptr".to_owned(),
-        Type::Own(_) => "kj::Own".to_owned(),
+        Type::KjOwn(_) => "kj::Own".to_owned(),
         Type::KjRc(_) => "kj::Rc".to_owned(),
         Type::KjArc(_) => "kj::Arc".to_owned(),
         Type::SharedPtr(_) => "shared_ptr".to_owned(),
         Type::WeakPtr(_) => "weak_ptr".to_owned(),
-        Type::Maybe(_) => "kj::Maybe".to_owned(),
+        Type::KjMaybe(_) => "kj::Maybe".to_owned(),
         Type::Ref(_) => "reference".to_owned(),
         Type::Ptr(_) => "raw pointer".to_owned(),
         Type::Str(_) => "&str".to_owned(),

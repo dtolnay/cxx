@@ -3,8 +3,8 @@
 use static_assertions::{assert_eq_align, assert_eq_size};
 use std::{fmt, marker::PhantomData};
 
-assert_eq_size!(repr::Own<()>, [*const (); 2]);
-assert_eq_align!(repr::Own<()>, *const ());
+assert_eq_size!(repr::KjOwn<()>, [*const (); 2]);
+assert_eq_align!(repr::KjOwn<()>, *const ());
 
 /// When we want to use an `Own`, we want the guarantee of being not null only
 /// in direct `Own<T>`, not Maybe<Own<T>>, and using a [`NonNull`] in `Own`
@@ -47,20 +47,20 @@ pub mod repr {
     use std::ops::DerefMut;
     use std::pin::Pin;
 
-    /// A [`Own<T>`] represents the `kj::Own<T>`. It is a smart pointer to an opaque C++ type.
+    /// A [`KjOwn<T>`] represents the `kj::Own<T>`. It is a smart pointer to an opaque C++ type.
     /// Safety:
     /// - Passing a null `kj::Own` to rust is considered unsafe from the C++ side,
     ///   and it is required that this invariant is upheld in C++ code.
     /// - Currently, it is runtime asserted in the bridge macro that no null Own can be passed
     ///   to Rust
     #[repr(C)]
-    pub struct Own<T: ?Sized> {
+    pub struct KjOwn<T: ?Sized> {
         pub(crate) disposer: *const c_void,
         pub(crate) ptr: NonNullExceptMaybe<T>,
     }
 
     /// Public-facing Own api
-    impl<T> Own<T> {
+    impl<T> KjOwn<T> {
         /// Returns a mutable pinned reference to the object owned by this [`Own`]
         /// if any, otherwise None.
         pub fn as_mut(&mut self) -> Pin<&mut T> {
@@ -99,7 +99,7 @@ pub mod repr {
         }
     }
 
-    impl<T> AsRef<T> for Own<T> {
+    impl<T> AsRef<T> for KjOwn<T> {
         /// Returns a reference to the object owned by this [`Own`] if any,
         /// otherwise None.
         fn as_ref(&self) -> &T {
@@ -108,11 +108,11 @@ pub mod repr {
         }
     }
 
-    unsafe impl<T> Send for Own<T> where T: Send {}
+    unsafe impl<T> Send for KjOwn<T> where T: Send {}
 
-    unsafe impl<T> Sync for Own<T> where T: Sync {}
+    unsafe impl<T> Sync for KjOwn<T> where T: Sync {}
 
-    impl<T> Deref for Own<T> {
+    impl<T> Deref for KjOwn<T> {
         type Target = T;
 
         fn deref(&self) -> &Self::Target {
@@ -120,7 +120,7 @@ pub mod repr {
         }
     }
 
-    impl<T> DerefMut for Own<T>
+    impl<T> DerefMut for KjOwn<T>
     where
         T: Unpin,
     {
@@ -131,15 +131,15 @@ pub mod repr {
 
     // Own<T> is safe to implement Unpin because moving the Own doesn't move the pointee, and
     // the drop implentation doesn't depend on the Own's location, because it's handed by virtual dispatch
-    impl<T> Unpin for Own<T> {}
+    impl<T> Unpin for KjOwn<T> {}
 
-    impl<T> Debug for Own<T> {
+    impl<T> Debug for KjOwn<T> {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
             write!(f, "Own(ptr: {:p}, disposer: {:p})", self.ptr, self.disposer)
         }
     }
 
-    impl<T> Display for Own<T>
+    impl<T> Display for KjOwn<T>
     where
         T: Display,
     {
@@ -148,7 +148,7 @@ pub mod repr {
         }
     }
 
-    impl<T> PartialEq for Own<T>
+    impl<T> PartialEq for KjOwn<T>
     where
         T: PartialEq,
     {
@@ -157,9 +157,9 @@ pub mod repr {
         }
     }
 
-    impl<T> Eq for Own<T> where T: Eq {}
+    impl<T> Eq for KjOwn<T> where T: Eq {}
 
-    impl<T> PartialOrd for Own<T>
+    impl<T> PartialOrd for KjOwn<T>
     where
         T: PartialOrd,
     {
@@ -168,7 +168,7 @@ pub mod repr {
         }
     }
 
-    impl<T> Ord for Own<T>
+    impl<T> Ord for KjOwn<T>
     where
         T: Ord,
     {
@@ -177,7 +177,7 @@ pub mod repr {
         }
     }
 
-    impl<T> Hash for Own<T>
+    impl<T> Hash for KjOwn<T>
     where
         T: Hash,
     {
@@ -186,7 +186,7 @@ pub mod repr {
         }
     }
 
-    impl<T: ?Sized> Drop for Own<T> {
+    impl<T: ?Sized> Drop for KjOwn<T> {
         fn drop(&mut self) {
             unsafe extern "C" {
                 #[link_name = "cxxbridge$kjrs$own$drop"]

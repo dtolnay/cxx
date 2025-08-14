@@ -26,13 +26,13 @@ impl ToTokens for Type {
             }
             Type::RustBox(ty)
             | Type::UniquePtr(ty)
-            | Type::Own(ty)
+            | Type::KjOwn(ty)
             | Type::KjRc(ty)
             | Type::KjArc(ty)
             | Type::SharedPtr(ty)
             | Type::WeakPtr(ty)
             | Type::CxxVector(ty)
-            | Type::Maybe(ty)
+            | Type::KjMaybe(ty)
             | Type::RustVec(ty) => ty.to_tokens(tokens),
             Type::Ref(r) | Type::Str(r) => r.to_tokens(tokens),
             Type::Ptr(p) => p.to_tokens(tokens),
@@ -75,7 +75,7 @@ impl ToTokens for Ty1 {
             "UniquePtr" | "SharedPtr" | "WeakPtr" | "CxxVector" => {
                 tokens.extend(quote_spanned!(span=> ::cxx::));
             }
-            "Own" => {
+            "KjOwn" => {
                 tokens.extend(quote_spanned!(span => ::kj_rs::repr::));
             }
             "KjRc" => {
@@ -87,7 +87,7 @@ impl ToTokens for Ty1 {
             "Box" => {
                 tokens.extend(quote_spanned!(span=> ::cxx::alloc::boxed::));
             }
-            "Maybe" => {
+            "KjMaybe" => {
                 tokens.extend(quote_spanned!(span=> ::kj_rs::repr::));
             }
             "Vec" => {

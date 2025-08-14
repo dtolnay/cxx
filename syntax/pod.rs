@@ -25,7 +25,7 @@ impl<'a> Types<'a> {
             Type::RustBox(_)
             | Type::RustVec(_)
             | Type::UniquePtr(_)
-            | Type::Own(_)
+            | Type::KjOwn(_)
             | Type::KjRc(_)
             | Type::KjArc(_)
             | Type::SharedPtr(_)
@@ -33,7 +33,7 @@ impl<'a> Types<'a> {
             | Type::CxxVector(_)
             | Type::Void(_) => false,
             Type::Ref(_) | Type::Str(_) | Type::Fn(_) | Type::SliceRef(_) | Type::Ptr(_) => true,
-            Type::Maybe(ty) => self.is_guaranteed_pod(&ty.inner),
+            Type::KjMaybe(ty) => self.is_guaranteed_pod(&ty.inner),
             Type::Array(array) => self.is_guaranteed_pod(&array.inner),
             Type::Future(_) => false,
         }

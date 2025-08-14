@@ -1057,12 +1057,12 @@ fn parse_impl(cx: &mut Errors, imp: ItemImpl) -> Result<Api> {
         Type::RustBox(ty)
         | Type::RustVec(ty)
         | Type::UniquePtr(ty)
-        | Type::Own(ty)
+        | Type::KjOwn(ty)
         | Type::KjRc(ty)
         | Type::KjArc(ty)
         | Type::SharedPtr(ty)
         | Type::WeakPtr(ty)
-        | Type::Maybe(ty)
+        | Type::KjMaybe(ty)
         | Type::CxxVector(ty) => match &ty.inner {
             Type::Ident(ident) => ident.generics.clone(),
             _ => Lifetimes::default(),
@@ -1229,10 +1229,10 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
                             rangle: generic.gt_token,
                         })));
                     }
-                } else if ident == "Own" && generic.args.len() == 1 {
+                } else if ident == "KjOwn" && generic.args.len() == 1 {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
                         let inner = parse_type(arg)?;
-                        return Ok(Type::Own(Box::new(Ty1 {
+                        return Ok(Type::KjOwn(Box::new(Ty1 {
                             name: ident,
                             langle: generic.lt_token,
                             inner,
@@ -1299,10 +1299,10 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
                             rangle: generic.gt_token,
                         })));
                     }
-                } else if ident == "Maybe" && generic.args.len() == 1 {
+                } else if ident == "KjMaybe" && generic.args.len() == 1 {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
                         let inner = parse_type(arg)?;
-                        return Ok(Type::Maybe(Box::new(Ty1 {
+                        return Ok(Type::KjMaybe(Box::new(Ty1 {
                             name: ident,
                             langle: generic.lt_token,
                             inner,
@@ -1519,12 +1519,12 @@ fn has_references_without_lifetime(ty: &Type) -> bool {
         Type::RustBox(t)
         | Type::RustVec(t)
         | Type::UniquePtr(t)
-        | Type::Own(t)
+        | Type::KjOwn(t)
         | Type::KjRc(t)
         | Type::KjArc(t)
         | Type::SharedPtr(t)
         | Type::WeakPtr(t)
-        | Type::Maybe(t)
+        | Type::KjMaybe(t)
         | Type::CxxVector(t) => has_references_without_lifetime(&t.inner),
         Type::Ptr(t) => has_references_without_lifetime(&t.inner),
         Type::Array(t) => has_references_without_lifetime(&t.inner),

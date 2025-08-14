@@ -5,7 +5,7 @@
 pub use repr::{AtomicRefcounted, Refcounted};
 
 pub mod repr {
-    use crate::Own;
+    use crate::KjOwn;
     use std::ops::Deref;
 
     /// # Safety
@@ -30,14 +30,14 @@ pub mod repr {
     /// like Rust's [`std::rc::Rc`].
     #[repr(C)]
     pub struct KjRc<T: Refcounted + ?Sized> {
-        own: Own<T>,
+        own: KjOwn<T>,
     }
 
     /// Bindings to the kj type `kj::Arc`. Represents and owned and atomically reference
     /// counted type, like Rust's [`std::sync::Arc`].
     #[repr(C)]
     pub struct KjArc<T: AtomicRefcounted + ?Sized> {
-        own: Own<T>,
+        own: KjOwn<T>,
     }
 
     unsafe impl<T: AtomicRefcounted> Send for KjArc<T> where T: Send {}
@@ -51,7 +51,7 @@ pub mod repr {
 
         // The return value here represents exclusive access to the internal `Own`.
         // This allows for exclusive mutation of the inner value.
-        pub fn get_mut(&mut self) -> Option<&mut Own<T>> {
+        pub fn get_mut(&mut self) -> Option<&mut KjOwn<T>> {
             if self.own.is_shared() {
                 None
             } else {
@@ -68,7 +68,7 @@ pub mod repr {
 
         // The return value here represents exclusive access to the internal `Own`.
         // This allows for exclusive mutation of the inner value.
-        pub fn get_mut(&mut self) -> Option<&mut Own<T>> {
+        pub fn get_mut(&mut self) -> Option<&mut KjOwn<T>> {
             if self.own.is_shared() {
                 None
             } else {

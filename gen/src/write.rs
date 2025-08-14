@@ -233,7 +233,11 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
             Type::SliceRef(_) => out.builtin.rust_slice = true,
             Type::Array(_) => out.include.array = true,
             Type::Ref(_) | Type::Void(_) | Type::Ptr(_) => {}
-            Type::Future(_) | Type::Maybe(_) | Type::Own(_) | Type::KjRc(_) | Type::KjArc(_) => {
+            Type::Future(_)
+            | Type::KjMaybe(_)
+            | Type::KjOwn(_)
+            | Type::KjRc(_)
+            | Type::KjArc(_) => {
                 out.include.kj_rs = true;
             }
         }
@@ -1039,7 +1043,7 @@ fn write_rust_function_shim_impl(
     writeln!(out, " {{");
     sig.args
         .iter()
-        .filter(|arg| matches!(arg.ty, Type::Own(_)))
+        .filter(|arg| matches!(arg.ty, Type::KjOwn(_)))
         .for_each(|arg_own| {
             writeln!(
                 out,
@@ -1243,7 +1247,7 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write_type(out, &ptr.inner);
             write!(out, ">");
         }
-        Type::Own(ptr) => {
+        Type::KjOwn(ptr) => {
             write!(out, "::kj::Own<");
             write_type(out, &ptr.inner);
             write!(out, ">");
@@ -1268,7 +1272,7 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write_type(out, &ptr.inner);
             write!(out, ">");
         }
-        Type::Maybe(ptr) => {
+        Type::KjMaybe(ptr) => {
             write!(out, "::kj::Maybe<");
             write_type(out, &ptr.inner);
             write!(out, ">");
@@ -1363,13 +1367,13 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
         Type::Ident(_)
         | Type::RustBox(_)
         | Type::UniquePtr(_)
-        | Type::Own(_)
+        | Type::KjOwn(_)
         | Type::KjRc(_)
         | Type::KjArc(_)
         | Type::SharedPtr(_)
         | Type::WeakPtr(_)
         | Type::Str(_)
-        | Type::Maybe(_)
+        | Type::KjMaybe(_)
         | Type::CxxVector(_)
         | Type::RustVec(_)
         | Type::SliceRef(_)

@@ -14,13 +14,13 @@ where
         Type::Ident(_) | Type::Str(_) | Type::Void(_) => {}
         Type::RustBox(ty)
         | Type::UniquePtr(ty)
-        | Type::Own(ty)
+        | Type::KjOwn(ty)
         | Type::KjRc(ty)
         | Type::KjArc(ty)
         | Type::SharedPtr(ty)
         | Type::WeakPtr(ty)
         | Type::CxxVector(ty)
-        | Type::Maybe(ty)
+        | Type::KjMaybe(ty)
         | Type::RustVec(ty) => visitor.visit_type(&ty.inner),
         Type::Ref(r) => visitor.visit_type(&r.inner),
         Type::Ptr(p) => visitor.visit_type(&p.inner),

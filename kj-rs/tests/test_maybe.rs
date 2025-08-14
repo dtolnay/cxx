@@ -1,12 +1,12 @@
 use crate::ffi::{OpaqueCxxClass, Shared};
 use kj_rs::{
     maybe::MaybeItem,
-    repr::{Maybe, Own},
+    repr::{KjMaybe, KjOwn},
 };
 use std::{cmp::PartialEq, fmt::Debug};
 
-pub fn take_maybe_own_ret(val: Maybe<Own<OpaqueCxxClass>>) -> Maybe<Own<OpaqueCxxClass>> {
-    let mut option: Option<Own<OpaqueCxxClass>> = val.into();
+pub fn take_maybe_own_ret(val: KjMaybe<KjOwn<OpaqueCxxClass>>) -> KjMaybe<KjOwn<OpaqueCxxClass>> {
+    let mut option: Option<KjOwn<OpaqueCxxClass>> = val.into();
     if let Some(val) = &mut option {
         val.as_mut().set_data(42);
     }
@@ -14,8 +14,8 @@ pub fn take_maybe_own_ret(val: Maybe<Own<OpaqueCxxClass>>) -> Maybe<Own<OpaqueCx
     option.into()
 }
 
-pub fn take_maybe_own(val: Maybe<Own<OpaqueCxxClass>>) {
-    let option: Option<Own<OpaqueCxxClass>> = val.into();
+pub fn take_maybe_own(val: KjMaybe<KjOwn<OpaqueCxxClass>>) {
+    let option: Option<KjOwn<OpaqueCxxClass>> = val.into();
     // Own gets destoyed at end of `if let` block, because it takes ownership of `option`
     if let Some(own) = option {
         assert_eq!(own.get_data(), 42);
@@ -24,7 +24,7 @@ pub fn take_maybe_own(val: Maybe<Own<OpaqueCxxClass>>) {
 
 /// # Safety: Uses a reference in a function that can be called from C++, which is opaque
 /// to the Rust compiler, so it cannot verify lifetime requirements
-pub unsafe fn take_maybe_ref_ret<'a>(val: Maybe<&'a u64>) -> Maybe<&'a u64> {
+pub unsafe fn take_maybe_ref_ret<'a>(val: KjMaybe<&'a u64>) -> KjMaybe<&'a u64> {
     let option: Option<&u64> = val.into();
     if let Some(num) = &option {
         assert_eq!(**num, 15);
@@ -32,7 +32,7 @@ pub unsafe fn take_maybe_ref_ret<'a>(val: Maybe<&'a u64>) -> Maybe<&'a u64> {
     option.into()
 }
 
-pub fn take_maybe_ref(val: Maybe<&u64>) {
+pub fn take_maybe_ref(val: KjMaybe<&u64>) {
     let mut option: Option<&u64> = val.into();
     // Pure Rust at this point, but just in case
     if let Some(val) = option.take() {
@@ -40,7 +40,7 @@ pub fn take_maybe_ref(val: Maybe<&u64>) {
     }
 }
 
-pub fn take_maybe_shared_ret(val: Maybe<Shared>) -> Maybe<Shared> {
+pub fn take_maybe_shared_ret(val: KjMaybe<Shared>) -> KjMaybe<Shared> {
     let mut option: Option<Shared> = val.into();
     if let Some(mut shared) = option.take() {
         shared.i = 18;
@@ -48,19 +48,19 @@ pub fn take_maybe_shared_ret(val: Maybe<Shared>) -> Maybe<Shared> {
     option.into()
 }
 
-pub fn take_maybe_shared(val: Maybe<Shared>) {
+pub fn take_maybe_shared(val: KjMaybe<Shared>) {
     let _: Option<Shared> = val.into();
 }
 
 #[allow(clippy::needless_pass_by_value, dead_code)]
-fn test_maybe_some<T: MaybeItem + PartialEq + Debug>(val: Maybe<T>, num: T) {
+fn test_maybe_some<T: MaybeItem + PartialEq + Debug>(val: KjMaybe<T>, num: T) {
     assert!(val.is_some());
     let opt: Option<T> = val.into();
     assert_eq!(opt.unwrap(), num);
 }
 
 #[allow(clippy::needless_pass_by_value, dead_code)]
-fn test_maybe_none<T: MaybeItem + PartialEq + Debug>(val: Maybe<T>) {
+fn test_maybe_none<T: MaybeItem + PartialEq + Debug>(val: KjMaybe<T>) {
     assert!(val.is_none());
 }
 
@@ -68,17 +68,17 @@ fn test_maybe_none<T: MaybeItem + PartialEq + Debug>(val: Maybe<T>) {
 pub mod tests {
     use super::{test_maybe_none, test_maybe_some};
     use crate::ffi::{self, OpaqueCxxClass, Shared};
-    use kj_rs::repr::{Maybe, Own};
+    use kj_rs::repr::{KjMaybe, KjOwn};
 
     #[test]
     fn test_some() {
-        let maybe: Maybe<i64> = ffi::return_maybe();
+        let maybe: KjMaybe<i64> = ffi::return_maybe();
         assert!(!maybe.is_none());
     }
 
     #[test]
     fn test_none() {
-        let maybe: Maybe<i64> = ffi::return_maybe_none();
+        let maybe: KjMaybe<i64> = ffi::return_maybe_none();
         assert!(maybe.is_none());
     }
 
@@ -110,7 +110,7 @@ pub mod tests {
 
     #[test]
     fn test_some_shared() {
-        let maybe: Maybe<Shared> = ffi::return_maybe_shared_some();
+        let maybe: KjMaybe<Shared> = ffi::return_maybe_shared_some();
         assert!(!maybe.is_none());
         let opt: Option<Shared> = maybe.into();
         assert!(opt.is_some());
@@ -119,7 +119,7 @@ pub mod tests {
 
     #[test]
     fn test_none_shared() {
-        let maybe: Maybe<Shared> = ffi::return_maybe_shared_none();
+        let maybe: KjMaybe<Shared> = ffi::return_maybe_shared_none();
         assert!(maybe.is_none());
         let opt: Option<Shared> = maybe.into();
         assert!(opt.is_none());
@@ -129,7 +129,7 @@ pub mod tests {
     fn test_some_own() {
         let maybe = ffi::return_maybe_own_some();
         assert!(!maybe.is_none());
-        let opt: Option<Own<OpaqueCxxClass>> = maybe.into();
+        let opt: Option<KjOwn<OpaqueCxxClass>> = maybe.into();
         assert!(opt.is_some());
         assert_eq!(opt.unwrap().get_data(), 14);
     }
@@ -138,7 +138,7 @@ pub mod tests {
     fn test_none_own() {
         let maybe = ffi::return_maybe_own_none();
         assert!(maybe.is_none());
-        let opt: Option<Own<OpaqueCxxClass>> = maybe.into();
+        let opt: Option<KjOwn<OpaqueCxxClass>> = maybe.into();
         assert!(opt.is_none());
     }
 
@@ -159,18 +159,18 @@ pub mod tests {
     #[test]
     fn test_maybe_cxx_shared() {
         let shared = ffi::Shared { i: -37 };
-        let some = Maybe::Some(shared);
+        let some = KjMaybe::Some(shared);
         ffi::cxx_take_maybe_shared_some(some);
-        let none: Maybe<Shared> = Maybe::None;
+        let none: KjMaybe<Shared> = KjMaybe::None;
         ffi::cxx_take_maybe_shared_none(none);
     }
 
     #[test]
     fn test_maybe_cxx_ref_shared() {
         let shared = ffi::Shared { i: -38 };
-        let some = Maybe::Some(&shared);
+        let some = KjMaybe::Some(&shared);
         ffi::cxx_take_maybe_ref_shared_some(some);
-        let none: Maybe<&Shared> = Maybe::None;
+        let none: KjMaybe<&Shared> = KjMaybe::None;
         ffi::cxx_take_maybe_ref_shared_none(none);
     }
 
@@ -178,9 +178,9 @@ pub mod tests {
     fn test_primitive_types() {
         macro_rules! Maybe {
             ($ty:ty) => {
-                let (some, none): (Maybe<$ty>, Maybe<$ty>) = unsafe {(
-                    Maybe::from_parts_unchecked(true, std::mem::MaybeUninit::new(<$ty>::default())),
-                    Maybe::from_parts_unchecked(false, std::mem::MaybeUninit::uninit()),
+                let (some, none): (KjMaybe<$ty>, KjMaybe<$ty>) = unsafe {(
+                    KjMaybe::from_parts_unchecked(true, std::mem::MaybeUninit::new(<$ty>::default())),
+                    KjMaybe::from_parts_unchecked(false, std::mem::MaybeUninit::uninit()),
                 )};
 
                 assert!(some.is_some());
@@ -239,8 +239,8 @@ pub mod tests {
     fn test_pass_rust() {
         let mut own = ffi::cxx_kj_own();
         own.pin_mut().set_data(14);
-        let maybe_some: Maybe<Own<ffi::OpaqueCxxClass>> = Maybe::Some(own);
-        let maybe_none: Maybe<Own<ffi::OpaqueCxxClass>> = Maybe::None;
+        let maybe_some: KjMaybe<KjOwn<ffi::OpaqueCxxClass>> = KjMaybe::Some(own);
+        let maybe_none: KjMaybe<KjOwn<ffi::OpaqueCxxClass>> = KjMaybe::None;
 
         assert!(maybe_some.is_some());
         assert!(maybe_none.is_none());

@@ -744,7 +744,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                         true => quote_spanned!(span=> #call.as_mut_slice::<#inner>()),
                     }
                 }
-                Type::Own(_) => quote_spanned! {span=>
+                Type::KjOwn(_) => quote_spanned! {span=>
                     let __temp = #call;
                     assert!(!__temp.as_ptr().is_null(), "Returning a Null kj::Own to Rust is not valid");
                     __temp
@@ -1889,25 +1889,25 @@ fn expand_kj_maybe(key: NamedImplKey, explicit_impl: Option<&Impl>, types: &Type
         #unsafe_token impl ::kj_rs::maybe::MaybeItem for #elem #ty_generics {
             type Discriminant = bool;
 
-            fn is_some(value: &::kj_rs::Maybe<Self>) -> bool {
+            fn is_some(value: &::kj_rs::KjMaybe<Self>) -> bool {
                 unsafe {
                     value.is_set()
                 }
             }
 
-            fn is_none(value: &::kj_rs::Maybe<Self>) -> bool {
+            fn is_none(value: &::kj_rs::KjMaybe<Self>) -> bool {
                 unsafe {
                     !value.is_set()
                 }
             }
 
-            const NONE: ::kj_rs::Maybe<Self> = unsafe {
-                ::kj_rs::Maybe::from_parts_unchecked(false, ::std::mem::MaybeUninit::uninit())
+            const NONE: ::kj_rs::KjMaybe<Self> = unsafe {
+                ::kj_rs::KjMaybe::from_parts_unchecked(false, ::std::mem::MaybeUninit::uninit())
             };
 
-            fn some(value: Self) -> ::kj_rs::Maybe<Self> {
+            fn some(value: Self) -> ::kj_rs::KjMaybe<Self> {
                 unsafe {
-                    ::kj_rs::Maybe::from_parts_unchecked(
+                    ::kj_rs::KjMaybe::from_parts_unchecked(
                         true,
                         ::std::mem::MaybeUninit::new(value)
                     )

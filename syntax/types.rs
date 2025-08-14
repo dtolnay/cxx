@@ -248,7 +248,7 @@ impl<'a> Types<'a> {
         match ty {
             Type::RustBox(_) | Type::UniquePtr(_) => false,
             Type::Array(_) => true,
-            Type::Future(_) | Type::Maybe(_) | Type::Own(_) => true,
+            Type::Future(_) | Type::KjMaybe(_) | Type::KjOwn(_) => true,
             _ => !self.is_guaranteed_pod(ty),
         }
     }

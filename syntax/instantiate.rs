@@ -44,11 +44,11 @@ impl Type {
             if let Type::Ident(ident) = &ty.inner {
                 return Some(ImplKey::UniquePtr(NamedImplKey::new(ty, ident)));
             }
-        } else if let Type::Own(ty) = self {
+        } else if let Type::KjOwn(ty) = self {
             if let Type::Ident(ident) = &ty.inner {
                 return Some(ImplKey::Own(NamedImplKey::new(ty, ident)));
             }
-        } else if let Type::Maybe(ty) = self {
+        } else if let Type::KjMaybe(ty) = self {
             if let Type::Ident(ident) = &ty.inner {
                 return Some(ImplKey::Maybe(NamedImplKey::new(ty, ident)));
             }
