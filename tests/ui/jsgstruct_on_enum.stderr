@@ -1,0 +1,5 @@
+error: JsgStruct only applies to structs, not enums
+ --> tests/ui/jsgstruct_on_enum.rs:3:14
+  |
+3 |     #[derive(JsgStruct)]
+  |              ^^^^^^^^^

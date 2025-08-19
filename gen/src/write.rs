@@ -339,6 +339,19 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
     out.include.type_traits = true;
     writeln!(out, "  using IsRelocatable = ::std::true_type;");
 
+    if derive::contains(&strct.derives, Trait::JsgStruct) {
+        out.include.jsg = true;
+        writeln!(out);
+        write!(out, "  JSG_STRUCT(");
+        for (i, field) in strct.fields.iter().enumerate() {
+            if i > 0 {
+                write!(out, ", ");
+            }
+            write!(out, "{}", field.name.cxx);
+        }
+        writeln!(out, ");");
+    }
+
     writeln!(out, "}};");
     writeln!(out, "#endif // {}", guard);
 }

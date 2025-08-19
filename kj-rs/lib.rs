@@ -31,6 +31,8 @@ pub mod repr {
 pub type Result<T> = std::io::Result<T>;
 pub type Error = std::io::Error;
 
+pub trait JsgStruct {}
+
 #[cxx::bridge(namespace = "kj_rs")]
 #[allow(clippy::needless_lifetimes)]
 mod ffi {

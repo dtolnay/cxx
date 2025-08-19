@@ -446,6 +446,7 @@ pub use crate::string::CxxString;
 pub use crate::unique_ptr::UniquePtr;
 pub use crate::weak_ptr::WeakPtr;
 pub use cxxbridge_macro::bridge;
+pub use cxxbridge_macro::JsgStruct;
 
 /// Synonym for `CxxString`.
 ///

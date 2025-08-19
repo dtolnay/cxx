@@ -477,6 +477,9 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
         if derive.what == Trait::Default || derive.what == Trait::ExternType {
             let msg = format!("derive({}) on shared enum is not supported", derive);
             cx.error(derive, msg);
+        } else if derive.what == Trait::JsgStruct {
+            let msg = "JsgStruct only applies to structs, not enums";
+            cx.error(derive, msg);
         }
     }
 }

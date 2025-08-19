@@ -10,6 +10,17 @@ const BRIDGE0: &str = r#"
     }
 "#;
 
+const BRIDGE1: &str = r"
+    #[cxx::bridge]
+    mod ffi {
+        #[derive(JsgStruct)]
+        struct MyStruct {
+            field1: i32,
+            field2: String,
+        }
+    }
+";
+
 #[test]
 fn test_extern_c_function() {
     let opt = Opt::default();
@@ -23,10 +34,22 @@ fn test_extern_c_function() {
 
 #[test]
 fn test_impl_annotation() {
-    let mut opt = Opt::default();
-    opt.cxx_impl_annotations = Some("ANNOTATION".to_owned());
+    let opt = Opt {
+        cxx_impl_annotations: Some("ANNOTATION".to_owned()),
+        ..Default::default()
+    };
     let source = BRIDGE0.parse().unwrap();
     let generated = generate_header_and_cc(source, &opt).unwrap();
     let output = str::from_utf8(&generated.implementation).unwrap();
     assert!(output.contains("ANNOTATION void cxxbridge1$do_cpp_thing(::rust::Str foo)"));
+}
+
+#[test]
+fn test_jsg_struct_derive() {
+    let opt = Opt::default();
+    let source = BRIDGE1.parse().unwrap();
+    let generated = generate_header_and_cc(source, &opt).unwrap();
+    let output = str::from_utf8(&generated.header).unwrap();
+    assert!(output.contains("JSG_STRUCT(field1, field2);"));
+    assert!(output.contains("jsg.h"));
 }

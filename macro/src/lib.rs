@@ -71,6 +71,14 @@ pub fn bridge(args: TokenStream, input: TokenStream) -> TokenStream {
         .into()
 }
 
+/// JsgStruct derive macro for generating JSG_STRUCT in C++ output
+#[proc_macro_derive(JsgStruct)]
+pub fn derive_jsg_struct(_input: TokenStream) -> TokenStream {
+    // This derive macro doesn't generate any Rust code
+    // The actual JSG_STRUCT generation happens in the C++ code generation phase
+    TokenStream::new()
+}
+
 #[doc(hidden)]
 #[proc_macro]
 pub fn type_id(input: TokenStream) -> TokenStream {

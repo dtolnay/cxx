@@ -13,4 +13,5 @@ PACKAGES = {
     "scratch": crate.spec(version = "1"),
     "static_assertions": crate.spec(version = "1"),
     "syn": crate.spec(features = ["full"], version = "2"),
+    "trybuild": crate.spec(version = "1"),
 }

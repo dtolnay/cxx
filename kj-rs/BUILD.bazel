@@ -10,6 +10,7 @@ cc_library(
         "@platforms//os:windows": True,
         "//conditions:default": False,
     }),
+    visibility = ["//tests:__pkg__"],
     deps = [
         ":bridge",
     ],
@@ -34,6 +35,7 @@ rust_cxx_bridge(
     src = "lib.rs",
     hdrs = glob(["*.h"]),
     include_prefix = "kj-rs",
+    visibility = ["//tests:__pkg__"],
     deps = [
         "@capnp-cpp//src/kj:kj",
         "@capnp-cpp//src/kj:kj-async",

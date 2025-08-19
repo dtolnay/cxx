@@ -162,3 +162,15 @@ alias(
     actual = "@vendor__syn-2.0.100//:syn",
     tags = ["manual"],
 )
+
+alias(
+    name = "trybuild-1.0.110",
+    actual = "@vendor__trybuild-1.0.110//:trybuild",
+    tags = ["manual"],
+)
+
+alias(
+    name = "trybuild",
+    actual = "@vendor__trybuild-1.0.110//:trybuild",
+    tags = ["manual"],
+)

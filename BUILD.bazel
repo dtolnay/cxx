@@ -89,6 +89,7 @@ rust_proc_macro(
     proc_macro_deps = [
         "@crates.io//:rustversion",
     ],
+    visibility = ["//tests:__pkg__"],
     deps = [
         ":gen",
         ":syntax",

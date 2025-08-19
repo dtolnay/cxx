@@ -7,7 +7,7 @@
 ###############################################################################
 
 load("@rules_rust//cargo:defs.bzl", "cargo_toml_env_vars")
-load("@rules_rust//rust:defs.bzl", "rust_proc_macro")
+load("@rules_rust//rust:defs.bzl", "rust_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -16,8 +16,8 @@ cargo_toml_env_vars(
     src = "Cargo.toml",
 )
 
-rust_proc_macro(
-    name = "serde_derive",
+rust_library(
+    name = "trybuild",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = True,
@@ -34,11 +34,11 @@ rust_proc_macro(
             "WORKSPACE.bazel",
         ],
     ),
-    crate_features = [
-        "default",
-    ],
     crate_root = "src/lib.rs",
-    edition = "2015",
+    edition = "2021",
+    proc_macro_deps = [
+        "@vendor__serde_derive-1.0.219//:serde_derive",
+    ],
     rustc_env_files = [
         ":cargo_toml_env_vars",
     ],
@@ -47,7 +47,7 @@ rust_proc_macro(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=serde_derive",
+        "crate-name=trybuild",
         "manual",
         "noclippy",
         "norustfmt",
@@ -91,10 +91,13 @@ rust_proc_macro(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "1.0.219",
+    version = "1.0.110",
     deps = [
-        "@vendor__proc-macro2-1.0.94//:proc_macro2",
-        "@vendor__quote-1.0.40//:quote",
-        "@vendor__syn-2.0.100//:syn",
+        "@vendor__glob-0.3.3//:glob",
+        "@vendor__serde-1.0.219//:serde",
+        "@vendor__serde_json-1.0.142//:serde_json",
+        "@vendor__target-triple-0.1.4//:target_triple",
+        "@vendor__termcolor-1.4.1//:termcolor",
+        "@vendor__toml-0.9.5//:toml",
     ],
 )

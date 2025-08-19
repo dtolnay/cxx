@@ -44,6 +44,7 @@ pub struct Includes<'a> {
     pub sys_types: bool,
     pub content: Content<'a>,
     pub kj_rs: bool,
+    pub jsg: bool,
 }
 
 impl<'a> Includes<'a> {
@@ -107,6 +108,7 @@ pub fn write(out: &mut OutFile) {
         basetsd,
         sys_types,
         kj_rs,
+        jsg,
         content: _,
     } = *include;
 
@@ -190,6 +192,9 @@ pub fn write(out: &mut OutFile) {
     }
     if kj_rs && !cxx_header {
         writeln!(out, "#include \"kj-rs/kj-rs.h\"");
+    }
+    if jsg && !cxx_header {
+        writeln!(out, "#include \"jsg.h\"");
     }
 }
 

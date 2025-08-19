@@ -13,6 +13,34 @@ rust_test(
     ],
 )
 
+rust_test(
+    name = "cxx_gen_test",
+    size = "small",
+    srcs = ["cxx_gen.rs"],
+    edition = "2021",
+    deps = [
+      ":cxx_test_suite",
+      "//:cxx",
+      "//:cxx-gen",
+    ],
+)
+
+rust_test(
+    name = "compile-test",
+    size = "small",
+    srcs = ["compiletest.rs"],
+    edition = "2021",
+    proc_macro_deps = [
+      "@crates.io//:rustversion",
+    ],
+    deps = [
+      ":cxx_test_suite",
+      "//:cxx",
+      "//:cxx-gen",
+      "@crates.io//:trybuild",
+    ],
+)
+
 rust_library(
     name = "cxx_test_suite",
     testonly = True,
@@ -22,10 +50,20 @@ rust_library(
         "ffi/module.rs",
     ],
     edition = "2021",
+    proc_macro_deps = [
+        "//:cxxbridge-macro",
+    ],
     deps = [
         ":impl",
         "//:cxx",
+        "//kj-rs"
     ],
+)
+
+cc_library(
+    name = "jsg",
+    hdrs = ["ffi/jsg.h"],
+    strip_include_prefix = "ffi"
 )
 
 cc_library(
@@ -35,13 +73,17 @@ cc_library(
         "ffi/tests.cc",
         ":bridge/source",
         ":module/source",
+        "//kj-rs:bridge/source",
     ],
     hdrs = ["ffi/tests.h"],
     linkstatic = True,
     deps = [
         ":bridge/include",
+        ":jsg",
         ":module/include",
         "//:core",
+        "//kj-rs:bridge/include",
+        "//kj-rs:kj-rs-lib",
     ],
 )
 
@@ -52,6 +94,7 @@ rust_cxx_bridge(
     hdrs = ["ffi/tests.h"],
     deps = [
         "//:core",
+        ":jsg",
         ":module",
     ]
 )

@@ -26,6 +26,7 @@ pub(crate) fn expand_struct(
             Trait::PartialOrd => expanded.extend(struct_partial_ord(strct, span)),
             Trait::Serialize => traits.push(quote_spanned!(span=> ::serde::Serialize)),
             Trait::Deserialize => traits.push(quote_spanned!(span=> ::serde::Deserialize)),
+            Trait::JsgStruct => expanded.extend(expand_jsg_struct(strct, span)),
         }
     }
 
@@ -73,6 +74,7 @@ pub(crate) fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) 
             Trait::PartialOrd => expanded.extend(enum_partial_ord(enm, span)),
             Trait::Serialize => traits.push(quote_spanned!(span=> ::serde::Serialize)),
             Trait::Deserialize => traits.push(quote_spanned!(span=> ::serde::Deserialize)),
+            Trait::JsgStruct => unreachable!(),
         }
     }
 
@@ -302,5 +304,15 @@ fn enum_partial_ord(enm: &Enum, span: Span) -> TokenStream {
                 ::cxx::core::cmp::PartialOrd::partial_cmp(&self.repr, &other.repr)
             }
         }
+    }
+}
+
+fn expand_jsg_struct(strct: &Struct, span: Span) -> TokenStream {
+    let ident = &strct.name.rust;
+    let generics = &strct.generics;
+
+    quote_spanned! {span=>
+        #[automatically_derived]
+        impl ::kj_rs::JsgStruct for #ident #generics {}
     }
 }

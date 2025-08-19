@@ -16,3 +16,4 @@ quote = "1.0.4"
 rustversion = "1"
 scratch = "1"
 syn = { version = "2.0.1", features = ["full"] }
+trybuild = "1"

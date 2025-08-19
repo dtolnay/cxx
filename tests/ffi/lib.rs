@@ -37,6 +37,13 @@ pub mod ffi {
         msg: String,
     }
 
+    #[derive(JsgStruct)]
+    struct CaaRecord {
+        critical: u8,
+        field: String,
+        value: String,
+    }
+
     #[derive(Debug, Hash, PartialOrd, Ord)]
     enum Enum {
         AVal,

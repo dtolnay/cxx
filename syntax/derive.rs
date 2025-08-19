@@ -21,6 +21,7 @@ pub enum Trait {
     PartialOrd,
     Serialize,
     Deserialize,
+    JsgStruct,
 }
 
 impl Derive {
@@ -38,6 +39,7 @@ impl Derive {
             "PartialOrd" => Trait::PartialOrd,
             "Serialize" => Trait::Serialize,
             "Deserialize" => Trait::Deserialize,
+            "JsgStruct" => Trait::JsgStruct,
             _ => return None,
         };
         let span = ident.span();
@@ -66,6 +68,7 @@ impl AsRef<str> for Trait {
             Trait::PartialOrd => "PartialOrd",
             Trait::Serialize => "Serialize",
             Trait::Deserialize => "Deserialize",
+            Trait::JsgStruct => "JsgStruct",
         }
     }
 }
