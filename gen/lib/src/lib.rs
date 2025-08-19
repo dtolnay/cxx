@@ -19,6 +19,7 @@
     clippy::inherent_to_string,
     clippy::items_after_statements,
     clippy::match_bool,
+    clippy::match_like_matches_macro,
     clippy::match_same_arms,
     clippy::missing_errors_doc,
     clippy::must_use_candidate,

@@ -56,6 +56,7 @@
     clippy::inherent_to_string,
     clippy::items_after_statements,
     clippy::match_bool,
+    clippy::match_like_matches_macro,
     clippy::match_same_arms,
     clippy::needless_doctest_main,
     clippy::needless_lifetimes,
