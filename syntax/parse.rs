@@ -1073,6 +1073,7 @@ fn parse_impl(cx: &mut Errors, imp: ItemImpl) -> Result<Api> {
         | Type::Str(_)
         | Type::Fn(_)
         | Type::Void(_)
+        | Type::KjDate(_)
         | Type::SliceRef(_)
         | Type::Array(_) => Lifetimes::default(),
         Type::Future(_) => todo!("file a workerd-cxx ticket"),
@@ -1217,7 +1218,12 @@ fn parse_type_path(ty: &TypePath) -> Result<Type> {
         let segment = &path.segments[0];
         let ident = segment.ident.clone();
         match &segment.arguments {
-            PathArguments::None => return Ok(Type::Ident(NamedType::new(ident))),
+            PathArguments::None => {
+                if ident == "KjDate" {
+                    return Ok(Type::KjDate(ident.span()));
+                }
+                return Ok(Type::Ident(NamedType::new(ident)));
+            }
             PathArguments::AngleBracketed(generic) => {
                 if ident == "UniquePtr" && generic.args.len() == 1 {
                     if let GenericArgument::Type(arg) = &generic.args[0] {
@@ -1515,7 +1521,7 @@ fn parse_return_type(
 }
 fn has_references_without_lifetime(ty: &Type) -> bool {
     match ty {
-        Type::Fn(_) | Type::Ident(_) | Type::Str(_) | Type::Void(_) => false,
+        Type::Fn(_) | Type::Ident(_) | Type::Str(_) | Type::Void(_) | Type::KjDate(_) => false,
         Type::RustBox(t)
         | Type::RustVec(t)
         | Type::UniquePtr(t)

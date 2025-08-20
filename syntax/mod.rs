@@ -304,6 +304,7 @@ pub enum Type {
     Fn(Box<Signature>),
     Void(Span),
     KjMaybe(Box<Ty1>),
+    KjDate(Span),
     SliceRef(Box<SliceRef>),
     Array(Box<Array>),
     Future(Box<Future>),

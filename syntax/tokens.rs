@@ -39,6 +39,7 @@ impl ToTokens for Type {
             Type::Array(a) => a.to_tokens(tokens),
             Type::Fn(f) => f.to_tokens(tokens),
             Type::Void(span) => tokens.extend(quote_spanned!(*span=> ())),
+            Type::KjDate(span) => tokens.extend(quote_spanned!(*span=> ::kj_rs::KjDate)),
             Type::SliceRef(r) => r.to_tokens(tokens),
             Type::Future(f) => f.to_tokens(tokens),
         }

@@ -61,7 +61,7 @@ impl Hash for Type {
             Type::Fn(t) => t.hash(state),
             Type::SliceRef(t) => t.hash(state),
             Type::Array(t) => t.hash(state),
-            Type::Void(_) => {}
+            Type::Void(_) | Type::KjDate(_) => {}
             Type::Future(t) => t.hash(state),
         }
     }
@@ -85,6 +85,7 @@ impl PartialEq for Type {
             (Type::Fn(lhs), Type::Fn(rhs)) => lhs == rhs,
             (Type::SliceRef(lhs), Type::SliceRef(rhs)) => lhs == rhs,
             (Type::Void(_), Type::Void(_)) => true,
+            (Type::KjDate(_), Type::KjDate(_)) => true,
             (Type::Future(lhs), Type::Future(rhs)) => lhs == rhs,
             (_, _) => false,
         }

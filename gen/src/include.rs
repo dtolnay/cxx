@@ -43,6 +43,7 @@ pub struct Includes<'a> {
     pub basetsd: bool,
     pub sys_types: bool,
     pub content: Content<'a>,
+    pub kj_date: bool,
     pub kj_rs: bool,
     pub jsg: bool,
 }
@@ -107,6 +108,7 @@ pub fn write(out: &mut OutFile) {
         vector,
         basetsd,
         sys_types,
+        kj_date,
         kj_rs,
         jsg,
         content: _,
@@ -189,6 +191,9 @@ pub fn write(out: &mut OutFile) {
         writeln!(out, "#if __cplusplus >= 202002L");
         writeln!(out, "#include <ranges>");
         writeln!(out, "#endif");
+    }
+    if kj_date && !cxx_header {
+        writeln!(out, "#include \"kj-rs/date.h\"");
     }
     if kj_rs && !cxx_header {
         writeln!(out, "#include \"kj-rs/kj-rs.h\"");

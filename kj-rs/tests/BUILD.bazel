@@ -18,6 +18,9 @@ rust_library(
     edition = "2024",
     deps = [
         ":bridge",
+        ":test-date",
+        ":test-promises",
+        ":test-maybe",
         # TODO(now): Why isn't :cxx transitive?
         "@workerd-cxx//:cxx",
         "//kj-rs",
@@ -28,28 +31,24 @@ rust_unpretty(
     name = "expand-rust_test",
     testonly = True,
     deps = [
-        ":rust_tests"
-    ]
+        ":rust_tests",
+    ],
 )
 
 rust_test(
     name = "rust_tests",
     crate = "tests",
-    deps = [
-        ":test-promises",
-        ":test-maybe",
-    ],
 )
 
 rust_cxx_bridge(
     name = "bridge",
     src = "lib.rs",
     hdrs = [
-        "test-promises.h",
+        "shared.h",
         "test-maybe.h",
         "test-own.h",
-        "shared.h",
-        "test-refcount.h"
+        "test-promises.h",
+        "test-refcount.h",
     ],
     include_prefix = "kj-rs-demo",
     deps = [
@@ -60,9 +59,9 @@ rust_cxx_bridge(
 cc_library(
     name = "test-promises",
     srcs = [
-        "test-promises.c++",
         "test-own.c++",
-        "test-refcount.c++"
+        "test-promises.c++",
+        "test-refcount.c++",
     ],
     linkstatic = select({
         "@platforms//os:windows": True,
@@ -89,6 +88,36 @@ cc_library(
     ],
 )
 
+rust_cxx_bridge(
+    name = "test-date-bridge",
+    src = "test_date.rs",
+    hdrs = [
+        "test-date.h",
+    ],
+    include_prefix = "kj-rs-demo",
+    deps = [
+        "//kj-rs",
+    ],
+)
+
+cc_library(
+    name = "test-date",
+    srcs = [
+        "test-date.c++",
+    ],
+    hdrs = [
+        "test-date.h",
+    ],
+    linkstatic = select({
+        "@platforms//os:windows": True,
+        "//conditions:default": False,
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
+        ":test-date-bridge",
+    ],
+)
+
 cc_test(
     name = "awaitables-cc-test",
     size = "medium",
@@ -100,10 +129,8 @@ cc_test(
         "//conditions:default": False,
     }),
     deps = [
-        ":tests",
         ":bridge",
-        ":test-promises",
-        ":test-maybe",
+        ":tests",
         "//third-party:runtime",
         "@capnp-cpp//src/kj:kj-test",
     ],
@@ -120,6 +147,24 @@ cc_test(
         "//conditions:default": False,
     }),
     deps = [
+        "//kj-rs",
+        "//third-party:runtime",
+        "@capnp-cpp//src/kj:kj-test",
+    ],
+)
+
+cc_test(
+    name = "date-test",
+    size = "small",
+    srcs = [
+        "date-test.c++",
+    ],
+    linkstatic = select({
+        "@platforms//os:windows": True,
+        "//conditions:default": False,
+    }),
+    deps = [
+        ":tests",
         "//kj-rs",
         "//third-party:runtime",
         "@capnp-cpp//src/kj:kj-test",

@@ -38,7 +38,7 @@ jobs:
         if: matrix.os.name == 'macos'
         run: sudo xcode-select -s "/Applications/Xcode_16.3.app"
       - run: bazel --version
-      - run: bazel test ... --verbose_failures ${{matrix.os.name == 'macos' && '--xcode_version_config=tools/bazel:github_actions_xcodes' || ''}}
+      - run: bazel test ... --verbose_failures --test_output=errors ${{matrix.os.name == 'macos' && '--xcode_version_config=tools/bazel:github_actions_xcodes' || ''}}
 
 
   clippy:
@@ -57,7 +57,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: sudo apt-get install lld
-      - run: bazel test --config=asan ... --verbose_failures
+      - run: bazel test --config=asan ... --verbose_failures --test_output=errors
 
   clang-tidy:
     name: Clang Tidy

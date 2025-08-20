@@ -84,7 +84,7 @@ fn check_type(cx: &mut Check, ty: &Type) {
         Type::Array(array) => check_type_array(cx, array),
         Type::Fn(ty) => check_type_fn(cx, ty),
         Type::SliceRef(ty) => check_type_slice_ref(cx, ty),
-        Type::Str(_) | Type::Void(_) => {}
+        Type::Str(_) | Type::Void(_) | Type::KjDate(_) => {}
         Type::Future(ty) => check_type_future(cx, ty),
     }
 }
@@ -797,6 +797,7 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
         | Type::Ref(_)
         | Type::Ptr(_)
         | Type::Str(_)
+        | Type::KjDate(_)
         | Type::SliceRef(_) => false,
         Type::Future(_) => false,
     }
@@ -873,6 +874,7 @@ fn describe(cx: &mut Check, ty: &Type) -> String {
         Type::SharedPtr(_) => "shared_ptr".to_owned(),
         Type::WeakPtr(_) => "weak_ptr".to_owned(),
         Type::KjMaybe(_) => "kj::Maybe".to_owned(),
+        Type::KjDate(_) => "kj::Date".to_owned(),
         Type::Ref(_) => "reference".to_owned(),
         Type::Ptr(_) => "raw pointer".to_owned(),
         Type::Str(_) => "&str".to_owned(),

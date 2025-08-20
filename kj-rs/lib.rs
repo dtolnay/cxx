@@ -3,6 +3,7 @@ use awaiter::WakerRef;
 
 pub use crate::ffi::KjWaker;
 pub use awaiter::PromiseAwaiter;
+pub use date::KjDate;
 pub use future::FuturePollStatus;
 pub use maybe::repr::KjMaybe;
 pub use own::repr::KjOwn;
@@ -11,9 +12,10 @@ pub use promise::KjPromiseNodeImpl;
 pub use promise::OwnPromiseNode;
 pub use promise::PromiseFuture;
 pub use promise::new_callbacks_promise_future;
-pub use repr::{KjArc, KjRc};
+pub use refcount::repr::{KjArc, KjRc};
 
 mod awaiter;
+mod date;
 mod future;
 pub mod maybe;
 mod own;

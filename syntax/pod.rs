@@ -32,7 +32,12 @@ impl<'a> Types<'a> {
             | Type::WeakPtr(_)
             | Type::CxxVector(_)
             | Type::Void(_) => false,
-            Type::Ref(_) | Type::Str(_) | Type::Fn(_) | Type::SliceRef(_) | Type::Ptr(_) => true,
+            Type::Ref(_)
+            | Type::Str(_)
+            | Type::Fn(_)
+            | Type::SliceRef(_)
+            | Type::Ptr(_)
+            | Type::KjDate(_) => true,
             Type::KjMaybe(ty) => self.is_guaranteed_pod(&ty.inner),
             Type::Array(array) => self.is_guaranteed_pod(&array.inner),
             Type::Future(_) => false,

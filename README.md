@@ -36,6 +36,7 @@ The following smart pointers can be used in ffi layers:
 ### KJ Data Structures Integration
 
 - `kj::Maybe<T>` - corresponds to `kj_rs::KjMaybe<T>`.
+- `kj::Date` - corresponds to `kj_rs::KjDate`.
 
 ### KJ/Rust conversion layer
 

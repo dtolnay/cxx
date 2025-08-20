@@ -80,9 +80,6 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
                 }
             }
             Api::CxxFunction(efn) => {
-                if efn.asyncness.is_some() {
-                    // todo!("expand_cxx_function_shim\n{}", expand_cxx_function_shim(efn, types).to_string());
-                }
                 expanded.extend(expand_cxx_function_shim(efn, types));
             }
             Api::RustType(ety) => {
@@ -90,9 +87,6 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
                 hidden.extend(expand_rust_type_layout(ety, types));
             }
             Api::RustFunction(efn) => {
-                if efn.asyncness.is_some() {
-                    // todo!("expand_rust_function_shim\n{}", expand_rust_function_shim(efn, types).to_string());
-                }
                 hidden.extend(expand_rust_function_shim(efn, types));
             }
             Api::TypeAlias(alias) => match alias.lang {
@@ -616,6 +610,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                 false => quote_spanned!(span=> ::cxx::private::RustSlice::from_ref(#var)),
                 true => quote_spanned!(span=> ::cxx::private::RustSlice::from_mut(#var)),
             },
+            Type::KjDate(_) => quote_spanned!(span=> #var.into()),
             ty if types.needs_indirect_abi(ty) => quote_spanned!(span=> #var.as_mut_ptr()),
             _ => quote!(#var),
         }
@@ -752,6 +747,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                 Type::Future(_) => {
                     quote_spanned!(span=> ::kj_rs::new_callbacks_promise_future(#call))
                 }
+                Type::KjDate(_) => quote_spanned!(span=> #call.into()),
                 _ => call,
             },
         };
@@ -1080,6 +1076,7 @@ fn expand_rust_function_shim_impl(
                     true => quote_spanned!(span=> #var.as_mut_slice::<#inner>()),
                 }
             }
+            Type::KjDate(_) => quote!(#var.into()),
             ty if types.needs_indirect_abi(ty) => {
                 requires_unsafe = true;
                 quote_spanned!(span=> ::cxx::core::ptr::read(#var))
@@ -1105,6 +1102,10 @@ fn expand_rust_function_shim_impl(
     };
     requires_closure |= !vars.is_empty();
     call.extend(quote! { (#(#vars),*) });
+
+    if let Some(Type::KjDate(_)) = sig.ret {
+        call = quote!(#call.into());
+    }
 
     let span = body_span;
     let conversion = sig.ret.as_ref().and_then(|ret| match ret {
@@ -2155,6 +2156,9 @@ fn expand_extern_type(ty: &Type, types: &Types, proper: bool) -> TokenStream {
         Type::Future(output) => {
             let span = output.span();
             quote_spanned!(span=> ::kj_rs::KjPromiseNodeImpl)
+        }
+        Type::KjDate(span) => {
+            quote_spanned!(*span=> i64)
         }
         _ => quote!(#ty),
     }

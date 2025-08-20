@@ -240,6 +240,9 @@ fn pick_includes_and_builtins(out: &mut OutFile, apis: &[Api]) {
             | Type::KjArc(_) => {
                 out.include.kj_rs = true;
             }
+            Type::KjDate(_) => {
+                out.include.kj_date = true;
+            }
         }
     }
 }
@@ -760,15 +763,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         if i > 0 || efn.receiver.is_some() {
             write!(out, ", ");
         }
-        if arg.ty == RustString {
-            write_type_space(out, &arg.ty);
-            write!(out, "const *{}", arg.name.cxx);
-        } else if let Type::RustVec(_) = arg.ty {
-            write_type_space(out, &arg.ty);
-            write!(out, "const *{}", arg.name.cxx);
-        } else {
-            write_extern_arg(out, arg);
-        }
+        write_cxx_shim_sig_arg(out, arg);
     }
     let indirect_return = indirect_return(efn, out.types);
     if indirect_return {
@@ -840,6 +835,9 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
             write_type(out, ty);
             write!(out, ">::repr(");
         }
+        Some(Type::KjDate(_)) => {
+            write!(out, "::kj_rs::repr::toNanos(");
+        }
         _ => {}
     }
     match &efn.receiver {
@@ -850,34 +848,13 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         if i > 0 {
             write!(out, ", ");
         }
-        if let Type::RustBox(_) = &arg.ty {
-            write_type(out, &arg.ty);
-            write!(out, "::from_raw({})", arg.name.cxx);
-        } else if let Type::UniquePtr(_) = &arg.ty {
-            write_type(out, &arg.ty);
-            write!(out, "({})", arg.name.cxx);
-        } else if arg.ty == RustString {
-            out.builtin.unsafe_bitcopy = true;
-            write!(
-                out,
-                "::rust::String(::rust::unsafe_bitcopy, *{})",
-                arg.name.cxx,
-            );
-        } else if let Type::RustVec(_) = arg.ty {
-            out.builtin.unsafe_bitcopy = true;
-            write_type(out, &arg.ty);
-            write!(out, "(::rust::unsafe_bitcopy, *{})", arg.name.cxx);
-        } else if out.types.needs_indirect_abi(&arg.ty) {
-            out.include.utility = true;
-            write!(out, "::std::move(*{})", arg.name.cxx);
-        } else {
-            write!(out, "{}", arg.name.cxx);
-        }
+        write_cxx_shim_arg(out, arg);
     }
     write!(out, ")");
     match &efn.ret {
         Some(Type::RustBox(_)) => write!(out, ".into_raw()"),
         Some(Type::UniquePtr(_)) => write!(out, ".release()"),
+        Some(Type::KjDate(_)) => write!(out, ")"),
         Some(Type::Str(_) | Type::SliceRef(_)) if !indirect_return => write!(out, ")"),
         _ => {}
     }
@@ -896,6 +873,63 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         }
     }
     out.end_block(Block::ExternC);
+}
+
+/// Write argument as part of cxx function call inside of cxx shim
+fn write_cxx_shim_arg(out: &mut OutFile, arg: &Var) {
+    match &arg.ty {
+        Type::RustBox(_) => {
+            write_type(out, &arg.ty);
+            write!(out, "::from_raw({})", arg.name.cxx);
+        }
+        Type::UniquePtr(_) => {
+            write_type(out, &arg.ty);
+            write!(out, "({})", arg.name.cxx);
+        }
+        Type::RustVec(_) => {
+            out.builtin.unsafe_bitcopy = true;
+            write_type(out, &arg.ty);
+            write!(out, "(::rust::unsafe_bitcopy, *{})", arg.name.cxx);
+        }
+        Type::KjDate(_) => {
+            write!(out, "::kj_rs::repr::fromNanos({})", arg.name.cxx);
+        }
+        t if t == RustString => {
+            out.builtin.unsafe_bitcopy = true;
+            write!(
+                out,
+                "::rust::String(::rust::unsafe_bitcopy, *{})",
+                arg.name.cxx,
+            );
+        }
+        t if out.types.needs_indirect_abi(t) => {
+            out.include.utility = true;
+            write!(out, "::std::move(*{})", arg.name.cxx);
+        }
+        _ => {
+            write!(out, "{}", arg.name.cxx);
+        }
+    }
+}
+
+/// Write argument as part of cxx shim function signature
+fn write_cxx_shim_sig_arg(out: &mut OutFile, arg: &Var) {
+    match &arg.ty {
+        Type::RustVec(_) => {
+            write_type_space(out, &arg.ty);
+            write!(out, "const *{}", arg.name.cxx);
+        }
+        Type::KjDate(_) => {
+            write!(out, "::std::int64_t {}", arg.name.cxx);
+        }
+        t if t == RustString => {
+            write_type_space(out, &arg.ty);
+            write!(out, "const *{}", arg.name.cxx);
+        }
+        _ => {
+            write_extern_arg(out, arg);
+        }
+    }
 }
 
 fn write_function_pointer_trampoline(out: &mut OutFile, efn: &ExternFn, var: &Pair, f: &Signature) {
@@ -1216,6 +1250,9 @@ fn write_extern_return_type_space(out: &mut OutFile, ty: &Option<Type>) {
             out.builtin.repr_fat = true;
             write!(out, "::rust::repr::Fat ");
         }
+        Some(Type::KjDate(_)) => {
+            write!(out, "::std::int64_t ");
+        }
         Some(ty) if out.types.needs_indirect_abi(ty) => write!(out, "void "),
         _ => write_return_type(out, ty),
     }
@@ -1341,6 +1378,7 @@ fn write_type(out: &mut OutFile, ty: &Type) {
             write!(out, ", {}>", &a.len);
         }
         Type::Void(_) => write!(out, "void"),
+        Type::KjDate(_) => write!(out, "::kj::Date"),
         Type::Future(ty) => {
             write!(out, "kj::Promise<");
             write_type(out, &ty.output);
@@ -1387,6 +1425,7 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
         | Type::WeakPtr(_)
         | Type::Str(_)
         | Type::KjMaybe(_)
+        | Type::KjDate(_)
         | Type::CxxVector(_)
         | Type::RustVec(_)
         | Type::SliceRef(_)

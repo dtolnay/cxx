@@ -268,7 +268,6 @@ struct RustCopy {
     return from(&ptr);
   }
 
-
   /// from<RustCopy>(rustSliceOfStrs) - Copy slice of strs to null-terminated KJ strings
   static kj::Array<kj::String> into(::rust::Slice<::rust::str> slice) {
     auto res = kj::heapArrayBuilder<kj::String>(slice.size());

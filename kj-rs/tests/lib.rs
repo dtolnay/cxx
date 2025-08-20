@@ -10,6 +10,7 @@
 #![allow(clippy::should_panic_without_expect)]
 #![allow(clippy::missing_panics_doc)]
 
+mod test_date;
 mod test_futures;
 mod test_maybe;
 mod test_own;

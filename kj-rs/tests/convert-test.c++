@@ -295,11 +295,11 @@ KJ_TEST("kj::LiteralStringConst as<RustCopy> conversion") {
 KJ_TEST("RustUncheckedUtf8 - Valid UTF-8 conversion") {
   // Test with valid UTF-8 strings
   kj::String kjStr = kj::str("Valid UTF-8: 🚀 测试");
-  
+
   auto rustString = kjStr.as<RustUncheckedUtf8>();
-  
+
   KJ_EXPECT(rustString.size() == kjStr.size());
-  
+
   // Convert back and verify
   auto convertedBack = kj::str(rustString);
   KJ_EXPECT(convertedBack == kjStr);
@@ -307,9 +307,9 @@ KJ_TEST("RustUncheckedUtf8 - Valid UTF-8 conversion") {
 
 KJ_TEST("RustCopyUncheckedUtf8 - StringPtr conversion") {
   kj::StringPtr kjStrPtr = "UTF-8 StringPtr: café";
-  
+
   auto rustString = kjStrPtr.as<RustCopyUncheckedUtf8>();
-  
+
   KJ_EXPECT(rustString.size() == kjStrPtr.size());
   auto convertedBack = kj::str(rustString);
   KJ_EXPECT(convertedBack == kjStrPtr);
@@ -317,9 +317,9 @@ KJ_TEST("RustCopyUncheckedUtf8 - StringPtr conversion") {
 
 KJ_TEST("RustCopyUncheckedUtf8 - ConstString conversion") {
   kj::ConstString kjConstStr = "UTF-8 ConstString: 日本語"_kjc;
-  
+
   auto rustString = kjConstStr.as<RustCopyUncheckedUtf8>();
-  
+
   KJ_EXPECT(rustString.size() == kjConstStr.size());
   auto convertedBack = kj::str(rustString);
   KJ_EXPECT(convertedBack == kjConstStr);
@@ -327,9 +327,9 @@ KJ_TEST("RustCopyUncheckedUtf8 - ConstString conversion") {
 
 KJ_TEST("RustUncheckedUtf8 - StringPtr conversion") {
   kj::StringPtr kjStrPtr = "UTF-8 StringPtr: café";
-  
+
   auto rustStr = kjStrPtr.as<RustUncheckedUtf8>();
-  
+
   KJ_EXPECT(rustStr.size() == kjStrPtr.size());
   auto convertedBack = kj::str(rustStr);
   KJ_EXPECT(convertedBack == kjStrPtr);
@@ -337,9 +337,9 @@ KJ_TEST("RustUncheckedUtf8 - StringPtr conversion") {
 
 KJ_TEST("RustUncheckedUtf8 - ConstString conversion") {
   kj::ConstString kjConstStr = "UTF-8 ConstString: 日本語"_kjc;
-  
+
   auto rustStr = kjConstStr.as<RustUncheckedUtf8>();
-  
+
   KJ_EXPECT(rustStr.size() == kjConstStr.size());
   auto convertedBack = kj::str(rustStr);
   KJ_EXPECT(convertedBack == kjConstStr);

@@ -27,6 +27,7 @@ impl<'a> Types<'a> {
             | Type::Str(_)
             | Type::Fn(_)
             | Type::Void(_)
+            | Type::KjDate(_)
             | Type::SliceRef(_) => Definite(true),
             Type::UniquePtr(_) | Type::SharedPtr(_) | Type::WeakPtr(_) | Type::CxxVector(_) => {
                 Definite(false)
