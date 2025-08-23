@@ -6,10 +6,8 @@ error: invalid suffix `int` for number literal
   |
   = help: the suffix must be one of the numeric types (`u32`, `isize`, `f32`, etc.)
 
-error[E0693]: incorrect `repr(align)` attribute format: `align` takes exactly one argument in parentheses
- --> tests/ui/repr_align_suffixed.rs:1:1
+error[E0589]: invalid `repr(align)` attribute: not an unsuffixed integer
+ --> tests/ui/repr_align_suffixed.rs:3:18
   |
-1 | #[cxx::bridge]
-  | ^^^^^^^^^^^^^^
-  |
-  = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
+3 |     #[repr(align(2int))]
+  |                  ^^^^
