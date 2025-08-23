@@ -1,0 +1,281 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Other build systems — Rust ♡ C++</title>
+
+
+        <!-- Custom HTML head -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DG41MK6DDN"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-DG41MK6DDN', {anonymize_ip: true, cookie_domain: 'cxx.rs', cookie_flags: 'samesite=strict;secure'});
+        </script>
+
+        <meta name="description" content="CXX — safe interop between Rust and C++ by David Tolnay. This library provides a safe mechanism for calling C++ code from Rust and Rust code from C++.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../css/cxx.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    <meta property="og:image" content="https://cxx.rs/cxx.png"><meta property="og:site_name" content="CXX"><meta property="og:title" content="CXX — safe interop between Rust and C++"><meta name="twitter:image:src" content="https://cxx.rs/cxx.png"><meta name="twitter:site" content="@davidtolnay"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="CXX — safe interop between Rust and C++"></head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>const html = document.documentElement;
+html.classList.add('js');</script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list" style="display:none">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/dtolnay/cxx" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="some-other-build-system"><a class="header" href="#some-other-build-system">Some other build system</a></h1>
+<p>You will need to achieve at least these three things:</p>
+<ul>
+<li>Produce the CXX-generated C++ bindings code.</li>
+<li>Compile the generated C++ code.</li>
+<li>Link the resulting objects together with your other C++ and Rust objects.</li>
+</ul>
+<p><em>Not all build systems are created equal. If you're hoping to use a build system
+from the '90s, especially if you're hoping to overlaying the limitations of 2 or
+more build systems (like automake+cargo) and expect to solve them
+simultaneously, then be mindful that your expectations are set accordingly and
+seek sympathy from those who have imposed the same approach on themselves.</em></p>
+<h3 id="producing-the-generated-code"><a class="header" href="#producing-the-generated-code">Producing the generated code</a></h3>
+<p>CXX's Rust code generation automatically happens when the <code class="hljs">#[cxx::bridge]</code>
+procedural macro is expanded during the normal Rust compilation process, so no
+special build steps are required there.</p>
+<p>But the C++ side of the bindings needs to be generated. Your options are:</p>
+<ul>
+<li>
+<p>Use the <code class="hljs">cxxbridge</code> command, which is a standalone command line interface to
+the CXX C++ code generator. Wire up your build system to compile and invoke
+this tool.</p>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-meta">$</span><span class="bash">  cxxbridge src/bridge.rs --header &gt; path/to/bridge.rs.h</span>
+<span class="hljs-meta">$</span><span class="bash">  cxxbridge src/bridge.rs &gt; path/to/bridge.rs.cc</span>
+</code></pre>
+<p>It's packaged as the <code class="hljs">cxxbridge-cmd</code> crate on crates.io or can be built from
+the <em>gen/cmd/</em> directory of the CXX GitHub repo.</p>
+</li>
+<li>
+<p>Or, build your own code generator frontend on top of the <a href="https://docs.rs/cxx-gen">cxx-gen</a> crate. This
+is currently unofficial and unsupported.</p>
+</li>
+</ul>
+<div class="warning">
+<p><strong>Important:</strong> The Rust side and C++ side of a binding must always be created
+using the same release of CXX. If using <code class="hljs">cxxbridge-cmd</code> for the C++ side, the
+version number of <code class="hljs">cxxbridge-cmd</code> must be identical to the version number of
+<code class="hljs">cxx</code> used for the Rust side. If using <code class="hljs">cxx-gen</code> for the C++ side, its patch
+number must be identical to the patch number of <code class="hljs">cxx</code>.</p>
+</div>
+<h3 id="compiling-c"><a class="header" href="#compiling-c">Compiling C++</a></h3>
+<p>However you like. We can provide no guidance.</p>
+<h3 id="linking-the-c-and-rust-together"><a class="header" href="#linking-the-c-and-rust-together">Linking the C++ and Rust together</a></h3>
+<p>When linking a binary which contains mixed Rust and C++ code, you will have to
+choose between using the Rust toolchain (<code class="hljs">rustc</code>) or the C++ toolchain which you
+may already have extensively tuned.</p>
+<p>The generated C++ code and the Rust code generated by the procedural macro both
+depend on each other. Simple examples may only require one or the other, but in
+general your linking will need to handle both directions. For some linkers, such
+as LLD, this is not a problem at all. For others, such as GNU ld, flags like
+<code class="hljs">--start-lib</code>/<code class="hljs">--end-lib</code> may help.</p>
+<p>Rust does not generate simple standalone <code class="hljs">.o</code> files, so you can't just throw the
+Rust-generated code into your existing C++ toolchain linker. Instead you need to
+choose one of these options:</p>
+<ul>
+<li>
+<p>Use <code class="hljs">rustc</code> as the final linker. Pass any non-Rust libraries using <code class="hljs">-L &lt;directory&gt;</code> and <code class="hljs">-l&lt;library&gt;</code> rustc arguments, and/or <code class="hljs">#[link]</code> directives in
+your Rust code. If you need to link against C/C++ <code class="hljs">.o</code> files you can use
+<code class="hljs">-Clink-arg=file.o</code>.</p>
+</li>
+<li>
+<p>Use your C++ linker. In this case, you first need to use <code class="hljs">rustc</code> and/or
+<code class="hljs">cargo</code> to generate a <em>single</em> Rust <code class="hljs">staticlib</code> target and pass that into your
+foreign linker invocation.</p>
+<ul>
+<li>If you need to link multiple Rust subsystems, you will need to generate a
+<em>single</em> <code class="hljs">staticlib</code> perhaps using lots of <code class="hljs">extern crate</code> statements to
+include multiple Rust <code class="hljs">rlib</code>s.  Multiple Rust <code class="hljs">staticlib</code> files are likely
+to conflict.</li>
+</ul>
+</li>
+</ul>
+<p>Passing Rust <code class="hljs">rlib</code>s directly into your non-Rust linker is not supported (but
+apparently sometimes works).</p>
+<p>See the <a href="https://doc.rust-lang.org/reference/linkage.html">Rust reference's <em>Linkage</em></a> page for some general information
+here.</p>
+<p>The following open rust-lang issues might hold more recent guidance or
+inspiration: <a href="https://github.com/rust-lang/rust/issues/73632">rust-lang/rust#73632</a>, <a href="https://github.com/rust-lang/rust/issues/73295">rust-lang/rust#73295</a>.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../build/cmake.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../reference.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../build/cmake.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../reference.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

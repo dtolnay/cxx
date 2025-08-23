@@ -1,0 +1,296 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Other Rust–C++ interop tools — Rust ♡ C++</title>
+
+
+        <!-- Custom HTML head -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DG41MK6DDN"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-DG41MK6DDN', {anonymize_ip: true, cookie_domain: 'cxx.rs', cookie_flags: 'samesite=strict;secure'});
+        </script>
+
+        <meta name="description" content="CXX — safe interop between Rust and C++ by David Tolnay. This library provides a safe mechanism for calling C++ code from Rust and Rust code from C++.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css" disabled="true">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css" disabled="true">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="css/cxx.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    <meta property="og:image" content="https://cxx.rs/cxx.png"><meta property="og:site_name" content="CXX"><meta property="og:title" content="CXX — safe interop between Rust and C++"><meta name="twitter:image:src" content="https://cxx.rs/cxx.png"><meta name="twitter:site" content="@davidtolnay"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="CXX — safe interop between Rust and C++"></head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>const html = document.documentElement;
+html.classList.add('js');</script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list" style="display:none">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/dtolnay/cxx" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="context-other-rustc-interop-tools"><a class="header" href="#context-other-rustc-interop-tools">Context: other Rust–C++ interop tools</a></h1>
+<p>When it comes to interacting with an idiomatic Rust API or idiomatic C++ API
+from the other language, the generally applicable approaches outside of the CXX
+crate are:</p>
+<ul>
+<li>
+<p>Build a C-compatible wrapper around the code (expressed using <code class="hljs">extern "C"</code>
+signatures, primitives, C-compatible structs, raw pointers). Translate that
+manually to equivalent <code class="hljs">extern "C"</code> declarations in the other language and
+keep them in sync. Preferably, build a safe/idiomatic wrapper around the
+translated <code class="hljs">extern "C"</code> signatures for callers to use.</p>
+</li>
+<li>
+<p>Build a C wrapper around the C++ code and use <strong><a href="https://github.com/rust-lang/rust-bindgen">bindgen</a></strong> to translate that
+programmatically to <code class="hljs">extern "C"</code> Rust signatures. Preferably, build a
+safe/idiomatic Rust wrapper on top.</p>
+</li>
+<li>
+<p>Build a C-compatible Rust wrapper around the Rust code and use <strong><a href="https://github.com/eqrion/cbindgen">cbindgen</a></strong>
+to translate that programmatically to an <code class="hljs">extern "C"</code> C++ header. Preferably,
+build an idiomatic C++ wrapper.</p>
+</li>
+</ul>
+<p><strong>If the code you are binding is already <em>"effectively C"</em>, the above has you
+covered.</strong> You should use bindgen or cbindgen, or manually translated C
+signatures if there aren't too many and they seldom change.</p>
+<h2 id="c-vs-c"><a class="header" href="#c-vs-c">C++ vs C</a></h2>
+<p>Bindgen has some basic support for C++. It can reason about classes, member
+functions, and the layout of templated types. However, everything it does
+related to C++ is best-effort only. Bindgen starts from a point of wanting to
+generate declarations for everything, so any C++ detail that it hasn't
+implemented will cause a crash if you are lucky (<a href="https://github.com/rust-lang/rust-bindgen/issues/388">bindgen#388</a>) or more likely
+silently emit an incompatible signature (<a href="https://github.com/rust-lang/rust-bindgen/issues/380">bindgen#380</a>, <a href="https://github.com/rust-lang/rust-bindgen/issues/607">bindgen#607</a>,
+<a href="https://github.com/rust-lang/rust-bindgen/issues/652">bindgen#652</a>, <a href="https://github.com/rust-lang/rust-bindgen/issues/778">bindgen#778</a>, <a href="https://github.com/rust-lang/rust-bindgen/issues/1194">bindgen#1194</a>) which will do arbitrary
+memory-unsafe things at runtime whenever called.</p>
+<p>Thus using bindgen correctly requires not just juggling all your pointers
+correctly at the language boundary, but also understanding ABI details and their
+workarounds and reliably applying them. For example, the programmer will
+discover that their program sometimes segfaults if they call a function that
+returns std::unique_ptr&lt;T&gt; through bindgen. Why? Because unique_ptr, despite
+being "just a pointer", has a different ABI than a pointer or a C struct
+containing a pointer (<a href="https://github.com/rust-lang/rust-bindgen/issues/778">bindgen#778</a>) and is not directly expressible in Rust.
+Bindgen emitted something that <em>looks</em> reasonable and you will have a hell of a
+time in gdb working out what went wrong. Eventually people learn to avoid
+anything involving a non-trivial copy constructor, destructor, or inheritance,
+and instead stick to raw pointers and primitives and trivial structs only
+— in other words C.</p>
+<h2 id="geometric-intuition-for-why-there-is-so-much-opportunity-for-improvement"><a class="header" href="#geometric-intuition-for-why-there-is-so-much-opportunity-for-improvement">Geometric intuition for why there is so much opportunity for improvement</a></h2>
+<p>The CXX project attempts a different approach to C++ FFI.</p>
+<p>Imagine Rust and C and C++ as three vertices of a scalene triangle, with length
+of the edges being related to similarity of the languages when it comes to
+library design.</p>
+<p>The most similar pair (the shortest edge) is Rust–C++. These languages
+have largely compatible concepts of things like ownership, vectors, strings,
+fallibility, etc that translate clearly from signatures in either language to
+signatures in the other language.</p>
+<p>When we make a binding for an idiomatic C++ API using bindgen, and we fall down
+to raw pointers and primitives and trivial structs as described above, what we
+are really doing is coding the two longest edges of the triangle: getting from
+C++ down to C, and C back up to Rust. The Rust–C edge always involves a
+great deal of <code class="hljs">unsafe</code> code, and the C++–C edge similarly requires care
+just for basic memory safety. Something as basic as "how do I pass ownership of
+a string to the other language?" becomes a strap-yourself-in moment,
+particularly for someone not already an expert in one or both sides.</p>
+<p>You should think of the <code class="hljs">cxx</code> crate as being the midpoint of the Rust–C++
+edge. Rather than coding the two long edges, you will code half the short edge
+in Rust and half the short edge in C++, in both cases with the library playing
+to the strengths of the Rust type system <em>and</em> the C++ type system to help
+assure correctness.</p>
+<p>If you've already been through the tutorial in the previous chapter, take a
+moment to appreciate that the C++ side <em>really</em> looks like we are just writing
+C++ and the Rust side <em>really</em> looks like we are just writing Rust. Anything you
+could do wrong in Rust, and almost anything you could reasonably do wrong in
+C++, will be caught by the compiler. This highlights that we are on the "short
+edge of the triangle".</p>
+<p>But it all still boils down to the same things: it's still FFI from one piece of
+native code to another, nothing is getting serialized or allocated or
+runtime-checked in between.</p>
+<h2 id="role-of-cxx"><a class="header" href="#role-of-cxx">Role of CXX</a></h2>
+<p>The role of CXX is to capture the language boundary with more fidelity than what
+<code class="hljs">extern "C"</code> is able to represent. You can think of CXX as being a replacement
+for <code class="hljs">extern "C"</code> in a sense.</p>
+<p>From this perspective, CXX is a lower level tool than the bindgens. Just as
+bindgen and cbindgen are built on top of <code class="hljs">extern "C"</code>, it makes sense to think
+about higher level tools built on top of CXX. Such a tool might consume a C++
+header and/or Rust module (and/or IDL like Thrift) and emit the corresponding
+safe cxx::bridge language boundary, leveraging CXX's static analysis and
+underlying implementation of that boundary. We are beginning to see this space
+explored by the <a href="https://github.com/google/autocxx">autocxx</a> tool, though nothing yet ready for broad use in the
+way that CXX on its own is.</p>
+<p>But note in other ways CXX is higher level than the bindgens, with rich support
+for common standard library types. CXX's types serve as an intuitive vocabulary
+for designing a good boundary between components in different languages.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="tutorial.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="building.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="tutorial.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="building.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
