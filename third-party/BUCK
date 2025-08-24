@@ -560,6 +560,29 @@ cargo.rust_library(
     deps = [":windows-sys-0.60.2"],
 )
 
+alias(
+    name = "windows-link",
+    actual = ":windows-link-0.1.3",
+    visibility = ["PUBLIC"],
+)
+
+http_archive(
+    name = "windows-link-0.1.3.crate",
+    sha256 = "5e6ad25900d524eaabdbbb96d20b4311e1e7ae1699af4fb28c17ae66c80d798a",
+    strip_prefix = "windows-link-0.1.3",
+    urls = ["https://static.crates.io/crates/windows-link/0.1.3/download"],
+    visibility = [],
+)
+
+cargo.rust_library(
+    name = "windows-link-0.1.3",
+    srcs = [":windows-link-0.1.3.crate"],
+    crate = "windows_link",
+    crate_root = "windows-link-0.1.3.crate/src/lib.rs",
+    edition = "2021",
+    visibility = [],
+)
+
 http_archive(
     name = "windows-sys-0.60.2.crate",
     sha256 = "f2f500e4d28234f72040990ec9d39e3a6b950f9f22d3dba18416c35882612bcb",
@@ -606,4 +629,5 @@ cargo.rust_library(
     rustc_flags = ["--cfg=windows_raw_dylib"],
     target_compatible_with = ["prelude//os:windows"],
     visibility = [],
+    deps = [":windows-link"],
 )
