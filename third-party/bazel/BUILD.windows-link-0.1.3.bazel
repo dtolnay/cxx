@@ -17,7 +17,7 @@ cargo_toml_env_vars(
 )
 
 rust_library(
-    name = "termcolor",
+    name = "windows_link",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = True,
@@ -35,7 +35,7 @@ rust_library(
         ],
     ),
     crate_root = "src/lib.rs",
-    edition = "2018",
+    edition = "2021",
     rustc_env_files = [
         ":cargo_toml_env_vars",
     ],
@@ -44,7 +44,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=termcolor",
+        "crate-name=windows-link",
         "manual",
         "noclippy",
         "norustfmt",
@@ -88,17 +88,5 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "1.4.1",
-    deps = select({
-        "@rules_rust//rust/platform:aarch64-pc-windows-msvc": [
-            "@vendor__winapi-util-0.1.10//:winapi_util",  # cfg(windows)
-        ],
-        "@rules_rust//rust/platform:i686-pc-windows-msvc": [
-            "@vendor__winapi-util-0.1.10//:winapi_util",  # cfg(windows)
-        ],
-        "@rules_rust//rust/platform:x86_64-pc-windows-msvc": [
-            "@vendor__winapi-util-0.1.10//:winapi_util",  # cfg(windows)
-        ],
-        "//conditions:default": [],
-    }),
+    version = "0.1.3",
 )

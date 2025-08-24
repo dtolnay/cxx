@@ -21,7 +21,7 @@ cargo_toml_env_vars(
 )
 
 rust_library(
-    name = "windows_i686_gnu",
+    name = "proc_macro2",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = True,
@@ -38,6 +38,11 @@ rust_library(
             "WORKSPACE.bazel",
         ],
     ),
+    crate_features = [
+        "default",
+        "proc-macro",
+        "span-locations",
+    ],
     crate_root = "src/lib.rs",
     edition = "2021",
     rustc_env_files = [
@@ -48,7 +53,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=windows_i686_gnu",
+        "crate-name=proc-macro2",
         "manual",
         "noclippy",
         "norustfmt",
@@ -92,9 +97,10 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "0.52.6",
+    version = "1.0.101",
     deps = [
-        "@vendor__windows_i686_gnu-0.52.6//:build_script_build",
+        "@vendor__proc-macro2-1.0.101//:build_script_build",
+        "@vendor__unicode-ident-1.0.18//:unicode_ident",
     ],
 )
 
@@ -117,6 +123,11 @@ cargo_build_script(
             "WORKSPACE.bazel",
         ],
     ),
+    crate_features = [
+        "default",
+        "proc-macro",
+        "span-locations",
+    ],
     crate_name = "build_script_build",
     crate_root = "build.rs",
     data = glob(
@@ -132,7 +143,7 @@ cargo_build_script(
         ],
     ),
     edition = "2021",
-    pkg_name = "windows_i686_gnu",
+    pkg_name = "proc-macro2",
     rustc_env_files = [
         ":cargo_toml_env_vars",
     ],
@@ -141,12 +152,12 @@ cargo_build_script(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=windows_i686_gnu",
+        "crate-name=proc-macro2",
         "manual",
         "noclippy",
         "norustfmt",
     ],
-    version = "0.52.6",
+    version = "1.0.101",
     visibility = ["//visibility:private"],
 )
 

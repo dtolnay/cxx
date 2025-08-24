@@ -6,11 +6,7 @@
 #     bazel run @@//third-party:vendor
 ###############################################################################
 
-load(
-    "@rules_rust//cargo:defs.bzl",
-    "cargo_build_script",
-    "cargo_toml_env_vars",
-)
+load("@rules_rust//cargo:defs.bzl", "cargo_toml_env_vars")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
 package(default_visibility = ["//visibility:public"])
@@ -21,7 +17,7 @@ cargo_toml_env_vars(
 )
 
 rust_library(
-    name = "windows_aarch64_gnullvm",
+    name = "indexmap",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = True,
@@ -38,6 +34,10 @@ rust_library(
             "WORKSPACE.bazel",
         ],
     ),
+    crate_features = [
+        "default",
+        "std",
+    ],
     crate_root = "src/lib.rs",
     edition = "2021",
     rustc_env_files = [
@@ -48,7 +48,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=windows_aarch64_gnullvm",
+        "crate-name=indexmap",
         "manual",
         "noclippy",
         "norustfmt",
@@ -92,66 +92,9 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "0.52.6",
+    version = "2.11.0",
     deps = [
-        "@vendor__windows_aarch64_gnullvm-0.52.6//:build_script_build",
+        "@vendor__equivalent-1.0.2//:equivalent",
+        "@vendor__hashbrown-0.15.5//:hashbrown",
     ],
-)
-
-cargo_build_script(
-    name = "_bs",
-    srcs = glob(
-        include = ["**/*.rs"],
-        allow_empty = True,
-    ),
-    compile_data = glob(
-        include = ["**"],
-        allow_empty = True,
-        exclude = [
-            "**/* *",
-            "**/*.rs",
-            ".tmp_git_root/**/*",
-            "BUILD",
-            "BUILD.bazel",
-            "WORKSPACE",
-            "WORKSPACE.bazel",
-        ],
-    ),
-    crate_name = "build_script_build",
-    crate_root = "build.rs",
-    data = glob(
-        include = ["**"],
-        allow_empty = True,
-        exclude = [
-            "**/* *",
-            ".tmp_git_root/**/*",
-            "BUILD",
-            "BUILD.bazel",
-            "WORKSPACE",
-            "WORKSPACE.bazel",
-        ],
-    ),
-    edition = "2021",
-    pkg_name = "windows_aarch64_gnullvm",
-    rustc_env_files = [
-        ":cargo_toml_env_vars",
-    ],
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    tags = [
-        "cargo-bazel",
-        "crate-name=windows_aarch64_gnullvm",
-        "manual",
-        "noclippy",
-        "norustfmt",
-    ],
-    version = "0.52.6",
-    visibility = ["//visibility:private"],
-)
-
-alias(
-    name = "build_script_build",
-    actual = ":_bs",
-    tags = ["manual"],
 )
