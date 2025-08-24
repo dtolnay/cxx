@@ -150,15 +150,3 @@ alias(
     actual = "@vendor__syn-2.0.106//:syn",
     tags = ["manual"],
 )
-
-alias(
-    name = "windows-link-0.1.3",
-    actual = "@vendor__windows-link-0.1.3//:windows_link",
-    tags = ["manual"],
-)
-
-alias(
-    name = "windows-link",
-    actual = "@vendor__windows-link-0.1.3//:windows_link",
-    tags = ["manual"],
-)

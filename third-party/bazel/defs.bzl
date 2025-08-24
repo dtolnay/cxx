@@ -305,17 +305,12 @@ _NORMAL_DEPENDENCIES = {
             "scratch": Label("@vendor//:scratch-1.0.9"),
             "syn": Label("@vendor//:syn-2.0.106"),
         },
-        "cfg(windows)": {
-            "windows-link": Label("@vendor//:windows-link-0.1.3"),
-        },
     },
 }
 
 _NORMAL_ALIASES = {
     "third-party": {
         _COMMON_CONDITION: {
-        },
-        "cfg(windows)": {
         },
     },
 }
@@ -772,5 +767,4 @@ def crate_repositories():
         struct(repo = "vendor__rustversion-1.0.22", is_dev_dep = False),
         struct(repo = "vendor__scratch-1.0.9", is_dev_dep = False),
         struct(repo = "vendor__syn-2.0.106", is_dev_dep = False),
-        struct(repo = "vendor__windows-link-0.1.3", is_dev_dep = False),
     ]

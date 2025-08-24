@@ -12,4 +12,3 @@ omit_deps = [
 
 ['cfg(target_os = "windows")']
 cfgs = ["windows_raw_dylib"]
-extra_deps = [":windows-link"]

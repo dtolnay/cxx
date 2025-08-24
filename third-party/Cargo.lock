@@ -171,7 +171,6 @@ dependencies = [
  "rustversion",
  "scratch",
  "syn",
- "windows-link",
 ]
 
 [[package]]

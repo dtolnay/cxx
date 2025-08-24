@@ -560,12 +560,6 @@ cargo.rust_library(
     deps = [":windows-sys-0.60.2"],
 )
 
-alias(
-    name = "windows-link",
-    actual = ":windows-link-0.1.3",
-    visibility = ["PUBLIC"],
-)
-
 http_archive(
     name = "windows-link-0.1.3.crate",
     sha256 = "5e6ad25900d524eaabdbbb96d20b4311e1e7ae1699af4fb28c17ae66c80d798a",
@@ -629,5 +623,5 @@ cargo.rust_library(
     rustc_flags = ["--cfg=windows_raw_dylib"],
     target_compatible_with = ["prelude//os:windows"],
     visibility = [],
-    deps = [":windows-link"],
+    deps = [":windows-link-0.1.3"],
 )
