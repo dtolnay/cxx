@@ -98,15 +98,15 @@ mod tests {
     }
 
     #[test]
-    fn test_from_nanoseconds() {
-        let date = KjDate::from_nanoseconds(1000000000);
-        assert_eq!(date.nanoseconds(), 1000000000);
+    fn test_from() {
+        let date = KjDate::from(1_000_000_000);
+        assert_eq!(date.nanoseconds(), 1_000_000_000);
     }
 
     #[test]
     fn test_ordering() {
-        let earlier = KjDate::from_nanoseconds(1000);
-        let later = KjDate::from_nanoseconds(2000);
+        let earlier = KjDate::from(1000);
+        let later = KjDate::from(2000);
         assert!(earlier < later);
     }
 
@@ -118,8 +118,8 @@ mod tests {
 
     #[test]
     fn test_system_time_conversion() {
-        let date = KjDate::from_nanoseconds(1000000000);
-        let system_time = date.to_system_time();
+        let date = KjDate::from(1_000_000_000);
+        let system_time: SystemTime = date.into();
         let converted_back = KjDate::from(system_time);
         assert_eq!(date, converted_back);
     }
