@@ -1,5 +1,5 @@
 {
-  "checksum": "04379a70ee825d794fb777d64831709d844f5d9041243b3289dc4b97794a0d6d",
+  "checksum": "8009f9f812a85b6d594d30e7e00d9c4ebbcd08fb1522f01020ebd2dfe2472c84",
   "crates": {
     "anstyle 1.0.11": {
       "name": "anstyle",
@@ -2061,7 +2061,7 @@
   },
   "binary_crates": [],
   "workspace_members": {
-    "third-party 0.0.0": "third-party"
+    "third-party 0.0.0": ""
   },
   "conditions": {
     "aarch64-apple-darwin": [
