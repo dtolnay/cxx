@@ -1,5 +1,5 @@
 {
-  "checksum": "8009f9f812a85b6d594d30e7e00d9c4ebbcd08fb1522f01020ebd2dfe2472c84",
+  "checksum": "40e250cec886abc6c1388ef85423e32fddff758a7c4b917177bfc35fd7c01bc1",
   "crates": {
     "anstyle 1.0.11": {
       "name": "anstyle",
@@ -95,14 +95,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "clap 4.5.45": {
+    "clap 4.5.46": {
       "name": "clap",
-      "version": "4.5.45",
+      "version": "4.5.46",
       "package_url": "https://github.com/clap-rs/clap",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/clap/4.5.45/download",
-          "sha256": "1fc0e74a703892159f5ae7d3aac52c8e6c392f5ae5f359c70b5881d60aaac318"
+          "url": "https://static.crates.io/crates/clap/4.5.46/download",
+          "sha256": "2c5e4fcf9c21d2e544ca1ee9d8552de13019a42aa7dbf32747fa7aaf1df76e57"
         }
       },
       "targets": [
@@ -136,14 +136,14 @@
         "deps": {
           "common": [
             {
-              "id": "clap_builder 4.5.44",
+              "id": "clap_builder 4.5.46",
               "target": "clap_builder"
             }
           ],
           "selects": {}
         },
         "edition": "2021",
-        "version": "4.5.45"
+        "version": "4.5.46"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -152,14 +152,14 @@
       ],
       "license_file": "LICENSE-APACHE"
     },
-    "clap_builder 4.5.44": {
+    "clap_builder 4.5.46": {
       "name": "clap_builder",
-      "version": "4.5.44",
+      "version": "4.5.46",
       "package_url": "https://github.com/clap-rs/clap",
       "repository": {
         "Http": {
-          "url": "https://static.crates.io/crates/clap_builder/4.5.44/download",
-          "sha256": "b3e7f4214277f3c7aa526a59dd3fbe306a370daee1f8b7b8c987069cd8e888a8"
+          "url": "https://static.crates.io/crates/clap_builder/4.5.46/download",
+          "sha256": "fecb53a0e6fcfb055f686001bc2e2592fa527efaf38dbe81a6a9563562e57d41"
         }
       },
       "targets": [
@@ -204,7 +204,7 @@
           "selects": {}
         },
         "edition": "2021",
-        "version": "4.5.44"
+        "version": "4.5.46"
       },
       "license": "MIT OR Apache-2.0",
       "license_ids": [
@@ -1106,7 +1106,7 @@
               "target": "cc"
             },
             {
-              "id": "clap 4.5.45",
+              "id": "clap 4.5.46",
               "target": "clap"
             },
             {
@@ -2106,7 +2106,7 @@
   },
   "direct_deps": [
     "cc 1.2.34",
-    "clap 4.5.45",
+    "clap 4.5.46",
     "codespan-reporting 0.12.0",
     "foldhash 0.2.0",
     "indexmap 2.11.0",
