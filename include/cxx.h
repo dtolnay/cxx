@@ -135,6 +135,8 @@ public:
   static String lossy(const char16_t *) noexcept;
   static String lossy(const char16_t *, std::size_t) noexcept;
 
+  static String latin1(const char*, std::size_t) noexcept;
+
   String &operator=(const String &) & noexcept;
   String &operator=(String &&) & noexcept;
 
@@ -177,6 +179,8 @@ private:
   struct lossy_t;
   String(lossy_t, const char *, std::size_t) noexcept;
   String(lossy_t, const char16_t *, std::size_t) noexcept;
+  struct latin1_t;
+  String(latin1_t, const char *, std::size_t) noexcept;
   friend void swap(String &lhs, String &rhs) noexcept { lhs.swap(rhs); }
 
   // Size and alignment statically verified by rust_string.rs.

@@ -19,6 +19,18 @@ unsafe extern "C" fn string_clone(this: &mut MaybeUninit<String>, other: &String
     unsafe { ptr::write(this, clone) }
 }
 
+#[export_name = "cxxbridge1$string$from_latin1"]
+unsafe extern "C" fn string_from_latin1(
+    this: &mut MaybeUninit<String>,
+    ptr: *const u8,
+    len: usize,
+) {
+    let slice = unsafe { slice::from_raw_parts(ptr, len) };
+    let this = this.as_mut_ptr();
+    let owned = slice.iter().map(|&c| c as char).collect();
+    unsafe { ptr::write(this, owned) }
+}
+
 #[export_name = "cxxbridge1$string$from_utf8"]
 unsafe extern "C" fn string_from_utf8(
     this: &mut MaybeUninit<String>,

@@ -41,6 +41,8 @@ void cxxbridge1$cxx_string$push(std::string &s, const std::uint8_t *ptr,
 void cxxbridge1$string$new(rust::String *self) noexcept;
 void cxxbridge1$string$clone(rust::String *self,
                              const rust::String &other) noexcept;
+void cxxbridge1$string$from_latin1(rust::String *self, const char *ptr,
+                                   std::size_t len) noexcept;
 bool cxxbridge1$string$from_utf8(rust::String *self, const char *ptr,
                                  std::size_t len) noexcept;
 void cxxbridge1$string$from_utf8_lossy(rust::String *self, const char *ptr,
@@ -193,6 +195,19 @@ String String::lossy(const char16_t *s, std::size_t len) noexcept {
   assert(s != nullptr || len == 0);
   assert(is_aligned<char16_t>(s));
   return String(lossy_t{}, s, len);
+}
+
+struct String::latin1_t {};
+
+String::String(latin1_t, const char *s, std::size_t len) noexcept {
+  cxxbridge1$string$from_latin1(
+      this, s == nullptr && len == 0 ? reinterpret_cast<const char *>(1) : s,
+      len);
+}
+
+String String::latin1(const char *s, std::size_t len) noexcept {
+  assert(s != nullptr || len == 0);
+  return String(latin1_t{}, s, len);
 }
 
 String &String::operator=(const String &other) & noexcept {

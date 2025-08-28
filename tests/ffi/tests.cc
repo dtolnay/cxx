@@ -987,6 +987,18 @@ extern "C" const char *cxx_run_test() noexcept {
   rust::String bad_utf16_rstring = rust::String::lossy(bad_utf16_literal);
   ASSERT(bad_utf8_rstring == bad_utf16_rstring);
 
+  const char *ascii_literal = "42";
+  const char *latin1_literal = "\xff";
+  rust::String ascii =
+      rust::String::latin1(ascii_literal, strlen(ascii_literal));
+  rust::String latin1 =
+      rust::String::latin1(latin1_literal, strlen(latin1_literal));
+  KJ_ASSERT(kj::arrayPtr(ascii.c_str(), ascii.length()) == "42"_kjb);
+  // \xff is a valid latin1 character but needs to converted into multi-byte utf8.
+  char expected[] = {static_cast<char>(195), static_cast<char>(191)};
+  KJ_ASSERT(kj::arrayPtr(latin1.c_str(), latin1.length()) ==
+            kj::arrayPtr(expected));
+
   // Test Slice<T> explicit constructor from container
   {
     std::vector<int> cpp_vec{1, 2, 3};
