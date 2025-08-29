@@ -108,7 +108,7 @@ impl<'a> PartialEq for Content<'a> {
 }
 
 impl<'a> Content<'a> {
-    fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Content::default()
     }
 
