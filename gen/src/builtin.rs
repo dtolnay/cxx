@@ -431,12 +431,17 @@ pub(super) fn write(out: &mut OutFile) {
             out,
             "struct is_destructible<T, true> : ::std::is_destructible<T> {{}};",
         );
+        writeln!(out, "template <typename T>");
+        writeln!(
+            out,
+            "struct is_destructible<T[], false> : is_destructible<T> {{}};",
+        );
         writeln!(
             out,
             "template <typename T, bool = ::rust::is_destructible<T>::value>",
         );
         writeln!(out, "struct shared_ptr_if_destructible {{");
-        writeln!(out, "  explicit shared_ptr_if_destructible(T *) {{}}");
+        writeln!(out, "  explicit shared_ptr_if_destructible(typename ::std::shared_ptr<T>::element_type *) {{}}");
         writeln!(out, "}};");
         writeln!(out, "template <typename T>");
         writeln!(

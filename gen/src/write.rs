@@ -1721,7 +1721,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     out.builtin.is_complete = true;
     writeln!(
         out,
-        "static_assert(::rust::detail::is_complete<{}>::value, \"definition of `{}` is required\");",
+        "static_assert(::rust::detail::is_complete<::std::remove_extent<{}>::type>::value, \"definition of `{}` is required\");",
         inner, inner,
     );
     writeln!(
@@ -1765,7 +1765,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     begin_function_definition(out);
     writeln!(
         out,
-        "void cxxbridge1$unique_ptr${}$raw(::std::unique_ptr<{}> *ptr, {} *raw) noexcept {{",
+        "void cxxbridge1$unique_ptr${}$raw(::std::unique_ptr<{}> *ptr, ::std::unique_ptr<{}>::pointer raw) noexcept {{",
         instance, inner, inner,
     );
     writeln!(out, "  ::new (ptr) ::std::unique_ptr<{}>(raw);", inner);
@@ -1774,7 +1774,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     begin_function_definition(out);
     writeln!(
         out,
-        "{} const *cxxbridge1$unique_ptr${}$get(::std::unique_ptr<{}> const &ptr) noexcept {{",
+        "::std::unique_ptr<{}>::element_type const *cxxbridge1$unique_ptr${}$get(::std::unique_ptr<{}> const &ptr) noexcept {{",
         inner, instance, inner,
     );
     writeln!(out, "  return ptr.get();");
@@ -1783,7 +1783,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     begin_function_definition(out);
     writeln!(
         out,
-        "{} *cxxbridge1$unique_ptr${}$release(::std::unique_ptr<{}> &ptr) noexcept {{",
+        "::std::unique_ptr<{}>::pointer cxxbridge1$unique_ptr${}$release(::std::unique_ptr<{}> &ptr) noexcept {{",
         inner, instance, inner,
     );
     writeln!(out, "  return ptr.release();");
@@ -1861,7 +1861,7 @@ fn write_shared_ptr(out: &mut OutFile, key: &NamedImplKey) {
     begin_function_definition(out);
     writeln!(
         out,
-        "bool cxxbridge1$shared_ptr${}$raw(::std::shared_ptr<{}> *ptr, {} *raw) noexcept {{",
+        "bool cxxbridge1$shared_ptr${}$raw(::std::shared_ptr<{}> *ptr, ::std::shared_ptr<{}>::element_type *raw) noexcept {{",
         instance, inner, inner,
     );
     writeln!(
@@ -1884,7 +1884,7 @@ fn write_shared_ptr(out: &mut OutFile, key: &NamedImplKey) {
     begin_function_definition(out);
     writeln!(
         out,
-        "{} const *cxxbridge1$shared_ptr${}$get(::std::shared_ptr<{}> const &self) noexcept {{",
+        "::std::shared_ptr<{}>::element_type const *cxxbridge1$shared_ptr${}$get(::std::shared_ptr<{}> const &self) noexcept {{",
         inner, instance, inner,
     );
     writeln!(out, "  return self.get();");

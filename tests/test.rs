@@ -275,7 +275,7 @@ fn test_c_method_calls() {
     assert_eq!(2026, ffi::C::c_static_method());
 
     let val = 42;
-    let mut array = ffi::Array {
+    let mut array = ffi::WithArray {
         a: [0, 0, 0, 0],
         b: ffi::Buffer::default(),
     };
