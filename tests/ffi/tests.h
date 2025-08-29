@@ -41,6 +41,9 @@ private:
   ~Private();
 };
 
+using Array = int[];
+using Array3 = int[3];
+
 struct R;
 struct Shared;
 struct SharedString;

@@ -30,6 +30,8 @@ pub mod ffi {
 
         type Undefined;
         type Private;
+        type Array;
+        type Array3;
     }
 
     #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -367,6 +369,10 @@ pub mod ffi {
     impl CxxVector<SharedString> {}
     impl SharedPtr<Undefined> {}
     impl SharedPtr<Private> {}
+    impl UniquePtr<Array> {}
+    impl UniquePtr<Array3> {}
+    impl SharedPtr<Array> {}
+    impl SharedPtr<Array3> {}
 }
 
 mod other {
