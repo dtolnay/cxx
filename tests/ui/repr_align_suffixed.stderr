@@ -5,9 +5,3 @@ error: invalid suffix `int` for number literal
   |                  ^^^^ invalid suffix `int`
   |
   = help: the suffix must be one of the numeric types (`u32`, `isize`, `f32`, etc.)
-
-error[E0589]: invalid `repr(align)` attribute: not an unsuffixed integer
- --> tests/ui/repr_align_suffixed.rs:3:18
-  |
-3 |     #[repr(align(2int))]
-  |                  ^^^^
