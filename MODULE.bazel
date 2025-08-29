@@ -17,11 +17,5 @@ use_repo(rust, "rust_toolchains")
 
 register_toolchains("@rust_toolchains//:all")
 
-crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
-crate.from_cargo(
-    name = "crates.io",
-    cargo_lockfile = "third-party/Cargo.lock",
-    lockfile = "third-party/cargo-bazel-lock.json",
-    manifests = ["third-party/Cargo.toml"],
-)
-use_repo(crate, "crates.io")
+crate_repositories = use_extension("//tools/bazel:extension.bzl", "crate_repositories")
+use_repo(crate_repositories, "crates.io", "vendor")
