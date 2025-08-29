@@ -10,6 +10,7 @@
     clippy::match_bool,
     clippy::match_like_matches_macro,
     clippy::match_same_arms,
+    clippy::needless_continue,
     clippy::needless_lifetimes,
     clippy::needless_pass_by_value,
     clippy::nonminimal_bool,

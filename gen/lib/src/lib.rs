@@ -23,6 +23,7 @@
     clippy::match_same_arms,
     clippy::missing_errors_doc,
     clippy::must_use_candidate,
+    clippy::needless_continue,
     clippy::needless_lifetimes,
     clippy::needless_pass_by_value,
     clippy::nonminimal_bool,
