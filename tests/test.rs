@@ -323,6 +323,24 @@ fn test_unique_to_shared_ptr_null() {
 }
 
 #[test]
+fn test_shared_ptr_from_raw() {
+    let shared = unsafe { SharedPtr::<ffi::C>::from_raw(ptr::null_mut()) };
+    assert!(shared.is_null());
+}
+
+#[test]
+#[should_panic = "tests::Undefined is not destructible"]
+fn test_shared_ptr_from_raw_undefined() {
+    unsafe { SharedPtr::<ffi::Undefined>::from_raw(ptr::null_mut()) };
+}
+
+#[test]
+#[should_panic = "tests::Private is not destructible"]
+fn test_shared_ptr_from_raw_private() {
+    unsafe { SharedPtr::<ffi::Private>::from_raw(ptr::null_mut()) };
+}
+
+#[test]
 fn test_c_ns_method_calls() {
     let unique_ptr = ffi2::ns_c_return_unique_ptr_ns();
 

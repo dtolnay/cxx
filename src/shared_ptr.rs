@@ -95,6 +95,11 @@ where
     /// The resulting shared pointer is **nonempty** regardless of whether the
     /// input pointer is null, but may be either **null** or **nonnull**.
     ///
+    /// # Panics
+    ///
+    /// Panics if `T` is an incomplete type (including `void`) or is not
+    /// destructible.
+    ///
     /// # Safety
     ///
     /// Pointer must either be null or point to a valid instance of T

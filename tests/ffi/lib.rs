@@ -25,6 +25,13 @@ use std::os::raw::c_char;
 
 #[cxx::bridge(namespace = "tests")]
 pub mod ffi {
+    extern "C++" {
+        include!("tests/ffi/tests.h");
+
+        type Undefined;
+        type Private;
+    }
+
     #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
     struct Shared {
         z: usize,
@@ -98,8 +105,6 @@ pub mod ffi {
     }
 
     unsafe extern "C++" {
-        include!("tests/ffi/tests.h");
-
         type C;
 
         fn c_return_primitive() -> usize;
@@ -360,6 +365,8 @@ pub mod ffi {
 
     impl Box<Shared> {}
     impl CxxVector<SharedString> {}
+    impl SharedPtr<Undefined> {}
+    impl SharedPtr<Private> {}
 }
 
 mod other {

@@ -14,6 +14,7 @@ use crate::type_id::Crate;
 use crate::{derive, generics};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
+use std::fmt::{self, Display};
 use std::mem;
 use syn::{parse_quote, punctuated, Generics, Lifetime, Result, Token};
 
@@ -1597,6 +1598,7 @@ fn expand_shared_ptr(
     let begin_span = explicit_impl.map_or(key.begin_span, |explicit| explicit.impl_token.span);
     let end_span = explicit_impl.map_or(key.end_span, |explicit| explicit.brace_token.span.join());
     let unsafe_token = format_ident!("unsafe", span = begin_span);
+    let not_destructible_err = format!("{} is not destructible", display_namespaced(resolve.name));
 
     quote_spanned! {end_span=>
         #[automatically_derived]
@@ -1617,10 +1619,10 @@ fn expand_shared_ptr(
             unsafe fn __raw(new: *mut ::cxx::core::ffi::c_void, raw: *mut Self) {
                 #UnsafeExtern extern "C" {
                     #[link_name = #link_raw]
-                    fn __raw(new: *const ::cxx::core::ffi::c_void, raw: *mut ::cxx::core::ffi::c_void);
+                    fn __raw(new: *const ::cxx::core::ffi::c_void, raw: *mut ::cxx::core::ffi::c_void) -> ::cxx::core::primitive::bool;
                 }
-                unsafe {
-                    __raw(new, raw as *mut ::cxx::core::ffi::c_void);
+                if !unsafe { __raw(new, raw as *mut ::cxx::core::ffi::c_void) } {
+                    ::cxx::core::panic!(#not_destructible_err);
                 }
             }
             unsafe fn __clone(this: *const ::cxx::core::ffi::c_void, new: *mut ::cxx::core::ffi::c_void) {
@@ -2000,6 +2002,21 @@ fn expand_extern_return_type(ret: &Option<Type>, types: &Types, proper: bool) ->
     };
     let ty = expand_extern_type(ret, types, proper);
     quote!(-> #ty)
+}
+
+fn display_namespaced(name: &Pair) -> impl Display + '_ {
+    struct Namespaced<'a>(&'a Pair);
+
+    impl<'a> Display for Namespaced<'a> {
+        fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            for segment in &self.0.namespace {
+                write!(formatter, "{segment}::")?;
+            }
+            write!(formatter, "{}", self.0.cxx)
+        }
+    }
+
+    Namespaced(name)
 }
 
 // #UnsafeExtern extern "C" {...}

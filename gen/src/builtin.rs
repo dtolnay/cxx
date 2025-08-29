@@ -32,6 +32,7 @@ pub(crate) struct Builtins<'a> {
     pub is_complete: bool,
     pub destroy: bool,
     pub deleter_if: bool,
+    pub shared_ptr: bool,
     pub alignmax: bool,
     pub content: Content<'a>,
 }
@@ -128,6 +129,12 @@ pub(super) fn write(out: &mut OutFile) {
     if builtin.layout {
         include.type_traits = true;
         include.cstddef = true;
+        builtin.is_complete = true;
+    }
+
+    if builtin.shared_ptr {
+        include.memory = true;
+        include.type_traits = true;
         builtin.is_complete = true;
     }
 
@@ -409,6 +416,34 @@ pub(super) fn write(out: &mut OutFile) {
             out,
             "  template <typename T> void operator()(T *ptr) {{ ptr->~T(); }}",
         );
+        writeln!(out, "}};");
+    }
+
+    if builtin.shared_ptr {
+        out.next_section();
+        writeln!(
+            out,
+            "template <typename T, bool = ::rust::detail::is_complete<T>::value>",
+        );
+        writeln!(out, "struct is_destructible : ::std::false_type {{}};");
+        writeln!(out, "template <typename T>");
+        writeln!(
+            out,
+            "struct is_destructible<T, true> : ::std::is_destructible<T> {{}};",
+        );
+        writeln!(
+            out,
+            "template <typename T, bool = ::rust::is_destructible<T>::value>",
+        );
+        writeln!(out, "struct shared_ptr_if_destructible {{");
+        writeln!(out, "  explicit shared_ptr_if_destructible(T *) {{}}");
+        writeln!(out, "}};");
+        writeln!(out, "template <typename T>");
+        writeln!(
+            out,
+            "struct shared_ptr_if_destructible<T, true> : ::std::shared_ptr<T> {{",
+        );
+        writeln!(out, "  using ::std::shared_ptr<T>::shared_ptr;");
         writeln!(out, "}};");
     }
 
