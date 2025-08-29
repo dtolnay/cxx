@@ -1616,6 +1616,7 @@ fn expand_shared_ptr(
                 }
             }
             #new_method
+            #[track_caller]
             unsafe fn __raw(new: *mut ::cxx::core::ffi::c_void, raw: *mut Self) {
                 #UnsafeExtern extern "C" {
                     #[link_name = #link_raw]
