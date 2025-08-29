@@ -104,6 +104,7 @@ where
     ///
     /// Pointer must either be null or point to a valid instance of T
     /// heap-allocated in C++ by `new`.
+    #[track_caller]
     pub unsafe fn from_raw(raw: *mut T) -> Self {
         let mut shared_ptr = MaybeUninit::<SharedPtr<T>>::uninit();
         let new = shared_ptr.as_mut_ptr().cast();
