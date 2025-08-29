@@ -199,7 +199,7 @@ pub fn write(out: &mut OutFile) {
         writeln!(out, "#include \"kj-rs/kj-rs.h\"");
     }
     if jsg && !cxx_header {
-        writeln!(out, "#include \"jsg.h\"");
+        writeln!(out, "#include <workerd/jsg/jsg.h>");
     }
 }
 

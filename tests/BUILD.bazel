@@ -61,9 +61,10 @@ rust_library(
 )
 
 cc_library(
-    name = "jsg",
+    name = "jsg-mock",
     hdrs = ["ffi/jsg.h"],
-    strip_include_prefix = "ffi"
+    strip_include_prefix = "ffi",
+    include_prefix = "workerd/jsg",
 )
 
 cc_library(
@@ -79,7 +80,7 @@ cc_library(
     linkstatic = True,
     deps = [
         ":bridge/include",
-        ":jsg",
+        ":jsg-mock",
         ":module/include",
         "//:core",
         "//kj-rs:bridge/include",
@@ -94,7 +95,7 @@ rust_cxx_bridge(
     hdrs = ["ffi/tests.h"],
     deps = [
         "//:core",
-        ":jsg",
+        ":jsg-mock",
         ":module",
     ]
 )
