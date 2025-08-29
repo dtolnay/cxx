@@ -371,8 +371,6 @@ pub mod ffi {
     impl SharedPtr<Private> {}
     impl UniquePtr<Array> {}
     impl UniquePtr<Array3> {}
-    impl SharedPtr<Array> {}
-    impl SharedPtr<Array3> {}
 }
 
 mod other {
