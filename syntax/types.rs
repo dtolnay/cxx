@@ -131,15 +131,11 @@ impl<'a> Types<'a> {
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
                     // Note: duplication of the C++ name is fine because C++ has
                     // function overloading.
-                    let receiver = efn.receiver().map(|receiver| &receiver.ty.rust);
-                    if !receiver.is_some_and(|receiver| receiver == "Self")
-                        && !function_names.insert((receiver, &efn.name.rust))
+                    let self_type = efn.self_type();
+                    if !self_type.is_some_and(|self_type| self_type == "Self")
+                        && !function_names.insert((self_type, &efn.name.rust))
                     {
-                        let name = match receiver {
-                            Some(receiver) => ItemName::Method(receiver, &efn.name.rust),
-                            None => ItemName::Function(&efn.name.rust),
-                        };
-                        duplicate_name(cx, efn, name);
+                        duplicate_name(cx, efn, ItemName::Function(self_type, &efn.name.rust));
                     }
                     for arg in &efn.args {
                         visit(&mut all, &arg.ty);
@@ -283,15 +279,16 @@ impl<'t, 'a> IntoIterator for &'t Types<'a> {
 
 enum ItemName<'a> {
     Type(&'a Ident),
-    Method(&'a Ident, &'a Ident),
-    Function(&'a Ident),
+    Function(Option<&'a Ident>, &'a Ident),
 }
 
 fn duplicate_name(cx: &mut Errors, sp: impl ToTokens, name: ItemName) {
     let description = match name {
         ItemName::Type(name) => format!("type `{}`", name),
-        ItemName::Method(receiver, name) => format!("method `{}::{}`", receiver, name),
-        ItemName::Function(name) => format!("function `{}`", name),
+        ItemName::Function(Some(self_type), name) => {
+            format!("associated function `{}::{}`", self_type, name)
+        }
+        ItemName::Function(None, name) => format!("function `{}`", name),
     };
     let msg = format!("the {} is defined multiple times", description);
     cx.error(sp, msg);
