@@ -34,6 +34,13 @@ public:
 
 namespace tests {
 
+class Undefined;
+
+class Private {
+private:
+  ~Private();
+};
+
 struct R;
 struct Shared;
 struct SharedString;
