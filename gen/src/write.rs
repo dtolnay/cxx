@@ -1857,13 +1857,19 @@ fn write_shared_ptr(out: &mut OutFile, key: &NamedImplKey) {
         writeln!(out, "}}");
     }
 
+    out.builtin.shared_ptr = true;
     begin_function_definition(out);
     writeln!(
         out,
-        "void cxxbridge1$shared_ptr${}$raw(::std::shared_ptr<{}> *ptr, {} *raw) noexcept {{",
+        "bool cxxbridge1$shared_ptr${}$raw(::std::shared_ptr<{}> *ptr, {} *raw) noexcept {{",
         instance, inner, inner,
     );
-    writeln!(out, "  ::new (ptr) ::std::shared_ptr<{}>(raw);", inner);
+    writeln!(
+        out,
+        "  ::new (ptr) ::rust::shared_ptr_if_destructible<{}>(raw);",
+        inner,
+    );
+    writeln!(out, "  return ::rust::is_destructible<{}>::value;", inner);
     writeln!(out, "}}");
 
     begin_function_definition(out);
