@@ -1861,7 +1861,7 @@ fn write_shared_ptr(out: &mut OutFile, key: &NamedImplKey) {
     begin_function_definition(out);
     writeln!(
         out,
-        "bool cxxbridge1$shared_ptr${}$raw(::std::shared_ptr<{}> *ptr, {} *raw) noexcept {{",
+        "bool cxxbridge1$shared_ptr${}$raw(::std::shared_ptr<{}> *ptr, ::std::shared_ptr<{}>::element_type *raw) noexcept {{",
         instance, inner, inner,
     );
     writeln!(
@@ -1884,7 +1884,7 @@ fn write_shared_ptr(out: &mut OutFile, key: &NamedImplKey) {
     begin_function_definition(out);
     writeln!(
         out,
-        "{} const *cxxbridge1$shared_ptr${}$get(::std::shared_ptr<{}> const &self) noexcept {{",
+        "::std::shared_ptr<{}>::element_type const *cxxbridge1$shared_ptr${}$get(::std::shared_ptr<{}> const &self) noexcept {{",
         inner, instance, inner,
     );
     writeln!(out, "  return self.get();");
