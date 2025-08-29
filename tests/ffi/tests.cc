@@ -52,7 +52,7 @@ size_t &Shared::c_method_mut_on_shared() noexcept { return this->z; }
 
 size_t Shared::c_static_method_on_shared() noexcept { return 2025; }
 
-void Array::c_set_array(int32_t val) noexcept {
+void WithArray::c_set_array(int32_t val) noexcept {
   this->a = {val, val, val, val};
 }
 
