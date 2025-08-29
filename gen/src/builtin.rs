@@ -404,11 +404,13 @@ fn write_builtin<'a>(out: &mut Content<'a>, include: &mut Includes, src: &'a str
             out.next_section();
             ready = true;
         } else if !line.trim_start_matches(' ').starts_with("//") {
+            assert!(ready);
             writeln!(out, "{}", line);
         }
     }
 
     assert!(namespace.is_empty());
+    assert!(ready);
 }
 
 #[cfg(test)]
