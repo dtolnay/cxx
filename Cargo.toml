@@ -28,11 +28,11 @@ foldhash = { version = "0.2", default-features = false }
 link-cplusplus = "1.0.9"
 
 [build-dependencies]
-cc = "1.0.83"
+cc = "1.0.101"
 cxxbridge-flags = { version = "=1.0.173", path = "flags", default-features = false }
 
 [dev-dependencies]
-cc = "1.0.83"
+cc = "1.0.101"
 cxx-build = { version = "=1.0.173", path = "gen/build" }
 cxx-gen = { version = "0.7", path = "gen/lib" }
 cxx-test-suite = { version = "0", path = "tests/ffi" }

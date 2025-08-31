@@ -7,7 +7,7 @@ publish = false
 rust-version = "1.77"
 
 [dependencies]
-cc = "1.0.83"
+cc = "1.0.101"
 clap = { version = "4", default-features = false, features = ["error-context", "help", "std", "usage"] }
 codespan-reporting = "0.12"
 foldhash = "0.2"
