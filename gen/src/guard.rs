@@ -1,3 +1,4 @@
+use crate::gen::out::OutFile;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::Pair;
 use std::fmt::{self, Display};
@@ -8,11 +9,10 @@ pub(crate) struct Guard {
 }
 
 impl Guard {
-    pub fn new(kind: &'static str, name: &Pair) -> Self {
-        Guard {
-            kind,
-            symbol: name.to_symbol(),
-        }
+    pub fn new(out: &mut OutFile, kind: &'static str, name: &Pair) -> Self {
+        let symbol = name.to_symbol();
+        out.pragma.dollar_in_identifier |= symbol.contains('$');
+        Guard { kind, symbol }
     }
 }
 
