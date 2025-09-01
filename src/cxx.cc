@@ -392,7 +392,8 @@ bool Str::operator<=(const Str &rhs) const noexcept {
   const_iterator liter = this->begin(), lend = this->end(), riter = rhs.begin(),
                  rend = rhs.end();
   while (liter != lend && riter != rend && *liter == *riter) {
-    ++liter, ++riter;
+    ++liter;
+    ++riter;
   }
   if (liter == lend) {
     return true; // equal or *this is a prefix of rhs
