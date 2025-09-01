@@ -1,5 +1,4 @@
 use crate::syntax::qualified::QualifiedName;
-use std::fmt::{self, Display};
 use std::slice::Iter;
 use syn::parse::{Error, Parse, ParseStream, Result};
 use syn::{Expr, Ident, Lit, Meta, Token};
@@ -77,15 +76,6 @@ impl Parse for Namespace {
     fn parse(input: ParseStream) -> Result<Self> {
         let segments = QualifiedName::parse_quoted_or_unquoted(input)?.segments;
         Ok(Namespace { segments })
-    }
-}
-
-impl Display for Namespace {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        for segment in self {
-            write!(f, "{}$", segment)?;
-        }
-        Ok(())
     }
 }
 
