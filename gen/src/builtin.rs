@@ -208,48 +208,54 @@ pub(super) fn write(out: &mut OutFile) {
     out.end_block(Block::InlineNamespace("cxxbridge1"));
     out.end_block(Block::Namespace("rust"));
 
+    macro_rules! write_builtin {
+        ($path:literal) => {
+            write_builtin(out, include, include_str!($path));
+        };
+    }
+
     // namespace rust::cxxbridge1
 
     if builtin.rust_str_new_unchecked {
-        write_builtin(out, include, include_str!("builtin/rust_str_uninit.h"));
+        write_builtin!("builtin/rust_str_uninit.h");
     }
 
     if builtin.rust_slice_new {
-        write_builtin(out, include, include_str!("builtin/rust_slice_uninit.h"));
+        write_builtin!("builtin/rust_slice_uninit.h");
     }
 
     // namespace rust::cxxbridge1::repr
 
     if builtin.repr_fat {
-        write_builtin(out, include, include_str!("builtin/repr_fat.h"));
+        write_builtin!("builtin/repr_fat.h");
     }
 
     if builtin.ptr_len {
-        write_builtin(out, include, include_str!("builtin/ptr_len.h"));
+        write_builtin!("builtin/ptr_len.h");
     }
 
     if builtin.alignmax {
-        write_builtin(out, include, include_str!("builtin/alignmax.h"));
+        write_builtin!("builtin/alignmax.h");
     }
 
     // namespace rust::cxxbridge1::detail
 
     if builtin.maybe_uninit {
-        write_builtin(out, include, include_str!("builtin/maybe_uninit_detail.h"));
+        write_builtin!("builtin/maybe_uninit_detail.h");
     }
 
     if builtin.trycatch {
-        write_builtin(out, include, include_str!("builtin/trycatch_detail.h"));
+        write_builtin!("builtin/trycatch_detail.h");
     }
 
     // namespace rust::cxxbridge1
 
     if builtin.manually_drop {
-        write_builtin(out, include, include_str!("builtin/manually_drop.h"));
+        write_builtin!("builtin/manually_drop.h");
     }
 
     if builtin.maybe_uninit {
-        write_builtin(out, include, include_str!("builtin/maybe_uninit.h"));
+        write_builtin!("builtin/maybe_uninit.h");
     }
 
     out.begin_block(Block::Namespace("rust"));
@@ -306,29 +312,29 @@ pub(super) fn write(out: &mut OutFile) {
     // namespace rust::cxxbridge1::(anonymous)
 
     if builtin.rust_error {
-        write_builtin(out, include, include_str!("builtin/rust_error.h"));
+        write_builtin!("builtin/rust_error.h");
     }
 
     if builtin.destroy {
-        write_builtin(out, include, include_str!("builtin/destroy.h"));
+        write_builtin!("builtin/destroy.h");
     }
 
     if builtin.deleter_if {
-        write_builtin(out, include, include_str!("builtin/deleter_if.h"));
+        write_builtin!("builtin/deleter_if.h");
     }
 
     if builtin.shared_ptr {
-        write_builtin(out, include, include_str!("builtin/shared_ptr.h"));
+        write_builtin!("builtin/shared_ptr.h");
     }
 
     if builtin.relocatable_or_array {
-        write_builtin(out, include, include_str!("builtin/relocatable_or_array.h"));
+        write_builtin!("builtin/relocatable_or_array.h");
     }
 
     // namespace rust::behavior
 
     if builtin.trycatch {
-        write_builtin(out, include, include_str!("builtin/trycatch.h"));
+        write_builtin!("builtin/trycatch.h");
     }
 }
 
