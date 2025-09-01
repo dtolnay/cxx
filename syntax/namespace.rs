@@ -1,5 +1,4 @@
 use crate::syntax::qualified::QualifiedName;
-use quote::IdentFragment;
 use std::fmt::{self, Display};
 use std::slice::Iter;
 use syn::parse::{Error, Parse, ParseStream, Result};
@@ -87,12 +86,6 @@ impl Display for Namespace {
             write!(f, "{}$", segment)?;
         }
         Ok(())
-    }
-}
-
-impl IdentFragment for Namespace {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        Display::fmt(self, f)
     }
 }
 
