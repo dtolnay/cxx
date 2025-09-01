@@ -25,6 +25,9 @@
 #ifdef __GNUC__
 #pragma GCC diagnostic ignored "-Wshadow"
 #endif
+#ifdef __clang__
+#pragma clang diagnostic ignored "-Wdollar-in-identifier-extension"
+#endif
 
 extern "C" {
 void cxxbridge1$cxx_string$init(std::string *s, const std::uint8_t *ptr,

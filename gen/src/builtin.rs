@@ -402,7 +402,11 @@ fn write_builtin<'a>(
             }
         } else if let Some(rest) = line.strip_prefix("#pragma GCC diagnostic ignored \"") {
             let diagnostic = rest.strip_suffix('"').unwrap();
-            pragma.diagnostic_ignore.insert(diagnostic);
+            pragma.gnu_diagnostic_ignore.insert(diagnostic);
+            ready = false;
+        } else if let Some(rest) = line.strip_prefix("#pragma clang diagnostic ignored \"") {
+            let diagnostic = rest.strip_suffix('"').unwrap();
+            pragma.clang_diagnostic_ignore.insert(diagnostic);
             ready = false;
         } else if line == "namespace {" {
             namespace.push(Block::AnonymousNamespace);
