@@ -1,4 +1,5 @@
 use crate::gen::block::Block;
+use crate::gen::guard::Guard;
 use crate::gen::nested::NamespaceEntries;
 use crate::gen::out::OutFile;
 use crate::gen::{builtin, include, pragma, Opt};
@@ -277,7 +278,7 @@ fn write_struct<'a>(out: &mut OutFile<'a>, strct: &'a Struct, methods: &[&Extern
     let operator_ord = derive::contains(&strct.derives, Trait::PartialOrd);
 
     out.set_namespace(&strct.name.namespace);
-    let guard = format!("CXXBRIDGE1_STRUCT_{}", strct.name.to_symbol());
+    let guard = Guard::new("CXXBRIDGE1_STRUCT", &strct.name);
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     write_doc(out, "", &strct.doc);
@@ -394,7 +395,7 @@ fn write_struct_using(out: &mut OutFile, ident: &Pair) {
 
 fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[&ExternFn]) {
     out.set_namespace(&ety.name.namespace);
-    let guard = format!("CXXBRIDGE1_STRUCT_{}", ety.name.to_symbol());
+    let guard = Guard::new("CXXBRIDGE1_STRUCT", &ety.name);
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     write_doc(out, "", &ety.doc);
@@ -441,7 +442,7 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
 
 fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
     out.set_namespace(&enm.name.namespace);
-    let guard = format!("CXXBRIDGE1_ENUM_{}", enm.name.to_symbol());
+    let guard = Guard::new("CXXBRIDGE1_ENUM", &enm.name);
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
     write_doc(out, "", &enm.doc);

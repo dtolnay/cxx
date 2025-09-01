@@ -8,6 +8,7 @@ mod check;
 pub(super) mod error;
 mod file;
 pub(super) mod fs;
+mod guard;
 mod ifndef;
 pub(super) mod include;
 mod names;
