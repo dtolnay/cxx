@@ -1,7 +1,7 @@
 use crate::gen::block::Block;
 use crate::gen::nested::NamespaceEntries;
 use crate::gen::out::OutFile;
-use crate::gen::{builtin, include, Opt};
+use crate::gen::{builtin, include, pragma, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::instantiate::{ImplKey, NamedImplKey};
 use crate::syntax::map::UnorderedMap as Map;
@@ -30,6 +30,7 @@ pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u
     write_generic_instantiations(out);
 
     builtin::write(out);
+    pragma::write(out);
     include::write(out);
 
     out_file.content()

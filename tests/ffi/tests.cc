@@ -13,6 +13,10 @@
 #include <string>
 #include <tuple>
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wshadow"
+#endif
+
 extern "C" void cxx_test_suite_set_correct() noexcept;
 extern "C" tests::R *cxx_test_suite_get_box() noexcept;
 extern "C" bool cxx_test_suite_r_is_correct(const tests::R *) noexcept;

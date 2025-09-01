@@ -2,6 +2,7 @@ use crate::gen::block::Block;
 use crate::gen::ifndef;
 use crate::gen::include::Includes;
 use crate::gen::out::{Content, OutFile};
+use crate::gen::pragma::Pragma;
 
 #[derive(Default, PartialEq)]
 pub(crate) struct Builtins<'a> {
@@ -50,6 +51,7 @@ pub(super) fn write(out: &mut OutFile) {
     }
 
     let include = &mut out.include;
+    let pragma = &mut out.pragma;
     let builtin = &mut out.builtin;
     let out = &mut builtin.content;
 
@@ -210,7 +212,7 @@ pub(super) fn write(out: &mut OutFile) {
 
     macro_rules! write_builtin {
         ($path:literal) => {
-            write_builtin(out, include, include_str!($path));
+            write_builtin(out, include, pragma, include_str!($path));
         };
     }
 
@@ -338,7 +340,12 @@ pub(super) fn write(out: &mut OutFile) {
     }
 }
 
-fn write_builtin<'a>(out: &mut Content<'a>, include: &mut Includes, src: &'a str) {
+fn write_builtin<'a>(
+    out: &mut Content<'a>,
+    include: &mut Includes,
+    pragma: &mut Pragma<'a>,
+    src: &'a str,
+) {
     let mut namespace = Vec::new();
     let mut ready = false;
 
@@ -393,6 +400,10 @@ fn write_builtin<'a>(out: &mut Content<'a>, include: &mut Includes, src: &'a str
                 "vector" => *vector = true,
                 _ => unimplemented!("{}", line),
             }
+        } else if let Some(rest) = line.strip_prefix("#pragma GCC diagnostic ignored \"") {
+            let diagnostic = rest.strip_suffix('"').unwrap();
+            pragma.diagnostic_ignore.insert(diagnostic);
+            ready = false;
         } else if line == "namespace {" {
             namespace.push(Block::AnonymousNamespace);
             out.begin_block(Block::AnonymousNamespace);
@@ -423,6 +434,7 @@ fn write_builtin<'a>(out: &mut Content<'a>, include: &mut Includes, src: &'a str
 mod tests {
     use crate::gen::include::Includes;
     use crate::gen::out::Content;
+    use crate::gen::pragma::Pragma;
     use std::fs;
 
     #[test]
@@ -440,8 +452,9 @@ mod tests {
 
         let mut content = Content::new();
         let mut include = Includes::new();
+        let mut pragma = Pragma::new();
         for src in &builtin_src {
-            super::write_builtin(&mut content, &mut include, src);
+            super::write_builtin(&mut content, &mut include, &mut pragma, src);
         }
     }
 }
