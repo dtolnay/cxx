@@ -86,7 +86,18 @@ jobs:
             rust: nightly
             os: ubuntu
             cc: clang++
-            flags: -Weverything
+            flags:
+              -Weverything
+              -Wno-c++98-compat
+              -Wno-c++98-compat-pedantic
+              -Wno-c++20-compat
+              -Wno-implicit-int-conversion
+              -Wno-missing-prototypes
+              -Wno-padded
+              -Wno-sign-conversion
+              -Wno-undefined-func-template
+              -Wno-unsafe-buffer-usage
+              -Wno-unused-macros
     env:
       CXX: ${{matrix.cc}}
       CXXFLAGS: ${{matrix.flags}} ${{matrix.os == 'windows' && '/EHsc /WX' || '-Werror -Wall -Wpedantic'}}
