@@ -25,7 +25,7 @@ std = ["alloc", "foldhash/std"]
 [dependencies]
 cxxbridge-macro = { version = "=1.0.173", path = "macro" }
 foldhash = { version = "0.2", default-features = false }
-link-cplusplus = "1.0.9"
+link-cplusplus = "1.0.11"
 
 [build-dependencies]
 cc = "1.0.101"
