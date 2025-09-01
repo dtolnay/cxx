@@ -26,26 +26,29 @@ cargo.rust_library(
 
 alias(
     name = "cc",
-    actual = ":cc-1.2.34",
+    actual = ":cc-1.2.35",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "cc-1.2.34.crate",
-    sha256 = "42bc4aea80032b7bf409b0bc7ccad88853858911b7713a8062fdc0623867bedc",
-    strip_prefix = "cc-1.2.34",
-    urls = ["https://static.crates.io/crates/cc/1.2.34/download"],
+    name = "cc-1.2.35.crate",
+    sha256 = "590f9024a68a8c40351881787f1934dc11afd69090f5edb6831464694d836ea3",
+    strip_prefix = "cc-1.2.35",
+    urls = ["https://static.crates.io/crates/cc/1.2.35/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "cc-1.2.34",
-    srcs = [":cc-1.2.34.crate"],
+    name = "cc-1.2.35",
+    srcs = [":cc-1.2.35.crate"],
     crate = "cc",
-    crate_root = "cc-1.2.34.crate/src/lib.rs",
+    crate_root = "cc-1.2.35.crate/src/lib.rs",
     edition = "2018",
     visibility = [],
-    deps = [":shlex-1.3.0"],
+    deps = [
+        ":find-msvc-tools-0.1.0",
+        ":shlex-1.3.0",
+    ],
 )
 
 alias(
@@ -168,6 +171,23 @@ cargo.rust_library(
     crate = "equivalent",
     crate_root = "equivalent-1.0.2.crate/src/lib.rs",
     edition = "2015",
+    visibility = [],
+)
+
+http_archive(
+    name = "find-msvc-tools-0.1.0.crate",
+    sha256 = "e178e4fba8a2726903f6ba98a6d221e76f9c12c650d5dc0e6afdc50677b49650",
+    strip_prefix = "find-msvc-tools-0.1.0",
+    urls = ["https://static.crates.io/crates/find-msvc-tools/0.1.0/download"],
+    visibility = [],
+)
+
+cargo.rust_library(
+    name = "find-msvc-tools-0.1.0",
+    srcs = [":find-msvc-tools-0.1.0.crate"],
+    crate = "find_msvc_tools",
+    crate_root = "find-msvc-tools-0.1.0.crate/src/lib.rs",
+    edition = "2018",
     visibility = [],
 )
 
