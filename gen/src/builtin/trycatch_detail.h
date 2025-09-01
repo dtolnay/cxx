@@ -2,6 +2,8 @@
 #include "./ptr_len.h"
 #include <string>
 
+#pragma GCC diagnostic ignored "-Wshadow"
+
 namespace rust {
 inline namespace cxxbridge1 {
 namespace detail {

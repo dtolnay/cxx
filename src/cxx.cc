@@ -22,6 +22,10 @@
 #define RUST_CXX_NO_EXCEPTIONS
 #endif
 
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wshadow"
+#endif
+
 extern "C" {
 void cxxbridge1$cxx_string$init(std::string *s, const std::uint8_t *ptr,
                                 std::size_t len) noexcept {

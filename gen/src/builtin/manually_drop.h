@@ -1,6 +1,8 @@
 #pragma once
 #include <utility>
 
+#pragma GCC diagnostic ignored "-Wshadow"
+
 namespace rust {
 inline namespace cxxbridge1 {
 template <typename T>
