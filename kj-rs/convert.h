@@ -191,33 +191,6 @@ inline auto from(U&& rustObject) {
 
 /// Zero-copy read-only Rust views: kjObject.as<Rust>() and from<Rust>(kjObject)
 struct Rust {
-  /// kjArrayPtr.as<Rust>() - via Rust::from(&kjArrayPtr)
-  template <typename T>
-  static ::rust::Slice<const T> from(const kj::ArrayPtr<T>* arr) {
-    return ::rust::Slice<const T>(arr->begin(), arr->size());
-  }
-
-  /// kjArray.as<Rust>() - via Rust::from(&kjArray)
-  template <typename T>
-  static ::rust::Slice<const T> from(const kj::Array<T>* arr) {
-    return ::rust::Slice<const T>(arr->begin(), arr->size());
-  }
-
-  /// kjString.as<Rust>() - via Rust::from(&kjString)
-  static ::rust::Slice<const char> from(const kj::String* str) {
-    return ::rust::Slice(str->begin(), str->size());
-  }
-
-  /// kjStringPtr.as<Rust>() - via Rust::from(&kjStringPtr)
-  static ::rust::Slice<const char> from(const kj::StringPtr* str) {
-    return ::rust::Slice(str->begin(), str->size());
-  }
-
-  /// kjConstString.as<Rust>() - via Rust::from(&kjConstString)
-  static ::rust::Slice<const char> from(const kj::ConstString* str) {
-    return ::rust::Slice(str->begin(), str->size());
-  }
-
   // into() methods for from<Rust>(rustObject) - converting Rust to KJ
 
   /// from<Rust>(rustVec) - Zero-copy read-only view
@@ -243,31 +216,35 @@ struct Rust {
   }
 };
 
+/// kjArrayPtr.as<Rust>()
+template <typename T>
+inline ::rust::Slice<const T> asImpl(Rust*, const kj::ArrayPtr<T>& arr) {
+  return ::rust::Slice<const T>(arr.begin(), arr.size());
+}
+
+/// kjArray.as<Rust>()
+template <typename T>
+inline ::rust::Slice<const T> asImpl(Rust*, const kj::Array<T>& arr) {
+  return ::rust::Slice<const T>(arr.begin(), arr.size());
+}
+
+/// kjString.as<Rust>()
+inline ::rust::Slice<const char> asImpl(Rust*, const kj::String& str) {
+  return ::rust::Slice(str.begin(), str.size());
+}
+
+/// kjStringPtr.as<Rust>()
+inline ::rust::Slice<const char> asImpl(Rust*, const kj::StringPtr& str) {
+  return ::rust::Slice(str.begin(), str.size());
+}
+
+/// kjConstString.as<Rust>()
+inline ::rust::Slice<const char> asImpl(Rust*, const kj::ConstString& str) {
+  return ::rust::Slice(str.begin(), str.size());
+}
+
 /// Owned Rust copies: kjObject.as<RustCopy>() and from<RustCopy>(kjObject)
 struct RustCopy {
-  /// kjArrayPtr.as<RustCopy>() - via RustCopy::from(&kjArrayPtr)
-  template <typename T>
-  static ::rust::Vec<T> from(kj::ArrayPtr<const T>* arr) {
-    ::rust::Vec<T> result;
-    result.reserve(arr->size());
-    for (auto& t: *arr) {
-      result.push_back(t);
-    }
-    return result;
-  }
-
-  /// kjStringPtr.as<RustCopy>() - via RustCopy::from(&kjStringPtr)
-  static ::rust::Vec<char> from(const kj::StringPtr* str) {
-    auto ptr = str->asArray();
-    return from(&ptr);
-  }
-
-  /// kjConstString.as<RustCopy>() - via RustCopy::from(&kjConstString)
-  static ::rust::Vec<char> from(const kj::ConstString* str) {
-    auto ptr = str->asArray();
-    return from(&ptr);
-  }
-
   /// from<RustCopy>(rustSliceOfStrs) - Copy slice of strs to null-terminated KJ strings
   static kj::Array<kj::String> into(::rust::Slice<::rust::str> slice) {
     auto res = kj::heapArrayBuilder<kj::String>(slice.size());
@@ -287,54 +264,77 @@ struct RustCopy {
   }
 };
 
-/// Mutable Rust views: kjObject.as<RustMutable>() and from<RustMutable>(kjObject)
-struct RustMutable {
-  /// kjArrayPtr.as<RustMutable>() - via RustMutable::from(&kjArrayPtr)
-  template <typename T>
-  static ::rust::Slice<T> from(kj::ArrayPtr<T>* arr) {
-    return ::rust::Slice<T>(arr->begin(), arr->size());
+/// kjArrayPtr.as<RustCopy>()
+template <typename T>
+static ::rust::Vec<T> asImpl(RustCopy*, kj::ArrayPtr<const T>& arr) {
+  ::rust::Vec<T> result;
+  result.reserve(arr.size());
+  for (auto& t: arr) {
+    result.push_back(t);
   }
+  return result;
+}
 
-  /// kjArray.as<RustMutable>() - via RustMutable::from(&kjArray)
-  template <typename T>
-  static ::rust::Slice<T> from(kj::Array<T>* arr) {
-    return ::rust::Slice<T>(arr->begin(), arr->size());
-  }
-};
+/// kjStringPtr.as<RustCopy>()
+inline ::rust::Vec<char> asImpl(RustCopy*, const kj::StringPtr& str) {
+  auto ptr = str.asArray();
+  return asImpl((RustCopy*)nullptr, ptr);
+}
+
+/// kjConstString.as<RustCopy>()
+inline ::rust::Vec<char> asImpl(RustCopy*, const kj::ConstString& str) {
+  auto ptr = str.asArray();
+  return asImpl((RustCopy*)nullptr, ptr);
+}
+
+/// Mutable Rust views
+struct RustMutable {};
+
+/// kjArrayPtr.as<RustMutable>()
+template <typename T>
+inline ::rust::Slice<T> asImpl(RustMutable*, kj::ArrayPtr<T>& arr) {
+  return ::rust::Slice<T>(arr.begin(), arr.size());
+}
+
+/// kjArray.as<RustMutable>()
+template <typename T>
+inline ::rust::Slice<T> asImpl(RustMutable*, kj::Array<T>& arr) {
+  return ::rust::Slice<T>(arr.begin(), arr.size());
+}
 
 // Rust strings require valid utf8 content, which is not enforced by `kj::String`.
 // Passing invalid utf8 to `rust::String` could result in panics and other unexpected behaviour.
 // Use this struct to convert `kj::String` to `rust::String` without checking for valid utf8
 // when you are confident about the content of the string or do not care about the consequences.
 // It is also safer to convert strings to slices and use `from_utf8_lossy` or friends on rust side.
-struct RustUncheckedUtf8 {
-  /// kjString.as<Rust>() - via Rust::from(&kjString)
-  static ::rust::String from(const kj::String* str) {
-    return ::rust::String(str->begin(), str->size());
-  }
+struct RustUncheckedUtf8 {};
 
-  /// kjStringPtr.as<Rust>() - via Rust::from(&kjStringPtr)
-  static ::rust::Str from(const kj::StringPtr* str) {
-    return ::rust::Str(str->begin(), str->size());
-  }
+/// kjString.as<RustUncheckedUtf8>()
+inline ::rust::String asImpl(RustUncheckedUtf8*, const kj::String& str) {
+  return ::rust::String(str.begin(), str.size());
+}
 
-  /// kjConstString.as<Rust>() - via Rust::from(&kjConstString)
-  static ::rust::Str from(const kj::ConstString* str) {
-    return ::rust::Str(str->begin(), str->size());
-  }
-};
+/// kjStringPtr.as<RustUncheckedUtf8>()
+inline ::rust::Str asImpl(RustUncheckedUtf8*, const kj::StringPtr& str) {
+  return ::rust::Str(str.begin(), str.size());
+}
+
+/// kjConstString.as<RustUncheckedUtf8>()
+inline ::rust::Str asImpl(RustUncheckedUtf8*, const kj::ConstString& str) {
+  return ::rust::Str(str.begin(), str.size());
+}
 
 // Copying conversion for string types. See comment for `RustUncheckedUtf8` for details.
-struct RustCopyUncheckedUtf8 {
-  /// kjStringPtr.as<RustCopy>() - via RustCopy::from(&kjStringPtr)
-  static ::rust::String from(const kj::StringPtr* str) {
-    return ::rust::String(str->begin(), str->size());
-  }
+struct RustCopyUncheckedUtf8 {};
 
-  /// kjConstString.as<RustCopy>() - via RustCopy::from(&kjConstString)
-  static ::rust::String from(const kj::ConstString* str) {
-    return ::rust::String(str->begin(), str->size());
-  }
-};
+/// kjStringPtr.as<RustCopyUncheckedUtf8>()
+inline ::rust::String asImpl(RustCopyUncheckedUtf8*, const kj::StringPtr& str) {
+  return ::rust::String(str.begin(), str.size());
+}
+
+/// kjConstString.as<RustCopyUncheckedUtf8>()
+inline ::rust::String asImpl(RustCopyUncheckedUtf8*, const kj::ConstString& str) {
+  return ::rust::String(str.begin(), str.size());
+}
 
 }  // namespace kj_rs

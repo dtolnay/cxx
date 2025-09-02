@@ -135,7 +135,7 @@ public:
   static String lossy(const char16_t *) noexcept;
   static String lossy(const char16_t *, std::size_t) noexcept;
 
-  static String latin1(const char*, std::size_t) noexcept;
+  static String latin1(const char *, std::size_t) noexcept;
 
   String &operator=(const String &) & noexcept;
   String &operator=(String &&) & noexcept;

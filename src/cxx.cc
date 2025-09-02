@@ -570,7 +570,7 @@ void cxxbridge1$kjCanceledException$dropInPlace(
 }
 
 // kj::Exception::getFile wrapper
-const char* cxxbridge1$kjException$getFile(kj::Exception *err) noexcept {
+const char *cxxbridge1$kjException$getFile(kj::Exception *err) noexcept {
   return err->getFile();
 }
 

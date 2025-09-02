@@ -151,7 +151,7 @@
   "moduleExtensions": {
     "//:capnp_cpp.bzl%capnp_cpp": {
       "general": {
-        "bzlTransitiveDigest": "QuC5VBOQp+gUGJmIDU9Q4JYmvu5C3DxoOtoHH8La1i8=",
+        "bzlTransitiveDigest": "PY7AUehNxGhexydS3nfU4ptocW9m8wIW/Cc+dFI0LDM=",
         "usagesDigest": "NcY49Lqyy8czgriyQfqodZtzPlf0EyttkWX8b7osJtY=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -160,10 +160,10 @@
           "capnp-cpp": {
             "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
             "attributes": {
-              "url": "https://github.com/capnproto/capnproto/tarball/5cbfc8e03033c1066d0e1309768fdb5f5fe2a6e4",
-              "strip_prefix": "capnproto-capnproto-5cbfc8e/c++",
+              "url": "https://github.com/capnproto/capnproto/tarball/f9f3c2a908513ea32a537fa19014e3d73acecf26",
+              "strip_prefix": "capnproto-capnproto-f9f3c2a/c++",
               "type": "tgz",
-              "sha256": "808f586689445f5237358a52f4f9afbed953d8263982ad2c8db23597ba039c5d"
+              "sha256": "f6a2b489110acc8c21a5c9bae4151b95436c3f5f916daa66dc78699e31c96fed"
             }
           }
         },
