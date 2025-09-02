@@ -692,7 +692,7 @@ fn r_result_kj_exception_disconnected_return_primitive() -> Result<usize, KjErro
         KjExceptionType::Disconnected,
         "connection lost from rust".to_owned(),
     )
-    .with_location("tests/ffi/lib.rs", 675))
+    .with_location("tests/ffi/lib.rs".to_string(), 675))
 }
 
 fn r_result_kj_exception_with_details_return_primitive() -> Result<usize, KjError> {
@@ -706,7 +706,7 @@ fn r_result_kj_exception_with_details_return_primitive() -> Result<usize, KjErro
         KjExceptionType::Failed,
         "rust exception with details".to_owned(),
     )
-    .with_location("tests/ffi/lib.rs", 685)
+    .with_location("tests/ffi/lib.rs".to_string(), 685)
     .with_details(details))
 }
 

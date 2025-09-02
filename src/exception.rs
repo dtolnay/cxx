@@ -78,6 +78,12 @@ pub(crate) mod repr {
 
         #[link_name = "cxxbridge1$kjException$dropInPlace"]
         pub fn kj_exception_drop_in_place(err: *mut KjException);
+
+        #[link_name = "cxxbridge1$kjException$getFile"]
+        pub fn kj_exception_get_file(err: *mut KjException) -> *const c_char;
+
+        #[link_name = "cxxbridge1$kjException$getLine"]
+        pub fn kj_exception_get_line(err: *mut KjException) -> i32;
     }
 }
 
@@ -223,6 +229,16 @@ impl KjException {
     pub unsafe fn into_raw(self) -> NonNull<repr::KjException> {
         ManuallyDrop::new(self).err
     }
+
+    /// File name where the exception was thrown.
+    pub fn file(&self) -> &CStr {
+        unsafe { CStr::from_ptr(repr::kj_exception_get_file(self.err.as_ptr())) }
+    }
+
+    /// Line number where the exception was thrown.
+    pub fn line(&self) -> i32 {
+        unsafe { repr::kj_exception_get_line(self.err.as_ptr()) }
+    }
 }
 
 impl Drop for KjException {
@@ -277,8 +293,8 @@ impl KjError {
 
     /// Adds source location information to this error.
     #[must_use]
-    pub fn with_location(mut self, file: &str, line: u32) -> Self {
-        self.file = Some(file.to_string());
+    pub fn with_location(mut self, file: String, line: u32) -> Self {
+        self.file = Some(file);
         self.line = Some(line);
         self
     }
@@ -321,6 +337,25 @@ impl IntoKjException for KjError {
     }
 }
 
+impl From<KjException> for KjError {
+    fn from(value: KjException) -> Self {
+        let mut error = Self::new(value.r#type(), value.to_string());
+
+        if let Ok(file) = value.file().to_str() {
+            error = error.with_location(
+                file.to_string(),
+                value.line().try_into().unwrap_or_default(),
+            );
+        }
+
+        if let Some(details) = value.details() {
+            error = error.with_details(details.clone());
+        }
+
+        error
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -356,6 +391,8 @@ mod tests {
 
         assert_eq!(exception.what(), "test with details");
         assert_eq!(exception.r#type(), repr::KjExceptionType::Overloaded);
+        assert_eq!(exception.file(), c"test.rs");
+        assert_eq!(exception.line(), 100);
 
         let retrieved_details = exception.details();
         assert!(retrieved_details.is_some());
@@ -399,6 +436,29 @@ mod tests {
         // Verify third detail
         assert_eq!(details_vec[2].0, 999);
         assert_eq!(details_vec[2].1, b"third detail with more data");
+    }
+
+    #[test]
+    fn test_kj_exception_into_kj_error() {
+        let details = vec![
+            (456u64, b"first detail".to_vec()),
+            (789u64, b"second detail".to_vec()),
+            (999u64, b"third detail with more data".to_vec()),
+        ];
+        let exception = KjException::new(
+            repr::KjExceptionType::Disconnected,
+            "multiple details test",
+            "multi_test.rs",
+            200,
+            Some(&details),
+        );
+
+        let error: KjError = exception.into();
+        assert_eq!(error.description(), "multiple details test");
+        assert_eq!(error.exception_type(), repr::KjExceptionType::Disconnected);
+        assert_eq!(error.file(), Some("multi_test.rs"));
+        assert_eq!(error.line(), Some(200));
+        assert_eq!(error.details(), Some(&details));
     }
 
     #[test]
@@ -509,7 +569,7 @@ mod tests {
             repr::KjExceptionType::Unimplemented,
             "error with location".to_string(),
         )
-        .with_location("original_file.rs", 42);
+        .with_location("original_file.rs".to_string(), 42);
 
         let exception = kj_error.into_kj_exception("fallback_file.rs", 999);
         assert_eq!(exception.what(), "error with location");

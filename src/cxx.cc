@@ -569,6 +569,16 @@ void cxxbridge1$kjCanceledException$dropInPlace(
   delete err;
 }
 
+// kj::Exception::getFile wrapper
+const char* cxxbridge1$kjException$getFile(kj::Exception *err) noexcept {
+  return err->getFile();
+}
+
+// kj::Exception::getLine wrapper
+int cxxbridge1$kjException$getLine(kj::Exception *err) noexcept {
+  return err->getLine();
+}
+
 } // extern "C"
 
 namespace {
