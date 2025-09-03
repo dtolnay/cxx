@@ -5,7 +5,7 @@ use crate::syntax::map::{OrderedMap, UnorderedMap};
 use crate::syntax::report::Errors;
 use crate::syntax::resolve::Resolution;
 use crate::syntax::set::{OrderedSet, UnorderedSet};
-use crate::syntax::trivial::{self, TrivialReason};
+use crate::syntax::trivial::{self, TrivialReasons};
 use crate::syntax::visit::{self, Visit};
 use crate::syntax::{
     toposort, Api, Atom, Enum, ExternType, Impl, Lifetimes, Pair, Struct, Type, TypeAlias,
@@ -21,7 +21,7 @@ pub(crate) struct Types<'a> {
     pub rust: UnorderedSet<&'a Ident>,
     pub aliases: UnorderedMap<&'a Ident, &'a TypeAlias>,
     pub untrusted: UnorderedMap<&'a Ident, &'a ExternType>,
-    pub required_trivial: UnorderedMap<&'a Ident, Vec<TrivialReason<'a>>>,
+    pub required_trivial: UnorderedMap<&'a Ident, TrivialReasons<'a>>,
     pub impls: OrderedMap<ImplKey<'a>, Option<&'a Impl>>,
     pub resolutions: UnorderedMap<&'a Ident, Resolution<'a>>,
     pub struct_improper_ctypes: UnorderedSet<&'a Ident>,

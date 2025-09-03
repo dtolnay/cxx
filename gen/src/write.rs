@@ -10,7 +10,7 @@ use crate::syntax::namespace::Namespace;
 use crate::syntax::primitive::{self, PrimitiveKind};
 use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::{self, Symbol};
-use crate::syntax::trivial::{self, TrivialReason};
+use crate::syntax::trivial::{TrivialReason, TrivialReasons};
 use crate::syntax::{
     derive, mangle, Api, Doc, Enum, ExternFn, ExternType, FnKind, Lang, Pair, Signature, Struct,
     Trait, Type, TypeAlias, Types, Var,
@@ -480,7 +480,7 @@ fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
     }
 }
 
-fn check_trivial_extern_type(out: &mut OutFile, alias: &TypeAlias, reasons: &[TrivialReason]) {
+fn check_trivial_extern_type(out: &mut OutFile, alias: &TypeAlias, reasons: &TrivialReasons) {
     // NOTE: The following static assertion is just nice-to-have and not
     // necessary for soundness. That's because triviality is always declared by
     // the user in the form of an unsafe impl of cxx::ExternType:
@@ -540,7 +540,7 @@ fn check_trivial_extern_type(out: &mut OutFile, alias: &TypeAlias, reasons: &[Tr
         out,
         "    \"type {} should be trivially move constructible and trivially destructible in C++ to be used as {} in Rust\");",
         id.trim_start_matches("::"),
-        trivial::as_what(&alias.name, reasons),
+        reasons.as_what(&alias.name),
     );
 }
 

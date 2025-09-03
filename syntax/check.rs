@@ -2,8 +2,8 @@ use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::report::Errors;
 use crate::syntax::visit::{self, Visit};
 use crate::syntax::{
-    error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, FnKind, Impl, Lang, Lifetimes,
-    NamedType, Ptr, Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
+    error, ident, Api, Array, Enum, ExternFn, ExternType, FnKind, Impl, Lang, Lifetimes, NamedType,
+    Ptr, Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
 };
 use proc_macro2::{Delimiter, Group, Ident, TokenStream};
 use quote::{quote, ToTokens};
@@ -398,10 +398,10 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
         cx.error(span, "extern type bounds are not implemented yet");
     }
 
-    if let Some(reasons) = cx.types.required_trivial.get(&ety.name.rust) {
+    if let Some(trivial_reasons) = cx.types.required_trivial.get(&ety.name.rust) {
         let msg = format!(
             "needs a cxx::ExternType impl in order to be used as {}",
-            trivial::as_what(&ety.name, reasons),
+            trivial_reasons.as_what(&ety.name),
         );
         cx.error(ety, msg);
     }
