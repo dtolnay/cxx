@@ -1,3 +1,4 @@
+use crate::syntax::attrs::OtherAttrs;
 use crate::syntax::improper::ImproperCtype;
 use crate::syntax::instantiate::ImplKey;
 use crate::syntax::map::{OrderedMap, UnorderedMap};
@@ -54,9 +55,17 @@ impl<'a> Types<'a> {
             CollectTypes(all).visit_type(ty);
         }
 
-        let mut add_resolution = |name: &'a Pair, generics: &'a Lifetimes| {
-            resolutions.insert(&name.rust, Resolution { name, generics });
-        };
+        let mut add_resolution =
+            |name: &'a Pair, attrs: &'a OtherAttrs, generics: &'a Lifetimes| {
+                resolutions.insert(
+                    &name.rust,
+                    Resolution {
+                        name,
+                        attrs,
+                        generics,
+                    },
+                );
+            };
 
         let mut type_names = UnorderedSet::new();
         let mut function_names = UnorderedSet::new();
@@ -85,7 +94,7 @@ impl<'a> Types<'a> {
                     for field in &strct.fields {
                         visit(&mut all, &field.ty);
                     }
-                    add_resolution(&strct.name, &strct.generics);
+                    add_resolution(&strct.name, &strct.attrs, &strct.generics);
                 }
                 Api::Enum(enm) => {
                     all.insert(&enm.repr.repr_type);
@@ -101,7 +110,7 @@ impl<'a> Types<'a> {
                         duplicate_name(cx, enm, ItemName::Type(ident));
                     }
                     enums.insert(ident, enm);
-                    add_resolution(&enm.name, &enm.generics);
+                    add_resolution(&enm.name, &enm.attrs, &enm.generics);
                 }
                 Api::CxxType(ety) => {
                     let ident = &ety.name.rust;
@@ -118,7 +127,7 @@ impl<'a> Types<'a> {
                     if !ety.trusted {
                         untrusted.insert(ident, ety);
                     }
-                    add_resolution(&ety.name, &ety.generics);
+                    add_resolution(&ety.name, &ety.attrs, &ety.generics);
                 }
                 Api::RustType(ety) => {
                     let ident = &ety.name.rust;
@@ -126,7 +135,7 @@ impl<'a> Types<'a> {
                         duplicate_name(cx, ety, ItemName::Type(ident));
                     }
                     rust.insert(ident);
-                    add_resolution(&ety.name, &ety.generics);
+                    add_resolution(&ety.name, &ety.attrs, &ety.generics);
                 }
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
                     // Note: duplication of the C++ name is fine because C++ has
@@ -151,7 +160,7 @@ impl<'a> Types<'a> {
                     }
                     cxx.insert(ident);
                     aliases.insert(ident, alias);
-                    add_resolution(&alias.name, &alias.generics);
+                    add_resolution(&alias.name, &alias.attrs, &alias.generics);
                 }
                 Api::Impl(imp) => {
                     visit(&mut all, &imp.ty);
