@@ -1424,6 +1424,7 @@ fn expand_rust_box(
 
     let (impl_generics, ty_generics) = generics::split_for_impl(key, conditional_impl, resolve);
 
+    let cfg = conditional_impl.cfg.into_attr();
     let begin_span = conditional_impl
         .explicit_impl
         .map_or(key.begin_span, |explicit| explicit.impl_token.span);
@@ -1434,9 +1435,12 @@ fn expand_rust_box(
     let prevent_unwind_drop_label = format!("::{} as Drop>::drop", ident);
 
     quote_spanned! {end_span=>
+        #cfg
         #[automatically_derived]
         #[doc(hidden)]
         #unsafe_token impl #impl_generics ::cxx::private::ImplBox for #ident #ty_generics {}
+
+        #cfg
         #[doc(hidden)]
         #[#UnsafeAttr(#ExportNameAttr = #link_alloc)]
         unsafe extern "C" fn #local_alloc #impl_generics() -> *mut ::cxx::core::mem::MaybeUninit<#ident #ty_generics> {
@@ -1447,12 +1451,16 @@ fn expand_rust_box(
             // https://github.com/rust-lang/rust/issues/63291
             ::cxx::alloc::boxed::Box::into_raw(::cxx::alloc::boxed::Box::new(::cxx::core::mem::MaybeUninit::uninit()))
         }
+
+        #cfg
         #[doc(hidden)]
         #[#UnsafeAttr(#ExportNameAttr = #link_dealloc)]
         unsafe extern "C" fn #local_dealloc #impl_generics(ptr: *mut ::cxx::core::mem::MaybeUninit<#ident #ty_generics>) {
             // No prevent_unwind: the global allocator is not allowed to panic.
             let _ = unsafe { ::cxx::alloc::boxed::Box::from_raw(ptr) };
         }
+
+        #cfg
         #[doc(hidden)]
         #[#UnsafeAttr(#ExportNameAttr = #link_drop)]
         unsafe extern "C" fn #local_drop #impl_generics(this: *mut ::cxx::alloc::boxed::Box<#ident #ty_generics>) {
@@ -1491,6 +1499,7 @@ fn expand_rust_vec(
 
     let (impl_generics, ty_generics) = generics::split_for_impl(key, conditional_impl, resolve);
 
+    let cfg = conditional_impl.cfg.into_attr();
     let begin_span = conditional_impl
         .explicit_impl
         .map_or(key.begin_span, |explicit| explicit.impl_token.span);
@@ -1501,9 +1510,12 @@ fn expand_rust_vec(
     let prevent_unwind_drop_label = format!("::{} as Drop>::drop", elem);
 
     quote_spanned! {end_span=>
+        #cfg
         #[automatically_derived]
         #[doc(hidden)]
         #unsafe_token impl #impl_generics ::cxx::private::ImplVec for #elem #ty_generics {}
+
+        #cfg
         #[doc(hidden)]
         #[#UnsafeAttr(#ExportNameAttr = #link_new)]
         unsafe extern "C" fn #local_new #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>) {
@@ -1512,6 +1524,8 @@ fn expand_rust_vec(
                 ::cxx::core::ptr::write(this, ::cxx::private::RustVec::new());
             }
         }
+
+        #cfg
         #[doc(hidden)]
         #[#UnsafeAttr(#ExportNameAttr = #link_drop)]
         unsafe extern "C" fn #local_drop #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>) {
@@ -1521,24 +1535,32 @@ fn expand_rust_vec(
                 || unsafe { ::cxx::core::ptr::drop_in_place(this) },
             );
         }
+
+        #cfg
         #[doc(hidden)]
         #[#UnsafeAttr(#ExportNameAttr = #link_len)]
         unsafe extern "C" fn #local_len #impl_generics(this: *const ::cxx::private::RustVec<#elem #ty_generics>) -> usize {
             // No prevent_unwind: cannot panic.
             unsafe { (*this).len() }
         }
+
+        #cfg
         #[doc(hidden)]
         #[#UnsafeAttr(#ExportNameAttr = #link_capacity)]
         unsafe extern "C" fn #local_capacity #impl_generics(this: *const ::cxx::private::RustVec<#elem #ty_generics>) -> usize {
             // No prevent_unwind: cannot panic.
             unsafe { (*this).capacity() }
         }
+
+        #cfg
         #[doc(hidden)]
         #[#UnsafeAttr(#ExportNameAttr = #link_data)]
         unsafe extern "C" fn #local_data #impl_generics(this: *const ::cxx::private::RustVec<#elem #ty_generics>) -> *const #elem #ty_generics {
             // No prevent_unwind: cannot panic.
             unsafe { (*this).as_ptr() }
         }
+
+        #cfg
         #[doc(hidden)]
         #[#UnsafeAttr(#ExportNameAttr = #link_reserve_total)]
         unsafe extern "C" fn #local_reserve_total #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>, new_cap: usize) {
@@ -1547,6 +1569,8 @@ fn expand_rust_vec(
                 (*this).reserve_total(new_cap);
             }
         }
+
+        #cfg
         #[doc(hidden)]
         #[#UnsafeAttr(#ExportNameAttr = #link_set_len)]
         unsafe extern "C" fn #local_set_len #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>, len: usize) {
@@ -1555,6 +1579,8 @@ fn expand_rust_vec(
                 (*this).set_len(len);
             }
         }
+
+        #cfg
         #[doc(hidden)]
         #[#UnsafeAttr(#ExportNameAttr = #link_truncate)]
         unsafe extern "C" fn #local_truncate #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>, len: usize) {
@@ -1609,6 +1635,7 @@ fn expand_unique_ptr(
         None
     };
 
+    let cfg = conditional_impl.cfg.into_attr();
     let begin_span = conditional_impl
         .explicit_impl
         .map_or(key.begin_span, |explicit| explicit.impl_token.span);
@@ -1628,6 +1655,7 @@ fn expand_unique_ptr(
     };
 
     quote_spanned! {end_span=>
+        #cfg
         #[automatically_derived]
         #unsafe_token impl #impl_generics ::cxx::private::UniquePtrTarget for #ident #ty_generics {
             fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
@@ -1718,6 +1746,7 @@ fn expand_shared_ptr(
         None
     };
 
+    let cfg = conditional_impl.cfg.into_attr();
     let begin_span = conditional_impl
         .explicit_impl
         .map_or(key.begin_span, |explicit| explicit.impl_token.span);
@@ -1728,6 +1757,7 @@ fn expand_shared_ptr(
     let not_destructible_err = format!("{} is not destructible", display_namespaced(resolve.name));
 
     quote_spanned! {end_span=>
+        #cfg
         #[automatically_derived]
         #unsafe_token impl #impl_generics ::cxx::private::SharedPtrTarget for #ident #ty_generics {
             fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
@@ -1799,6 +1829,7 @@ fn expand_weak_ptr(
 
     let (impl_generics, ty_generics) = generics::split_for_impl(key, conditional_impl, resolve);
 
+    let cfg = conditional_impl.cfg.into_attr();
     let begin_span = conditional_impl
         .explicit_impl
         .map_or(key.begin_span, |explicit| explicit.impl_token.span);
@@ -1808,6 +1839,7 @@ fn expand_weak_ptr(
     let unsafe_token = format_ident!("unsafe", span = begin_span);
 
     quote_spanned! {end_span=>
+        #cfg
         #[automatically_derived]
         #unsafe_token impl #impl_generics ::cxx::private::WeakPtrTarget for #ident #ty_generics {
             fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
@@ -1890,6 +1922,7 @@ fn expand_cxx_vector(
 
     let (impl_generics, ty_generics) = generics::split_for_impl(key, conditional_impl, resolve);
 
+    let cfg = conditional_impl.cfg.into_attr();
     let begin_span = conditional_impl
         .explicit_impl
         .map_or(key.begin_span, |explicit| explicit.impl_token.span);
@@ -1954,6 +1987,7 @@ fn expand_cxx_vector(
     };
 
     quote_spanned! {end_span=>
+        #cfg
         #[automatically_derived]
         #unsafe_token impl #impl_generics ::cxx::private::VectorElement for #elem #ty_generics {
             fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {

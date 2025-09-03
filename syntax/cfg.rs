@@ -6,11 +6,9 @@ use syn::{parenthesized, token, Attribute, LitStr, Token};
 #[derive(Clone)]
 pub(crate) enum CfgExpr {
     Unconditional,
-    #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
     Eq(Ident, Option<LitStr>),
     All(Vec<CfgExpr>),
     Any(Vec<CfgExpr>),
-    #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
     Not(Box<CfgExpr>),
 }
 

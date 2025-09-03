@@ -23,6 +23,7 @@
 )]
 #![allow(unknown_lints, mismatched_lifetime_syntaxes)]
 
+mod cfg;
 mod derive;
 mod expand;
 mod generics;
