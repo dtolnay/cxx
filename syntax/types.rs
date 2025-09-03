@@ -1,10 +1,11 @@
 use crate::syntax::attrs::OtherAttrs;
+use crate::syntax::cfg::CfgExpr;
 use crate::syntax::improper::ImproperCtype;
 use crate::syntax::instantiate::ImplKey;
 use crate::syntax::map::{OrderedMap, UnorderedMap};
 use crate::syntax::report::Errors;
 use crate::syntax::resolve::Resolution;
-use crate::syntax::set::{OrderedSet, UnorderedSet};
+use crate::syntax::set::UnorderedSet;
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::visit::{self, Visit};
 use crate::syntax::{
@@ -14,7 +15,7 @@ use proc_macro2::Ident;
 use quote::ToTokens;
 
 pub(crate) struct Types<'a> {
-    pub all: OrderedSet<&'a Type>,
+    pub all: OrderedMap<&'a Type, CfgExpr>,
     pub structs: UnorderedMap<&'a Ident, &'a Struct>,
     pub enums: UnorderedMap<&'a Ident, &'a Enum>,
     pub cxx: UnorderedSet<&'a Ident>,
@@ -22,15 +23,23 @@ pub(crate) struct Types<'a> {
     pub aliases: UnorderedMap<&'a Ident, &'a TypeAlias>,
     pub untrusted: UnorderedMap<&'a Ident, &'a ExternType>,
     pub required_trivial: UnorderedMap<&'a Ident, Vec<TrivialReason<'a>>>,
-    pub impls: OrderedMap<ImplKey<'a>, Option<&'a Impl>>,
+    pub impls: OrderedMap<ImplKey<'a>, ConditionalImpl<'a>>,
     pub resolutions: UnorderedMap<&'a Ident, Resolution<'a>>,
     pub struct_improper_ctypes: UnorderedSet<&'a Ident>,
     pub toposorted_structs: Vec<&'a Struct>,
 }
 
+pub(crate) struct ConditionalImpl<'a> {
+    pub cfg: CfgExpr,
+    // None for implicit impls, which arise from using a generic type
+    // instantiation in a struct field or function signature.
+    #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
+    pub explicit_impl: Option<&'a Impl>,
+}
+
 impl<'a> Types<'a> {
     pub(crate) fn collect(cx: &mut Errors, apis: &'a [Api]) -> Self {
-        let mut all = OrderedSet::new();
+        let mut all = OrderedMap::new();
         let mut structs = UnorderedMap::new();
         let mut enums = UnorderedMap::new();
         let mut cxx = UnorderedSet::new();
@@ -42,17 +51,24 @@ impl<'a> Types<'a> {
         let struct_improper_ctypes = UnorderedSet::new();
         let toposorted_structs = Vec::new();
 
-        fn visit<'a>(all: &mut OrderedSet<&'a Type>, ty: &'a Type) {
-            struct CollectTypes<'s, 'a>(&'s mut OrderedSet<&'a Type>);
+        fn visit<'a>(all: &mut OrderedMap<&'a Type, CfgExpr>, ty: &'a Type, cfg: &CfgExpr) {
+            struct CollectTypes<'s, 'a> {
+                all: &'s mut OrderedMap<&'a Type, CfgExpr>,
+                cfg: &'s CfgExpr,
+            }
 
             impl<'s, 'a> Visit<'a> for CollectTypes<'s, 'a> {
                 fn visit_type(&mut self, ty: &'a Type) {
-                    self.0.insert(ty);
+                    self.all
+                        .entry(ty)
+                        .or_insert(CfgExpr::Any(Vec::new()))
+                        .merge_or(self.cfg.clone());
                     visit::visit_type(self, ty);
                 }
             }
 
-            CollectTypes(all).visit_type(ty);
+            let mut visitor = CollectTypes { all, cfg };
+            visitor.visit_type(ty);
         }
 
         let mut add_resolution =
@@ -92,12 +108,14 @@ impl<'a> Types<'a> {
                     }
                     structs.insert(&strct.name.rust, strct);
                     for field in &strct.fields {
-                        visit(&mut all, &field.ty);
+                        let mut cfg = strct.cfg.clone();
+                        cfg.merge_and(field.cfg.clone());
+                        visit(&mut all, &field.ty, &cfg);
                     }
                     add_resolution(&strct.name, &strct.attrs, &strct.generics);
                 }
                 Api::Enum(enm) => {
-                    all.insert(&enm.repr.repr_type);
+                    all.insert(&enm.repr.repr_type, enm.cfg.clone());
                     let ident = &enm.name.rust;
                     if !type_names.insert(ident)
                         && (!cxx.contains(ident)
@@ -147,10 +165,10 @@ impl<'a> Types<'a> {
                         duplicate_name(cx, efn, ItemName::Function(self_type, &efn.name.rust));
                     }
                     for arg in &efn.args {
-                        visit(&mut all, &arg.ty);
+                        visit(&mut all, &arg.ty, &efn.cfg);
                     }
                     if let Some(ret) = &efn.ret {
-                        visit(&mut all, ret);
+                        visit(&mut all, ret, &efn.cfg);
                     }
                 }
                 Api::TypeAlias(alias) => {
@@ -163,15 +181,15 @@ impl<'a> Types<'a> {
                     add_resolution(&alias.name, &alias.attrs, &alias.generics);
                 }
                 Api::Impl(imp) => {
-                    visit(&mut all, &imp.ty);
+                    visit(&mut all, &imp.ty, &imp.cfg);
                     if let Some(key) = imp.ty.impl_key() {
-                        impls.insert(key, Some(imp));
+                        impls.insert(key, ConditionalImpl::from(imp));
                     }
                 }
             }
         }
 
-        for ty in &all {
+        for (ty, cfg) in &all {
             let Some(impl_key) = ty.impl_key() else {
                 continue;
             };
@@ -185,8 +203,15 @@ impl<'a> Types<'a> {
                     Atom::from(ident.rust).is_none() && !aliases.contains_key(ident.rust)
                 }
             };
-            if implicit_impl && !impls.contains_key(&impl_key) {
-                impls.insert(impl_key, None);
+            if implicit_impl {
+                impls
+                    .entry(impl_key)
+                    .or_insert(ConditionalImpl {
+                        cfg: CfgExpr::Any(Vec::new()),
+                        explicit_impl: None,
+                    })
+                    .cfg
+                    .merge_or(cfg.clone());
             }
         }
 
@@ -280,9 +305,18 @@ impl<'a> Types<'a> {
 
 impl<'t, 'a> IntoIterator for &'t Types<'a> {
     type Item = &'a Type;
-    type IntoIter = crate::syntax::set::Iter<'t, 'a, Type>;
+    type IntoIter = std::iter::Copied<indexmap::map::Keys<'t, &'a Type, CfgExpr>>;
     fn into_iter(self) -> Self::IntoIter {
-        self.all.into_iter()
+        self.all.keys().copied()
+    }
+}
+
+impl<'a> From<&'a Impl> for ConditionalImpl<'a> {
+    fn from(imp: &'a Impl) -> Self {
+        ConditionalImpl {
+            cfg: imp.cfg.clone(),
+            explicit_impl: Some(imp),
+        }
     }
 }
 
