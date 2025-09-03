@@ -33,13 +33,6 @@ mod ordered {
         pub(crate) fn entry(&mut self, key: K) -> indexmap::map::Entry<K, V> {
             self.0.entry(key)
         }
-
-        pub(crate) fn contains_key<Q>(&self, key: &Q) -> bool
-        where
-            Q: ?Sized + Hash + indexmap::Equivalent<K>,
-        {
-            self.0.contains_key(key)
-        }
     }
 
     impl<'a, K, V> IntoIterator for &'a OrderedMap<K, V> {

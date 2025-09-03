@@ -23,10 +23,18 @@ pub(crate) struct Types<'a> {
     pub aliases: UnorderedMap<&'a Ident, &'a TypeAlias>,
     pub untrusted: UnorderedMap<&'a Ident, &'a ExternType>,
     pub required_trivial: UnorderedMap<&'a Ident, Vec<TrivialReason<'a>>>,
-    pub impls: OrderedMap<ImplKey<'a>, Option<&'a Impl>>,
+    pub impls: OrderedMap<ImplKey<'a>, ConditionalImpl<'a>>,
     pub resolutions: UnorderedMap<&'a Ident, Resolution<'a>>,
     pub struct_improper_ctypes: UnorderedSet<&'a Ident>,
     pub toposorted_structs: Vec<&'a Struct>,
+}
+
+pub(crate) struct ConditionalImpl<'a> {
+    pub cfg: CfgExpr,
+    // None for implicit impls, which arise from using a generic type
+    // instantiation in a struct field or function signature.
+    #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
+    pub explicit_impl: Option<&'a Impl>,
 }
 
 impl<'a> Types<'a> {
@@ -175,14 +183,13 @@ impl<'a> Types<'a> {
                 Api::Impl(imp) => {
                     visit(&mut all, &imp.ty, &imp.cfg);
                     if let Some(key) = imp.ty.impl_key() {
-                        impls.insert(key, Some(imp));
+                        impls.insert(key, ConditionalImpl::from(imp));
                     }
                 }
             }
         }
 
-        for (ty, _cfg) in &all {
-            // FIXME: generate implicit impls conditionally based on cfg
+        for (ty, cfg) in &all {
             let Some(impl_key) = ty.impl_key() else {
                 continue;
             };
@@ -196,8 +203,15 @@ impl<'a> Types<'a> {
                     Atom::from(ident.rust).is_none() && !aliases.contains_key(ident.rust)
                 }
             };
-            if implicit_impl && !impls.contains_key(&impl_key) {
-                impls.insert(impl_key, None);
+            if implicit_impl {
+                impls
+                    .entry(impl_key)
+                    .or_insert(ConditionalImpl {
+                        cfg: CfgExpr::Any(Vec::new()),
+                        explicit_impl: None,
+                    })
+                    .cfg
+                    .merge_or(cfg.clone());
             }
         }
 
@@ -294,6 +308,15 @@ impl<'t, 'a> IntoIterator for &'t Types<'a> {
     type IntoIter = std::iter::Copied<indexmap::map::Keys<'t, &'a Type, CfgExpr>>;
     fn into_iter(self) -> Self::IntoIter {
         self.all.keys().copied()
+    }
+}
+
+impl<'a> From<&'a Impl> for ConditionalImpl<'a> {
+    fn from(imp: &'a Impl) -> Self {
+        ConditionalImpl {
+            cfg: imp.cfg.clone(),
+            explicit_impl: Some(imp),
+        }
     }
 }
 
