@@ -12,6 +12,14 @@ pub(crate) enum CfgExpr {
     Not(Box<CfgExpr>),
 }
 
+#[derive(Clone)]
+pub(crate) enum ComputedCfg<'a> {
+    Leaf(&'a CfgExpr),
+    #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
+    All(Vec<&'a CfgExpr>),
+    Any(Vec<ComputedCfg<'a>>),
+}
+
 impl CfgExpr {
     pub(crate) fn merge_and(&mut self, expr: CfgExpr) {
         if let CfgExpr::Unconditional = self {
@@ -25,18 +33,40 @@ impl CfgExpr {
             *self = CfgExpr::All(vec![prev, expr]);
         }
     }
+}
 
-    pub(crate) fn merge_or(&mut self, expr: CfgExpr) {
-        if let CfgExpr::Unconditional = self {
-            // drop
-        } else if let CfgExpr::Unconditional = expr {
-            *self = expr;
-        } else if let CfgExpr::Any(list) = self {
-            list.push(expr);
+impl<'a> ComputedCfg<'a> {
+    pub(crate) fn all(one: &'a CfgExpr, two: &'a CfgExpr) -> Self {
+        if let CfgExpr::Unconditional = two {
+            ComputedCfg::Leaf(one)
+        } else if let CfgExpr::Unconditional = one {
+            ComputedCfg::Leaf(two)
         } else {
-            let prev = mem::replace(self, CfgExpr::Unconditional);
-            *self = CfgExpr::Any(vec![prev, expr]);
+            ComputedCfg::All(vec![one, two])
         }
+    }
+
+    pub(crate) fn merge_or(&mut self, other: impl Into<ComputedCfg<'a>>) {
+        let other = other.into();
+        if let ComputedCfg::Leaf(CfgExpr::Unconditional) = self {
+            // drop
+        } else if let ComputedCfg::Leaf(CfgExpr::Unconditional) = other {
+            *self = other;
+        } else if let ComputedCfg::Any(list) = self {
+            list.push(other);
+        } else {
+            let prev = mem::replace(self, ComputedCfg::Any(Vec::new()));
+            let ComputedCfg::Any(list) = self else {
+                unreachable!();
+            };
+            list.extend([prev, other]);
+        }
+    }
+}
+
+impl<'a> From<&'a CfgExpr> for ComputedCfg<'a> {
+    fn from(cfg: &'a CfgExpr) -> Self {
+        ComputedCfg::Leaf(cfg)
     }
 }
 

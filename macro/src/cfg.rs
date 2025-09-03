@@ -1,11 +1,11 @@
-use crate::syntax::cfg::CfgExpr;
+use crate::syntax::cfg::{CfgExpr, ComputedCfg};
 use proc_macro2::{Delimiter, Group, Ident, Span, TokenStream};
 use quote::{ToTokens, TokenStreamExt as _};
 use syn::{token, AttrStyle, Attribute, MacroDelimiter, Meta, MetaList, Path, Token};
 
-impl CfgExpr {
+impl<'a> ComputedCfg<'a> {
     pub(crate) fn into_attr(&self) -> Option<Attribute> {
-        if let CfgExpr::Unconditional = self {
+        if let ComputedCfg::Leaf(CfgExpr::Unconditional) = self {
             None
         } else {
             let span = Span::call_site();
@@ -23,12 +23,12 @@ impl CfgExpr {
     }
 }
 
-struct Print<'a> {
-    cfg: &'a CfgExpr,
+struct Print<'a, Cfg> {
+    cfg: &'a Cfg,
     span: Span,
 }
 
-impl<'a> ToTokens for Print<'a> {
+impl<'a> ToTokens for Print<'a, CfgExpr> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let span = self.span;
         let print = |cfg| Print { cfg, span };
@@ -56,6 +56,31 @@ impl<'a> ToTokens for Print<'a> {
             CfgExpr::Not(inner) => {
                 tokens.append(Ident::new("not", span));
                 let group = print(inner).into_token_stream();
+                tokens.append(Group::new(Delimiter::Parenthesis, group));
+            }
+        }
+    }
+}
+
+impl<'a> ToTokens for Print<'a, ComputedCfg<'a>> {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let span = self.span;
+        match *self.cfg {
+            ComputedCfg::Leaf(cfg) => Print { cfg, span }.to_tokens(tokens),
+            ComputedCfg::All(ref inner) => {
+                tokens.append(Ident::new("all", span));
+                let mut group = TokenStream::new();
+                group.append_separated(
+                    inner.iter().map(|&cfg| Print { cfg, span }),
+                    Token![,](span),
+                );
+                tokens.append(Group::new(Delimiter::Parenthesis, group));
+            }
+            ComputedCfg::Any(ref inner) => {
+                tokens.append(Ident::new("any", span));
+                let mut group = TokenStream::new();
+                group
+                    .append_separated(inner.iter().map(|cfg| Print { cfg, span }), Token![,](span));
                 tokens.append(Group::new(Delimiter::Parenthesis, group));
             }
         }

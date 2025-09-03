@@ -1,5 +1,5 @@
 use crate::syntax::attrs::OtherAttrs;
-use crate::syntax::cfg::CfgExpr;
+use crate::syntax::cfg::ComputedCfg;
 use crate::syntax::improper::ImproperCtype;
 use crate::syntax::instantiate::ImplKey;
 use crate::syntax::map::{OrderedMap, UnorderedMap};
@@ -11,11 +11,12 @@ use crate::syntax::visit::{self, Visit};
 use crate::syntax::{
     toposort, Api, Atom, Enum, ExternType, Impl, Lifetimes, Pair, Struct, Type, TypeAlias,
 };
+use indexmap::map::Entry;
 use proc_macro2::Ident;
 use quote::ToTokens;
 
 pub(crate) struct Types<'a> {
-    pub all: OrderedMap<&'a Type, CfgExpr>,
+    pub all: OrderedMap<&'a Type, ComputedCfg<'a>>,
     pub structs: UnorderedMap<&'a Ident, &'a Struct>,
     pub enums: UnorderedMap<&'a Ident, &'a Enum>,
     pub cxx: UnorderedSet<&'a Ident>,
@@ -30,7 +31,7 @@ pub(crate) struct Types<'a> {
 }
 
 pub(crate) struct ConditionalImpl<'a> {
-    pub cfg: CfgExpr,
+    pub cfg: ComputedCfg<'a>,
     // None for implicit impls, which arise from using a generic type
     // instantiation in a struct field or function signature.
     #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
@@ -51,23 +52,32 @@ impl<'a> Types<'a> {
         let struct_improper_ctypes = UnorderedSet::new();
         let toposorted_structs = Vec::new();
 
-        fn visit<'a>(all: &mut OrderedMap<&'a Type, CfgExpr>, ty: &'a Type, cfg: &CfgExpr) {
+        fn visit<'a>(
+            all: &mut OrderedMap<&'a Type, ComputedCfg<'a>>,
+            ty: &'a Type,
+            cfg: impl Into<ComputedCfg<'a>>,
+        ) {
             struct CollectTypes<'s, 'a> {
-                all: &'s mut OrderedMap<&'a Type, CfgExpr>,
-                cfg: &'s CfgExpr,
+                all: &'s mut OrderedMap<&'a Type, ComputedCfg<'a>>,
+                cfg: ComputedCfg<'a>,
             }
 
             impl<'s, 'a> Visit<'a> for CollectTypes<'s, 'a> {
                 fn visit_type(&mut self, ty: &'a Type) {
-                    self.all
-                        .entry(ty)
-                        .or_insert(CfgExpr::Any(Vec::new()))
-                        .merge_or(self.cfg.clone());
+                    match self.all.entry(ty) {
+                        Entry::Vacant(entry) => {
+                            entry.insert(self.cfg.clone());
+                        }
+                        Entry::Occupied(mut entry) => entry.get_mut().merge_or(self.cfg.clone()),
+                    }
                     visit::visit_type(self, ty);
                 }
             }
 
-            let mut visitor = CollectTypes { all, cfg };
+            let mut visitor = CollectTypes {
+                all,
+                cfg: cfg.into(),
+            };
             visitor.visit_type(ty);
         }
 
@@ -108,14 +118,18 @@ impl<'a> Types<'a> {
                     }
                     structs.insert(&strct.name.rust, strct);
                     for field in &strct.fields {
-                        let mut cfg = strct.cfg.clone();
-                        cfg.merge_and(field.cfg.clone());
-                        visit(&mut all, &field.ty, &cfg);
+                        let cfg = ComputedCfg::all(&strct.cfg, &field.cfg);
+                        visit(&mut all, &field.ty, cfg);
                     }
                     add_resolution(&strct.name, &strct.attrs, &strct.generics);
                 }
                 Api::Enum(enm) => {
-                    all.insert(&enm.repr.repr_type, enm.cfg.clone());
+                    match all.entry(&enm.repr.repr_type) {
+                        Entry::Vacant(entry) => {
+                            entry.insert(ComputedCfg::Leaf(&enm.cfg));
+                        }
+                        Entry::Occupied(mut entry) => entry.get_mut().merge_or(&enm.cfg),
+                    }
                     let ident = &enm.name.rust;
                     if !type_names.insert(ident)
                         && (!cxx.contains(ident)
@@ -204,14 +218,12 @@ impl<'a> Types<'a> {
                 }
             };
             if implicit_impl {
-                impls
-                    .entry(impl_key)
-                    .or_insert(ConditionalImpl {
-                        cfg: CfgExpr::Any(Vec::new()),
-                        explicit_impl: None,
-                    })
-                    .cfg
-                    .merge_or(cfg.clone());
+                match impls.entry(impl_key) {
+                    Entry::Vacant(entry) => {
+                        entry.insert(ConditionalImpl::from(cfg.clone()));
+                    }
+                    Entry::Occupied(mut entry) => entry.get_mut().cfg.merge_or(cfg.clone()),
+                }
             }
         }
 
@@ -305,16 +317,25 @@ impl<'a> Types<'a> {
 
 impl<'t, 'a> IntoIterator for &'t Types<'a> {
     type Item = &'a Type;
-    type IntoIter = std::iter::Copied<indexmap::map::Keys<'t, &'a Type, CfgExpr>>;
+    type IntoIter = std::iter::Copied<indexmap::map::Keys<'t, &'a Type, ComputedCfg<'a>>>;
     fn into_iter(self) -> Self::IntoIter {
         self.all.keys().copied()
+    }
+}
+
+impl<'a> From<ComputedCfg<'a>> for ConditionalImpl<'a> {
+    fn from(cfg: ComputedCfg<'a>) -> Self {
+        ConditionalImpl {
+            cfg,
+            explicit_impl: None,
+        }
     }
 }
 
 impl<'a> From<&'a Impl> for ConditionalImpl<'a> {
     fn from(imp: &'a Impl) -> Self {
         ConditionalImpl {
-            cfg: imp.cfg.clone(),
+            cfg: ComputedCfg::Leaf(&imp.cfg),
             explicit_impl: Some(imp),
         }
     }
