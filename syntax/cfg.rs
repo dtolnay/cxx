@@ -9,21 +9,35 @@ pub(crate) enum CfgExpr {
     #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
     Eq(Ident, Option<LitStr>),
     All(Vec<CfgExpr>),
-    #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
     Any(Vec<CfgExpr>),
     #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
     Not(Box<CfgExpr>),
 }
 
 impl CfgExpr {
-    pub(crate) fn merge(&mut self, expr: CfgExpr) {
+    pub(crate) fn merge_and(&mut self, expr: CfgExpr) {
         if let CfgExpr::Unconditional = self {
             *self = expr;
+        } else if let CfgExpr::Unconditional = expr {
+            // drop
         } else if let CfgExpr::All(list) = self {
             list.push(expr);
         } else {
             let prev = mem::replace(self, CfgExpr::Unconditional);
             *self = CfgExpr::All(vec![prev, expr]);
+        }
+    }
+
+    pub(crate) fn merge_or(&mut self, expr: CfgExpr) {
+        if let CfgExpr::Unconditional = self {
+            // drop
+        } else if let CfgExpr::Unconditional = expr {
+            *self = expr;
+        } else if let CfgExpr::Any(list) = self {
+            list.push(expr);
+        } else {
+            let prev = mem::replace(self, CfgExpr::Unconditional);
+            *self = CfgExpr::Any(vec![prev, expr]);
         }
     }
 }

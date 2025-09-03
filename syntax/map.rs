@@ -30,6 +30,10 @@ mod ordered {
             self.0.insert(key, value)
         }
 
+        pub(crate) fn entry(&mut self, key: K) -> indexmap::map::Entry<K, V> {
+            self.0.entry(key)
+        }
+
         pub(crate) fn contains_key<Q>(&self, key: &Q) -> bool
         where
             Q: ?Sized + Hash + indexmap::Equivalent<K>,
