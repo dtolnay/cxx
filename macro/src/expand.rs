@@ -1657,7 +1657,7 @@ fn expand_unique_ptr(
     quote_spanned! {end_span=>
         #cfg
         #[automatically_derived]
-        #unsafe_token impl #impl_generics ::cxx::private::UniquePtrTarget for #ident #ty_generics {
+        #unsafe_token impl #impl_generics ::cxx::memory::UniquePtrTarget for #ident #ty_generics {
             fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
                 f.write_str(#name)
             }
@@ -1759,7 +1759,7 @@ fn expand_shared_ptr(
     quote_spanned! {end_span=>
         #cfg
         #[automatically_derived]
-        #unsafe_token impl #impl_generics ::cxx::private::SharedPtrTarget for #ident #ty_generics {
+        #unsafe_token impl #impl_generics ::cxx::memory::SharedPtrTarget for #ident #ty_generics {
             fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
                 f.write_str(#name)
             }
@@ -1841,7 +1841,7 @@ fn expand_weak_ptr(
     quote_spanned! {end_span=>
         #cfg
         #[automatically_derived]
-        #unsafe_token impl #impl_generics ::cxx::private::WeakPtrTarget for #ident #ty_generics {
+        #unsafe_token impl #impl_generics ::cxx::memory::WeakPtrTarget for #ident #ty_generics {
             fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
                 f.write_str(#name)
             }
@@ -1989,7 +1989,7 @@ fn expand_cxx_vector(
     quote_spanned! {end_span=>
         #cfg
         #[automatically_derived]
-        #unsafe_token impl #impl_generics ::cxx::private::VectorElement for #elem #ty_generics {
+        #unsafe_token impl #impl_generics ::cxx::vector::VectorElement for #elem #ty_generics {
             fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
                 f.write_str(#name)
             }
