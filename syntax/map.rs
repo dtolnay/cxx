@@ -7,7 +7,6 @@ pub(crate) use self::unordered::UnorderedMap;
 pub(crate) use std::collections::hash_map::Entry;
 
 mod ordered {
-    use super::Keys;
     use std::hash::Hash;
 
     pub(crate) struct OrderedMap<K, V>(indexmap::IndexMap<K, V>);
@@ -18,8 +17,8 @@ mod ordered {
         }
 
         #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
-        pub(crate) fn keys(&self) -> Keys<K, V> {
-            Keys(self.0.keys())
+        pub(crate) fn keys(&self) -> indexmap::map::Keys<K, V> {
+            self.0.keys()
         }
     }
 
@@ -111,20 +110,6 @@ mod unordered {
             }
             set
         }
-    }
-}
-
-pub(crate) struct Keys<'a, K, V>(indexmap::map::Keys<'a, K, V>);
-
-impl<'a, K, V> Iterator for Keys<'a, K, V> {
-    type Item = &'a K;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.0.next()
-    }
-
-    fn size_hint(&self) -> (usize, Option<usize>) {
-        self.0.size_hint()
     }
 }
 
