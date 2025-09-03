@@ -191,6 +191,7 @@ fn expand_struct(strct: &Struct) -> TokenStream {
         #[repr(C #align)]
         #struct_def
 
+        #attrs
         #[automatically_derived]
         unsafe impl #generics ::cxx::ExternType for #ident #generics {
             #[allow(unused_attributes)] // incorrect lint
@@ -206,6 +207,7 @@ fn expand_struct(strct: &Struct) -> TokenStream {
 fn expand_struct_operators(strct: &Struct) -> TokenStream {
     let ident = &strct.name.rust;
     let generics = &strct.generics;
+    let attrs = &strct.attrs;
     let mut operators = TokenStream::new();
 
     for derive in &strct.derives {
@@ -216,6 +218,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                 let local_name = format_ident!("__operator_eq_{}", strct.name.rust);
                 let prevent_unwind_label = format!("::{} as PartialEq>::eq", strct.name.rust);
                 operators.extend(quote_spanned! {span=>
+                    #attrs
                     #[doc(hidden)]
                     #[#UnsafeAttr(#ExportNameAttr = #link_name)]
                     extern "C" fn #local_name #generics(lhs: &#ident #generics, rhs: &#ident #generics) -> bool {
@@ -229,6 +232,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                     let local_name = format_ident!("__operator_ne_{}", strct.name.rust);
                     let prevent_unwind_label = format!("::{} as PartialEq>::ne", strct.name.rust);
                     operators.extend(quote_spanned! {span=>
+                        #attrs
                         #[doc(hidden)]
                         #[#UnsafeAttr(#ExportNameAttr = #link_name)]
                         extern "C" fn #local_name #generics(lhs: &#ident #generics, rhs: &#ident #generics) -> bool {
@@ -243,6 +247,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                 let local_name = format_ident!("__operator_lt_{}", strct.name.rust);
                 let prevent_unwind_label = format!("::{} as PartialOrd>::lt", strct.name.rust);
                 operators.extend(quote_spanned! {span=>
+                    #attrs
                     #[doc(hidden)]
                     #[#UnsafeAttr(#ExportNameAttr = #link_name)]
                     extern "C" fn #local_name #generics(lhs: &#ident #generics, rhs: &#ident #generics) -> bool {
@@ -255,6 +260,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                 let local_name = format_ident!("__operator_le_{}", strct.name.rust);
                 let prevent_unwind_label = format!("::{} as PartialOrd>::le", strct.name.rust);
                 operators.extend(quote_spanned! {span=>
+                    #attrs
                     #[doc(hidden)]
                     #[#UnsafeAttr(#ExportNameAttr = #link_name)]
                     extern "C" fn #local_name #generics(lhs: &#ident #generics, rhs: &#ident #generics) -> bool {
@@ -268,6 +274,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                     let local_name = format_ident!("__operator_gt_{}", strct.name.rust);
                     let prevent_unwind_label = format!("::{} as PartialOrd>::gt", strct.name.rust);
                     operators.extend(quote_spanned! {span=>
+                        #attrs
                         #[doc(hidden)]
                         #[#UnsafeAttr(#ExportNameAttr = #link_name)]
                         extern "C" fn #local_name #generics(lhs: &#ident #generics, rhs: &#ident #generics) -> bool {
@@ -280,6 +287,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                     let local_name = format_ident!("__operator_ge_{}", strct.name.rust);
                     let prevent_unwind_label = format!("::{} as PartialOrd>::ge", strct.name.rust);
                     operators.extend(quote_spanned! {span=>
+                        #attrs
                         #[doc(hidden)]
                         #[#UnsafeAttr(#ExportNameAttr = #link_name)]
                         extern "C" fn #local_name #generics(lhs: &#ident #generics, rhs: &#ident #generics) -> bool {
@@ -294,6 +302,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                 let local_name = format_ident!("__operator_hash_{}", strct.name.rust);
                 let prevent_unwind_label = format!("::{} as Hash>::hash", strct.name.rust);
                 operators.extend(quote_spanned! {span=>
+                    #attrs
                     #[doc(hidden)]
                     #[#UnsafeAttr(#ExportNameAttr = #link_name)]
                     #[allow(clippy::cast_possible_truncation)]
@@ -313,10 +322,12 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
 fn expand_struct_forbid_drop(strct: &Struct) -> TokenStream {
     let ident = &strct.name.rust;
     let generics = &strct.generics;
+    let attrs = &strct.attrs;
     let span = ident.span();
     let impl_token = Token![impl](strct.visibility.span);
 
     quote_spanned! {span=>
+        #attrs
         #[automatically_derived]
         #impl_token #generics self::Drop for super::#ident #generics {}
     }
@@ -364,11 +375,13 @@ fn expand_enum(enm: &Enum) -> TokenStream {
         #[repr(transparent)]
         #enum_def
 
+        #attrs
         #[allow(non_upper_case_globals)]
         impl #ident {
             #(#variants)*
         }
 
+        #attrs
         #[automatically_derived]
         unsafe impl ::cxx::ExternType for #ident {
             #[allow(unused_attributes)] // incorrect lint
@@ -412,6 +425,7 @@ fn expand_cxx_type(ety: &ExternType) -> TokenStream {
         #[repr(C)]
         #extern_type_def
 
+        #attrs
         #[automatically_derived]
         unsafe impl #generics ::cxx::ExternType for #ident #generics {
             #[allow(unused_attributes)] // incorrect lint
@@ -424,12 +438,14 @@ fn expand_cxx_type(ety: &ExternType) -> TokenStream {
 
 fn expand_cxx_type_assert_pinned(ety: &ExternType, types: &Types) -> TokenStream {
     let ident = &ety.name.rust;
+    let attrs = &ety.attrs;
     let infer = Token![_](ident.span());
 
     let resolve = types.resolve(ident);
     let lifetimes = resolve.generics.to_underscore_lifetimes();
 
     quote! {
+        #attrs
         let _: fn() = {
             // Derived from https://github.com/nvzqz/static-assertions-rs.
             trait __AmbiguousIfImpl<A> {
@@ -464,6 +480,7 @@ fn expand_extern_shared_struct(ety: &ExternType, ffi: &Module) -> TokenStream {
     let module = &ffi.ident;
     let name = &ety.name.rust;
     let namespaced_name = display_namespaced(&ety.name);
+    let attrs = &ety.attrs;
 
     let visibility = match &ffi.vis {
         Visibility::Public(_) => "pub ".to_owned(),
@@ -522,8 +539,11 @@ fn expand_extern_shared_struct(ety: &ExternType, ffi: &Module) -> TokenStream {
     );
 
     quote! {
+        #attrs
         #[deprecated = #message]
         struct #name {}
+
+        #attrs
         let _ = #name {};
     }
 }
@@ -827,6 +847,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         Some(self_type) => {
             let elided_generics;
             let resolve = types.resolve(self_type);
+            let self_type_attrs = resolve.attrs;
             let self_type_generics = match &efn.kind {
                 FnKind::Method(receiver) if receiver.ty.generics.lt_token.is_some() => {
                     &receiver.ty.generics
@@ -850,6 +871,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                 }
             };
             quote_spanned! {ident.span()=>
+                #self_type_attrs
                 impl #generics #self_type #self_type_generics {
                     #doc
                     #attrs
@@ -906,9 +928,11 @@ fn expand_function_pointer_trampoline(
 
 fn expand_rust_type_import(ety: &ExternType) -> TokenStream {
     let ident = &ety.name.rust;
+    let attrs = &ety.attrs;
     let span = ident.span();
 
     quote_spanned! {span=>
+        #attrs
         use super::#ident;
     }
 }
@@ -916,10 +940,12 @@ fn expand_rust_type_import(ety: &ExternType) -> TokenStream {
 fn expand_rust_type_impl(ety: &ExternType) -> TokenStream {
     let ident = &ety.name.rust;
     let generics = &ety.generics;
+    let attrs = &ety.attrs;
     let span = ident.span();
     let unsafe_impl = quote_spanned!(ety.type_token.span=> unsafe impl);
 
     let mut impls = quote_spanned! {span=>
+        #attrs
         #[automatically_derived]
         #[doc(hidden)]
         #unsafe_impl #generics ::cxx::private::RustType for #ident #generics {}
@@ -930,6 +956,7 @@ fn expand_rust_type_impl(ety: &ExternType) -> TokenStream {
             let type_id = type_id(&ety.name);
             let span = derive.span;
             impls.extend(quote_spanned! {span=>
+                #attrs
                 #[automatically_derived]
                 unsafe impl #generics ::cxx::ExternType for #ident #generics {
                     #[allow(unused_attributes)] // incorrect lint
@@ -946,6 +973,7 @@ fn expand_rust_type_impl(ety: &ExternType) -> TokenStream {
 
 fn expand_rust_type_assert_unpin(ety: &ExternType, types: &Types) -> TokenStream {
     let ident = &ety.name.rust;
+    let attrs = &ety.attrs;
     let begin_span = Token![::](ety.type_token.span);
     let unpin = quote_spanned! {ety.semi_token.span=>
         #begin_span cxx::core::marker::Unpin
@@ -955,6 +983,7 @@ fn expand_rust_type_assert_unpin(ety: &ExternType, types: &Types) -> TokenStream
     let lifetimes = resolve.generics.to_underscore_lifetimes();
 
     quote_spanned! {ident.span()=>
+        #attrs
         let _ = {
             fn __AssertUnpin<T: ?::cxx::core::marker::Sized + #unpin>() {}
             __AssertUnpin::<#ident #lifetimes>
@@ -972,6 +1001,7 @@ fn expand_rust_type_layout(ety: &ExternType, types: &Types) -> TokenStream {
     //     required by this bound in `__AssertSized`
 
     let ident = &ety.name.rust;
+    let attrs = &ety.attrs;
     let begin_span = Token![::](ety.type_token.span);
     let sized = quote_spanned! {ety.semi_token.span=>
         #begin_span cxx::core::marker::Sized
@@ -987,6 +1017,7 @@ fn expand_rust_type_layout(ety: &ExternType, types: &Types) -> TokenStream {
     let lifetimes = resolve.generics.to_underscore_lifetimes();
 
     quote_spanned! {ident.span()=>
+        #attrs
         {
             #[doc(hidden)]
             #[allow(clippy::needless_maybe_sized)]
