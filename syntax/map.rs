@@ -17,7 +17,7 @@ mod ordered {
         }
 
         #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
-        pub(crate) fn keys(&self) -> impl Iterator<Item = &K> {
+        pub(crate) fn keys(&self) -> indexmap::map::Keys<K, V> {
             self.0.keys()
         }
     }
