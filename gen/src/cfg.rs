@@ -4,6 +4,7 @@ use crate::syntax::report::Errors;
 use crate::syntax::Api;
 use quote::quote;
 use std::collections::BTreeSet as Set;
+use std::mem;
 use syn::{Error, LitStr};
 
 pub(super) struct UnsupportedCfgEvaluator;
@@ -23,15 +24,15 @@ pub(super) fn strip(
     cfg_evaluator: &dyn CfgEvaluator,
     apis: &mut Vec<Api>,
 ) {
-    apis.retain(|api| eval(cx, cfg_errors, cfg_evaluator, api.cfg()));
+    let mut eval = |cfg: &mut CfgExpr| {
+        let cfg = mem::replace(cfg, CfgExpr::Unconditional);
+        self::eval(cx, cfg_errors, cfg_evaluator, &cfg)
+    };
+    apis.retain_mut(|api| eval(api.cfg_mut()));
     for api in apis {
         match api {
-            Api::Struct(strct) => strct
-                .fields
-                .retain(|field| eval(cx, cfg_errors, cfg_evaluator, &field.cfg)),
-            Api::Enum(enm) => enm
-                .variants
-                .retain(|variant| eval(cx, cfg_errors, cfg_evaluator, &variant.cfg)),
+            Api::Struct(strct) => strct.fields.retain_mut(|field| eval(&mut field.cfg)),
+            Api::Enum(enm) => enm.variants.retain_mut(|variant| eval(&mut variant.cfg)),
             _ => {}
         }
     }
@@ -109,15 +110,15 @@ fn try_eval(cfg_evaluator: &dyn CfgEvaluator, expr: &CfgExpr) -> Result<bool, Ve
 }
 
 impl Api {
-    fn cfg(&self) -> &CfgExpr {
+    fn cfg_mut(&mut self) -> &mut CfgExpr {
         match self {
-            Api::Include(include) => &include.cfg,
-            Api::Struct(strct) => &strct.cfg,
-            Api::Enum(enm) => &enm.cfg,
-            Api::CxxType(ety) | Api::RustType(ety) => &ety.cfg,
-            Api::CxxFunction(efn) | Api::RustFunction(efn) => &efn.cfg,
-            Api::TypeAlias(alias) => &alias.cfg,
-            Api::Impl(imp) => &imp.cfg,
+            Api::Include(include) => &mut include.cfg,
+            Api::Struct(strct) => &mut strct.cfg,
+            Api::Enum(enm) => &mut enm.cfg,
+            Api::CxxType(ety) | Api::RustType(ety) => &mut ety.cfg,
+            Api::CxxFunction(efn) | Api::RustFunction(efn) => &mut efn.cfg,
+            Api::TypeAlias(alias) => &mut alias.cfg,
+            Api::Impl(imp) => &mut imp.cfg,
         }
     }
 }
