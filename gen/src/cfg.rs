@@ -28,7 +28,17 @@ pub(super) fn strip(
         let cfg = mem::replace(cfg, CfgExpr::Unconditional);
         self::eval(cx, cfg_errors, cfg_evaluator, &cfg)
     };
-    apis.retain_mut(|api| eval(api.cfg_mut()));
+    apis.retain_mut(|api| {
+        eval(match api {
+            Api::Include(include) => &mut include.cfg,
+            Api::Struct(strct) => &mut strct.cfg,
+            Api::Enum(enm) => &mut enm.cfg,
+            Api::CxxType(ety) | Api::RustType(ety) => &mut ety.cfg,
+            Api::CxxFunction(efn) | Api::RustFunction(efn) => &mut efn.cfg,
+            Api::TypeAlias(alias) => &mut alias.cfg,
+            Api::Impl(imp) => &mut imp.cfg,
+        })
+    });
     for api in apis {
         match api {
             Api::Struct(strct) => strct.fields.retain_mut(|field| eval(&mut field.cfg)),
@@ -106,20 +116,6 @@ fn try_eval(cfg_evaluator: &dyn CfgEvaluator, expr: &CfgExpr) -> Result<bool, Ve
             Ok(value) => Ok(!value),
             Err(errors) => Err(errors),
         },
-    }
-}
-
-impl Api {
-    fn cfg_mut(&mut self) -> &mut CfgExpr {
-        match self {
-            Api::Include(include) => &mut include.cfg,
-            Api::Struct(strct) => &mut strct.cfg,
-            Api::Enum(enm) => &mut enm.cfg,
-            Api::CxxType(ety) | Api::RustType(ety) => &mut ety.cfg,
-            Api::CxxFunction(efn) | Api::RustFunction(efn) => &mut efn.cfg,
-            Api::TypeAlias(alias) => &mut alias.cfg,
-            Api::Impl(imp) => &mut imp.cfg,
-        }
     }
 }
 
