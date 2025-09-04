@@ -16,9 +16,16 @@ impl<'a> ComputedCfg<'a> {
                 meta: Meta::List(MetaList {
                     path: Path::from(Ident::new("cfg", span)),
                     delimiter: MacroDelimiter::Paren(token::Paren(span)),
-                    tokens: Print { cfg: self, span }.into_token_stream(),
+                    tokens: self.as_meta().into_token_stream(),
                 }),
             })
+        }
+    }
+
+    pub(crate) fn as_meta(&self) -> impl ToTokens + '_ {
+        Print {
+            cfg: self,
+            span: Span::call_site(),
         }
     }
 }
