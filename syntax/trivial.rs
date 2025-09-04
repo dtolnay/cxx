@@ -1,4 +1,4 @@
-use crate::syntax::cfg::CfgExpr;
+use crate::syntax::cfg::ComputedCfg;
 use crate::syntax::map::{OrderedMap, UnorderedMap};
 use crate::syntax::set::{OrderedSet as Set, UnorderedSet};
 use crate::syntax::{Api, Enum, ExternFn, NamedType, Pair, Struct, Type};
@@ -18,7 +18,7 @@ pub(crate) enum TrivialReason<'a> {
 
 pub(crate) fn required_trivial_reasons<'a>(
     apis: &'a [Api],
-    all: &OrderedMap<&'a Type, CfgExpr>,
+    all: &OrderedMap<&'a Type, ComputedCfg>,
     structs: &UnorderedMap<&'a Ident, &'a Struct>,
     enums: &UnorderedMap<&'a Ident, &'a Enum>,
     cxx: &UnorderedSet<&'a Ident>,
