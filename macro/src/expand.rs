@@ -1,6 +1,6 @@
 use crate::syntax::atom::Atom::*;
 use crate::syntax::attrs::{self, OtherAttrs};
-use crate::syntax::cfg::CfgExpr;
+use crate::syntax::cfg::{CfgExpr, ComputedCfg};
 use crate::syntax::file::Module;
 use crate::syntax::instantiate::{ImplKey, NamedImplKey};
 use crate::syntax::namespace::Namespace;
@@ -66,6 +66,7 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
             Api::Include(_) | Api::Impl(_) => {}
             Api::Struct(strct) => {
                 expanded.extend(expand_struct(strct));
+                hidden.extend(expand_struct_nonempty(strct));
                 hidden.extend(expand_struct_operators(strct));
                 forbid.extend(expand_struct_forbid_drop(strct));
             }
@@ -202,6 +203,33 @@ fn expand_struct(strct: &Struct) -> TokenStream {
         }
 
         #derived_traits
+    }
+}
+
+fn expand_struct_nonempty(strct: &Struct) -> TokenStream {
+    let has_unconditional_field = strct
+        .fields
+        .iter()
+        .any(|field| matches!(field.cfg, CfgExpr::Unconditional));
+    if has_unconditional_field {
+        return TokenStream::new();
+    }
+
+    let mut fields = strct.fields.iter();
+    let mut cfg = ComputedCfg::from(&fields.next().unwrap().cfg);
+    fields.for_each(|field| cfg.merge_or(&field.cfg));
+
+    if let ComputedCfg::Leaf(CfgExpr::Unconditional) = cfg {
+        // At least one field is unconditional, nothing to check.
+        TokenStream::new()
+    } else {
+        let meta = cfg.as_meta();
+        let msg = "structs without any fields are not supported";
+        let error = syn::Error::new_spanned(strct, msg).into_compile_error();
+        quote! {
+            #[cfg(not(#meta))]
+            #error
+        }
     }
 }
 
