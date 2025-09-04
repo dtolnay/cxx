@@ -327,7 +327,7 @@ pub(crate) struct Array {
     pub len_token: LitInt,
 }
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub(crate) enum Lang {
     Cxx,
     CxxUnwind,

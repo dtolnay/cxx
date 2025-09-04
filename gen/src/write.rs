@@ -12,8 +12,8 @@ use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::{self, Symbol};
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::{
-    derive, mangle, Api, Doc, Enum, ExternFn, ExternType, FnKind, Lang, Pair, Signature, Struct,
-    Trait, Type, TypeAlias, Types, Var,
+    derive, mangle, Api, Doc, Enum, ExternFn, ExternType, FnKind, Lang, NamedType, Pair, Signature,
+    Struct, Trait, Type, TypeAlias, Types, Var,
 };
 use proc_macro2::Ident;
 
@@ -156,8 +156,15 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
     out.next_section();
     for api in apis {
         if let Api::TypeAlias(ety) = api {
-            if let Some(reasons) = out.types.required_trivial.get(&ety.name.rust) {
-                check_trivial_extern_type(out, ety, reasons);
+            match ety.lang {
+                Lang::Cxx | Lang::CxxUnwind => {
+                    if let Some(reasons) = out.types.required_trivial.get(&ety.name.rust) {
+                        check_trivial_extern_type(out, ety, reasons);
+                    }
+                }
+                Lang::Rust => {
+                    check_rust_opaque_type(out, ety);
+                }
             }
         }
     }
@@ -481,6 +488,8 @@ fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
 }
 
 fn check_trivial_extern_type(out: &mut OutFile, alias: &TypeAlias, reasons: &[TrivialReason]) {
+    debug_assert!(matches!(alias.lang, Lang::Cxx | Lang::CxxUnwind));
+
     // NOTE: The following static assertion is just nice-to-have and not
     // necessary for soundness. That's because triviality is always declared by
     // the user in the form of an unsafe impl of cxx::ExternType:
@@ -541,6 +550,25 @@ fn check_trivial_extern_type(out: &mut OutFile, alias: &TypeAlias, reasons: &[Tr
         "    \"type {} should be trivially move constructible and trivially destructible in C++ to be used as {} in Rust\");",
         id.trim_start_matches("::"),
         trivial::as_what(&alias.name, reasons),
+    );
+}
+
+fn check_rust_opaque_type(out: &mut OutFile, alias: &TypeAlias) {
+    debug_assert_eq!(alias.lang, Lang::Rust);
+
+    out.include.type_traits = true;
+    writeln!(out, "static_assert(");
+    write!(out, "    ::std::is_base_of<::rust::Opaque, ");
+    let ty = Type::Ident(NamedType {
+        rust: alias.name.rust.clone(),
+        generics: alias.generics.clone(),
+    });
+    write_type(out, &ty);
+    writeln!(out, ">::value,");
+    writeln!(
+        out,
+        "    \"Rust type alias `{}` should alias a type derived from `rust::Opaque`\");",
+        alias.name.rust,
     );
 }
 

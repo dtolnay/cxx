@@ -57,6 +57,12 @@ impl Test {
         fs::write(&generated_h, &generated.header).unwrap();
         fs::write(&generated_cc, &generated.implementation).unwrap();
 
+        // Dump the generated files to help with debugging test failures (if any).
+        eprintln!("==================== generated .h file:");
+        eprintln!("{}", String::from_utf8_lossy(&generated.header));
+        eprintln!("==================== generated .cc file:");
+        eprintln!("{}", String::from_utf8_lossy(&generated.implementation));
+
         Self {
             temp_dir,
             generated_cc,
@@ -130,7 +136,9 @@ impl CompilationResult {
     }
 
     fn dump_output_and_panic(&self, msg: &str) -> ! {
+        eprintln!("==================== C++ compiler's stdout:");
         eprintln!("{}", self.stdout());
+        eprintln!("==================== C++ compiler's stderr:");
         eprintln!("{}", self.stderr());
         panic!("{msg}");
     }
@@ -178,6 +186,9 @@ impl CompilationResult {
     /// Panics if there was no error, or if there was more than a single error.
     #[must_use]
     pub fn expect_single_error(&self) -> String {
+        if self.0.status.success() {
+            self.dump_output_and_panic("Compilation unexpectedly succeeded");
+        }
         let error_lines = self.error_lines();
         if error_lines.is_empty() {
             self.dump_output_and_panic("No error lines found, despite non-zero exit code?");
