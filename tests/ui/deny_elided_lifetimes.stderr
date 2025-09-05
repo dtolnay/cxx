@@ -14,17 +14,6 @@ help: indicate the anonymous lifetime
 36 |         fn lifetime_elided(s: &i32) -> UniquePtr<Cpp<'_>>;
    |                                                     ++++
 
-error: hidden lifetime parameters in types are deprecated
-  --> tests/ui/deny_elided_lifetimes.rs:30:14
-   |
-30 |         type Alias<'a> = crate::Alias<'a>;
-   |              ^^^^^ expected lifetime parameter
-   |
-help: indicate the anonymous lifetime
-   |
-30 |         type Alias<'_><'a> = crate::Alias<'a>;
-   |                   ++++
-
 error: hiding a lifetime that's elided elsewhere is confusing
   --> tests/ui/deny_elided_lifetimes.rs:36:31
    |

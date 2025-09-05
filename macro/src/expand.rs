@@ -1401,16 +1401,19 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
     let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_type::<);
     let end = quote_spanned!(end_span=> >);
 
+    let resolve = types.resolve(ident);
+    let lifetimes = resolve.generics.to_underscore_lifetimes();
+
     let mut verify = quote! {
         #attrs
-        const _: fn() = #begin #ident, #type_id #end;
+        const _: fn() = #begin #ident #lifetimes, #type_id #end;
     };
 
     if types.required_trivial.contains_key(&alias.name.rust) {
         let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_kind::<);
         verify.extend(quote! {
             #attrs
-            const _: fn() = #begin #ident, ::cxx::kind::Trivial #end;
+            const _: fn() = #begin #ident #lifetimes, ::cxx::kind::Trivial #end;
         });
     }
 
