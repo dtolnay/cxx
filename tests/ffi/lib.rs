@@ -237,11 +237,17 @@ pub mod ffi {
         fn c_static_method() -> usize;
     }
 
+    struct ContainsOpaqueRust {
+        boxed: Box<OpaqueRust>,
+        vecked: Vec<OpaqueRust>,
+    }
+
     extern "C++" {
         include!("tests/ffi/module.rs.h");
 
         type COwnedEnum;
         type Job = crate::module::ffi::Job;
+        type OpaqueRust = crate::module::OpaqueRust;
     }
 
     extern "Rust" {
