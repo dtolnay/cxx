@@ -991,7 +991,7 @@ fn expand_rust_type_impl(ety: &ExternType) -> TokenStream {
                     #[allow(unused_attributes)] // incorrect lint
                     #[doc(hidden)]
                     type Id = #type_id;
-                    type Kind = ::cxx::kind::Opaque;
+                    type Kind = ::cxx::kind::Trivial;
                 }
             });
         }

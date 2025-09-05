@@ -427,6 +427,7 @@ fn write_opaque_type<'a>(out: &mut OutFile<'a>, ety: &'a ExternType, methods: &[
     }
 
     writeln!(out, "  ~{}() = delete;", ety.name.cxx);
+    writeln!(out, "  using IsRelocatable = std::true_type;");
     writeln!(out);
 
     out.builtin.layout = true;

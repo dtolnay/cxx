@@ -189,23 +189,40 @@ manually implemented as described below.
 
 #### Safely unifying occurrences of an extern type across bridges
 
-In the following snippet, two #\[cxx::bridge\] invocations in different files
+In the following snippet, two `#[cxx::bridge]` invocations in different files
 (possibly different crates) both contain function signatures involving the same
-C++ type `example::Demo`. If both were written just containing `type Demo;`,
+C++ type `example::CppType`. If both were written just containing
+`type CppType;`,
 then both macro expansions would produce their own separate Rust type called
-`Demo` and thus the compiler wouldn't allow us to take the `Demo` returned by
-`file1::ffi::create_demo` and pass it as the `Demo` argument accepted by
-`file2::ffi::take_ref_demo`. Instead, one of the two `Demo`s has been defined as
+`CppType` and thus the compiler wouldn't allow us to take the `CppType` returned
+by
+`file1::ffi::create_cpp_type` and pass it as the `CppType` argument accepted by
+`file2::ffi::take_cpp_type_by_ref`. Instead, one of the two `CppType`s has been
+defined as
 an extern type alias of the other, making them the same type in Rust.
+
+Problems would also happen if `type RustType` appeared in both `#[cxx::bridge]`
+invocations.  The solution is similar - replacing one of the occurences with
+an extern type alias of the other type.  Note that this type alias has to be
+present in `extern "C++"` section even though we are aliasing a Rust type.
+Also note that the type alias depends on `impl ExternType for RustType` which
+the example below generates via `#[derive(ExternType)]`.
 
 ```rust,noplayground
 // file1.rs
 #[cxx::bridge(namespace = "example")]
 pub mod ffi {
     unsafe extern "C++" {
-        type Demo;
+        type CppType;
 
-        fn create_demo() -> UniquePtr<Demo>;
+        fn create_cpp_type() -> UniquePtr<CppType>;
+    }
+
+    extern "Rust {
+        #[derive(ExternType)]
+        type RustType;
+
+        fn create_rust_type() -> Box<RustType>;
     }
 }
 ```
@@ -215,9 +232,14 @@ pub mod ffi {
 #[cxx::bridge(namespace = "example")]
 pub mod ffi {
     unsafe extern "C++" {
-        type Demo = crate::file1::ffi::Demo;
+        type CppType = crate::file1::ffi::CppType;
+        type RustType = crate::file1::ffi::RustType;
 
-        fn take_ref_demo(demo: &Demo);
+        fn take_cpp_type_by_ref(x: &CppType);
+    }
+
+    extern "Rust {
+        fn take_rust_type_by_ref(x: &RustType);
     }
 }
 ```
