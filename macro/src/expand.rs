@@ -1003,20 +1003,13 @@ fn expand_rust_type_impl(ety: &ExternType) -> TokenStream {
 fn expand_rust_type_assert_unpin(ety: &ExternType, types: &Types) -> TokenStream {
     let ident = &ety.name.rust;
     let attrs = &ety.attrs;
-    let begin_span = Token![::](ety.type_token.span);
-    let unpin = quote_spanned! {ety.semi_token.span=>
-        #begin_span cxx::core::marker::Unpin
-    };
 
     let resolve = types.resolve(ident);
     let lifetimes = resolve.generics.to_underscore_lifetimes();
 
     quote_spanned! {ident.span()=>
         #attrs
-        let _ = {
-            fn __AssertUnpin<T: ?::cxx::core::marker::Sized + #unpin>() {}
-            __AssertUnpin::<#ident #lifetimes>
-        };
+        const _: fn() = ::cxx::private::require_unpin::<#ident #lifetimes>;
     }
 }
 
