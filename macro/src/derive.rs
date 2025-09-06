@@ -234,7 +234,6 @@ fn struct_partial_ord(strct: &Struct, span: Span) -> TokenStream {
         #[automatically_derived]
         impl #generics ::cxx::core::cmp::PartialOrd for #ident #generics {
             #[allow(clippy::non_canonical_partial_ord_impl)]
-            #[allow(renamed_and_removed_lints, clippy::incorrect_partial_ord_impl_on_ord_type)] // Rust 1.73 and older
             fn partial_cmp(&self, other: &Self) -> ::cxx::core::option::Option<::cxx::core::cmp::Ordering> {
                 #body
             }
@@ -319,7 +318,6 @@ fn enum_partial_ord(enm: &Enum, span: Span) -> TokenStream {
         #[automatically_derived]
         impl ::cxx::core::cmp::PartialOrd for #ident {
             #[allow(clippy::non_canonical_partial_ord_impl)]
-            #[allow(renamed_and_removed_lints, clippy::incorrect_partial_ord_impl_on_ord_type)] // Rust 1.73 and older
             fn partial_cmp(&self, other: &Self) -> ::cxx::core::option::Option<::cxx::core::cmp::Ordering> {
                 ::cxx::core::cmp::PartialOrd::partial_cmp(&self.repr, &other.repr)
             }
