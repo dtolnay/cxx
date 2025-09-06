@@ -1431,30 +1431,37 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
     }
 
     if let Some(reason) = types.required_unpin.get(ident) {
+        let label;
         let ampersand;
         let mutability;
-        let inner;
+        let mut inner;
         match reason {
             UnpinReason::Receiver(receiver) => {
                 ampersand = &receiver.ampersand;
                 mutability = &receiver.mutability;
-                inner = &receiver.ty.rust;
+                inner = receiver.ty.rust.clone();
+                if receiver.shorthand {
+                    inner.set_span(receiver.var.span);
+                    label = format!("use `self: Pin<&mut {ident}>`");
+                } else {
+                    label = format!("use `Pin<&mut {ident}>`");
+                }
             }
             UnpinReason::Ref(mutable_reference) => {
+                label = format!("use `Pin<&mut {ident}>`");
                 ampersand = &mutable_reference.ampersand;
                 mutability = &mutable_reference.mutability;
                 let Type::Ident(ident) = &mutable_reference.inner else {
                     unreachable!();
                 };
-                inner = &ident.rust;
+                inner = ident.rust.clone();
             }
         }
         let message =
             format!("mutable reference to C++ type requires a pin -- use Pin<&mut {ident}>");
-        let label = format!("use Pin<&mut {ident}>");
         verify.extend(quote! {
             #attrs
-            const _: fn() = {
+            let _ = {
                 #[diagnostic::on_unimplemented(message = #message, label = #label)]
                 trait ReferenceToUnpin {
                     fn check_unpin() {}
