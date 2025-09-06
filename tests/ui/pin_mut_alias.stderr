@@ -1,23 +1,44 @@
 error[E0277]: mutable reference to C++ type requires a pin -- use Pin<&mut Arg>
-  --> tests/ui/pin_mut_alias.rs:16:23
+  --> tests/ui/pin_mut_alias.rs:23:23
    |
-16 |             fn f(arg: &mut Arg);
+23 |             fn f(arg: &mut Arg);
    |                       ^^^^^^^^ use `Pin<&mut Arg>`
    |
    = help: the trait `arg::ffi::_::ReferenceToUnpin` is not implemented for `&mut arg::Arg`
+help: trait impl with same name found
+  --> tests/ui/pin_mut_alias.rs:19:5
+   |
+19 |     #[cxx::bridge]
+   |     ^^^^^^^^^^^^^^
+   = note: perhaps two different versions of crate `$CRATE` are being used?
+   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: mutable reference to C++ type requires a pin -- use Pin<&mut Receiver>
-  --> tests/ui/pin_mut_alias.rs:36:18
+  --> tests/ui/pin_mut_alias.rs:53:18
    |
-36 |             fn g(&mut self);
+53 |             fn g(&mut self);
    |                  ^^^^^^^^^ use `self: Pin<&mut Receiver>`
    |
    = help: the trait `receiver::ffi::_::ReferenceToUnpin` is not implemented for `&mut receiver::Receiver`
+help: trait impl with same name found
+  --> tests/ui/pin_mut_alias.rs:49:5
+   |
+49 |     #[cxx::bridge]
+   |     ^^^^^^^^^^^^^^
+   = note: perhaps two different versions of crate `$CRATE` are being used?
+   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: mutable reference to C++ type requires a pin -- use Pin<&mut Receiver2>
-  --> tests/ui/pin_mut_alias.rs:56:24
+  --> tests/ui/pin_mut_alias.rs:85:24
    |
-56 |             fn h(self: &mut Receiver2);
+85 |             fn h(self: &mut Receiver2);
    |                        ^^^^^^^^^^^^^^ use `Pin<&mut Receiver2>`
    |
    = help: the trait `receiver2::ffi::_::ReferenceToUnpin` is not implemented for `&mut receiver2::Receiver2`
+help: trait impl with same name found
+  --> tests/ui/pin_mut_alias.rs:81:5
+   |
+81 |     #[cxx::bridge]
+   |     ^^^^^^^^^^^^^^
+   = note: perhaps two different versions of crate `$CRATE` are being used?
+   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)

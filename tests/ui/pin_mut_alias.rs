@@ -1,6 +1,6 @@
 mod arg {
     use cxx::ExternType;
-    use std::marker::PhantomPinned;
+    use std::marker::{PhantomData, PhantomPinned};
 
     struct Arg(PhantomPinned);
 
@@ -9,23 +9,40 @@ mod arg {
         type Kind = cxx::kind::Opaque;
     }
 
+    struct ArgLife<'a>(PhantomPinned, PhantomData<&'a ()>);
+
+    unsafe impl<'a> ExternType for ArgLife<'a> {
+        type Id = cxx::type_id!("ArgLife");
+        type Kind = cxx::kind::Opaque;
+    }
+
     #[cxx::bridge]
     mod ffi {
         unsafe extern "C++" {
             type Arg = crate::arg::Arg;
             fn f(arg: &mut Arg);
+
+            type ArgLife<'a> = crate::arg::ArgLife<'a>;
+            fn fl<'a>(arg: &mut ArgLife<'a>);
         }
     }
 }
 
 mod receiver {
     use cxx::ExternType;
-    use std::marker::PhantomPinned;
+    use std::marker::{PhantomData, PhantomPinned};
 
     struct Receiver(PhantomPinned);
 
     unsafe impl ExternType for Receiver {
         type Id = cxx::type_id!("Receiver");
+        type Kind = cxx::kind::Opaque;
+    }
+
+    struct ReceiverLife<'a>(PhantomPinned, PhantomData<&'a ()>);
+
+    unsafe impl<'a> ExternType for ReceiverLife<'a> {
+        type Id = cxx::type_id!("ReceiverLife");
         type Kind = cxx::kind::Opaque;
     }
 
@@ -35,12 +52,17 @@ mod receiver {
             type Receiver = crate::receiver::Receiver;
             fn g(&mut self);
         }
+
+        unsafe extern "C++" {
+            type ReceiverLife<'a> = crate::receiver::ReceiverLife<'a>;
+            fn g(&mut self);
+        }
     }
 }
 
 mod receiver2 {
     use cxx::ExternType;
-    use std::marker::PhantomPinned;
+    use std::marker::{PhantomData, PhantomPinned};
 
     struct Receiver2(PhantomPinned);
 
@@ -49,11 +71,21 @@ mod receiver2 {
         type Kind = cxx::kind::Opaque;
     }
 
+    struct ReveiverLife2<'a>(PhantomPinned, PhantomData<&'a ()>);
+
+    unsafe impl<'a> ExternType for ReveiverLife2<'a> {
+        type Id = cxx::type_id!("ReveiverLife2");
+        type Kind = cxx::kind::Opaque;
+    }
+
     #[cxx::bridge]
     mod ffi {
         unsafe extern "C++" {
             type Receiver2 = crate::receiver2::Receiver2;
             fn h(self: &mut Receiver2);
+
+            type ReveiverLife2<'a> = crate::receiver2::ReveiverLife2<'a>;
+            fn h<'a>(self: &mut ReveiverLife2<'a>);
         }
     }
 }
