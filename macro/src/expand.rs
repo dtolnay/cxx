@@ -1449,24 +1449,19 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
                 inner = &ident.rust;
             }
         }
-        let extension_trait = format_ident!("Unpin_{ident}");
         let message =
             format!("mutable reference to C++ type requires a pin -- use Pin<&mut {ident}>");
         let label = format!("use Pin<&mut {ident}>");
         verify.extend(quote! {
             #attrs
-            const _: fn() = || {
-                trait #extension_trait {
-                    fn check_unpin<U: ReferenceToUnpin>(&self);
-                }
-                impl #extension_trait for ::cxx::private::Without {
-                    fn check_unpin<U: ReferenceToUnpin>(&self) {}
-                }
+            const _: fn() = {
                 #[diagnostic::on_unimplemented(message = #message, label = #label)]
-                trait ReferenceToUnpin {}
+                trait ReferenceToUnpin {
+                    fn check_unpin() {}
+                }
                 #[diagnostic::do_not_recommend]
                 impl<'a, T: ?::cxx::core::marker::Sized + ::cxx::core::marker::Unpin> ReferenceToUnpin for &'a mut T {}
-                ::cxx::private::with::<#ident #lifetimes>().check_unpin::<#ampersand #mutability #inner>();
+                <#ampersand #mutability #inner as ReferenceToUnpin>::check_unpin
             };
         });
     } else if require_unpin {

@@ -4,13 +4,7 @@ error[E0277]: mutable reference to C++ type requires a pin -- use Pin<&mut Arg>
 16 |             fn f(arg: &mut Arg);
    |                       ^^^^^^^^ use Pin<&mut Arg>
    |
-   = help: the trait `arg::ffi::_::_::{closure#0}::ReferenceToUnpin` is not implemented for `&mut arg::Arg`
-note: required by a bound in `Unpin_Arg::check_unpin`
-  --> tests/ui/pin_mut_alias.rs:12:5
-   |
-12 |     #[cxx::bridge]
-   |     ^^^^^^^^^^^^^^ required by this bound in `Unpin_Arg::check_unpin`
-   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = help: the trait `arg::ffi::_::_::ReferenceToUnpin` is not implemented for `&mut arg::Arg`
 
 error[E0277]: mutable reference to C++ type requires a pin -- use Pin<&mut Receiver>
   --> tests/ui/pin_mut_alias.rs:35:18
@@ -20,13 +14,7 @@ error[E0277]: mutable reference to C++ type requires a pin -- use Pin<&mut Recei
 36 | |             fn g(&mut self);
    | |__________________^ use Pin<&mut Receiver>
    |
-   = help: the trait `receiver::ffi::_::_::{closure#0}::ReferenceToUnpin` is not implemented for `&mut receiver::Receiver`
-note: required by a bound in `Unpin_Receiver::check_unpin`
-  --> tests/ui/pin_mut_alias.rs:32:5
-   |
-32 |     #[cxx::bridge]
-   |     ^^^^^^^^^^^^^^ required by this bound in `Unpin_Receiver::check_unpin`
-   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = help: the trait `receiver::ffi::_::_::ReferenceToUnpin` is not implemented for `&mut receiver::Receiver`
 
 error[E0277]: mutable reference to C++ type requires a pin -- use Pin<&mut Receiver2>
   --> tests/ui/pin_mut_alias.rs:56:24
@@ -34,10 +22,4 @@ error[E0277]: mutable reference to C++ type requires a pin -- use Pin<&mut Recei
 56 |             fn h(self: &mut Receiver2);
    |                        ^^^^^^^^^^^^^^ use Pin<&mut Receiver2>
    |
-   = help: the trait `receiver2::ffi::_::_::{closure#0}::ReferenceToUnpin` is not implemented for `&mut receiver2::Receiver2`
-note: required by a bound in `Unpin_Receiver2::check_unpin`
-  --> tests/ui/pin_mut_alias.rs:52:5
-   |
-52 |     #[cxx::bridge]
-   |     ^^^^^^^^^^^^^^ required by this bound in `Unpin_Receiver2::check_unpin`
-   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = help: the trait `receiver2::ffi::_::_::ReferenceToUnpin` is not implemented for `&mut receiver2::Receiver2`
