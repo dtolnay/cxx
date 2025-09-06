@@ -3,6 +3,7 @@ use crate::syntax::cfg::ComputedCfg;
 use crate::syntax::improper::ImproperCtype;
 use crate::syntax::instantiate::ImplKey;
 use crate::syntax::map::{OrderedMap, UnorderedMap};
+use crate::syntax::query::TypeQuery;
 use crate::syntax::report::Errors;
 use crate::syntax::resolve::Resolution;
 use crate::syntax::set::UnorderedSet;
@@ -285,16 +286,17 @@ impl<'a> Types<'a> {
         types
     }
 
-    pub(crate) fn needs_indirect_abi(&self, ty: &Type) -> bool {
+    pub(crate) fn needs_indirect_abi(&self, ty: impl Into<TypeQuery<'a>>) -> bool {
+        let ty = ty.into();
         match ty {
-            Type::RustBox(_)
-            | Type::UniquePtr(_)
-            | Type::Ref(_)
-            | Type::Ptr(_)
-            | Type::Str(_)
-            | Type::Fn(_)
-            | Type::SliceRef(_) => false,
-            Type::Array(_) => true,
+            TypeQuery::RustBox
+            | TypeQuery::UniquePtr
+            | TypeQuery::Ref(_)
+            | TypeQuery::Ptr(_)
+            | TypeQuery::Str
+            | TypeQuery::Fn
+            | TypeQuery::SliceRef => false,
+            TypeQuery::Array(_) => true,
             _ => !self.is_guaranteed_pod(ty) || self.is_considered_improper_ctype(ty),
         }
     }
@@ -305,7 +307,7 @@ impl<'a> Types<'a> {
     // refuses to believe that C could know how to supply us with a pointer to a
     // Rust String, even though C could easily have obtained that pointer
     // legitimately from a Rust call.
-    pub(crate) fn is_considered_improper_ctype(&self, ty: &Type) -> bool {
+    pub(crate) fn is_considered_improper_ctype(&self, ty: impl Into<TypeQuery<'a>>) -> bool {
         match self.determine_improper_ctype(ty) {
             ImproperCtype::Definite(improper) => improper,
             ImproperCtype::Depends(ident) => self.struct_improper_ctypes.contains(ident),

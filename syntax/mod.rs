@@ -22,6 +22,7 @@ mod parse;
 mod pod;
 pub(crate) mod primitive;
 pub(crate) mod qualified;
+pub(crate) mod query;
 pub(crate) mod report;
 pub(crate) mod repr;
 pub(crate) mod resolve;
