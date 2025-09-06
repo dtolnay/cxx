@@ -16,11 +16,11 @@ pub(crate) enum TrivialReason<'a> {
         // Whether the extern functions used by rust::Box are being produced
         // within this cxx::bridge expansion, as opposed to the boxed type being
         // a type alias from a different module.
-        #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
+        #[cfg_attr(not(proc_macro), expect(dead_code))]
         local: bool,
     },
     VecElement {
-        #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
+        #[cfg_attr(not(proc_macro), expect(dead_code))]
         local: bool,
     },
     SliceElement(&'a SliceRef),

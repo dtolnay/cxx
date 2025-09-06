@@ -19,14 +19,14 @@ pub(crate) struct Check<'a> {
 
 pub(crate) enum Generator {
     // cxx-build crate, cxxbridge cli, cxx-gen.
-    #[allow(dead_code)]
+    #[cfg_attr(proc_macro, expect(dead_code))]
     Build,
     // cxxbridge-macro. This is relevant in that the macro output is going to
     // get fed straight to rustc, so for errors that rustc already contains
     // logic to catch (probably with a better diagnostic than what the proc
     // macro API is able to produce), we avoid duplicating them in our own
     // diagnostics.
-    #[allow(dead_code)]
+    #[cfg_attr(not(proc_macro), expect(dead_code))]
     Macro,
 }
 

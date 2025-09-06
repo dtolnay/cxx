@@ -25,7 +25,7 @@ pub(crate) struct Types<'a> {
     pub aliases: UnorderedMap<&'a Ident, &'a TypeAlias>,
     pub untrusted: UnorderedMap<&'a Ident, &'a ExternType>,
     pub required_trivial: UnorderedMap<&'a Ident, Vec<TrivialReason<'a>>>,
-    #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
+    #[cfg_attr(not(proc_macro), expect(dead_code))]
     pub required_unpin: UnorderedMap<&'a Ident, UnpinReason<'a>>,
     pub impls: OrderedMap<ImplKey<'a>, ConditionalImpl<'a>>,
     pub resolutions: UnorderedMap<&'a Ident, Resolution<'a>>,
@@ -37,7 +37,7 @@ pub(crate) struct ConditionalImpl<'a> {
     pub cfg: ComputedCfg<'a>,
     // None for implicit impls, which arise from using a generic type
     // instantiation in a struct field or function signature.
-    #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
+    #[cfg_attr(not(proc_macro), expect(dead_code))]
     pub explicit_impl: Option<&'a Impl>,
 }
 
@@ -305,7 +305,6 @@ impl<'a> Types<'a> {
     // refuses to believe that C could know how to supply us with a pointer to a
     // Rust String, even though C could easily have obtained that pointer
     // legitimately from a Rust call.
-    #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
     pub(crate) fn is_considered_improper_ctype(&self, ty: &Type) -> bool {
         match self.determine_improper_ctype(ty) {
             ImproperCtype::Definite(improper) => improper,
