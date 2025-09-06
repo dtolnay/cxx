@@ -1463,8 +1463,28 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
                     generics = &inner_type.generics;
                     shorthand = false;
                 }
-                UnpinReason::Slice(_mutable_slice) => {
-                    require_unpin = true;
+                UnpinReason::Slice(mutable_slice) => {
+                    ampersand = &mutable_slice.ampersand;
+                    mutability = &mutable_slice.mutability;
+                    let inner = quote_spanned!(mutable_slice.bracket.span=> [#ident #lifetimes]);
+                    let trait_name = format_ident!("SliceOfUnpin_{ident}");
+                    let label = format!("requires `{ident}: Unpin`");
+                    verify.extend(quote! {
+                        #attrs
+                        let _ = {
+                            #[diagnostic::on_unimplemented(
+                                message = "mutable slice of pinned type is not supported",
+                                label = #label,
+                            )]
+                            trait #trait_name {
+                                fn check_unpin() {}
+                            }
+                            #[diagnostic::do_not_recommend]
+                            impl<'a, T: ?::cxx::core::marker::Sized + ::cxx::core::marker::Unpin> #trait_name for &'a #mutability T {}
+                            <#ampersand #mutability #inner as #trait_name>::check_unpin
+                        };
+                    });
+                    require_unpin = false;
                     break 'unpin;
                 }
             }
