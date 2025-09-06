@@ -1,9 +1,9 @@
-use crate::message::Message;
 use crate::syntax::atom::Atom::*;
 use crate::syntax::attrs::{self, OtherAttrs};
 use crate::syntax::cfg::{CfgExpr, ComputedCfg};
 use crate::syntax::file::Module;
 use crate::syntax::instantiate::{ImplKey, NamedImplKey};
+use crate::syntax::message::Message;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::qualified::QualifiedName;
 use crate::syntax::report::Errors;

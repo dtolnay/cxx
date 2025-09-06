@@ -356,6 +356,11 @@ fn test_enum_representations() {
 }
 
 #[test]
+fn test_enum_default() {
+    assert_eq!(ffi::Enum::BVal, ffi::Enum::default());
+}
+
+#[test]
 fn test_struct_repr_align() {
     assert_eq!(4, std::mem::align_of::<ffi::OveralignedStruct>());
 }

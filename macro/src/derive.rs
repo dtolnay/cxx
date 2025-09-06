@@ -58,7 +58,7 @@ pub(crate) fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) 
                 has_clone = true;
             }
             Trait::Debug => expanded.extend(enum_debug(enm, span)),
-            Trait::Default => unreachable!(),
+            Trait::Default => expanded.extend(enum_default(enm, span)),
             Trait::Eq => {
                 traits.push(quote_spanned!(span=> ::cxx::core::cmp::Eq));
                 has_eq = true;
@@ -292,6 +292,28 @@ fn enum_debug(enm: &Enum, span: Span) -> TokenStream {
             }
         }
     }
+}
+
+fn enum_default(enm: &Enum, span: Span) -> TokenStream {
+    let ident = &enm.name.rust;
+    let attrs = &enm.attrs;
+
+    for variant in &enm.variants {
+        if variant.default {
+            let variant = &variant.name.rust;
+            return quote_spanned! {span=>
+                #attrs
+                #[automatically_derived]
+                impl ::cxx::core::default::Default for #ident {
+                    fn default() -> Self {
+                        #ident::#variant
+                    }
+                }
+            };
+        }
+    }
+
+    unreachable!("no #[default] variant");
 }
 
 fn enum_ord(enm: &Enum, span: Span) -> TokenStream {

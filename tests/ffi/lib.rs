@@ -43,9 +43,10 @@ pub mod ffi {
         msg: String,
     }
 
-    #[derive(Debug, Hash, PartialOrd, Ord)]
+    #[derive(Debug, Hash, PartialOrd, Ord, Default)]
     enum Enum {
         AVal,
+        #[default]
         BVal = 2020,
         #[cxx_name = "CVal"]
         LastVal,
