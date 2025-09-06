@@ -1,5 +1,4 @@
-#![allow(unknown_lints)]
-#![allow(unexpected_cfgs)]
+#![expect(unexpected_cfgs)]
 
 use std::env;
 use std::path::{Path, PathBuf};
