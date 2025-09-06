@@ -771,6 +771,8 @@ std::unique_ptr<::F::F> c_return_ns_opaque_ptr() {
   return f;
 }
 
+void R::c_member_function_on_rust_type() const noexcept {}
+
 extern "C" const char *cxx_run_test() noexcept {
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)

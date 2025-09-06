@@ -583,8 +583,16 @@ fn expand_extern_shared_struct(ety: &ExternType, ffi: &Module) -> TokenStream {
 fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
     let generics = &efn.generics;
     let receiver = efn.receiver().into_iter().map(|receiver| {
-        let receiver_type = receiver.ty();
-        quote!(_: #receiver_type)
+        if types.is_considered_improper_ctype(&receiver.ty) {
+            if receiver.mutable {
+                quote!(_: *mut ::cxx::core::ffi::c_void)
+            } else {
+                quote!(_: *const ::cxx::core::ffi::c_void)
+            }
+        } else {
+            let receiver_type = receiver.ty();
+            quote!(_: #receiver_type)
+        }
     });
     let args = efn.args.iter().map(|arg| {
         let var = &arg.name.rust;
@@ -650,10 +658,23 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         expand_return_type(&efn.ret)
     };
     let indirect_return = indirect_return(efn, types);
-    let receiver_var = efn
-        .receiver()
-        .into_iter()
-        .map(|receiver| receiver.var.to_token_stream());
+    let receiver_var = efn.receiver().into_iter().map(|receiver| {
+        if types.is_considered_improper_ctype(&receiver.ty) {
+            let var = receiver.var;
+            let ty = &receiver.ty.rust;
+            let resolve = types.resolve(ty);
+            let lifetimes = resolve.generics.to_underscore_lifetimes();
+            if receiver.pinned {
+                quote!(::cxx::core::pin::Pin::into_inner_unchecked(#var) as *mut #ty #lifetimes as *mut ::cxx::core::ffi::c_void)
+            } else if receiver.mutable {
+                quote!(#var as *mut #ty #lifetimes as *mut ::cxx::core::ffi::c_void)
+            } else {
+                quote!(#var as *const #ty #lifetimes as *const ::cxx::core::ffi::c_void)
+            }
+        } else {
+            receiver.var.to_token_stream()
+        }
+    });
     let arg_vars = efn.args.iter().map(|arg| {
         let var = &arg.name.rust;
         let span = var.span();

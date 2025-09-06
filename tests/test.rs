@@ -281,6 +281,8 @@ fn test_c_method_calls() {
     };
     array.c_set_array(val);
     assert_eq!(array.a.len() as i32 * val, array.r_get_array_sum());
+
+    R(2020).c_member_function_on_rust_type();
 }
 
 #[test]
