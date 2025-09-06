@@ -1,56 +1,49 @@
-error[E0277]: `PhantomPinned` cannot be unpinned
-  --> tests/ui/pin_mut_alias.rs:15:18
+error[E0277]: mutable reference to C++ type requires a pin -- use Pin<&mut arg::Arg>
+  --> tests/ui/pin_mut_alias.rs:16:23
    |
-15 |             type Arg = crate::arg::Arg;
-   |                  ^^^ within `arg::Arg`, the trait `Unpin` is not implemented for `PhantomPinned`
+12 |     #[cxx::bridge]
+   |     -------------- required by a bound introduced by this call
+...
+16 |             fn f(arg: &mut Arg);
+   |                       ^^^^^^^^ use Pin<&mut arg::Arg>
    |
-   = note: consider using the `pin!` macro
-           consider using `Box::pin` if you need to access the pinned value outside of the current scope
-note: required because it appears within the type `arg::Arg`
-  --> tests/ui/pin_mut_alias.rs:5:12
-   |
- 5 |     struct Arg(PhantomPinned);
-   |            ^^^
-note: required by a bound in `require_unpin`
+   = help: the trait `cxx::rust_type::ReferenceToUnpin` is not implemented for `&mut arg::Arg`
+note: required by a bound in `cxx::rust_type::Without::<T>::check_unpin`
   --> src/rust_type.rs
    |
-   | pub fn require_unpin<T: ?Sized + Unpin>() {}
-   |                                  ^^^^^ required by this bound in `require_unpin`
+   |     pub const fn check_unpin<U: ReferenceToUnpin>(&self) {}
+   |                                 ^^^^^^^^^^^^^^^^ required by this bound in `Without::<T>::check_unpin`
 
-error[E0277]: `PhantomPinned` cannot be unpinned
+error[E0277]: mutable reference to C++ type requires a pin -- use Pin<&mut receiver::Receiver>
   --> tests/ui/pin_mut_alias.rs:35:18
    |
-35 |             type Receiver = crate::receiver::Receiver;
-   |                  ^^^^^^^^ within `receiver::Receiver`, the trait `Unpin` is not implemented for `PhantomPinned`
+32 |       #[cxx::bridge]
+   |       -------------- required by a bound introduced by this call
+...
+35 |               type Receiver = crate::receiver::Receiver;
+   |  __________________^
+36 | |             fn g(&mut self);
+   | |__________________^ use Pin<&mut receiver::Receiver>
    |
-   = note: consider using the `pin!` macro
-           consider using `Box::pin` if you need to access the pinned value outside of the current scope
-note: required because it appears within the type `receiver::Receiver`
-  --> tests/ui/pin_mut_alias.rs:25:12
-   |
-25 |     struct Receiver(PhantomPinned);
-   |            ^^^^^^^^
-note: required by a bound in `require_unpin`
+   = help: the trait `cxx::rust_type::ReferenceToUnpin` is not implemented for `&mut receiver::Receiver`
+note: required by a bound in `cxx::rust_type::Without::<T>::check_unpin`
   --> src/rust_type.rs
    |
-   | pub fn require_unpin<T: ?Sized + Unpin>() {}
-   |                                  ^^^^^ required by this bound in `require_unpin`
+   |     pub const fn check_unpin<U: ReferenceToUnpin>(&self) {}
+   |                                 ^^^^^^^^^^^^^^^^ required by this bound in `Without::<T>::check_unpin`
 
-error[E0277]: `PhantomPinned` cannot be unpinned
-  --> tests/ui/pin_mut_alias.rs:55:18
+error[E0277]: mutable reference to C++ type requires a pin -- use Pin<&mut receiver2::Receiver2>
+  --> tests/ui/pin_mut_alias.rs:56:24
    |
-55 |             type Receiver2 = crate::receiver2::Receiver2;
-   |                  ^^^^^^^^^ within `receiver2::Receiver2`, the trait `Unpin` is not implemented for `PhantomPinned`
+52 |     #[cxx::bridge]
+   |     -------------- required by a bound introduced by this call
+...
+56 |             fn h(self: &mut Receiver2);
+   |                        ^^^^^^^^^^^^^^ use Pin<&mut receiver2::Receiver2>
    |
-   = note: consider using the `pin!` macro
-           consider using `Box::pin` if you need to access the pinned value outside of the current scope
-note: required because it appears within the type `receiver2::Receiver2`
-  --> tests/ui/pin_mut_alias.rs:45:12
-   |
-45 |     struct Receiver2(PhantomPinned);
-   |            ^^^^^^^^^
-note: required by a bound in `require_unpin`
+   = help: the trait `cxx::rust_type::ReferenceToUnpin` is not implemented for `&mut receiver2::Receiver2`
+note: required by a bound in `cxx::rust_type::Without::<T>::check_unpin`
   --> src/rust_type.rs
    |
-   | pub fn require_unpin<T: ?Sized + Unpin>() {}
-   |                                  ^^^^^ required by this bound in `require_unpin`
+   |     pub const fn check_unpin<U: ReferenceToUnpin>(&self) {}
+   |                                 ^^^^^^^^^^^^^^^^ required by this bound in `Without::<T>::check_unpin`

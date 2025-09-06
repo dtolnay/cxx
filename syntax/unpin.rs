@@ -1,18 +1,24 @@
 use crate::syntax::cfg::ComputedCfg;
 use crate::syntax::map::{OrderedMap, UnorderedMap};
 use crate::syntax::set::UnorderedSet;
-use crate::syntax::{Api, Enum, Struct, Type, TypeAlias};
+use crate::syntax::{Api, Enum, Receiver, Ref, Struct, Type, TypeAlias};
 use proc_macro2::Ident;
 
-pub(crate) fn required_unpin_aliases<'a>(
+#[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
+pub(crate) enum UnpinReason<'a> {
+    Receiver(&'a Receiver),
+    Ref(&'a Ref),
+}
+
+pub(crate) fn required_unpin_reasons<'a>(
     apis: &'a [Api],
     all: &OrderedMap<&'a Type, ComputedCfg>,
     structs: &UnorderedMap<&'a Ident, &'a Struct>,
     enums: &UnorderedMap<&'a Ident, &'a Enum>,
     cxx: &UnorderedSet<&'a Ident>,
     aliases: &UnorderedMap<&'a Ident, &'a TypeAlias>,
-) -> UnorderedSet<&'a Ident> {
-    let mut required_unpin = UnorderedSet::new();
+) -> UnorderedMap<&'a Ident, UnpinReason<'a>> {
+    let mut reasons = UnorderedMap::new();
 
     for api in apis {
         if let Api::CxxFunction(efn) | Api::RustFunction(efn) = api {
@@ -24,7 +30,7 @@ pub(crate) fn required_unpin_aliases<'a>(
                     && !enums.contains_key(&receiver.ty.rust)
                     && aliases.contains_key(&receiver.ty.rust)
                 {
-                    required_unpin.insert(&receiver.ty.rust);
+                    reasons.insert(&receiver.ty.rust, UnpinReason::Receiver(receiver));
                 }
             }
         }
@@ -40,11 +46,11 @@ pub(crate) fn required_unpin_aliases<'a>(
                     && !enums.contains_key(&inner.rust)
                     && aliases.contains_key(&inner.rust)
                 {
-                    required_unpin.insert(&inner.rust);
+                    reasons.insert(&inner.rust, UnpinReason::Ref(ty));
                 }
             }
         }
     }
 
-    required_unpin
+    reasons
 }

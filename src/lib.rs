@@ -503,7 +503,7 @@ pub mod private {
     #[cfg(feature = "alloc")]
     pub use crate::rust_string::RustString;
     pub use crate::rust_type::{
-        require_box, require_unpin, require_vec, ImplBox, ImplVec, RustType,
+        require_box, require_unpin, require_vec, with, ImplBox, ImplVec, RustType,
     };
     #[cfg(feature = "alloc")]
     pub use crate::rust_vec::RustVec;

@@ -9,6 +9,7 @@ use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::trivial::TrivialReason;
 use crate::syntax::types::ConditionalImpl;
+use crate::syntax::unpin::UnpinReason;
 use crate::syntax::{
     self, check, mangle, Api, Doc, Enum, ExternFn, ExternType, FnKind, Lang, Lifetimes, Pair,
     Signature, Struct, Trait, Type, TypeAlias, Types,
@@ -1410,7 +1411,7 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
         const _: fn() = #begin #ident #lifetimes, #type_id #end;
     };
 
-    let mut require_unpin = types.required_unpin.contains(ident);
+    let mut require_unpin = false;
     let mut require_box = false;
     let mut require_vec = false;
     let mut require_extern_type_trivial = false;
@@ -1429,7 +1430,32 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
         }
     }
 
-    if require_unpin {
+    if let Some(reason) = types.required_unpin.get(ident) {
+        let ampersand;
+        let mutability;
+        let inner;
+        match reason {
+            UnpinReason::Receiver(receiver) => {
+                ampersand = &receiver.ampersand;
+                mutability = &receiver.mutability;
+                inner = &receiver.ty.rust;
+            }
+            UnpinReason::Ref(mutable_reference) => {
+                ampersand = &mutable_reference.ampersand;
+                mutability = &mutable_reference.mutability;
+                let Type::Ident(ident) = &mutable_reference.inner else {
+                    unreachable!();
+                };
+                inner = &ident.rust;
+            }
+        }
+        verify.extend(quote! {
+            #attrs
+            const _: fn() = || {
+                ::cxx::private::with::<#ident #lifetimes>().check_unpin::<#ampersand #mutability #inner>()
+            };
+        });
+    } else if require_unpin {
         verify.extend(quote! {
             #attrs
             const _: fn() = ::cxx::private::require_unpin::<#ident #lifetimes>;
