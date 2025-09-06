@@ -26,27 +26,27 @@ cargo.rust_library(
 
 alias(
     name = "cc",
-    actual = ":cc-1.2.35",
+    actual = ":cc-1.2.36",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "cc-1.2.35.crate",
-    sha256 = "590f9024a68a8c40351881787f1934dc11afd69090f5edb6831464694d836ea3",
-    strip_prefix = "cc-1.2.35",
-    urls = ["https://static.crates.io/crates/cc/1.2.35/download"],
+    name = "cc-1.2.36.crate",
+    sha256 = "5252b3d2648e5eedbc1a6f501e3c795e07025c1e93bbf8bbdd6eef7f447a6d54",
+    strip_prefix = "cc-1.2.36",
+    urls = ["https://static.crates.io/crates/cc/1.2.36/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "cc-1.2.35",
-    srcs = [":cc-1.2.35.crate"],
+    name = "cc-1.2.36",
+    srcs = [":cc-1.2.36.crate"],
     crate = "cc",
-    crate_root = "cc-1.2.35.crate/src/lib.rs",
+    crate_root = "cc-1.2.36.crate/src/lib.rs",
     edition = "2018",
     visibility = [],
     deps = [
-        ":find-msvc-tools-0.1.0",
+        ":find-msvc-tools-0.1.1",
         ":shlex-1.3.0",
     ],
 )
@@ -175,18 +175,18 @@ cargo.rust_library(
 )
 
 http_archive(
-    name = "find-msvc-tools-0.1.0.crate",
-    sha256 = "e178e4fba8a2726903f6ba98a6d221e76f9c12c650d5dc0e6afdc50677b49650",
-    strip_prefix = "find-msvc-tools-0.1.0",
-    urls = ["https://static.crates.io/crates/find-msvc-tools/0.1.0/download"],
+    name = "find-msvc-tools-0.1.1.crate",
+    sha256 = "7fd99930f64d146689264c637b5af2f0233a933bef0d8570e2526bf9e083192d",
+    strip_prefix = "find-msvc-tools-0.1.1",
+    urls = ["https://static.crates.io/crates/find-msvc-tools/0.1.1/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "find-msvc-tools-0.1.0",
-    srcs = [":find-msvc-tools-0.1.0.crate"],
+    name = "find-msvc-tools-0.1.1",
+    srcs = [":find-msvc-tools-0.1.1.crate"],
     crate = "find_msvc_tools",
-    crate_root = "find-msvc-tools-0.1.0.crate/src/lib.rs",
+    crate_root = "find-msvc-tools-0.1.1.crate/src/lib.rs",
     edition = "2018",
     visibility = [],
 )

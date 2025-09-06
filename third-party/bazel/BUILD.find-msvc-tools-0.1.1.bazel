@@ -17,7 +17,7 @@ cargo_toml_env_vars(
 )
 
 rust_library(
-    name = "cc",
+    name = "find_msvc_tools",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = True,
@@ -44,7 +44,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=cc",
+        "crate-name=find-msvc-tools",
         "manual",
         "noclippy",
         "norustfmt",
@@ -92,9 +92,5 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "1.2.35",
-    deps = [
-        "@vendor__find-msvc-tools-0.1.0//:find_msvc_tools",
-        "@vendor__shlex-1.3.0//:shlex",
-    ],
+    version = "0.1.1",
 )

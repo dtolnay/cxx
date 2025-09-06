@@ -295,7 +295,7 @@ def aliases(
 _NORMAL_DEPENDENCIES = {
     "third-party": {
         _COMMON_CONDITION: {
-            "cc": Label("@vendor//:cc-1.2.35"),
+            "cc": Label("@vendor//:cc-1.2.36"),
             "clap": Label("@vendor//:clap-4.5.47"),
             "codespan-reporting": Label("@vendor//:codespan-reporting-0.12.0"),
             "foldhash": Label("@vendor//:foldhash-0.2.0"),
@@ -442,12 +442,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__cc-1.2.35",
-        sha256 = "590f9024a68a8c40351881787f1934dc11afd69090f5edb6831464694d836ea3",
+        name = "vendor__cc-1.2.36",
+        sha256 = "5252b3d2648e5eedbc1a6f501e3c795e07025c1e93bbf8bbdd6eef7f447a6d54",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/cc/1.2.35/download"],
-        strip_prefix = "cc-1.2.35",
-        build_file = Label("//third-party/bazel:BUILD.cc-1.2.35.bazel"),
+        urls = ["https://static.crates.io/crates/cc/1.2.36/download"],
+        strip_prefix = "cc-1.2.36",
+        build_file = Label("//third-party/bazel:BUILD.cc-1.2.36.bazel"),
     )
 
     maybe(
@@ -502,12 +502,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__find-msvc-tools-0.1.0",
-        sha256 = "e178e4fba8a2726903f6ba98a6d221e76f9c12c650d5dc0e6afdc50677b49650",
+        name = "vendor__find-msvc-tools-0.1.1",
+        sha256 = "7fd99930f64d146689264c637b5af2f0233a933bef0d8570e2526bf9e083192d",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/find-msvc-tools/0.1.0/download"],
-        strip_prefix = "find-msvc-tools-0.1.0",
-        build_file = Label("//third-party/bazel:BUILD.find-msvc-tools-0.1.0.bazel"),
+        urls = ["https://static.crates.io/crates/find-msvc-tools/0.1.1/download"],
+        strip_prefix = "find-msvc-tools-0.1.1",
+        build_file = Label("//third-party/bazel:BUILD.find-msvc-tools-0.1.1.bazel"),
     )
 
     maybe(
@@ -771,7 +771,7 @@ def crate_repositories():
     )
 
     return [
-        struct(repo = "vendor__cc-1.2.35", is_dev_dep = False),
+        struct(repo = "vendor__cc-1.2.36", is_dev_dep = False),
         struct(repo = "vendor__clap-4.5.47", is_dev_dep = False),
         struct(repo = "vendor__codespan-reporting-0.12.0", is_dev_dep = False),
         struct(repo = "vendor__foldhash-0.2.0", is_dev_dep = False),
