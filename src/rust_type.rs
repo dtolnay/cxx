@@ -1,5 +1,7 @@
 #![allow(missing_docs)]
 
+use crate::extern_type::ExternType;
+use crate::kind::Trivial;
 use core::marker::{PhantomData, Unpin};
 use core::ops::Deref;
 
@@ -20,9 +22,9 @@ pub const fn with<T: ?Sized>() -> With<T> {
     With(PhantomData)
 }
 
-impl<T: ?Sized + Unpin> With<T> {
+impl<T: ?Sized + RustType> With<T> {
     #[allow(clippy::unused_self)]
-    pub const fn check_unpin<U>(&self) {}
+    pub const fn check_rust_type_or_trivial<U>(&self) {}
 }
 
 impl<T: ?Sized> Deref for With<T> {
@@ -30,4 +32,9 @@ impl<T: ?Sized> Deref for With<T> {
     fn deref(&self) -> &Self::Target {
         &Without
     }
+}
+
+impl Without {
+    #[allow(clippy::unused_self)]
+    pub const fn check_rust_type_or_trivial<U: ExternType<Kind = Trivial>>(&self) {}
 }

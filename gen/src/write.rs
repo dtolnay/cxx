@@ -523,11 +523,12 @@ fn check_trivial_extern_type(out: &mut OutFile, alias: &TypeAlias, reasons: &[Tr
         // Allow extern type that inherits from ::rust::Opaque in positions
         // where an opaque Rust type would be allowed.
         rust_type_ok &= match reason {
-            TrivialReason::BoxTarget { .. } | TrivialReason::VecElement { .. } => true,
+            TrivialReason::BoxTarget { .. }
+            | TrivialReason::VecElement { .. }
+            | TrivialReason::SliceElement { .. } => true,
             TrivialReason::StructField(_)
             | TrivialReason::FunctionArgument(_)
-            | TrivialReason::FunctionReturn(_)
-            | TrivialReason::SliceElement { .. } => false,
+            | TrivialReason::FunctionReturn(_) => false,
         };
         // If the type is only used as a struct field or Vec element, not as
         // by-value function argument or return value, then C array of trivially

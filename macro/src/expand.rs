@@ -1416,6 +1416,7 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
     let mut require_box = false;
     let mut require_vec = false;
     let mut require_extern_type_trivial = false;
+    let mut require_rust_type_or_trivial = None;
     if let Some(reasons) = types.required_trivial.get(&alias.name.rust) {
         for reason in reasons {
             match reason {
@@ -1425,8 +1426,8 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
                 TrivialReason::VecElement { local: false } => require_vec = true,
                 TrivialReason::StructField(_)
                 | TrivialReason::FunctionArgument(_)
-                | TrivialReason::FunctionReturn(_)
-                | TrivialReason::SliceElement { .. } => require_extern_type_trivial = true,
+                | TrivialReason::FunctionReturn(_) => require_extern_type_trivial = true,
+                TrivialReason::SliceElement(slice) => require_rust_type_or_trivial = Some(slice),
             }
         }
     }
@@ -1537,6 +1538,11 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
         verify.extend(quote! {
             #attrs
             const _: fn() = #begin #ident #lifetimes, ::cxx::kind::Trivial #end;
+        });
+    } else if require_rust_type_or_trivial {
+        verify.extend(quote! {
+            #attrs
+            let _ = || ::cxx::private::with::<#ident #lifetimes>().check_rust_type_or_trivial::<#ident #lifetimes>();
         });
     }
 
