@@ -7,6 +7,7 @@ use crate::syntax::report::Errors;
 use crate::syntax::resolve::Resolution;
 use crate::syntax::set::UnorderedSet;
 use crate::syntax::trivial::{self, TrivialReason};
+use crate::syntax::unpin;
 use crate::syntax::visit::{self, Visit};
 use crate::syntax::{
     toposort, Api, Atom, Enum, ExternType, Impl, Lifetimes, Pair, Struct, Type, TypeAlias,
@@ -49,7 +50,6 @@ impl<'a> Types<'a> {
         let mut rust = UnorderedSet::new();
         let mut aliases = UnorderedMap::new();
         let mut untrusted = UnorderedMap::new();
-        let mut required_unpin = UnorderedSet::new();
         let mut impls = OrderedMap::new();
         let mut resolutions = UnorderedMap::new();
         let struct_improper_ctypes = UnorderedSet::new();
@@ -206,41 +206,10 @@ impl<'a> Types<'a> {
             }
         }
 
-        for api in apis {
-            if let Api::CxxFunction(efn) | Api::RustFunction(efn) = api {
-                if let Some(receiver) = efn.receiver() {
-                    if receiver.mutable
-                        && !receiver.pinned
-                        && cxx.contains(&receiver.ty.rust)
-                        && !structs.contains_key(&receiver.ty.rust)
-                        && !enums.contains_key(&receiver.ty.rust)
-                        && aliases.contains_key(&receiver.ty.rust)
-                    {
-                        required_unpin.insert(&receiver.ty.rust);
-                    }
-                }
-            }
-        }
-
         for (ty, cfg) in &all {
-            if let Type::Ref(ty) = ty {
-                if let Type::Ident(inner) = &ty.inner {
-                    if ty.mutable
-                        && !ty.pinned
-                        && cxx.contains(&inner.rust)
-                        && !structs.contains_key(&inner.rust)
-                        && !enums.contains_key(&inner.rust)
-                        && aliases.contains_key(&inner.rust)
-                    {
-                        required_unpin.insert(&inner.rust);
-                    }
-                }
-            }
-
             let Some(impl_key) = ty.impl_key() else {
                 continue;
             };
-
             let implicit_impl = match &impl_key {
                 ImplKey::RustBox(ident)
                 | ImplKey::RustVec(ident)
@@ -267,6 +236,9 @@ impl<'a> Types<'a> {
         // which is declared subsequently.
         let required_trivial =
             trivial::required_trivial_reasons(apis, &all, &structs, &enums, &cxx, &aliases, &impls);
+
+        let required_unpin =
+            unpin::required_unpin_aliases(apis, &all, &structs, &enums, &cxx, &aliases);
 
         let mut types = Types {
             all,
