@@ -241,6 +241,7 @@ pub mod ffi {
         boxed: Box<OpaqueRust>,
         vecked: Vec<OpaqueRust>,
         referenced: &'a mut OpaqueRust,
+        sliced: &'a mut [OpaqueRust],
     }
 
     extern "C++" {
