@@ -21,7 +21,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [nightly, beta, stable, 1.82.0, 1.81.0, 1.80.0, 1.77.0, 1.73.0]
+        rust: [nightly, beta, stable, 1.82.0, 1.81.0, 1.80.0, 1.78.0]
         os: [ubuntu]
         cc: [g++]
         flags: ['']
@@ -121,7 +121,7 @@ jobs:
         # builds.
         run: |
           echo RUSTFLAGS=$RUSTFLAGS >> $GITHUB_ENV
-          echo exclude=--exclude cxx-test-suite ${{matrix.rust == '1.73.0' && '--exclude cxxbridge-cmd' || ''}} >> $GITHUB_OUTPUT
+          echo exclude=--exclude cxx-test-suite >> $GITHUB_OUTPUT
         env:
           RUSTFLAGS: ${{env.RUSTFLAGS}} ${{matrix.os != 'ubuntu' && github.event_name != 'schedule' && '--cfg skip_ui_tests' || ''}}
         id: testsuite
@@ -131,7 +131,7 @@ jobs:
         if: matrix.os == 'macos'
       - run: cargo run --manifest-path demo/Cargo.toml
       - run: cargo test --workspace ${{steps.testsuite.outputs.exclude}}
-        if: matrix.rust != '1.73.0' && !contains(matrix.flags, '-fno-exceptions')
+        if: !contains(matrix.flags, '-fno-exceptions')
       - run: cargo check --no-default-features --features alloc
         env:
           RUSTFLAGS: --cfg compile_error_if_std ${{env.RUSTFLAGS}}
