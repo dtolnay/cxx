@@ -228,7 +228,9 @@ fn check_type_cxx_vector(cx: &mut Check, ptr: &Ty1) {
 fn check_type_ref(cx: &mut Check, ty: &Ref) {
     if ty.mutable && !ty.pinned {
         if let Some(requires_pin) = match &ty.inner {
-            Type::Ident(ident) if ident.rust == CxxString || is_opaque_cxx(cx, &ident.rust) => {
+            Type::Ident(ident)
+                if ident.rust == CxxString || is_opaque_cxx(cx.types, &ident.rust) =>
+            {
                 Some(ident.rust.to_string())
             }
             Type::CxxVector(_) => Some("CxxVector<...>".to_owned()),
@@ -270,7 +272,7 @@ fn check_type_ptr(cx: &mut Check, ty: &Ptr) {
 }
 
 fn check_type_slice_ref(cx: &mut Check, ty: &SliceRef) {
-    let supported = !is_unsized(cx, &ty.inner)
+    let supported = !is_unsized(cx.types, &ty.inner)
         || match &ty.inner {
             Type::Ident(ident) => {
                 cx.types.rust.contains(&ident.rust) || cx.types.aliases.contains_key(&ident.rust)
@@ -282,7 +284,7 @@ fn check_type_slice_ref(cx: &mut Check, ty: &SliceRef) {
         let mutable = if ty.mutable { "mut " } else { "" };
         let mut msg = format!("unsupported &{}[T] element type", mutable);
         if let Type::Ident(ident) = &ty.inner {
-            if is_opaque_cxx(cx, &ident.rust) {
+            if is_opaque_cxx(cx.types, &ident.rust) {
                 msg += ": opaque C++ type is not supported yet";
             }
         }
@@ -291,7 +293,7 @@ fn check_type_slice_ref(cx: &mut Check, ty: &SliceRef) {
 }
 
 fn check_type_array(cx: &mut Check, ty: &Array) {
-    let supported = !is_unsized(cx, &ty.inner);
+    let supported = !is_unsized(cx.types, &ty.inner);
 
     if !supported {
         cx.error(ty, "unsupported array element type");
@@ -345,8 +347,8 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
                 field,
                 "function pointers in a struct field are not implemented yet",
             );
-        } else if is_unsized(cx, &field.ty) {
-            let desc = describe(cx, &field.ty);
+        } else if is_unsized(cx.types, &field.ty) {
+            let desc = describe(cx.types, &field.ty);
             let msg = format!("using {} by value is not supported", desc);
             cx.error(field, msg);
         }
@@ -453,7 +455,10 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
                 && !cx.types.rust.contains(&receiver.ty.rust)
             {
                 cx.error(span, "unrecognized receiver type");
-            } else if receiver.mutable && !receiver.pinned && is_opaque_cxx(cx, &receiver.ty.rust) {
+            } else if receiver.mutable
+                && !receiver.pinned
+                && is_opaque_cxx(cx.types, &receiver.ty.rust)
+            {
                 cx.error(
                     span,
                     format!(
@@ -494,8 +499,8 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
                     "pointer argument requires that the function be marked unsafe",
                 );
             }
-        } else if is_unsized(cx, &arg.ty) {
-            let desc = describe(cx, &arg.ty);
+        } else if is_unsized(cx.types, &arg.ty) {
+            let desc = describe(cx.types, &arg.ty);
             let msg = format!("passing {} by value is not supported", desc);
             cx.error(arg, msg);
         }
@@ -504,8 +509,8 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
     if let Some(ty) = &efn.ret {
         if let Type::Fn(_) = ty {
             cx.error(ty, "returning a function pointer is not implemented yet");
-        } else if is_unsized(cx, ty) {
-            let desc = describe(cx, ty);
+        } else if is_unsized(cx.types, ty) {
+            let desc = describe(cx.types, ty);
             let msg = format!("returning {} by value is not supported", desc);
             cx.error(ty, msg);
         }
@@ -656,13 +661,13 @@ fn check_generics(cx: &mut Check, generics: &Generics) {
     }
 }
 
-fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
+fn is_unsized(types: &Types, ty: &Type) -> bool {
     match ty {
         Type::Ident(ident) => {
             let ident = &ident.rust;
-            ident == CxxString || is_opaque_cxx(cx, ident) || cx.types.rust.contains(ident)
+            ident == CxxString || is_opaque_cxx(types, ident) || types.rust.contains(ident)
         }
-        Type::Array(array) => is_unsized(cx, &array.inner),
+        Type::Array(array) => is_unsized(types, &array.inner),
         Type::CxxVector(_) | Type::Fn(_) | Type::Void(_) => true,
         Type::RustBox(_)
         | Type::RustVec(_)
@@ -676,11 +681,11 @@ fn is_unsized(cx: &mut Check, ty: &Type) -> bool {
     }
 }
 
-fn is_opaque_cxx(cx: &mut Check, ty: &Ident) -> bool {
-    cx.types.cxx.contains(ty)
-        && !cx.types.structs.contains_key(ty)
-        && !cx.types.enums.contains_key(ty)
-        && !(cx.types.aliases.contains_key(ty) && cx.types.required_trivial.contains_key(ty))
+fn is_opaque_cxx(types: &Types, ty: &Ident) -> bool {
+    types.cxx.contains(ty)
+        && !types.structs.contains_key(ty)
+        && !types.enums.contains_key(ty)
+        && !(types.aliases.contains_key(ty) && types.required_trivial.contains_key(ty))
 }
 
 fn span_for_struct_error(strct: &Struct) -> TokenStream {
@@ -717,18 +722,18 @@ fn span_for_generics_error(efn: &ExternFn) -> TokenStream {
     quote!(#unsafety #fn_token #generics)
 }
 
-fn describe(cx: &mut Check, ty: &Type) -> String {
+fn describe(types: &Types, ty: &Type) -> String {
     match ty {
         Type::Ident(ident) => {
-            if cx.types.structs.contains_key(&ident.rust) {
+            if types.structs.contains_key(&ident.rust) {
                 "struct".to_owned()
-            } else if cx.types.enums.contains_key(&ident.rust) {
+            } else if types.enums.contains_key(&ident.rust) {
                 "enum".to_owned()
-            } else if cx.types.aliases.contains_key(&ident.rust) {
+            } else if types.aliases.contains_key(&ident.rust) {
                 "C++ type".to_owned()
-            } else if cx.types.cxx.contains(&ident.rust) {
+            } else if types.cxx.contains(&ident.rust) {
                 "opaque C++ type".to_owned()
-            } else if cx.types.rust.contains(&ident.rust) {
+            } else if types.rust.contains(&ident.rust) {
                 "opaque Rust type".to_owned()
             } else if Atom::from(&ident.rust) == Some(CxxString) {
                 "C++ string".to_owned()
