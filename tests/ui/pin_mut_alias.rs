@@ -28,7 +28,7 @@ mod arg {
     mod ffi_life {
         unsafe extern "C++" {
             type ArgLife<'a> = crate::arg::ArgLife<'a>;
-            fn fl<'a>(arg: &mut ArgLife<'a>);
+            fn fl<'b, 'c>(arg: &'b mut ArgLife<'c>);
         }
     }
 }
@@ -63,7 +63,7 @@ mod receiver {
     mod ffi_life {
         unsafe extern "C++" {
             type ReceiverLife<'a> = crate::receiver::ReceiverLife<'a>;
-            fn g(&mut self);
+            fn g<'b>(&'b mut self);
         }
     }
 }
@@ -98,7 +98,7 @@ mod receiver2 {
     mod ffi_life {
         unsafe extern "C++" {
             type ReveiverLife2<'a> = crate::receiver2::ReveiverLife2<'a>;
-            fn h<'a>(self: &mut ReveiverLife2<'a>);
+            fn h<'b, 'c>(self: &'b mut ReveiverLife2<'c>);
         }
     }
 }
