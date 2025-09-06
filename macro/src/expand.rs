@@ -1457,18 +1457,19 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
                 inner = ident.rust.clone();
             }
         }
+        let trait_name = format_ident!("ReferenceToUnpin_{ident}");
         let message =
             format!("mutable reference to C++ type requires a pin -- use Pin<&mut {ident}>");
         verify.extend(quote! {
             #attrs
             let _ = {
                 #[diagnostic::on_unimplemented(message = #message, label = #label)]
-                trait ReferenceToUnpin {
+                trait #trait_name {
                     fn check_unpin() {}
                 }
                 #[diagnostic::do_not_recommend]
-                impl<'a, T: ?::cxx::core::marker::Sized + ::cxx::core::marker::Unpin> ReferenceToUnpin for &'a mut T {}
-                <#ampersand #mutability #inner as ReferenceToUnpin>::check_unpin
+                impl<'a, T: ?::cxx::core::marker::Sized + ::cxx::core::marker::Unpin> #trait_name for &'a mut T {}
+                <#ampersand #mutability #inner as #trait_name>::check_unpin
             };
         });
     } else if require_unpin {
