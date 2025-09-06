@@ -1539,10 +1539,13 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
             #attrs
             const _: fn() = #begin #ident #lifetimes, ::cxx::kind::Trivial #end;
         });
-    } else if require_rust_type_or_trivial {
+    } else if let Some(slice_type) = require_rust_type_or_trivial {
+        let ampersand = &slice_type.ampersand;
+        let mutability = &slice_type.mutability;
+        let inner = quote_spanned!(slice_type.bracket.span.join()=> [#ident #lifetimes]);
         verify.extend(quote! {
             #attrs
-            let _ = || ::cxx::private::with::<#ident #lifetimes>().check_rust_type_or_trivial::<#ident #lifetimes>();
+            let _ = || ::cxx::private::with::<#ident #lifetimes>().check_slice::<#ampersand #mutability #inner>();
         });
     }
 

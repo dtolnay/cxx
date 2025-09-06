@@ -1,16 +1,11 @@
-error[E0271]: type mismatch resolving `<ElementOpaque as ExternType>::Kind == Trivial`
-  --> tests/ui/slice_of_type_alias.rs:13:14
+error[E0271]: type mismatch resolving `<&[ElementOpaque] as SliceOfExternType>::Kind == Trivial`
+  --> tests/ui/slice_of_type_alias.rs:16:21
    |
-13 |         type ElementOpaque = crate::ElementOpaque;
-   |              ^^^^^^^^^^^^^ type mismatch resolving `<ElementOpaque as ExternType>::Kind == Trivial`
+16 |         fn g(slice: &[ElementOpaque]);
+   |                     ^^^^^^^^^^^^^^^^ expected `Trivial`, found `Opaque`
    |
-note: expected this to be `Trivial`
-  --> tests/ui/slice_of_type_alias.rs:27:17
-   |
-27 |     type Kind = cxx::kind::Opaque;
-   |                 ^^^^^^^^^^^^^^^^^
-note: required by a bound in `Without::check_rust_type_or_trivial`
+note: required by a bound in `Without::check_slice`
   --> src/rust_type.rs
    |
-   |     pub const fn check_rust_type_or_trivial<U: ExternType<Kind = Trivial>>(&self) {}
-   |                                                           ^^^^^^^^^^^^^^ required by this bound in `Without::check_rust_type_or_trivial`
+   |     pub const fn check_slice<U: SliceOfExternType<Kind = Trivial>>(&self) {}
+   |                                                   ^^^^^^^^^^^^^^ required by this bound in `Without::check_slice`

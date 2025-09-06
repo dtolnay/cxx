@@ -24,7 +24,7 @@ pub const fn with<T: ?Sized>() -> With<T> {
 
 impl<T: ?Sized + RustType> With<T> {
     #[allow(clippy::unused_self)]
-    pub const fn check_rust_type_or_trivial<U>(&self) {}
+    pub const fn check_slice<U>(&self) {}
 }
 
 impl<T: ?Sized> Deref for With<T> {
@@ -34,7 +34,17 @@ impl<T: ?Sized> Deref for With<T> {
     }
 }
 
+pub trait SliceOfExternType {
+    type Kind;
+}
+impl<T: ExternType> SliceOfExternType for &[T] {
+    type Kind = T::Kind;
+}
+impl<T: ExternType> SliceOfExternType for &mut [T] {
+    type Kind = T::Kind;
+}
+
 impl Without {
     #[allow(clippy::unused_self)]
-    pub const fn check_rust_type_or_trivial<U: ExternType<Kind = Trivial>>(&self) {}
+    pub const fn check_slice<U: SliceOfExternType<Kind = Trivial>>(&self) {}
 }
