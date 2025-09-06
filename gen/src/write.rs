@@ -527,8 +527,7 @@ fn check_trivial_extern_type(out: &mut OutFile, alias: &TypeAlias, reasons: &[Tr
             TrivialReason::StructField(_)
             | TrivialReason::FunctionArgument(_)
             | TrivialReason::FunctionReturn(_)
-            | TrivialReason::SliceElement { .. }
-            | TrivialReason::UnpinnedMut(_) => false,
+            | TrivialReason::SliceElement { .. } => false,
         };
         // If the type is only used as a struct field or Vec element, not as
         // by-value function argument or return value, then C array of trivially
@@ -545,8 +544,7 @@ fn check_trivial_extern_type(out: &mut OutFile, alias: &TypeAlias, reasons: &[Tr
             TrivialReason::FunctionArgument(_)
             | TrivialReason::FunctionReturn(_)
             | TrivialReason::BoxTarget { .. }
-            | TrivialReason::SliceElement { .. }
-            | TrivialReason::UnpinnedMut(_) => false,
+            | TrivialReason::SliceElement { .. } => false,
         };
     }
 

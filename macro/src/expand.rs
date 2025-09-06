@@ -1410,7 +1410,7 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
         const _: fn() = #begin #ident #lifetimes, #type_id #end;
     };
 
-    let mut require_unpin = false;
+    let mut require_unpin = types.required_unpin.contains(ident);
     let mut require_box = false;
     let mut require_vec = false;
     let mut require_extern_type_trivial = false;
@@ -1424,8 +1424,7 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
                 TrivialReason::StructField(_)
                 | TrivialReason::FunctionArgument(_)
                 | TrivialReason::FunctionReturn(_)
-                | TrivialReason::SliceElement { .. }
-                | TrivialReason::UnpinnedMut(_) => require_extern_type_trivial = true,
+                | TrivialReason::SliceElement { .. } => require_extern_type_trivial = true,
             }
         }
     }

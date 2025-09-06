@@ -233,8 +233,7 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
                     || (cx.types.cxx.contains(&ident.rust)
                         && !cx.types.structs.contains_key(&ident.rust)
                         && !cx.types.enums.contains_key(&ident.rust)
-                        && !(cx.types.aliases.contains_key(&ident.rust)
-                            && cx.types.required_trivial.contains_key(&ident.rust))) =>
+                        && !cx.types.aliases.contains_key(&ident.rust)) =>
             {
                 Some(ident.rust.to_string())
             }
@@ -467,8 +466,7 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
                 && !receiver.pinned
                 && cx.types.cxx.contains(&receiver.ty.rust)
                 && !cx.types.structs.contains_key(&receiver.ty.rust)
-                && !(cx.types.aliases.contains_key(&receiver.ty.rust)
-                    && cx.types.required_trivial.contains_key(&receiver.ty.rust))
+                && !cx.types.aliases.contains_key(&receiver.ty.rust)
             {
                 cx.error(
                     span,
