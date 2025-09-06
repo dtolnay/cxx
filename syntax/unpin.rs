@@ -4,7 +4,7 @@ use crate::syntax::set::UnorderedSet;
 use crate::syntax::{Api, Enum, NamedType, Receiver, Ref, SliceRef, Struct, Type, TypeAlias};
 use proc_macro2::Ident;
 
-#[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
+#[cfg_attr(not(proc_macro), expect(dead_code))]
 pub(crate) enum UnpinReason<'a> {
     Receiver(&'a Receiver),
     Ref(&'a Ref),
