@@ -145,6 +145,27 @@ jobs:
           path: Cargo.lock
         continue-on-error: true
 
+  wasi:
+    name: WebAssembly
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@nightly
+        with:
+          targets: wasm32-wasip1
+          components: rust-src
+      - uses: dtolnay/install@wasmtime-cli
+      - run: curl https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-27/wasi-sdk-27.0-x86_64-linux.tar.gz --location --silent --show-error --fail --retry 2 --output ${{runner.temp}}/wasi-sdk-27.0-x86_64-linux.tar.gz
+      - run: tar xf ${{runner.temp}}/wasi-sdk-27.0-x86_64-linux.tar.gz -C ${{runner.temp}}
+      - run: cargo build --target=wasm32-wasip1 --manifest-path=demo/Cargo.toml --release
+          --config='target.wasm32-wasip1.linker="${{runner.temp}}/wasi-sdk-27.0-x86_64-linux/bin/lld"'
+          --config='target.wasm32-wasip1.rustflags=["-Clink-args=-L${{runner.temp}}/wasi-sdk-27.0-x86_64-linux/share/wasi-sysroot/lib/wasm32-wasip1", "-Clink-args=-lc++abi"]'
+        env:
+          CXX: ${{runner.temp}}/wasi-sdk-27.0-x86_64-linux/bin/clang++
+          CXXFLAGS: --sysroot=${{runner.temp}}/wasi-sdk-27.0-x86_64-linux/share/wasi-sysroot
+      - run: wasmtime target/wasm32-wasip1/release/demo.wasm
+
   reindeer:
     name: Reindeer
     runs-on: ubuntu-latest
