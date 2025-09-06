@@ -26,7 +26,6 @@ pub(crate) enum TrivialReason<'a> {
     SliceElement {
         mutable: bool,
     },
-    UnpinnedMut(&'a ExternFn),
 }
 
 pub(crate) fn required_trivial_reasons<'a>(
@@ -63,45 +62,15 @@ pub(crate) fn required_trivial_reasons<'a>(
                 }
             }
             Api::CxxFunction(efn) | Api::RustFunction(efn) => {
-                if let Some(receiver) = &efn.receiver() {
-                    if receiver.mutable && !receiver.pinned {
-                        let reason = TrivialReason::UnpinnedMut(efn);
-                        insist_extern_types_are_trivial(&receiver.ty, reason);
-                    }
-                }
                 for arg in &efn.args {
-                    match &arg.ty {
-                        Type::Ident(ident) => {
-                            let reason = TrivialReason::FunctionArgument(efn);
-                            insist_extern_types_are_trivial(ident, reason);
-                        }
-                        Type::Ref(ty) => {
-                            if ty.mutable && !ty.pinned {
-                                if let Type::Ident(ident) = &ty.inner {
-                                    let reason = TrivialReason::UnpinnedMut(efn);
-                                    insist_extern_types_are_trivial(ident, reason);
-                                }
-                            }
-                        }
-                        _ => {}
+                    if let Type::Ident(ident) = &arg.ty {
+                        let reason = TrivialReason::FunctionArgument(efn);
+                        insist_extern_types_are_trivial(ident, reason);
                     }
                 }
-                if let Some(ret) = &efn.ret {
-                    match ret {
-                        Type::Ident(ident) => {
-                            let reason = TrivialReason::FunctionReturn(efn);
-                            insist_extern_types_are_trivial(ident, reason);
-                        }
-                        Type::Ref(ty) => {
-                            if ty.mutable && !ty.pinned {
-                                if let Type::Ident(ident) = &ty.inner {
-                                    let reason = TrivialReason::UnpinnedMut(efn);
-                                    insist_extern_types_are_trivial(ident, reason);
-                                }
-                            }
-                        }
-                        _ => {}
-                    }
+                if let Some(Type::Ident(ident)) = &efn.ret {
+                    let reason = TrivialReason::FunctionReturn(efn);
+                    insist_extern_types_are_trivial(ident, reason);
                 }
             }
             _ => {}
@@ -162,7 +131,6 @@ pub(crate) fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl 
             let mut vec_element = false;
             let mut slice_shared_element = false;
             let mut slice_mut_element = false;
-            let mut unpinned_mut = Set::new();
 
             for reason in self.reasons {
                 match reason {
@@ -183,9 +151,6 @@ pub(crate) fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl 
                         } else {
                             slice_shared_element = true;
                         }
-                    }
-                    TrivialReason::UnpinnedMut(efn) => {
-                        unpinned_mut.insert(&efn.name.rust);
                     }
                 }
             }
@@ -233,13 +198,6 @@ pub(crate) fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl 
                     shared: slice_shared_element,
                     mutable: slice_mut_element,
                     param: self.name,
-                });
-            }
-            if !unpinned_mut.is_empty() {
-                clauses.push(Clause::Set {
-                    article: "a",
-                    desc: "non-pinned mutable reference in signature of",
-                    set: &unpinned_mut,
                 });
             }
 

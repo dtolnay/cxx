@@ -7,6 +7,7 @@ use crate::syntax::report::Errors;
 use crate::syntax::resolve::Resolution;
 use crate::syntax::set::UnorderedSet;
 use crate::syntax::trivial::{self, TrivialReason};
+use crate::syntax::unpin::{self, UnpinReason};
 use crate::syntax::visit::{self, Visit};
 use crate::syntax::{
     toposort, Api, Atom, Enum, ExternType, Impl, Lifetimes, Pair, Struct, Type, TypeAlias,
@@ -24,6 +25,8 @@ pub(crate) struct Types<'a> {
     pub aliases: UnorderedMap<&'a Ident, &'a TypeAlias>,
     pub untrusted: UnorderedMap<&'a Ident, &'a ExternType>,
     pub required_trivial: UnorderedMap<&'a Ident, Vec<TrivialReason<'a>>>,
+    #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
+    pub required_unpin: UnorderedMap<&'a Ident, UnpinReason<'a>>,
     pub impls: OrderedMap<ImplKey<'a>, ConditionalImpl<'a>>,
     pub resolutions: UnorderedMap<&'a Ident, Resolution<'a>>,
     pub struct_improper_ctypes: UnorderedSet<&'a Ident>,
@@ -234,6 +237,9 @@ impl<'a> Types<'a> {
         let required_trivial =
             trivial::required_trivial_reasons(apis, &all, &structs, &enums, &cxx, &aliases, &impls);
 
+        let required_unpin =
+            unpin::required_unpin_reasons(apis, &all, &structs, &enums, &cxx, &aliases);
+
         let mut types = Types {
             all,
             structs,
@@ -243,6 +249,7 @@ impl<'a> Types<'a> {
             aliases,
             untrusted,
             required_trivial,
+            required_unpin,
             impls,
             resolutions,
             struct_improper_ctypes,

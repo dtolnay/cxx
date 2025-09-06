@@ -27,6 +27,7 @@ mod cfg;
 mod derive;
 mod expand;
 mod generics;
+mod message;
 mod syntax;
 mod tokens;
 mod type_id;

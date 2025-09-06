@@ -237,9 +237,10 @@ pub mod ffi {
         fn c_static_method() -> usize;
     }
 
-    struct ContainsOpaqueRust {
+    struct ContainsOpaqueRust<'a> {
         boxed: Box<OpaqueRust>,
         vecked: Vec<OpaqueRust>,
+        referenced: &'a mut OpaqueRust,
     }
 
     extern "C++" {
