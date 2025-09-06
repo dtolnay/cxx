@@ -3,7 +3,7 @@ use crate::syntax::instantiate::ImplKey;
 use crate::syntax::map::{OrderedMap, UnorderedMap};
 use crate::syntax::set::{OrderedSet as Set, UnorderedSet};
 use crate::syntax::types::ConditionalImpl;
-use crate::syntax::{Api, Enum, ExternFn, NamedType, Pair, Struct, Type, TypeAlias};
+use crate::syntax::{Api, Enum, ExternFn, NamedType, Pair, SliceRef, Struct, Type, TypeAlias};
 use proc_macro2::Ident;
 use std::fmt::{self, Display};
 
@@ -23,9 +23,7 @@ pub(crate) enum TrivialReason<'a> {
         #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
         local: bool,
     },
-    SliceElement {
-        mutable: bool,
-    },
+    SliceElement(&'a SliceRef),
 }
 
 pub(crate) fn required_trivial_reasons<'a>(
@@ -100,9 +98,7 @@ pub(crate) fn required_trivial_reasons<'a>(
             }
             Type::SliceRef(ty) => {
                 if let Type::Ident(ident) = &ty.inner {
-                    let reason = TrivialReason::SliceElement {
-                        mutable: ty.mutable,
-                    };
+                    let reason = TrivialReason::SliceElement(ty);
                     insist_extern_types_are_trivial(ident, reason);
                 }
             }
@@ -145,8 +141,8 @@ pub(crate) fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl 
                     }
                     TrivialReason::BoxTarget { .. } => box_target = true,
                     TrivialReason::VecElement { .. } => vec_element = true,
-                    TrivialReason::SliceElement { mutable } => {
-                        if *mutable {
+                    TrivialReason::SliceElement(slice) => {
+                        if slice.mutable {
                             slice_mut_element = true;
                         } else {
                             slice_shared_element = true;
