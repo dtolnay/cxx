@@ -9,8 +9,8 @@
 
 #![doc(html_root_url = "https://docs.rs/cxx-gen/0.7.177")]
 #![deny(missing_docs)]
-#![allow(dead_code)]
-#![cfg_attr(not(check_cfg), allow(unexpected_cfgs))]
+#![expect(dead_code)]
+#![cfg_attr(not(check_cfg), expect(unexpected_cfgs))]
 #![allow(
     clippy::cast_sign_loss,
     clippy::default_trait_access,
