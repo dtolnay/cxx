@@ -1425,93 +1425,101 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
                 TrivialReason::VecElement { local: false } => require_vec = true,
                 TrivialReason::StructField(_)
                 | TrivialReason::FunctionArgument(_)
-                | TrivialReason::FunctionReturn(_)
-                | TrivialReason::SliceElement { .. } => require_extern_type_trivial = true,
+                | TrivialReason::FunctionReturn(_) => require_extern_type_trivial = true,
             }
         }
     }
 
-    if let Some(reason) = types.required_unpin.get(ident) {
-        let ampersand;
-        let reference_lifetime;
-        let mutability;
-        let mut inner;
-        let generics;
-        let shorthand;
-        match reason {
-            UnpinReason::Receiver(receiver) => {
-                ampersand = &receiver.ampersand;
-                reference_lifetime = &receiver.lifetime;
-                mutability = &receiver.mutability;
-                inner = receiver.ty.rust.clone();
-                generics = &receiver.ty.generics;
-                shorthand = receiver.shorthand;
-                if receiver.shorthand {
-                    inner.set_span(receiver.var.span);
-                }
-            }
-            UnpinReason::Ref(mutable_reference) => {
-                ampersand = &mutable_reference.ampersand;
-                reference_lifetime = &mutable_reference.lifetime;
-                mutability = &mutable_reference.mutability;
-                let Type::Ident(inner_type) = &mutable_reference.inner else {
-                    unreachable!();
-                };
-                inner = inner_type.rust.clone();
-                generics = &inner_type.generics;
-                shorthand = false;
-            }
-        }
-        let trait_name = format_ident!("ReferenceToUnpin_{ident}");
-        let message =
-            format!("mutable reference to C++ type requires a pin -- use Pin<&mut {ident}>");
-        let label = {
-            let mut label = Message::new();
-            write!(label, "use `");
-            if shorthand {
-                write!(label, "self: ");
-            }
-            write!(label, "Pin<&");
-            if let Some(reference_lifetime) = reference_lifetime {
-                write!(label, "{reference_lifetime} ");
-            }
-            write!(label, "mut {ident}");
-            if !generics.lifetimes.is_empty() {
-                write!(label, "<");
-                for (i, lifetime) in generics.lifetimes.iter().enumerate() {
-                    if i > 0 {
-                        write!(label, ", ");
+    'unpin: {
+        if let Some(reason) = types.required_unpin.get(ident) {
+            let ampersand;
+            let reference_lifetime;
+            let mutability;
+            let mut inner;
+            let generics;
+            let shorthand;
+            match reason {
+                UnpinReason::Receiver(receiver) => {
+                    ampersand = &receiver.ampersand;
+                    reference_lifetime = &receiver.lifetime;
+                    mutability = &receiver.mutability;
+                    inner = receiver.ty.rust.clone();
+                    generics = &receiver.ty.generics;
+                    shorthand = receiver.shorthand;
+                    if receiver.shorthand {
+                        inner.set_span(receiver.var.span);
                     }
-                    write!(label, "{lifetime}");
                 }
-                write!(label, ">");
-            } else if shorthand && !alias.generics.lifetimes.is_empty() {
-                write!(label, "<");
-                for i in 0..alias.generics.lifetimes.len() {
-                    if i > 0 {
-                        write!(label, ", ");
-                    }
-                    write!(label, "'_");
+                UnpinReason::Ref(mutable_reference) => {
+                    ampersand = &mutable_reference.ampersand;
+                    reference_lifetime = &mutable_reference.lifetime;
+                    mutability = &mutable_reference.mutability;
+                    let Type::Ident(inner_type) = &mutable_reference.inner else {
+                        unreachable!();
+                    };
+                    inner = inner_type.rust.clone();
+                    generics = &inner_type.generics;
+                    shorthand = false;
                 }
-                write!(label, ">");
+                UnpinReason::Slice => {
+                    require_unpin = true;
+                    break 'unpin;
+                }
             }
-            write!(label, ">`");
-            label
-        };
-        let lifetimes = generics.to_underscore_lifetimes();
-        verify.extend(quote! {
-            #attrs
-            let _ = {
-                #[diagnostic::on_unimplemented(message = #message, label = #label)]
-                trait #trait_name {
-                    fn check_unpin() {}
+            let trait_name = format_ident!("ReferenceToUnpin_{ident}");
+            let message =
+                format!("mutable reference to C++ type requires a pin -- use Pin<&mut {ident}>");
+            let label = {
+                let mut label = Message::new();
+                write!(label, "use `");
+                if shorthand {
+                    write!(label, "self: ");
                 }
-                #[diagnostic::do_not_recommend]
-                impl<'a, T: ?::cxx::core::marker::Sized + ::cxx::core::marker::Unpin> #trait_name for &'a mut T {}
-                <#ampersand #mutability #inner #lifetimes as #trait_name>::check_unpin
+                write!(label, "Pin<&");
+                if let Some(reference_lifetime) = reference_lifetime {
+                    write!(label, "{reference_lifetime} ");
+                }
+                write!(label, "mut {ident}");
+                if !generics.lifetimes.is_empty() {
+                    write!(label, "<");
+                    for (i, lifetime) in generics.lifetimes.iter().enumerate() {
+                        if i > 0 {
+                            write!(label, ", ");
+                        }
+                        write!(label, "{lifetime}");
+                    }
+                    write!(label, ">");
+                } else if shorthand && !alias.generics.lifetimes.is_empty() {
+                    write!(label, "<");
+                    for i in 0..alias.generics.lifetimes.len() {
+                        if i > 0 {
+                            write!(label, ", ");
+                        }
+                        write!(label, "'_");
+                    }
+                    write!(label, ">");
+                }
+                write!(label, ">`");
+                label
             };
-        });
-    } else if require_unpin {
+            let lifetimes = generics.to_underscore_lifetimes();
+            verify.extend(quote! {
+                #attrs
+                let _ = {
+                    #[diagnostic::on_unimplemented(message = #message, label = #label)]
+                    trait #trait_name {
+                        fn check_unpin() {}
+                    }
+                    #[diagnostic::do_not_recommend]
+                    impl<'a, T: ?::cxx::core::marker::Sized + ::cxx::core::marker::Unpin> #trait_name for &'a mut T {}
+                    <#ampersand #mutability #inner #lifetimes as #trait_name>::check_unpin
+                };
+            });
+            require_unpin = false;
+        }
+    }
+
+    if require_unpin {
         verify.extend(quote! {
             #attrs
             const _: fn() = ::cxx::private::require_unpin::<#ident #lifetimes>;

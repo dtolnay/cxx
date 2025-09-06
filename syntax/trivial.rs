@@ -23,9 +23,6 @@ pub(crate) enum TrivialReason<'a> {
         #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
         local: bool,
     },
-    SliceElement {
-        mutable: bool,
-    },
 }
 
 pub(crate) fn required_trivial_reasons<'a>(
@@ -98,14 +95,6 @@ pub(crate) fn required_trivial_reasons<'a>(
                     insist_extern_types_are_trivial(ident, reason);
                 }
             }
-            Type::SliceRef(ty) => {
-                if let Type::Ident(ident) = &ty.inner {
-                    let reason = TrivialReason::SliceElement {
-                        mutable: ty.mutable,
-                    };
-                    insist_extern_types_are_trivial(ident, reason);
-                }
-            }
             _ => {}
         }
     }
@@ -129,8 +118,6 @@ pub(crate) fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl 
             let mut return_of = Set::new();
             let mut box_target = false;
             let mut vec_element = false;
-            let mut slice_shared_element = false;
-            let mut slice_mut_element = false;
 
             for reason in self.reasons {
                 match reason {
@@ -145,13 +132,6 @@ pub(crate) fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl 
                     }
                     TrivialReason::BoxTarget { .. } => box_target = true,
                     TrivialReason::VecElement { .. } => vec_element = true,
-                    TrivialReason::SliceElement { mutable } => {
-                        if *mutable {
-                            slice_mut_element = true;
-                        } else {
-                            slice_shared_element = true;
-                        }
-                    }
                 }
             }
 
@@ -191,15 +171,6 @@ pub(crate) fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl 
                     param: self.name,
                 });
             }
-            if slice_shared_element || slice_mut_element {
-                clauses.push(Clause::Slice {
-                    article: "a",
-                    desc: "slice element in",
-                    shared: slice_shared_element,
-                    mutable: slice_mut_element,
-                    param: self.name,
-                });
-            }
 
             for (i, clause) in clauses.iter().enumerate() {
                 if i == 0 {
@@ -227,21 +198,12 @@ pub(crate) fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl 
             desc: &'a str,
             param: &'a Pair,
         },
-        Slice {
-            article: &'a str,
-            desc: &'a str,
-            shared: bool,
-            mutable: bool,
-            param: &'a Pair,
-        },
     }
 
     impl<'a> Clause<'a> {
         fn article(&self) -> &'a str {
             match self {
-                Clause::Set { article, .. }
-                | Clause::Ty1 { article, .. }
-                | Clause::Slice { article, .. } => article,
+                Clause::Set { article, .. } | Clause::Ty1 { article, .. } => article,
             }
         }
 
@@ -266,25 +228,6 @@ pub(crate) fn as_what<'a>(name: &'a Pair, reasons: &'a [TrivialReason]) -> impl 
                     desc,
                     param,
                 } => write!(f, "{}<{}>", desc, param.rust),
-                Clause::Slice {
-                    article: _,
-                    desc,
-                    shared,
-                    mutable,
-                    param,
-                } => {
-                    write!(f, "{} ", desc)?;
-                    if *shared {
-                        write!(f, "&[{}]", param.rust)?;
-                    }
-                    if *shared && *mutable {
-                        write!(f, " and ")?;
-                    }
-                    if *mutable {
-                        write!(f, "&mut [{}]", param.rust)?;
-                    }
-                    Ok(())
-                }
             }
         }
     }

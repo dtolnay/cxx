@@ -1,10 +1,11 @@
 use cxx::{type_id, ExternType};
+use std::marker::PhantomPinned;
 
 #[repr(C)]
 struct ElementTrivial(usize);
 
 #[repr(C)]
-struct ElementOpaque(usize);
+struct ElementOpaque(usize, PhantomPinned);
 
 #[cxx::bridge]
 mod ffi {
