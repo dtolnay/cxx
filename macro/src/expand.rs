@@ -1427,7 +1427,10 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
                 TrivialReason::StructField(_)
                 | TrivialReason::FunctionArgument(_)
                 | TrivialReason::FunctionReturn(_) => require_extern_type_trivial = true,
-                TrivialReason::SliceElement(slice) => require_rust_type_or_trivial = Some(slice),
+                TrivialReason::SliceElement(slice) => {
+                    require_unpin |= slice.mutable;
+                    require_rust_type_or_trivial = Some(slice);
+                }
             }
         }
     }

@@ -1,0 +1,18 @@
+error[E0277]: `PhantomPinned` cannot be unpinned
+  --> tests/ui/slice_of_pinned.rs:10:14
+   |
+10 |         type Pinned = crate::Pinned;
+   |              ^^^^^^ within `Pinned`, the trait `Unpin` is not implemented for `PhantomPinned`
+   |
+   = note: consider using the `pin!` macro
+           consider using `Box::pin` if you need to access the pinned value outside of the current scope
+note: required because it appears within the type `Pinned`
+  --> tests/ui/slice_of_pinned.rs:5:8
+   |
+ 5 | struct Pinned(usize, PhantomPinned);
+   |        ^^^^^^
+note: required by a bound in `require_unpin`
+  --> src/rust_type.rs
+   |
+   | pub fn require_unpin<T: ?Sized + Unpin>() {}
+   |                                  ^^^^^ required by this bound in `require_unpin`
