@@ -1461,8 +1461,26 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
                     generics = &inner_type.generics;
                     shorthand = false;
                 }
-                UnpinReason::Slice => {
-                    require_unpin = true;
+                UnpinReason::Slice(slice) => {
+                    ampersand = &slice.ampersand;
+                    mutability = &slice.mutability;
+                    let inner = quote_spanned!(slice.bracket.span=> [#ident #lifetimes]);
+                    let trait_name = format_ident!("SliceOfUnpin_{ident}");
+                    let message = "slice of opaque C++ type is not supported";
+                    let label = format!("requires `{ident}: Unpin`");
+                    verify.extend(quote! {
+                        #attrs
+                        let _ = {
+                            #[diagnostic::on_unimplemented(message = #message, label = #label)]
+                            trait #trait_name {
+                                fn check_unpin() {}
+                            }
+                            #[diagnostic::do_not_recommend]
+                            impl<'a, T: ?::cxx::core::marker::Sized + ::cxx::core::marker::Unpin> #trait_name for &'a #mutability T {}
+                            <#ampersand #mutability #inner as #trait_name>::check_unpin
+                        };
+                    });
+                    require_unpin = false;
                     break 'unpin;
                 }
             }

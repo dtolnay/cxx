@@ -1,18 +1,7 @@
-error[E0277]: `PhantomPinned` cannot be unpinned
-  --> tests/ui/slice_of_type_alias.rs:14:14
+error[E0277]: slice of opaque C++ type is not supported
+  --> tests/ui/slice_of_type_alias.rs:17:21
    |
-14 |         type ElementOpaque = crate::ElementOpaque;
-   |              ^^^^^^^^^^^^^ within `ElementOpaque`, the trait `Unpin` is not implemented for `PhantomPinned`
+17 |         fn g(slice: &[ElementOpaque]);
+   |                     ^^^^^^^^^^^^^^^^ requires `ElementOpaque: Unpin`
    |
-   = note: consider using the `pin!` macro
-           consider using `Box::pin` if you need to access the pinned value outside of the current scope
-note: required because it appears within the type `ElementOpaque`
-  --> tests/ui/slice_of_type_alias.rs:8:8
-   |
- 8 | struct ElementOpaque(usize, PhantomPinned);
-   |        ^^^^^^^^^^^^^
-note: required by a bound in `require_unpin`
-  --> src/rust_type.rs
-   |
-   | pub fn require_unpin<T: ?Sized + Unpin>() {}
-   |                                  ^^^^^ required by this bound in `require_unpin`
+   = help: the trait `SliceOfUnpin_ElementOpaque` is not implemented for `&[ElementOpaque]`

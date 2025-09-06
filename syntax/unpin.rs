@@ -1,14 +1,14 @@
 use crate::syntax::cfg::ComputedCfg;
 use crate::syntax::map::{OrderedMap, UnorderedMap};
 use crate::syntax::set::UnorderedSet;
-use crate::syntax::{Api, Enum, NamedType, Receiver, Ref, Struct, Type, TypeAlias};
+use crate::syntax::{Api, Enum, NamedType, Receiver, Ref, SliceRef, Struct, Type, TypeAlias};
 use proc_macro2::Ident;
 
 #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
 pub(crate) enum UnpinReason<'a> {
     Receiver(&'a Receiver),
     Ref(&'a Ref),
-    Slice,
+    Slice(&'a SliceRef),
 }
 
 pub(crate) fn required_unpin_reasons<'a>(
@@ -32,7 +32,7 @@ pub(crate) fn required_unpin_reasons<'a>(
         if let Type::SliceRef(ty) = ty {
             if let Type::Ident(inner) = &ty.inner {
                 if is_extern_type_alias(inner) {
-                    reasons.insert(&inner.rust, UnpinReason::Slice);
+                    reasons.insert(&inner.rust, UnpinReason::Slice(ty));
                 }
             }
         }
