@@ -1,14 +1,48 @@
-error[E0271]: type mismatch resolving `<Opaque as ExternType>::Kind == Trivial`
-  --> tests/ui/pin_mut_alias.rs:14:14
+error[E0271]: type mismatch resolving `<Arg as ExternType>::Kind == Trivial`
+  --> tests/ui/pin_mut_alias.rs:15:18
    |
-14 |         type Opaque = crate::Opaque;
-   |              ^^^^^^ type mismatch resolving `<Opaque as ExternType>::Kind == Trivial`
+15 |             type Arg = crate::arg::Arg;
+   |                  ^^^ type mismatch resolving `<Arg as ExternType>::Kind == Trivial`
    |
 note: expected this to be `Trivial`
-  --> tests/ui/pin_mut_alias.rs:8:17
+  --> tests/ui/pin_mut_alias.rs:9:21
    |
- 8 |     type Kind = cxx::kind::Opaque;
-   |                 ^^^^^^^^^^^^^^^^^
+ 9 |         type Kind = cxx::kind::Opaque;
+   |                     ^^^^^^^^^^^^^^^^^
+note: required by a bound in `verify_extern_kind`
+  --> src/extern_type.rs
+   |
+   | pub fn verify_extern_kind<T: ExternType<Kind = Kind>, Kind: self::Kind>() {}
+   |                                         ^^^^^^^^^^^ required by this bound in `verify_extern_kind`
+
+error[E0271]: type mismatch resolving `<Receiver as ExternType>::Kind == Trivial`
+  --> tests/ui/pin_mut_alias.rs:35:18
+   |
+35 |             type Receiver = crate::receiver::Receiver;
+   |                  ^^^^^^^^ type mismatch resolving `<Receiver as ExternType>::Kind == Trivial`
+   |
+note: expected this to be `Trivial`
+  --> tests/ui/pin_mut_alias.rs:29:21
+   |
+29 |         type Kind = cxx::kind::Opaque;
+   |                     ^^^^^^^^^^^^^^^^^
+note: required by a bound in `verify_extern_kind`
+  --> src/extern_type.rs
+   |
+   | pub fn verify_extern_kind<T: ExternType<Kind = Kind>, Kind: self::Kind>() {}
+   |                                         ^^^^^^^^^^^ required by this bound in `verify_extern_kind`
+
+error[E0271]: type mismatch resolving `<Receiver2 as ExternType>::Kind == Trivial`
+  --> tests/ui/pin_mut_alias.rs:55:18
+   |
+55 |             type Receiver2 = crate::receiver2::Receiver2;
+   |                  ^^^^^^^^^ type mismatch resolving `<Receiver2 as ExternType>::Kind == Trivial`
+   |
+note: expected this to be `Trivial`
+  --> tests/ui/pin_mut_alias.rs:49:21
+   |
+49 |         type Kind = cxx::kind::Opaque;
+   |                     ^^^^^^^^^^^^^^^^^
 note: required by a bound in `verify_extern_kind`
   --> src/extern_type.rs
    |
