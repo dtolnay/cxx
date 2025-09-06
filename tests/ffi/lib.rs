@@ -352,6 +352,10 @@ pub mod ffi {
         fn r_static_method() -> usize;
     }
 
+    unsafe extern "C++" {
+        fn c_member_function_on_rust_type(self: &R);
+    }
+
     struct Dag0 {
         i: i32,
     }
