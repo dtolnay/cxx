@@ -7,6 +7,7 @@ use crate::syntax::namespace::Namespace;
 use crate::syntax::qualified::QualifiedName;
 use crate::syntax::report::Errors;
 use crate::syntax::symbol::Symbol;
+use crate::syntax::trivial::TrivialReason;
 use crate::syntax::types::ConditionalImpl;
 use crate::syntax::{
     self, check, mangle, Api, Doc, Enum, ExternFn, ExternType, FnKind, Lang, Lifetimes, Pair,
@@ -1409,7 +1410,48 @@ fn expand_type_alias_verify(alias: &TypeAlias, types: &Types) -> TokenStream {
         const _: fn() = #begin #ident #lifetimes, #type_id #end;
     };
 
-    if types.required_trivial.contains_key(&alias.name.rust) {
+    let mut require_unpin = false;
+    let mut require_box = false;
+    let mut require_vec = false;
+    let mut require_extern_type_trivial = false;
+    if let Some(reasons) = types.required_trivial.get(&alias.name.rust) {
+        for reason in reasons {
+            match reason {
+                TrivialReason::BoxTarget { local: true }
+                | TrivialReason::VecElement { local: true } => require_unpin = true,
+                TrivialReason::BoxTarget { local: false } => require_box = true,
+                TrivialReason::VecElement { local: false } => require_vec = true,
+                TrivialReason::StructField(_)
+                | TrivialReason::FunctionArgument(_)
+                | TrivialReason::FunctionReturn(_)
+                | TrivialReason::SliceElement { .. }
+                | TrivialReason::UnpinnedMut(_) => require_extern_type_trivial = true,
+            }
+        }
+    }
+
+    if require_unpin {
+        verify.extend(quote! {
+            #attrs
+            const _: fn() = ::cxx::private::require_unpin::<#ident #lifetimes>;
+        });
+    }
+
+    if require_box {
+        verify.extend(quote! {
+            #attrs
+            const _: fn() = ::cxx::private::require_box::<#ident #lifetimes>;
+        });
+    }
+
+    if require_vec {
+        verify.extend(quote! {
+            #attrs
+            const _: fn() = ::cxx::private::require_vec::<#ident #lifetimes>;
+        });
+    }
+
+    if require_extern_type_trivial {
         let begin = quote_spanned!(begin_span=> ::cxx::private::verify_extern_kind::<);
         verify.extend(quote! {
             #attrs

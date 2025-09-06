@@ -232,7 +232,7 @@ impl<'a> Types<'a> {
         // the APIs above, in case some function or struct references a type
         // which is declared subsequently.
         let required_trivial =
-            trivial::required_trivial_reasons(apis, &all, &structs, &enums, &cxx);
+            trivial::required_trivial_reasons(apis, &all, &structs, &enums, &cxx, &aliases, &impls);
 
         let mut types = Types {
             all,

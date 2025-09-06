@@ -1,5 +1,7 @@
 #![deny(warnings)] // Check that expansion of `cxx::bridge` doesn't trigger warnings.
 
+pub struct OpaqueRust(pub i32);
+
 #[cxx::bridge(namespace = "tests")]
 pub mod ffi {
     struct Job {
@@ -14,7 +16,14 @@ pub mod ffi {
         fn c_take_unique_ptr(c: UniquePtr<C>);
     }
 
+    extern "Rust" {
+        #[derive(ExternType)]
+        type OpaqueRust;
+    }
+
     impl Vec<Job> {}
+    impl Box<OpaqueRust> {}
+    impl Vec<OpaqueRust> {}
 }
 
 #[cxx::bridge(namespace = "tests")]

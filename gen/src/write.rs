@@ -516,11 +516,20 @@ fn check_trivial_extern_type(out: &mut OutFile, alias: &TypeAlias, reasons: &[Tr
 
     let id = alias.name.to_fully_qualified();
     out.builtin.relocatable = true;
-    writeln!(out, "static_assert(");
-    if reasons
-        .iter()
-        .all(|r| matches!(r, TrivialReason::StructField(_) | TrivialReason::VecElement))
-    {
+
+    let mut rust_type_ok = true;
+    let mut array_ok = true;
+    for reason in reasons {
+        // Allow extern type that inherits from ::rust::Opaque in positions
+        // where an opaque Rust type would be allowed.
+        rust_type_ok &= match reason {
+            TrivialReason::BoxTarget { .. } | TrivialReason::VecElement { .. } => true,
+            TrivialReason::StructField(_)
+            | TrivialReason::FunctionArgument(_)
+            | TrivialReason::FunctionReturn(_)
+            | TrivialReason::SliceElement { .. }
+            | TrivialReason::UnpinnedMut(_) => false,
+        };
         // If the type is only used as a struct field or Vec element, not as
         // by-value function argument or return value, then C array of trivially
         // relocatable type is also permissible.
@@ -531,10 +540,28 @@ fn check_trivial_extern_type(out: &mut OutFile, alias: &TypeAlias, reasons: &[Tr
         //     --- means something totally different:
         //     void f(char buf[N]);
         //
+        array_ok &= match reason {
+            TrivialReason::StructField(_) | TrivialReason::VecElement { .. } => true,
+            TrivialReason::FunctionArgument(_)
+            | TrivialReason::FunctionReturn(_)
+            | TrivialReason::BoxTarget { .. }
+            | TrivialReason::SliceElement { .. }
+            | TrivialReason::UnpinnedMut(_) => false,
+        };
+    }
+
+    writeln!(out, "static_assert(");
+    write!(out, "    ");
+    if rust_type_ok {
+        out.include.type_traits = true;
+        out.builtin.opaque = true;
+        write!(out, "::std::is_base_of<::rust::Opaque, {}>::value || ", id);
+    }
+    if array_ok {
         out.builtin.relocatable_or_array = true;
-        writeln!(out, "    ::rust::IsRelocatableOrArray<{}>::value,", id);
+        writeln!(out, "::rust::IsRelocatableOrArray<{}>::value,", id);
     } else {
-        writeln!(out, "    ::rust::IsRelocatable<{}>::value,", id);
+        writeln!(out, "::rust::IsRelocatable<{}>::value,", id);
     }
     writeln!(
         out,
