@@ -229,7 +229,12 @@ fn check_type_ref(cx: &mut Check, ty: &Ref) {
     if ty.mutable && !ty.pinned {
         if let Some(requires_pin) = match &ty.inner {
             Type::Ident(ident)
-                if ident.rust == CxxString || is_opaque_cxx(cx.types, &ident.rust) =>
+                if ident.rust == CxxString
+                    || (cx.types.cxx.contains(&ident.rust)
+                        && !cx.types.structs.contains_key(&ident.rust)
+                        && !cx.types.enums.contains_key(&ident.rust)
+                        && !(cx.types.aliases.contains_key(&ident.rust)
+                            && cx.types.required_trivial.contains_key(&ident.rust))) =>
             {
                 Some(ident.rust.to_string())
             }
@@ -284,7 +289,12 @@ fn check_type_slice_ref(cx: &mut Check, ty: &SliceRef) {
         let mutable = if ty.mutable { "mut " } else { "" };
         let mut msg = format!("unsupported &{}[T] element type", mutable);
         if let Type::Ident(ident) = &ty.inner {
-            if is_opaque_cxx(cx.types, &ident.rust) {
+            if cx.types.cxx.contains(&ident.rust)
+                && !cx.types.structs.contains_key(&ident.rust)
+                && !cx.types.enums.contains_key(&ident.rust)
+                && !(cx.types.aliases.contains_key(&ident.rust)
+                    && cx.types.required_trivial.contains_key(&ident.rust))
+            {
                 msg += ": opaque C++ type is not supported yet";
             }
         }
@@ -457,7 +467,11 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
                 cx.error(span, "unrecognized receiver type");
             } else if receiver.mutable
                 && !receiver.pinned
-                && is_opaque_cxx(cx.types, &receiver.ty.rust)
+                && cx.types.cxx.contains(&receiver.ty.rust)
+                && !cx.types.structs.contains_key(&receiver.ty.rust)
+                && !cx.types.enums.contains_key(&receiver.ty.rust)
+                && !(cx.types.aliases.contains_key(&receiver.ty.rust)
+                    && cx.types.required_trivial.contains_key(&receiver.ty.rust))
             {
                 cx.error(
                     span,
@@ -665,7 +679,13 @@ fn is_unsized(types: &Types, ty: &Type) -> bool {
     match ty {
         Type::Ident(ident) => {
             let ident = &ident.rust;
-            ident == CxxString || is_opaque_cxx(types, ident) || types.rust.contains(ident)
+            ident == CxxString
+                || (types.cxx.contains(ident)
+                    && !types.structs.contains_key(ident)
+                    && !types.enums.contains_key(ident)
+                    && !(types.aliases.contains_key(ident)
+                        && types.required_trivial.contains_key(ident)))
+                || types.rust.contains(ident)
         }
         Type::Array(array) => is_unsized(types, &array.inner),
         Type::CxxVector(_) | Type::Fn(_) | Type::Void(_) => true,
@@ -679,13 +699,6 @@ fn is_unsized(types: &Types, ty: &Type) -> bool {
         | Type::Str(_)
         | Type::SliceRef(_) => false,
     }
-}
-
-fn is_opaque_cxx(types: &Types, ty: &Ident) -> bool {
-    types.cxx.contains(ty)
-        && !types.structs.contains_key(ty)
-        && !types.enums.contains_key(ty)
-        && !(types.aliases.contains_key(ty) && types.required_trivial.contains_key(ty))
 }
 
 fn span_for_struct_error(strct: &Struct) -> TokenStream {
