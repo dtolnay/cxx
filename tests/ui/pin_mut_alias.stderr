@@ -1,0 +1,16 @@
+error[E0271]: type mismatch resolving `<Opaque as ExternType>::Kind == Trivial`
+  --> tests/ui/pin_mut_alias.rs:14:14
+   |
+14 |         type Opaque = crate::Opaque;
+   |              ^^^^^^ type mismatch resolving `<Opaque as ExternType>::Kind == Trivial`
+   |
+note: expected this to be `Trivial`
+  --> tests/ui/pin_mut_alias.rs:8:17
+   |
+ 8 |     type Kind = cxx::kind::Opaque;
+   |                 ^^^^^^^^^^^^^^^^^
+note: required by a bound in `verify_extern_kind`
+  --> src/extern_type.rs
+   |
+   | pub fn verify_extern_kind<T: ExternType<Kind = Kind>, Kind: self::Kind>() {}
+   |                                         ^^^^^^^^^^^ required by this bound in `verify_extern_kind`
