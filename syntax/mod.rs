@@ -15,6 +15,7 @@ mod improper;
 pub(crate) mod instantiate;
 pub(crate) mod mangle;
 pub(crate) mod map;
+pub(crate) mod message;
 mod names;
 pub(crate) mod namespace;
 mod parse;
@@ -249,6 +250,7 @@ pub(crate) struct Variant {
     #[cfg_attr(proc_macro, expect(dead_code))]
     pub cfg: CfgExpr,
     pub doc: Doc,
+    pub default: bool,
     #[cfg_attr(not(proc_macro), expect(dead_code))]
     pub attrs: OtherAttrs,
     pub name: Pair,
