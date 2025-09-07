@@ -623,6 +623,14 @@ extern "C" std::string *cxx_test_suite_get_unique_ptr_string() noexcept {
   return std::unique_ptr<std::string>(new std::string("2020")).release();
 }
 
+const std::vector<uint8_t> &C::c_lifetime_elision_member_fn() const {
+  return this->get_v();
+}
+
+const std::vector<uint8_t> &c_lifetime_elision_fn(const C &c) {
+  return c.get_v();
+}
+
 rust::String C::cOverloadedMethod(int32_t x) const {
   return rust::String(std::to_string(x));
 }

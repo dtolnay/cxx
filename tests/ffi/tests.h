@@ -60,6 +60,7 @@ public:
   size_t get_fail();
   const std::vector<uint8_t> &get_v() const;
   std::vector<uint8_t> &get_v();
+  const std::vector<uint8_t> &c_lifetime_elision_member_fn() const;
   rust::String cOverloadedMethod(int32_t x) const;
   rust::String cOverloadedMethod(rust::Str x) const;
   static size_t c_static_method();
@@ -226,6 +227,7 @@ std::unique_ptr<E> c_return_opaque_ptr();
 E &c_return_opaque_mut_pin(E &e);
 std::unique_ptr<::F::F> c_return_ns_opaque_ptr();
 
+const std::vector<uint8_t> &c_lifetime_elision_fn(const C &c);
 rust::String cOverloadedFunction(int32_t x);
 rust::String cOverloadedFunction(rust::Str x);
 

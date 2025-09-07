@@ -14,6 +14,8 @@ pub mod ffi {
         type C = crate::ffi::C;
 
         fn c_take_unique_ptr(c: UniquePtr<C>);
+        fn c_lifetime_elision_member_fn(self: &C) -> &CxxVector<u8>;
+        fn c_lifetime_elision_fn(c: &C) -> &CxxVector<u8>;
     }
 
     extern "Rust" {
