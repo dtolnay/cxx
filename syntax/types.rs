@@ -321,6 +321,29 @@ impl<'a> Types<'a> {
             || self.enums.contains_key(ty)
             || self.aliases.contains_key(ty)
     }
+
+    pub(crate) fn contains_elided_lifetime(&self, ty: &Type) -> bool {
+        match ty {
+            Type::Ident(ty) => {
+                Atom::from(&ty.rust).is_none()
+                    && ty.generics.lifetimes.len()
+                        != self.resolve(&ty.rust).generics.lifetimes.len()
+            }
+            Type::RustBox(ty)
+            | Type::RustVec(ty)
+            | Type::UniquePtr(ty)
+            | Type::SharedPtr(ty)
+            | Type::WeakPtr(ty)
+            | Type::CxxVector(ty) => self.contains_elided_lifetime(&ty.inner),
+            Type::Ref(ty) | Type::Str(ty) => {
+                ty.lifetime.is_none() || self.contains_elided_lifetime(&ty.inner)
+            }
+            Type::Ptr(ty) => self.contains_elided_lifetime(&ty.inner),
+            Type::SliceRef(ty) => ty.lifetime.is_none() || self.contains_elided_lifetime(&ty.inner),
+            Type::Array(ty) => self.contains_elided_lifetime(&ty.inner),
+            Type::Fn(_) | Type::Void(_) => false,
+        }
+    }
 }
 
 impl<'t, 'a> IntoIterator for &'t Types<'a> {
