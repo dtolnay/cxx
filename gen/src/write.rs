@@ -787,7 +787,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         out.builtin.ptr_len = true;
         write!(out, "::rust::repr::PtrLen ");
     } else {
-        write_extern_return_type_space(out, &efn.ret);
+        write_extern_return_type_space(out, efn, efn.lang);
     }
     let mangled = mangle::extern_fn(efn, out.types);
     write!(out, "{}(", mangled);
@@ -816,7 +816,7 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
             write_extern_arg(out, arg);
         }
     }
-    let indirect_return = indirect_return(efn, out.types);
+    let indirect_return = indirect_return(efn, out.types, efn.lang);
     if indirect_return {
         if !efn.args.is_empty() || matches!(efn.kind, FnKind::Method(_)) {
             write!(out, ", ");
@@ -996,7 +996,7 @@ fn write_rust_function_decl_impl(
         out.builtin.ptr_len = true;
         write!(out, "::rust::repr::PtrLen ");
     } else {
-        write_extern_return_type_space(out, &sig.ret);
+        write_extern_return_type_space(out, sig, Lang::Rust);
     }
     write!(out, "{}(", link_name);
     let mut needs_comma = false;
@@ -1019,7 +1019,7 @@ fn write_rust_function_decl_impl(
         write_extern_arg(out, arg);
         needs_comma = true;
     }
-    if indirect_return(sig, out.types) {
+    if indirect_return(sig, out.types, Lang::Rust) {
         if needs_comma {
             write!(out, ", ");
         }
@@ -1148,7 +1148,7 @@ fn write_rust_function_shim_impl(
         }
     }
     write!(out, "  ");
-    let indirect_return = indirect_return(sig, out.types);
+    let indirect_return = indirect_return(sig, out.types, Lang::Rust);
     if indirect_return {
         out.builtin.maybe_uninit = true;
         write!(out, "::rust::MaybeUninit<");
@@ -1264,10 +1264,15 @@ fn write_return_type(out: &mut OutFile, ty: &Option<Type>) {
     }
 }
 
-fn indirect_return(sig: &Signature, types: &Types) -> bool {
-    sig.ret
-        .as_ref()
-        .is_some_and(|ret| sig.throws || types.needs_indirect_abi(ret))
+fn indirect_return(sig: &Signature, types: &Types, lang: Lang) -> bool {
+    sig.ret.as_ref().is_some_and(|ret| {
+        sig.throws
+            || types.needs_indirect_abi(ret)
+            || match lang {
+                Lang::Cxx | Lang::CxxUnwind => types.contains_elided_lifetime(ret),
+                Lang::Rust => false,
+            }
+    })
 }
 
 fn write_indirect_return_type(out: &mut OutFile, ty: &Type) {
@@ -1296,8 +1301,9 @@ fn write_indirect_return_type_space(out: &mut OutFile, ty: &Type) {
     }
 }
 
-fn write_extern_return_type_space(out: &mut OutFile, ty: &Option<Type>) {
-    match ty {
+fn write_extern_return_type_space(out: &mut OutFile, sig: &Signature, lang: Lang) {
+    match &sig.ret {
+        Some(_) if indirect_return(sig, out.types, lang) => write!(out, "void "),
         Some(Type::RustBox(ty) | Type::UniquePtr(ty)) => {
             write_type_space(out, &ty.inner);
             write!(out, "*");
@@ -1313,8 +1319,7 @@ fn write_extern_return_type_space(out: &mut OutFile, ty: &Option<Type>) {
             out.builtin.repr_fat = true;
             write!(out, "::rust::repr::Fat ");
         }
-        Some(ty) if out.types.needs_indirect_abi(ty) => write!(out, "void "),
-        _ => write_return_type(out, ty),
+        ty => write_return_type(out, ty),
     }
 }
 

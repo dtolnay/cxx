@@ -614,10 +614,10 @@ fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
     let ret = if efn.throws {
         quote!(-> ::cxx::private::Result)
     } else {
-        expand_extern_return_type(&efn.ret, types, true)
+        expand_extern_return_type(efn, types, true, efn.lang)
     };
     let mut outparam = None;
-    if indirect_return(efn, types) {
+    if indirect_return(efn, types, efn.lang) {
         let ret = expand_extern_type(efn.ret.as_ref().unwrap(), types, true);
         outparam = Some(quote!(__return: *mut #ret));
     }
@@ -657,7 +657,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     } else {
         expand_return_type(&efn.ret)
     };
-    let indirect_return = indirect_return(efn, types);
+    let indirect_return = indirect_return(efn, types, efn.lang);
     let receiver_var = efn.receiver().into_iter().map(|receiver| {
         if types.is_considered_improper_ctype(&receiver.ty) {
             let var = receiver.var;
@@ -1281,7 +1281,7 @@ fn expand_rust_function_shim_impl(
     };
 
     let mut outparam = None;
-    let indirect_return = indirect_return(sig, types);
+    let indirect_return = indirect_return(sig, types, Lang::Rust);
     if indirect_return {
         let ret = expand_extern_type(sig.ret.as_ref().unwrap(), types, false);
         outparam = Some(quote_spanned!(span=> __return: *mut #ret,));
@@ -1315,7 +1315,7 @@ fn expand_rust_function_shim_impl(
     let ret = if sig.throws {
         quote!(-> ::cxx::private::Result)
     } else {
-        expand_extern_return_type(&sig.ret, types, false)
+        expand_extern_return_type(sig, types, false, Lang::Rust)
     };
 
     let pointer = match invoke {
@@ -2297,10 +2297,15 @@ fn expand_return_type(ret: &Option<Type>) -> TokenStream {
     }
 }
 
-fn indirect_return(sig: &Signature, types: &Types) -> bool {
-    sig.ret
-        .as_ref()
-        .is_some_and(|ret| sig.throws || types.needs_indirect_abi(ret))
+fn indirect_return(sig: &Signature, types: &Types, lang: Lang) -> bool {
+    sig.ret.as_ref().is_some_and(|ret| {
+        sig.throws
+            || types.needs_indirect_abi(ret)
+            || match lang {
+                Lang::Cxx | Lang::CxxUnwind => types.contains_elided_lifetime(ret),
+                Lang::Rust => false,
+            }
+    })
 }
 
 fn expand_extern_type(ty: &Type, types: &Types, proper: bool) -> TokenStream {
@@ -2375,9 +2380,14 @@ fn expand_extern_type(ty: &Type, types: &Types, proper: bool) -> TokenStream {
     }
 }
 
-fn expand_extern_return_type(ret: &Option<Type>, types: &Types, proper: bool) -> TokenStream {
-    let ret = match ret {
-        Some(ret) if !types.needs_indirect_abi(ret) => ret,
+fn expand_extern_return_type(
+    sig: &Signature,
+    types: &Types,
+    proper: bool,
+    lang: Lang,
+) -> TokenStream {
+    let ret = match &sig.ret {
+        Some(ret) if !indirect_return(sig, types, lang) => ret,
         _ => return TokenStream::new(),
     };
     let ty = expand_extern_type(ret, types, proper);
