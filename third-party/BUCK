@@ -514,10 +514,10 @@ cargo.rust_library(
     edition = "2018",
     platform = {
         "windows-gnu": dict(
-            deps = [":winapi-util-0.1.10"],
+            deps = [":winapi-util-0.1.11"],
         ),
         "windows-msvc": dict(
-            deps = [":winapi-util-0.1.10"],
+            deps = [":winapi-util-0.1.11"],
         ),
     },
     visibility = [],
@@ -562,54 +562,54 @@ cargo.rust_library(
 )
 
 http_archive(
-    name = "winapi-util-0.1.10.crate",
-    sha256 = "0978bf7171b3d90bac376700cb56d606feb40f251a475a5d6634613564460b22",
-    strip_prefix = "winapi-util-0.1.10",
-    urls = ["https://static.crates.io/crates/winapi-util/0.1.10/download"],
+    name = "winapi-util-0.1.11.crate",
+    sha256 = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22",
+    strip_prefix = "winapi-util-0.1.11",
+    urls = ["https://static.crates.io/crates/winapi-util/0.1.11/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "winapi-util-0.1.10",
-    srcs = [":winapi-util-0.1.10.crate"],
+    name = "winapi-util-0.1.11",
+    srcs = [":winapi-util-0.1.11.crate"],
     crate = "winapi_util",
-    crate_root = "winapi-util-0.1.10.crate/src/lib.rs",
+    crate_root = "winapi-util-0.1.11.crate/src/lib.rs",
     edition = "2021",
     target_compatible_with = ["prelude//os:windows"],
     visibility = [],
-    deps = [":windows-sys-0.60.2"],
+    deps = [":windows-sys-0.61.0"],
 )
 
 http_archive(
-    name = "windows-link-0.1.3.crate",
-    sha256 = "5e6ad25900d524eaabdbbb96d20b4311e1e7ae1699af4fb28c17ae66c80d798a",
-    strip_prefix = "windows-link-0.1.3",
-    urls = ["https://static.crates.io/crates/windows-link/0.1.3/download"],
+    name = "windows-link-0.2.0.crate",
+    sha256 = "45e46c0661abb7180e7b9c281db115305d49ca1709ab8242adf09666d2173c65",
+    strip_prefix = "windows-link-0.2.0",
+    urls = ["https://static.crates.io/crates/windows-link/0.2.0/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "windows-link-0.1.3",
-    srcs = [":windows-link-0.1.3.crate"],
+    name = "windows-link-0.2.0",
+    srcs = [":windows-link-0.2.0.crate"],
     crate = "windows_link",
-    crate_root = "windows-link-0.1.3.crate/src/lib.rs",
+    crate_root = "windows-link-0.2.0.crate/src/lib.rs",
     edition = "2021",
     visibility = [],
 )
 
 http_archive(
-    name = "windows-sys-0.60.2.crate",
-    sha256 = "f2f500e4d28234f72040990ec9d39e3a6b950f9f22d3dba18416c35882612bcb",
-    strip_prefix = "windows-sys-0.60.2",
-    urls = ["https://static.crates.io/crates/windows-sys/0.60.2/download"],
+    name = "windows-sys-0.61.0.crate",
+    sha256 = "e201184e40b2ede64bc2ea34968b28e33622acdbbf37104f0e4a33f7abe657aa",
+    strip_prefix = "windows-sys-0.61.0",
+    urls = ["https://static.crates.io/crates/windows-sys/0.61.0/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "windows-sys-0.60.2",
-    srcs = [":windows-sys-0.60.2.crate"],
+    name = "windows-sys-0.61.0",
+    srcs = [":windows-sys-0.61.0.crate"],
     crate = "windows_sys",
-    crate_root = "windows-sys-0.60.2.crate/src/lib.rs",
+    crate_root = "windows-sys-0.61.0.crate/src/lib.rs",
     edition = "2021",
     features = [
         "Win32",
@@ -623,25 +623,5 @@ cargo.rust_library(
     ],
     target_compatible_with = ["prelude//os:windows"],
     visibility = [],
-    deps = [":windows-targets-0.53.3"],
-)
-
-http_archive(
-    name = "windows-targets-0.53.3.crate",
-    sha256 = "d5fe6031c4041849d7c496a8ded650796e7b6ecc19df1a431c1a363342e5dc91",
-    strip_prefix = "windows-targets-0.53.3",
-    urls = ["https://static.crates.io/crates/windows-targets/0.53.3/download"],
-    visibility = [],
-)
-
-cargo.rust_library(
-    name = "windows-targets-0.53.3",
-    srcs = [":windows-targets-0.53.3.crate"],
-    crate = "windows_targets",
-    crate_root = "windows-targets-0.53.3.crate/src/lib.rs",
-    edition = "2021",
-    rustc_flags = ["--cfg=windows_raw_dylib"],
-    target_compatible_with = ["prelude//os:windows"],
-    visibility = [],
-    deps = [":windows-link-0.1.3"],
+    deps = [":windows-link-0.2.0"],
 )

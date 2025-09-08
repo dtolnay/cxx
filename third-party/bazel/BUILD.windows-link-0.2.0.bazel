@@ -17,7 +17,7 @@ cargo_toml_env_vars(
 )
 
 rust_library(
-    name = "windows_targets",
+    name = "windows_link",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = True,
@@ -44,7 +44,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=windows-targets",
+        "crate-name=windows-link",
         "manual",
         "noclippy",
         "norustfmt",
@@ -92,26 +92,5 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "0.53.3",
-    deps = select({
-        "@rules_rust//rust/platform:aarch64-pc-windows-msvc": [
-            "@vendor__windows_aarch64_msvc-0.53.0//:windows_aarch64_msvc",  # cfg(all(target_arch = "aarch64", target_env = "msvc", not(windows_raw_dylib)))
-        ],
-        "@rules_rust//rust/platform:i686-pc-windows-msvc": [
-            "@vendor__windows_i686_msvc-0.53.0//:windows_i686_msvc",  # cfg(all(target_arch = "x86", target_env = "msvc", not(windows_raw_dylib)))
-        ],
-        "@rules_rust//rust/platform:i686-unknown-linux-gnu": [
-            "@vendor__windows_i686_gnu-0.53.0//:windows_i686_gnu",  # cfg(all(target_arch = "x86", target_env = "gnu", not(target_abi = "llvm"), not(windows_raw_dylib)))
-        ],
-        "@rules_rust//rust/platform:x86_64-pc-windows-msvc": [
-            "@vendor__windows_x86_64_msvc-0.53.0//:windows_x86_64_msvc",  # cfg(all(any(target_arch = "x86_64", target_arch = "arm64ec"), target_env = "msvc", not(windows_raw_dylib)))
-        ],
-        "@rules_rust//rust/platform:x86_64-unknown-linux-gnu": [
-            "@vendor__windows_x86_64_gnu-0.53.0//:windows_x86_64_gnu",  # cfg(all(target_arch = "x86_64", target_env = "gnu", not(target_abi = "llvm"), not(windows_raw_dylib)))
-        ],
-        "@rules_rust//rust/platform:x86_64-unknown-nixos-gnu": [
-            "@vendor__windows_x86_64_gnu-0.53.0//:windows_x86_64_gnu",  # cfg(all(target_arch = "x86_64", target_env = "gnu", not(target_abi = "llvm"), not(windows_raw_dylib)))
-        ],
-        "//conditions:default": [],
-    }),
+    version = "0.2.0",
 )
