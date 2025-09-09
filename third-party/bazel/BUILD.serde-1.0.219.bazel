@@ -38,8 +38,17 @@ rust_library(
             "WORKSPACE.bazel",
         ],
     ),
+    crate_features = [
+        "default",
+        "derive",
+        "serde_derive",
+        "std",
+    ],
     crate_root = "src/lib.rs",
     edition = "2018",
+    proc_macro_deps = [
+        "@vendor__serde_derive-1.0.219//:serde_derive",
+    ],
     rustc_env_files = [
         ":cargo_toml_env_vars",
     ],
@@ -121,6 +130,12 @@ cargo_build_script(
             "WORKSPACE.bazel",
         ],
     ),
+    crate_features = [
+        "default",
+        "derive",
+        "serde_derive",
+        "std",
+    ],
     crate_name = "build_script_build",
     crate_root = "build.rs",
     data = glob(

@@ -10,6 +10,7 @@ path = "lib.rs"
 
 [dependencies]
 cxx = { path = "../..", default-features = false }
+serde = { version = "1", features = ["derive"] }
 
 [build-dependencies]
 cxx-build = { path = "../../gen/build" }

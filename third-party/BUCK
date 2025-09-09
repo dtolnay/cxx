@@ -440,6 +440,92 @@ buildscript_run(
     version = "1.0.9",
 )
 
+alias(
+    name = "serde",
+    actual = ":serde-1.0.219",
+    visibility = ["PUBLIC"],
+)
+
+http_archive(
+    name = "serde-1.0.219.crate",
+    sha256 = "5f0e2c6ed6606019b4e29e69dbaba95b11854410e5347d525002456dbbb786b6",
+    strip_prefix = "serde-1.0.219",
+    urls = ["https://static.crates.io/crates/serde/1.0.219/download"],
+    visibility = [],
+)
+
+cargo.rust_library(
+    name = "serde-1.0.219",
+    srcs = [":serde-1.0.219.crate"],
+    crate = "serde",
+    crate_root = "serde-1.0.219.crate/src/lib.rs",
+    edition = "2018",
+    env = {
+        "OUT_DIR": "$(location :serde-1.0.219-build-script-run[out_dir])",
+    },
+    features = [
+        "default",
+        "derive",
+        "serde_derive",
+        "std",
+    ],
+    rustc_flags = ["@$(location :serde-1.0.219-build-script-run[rustc_flags])"],
+    visibility = [],
+    deps = [":serde_derive-1.0.219"],
+)
+
+cargo.rust_binary(
+    name = "serde-1.0.219-build-script-build",
+    srcs = [":serde-1.0.219.crate"],
+    crate = "build_script_build",
+    crate_root = "serde-1.0.219.crate/build.rs",
+    edition = "2018",
+    features = [
+        "default",
+        "derive",
+        "serde_derive",
+        "std",
+    ],
+    visibility = [],
+)
+
+buildscript_run(
+    name = "serde-1.0.219-build-script-run",
+    package_name = "serde",
+    buildscript_rule = ":serde-1.0.219-build-script-build",
+    features = [
+        "default",
+        "derive",
+        "serde_derive",
+        "std",
+    ],
+    version = "1.0.219",
+)
+
+http_archive(
+    name = "serde_derive-1.0.219.crate",
+    sha256 = "5b0276cf7f2c73365f7157c8123c21cd9a50fbbd844757af28ca1f5925fc2a00",
+    strip_prefix = "serde_derive-1.0.219",
+    urls = ["https://static.crates.io/crates/serde_derive/1.0.219/download"],
+    visibility = [],
+)
+
+cargo.rust_library(
+    name = "serde_derive-1.0.219",
+    srcs = [":serde_derive-1.0.219.crate"],
+    crate = "serde_derive",
+    crate_root = "serde_derive-1.0.219.crate/src/lib.rs",
+    edition = "2015",
+    features = ["default"],
+    proc_macro = True,
+    visibility = [],
+    deps = [
+        ":proc-macro2-1.0.101",
+        ":quote-1.0.40",
+        ":syn-2.0.106",
+    ],
+)
+
 http_archive(
     name = "shlex-1.3.0.crate",
     sha256 = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64",

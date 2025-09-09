@@ -177,6 +177,7 @@ dependencies = [
  "quote",
  "rustversion",
  "scratch",
+ "serde",
  "syn",
 ]
 

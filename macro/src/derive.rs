@@ -100,10 +100,10 @@ pub(crate) fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) 
 fn struct_copy(strct: &Struct, span: Span) -> TokenStream {
     let ident = &strct.name.rust;
     let generics = &strct.generics;
-    let attrs = &strct.attrs;
+    let cfg_and_lint_attrs = strct.attrs.cfg_and_lint();
 
     quote_spanned! {span=>
-        #attrs
+        #cfg_and_lint_attrs
         #[automatically_derived]
         impl #generics ::cxx::core::marker::Copy for #ident #generics {}
     }
@@ -112,7 +112,7 @@ fn struct_copy(strct: &Struct, span: Span) -> TokenStream {
 fn struct_clone(strct: &Struct, span: Span) -> TokenStream {
     let ident = &strct.name.rust;
     let generics = &strct.generics;
-    let attrs = &strct.attrs;
+    let cfg_and_lint_attrs = strct.attrs.cfg_and_lint();
 
     let body = if derive::contains(&strct.derives, Trait::Copy) {
         quote!(*self)
@@ -130,7 +130,7 @@ fn struct_clone(strct: &Struct, span: Span) -> TokenStream {
     };
 
     quote_spanned! {span=>
-        #attrs
+        #cfg_and_lint_attrs
         #[automatically_derived]
         #[allow(clippy::expl_impl_clone_on_copy)]
         impl #generics ::cxx::core::clone::Clone for #ident #generics {
@@ -144,13 +144,13 @@ fn struct_clone(strct: &Struct, span: Span) -> TokenStream {
 fn struct_debug(strct: &Struct, span: Span) -> TokenStream {
     let ident = &strct.name.rust;
     let generics = &strct.generics;
-    let attrs = &strct.attrs;
+    let cfg_and_lint_attrs = strct.attrs.cfg_and_lint();
     let struct_name = ident.to_string();
     let fields = strct.fields.iter().map(|field| &field.name.rust);
     let field_names = fields.clone().map(Ident::to_string);
 
     quote_spanned! {span=>
-        #attrs
+        #cfg_and_lint_attrs
         #[automatically_derived]
         impl #generics ::cxx::core::fmt::Debug for #ident #generics {
             fn fmt(&self, formatter: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
@@ -165,11 +165,11 @@ fn struct_debug(strct: &Struct, span: Span) -> TokenStream {
 fn struct_default(strct: &Struct, span: Span) -> TokenStream {
     let ident = &strct.name.rust;
     let generics = &strct.generics;
-    let attrs = &strct.attrs;
+    let cfg_and_lint_attrs = strct.attrs.cfg_and_lint();
     let fields = strct.fields.iter().map(|field| &field.name.rust);
 
     quote_spanned! {span=>
-        #attrs
+        #cfg_and_lint_attrs
         #[automatically_derived]
         #[allow(clippy::derivable_impls)] // different spans than the derived impl
         impl #generics ::cxx::core::default::Default for #ident #generics {
@@ -187,11 +187,11 @@ fn struct_default(strct: &Struct, span: Span) -> TokenStream {
 fn struct_ord(strct: &Struct, span: Span) -> TokenStream {
     let ident = &strct.name.rust;
     let generics = &strct.generics;
-    let attrs = &strct.attrs;
+    let cfg_and_lint_attrs = strct.attrs.cfg_and_lint();
     let fields = strct.fields.iter().map(|field| &field.name.rust);
 
     quote_spanned! {span=>
-        #attrs
+        #cfg_and_lint_attrs
         #[automatically_derived]
         impl #generics ::cxx::core::cmp::Ord for #ident #generics {
             fn cmp(&self, other: &Self) -> ::cxx::core::cmp::Ordering {
@@ -210,7 +210,7 @@ fn struct_ord(strct: &Struct, span: Span) -> TokenStream {
 fn struct_partial_ord(strct: &Struct, span: Span) -> TokenStream {
     let ident = &strct.name.rust;
     let generics = &strct.generics;
-    let attrs = &strct.attrs;
+    let cfg_and_lint_attrs = strct.attrs.cfg_and_lint();
 
     let body = if derive::contains(&strct.derives, Trait::Ord) {
         quote! {
@@ -230,7 +230,7 @@ fn struct_partial_ord(strct: &Struct, span: Span) -> TokenStream {
     };
 
     quote_spanned! {span=>
-        #attrs
+        #cfg_and_lint_attrs
         #[automatically_derived]
         impl #generics ::cxx::core::cmp::PartialOrd for #ident #generics {
             #[allow(clippy::non_canonical_partial_ord_impl)]
@@ -243,10 +243,10 @@ fn struct_partial_ord(strct: &Struct, span: Span) -> TokenStream {
 
 fn enum_copy(enm: &Enum, span: Span) -> TokenStream {
     let ident = &enm.name.rust;
-    let attrs = &enm.attrs;
+    let cfg_and_lint_attrs = enm.attrs.cfg_and_lint();
 
     quote_spanned! {span=>
-        #attrs
+        #cfg_and_lint_attrs
         #[automatically_derived]
         impl ::cxx::core::marker::Copy for #ident {}
     }
@@ -254,10 +254,10 @@ fn enum_copy(enm: &Enum, span: Span) -> TokenStream {
 
 fn enum_clone(enm: &Enum, span: Span) -> TokenStream {
     let ident = &enm.name.rust;
-    let attrs = &enm.attrs;
+    let cfg_and_lint_attrs = enm.attrs.cfg_and_lint();
 
     quote_spanned! {span=>
-        #attrs
+        #cfg_and_lint_attrs
         #[automatically_derived]
         #[allow(clippy::expl_impl_clone_on_copy)]
         impl ::cxx::core::clone::Clone for #ident {
@@ -270,7 +270,7 @@ fn enum_clone(enm: &Enum, span: Span) -> TokenStream {
 
 fn enum_debug(enm: &Enum, span: Span) -> TokenStream {
     let ident = &enm.name.rust;
-    let attrs = &enm.attrs;
+    let cfg_and_lint_attrs = enm.attrs.cfg_and_lint();
     let variants = enm.variants.iter().map(|variant| {
         let variant = &variant.name.rust;
         let name = variant.to_string();
@@ -281,7 +281,7 @@ fn enum_debug(enm: &Enum, span: Span) -> TokenStream {
     let fallback = format!("{}({{}})", ident);
 
     quote_spanned! {span=>
-        #attrs
+        #cfg_and_lint_attrs
         #[automatically_derived]
         impl ::cxx::core::fmt::Debug for #ident {
             fn fmt(&self, formatter: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
@@ -296,13 +296,13 @@ fn enum_debug(enm: &Enum, span: Span) -> TokenStream {
 
 fn enum_default(enm: &Enum, span: Span) -> TokenStream {
     let ident = &enm.name.rust;
-    let attrs = &enm.attrs;
+    let cfg_and_lint_attrs = enm.attrs.cfg_and_lint();
 
     for variant in &enm.variants {
         if variant.default {
             let variant = &variant.name.rust;
             return quote_spanned! {span=>
-                #attrs
+                #cfg_and_lint_attrs
                 #[automatically_derived]
                 impl ::cxx::core::default::Default for #ident {
                     fn default() -> Self {
@@ -318,10 +318,10 @@ fn enum_default(enm: &Enum, span: Span) -> TokenStream {
 
 fn enum_ord(enm: &Enum, span: Span) -> TokenStream {
     let ident = &enm.name.rust;
-    let attrs = &enm.attrs;
+    let cfg_and_lint_attrs = enm.attrs.cfg_and_lint();
 
     quote_spanned! {span=>
-        #attrs
+        #cfg_and_lint_attrs
         #[automatically_derived]
         impl ::cxx::core::cmp::Ord for #ident {
             fn cmp(&self, other: &Self) -> ::cxx::core::cmp::Ordering {
@@ -333,10 +333,10 @@ fn enum_ord(enm: &Enum, span: Span) -> TokenStream {
 
 fn enum_partial_ord(enm: &Enum, span: Span) -> TokenStream {
     let ident = &enm.name.rust;
-    let attrs = &enm.attrs;
+    let cfg_and_lint_attrs = enm.attrs.cfg_and_lint();
 
     quote_spanned! {span=>
-        #attrs
+        #cfg_and_lint_attrs
         #[automatically_derived]
         impl ::cxx::core::cmp::PartialOrd for #ident {
             #[allow(clippy::non_canonical_partial_ord_impl)]
