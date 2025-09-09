@@ -33,7 +33,7 @@ cxxbridge-flags = { version = "=1.0.180", path = "flags", default-features = fal
 
 [dev-dependencies]
 cc = "1.0.101"
-cxx-build = { version = "=1.0.180", path = "gen/build" }
+cxx-build = { version = "1", path = "gen/build" }
 cxx-gen = { version = "0.7", path = "gen/lib" }
 cxx-test-suite = { version = "0", path = "tests/ffi" }
 indoc = "2"
@@ -45,8 +45,9 @@ target-triple = "0.1"
 tempfile = "3.8"
 trybuild = { version = "1.0.81", features = ["diff"] }
 
-# Disallow incompatible cxxbridge-cmd version appearing in the same lockfile.
+# Disallow incompatible version appearing in the same lockfile.
 [target.'cfg(any())'.build-dependencies]
+cxx-build = { version = "=1.0.180", path = "gen/build" }
 cxxbridge-cmd = { version = "=1.0.180", path = "gen/cmd" }
 
 [workspace]
