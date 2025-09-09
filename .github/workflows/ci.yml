@@ -265,7 +265,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Install clang-tidy
-        run: sudo apt-get install clang-tidy-20
+        run: sudo apt-get update && sudo apt-get install clang-tidy-20
       - name: Run clang-tidy
         run: clang-tidy-20 src/cxx.cc --warnings-as-errors=*
 
