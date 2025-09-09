@@ -33,8 +33,10 @@ pub mod ffi {
         type Array;
     }
 
-    #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
+    #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+    #[serde(deny_unknown_fields)]
     struct Shared {
+        #[serde(default)]
         z: usize,
     }
 

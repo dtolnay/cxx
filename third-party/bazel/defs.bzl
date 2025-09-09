@@ -303,6 +303,7 @@ _NORMAL_DEPENDENCIES = {
             "proc-macro2": Label("@vendor//:proc-macro2-1.0.101"),
             "quote": Label("@vendor//:quote-1.0.40"),
             "scratch": Label("@vendor//:scratch-1.0.9"),
+            "serde": Label("@vendor//:serde-1.0.219"),
             "syn": Label("@vendor//:syn-2.0.106"),
         },
     },
@@ -382,7 +383,6 @@ _CONDITIONS = {
     "arm-unknown-linux-gnueabi": ["@rules_rust//rust/platform:arm-unknown-linux-gnueabi"],
     "armv7-linux-androideabi": ["@rules_rust//rust/platform:armv7-linux-androideabi"],
     "armv7-unknown-linux-gnueabi": ["@rules_rust//rust/platform:armv7-unknown-linux-gnueabi"],
-    "cfg(any())": [],
     "cfg(windows)": ["@rules_rust//rust/platform:aarch64-pc-windows-msvc", "@rules_rust//rust/platform:i686-pc-windows-msvc", "@rules_rust//rust/platform:x86_64-pc-windows-msvc"],
     "i686-apple-darwin": ["@rules_rust//rust/platform:i686-apple-darwin"],
     "i686-linux-android": ["@rules_rust//rust/platform:i686-linux-android"],
@@ -681,5 +681,6 @@ def crate_repositories():
         struct(repo = "vendor__quote-1.0.40", is_dev_dep = False),
         struct(repo = "vendor__rustversion-1.0.22", is_dev_dep = False),
         struct(repo = "vendor__scratch-1.0.9", is_dev_dep = False),
+        struct(repo = "vendor__serde-1.0.219", is_dev_dep = False),
         struct(repo = "vendor__syn-2.0.106", is_dev_dep = False),
     ]
