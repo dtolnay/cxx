@@ -44,7 +44,9 @@ impl ToTokens for Var {
         let Var {
             cfg: _,
             doc: _,
-            attrs: _,
+            cfg_attrs: _,
+            lint_attrs: _,
+            passthrough_attrs: _,
             visibility: _,
             name,
             colon_token: _,
@@ -222,7 +224,9 @@ impl ToTokens for Impl {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let Impl {
             cfg: _,
-            attrs: _,
+            cfg_attrs: _,
+            lint_attrs: _,
+            passthrough_attrs: _,
             impl_token,
             impl_generics,
             negative: _,

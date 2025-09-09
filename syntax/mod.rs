@@ -92,7 +92,11 @@ pub(crate) struct ExternType {
     pub lang: Lang,
     pub doc: Doc,
     pub derives: Vec<Derive>,
-    pub attrs: OtherAttrs,
+    pub cfg_attrs: OtherAttrs,
+    #[cfg_attr(not(proc_macro), expect(dead_code))]
+    pub lint_attrs: OtherAttrs,
+    #[cfg_attr(not(proc_macro), expect(dead_code))]
+    pub passthrough_attrs: OtherAttrs,
     #[cfg_attr(not(proc_macro), expect(dead_code))]
     pub visibility: Token![pub],
     pub type_token: Token![type],
@@ -111,7 +115,11 @@ pub(crate) struct Struct {
     pub doc: Doc,
     pub derives: Vec<Derive>,
     pub align: Option<LitInt>,
-    pub attrs: OtherAttrs,
+    pub cfg_attrs: OtherAttrs,
+    #[cfg_attr(not(proc_macro), expect(dead_code))]
+    pub lint_attrs: OtherAttrs,
+    #[cfg_attr(not(proc_macro), expect(dead_code))]
+    pub passthrough_attrs: OtherAttrs,
     #[cfg_attr(not(proc_macro), expect(dead_code))]
     pub visibility: Token![pub],
     pub struct_token: Token![struct],
@@ -125,7 +133,11 @@ pub(crate) struct Enum {
     pub cfg: CfgExpr,
     pub doc: Doc,
     pub derives: Vec<Derive>,
-    pub attrs: OtherAttrs,
+    pub cfg_attrs: OtherAttrs,
+    #[cfg_attr(not(proc_macro), expect(dead_code))]
+    pub lint_attrs: OtherAttrs,
+    #[cfg_attr(not(proc_macro), expect(dead_code))]
+    pub passthrough_attrs: OtherAttrs,
     #[cfg_attr(not(proc_macro), expect(dead_code))]
     pub visibility: Token![pub],
     pub enum_token: Token![enum],
@@ -147,7 +159,11 @@ pub(crate) struct ExternFn {
     pub lang: Lang,
     pub doc: Doc,
     #[cfg_attr(not(proc_macro), expect(dead_code))]
-    pub attrs: OtherAttrs,
+    pub cfg_attrs: OtherAttrs,
+    #[cfg_attr(not(proc_macro), expect(dead_code))]
+    pub lint_attrs: OtherAttrs,
+    #[cfg_attr(not(proc_macro), expect(dead_code))]
+    pub passthrough_attrs: OtherAttrs,
     #[cfg_attr(not(proc_macro), expect(dead_code))]
     pub visibility: Token![pub],
     pub name: Pair,
@@ -162,7 +178,11 @@ pub(crate) struct TypeAlias {
     #[cfg_attr(not(proc_macro), expect(dead_code))]
     pub doc: Doc,
     pub derives: Vec<Derive>,
-    pub attrs: OtherAttrs,
+    pub cfg_attrs: OtherAttrs,
+    #[cfg_attr(not(proc_macro), expect(dead_code))]
+    pub lint_attrs: OtherAttrs,
+    #[cfg_attr(not(proc_macro), expect(dead_code))]
+    pub passthrough_attrs: OtherAttrs,
     #[cfg_attr(not(proc_macro), expect(dead_code))]
     pub visibility: Token![pub],
     pub type_token: Token![type],
@@ -179,7 +199,11 @@ pub(crate) struct TypeAlias {
 pub(crate) struct Impl {
     pub cfg: CfgExpr,
     #[expect(dead_code)]
-    pub attrs: OtherAttrs,
+    pub cfg_attrs: OtherAttrs,
+    #[expect(dead_code)]
+    pub lint_attrs: OtherAttrs,
+    #[expect(dead_code)]
+    pub passthrough_attrs: OtherAttrs,
     pub impl_token: Token![impl],
     pub impl_generics: Lifetimes,
     #[expect(dead_code)]
@@ -225,7 +249,11 @@ pub(crate) struct Var {
     pub cfg: CfgExpr,
     pub doc: Doc,
     #[cfg_attr(not(proc_macro), expect(dead_code))]
-    pub attrs: OtherAttrs,
+    pub cfg_attrs: OtherAttrs,
+    #[cfg_attr(not(proc_macro), expect(dead_code))]
+    pub lint_attrs: OtherAttrs,
+    #[cfg_attr(not(proc_macro), expect(dead_code))]
+    pub passthrough_attrs: OtherAttrs,
     #[cfg_attr(not(proc_macro), expect(dead_code))]
     pub visibility: Token![pub],
     pub name: Pair,
@@ -255,7 +283,11 @@ pub(crate) struct Variant {
     pub doc: Doc,
     pub default: bool,
     #[cfg_attr(not(proc_macro), expect(dead_code))]
-    pub attrs: OtherAttrs,
+    pub cfg_attrs: OtherAttrs,
+    #[cfg_attr(not(proc_macro), expect(dead_code))]
+    pub lint_attrs: OtherAttrs,
+    #[cfg_attr(not(proc_macro), expect(dead_code))]
+    pub passthrough_attrs: OtherAttrs,
     pub name: Pair,
     pub discriminant: Discriminant,
     #[expect(dead_code)]

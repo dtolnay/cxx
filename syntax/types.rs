@@ -86,12 +86,12 @@ impl<'a> Types<'a> {
         }
 
         let mut add_resolution =
-            |name: &'a Pair, attrs: &'a OtherAttrs, generics: &'a Lifetimes| {
+            |name: &'a Pair, cfg_attrs: &'a OtherAttrs, generics: &'a Lifetimes| {
                 resolutions.insert(
                     &name.rust,
                     Resolution {
                         name,
-                        attrs,
+                        cfg_attrs,
                         generics,
                     },
                 );
@@ -125,7 +125,7 @@ impl<'a> Types<'a> {
                         let cfg = ComputedCfg::all(&strct.cfg, &field.cfg);
                         visit(&mut all, &field.ty, cfg);
                     }
-                    add_resolution(&strct.name, &strct.attrs, &strct.generics);
+                    add_resolution(&strct.name, &strct.cfg_attrs, &strct.generics);
                 }
                 Api::Enum(enm) => {
                     match all.entry(&enm.repr.repr_type) {
@@ -146,7 +146,7 @@ impl<'a> Types<'a> {
                         duplicate_name(cx, enm, ItemName::Type(ident));
                     }
                     enums.insert(ident, enm);
-                    add_resolution(&enm.name, &enm.attrs, &enm.generics);
+                    add_resolution(&enm.name, &enm.cfg_attrs, &enm.generics);
                 }
                 Api::CxxType(ety) => {
                     let ident = &ety.name.rust;
@@ -163,7 +163,7 @@ impl<'a> Types<'a> {
                     if !ety.trusted {
                         untrusted.insert(ident, ety);
                     }
-                    add_resolution(&ety.name, &ety.attrs, &ety.generics);
+                    add_resolution(&ety.name, &ety.cfg_attrs, &ety.generics);
                 }
                 Api::RustType(ety) => {
                     let ident = &ety.name.rust;
@@ -171,7 +171,7 @@ impl<'a> Types<'a> {
                         duplicate_name(cx, ety, ItemName::Type(ident));
                     }
                     rust.insert(ident);
-                    add_resolution(&ety.name, &ety.attrs, &ety.generics);
+                    add_resolution(&ety.name, &ety.cfg_attrs, &ety.generics);
                 }
                 Api::CxxFunction(efn) | Api::RustFunction(efn) => {
                     // Note: duplication of the C++ name is fine because C++ has
@@ -196,7 +196,7 @@ impl<'a> Types<'a> {
                     }
                     cxx.insert(ident);
                     aliases.insert(ident, alias);
-                    add_resolution(&alias.name, &alias.attrs, &alias.generics);
+                    add_resolution(&alias.name, &alias.cfg_attrs, &alias.generics);
                 }
                 Api::Impl(imp) => {
                     visit(&mut all, &imp.ty, &imp.cfg);

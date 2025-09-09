@@ -342,7 +342,9 @@ impl PartialEq for Signature {
                 let Var {
                     cfg: _,
                     doc: _,
-                    attrs: _,
+                    cfg_attrs: _,
+                    lint_attrs: _,
+                    passthrough_attrs: _,
                     visibility: _,
                     name: _,
                     colon_token: _,
@@ -351,7 +353,9 @@ impl PartialEq for Signature {
                 let Var {
                     cfg: _,
                     doc: _,
-                    attrs: _,
+                    cfg_attrs: _,
+                    lint_attrs: _,
+                    passthrough_attrs: _,
                     visibility: _,
                     name: _,
                     colon_token: _,
@@ -383,7 +387,9 @@ impl Hash for Signature {
             let Var {
                 cfg: _,
                 doc: _,
-                attrs: _,
+                cfg_attrs: _,
+                lint_attrs: _,
+                passthrough_attrs: _,
                 visibility: _,
                 name: _,
                 colon_token: _,

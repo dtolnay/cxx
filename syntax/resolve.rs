@@ -7,7 +7,7 @@ use proc_macro2::Ident;
 pub(crate) struct Resolution<'a> {
     pub name: &'a Pair,
     #[cfg_attr(not(proc_macro), expect(dead_code))]
-    pub attrs: &'a OtherAttrs,
+    pub cfg_attrs: &'a OtherAttrs,
     pub generics: &'a Lifetimes,
 }
 

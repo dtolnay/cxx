@@ -58,17 +58,23 @@ pub(crate) fn parse_items(
 
 fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) -> Result<Api> {
     let mut cfg = CfgExpr::Unconditional;
+    let mut cfg_attrs = OtherAttrs::new();
+    let mut lint_attrs = OtherAttrs::new();
+    let mut passthrough_attrs = OtherAttrs::new();
     let mut doc = Doc::new();
     let mut derives = Vec::new();
     let mut repr = None;
     let mut namespace = namespace.clone();
     let mut cxx_name = None;
     let mut rust_name = None;
-    let attrs = attrs::parse(
+    attrs::parse(
         cx,
         mem::take(&mut item.attrs),
         attrs::Parser {
             cfg: Some(&mut cfg),
+            cfg_attrs: Some(&mut cfg_attrs),
+            lint_attrs: Some(&mut lint_attrs),
+            passthrough_attrs: Some(&mut passthrough_attrs),
             doc: Some(&mut doc),
             derives: Some(&mut derives),
             repr: Some(&mut repr),
@@ -140,14 +146,20 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
     for field in named_fields.named {
         let ident = field.ident.unwrap();
         let mut cfg = CfgExpr::Unconditional;
+        let mut cfg_attrs = OtherAttrs::new();
+        let mut lint_attrs = OtherAttrs::new();
+        let mut passthrough_attrs = OtherAttrs::new();
         let mut doc = Doc::new();
         let mut cxx_name = None;
         let mut rust_name = None;
-        let attrs = attrs::parse(
+        attrs::parse(
             cx,
             field.attrs,
             attrs::Parser {
                 cfg: Some(&mut cfg),
+                cfg_attrs: Some(&mut cfg_attrs),
+                lint_attrs: Some(&mut lint_attrs),
+                passthrough_attrs: Some(&mut passthrough_attrs),
                 doc: Some(&mut doc),
                 cxx_name: Some(&mut cxx_name),
                 rust_name: Some(&mut rust_name),
@@ -167,7 +179,9 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
         fields.push(Var {
             cfg,
             doc,
-            attrs,
+            cfg_attrs,
+            lint_attrs,
+            passthrough_attrs,
             visibility,
             name,
             colon_token,
@@ -190,7 +204,9 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
         doc,
         derives,
         align,
-        attrs,
+        cfg_attrs,
+        lint_attrs,
+        passthrough_attrs,
         visibility,
         struct_token,
         name,
@@ -202,17 +218,23 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
 
 fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
     let mut cfg = CfgExpr::Unconditional;
+    let mut cfg_attrs = OtherAttrs::new();
+    let mut lint_attrs = OtherAttrs::new();
+    let mut passthrough_attrs = OtherAttrs::new();
     let mut doc = Doc::new();
     let mut derives = Vec::new();
     let mut repr = None;
     let mut namespace = namespace.clone();
     let mut cxx_name = None;
     let mut rust_name = None;
-    let attrs = attrs::parse(
+    attrs::parse(
         cx,
         item.attrs,
         attrs::Parser {
             cfg: Some(&mut cfg),
+            cfg_attrs: Some(&mut cfg_attrs),
+            lint_attrs: Some(&mut lint_attrs),
+            passthrough_attrs: Some(&mut passthrough_attrs),
             doc: Some(&mut doc),
             derives: Some(&mut derives),
             repr: Some(&mut repr),
@@ -284,7 +306,9 @@ fn parse_enum(cx: &mut Errors, item: ItemEnum, namespace: &Namespace) -> Api {
         cfg,
         doc,
         derives,
-        attrs,
+        cfg_attrs,
+        lint_attrs,
+        passthrough_attrs,
         visibility,
         enum_token,
         name,
@@ -302,15 +326,21 @@ fn parse_variant(
     discriminants: &mut DiscriminantSet,
 ) -> Result<Variant> {
     let mut cfg = CfgExpr::Unconditional;
+    let mut cfg_attrs = OtherAttrs::new();
+    let mut lint_attrs = OtherAttrs::new();
+    let mut passthrough_attrs = OtherAttrs::new();
     let mut doc = Doc::new();
     let mut default = false;
     let mut cxx_name = None;
     let mut rust_name = None;
-    let attrs = attrs::parse(
+    attrs::parse(
         cx,
         mem::take(&mut variant.attrs),
         attrs::Parser {
             cfg: Some(&mut cfg),
+            cfg_attrs: Some(&mut cfg_attrs),
+            lint_attrs: Some(&mut lint_attrs),
+            passthrough_attrs: Some(&mut passthrough_attrs),
             doc: Some(&mut doc),
             default: Some(&mut default),
             cxx_name: Some(&mut cxx_name),
@@ -344,7 +374,9 @@ fn parse_variant(
         cfg,
         doc,
         default,
-        attrs,
+        cfg_attrs,
+        lint_attrs,
+        passthrough_attrs,
         name,
         discriminant,
         expr,
@@ -378,12 +410,18 @@ fn parse_foreign_mod(
     let trusted = trusted || foreign_mod.unsafety.is_some();
 
     let mut cfg = CfgExpr::Unconditional;
+    let mut cfg_attrs = OtherAttrs::new();
+    let mut lint_attrs = OtherAttrs::new();
+    let mut passthrough_attrs = OtherAttrs::new();
     let mut namespace = namespace.clone();
-    let attrs = attrs::parse(
+    attrs::parse(
         cx,
         foreign_mod.attrs,
         attrs::Parser {
             cfg: Some(&mut cfg),
+            cfg_attrs: Some(&mut cfg_attrs),
+            lint_attrs: Some(&mut lint_attrs),
+            passthrough_attrs: Some(&mut passthrough_attrs),
             namespace: Some(&mut namespace),
             ..Default::default()
         },
@@ -393,11 +431,31 @@ fn parse_foreign_mod(
     for foreign in foreign_mod.items {
         match foreign {
             ForeignItem::Type(foreign) => {
-                let ety = parse_extern_type(cx, foreign, lang, trusted, &cfg, &namespace, &attrs);
+                let ety = parse_extern_type(
+                    cx,
+                    foreign,
+                    lang,
+                    trusted,
+                    &cfg,
+                    &namespace,
+                    &cfg_attrs,
+                    &lint_attrs,
+                    &passthrough_attrs,
+                );
                 items.push(ety);
             }
             ForeignItem::Fn(foreign) => {
-                match parse_extern_fn(cx, foreign, lang, trusted, &cfg, &namespace, &attrs) {
+                match parse_extern_fn(
+                    cx,
+                    foreign,
+                    lang,
+                    trusted,
+                    &cfg,
+                    &namespace,
+                    &cfg_attrs,
+                    &lint_attrs,
+                    &passthrough_attrs,
+                ) {
                     Ok(efn) => items.push(efn),
                     Err(err) => cx.push(err),
                 }
@@ -412,7 +470,17 @@ fn parse_foreign_mod(
                 }
             }
             ForeignItem::Verbatim(tokens) => {
-                match parse_extern_verbatim(cx, tokens, lang, trusted, &cfg, &namespace, &attrs) {
+                match parse_extern_verbatim(
+                    cx,
+                    tokens,
+                    lang,
+                    trusted,
+                    &cfg,
+                    &namespace,
+                    &cfg_attrs,
+                    &lint_attrs,
+                    &passthrough_attrs,
+                ) {
                     Ok(api) => items.push(api),
                     Err(err) => cx.push(err),
                 }
@@ -480,20 +548,27 @@ fn parse_extern_type(
     trusted: bool,
     extern_block_cfg: &CfgExpr,
     namespace: &Namespace,
-    attrs: &OtherAttrs,
+    cfg_attrs: &OtherAttrs,
+    lint_attrs: &OtherAttrs,
+    passthrough_attrs: &OtherAttrs,
 ) -> Api {
     let mut cfg = extern_block_cfg.clone();
+    let mut cfg_attrs = cfg_attrs.clone();
+    let mut lint_attrs = lint_attrs.clone();
+    let mut passthrough_attrs = passthrough_attrs.clone();
     let mut doc = Doc::new();
     let mut derives = Vec::new();
     let mut namespace = namespace.clone();
     let mut cxx_name = None;
     let mut rust_name = None;
-    let mut attrs = attrs.clone();
-    attrs.extend(attrs::parse(
+    attrs::parse(
         cx,
         foreign_type.attrs,
         attrs::Parser {
             cfg: Some(&mut cfg),
+            cfg_attrs: Some(&mut cfg_attrs),
+            lint_attrs: Some(&mut lint_attrs),
+            passthrough_attrs: Some(&mut passthrough_attrs),
             doc: Some(&mut doc),
             derives: Some(&mut derives),
             namespace: Some(&mut namespace),
@@ -501,7 +576,7 @@ fn parse_extern_type(
             rust_name: Some(&mut rust_name),
             ..Default::default()
         },
-    ));
+    );
 
     let type_token = foreign_type.type_token;
     let visibility = visibility_pub(&foreign_type.vis, type_token.span);
@@ -519,7 +594,9 @@ fn parse_extern_type(
         lang,
         doc,
         derives,
-        attrs,
+        cfg_attrs,
+        lint_attrs,
+        passthrough_attrs,
         visibility,
         type_token,
         name,
@@ -538,20 +615,27 @@ fn parse_extern_fn(
     trusted: bool,
     extern_block_cfg: &CfgExpr,
     namespace: &Namespace,
-    attrs: &OtherAttrs,
+    cfg_attrs: &OtherAttrs,
+    lint_attrs: &OtherAttrs,
+    passthrough_attrs: &OtherAttrs,
 ) -> Result<Api> {
     let mut cfg = extern_block_cfg.clone();
+    let mut cfg_attrs = cfg_attrs.clone();
+    let mut lint_attrs = lint_attrs.clone();
+    let mut passthrough_attrs = passthrough_attrs.clone();
     let mut doc = Doc::new();
     let mut namespace = namespace.clone();
     let mut cxx_name = None;
     let mut rust_name = None;
     let mut self_type = None;
-    let mut attrs = attrs.clone();
-    attrs.extend(attrs::parse(
+    attrs::parse(
         cx,
         mem::take(&mut foreign_fn.attrs),
         attrs::Parser {
             cfg: Some(&mut cfg),
+            cfg_attrs: Some(&mut cfg_attrs),
+            lint_attrs: Some(&mut lint_attrs),
+            passthrough_attrs: Some(&mut passthrough_attrs),
             doc: Some(&mut doc),
             namespace: Some(&mut namespace),
             cxx_name: Some(&mut cxx_name),
@@ -559,7 +643,7 @@ fn parse_extern_fn(
             self_type: Some(&mut self_type),
             ..Default::default()
         },
-    ));
+    );
 
     let generics = &foreign_fn.sig.generics;
     if generics.where_clause.is_some()
@@ -659,14 +743,18 @@ fn parse_extern_fn(
                 let ty = parse_type(&arg.ty)?;
                 let cfg = CfgExpr::Unconditional;
                 let doc = Doc::new();
-                let attrs = OtherAttrs::new();
+                let cfg_attrs = OtherAttrs::new();
+                let lint_attrs = OtherAttrs::new();
+                let passthrough_attrs = OtherAttrs::new();
                 let visibility = Token![pub](ident.span());
                 let name = pair(Namespace::default(), &ident, None, None);
                 let colon_token = arg.colon_token;
                 args.push_value(Var {
                     cfg,
                     doc,
-                    attrs,
+                    cfg_attrs,
+                    lint_attrs,
+                    passthrough_attrs,
                     visibility,
                     name,
                     colon_token,
@@ -710,7 +798,9 @@ fn parse_extern_fn(
         cfg,
         lang,
         doc,
-        attrs,
+        cfg_attrs,
+        lint_attrs,
+        passthrough_attrs,
         visibility,
         name,
         sig: Signature {
@@ -737,7 +827,9 @@ fn parse_extern_verbatim(
     trusted: bool,
     extern_block_cfg: &CfgExpr,
     namespace: &Namespace,
-    attrs: &OtherAttrs,
+    cfg_attrs: &OtherAttrs,
+    lint_attrs: &OtherAttrs,
+    passthrough_attrs: &OtherAttrs,
 ) -> Result<Api> {
     |input: ParseStream| -> Result<Api> {
         let unparsed_attrs = input.call(Attribute::parse_outer)?;
@@ -752,7 +844,9 @@ fn parse_extern_verbatim(
                 trusted,
                 extern_block_cfg,
                 namespace,
-                attrs,
+                cfg_attrs,
+                lint_attrs,
+                passthrough_attrs,
             )
         } else if input.peek(Token![fn]) {
             parse_extern_verbatim_fn(input)
@@ -776,7 +870,9 @@ fn parse_extern_verbatim_type(
     trusted: bool,
     extern_block_cfg: &CfgExpr,
     namespace: &Namespace,
-    attrs: &OtherAttrs,
+    cfg_attrs: &OtherAttrs,
+    lint_attrs: &OtherAttrs,
+    passthrough_attrs: &OtherAttrs,
 ) -> Result<Api> {
     let type_token: Token![type] = input.parse()?;
     let ident: Ident = input.parse()?;
@@ -796,7 +892,9 @@ fn parse_extern_verbatim_type(
             lang,
             extern_block_cfg,
             namespace,
-            attrs,
+            cfg_attrs,
+            lint_attrs,
+            passthrough_attrs,
         )
     } else if lookahead.peek(Token![:]) {
         // type Opaque: Bound2 + Bound2;
@@ -812,7 +910,9 @@ fn parse_extern_verbatim_type(
             trusted,
             extern_block_cfg,
             namespace,
-            attrs,
+            cfg_attrs,
+            lint_attrs,
+            passthrough_attrs,
         )
     } else {
         Err(lookahead.error())
@@ -876,24 +976,31 @@ fn parse_type_alias(
     lang: Lang,
     extern_block_cfg: &CfgExpr,
     namespace: &Namespace,
-    attrs: &OtherAttrs,
+    cfg_attrs: &OtherAttrs,
+    lint_attrs: &OtherAttrs,
+    passthrough_attrs: &OtherAttrs,
 ) -> Result<Api> {
     let eq_token: Token![=] = input.parse()?;
     let ty: RustType = input.parse()?;
     let semi_token: Token![;] = input.parse()?;
 
     let mut cfg = extern_block_cfg.clone();
+    let mut cfg_attrs = cfg_attrs.clone();
+    let mut lint_attrs = lint_attrs.clone();
+    let mut passthrough_attrs = passthrough_attrs.clone();
     let mut doc = Doc::new();
     let mut derives = Vec::new();
     let mut namespace = namespace.clone();
     let mut cxx_name = None;
     let mut rust_name = None;
-    let mut attrs = attrs.clone();
-    attrs.extend(attrs::parse(
+    attrs::parse(
         cx,
         unparsed_attrs,
         attrs::Parser {
             cfg: Some(&mut cfg),
+            cfg_attrs: Some(&mut cfg_attrs),
+            lint_attrs: Some(&mut lint_attrs),
+            passthrough_attrs: Some(&mut passthrough_attrs),
             doc: Some(&mut doc),
             derives: Some(&mut derives),
             namespace: Some(&mut namespace),
@@ -901,7 +1008,7 @@ fn parse_type_alias(
             rust_name: Some(&mut rust_name),
             ..Default::default()
         },
-    ));
+    );
 
     if lang == Lang::Rust {
         let span = quote!(#type_token #semi_token);
@@ -916,7 +1023,9 @@ fn parse_type_alias(
         cfg,
         doc,
         derives,
-        attrs,
+        cfg_attrs,
+        lint_attrs,
+        passthrough_attrs,
         visibility,
         type_token,
         name,
@@ -939,7 +1048,9 @@ fn parse_extern_type_bounded(
     trusted: bool,
     extern_block_cfg: &CfgExpr,
     namespace: &Namespace,
-    attrs: &OtherAttrs,
+    cfg_attrs: &OtherAttrs,
+    lint_attrs: &OtherAttrs,
+    passthrough_attrs: &OtherAttrs,
 ) -> Result<Api> {
     let mut bounds = Vec::new();
     let colon_token: Option<Token![:]> = input.parse()?;
@@ -973,17 +1084,22 @@ fn parse_extern_type_bounded(
     let semi_token: Token![;] = input.parse()?;
 
     let mut cfg = extern_block_cfg.clone();
+    let mut cfg_attrs = cfg_attrs.clone();
+    let mut lint_attrs = lint_attrs.clone();
+    let mut passthrough_attrs = passthrough_attrs.clone();
     let mut doc = Doc::new();
     let mut derives = Vec::new();
     let mut namespace = namespace.clone();
     let mut cxx_name = None;
     let mut rust_name = None;
-    let mut attrs = attrs.clone();
-    attrs.extend(attrs::parse(
+    attrs::parse(
         cx,
         unparsed_attrs,
         attrs::Parser {
             cfg: Some(&mut cfg),
+            cfg_attrs: Some(&mut cfg_attrs),
+            lint_attrs: Some(&mut lint_attrs),
+            passthrough_attrs: Some(&mut passthrough_attrs),
             doc: Some(&mut doc),
             derives: Some(&mut derives),
             namespace: Some(&mut namespace),
@@ -991,7 +1107,7 @@ fn parse_extern_type_bounded(
             rust_name: Some(&mut rust_name),
             ..Default::default()
         },
-    ));
+    );
 
     let visibility = visibility_pub(&visibility, type_token.span);
     let name = pair(namespace, &ident, cxx_name, rust_name);
@@ -1004,7 +1120,9 @@ fn parse_extern_type_bounded(
         lang,
         doc,
         derives,
-        attrs,
+        cfg_attrs,
+        lint_attrs,
+        passthrough_attrs,
         visibility,
         type_token,
         name,
@@ -1020,11 +1138,17 @@ fn parse_impl(cx: &mut Errors, imp: ItemImpl) -> Result<Api> {
     let impl_token = imp.impl_token;
 
     let mut cfg = CfgExpr::Unconditional;
-    let attrs = attrs::parse(
+    let mut cfg_attrs = OtherAttrs::new();
+    let mut lint_attrs = OtherAttrs::new();
+    let mut passthrough_attrs = OtherAttrs::new();
+    attrs::parse(
         cx,
         imp.attrs,
         attrs::Parser {
             cfg: Some(&mut cfg),
+            cfg_attrs: Some(&mut cfg_attrs),
+            lint_attrs: Some(&mut lint_attrs),
+            passthrough_attrs: Some(&mut passthrough_attrs),
             ..Default::default()
         },
     );
@@ -1115,7 +1239,9 @@ fn parse_impl(cx: &mut Errors, imp: ItemImpl) -> Result<Api> {
 
     Ok(Api::Impl(Impl {
         cfg,
-        attrs,
+        cfg_attrs,
+        lint_attrs,
+        passthrough_attrs,
         impl_token,
         impl_generics,
         negative,
@@ -1427,13 +1553,17 @@ fn parse_type_fn(ty: &TypeBareFn) -> Result<Type> {
             let ty = parse_type(&arg.ty)?;
             let cfg = CfgExpr::Unconditional;
             let doc = Doc::new();
-            let attrs = OtherAttrs::new();
+            let cfg_attrs = OtherAttrs::new();
+            let lint_attrs = OtherAttrs::new();
+            let passthrough_attrs = OtherAttrs::new();
             let visibility = Token![pub](ident.span());
             let name = pair(Namespace::default(), &ident, None, None);
             Ok(Var {
                 cfg,
                 doc,
-                attrs,
+                cfg_attrs,
+                lint_attrs,
+                passthrough_attrs,
                 visibility,
                 name,
                 colon_token,
