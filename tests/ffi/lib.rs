@@ -14,6 +14,7 @@
 #![warn(rust_2024_compatibility)]
 #![forbid(unsafe_op_in_unsafe_fn)]
 #![deny(warnings)] // Check that expansion of `cxx::bridge` doesn't trigger warnings.
+#![allow(clippy::unsafe_derive_deserialize)]
 
 pub mod cast;
 pub mod module;
