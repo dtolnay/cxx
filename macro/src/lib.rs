@@ -24,6 +24,7 @@
 #![cfg_attr(test, allow(dead_code, unfulfilled_lint_expectations))]
 #![allow(unknown_lints, mismatched_lifetime_syntaxes)]
 
+mod attrs;
 mod cfg;
 mod derive;
 mod expand;
