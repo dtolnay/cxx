@@ -237,23 +237,23 @@ cargo.rust_library(
 
 alias(
     name = "indexmap",
-    actual = ":indexmap-2.11.0",
+    actual = ":indexmap-2.11.1",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "indexmap-2.11.0.crate",
-    sha256 = "f2481980430f9f78649238835720ddccc57e52df14ffce1c6f37391d61b563e9",
-    strip_prefix = "indexmap-2.11.0",
-    urls = ["https://static.crates.io/crates/indexmap/2.11.0/download"],
+    name = "indexmap-2.11.1.crate",
+    sha256 = "206a8042aec68fa4a62e8d3f7aa4ceb508177d9324faf261e1959e495b7a1921",
+    strip_prefix = "indexmap-2.11.1",
+    urls = ["https://static.crates.io/crates/indexmap/2.11.1/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "indexmap-2.11.0",
-    srcs = [":indexmap-2.11.0.crate"],
+    name = "indexmap-2.11.1",
+    srcs = [":indexmap-2.11.1.crate"],
     crate = "indexmap",
-    crate_root = "indexmap-2.11.0.crate/src/lib.rs",
+    crate_root = "indexmap-2.11.1.crate/src/lib.rs",
     edition = "2021",
     features = [
         "default",
