@@ -1220,8 +1220,6 @@ fn expand_rust_function_shim_impl(
     });
     let vars: Vec<_> = receiver_var.into_iter().chain(arg_vars).collect();
 
-    let wrap_super = invoke.map(|invoke| expand_rust_function_shim_super(sig, &local_name, invoke));
-
     let mut requires_closure;
     let mut call = match invoke {
         Some(_) => {
@@ -1236,6 +1234,13 @@ fn expand_rust_function_shim_impl(
     };
     requires_closure |= !vars.is_empty();
     call.extend(quote! { (#(#vars),*) });
+
+    let wrap_super = invoke.map(|invoke| {
+        // If the wrapper function is being passed directly to prevent_unwind,
+        // it must implement `FnOnce() -> R` and cannot be an unsafe fn.
+        let unsafety = sig.unsafety.filter(|_| requires_closure);
+        expand_rust_function_shim_super(sig, &local_name, invoke, unsafety)
+    });
 
     let span = body_span;
     let conversion = sig.ret.as_ref().and_then(|ret| match ret {
@@ -1347,8 +1352,8 @@ fn expand_rust_function_shim_super(
     sig: &Signature,
     local_name: &Ident,
     invoke: &Ident,
+    unsafety: Option<Token![unsafe]>,
 ) -> TokenStream {
-    let unsafety = sig.unsafety;
     let generics = &sig.generics;
 
     let receiver_var = sig
@@ -1391,7 +1396,7 @@ fn expand_rust_function_shim_super(
 
     let mut body = quote_spanned!(span=> #call(#(#vars,)*));
     let mut allow_unused_unsafe = None;
-    if unsafety.is_some() {
+    if sig.unsafety.is_some() {
         body = quote_spanned!(span=> unsafe { #body });
         allow_unused_unsafe = Some(quote_spanned!(span=> #[allow(unused_unsafe)]));
     }
