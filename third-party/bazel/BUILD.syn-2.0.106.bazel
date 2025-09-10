@@ -105,6 +105,6 @@ rust_library(
     deps = [
         "@vendor__proc-macro2-1.0.101//:proc_macro2",
         "@vendor__quote-1.0.40//:quote",
-        "@vendor__unicode-ident-1.0.18//:unicode_ident",
+        "@vendor__unicode-ident-1.0.19//:unicode_ident",
     ],
 )

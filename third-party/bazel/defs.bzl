@@ -623,12 +623,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__unicode-ident-1.0.18",
-        sha256 = "5a5f39404a5da50712a4c1eecf25e90dd62b613502b7e925fd4e4d19b5c96512",
+        name = "vendor__unicode-ident-1.0.19",
+        sha256 = "f63a545481291138910575129486daeaf8ac54aee4387fe7906919f7830c7d9d",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/unicode-ident/1.0.18/download"],
-        strip_prefix = "unicode-ident-1.0.18",
-        build_file = Label("//third-party/bazel:BUILD.unicode-ident-1.0.18.bazel"),
+        urls = ["https://static.crates.io/crates/unicode-ident/1.0.19/download"],
+        strip_prefix = "unicode-ident-1.0.19",
+        build_file = Label("//third-party/bazel:BUILD.unicode-ident-1.0.19.bazel"),
     )
 
     maybe(

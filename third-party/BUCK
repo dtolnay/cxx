@@ -296,7 +296,7 @@ cargo.rust_library(
     ],
     rustc_flags = ["@$(location :proc-macro2-1.0.101-build-script-run[rustc_flags])"],
     visibility = [],
-    deps = [":unicode-ident-1.0.18"],
+    deps = [":unicode-ident-1.0.19"],
 )
 
 cargo.rust_binary(
@@ -580,7 +580,7 @@ cargo.rust_library(
     deps = [
         ":proc-macro2-1.0.101",
         ":quote-1.0.40",
-        ":unicode-ident-1.0.18",
+        ":unicode-ident-1.0.19",
     ],
 )
 
@@ -610,18 +610,18 @@ cargo.rust_library(
 )
 
 http_archive(
-    name = "unicode-ident-1.0.18.crate",
-    sha256 = "5a5f39404a5da50712a4c1eecf25e90dd62b613502b7e925fd4e4d19b5c96512",
-    strip_prefix = "unicode-ident-1.0.18",
-    urls = ["https://static.crates.io/crates/unicode-ident/1.0.18/download"],
+    name = "unicode-ident-1.0.19.crate",
+    sha256 = "f63a545481291138910575129486daeaf8ac54aee4387fe7906919f7830c7d9d",
+    strip_prefix = "unicode-ident-1.0.19",
+    urls = ["https://static.crates.io/crates/unicode-ident/1.0.19/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "unicode-ident-1.0.18",
-    srcs = [":unicode-ident-1.0.18.crate"],
+    name = "unicode-ident-1.0.19",
+    srcs = [":unicode-ident-1.0.19.crate"],
     crate = "unicode_ident",
-    crate_root = "unicode-ident-1.0.18.crate/src/lib.rs",
+    crate_root = "unicode-ident-1.0.19.crate/src/lib.rs",
     edition = "2018",
     visibility = [],
 )
