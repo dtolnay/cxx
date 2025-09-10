@@ -447,6 +447,7 @@ fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
     let guard = Guard::new(out, "CXXBRIDGE1_ENUM", &enm.name);
     writeln!(out, "#ifndef {}", guard);
     writeln!(out, "#define {}", guard);
+
     write_doc(out, "", &enm.doc);
     write!(out, "enum class {} : ", enm.name.cxx);
     write_atom(out, enm.repr.atom);
@@ -458,6 +459,11 @@ fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
         writeln!(out, ",");
     }
     writeln!(out, "}};");
+
+    if out.header {
+        write_enum_operators(out, enm);
+    }
+
     writeln!(out, "#endif // {}", guard);
 }
 
@@ -479,6 +485,20 @@ fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
         write_discriminant(out, enm.repr.atom, variant.discriminant);
         writeln!(out, ", \"disagrees with the value in #[cxx::bridge]\");");
     }
+
+    if out.header
+        && (derive::contains(&enm.derives, Trait::BitAnd)
+            || derive::contains(&enm.derives, Trait::BitOr)
+            || derive::contains(&enm.derives, Trait::BitXor))
+    {
+        out.next_section();
+        let guard = Guard::new(out, "CXXBRIDGE1_ENUM", &enm.name);
+        writeln!(out, "#ifndef {}", guard);
+        writeln!(out, "#define {}", guard);
+        out.suppress_next_section();
+        write_enum_operators(out, enm);
+        writeln!(out, "#endif // {}", guard);
+    }
 }
 
 fn write_discriminant(out: &mut OutFile, repr: Atom, discriminant: Discriminant) {
@@ -490,6 +510,53 @@ fn write_discriminant(out: &mut OutFile, repr: Atom, discriminant: Discriminant)
         write!(out, ">::min()");
     } else {
         write!(out, "{}", discriminant);
+    }
+}
+
+fn write_enum_operators(out: &mut OutFile, enm: &Enum) {
+    if derive::contains(&enm.derives, Trait::BitAnd) {
+        out.next_section();
+        writeln!(
+            out,
+            "inline {} operator&({} lhs, {} rhs) {{",
+            enm.name.cxx, enm.name.cxx, enm.name.cxx,
+        );
+        write!(out, "  return static_cast<{}>(static_cast<", enm.name.cxx);
+        write_atom(out, enm.repr.atom);
+        write!(out, ">(lhs) & static_cast<");
+        write_atom(out, enm.repr.atom);
+        writeln!(out, ">(rhs));");
+        writeln!(out, "}}");
+    }
+
+    if derive::contains(&enm.derives, Trait::BitOr) {
+        out.next_section();
+        writeln!(
+            out,
+            "inline {} operator|({} lhs, {} rhs) {{",
+            enm.name.cxx, enm.name.cxx, enm.name.cxx,
+        );
+        write!(out, "  return static_cast<{}>(static_cast<", enm.name.cxx);
+        write_atom(out, enm.repr.atom);
+        write!(out, ">(lhs) | static_cast<");
+        write_atom(out, enm.repr.atom);
+        writeln!(out, ">(rhs));");
+        writeln!(out, "}}");
+    }
+
+    if derive::contains(&enm.derives, Trait::BitXor) {
+        out.next_section();
+        writeln!(
+            out,
+            "inline {} operator^({} lhs, {} rhs) {{",
+            enm.name.cxx, enm.name.cxx, enm.name.cxx,
+        );
+        write!(out, "  return static_cast<{}>(static_cast<", enm.name.cxx);
+        write_atom(out, enm.repr.atom);
+        write!(out, ">(lhs) ^ static_cast<");
+        write_atom(out, enm.repr.atom);
+        writeln!(out, ">(rhs));");
+        writeln!(out, "}}");
     }
 }
 

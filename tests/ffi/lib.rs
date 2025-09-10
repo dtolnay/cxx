@@ -45,7 +45,7 @@ pub mod ffi {
         msg: String,
     }
 
-    #[derive(Debug, Hash, PartialOrd, Ord, Default)]
+    #[derive(Debug, Hash, PartialOrd, Ord, Default, BitAnd, BitOr, BitXor)]
     enum Enum {
         AVal,
         #[default]

@@ -355,6 +355,13 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
             | Trait::PartialOrd
             | Trait::Serialize
             | Trait::Deserialize => {}
+            Trait::BitAnd | Trait::BitOr | Trait::BitXor => {
+                let msg = format!(
+                    "derive({}) is currently only supported on enums, not structs",
+                    derive,
+                );
+                cx.error(derive, msg);
+            }
             Trait::ExternType => {
                 let msg = format!("derive({}) on shared struct is not supported", derive);
                 cx.error(derive, msg);
@@ -390,7 +397,10 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
 
     for derive in &enm.derives {
         match derive.what {
-            Trait::Clone
+            Trait::BitAnd
+            | Trait::BitOr
+            | Trait::BitXor
+            | Trait::Clone
             | Trait::Copy
             | Trait::Debug
             | Trait::Eq

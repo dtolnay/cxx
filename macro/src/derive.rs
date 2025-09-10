@@ -14,6 +14,9 @@ pub(crate) fn expand_struct(
     for derive in &strct.derives {
         let span = derive.span;
         match derive.what {
+            Trait::BitAnd => unreachable!(),
+            Trait::BitOr => unreachable!(),
+            Trait::BitXor => unreachable!(),
             Trait::Copy => expanded.extend(struct_copy(strct, span)),
             Trait::Clone => expanded.extend(struct_clone(strct, span)),
             Trait::Debug => expanded.extend(struct_debug(strct, span)),
@@ -49,6 +52,9 @@ pub(crate) fn expand_enum(enm: &Enum, actual_derives: &mut Option<TokenStream>) 
     for derive in &enm.derives {
         let span = derive.span;
         match derive.what {
+            Trait::BitAnd => expanded.extend(enum_bitand(enm, span)),
+            Trait::BitOr => expanded.extend(enum_bitor(enm, span)),
+            Trait::BitXor => expanded.extend(enum_bitxor(enm, span)),
             Trait::Copy => {
                 expanded.extend(enum_copy(enm, span));
                 has_copy = true;
@@ -236,6 +242,60 @@ fn struct_partial_ord(strct: &Struct, span: Span) -> TokenStream {
             #[allow(clippy::non_canonical_partial_ord_impl)]
             fn partial_cmp(&self, other: &Self) -> ::cxx::core::option::Option<::cxx::core::cmp::Ordering> {
                 #body
+            }
+        }
+    }
+}
+
+fn enum_bitand(enm: &Enum, span: Span) -> TokenStream {
+    let ident = &enm.name.rust;
+    let cfg_and_lint_attrs = enm.attrs.cfg_and_lint();
+
+    quote_spanned! {span=>
+        #cfg_and_lint_attrs
+        #[automatically_derived]
+        impl ::cxx::core::ops::BitAnd for #ident {
+            type Output = #ident;
+            fn bitand(self, rhs: Self) -> Self::Output {
+                #ident {
+                    repr: self.repr & rhs.repr,
+                }
+            }
+        }
+    }
+}
+
+fn enum_bitor(enm: &Enum, span: Span) -> TokenStream {
+    let ident = &enm.name.rust;
+    let cfg_and_lint_attrs = enm.attrs.cfg_and_lint();
+
+    quote_spanned! {span=>
+        #cfg_and_lint_attrs
+        #[automatically_derived]
+        impl ::cxx::core::ops::BitOr for #ident {
+            type Output = #ident;
+            fn bitor(self, rhs: Self) -> Self::Output {
+                #ident {
+                    repr: self.repr | rhs.repr,
+                }
+            }
+        }
+    }
+}
+
+fn enum_bitxor(enm: &Enum, span: Span) -> TokenStream {
+    let ident = &enm.name.rust;
+    let cfg_and_lint_attrs = enm.attrs.cfg_and_lint();
+
+    quote_spanned! {span=>
+        #cfg_and_lint_attrs
+        #[automatically_derived]
+        impl ::cxx::core::ops::BitXor for #ident {
+            type Output = #ident;
+            fn bitxor(self, rhs: Self) -> Self::Output {
+                #ident {
+                    repr: self.repr ^ rhs.repr,
+                }
             }
         }
     }
