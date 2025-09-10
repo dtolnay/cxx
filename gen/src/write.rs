@@ -4,6 +4,7 @@ use crate::gen::nested::NamespaceEntries;
 use crate::gen::out::OutFile;
 use crate::gen::{builtin, include, pragma, Opt};
 use crate::syntax::atom::Atom::{self, *};
+use crate::syntax::discriminant::{Discriminant, Limits};
 use crate::syntax::instantiate::{ImplKey, NamedImplKey};
 use crate::syntax::map::UnorderedMap as Map;
 use crate::syntax::namespace::Namespace;
@@ -452,7 +453,9 @@ fn write_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
     writeln!(out, " {{");
     for variant in &enm.variants {
         write_doc(out, "  ", &variant.doc);
-        writeln!(out, "  {} = {},", variant.name.cxx, variant.discriminant);
+        write!(out, "  {} = ", variant.name.cxx);
+        write_discriminant(out, enm.repr.atom, variant.discriminant);
+        writeln!(out, ",");
     }
     writeln!(out, "}};");
     writeln!(out, "#endif // {}", guard);
@@ -472,11 +475,21 @@ fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
     for variant in &enm.variants {
         write!(out, "static_assert(static_cast<");
         write_atom(out, enm.repr.atom);
-        writeln!(
-            out,
-            ">({}::{}) == {}, \"disagrees with the value in #[cxx::bridge]\");",
-            enm.name.cxx, variant.name.cxx, variant.discriminant,
-        );
+        writeln!(out, ">({}::{}) == ", enm.name.cxx, variant.name.cxx);
+        write_discriminant(out, enm.repr.atom, variant.discriminant);
+        writeln!(out, ", \"disagrees with the value in #[cxx::bridge]\");");
+    }
+}
+
+fn write_discriminant(out: &mut OutFile, repr: Atom, discriminant: Discriminant) {
+    let limits = Limits::of(repr).unwrap();
+    if discriminant == limits.min && limits.min < Discriminant::zero() {
+        out.include.limits = true;
+        write!(out, "::std::numeric_limits<");
+        write_atom(out, repr);
+        write!(out, ">::min()");
+    } else {
+        write!(out, "{}", discriminant);
     }
 }
 

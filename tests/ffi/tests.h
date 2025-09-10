@@ -8,7 +8,7 @@ struct AShared;
 enum class AEnum : uint16_t;
 namespace B {
 struct ABShared;
-enum class ABEnum : uint16_t;
+enum class ABEnum : int32_t;
 } // namespace B
 } // namespace A
 
