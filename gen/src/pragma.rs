@@ -6,6 +6,7 @@ pub(crate) struct Pragma<'a> {
     pub gnu_diagnostic_ignore: BTreeSet<&'a str>,
     pub clang_diagnostic_ignore: BTreeSet<&'a str>,
     pub dollar_in_identifier: bool,
+    pub return_type_c_linkage: bool,
     pub begin: Content<'a>,
     pub end: Content<'a>,
 }
@@ -21,6 +22,12 @@ pub(super) fn write(out: &mut OutFile) {
         out.pragma
             .clang_diagnostic_ignore
             .insert("-Wdollar-in-identifier-extension");
+    }
+
+    if out.pragma.return_type_c_linkage {
+        out.pragma
+            .clang_diagnostic_ignore
+            .insert("-Wreturn-type-c-linkage");
     }
 
     let begin = &mut out.pragma.begin;

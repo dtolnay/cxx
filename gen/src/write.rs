@@ -956,6 +956,8 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
 }
 
 fn write_function_pointer_trampoline(out: &mut OutFile, efn: &ExternFn, var: &Pair, f: &Signature) {
+    out.pragma.return_type_c_linkage = true;
+
     let r_trampoline = mangle::r_trampoline(efn, var, out.types);
     let indirect_call = true;
     write_rust_function_decl_impl(out, &r_trampoline, f, indirect_call);
