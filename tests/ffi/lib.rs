@@ -72,7 +72,7 @@ pub mod ffi {
     enum ABEnum {
         ABAVal,
         ABBVal = 2020,
-        ABCVal,
+        ABCVal = -2147483648i32,
     }
 
     #[namespace = "A::B"]

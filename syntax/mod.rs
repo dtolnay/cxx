@@ -5,7 +5,7 @@ pub(crate) mod attrs;
 pub(crate) mod cfg;
 pub(crate) mod check;
 pub(crate) mod derive;
-mod discriminant;
+pub(crate) mod discriminant;
 mod doc;
 pub(crate) mod error;
 pub(crate) mod file;
