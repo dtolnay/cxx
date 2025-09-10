@@ -576,6 +576,7 @@ fn write_struct_operator_decls<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
 
     if derive::contains(&strct.derives, Trait::PartialEq) {
         out.pragma.dollar_in_identifier = true;
+        out.pragma.missing_declarations = true;
         let link_name = mangle::operator(&strct.name, "eq");
         writeln!(
             out,
@@ -595,6 +596,7 @@ fn write_struct_operator_decls<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
 
     if derive::contains(&strct.derives, Trait::PartialOrd) {
         out.pragma.dollar_in_identifier = true;
+        out.pragma.missing_declarations = true;
         let link_name = mangle::operator(&strct.name, "lt");
         writeln!(
             out,
@@ -629,6 +631,7 @@ fn write_struct_operator_decls<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
     if derive::contains(&strct.derives, Trait::Hash) {
         out.include.cstddef = true;
         out.pragma.dollar_in_identifier = true;
+        out.pragma.missing_declarations = true;
         let link_name = mangle::operator(&strct.name, "hash");
         writeln!(
             out,
@@ -732,6 +735,7 @@ fn write_opaque_type_layout_decls<'a>(out: &mut OutFile<'a>, ety: &'a ExternType
     out.set_namespace(&ety.name.namespace);
     out.begin_block(Block::ExternC);
     out.pragma.dollar_in_identifier = true;
+    out.pragma.missing_declarations = true;
 
     let link_name = mangle::operator(&ety.name, "sizeof");
     writeln!(out, "::std::size_t {}() noexcept;", link_name);
@@ -779,6 +783,7 @@ fn begin_function_definition(out: &mut OutFile) {
 
 fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     out.pragma.dollar_in_identifier = true;
+    out.pragma.missing_declarations = true;
     out.next_section();
     out.set_namespace(&efn.name.namespace);
     out.begin_block(Block::ExternC);
@@ -1761,6 +1766,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
     out.include.new = true;
     out.include.utility = true;
     out.pragma.dollar_in_identifier = true;
+    out.pragma.missing_declarations = true;
 
     let inner = ty.to_typename(out.types);
     let instance = ty.to_mangled(out.types);
@@ -1869,6 +1875,7 @@ fn write_shared_ptr(out: &mut OutFile, key: &NamedImplKey) {
     out.include.new = true;
     out.include.utility = true;
     out.pragma.dollar_in_identifier = true;
+    out.pragma.missing_declarations = true;
 
     // Some aliases are to opaque types; some are to trivial types. We can't
     // know at code generation time, so we generate both C++ and Rust side
@@ -1965,6 +1972,7 @@ fn write_weak_ptr(out: &mut OutFile, key: &NamedImplKey) {
     out.include.new = true;
     out.include.utility = true;
     out.pragma.dollar_in_identifier = true;
+    out.pragma.missing_declarations = true;
 
     writeln!(
         out,
@@ -2036,6 +2044,7 @@ fn write_cxx_vector(out: &mut OutFile, key: &NamedImplKey) {
     out.include.utility = true;
     out.builtin.destroy = true;
     out.pragma.dollar_in_identifier = true;
+    out.pragma.missing_declarations = true;
 
     begin_function_definition(out);
     writeln!(
