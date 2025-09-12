@@ -8,10 +8,10 @@ fn bridge(cxx_bridge: TokenStream) -> String {
     let module = syn::parse2::<Module>(cxx_bridge).unwrap();
     let tokens = expand::bridge(module).unwrap();
 
-    // TODO: Consider returning `TokenStream` and letting clients use `assert_matches!` macros
-    // if Crubit publishes
-    // https://github.com/google/crubit/blob/main/common/token_stream_matchers.rs as a separate
-    // crate.
+    // TODO: Consider returning `TokenStream` and letting clients use
+    // `assert_matches!` macros if Crubit publishes
+    // https://github.com/google/crubit/blob/main/common/token_stream_matchers.rs
+    // as a separate crate.
     let file = syn::parse2::<File>(tokens).unwrap();
     let pretty = prettyplease::unparse(&file);
 
@@ -23,21 +23,23 @@ fn bridge(cxx_bridge: TokenStream) -> String {
     pretty
 }
 
-/// This is a regression test for how `UniquePtrTarget` `impl` is generated.  The regression
-/// happened in a WIP version of refactoring of how generics are handled:
+/// This is a regression test for how `UniquePtrTarget` `impl` is generated.
+/// The regression happened in a WIP version of refactoring of how generics are
+/// handled:
 ///
 /// * Expected:     `unsafe impl<'a> ::cxx::memory::UniquePtrTarget for Borrowed<'a>`
 /// * Actual/Wrong: `unsafe impl     ::cxx::memory::UniquePtrTarget for Borrowed    `
 #[test]
 fn test_unique_ptr_with_lifetime_parametrized_pointee_implicit_impl() {
-    // Note that it is okay that the return type infers and doesn't explicitly spell out
-    // the lifetime parameter of `Borrowed`.  But this lifetime parameter needs to still
-    // be spelled out in `impl<'a> ... for Borrowed<'a'>` in the expansion.
+    // Note that it is okay that the return type infers and doesn't explicitly
+    // spell out the lifetime parameter of `Borrowed`. But this lifetime
+    // parameter needs to still be spelled out in `impl<'a> ... for
+    // Borrowed<'a'>` in the expansion.
     //
     // The original regression was that an incorrect refactoring started to use
-    // the inner type of `UniquePtr` (i.e. `Borrowed` - without generic lifetime args)
-    // in the expansion of `impl...UniquePtrTarget`.  Instead that expansion should
-    // first "resolve" the inner type using `Types::resolve`.
+    // the inner type of `UniquePtr` (i.e. `Borrowed` - without generic lifetime
+    // args) in the expansion of `impl...UniquePtrTarget`. Instead that
+    // expansion should first "resolve" the inner type using `Types::resolve`.
     let rs = bridge(quote! {
         mod ffi {
             unsafe extern "C++" {
@@ -52,18 +54,19 @@ fn test_unique_ptr_with_lifetime_parametrized_pointee_implicit_impl() {
     assert!(rs.contains("unsafe impl<'a> ::cxx::memory::UniquePtrTarget for Borrowed<'a>"));
 }
 
-/// This is a test that verifies that the lifetime arguments in `impl<'a>` comes from
-/// an explicit `impl` if one is present.
+/// This is a test that verifies that the lifetime arguments in `impl<'a>` comes
+/// from an explicit `impl` if one is present.
 #[test]
 fn test_unique_ptr_with_lifetime_parametrized_pointee_explicit_impl() {
-    // Note that it is okay that the return type infers and doesn't explicitly spell out
-    // the lifetime parameter of `Borrowed`.  But this lifetime parameter needs to still
-    // be spelled out in `impl<'a> ... for Borrowed<'a'>` in the expansion.
+    // Note that it is okay that the return type infers and doesn't explicitly
+    // spell out the lifetime parameter of `Borrowed`. But this lifetime
+    // parameter needs to still be spelled out in `impl<'a> ... for
+    // Borrowed<'a'>` in the expansion.
     //
     // The original regression was that an incorrect refactoring started to use
-    // the inner type of `UniquePtr` (i.e. `Borrowed` - without generic lifetime args)
-    // in the expansion of `impl...UniquePtrTarget`.  Instead that expansion should
-    // first "resolve" the inner type using `Types::resolve`.
+    // the inner type of `UniquePtr` (i.e. `Borrowed` - without generic lifetime
+    // args) in the expansion of `impl...UniquePtrTarget`. Instead that
+    // expansion should first "resolve" the inner type using `Types::resolve`.
     let rs = bridge(quote! {
         mod ffi {
             unsafe extern "C++" {
@@ -77,7 +80,8 @@ fn test_unique_ptr_with_lifetime_parametrized_pointee_explicit_impl() {
     assert!(rs.contains("unsafe impl<'b> ::cxx::memory::UniquePtrTarget for Borrowed<'c>"));
 }
 
-/// This test verifies if `String` <=> `RustString` substitution happens for `Vec<String>`.
+/// This test verifies if `String` <=> `RustString` substitution happens for
+/// `Vec<String>`.
 #[test]
 fn test_vec_string_return_by_value() {
     let rs = bridge(quote! {
@@ -92,7 +96,8 @@ fn test_vec_string_return_by_value() {
     assert!(rs.contains("fn __foo() -> ::cxx::alloc::vec::Vec<::cxx::alloc::string::String>"));
 }
 
-/// This test verifies if `String` <=> `RustString` substitution happens for `Vec<String>`.
+/// This test verifies if `String` <=> `RustString` substitution happens for
+/// `Vec<String>`.
 #[test]
 fn test_vec_string_take_by_ref() {
     let rs = bridge(quote! {
