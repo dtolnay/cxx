@@ -41,6 +41,7 @@ kj::Maybe<rust::isize> test_maybe_isize_some();
 kj::Maybe<rust::f32> test_maybe_f32_some();
 kj::Maybe<rust::f64> test_maybe_f64_some();
 kj::Maybe<bool> test_maybe_bool_some();
+kj::Maybe<rust::Str> test_maybe_str_some();
 kj::Maybe<rust::u8> test_maybe_u8_none();
 kj::Maybe<rust::u16> test_maybe_u16_none();
 kj::Maybe<rust::u32> test_maybe_u32_none();
@@ -54,5 +55,6 @@ kj::Maybe<rust::isize> test_maybe_isize_none();
 kj::Maybe<rust::f32> test_maybe_f32_none();
 kj::Maybe<rust::f64> test_maybe_f64_none();
 kj::Maybe<bool> test_maybe_bool_none();
+kj::Maybe<rust::Str> test_maybe_str_none();
 
 }  // namespace kj_rs_demo

@@ -213,6 +213,7 @@ pub mod tests {
         test_maybe_some(ffi::test_maybe_f32_some(), 244.678);
         test_maybe_some(ffi::test_maybe_f64_some(), 245.678);
         test_maybe_some(ffi::test_maybe_bool_some(), false);
+        test_maybe_some(ffi::test_maybe_str_some(), "hello");
 
         test_maybe_none(ffi::test_maybe_u8_none());
         test_maybe_none(ffi::test_maybe_u16_none());
@@ -227,6 +228,7 @@ pub mod tests {
         test_maybe_none(ffi::test_maybe_f32_none());
         test_maybe_none(ffi::test_maybe_f64_none());
         test_maybe_none(ffi::test_maybe_bool_none());
+        test_maybe_none(ffi::test_maybe_str_none());
     }
 
     #[test]

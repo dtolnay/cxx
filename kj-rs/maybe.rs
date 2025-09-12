@@ -171,7 +171,7 @@ macro_rules! impl_maybe_item_for_primitive {
 
 impl_maybe_item_for_has_niche!(crate::KjOwn<T>, &T, &mut T);
 impl_maybe_item_for_primitive!(
-    u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize, f32, f64, bool
+    u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize, f32, f64, bool, &str
 );
 
 pub(crate) mod repr {

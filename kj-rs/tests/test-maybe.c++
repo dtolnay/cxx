@@ -146,6 +146,9 @@ kj::Maybe<rust::f64> test_maybe_f64_some() {
 kj::Maybe<bool> test_maybe_bool_some() {
   return kj::some(false);
 }
+kj::Maybe<rust::Str> test_maybe_str_some() {
+  return kj::some("hello");
+}
 
 kj::Maybe<rust::u8> test_maybe_u8_none() {
   return kj::none;
@@ -184,6 +187,9 @@ kj::Maybe<rust::f64> test_maybe_f64_none() {
   return kj::none;
 }
 kj::Maybe<bool> test_maybe_bool_none() {
+  return kj::none;
+}
+kj::Maybe<rust::Str> test_maybe_str_none() {
   return kj::none;
 }
 

@@ -202,6 +202,8 @@ mod ffi {
         #[allow(dead_code)]
         fn test_maybe_bool_some() -> KjMaybe<bool>;
         #[allow(dead_code)]
+        fn test_maybe_str_some() -> KjMaybe<&'static str>;
+        #[allow(dead_code)]
         fn test_maybe_u8_none() -> KjMaybe<u8>;
         #[allow(dead_code)]
         fn test_maybe_u16_none() -> KjMaybe<u16>;
@@ -227,6 +229,9 @@ mod ffi {
         fn test_maybe_f64_none() -> KjMaybe<f64>;
         #[allow(dead_code)]
         fn test_maybe_bool_none() -> KjMaybe<bool>;
+
+        #[allow(dead_code)]
+        fn test_maybe_str_none() -> KjMaybe<&'static str>;
     }
 
     extern "Rust" {
