@@ -30,6 +30,8 @@ mod derive;
 mod expand;
 mod generics;
 mod syntax;
+#[cfg(test)]
+mod tests;
 mod tokens;
 mod type_id;
 
