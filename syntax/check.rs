@@ -305,7 +305,7 @@ fn check_type_kj_maybe(cx: &mut Check, ptr: &Ty1) {
             check_type_kj_own(cx, own);
             return;
         }
-        Type::Str(_) => return,
+        Type::SliceRef(_) | Type::Str(_) => return,
         _ => (),
     }
     cx.error(ptr, "unsupported kj::Maybe target type");

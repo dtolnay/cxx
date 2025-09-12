@@ -192,5 +192,10 @@ kj::Maybe<bool> test_maybe_bool_none() {
 kj::Maybe<rust::Str> test_maybe_str_none() {
   return kj::none;
 }
-
+kj::Maybe<rust::Slice<const kj::byte>> test_maybe_u8_slice_some() {
+  return "abc"_kjb.as<::kj_rs::Rust>();
+}
+kj::Maybe<rust::Slice<const kj::byte>> test_maybe_u8_slice_none() {
+  return kj::none;
+}
 }  // namespace kj_rs_demo
