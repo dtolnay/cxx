@@ -2,17 +2,17 @@ use crate::expand;
 use crate::syntax::file::Module;
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::{File, Result};
+use syn::File;
 
-fn bridge(cxx_bridge: TokenStream) -> Result<String> {
-    let module = syn::parse2::<Module>(cxx_bridge)?;
-    let tokens = expand::bridge(module)?;
+fn bridge(cxx_bridge: TokenStream) -> String {
+    let module = syn::parse2::<Module>(cxx_bridge).unwrap();
+    let tokens = expand::bridge(module).unwrap();
 
     // TODO: Consider returning `TokenStream` and letting clients use `assert_matches!` macros
     // if Crubit publishes
     // https://github.com/google/crubit/blob/main/common/token_stream_matchers.rs as a separate
     // crate.
-    let file = syn::parse2::<File>(tokens)?;
+    let file = syn::parse2::<File>(tokens).unwrap();
     let pretty = prettyplease::unparse(&file);
 
     // Print the whole result in case subsequent assertions lead to a test failure.
@@ -20,7 +20,7 @@ fn bridge(cxx_bridge: TokenStream) -> Result<String> {
     eprintln!("{pretty}");
     eprintln!("// expanded.rs - end   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^");
 
-    Ok(pretty)
+    pretty
 }
 
 /// This is a regression test for how `UniquePtrTarget` `impl` is generated.  The regression
@@ -45,8 +45,8 @@ fn test_unique_ptr_with_lifetime_parametrized_pointee_implicit_impl() {
                 fn borrowed(arg: &i32) -> UniquePtr<Borrowed>;
             }
         }
-    })
-    .unwrap();
+    });
+
     assert!(rs.contains("unsafe impl<'a> ::cxx::ExternType for Borrowed<'a>"));
     assert!(rs.contains("pub fn borrowed(arg: &i32) -> ::cxx::UniquePtr<Borrowed>"));
     assert!(rs.contains("unsafe impl<'a> ::cxx::memory::UniquePtrTarget for Borrowed<'a>"));
@@ -71,8 +71,8 @@ fn test_unique_ptr_with_lifetime_parametrized_pointee_explicit_impl() {
             }
             impl<'b> UniquePtr<Borrowed<'c>> {}
         }
-    })
-    .unwrap();
+    });
+
     assert!(rs.contains("unsafe impl<'a> ::cxx::ExternType for Borrowed<'a>"));
     assert!(rs.contains("unsafe impl<'b> ::cxx::memory::UniquePtrTarget for Borrowed<'c>"));
 }
@@ -86,8 +86,8 @@ fn test_vec_string_return_by_value() {
                 fn foo() -> Vec<String>;
             }
         }
-    })
-    .unwrap();
+    });
+
     assert!(rs.contains("__return: *mut ::cxx::private::RustVec<::cxx::alloc::string::String>"));
     assert!(rs.contains("fn __foo() -> ::cxx::alloc::vec::Vec<::cxx::alloc::string::String>"));
 }
@@ -101,8 +101,8 @@ fn test_vec_string_take_by_ref() {
                 fn foo(v: &Vec<String>);
             }
         }
-    })
-    .unwrap();
+    });
+
     assert!(rs.contains("v: &::cxx::private::RustVec<::cxx::alloc::string::String>"));
     assert!(rs.contains("fn __foo(v: &::cxx::alloc::vec::Vec<::cxx::alloc::string::String>)"));
 }
