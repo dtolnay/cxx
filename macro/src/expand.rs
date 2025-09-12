@@ -2305,9 +2305,10 @@ fn expand_extern_type(ty: &Type, types: &Types, proper: bool) -> TokenStream {
             }
         }
         Type::RustVec(ty) => {
-            // Replace `Vec<Foo>` with `::cxx::private::RustVec<Foo>` because the latter
-            // (unlike the former) has a guaranteed, predictible ABI (both have the same memory
-            // layout).  Note that the ABI and memory layout does not depend on the `elem` type.
+            // Replace Vec<Foo> with ::cxx::private::RustVec<Foo>. Both have the
+            // same layout but only the latter has a predictable ABI. Note that
+            // the overall size and alignment are independent of the element
+            // type, but the field order inside of Vec may not be.
             let span = ty.name.span();
             let langle = ty.langle;
             let elem = &ty.inner;
