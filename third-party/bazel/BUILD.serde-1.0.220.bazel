@@ -6,8 +6,12 @@
 #     bazel run @@//third-party:vendor
 ###############################################################################
 
-load("@rules_rust//cargo:defs.bzl", "cargo_toml_env_vars")
-load("@rules_rust//rust:defs.bzl", "rust_proc_macro")
+load(
+    "@rules_rust//cargo:defs.bzl",
+    "cargo_build_script",
+    "cargo_toml_env_vars",
+)
+load("@rules_rust//rust:defs.bzl", "rust_library")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -16,8 +20,8 @@ cargo_toml_env_vars(
     src = "Cargo.toml",
 )
 
-rust_proc_macro(
-    name = "serde_derive",
+rust_library(
+    name = "serde",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = True,
@@ -36,9 +40,15 @@ rust_proc_macro(
     ),
     crate_features = [
         "default",
+        "derive",
+        "serde_derive",
+        "std",
     ],
     crate_root = "src/lib.rs",
-    edition = "2015",
+    edition = "2021",
+    proc_macro_deps = [
+        "@vendor__serde_derive-1.0.220//:serde_derive",
+    ],
     rustc_env_files = [
         ":cargo_toml_env_vars",
     ],
@@ -47,7 +57,7 @@ rust_proc_macro(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=serde_derive",
+        "crate-name=serde",
         "manual",
         "noclippy",
         "norustfmt",
@@ -95,10 +105,73 @@ rust_proc_macro(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "1.0.219",
+    version = "1.0.220",
     deps = [
-        "@vendor__proc-macro2-1.0.101//:proc_macro2",
-        "@vendor__quote-1.0.40//:quote",
-        "@vendor__syn-2.0.106//:syn",
+        "@vendor__serde-1.0.220//:build_script_build",
+        "@vendor__serde_core-1.0.220//:serde_core",
     ],
+)
+
+cargo_build_script(
+    name = "_bs",
+    srcs = glob(
+        include = ["**/*.rs"],
+        allow_empty = True,
+    ),
+    compile_data = glob(
+        include = ["**"],
+        allow_empty = True,
+        exclude = [
+            "**/* *",
+            "**/*.rs",
+            ".tmp_git_root/**/*",
+            "BUILD",
+            "BUILD.bazel",
+            "WORKSPACE",
+            "WORKSPACE.bazel",
+        ],
+    ),
+    crate_features = [
+        "default",
+        "derive",
+        "serde_derive",
+        "std",
+    ],
+    crate_name = "build_script_build",
+    crate_root = "build.rs",
+    data = glob(
+        include = ["**"],
+        allow_empty = True,
+        exclude = [
+            "**/* *",
+            ".tmp_git_root/**/*",
+            "BUILD",
+            "BUILD.bazel",
+            "WORKSPACE",
+            "WORKSPACE.bazel",
+        ],
+    ),
+    edition = "2021",
+    pkg_name = "serde",
+    rustc_env_files = [
+        ":cargo_toml_env_vars",
+    ],
+    rustc_flags = [
+        "--cap-lints=allow",
+    ],
+    tags = [
+        "cargo-bazel",
+        "crate-name=serde",
+        "manual",
+        "noclippy",
+        "norustfmt",
+    ],
+    version = "1.0.220",
+    visibility = ["//visibility:private"],
+)
+
+alias(
+    name = "build_script_build",
+    actual = ":_bs",
+    tags = ["manual"],
 )

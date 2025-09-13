@@ -442,26 +442,26 @@ buildscript_run(
 
 alias(
     name = "serde",
-    actual = ":serde-1.0.219",
+    actual = ":serde-1.0.220",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "serde-1.0.219.crate",
-    sha256 = "5f0e2c6ed6606019b4e29e69dbaba95b11854410e5347d525002456dbbb786b6",
-    strip_prefix = "serde-1.0.219",
-    urls = ["https://static.crates.io/crates/serde/1.0.219/download"],
+    name = "serde-1.0.220.crate",
+    sha256 = "ceecad4c782e936ac90ecfd6b56532322e3262b14320abf30ce89a92ffdbfe22",
+    strip_prefix = "serde-1.0.220",
+    urls = ["https://static.crates.io/crates/serde/1.0.220/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "serde-1.0.219",
-    srcs = [":serde-1.0.219.crate"],
+    name = "serde-1.0.220",
+    srcs = [":serde-1.0.220.crate"],
     crate = "serde",
-    crate_root = "serde-1.0.219.crate/src/lib.rs",
-    edition = "2018",
+    crate_root = "serde-1.0.220.crate/src/lib.rs",
+    edition = "2021",
     env = {
-        "OUT_DIR": "$(location :serde-1.0.219-build-script-run[out_dir])",
+        "OUT_DIR": "$(location :serde-1.0.220-build-script-run[out_dir])",
     },
     features = [
         "default",
@@ -469,17 +469,20 @@ cargo.rust_library(
         "serde_derive",
         "std",
     ],
-    rustc_flags = ["@$(location :serde-1.0.219-build-script-run[rustc_flags])"],
+    rustc_flags = ["@$(location :serde-1.0.220-build-script-run[rustc_flags])"],
     visibility = [],
-    deps = [":serde_derive-1.0.219"],
+    deps = [
+        ":serde_core-1.0.220",
+        ":serde_derive-1.0.220",
+    ],
 )
 
 cargo.rust_binary(
-    name = "serde-1.0.219-build-script-build",
-    srcs = [":serde-1.0.219.crate"],
+    name = "serde-1.0.220-build-script-build",
+    srcs = [":serde-1.0.220.crate"],
     crate = "build_script_build",
-    crate_root = "serde-1.0.219.crate/build.rs",
-    edition = "2018",
+    crate_root = "serde-1.0.220.crate/build.rs",
+    edition = "2021",
     features = [
         "default",
         "derive",
@@ -490,32 +493,81 @@ cargo.rust_binary(
 )
 
 buildscript_run(
-    name = "serde-1.0.219-build-script-run",
+    name = "serde-1.0.220-build-script-run",
     package_name = "serde",
-    buildscript_rule = ":serde-1.0.219-build-script-build",
+    buildscript_rule = ":serde-1.0.220-build-script-build",
     features = [
         "default",
         "derive",
         "serde_derive",
         "std",
     ],
-    version = "1.0.219",
+    version = "1.0.220",
 )
 
 http_archive(
-    name = "serde_derive-1.0.219.crate",
-    sha256 = "5b0276cf7f2c73365f7157c8123c21cd9a50fbbd844757af28ca1f5925fc2a00",
-    strip_prefix = "serde_derive-1.0.219",
-    urls = ["https://static.crates.io/crates/serde_derive/1.0.219/download"],
+    name = "serde_core-1.0.220.crate",
+    sha256 = "ddba47394f3b862d6ff6efdbd26ca4673e3566a307880a0ffb98f274bbe0ec32",
+    strip_prefix = "serde_core-1.0.220",
+    urls = ["https://static.crates.io/crates/serde_core/1.0.220/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "serde_derive-1.0.219",
-    srcs = [":serde_derive-1.0.219.crate"],
+    name = "serde_core-1.0.220",
+    srcs = [":serde_core-1.0.220.crate"],
+    crate = "serde_core",
+    crate_root = "serde_core-1.0.220.crate/src/lib.rs",
+    edition = "2021",
+    env = {
+        "OUT_DIR": "$(location :serde_core-1.0.220-build-script-run[out_dir])",
+    },
+    features = [
+        "result",
+        "std",
+    ],
+    rustc_flags = ["@$(location :serde_core-1.0.220-build-script-run[rustc_flags])"],
+    visibility = [],
+)
+
+cargo.rust_binary(
+    name = "serde_core-1.0.220-build-script-build",
+    srcs = [":serde_core-1.0.220.crate"],
+    crate = "build_script_build",
+    crate_root = "serde_core-1.0.220.crate/build.rs",
+    edition = "2021",
+    features = [
+        "result",
+        "std",
+    ],
+    visibility = [],
+)
+
+buildscript_run(
+    name = "serde_core-1.0.220-build-script-run",
+    package_name = "serde_core",
+    buildscript_rule = ":serde_core-1.0.220-build-script-build",
+    features = [
+        "result",
+        "std",
+    ],
+    version = "1.0.220",
+)
+
+http_archive(
+    name = "serde_derive-1.0.220.crate",
+    sha256 = "60e1f3b1761e96def5ec6d04a6e7421c0404fa3cf5c0155f1e2848fae3d8cc08",
+    strip_prefix = "serde_derive-1.0.220",
+    urls = ["https://static.crates.io/crates/serde_derive/1.0.220/download"],
+    visibility = [],
+)
+
+cargo.rust_library(
+    name = "serde_derive-1.0.220",
+    srcs = [":serde_derive-1.0.220.crate"],
     crate = "serde_derive",
-    crate_root = "serde_derive-1.0.219.crate/src/lib.rs",
-    edition = "2015",
+    crate_root = "serde_derive-1.0.220.crate/src/lib.rs",
+    edition = "2021",
     features = ["default"],
     proc_macro = True,
     visibility = [],
