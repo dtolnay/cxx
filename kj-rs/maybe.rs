@@ -174,6 +174,32 @@ impl_maybe_item_for_primitive!(
     u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize, f32, f64, bool, &str
 );
 
+unsafe impl<T> MaybeItem for &[T] {
+    type Discriminant = bool;
+
+    fn is_some(value: &KjMaybe<Self>) -> bool {
+        value.is_set
+    }
+
+    fn is_none(value: &KjMaybe<Self>) -> bool {
+        !value.is_set
+    }
+
+    const NONE: KjMaybe<Self> = {
+        KjMaybe {
+            is_set: false,
+            some: MaybeUninit::uninit(),
+        }
+    };
+
+    fn some(value: Self) -> KjMaybe<Self> {
+        KjMaybe {
+            is_set: true,
+            some: MaybeUninit::new(value),
+        }
+    }
+}
+
 pub(crate) mod repr {
     use super::MaybeItem;
     use static_assertions::assert_eq_size;

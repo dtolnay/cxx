@@ -56,5 +56,7 @@ kj::Maybe<rust::f32> test_maybe_f32_none();
 kj::Maybe<rust::f64> test_maybe_f64_none();
 kj::Maybe<bool> test_maybe_bool_none();
 kj::Maybe<rust::Str> test_maybe_str_none();
+kj::Maybe<rust::Slice<const kj::byte>> test_maybe_u8_slice_some();
+kj::Maybe<rust::Slice<const kj::byte>> test_maybe_u8_slice_none();
 
 }  // namespace kj_rs_demo
