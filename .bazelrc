@@ -10,16 +10,16 @@
 build --enable_platform_specific_config
 
 build:linux --action_env=CC=clang --action_env=CXX=clang++
-build:linux --cxxopt=-std=c++20 --host_cxxopt=-std=c++20
+build:linux --cxxopt=-std=c++23 --host_cxxopt=-std=c++23
 
 build:macos --action_env=CC=clang --action_env=CXX=clang++
-build:macos --cxxopt=-std=c++20 --host_cxxopt=-std=c++20
+build:macos --cxxopt=-std=c++23 --host_cxxopt=-std=c++23
 
 startup --windows_enable_symlinks
 build:windows --enable_runfiles
 build:windows --extra_toolchains=@local_config_cc//:cc-toolchain-x64_windows-clang-cl
 build:windows --extra_execution_platforms=//:x64_windows-clang-cl
-build:windows --cxxopt='/std:c++20' --host_cxxopt='/std:c++20'
+build:windows --cxxopt='/std:c++23preview' --host_cxxopt='/std:c++23preview'
 build:windows --copt='/D_CRT_USE_BUILTIN_OFFSETOF' --host_copt='/D_CRT_USE_BUILTIN_OFFSETOF'
 build:windows --copt='/DWIN32_LEAN_AND_MEAN' --host_copt='/DWIN32_LEAN_AND_MEAN'
 build:windows --cxxopt='/Zc:__cplusplus' --host_cxxopt='/Zc:__cplusplus'

@@ -91,7 +91,6 @@ struct PromiseArcWakerPair {
 //
 // This class is mostly an implementation detail of LazyArcWaker.
 class ArcWaker: public kj::AtomicRefcounted,
-                public kj::EnableAddRefToThis<ArcWaker>,
                 public KjWaker {
  public:
   // Construct a new promise and ArcWaker promise pair, with the Promise to be scheduled on the
