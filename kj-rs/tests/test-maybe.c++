@@ -198,4 +198,12 @@ kj::Maybe<rust::Slice<const kj::byte>> test_maybe_u8_slice_some() {
 kj::Maybe<rust::Slice<const kj::byte>> test_maybe_u8_slice_none() {
   return kj::none;
 }
+
+kj::Maybe<uint64_t&> test_maybe_pin_mut_some() {
+  static uint64_t num = 15;
+  return kj::Maybe<uint64_t&>(num);
+}
+kj::Maybe<uint64_t&> test_maybe_pin_mut_none() {
+  return kj::none;
+}
 }  // namespace kj_rs_demo

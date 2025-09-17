@@ -206,6 +206,9 @@ mod ffi {
         #[allow(dead_code)]
         fn test_maybe_u8_slice_some() -> KjMaybe<&'static [u8]>;
         #[allow(dead_code)]
+        fn test_maybe_pin_mut_some<'a>() -> KjMaybe<Pin<&'a mut u64>>;
+
+        #[allow(dead_code)]
         fn test_maybe_u8_none() -> KjMaybe<u8>;
         #[allow(dead_code)]
         fn test_maybe_u16_none() -> KjMaybe<u16>;
@@ -236,6 +239,8 @@ mod ffi {
         fn test_maybe_str_none() -> KjMaybe<&'static str>;
         #[allow(dead_code)]
         fn test_maybe_u8_slice_none() -> KjMaybe<&'static [u8]>;
+        #[allow(dead_code)]
+        fn test_maybe_pin_mut_none<'a>() -> KjMaybe<Pin<&'a mut u64>>;
     }
 
     extern "Rust" {

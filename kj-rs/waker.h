@@ -90,8 +90,7 @@ struct PromiseArcWakerPair {
 // `wake()` is implemented in terms of `wake_by_ref()` and `drop()`.
 //
 // This class is mostly an implementation detail of LazyArcWaker.
-class ArcWaker: public kj::AtomicRefcounted,
-                public KjWaker {
+class ArcWaker: public kj::AtomicRefcounted, public KjWaker {
  public:
   // Construct a new promise and ArcWaker promise pair, with the Promise to be scheduled on the
   // event loop associated with `executor`.

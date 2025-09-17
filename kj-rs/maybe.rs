@@ -1,5 +1,5 @@
 use repr::KjMaybe;
-use std::mem::MaybeUninit;
+use std::{mem::MaybeUninit, pin::Pin};
 
 /// # Safety
 /// This trait should only be implemented in `workerd-cxx` on types
@@ -43,6 +43,17 @@ unsafe impl<T> HasNiche for &T {
 
 unsafe impl<T> HasNiche for &mut T {
     fn is_niche(value: *const &mut T) -> bool {
+        unsafe {
+            // We must cast it as pointing to a pointer, as opposed to a reference,
+            // because the rust compiler assumes a reference is never null, and
+            // therefore will optimize any null check on that reference.
+            (*(value.cast::<*mut T>())).is_null()
+        }
+    }
+}
+
+unsafe impl<T> HasNiche for Pin<&mut T> {
+    fn is_niche(value: *const Pin<&mut T>) -> bool {
         unsafe {
             // We must cast it as pointing to a pointer, as opposed to a reference,
             // because the rust compiler assumes a reference is never null, and
@@ -169,7 +180,7 @@ macro_rules! impl_maybe_item_for_primitive {
     };
 }
 
-impl_maybe_item_for_has_niche!(crate::KjOwn<T>, &T, &mut T);
+impl_maybe_item_for_has_niche!(crate::KjOwn<T>, &T, &mut T, Pin<&mut T>);
 impl_maybe_item_for_primitive!(
     u8, u16, u32, u64, u128, usize, i8, i16, i32, i64, i128, isize, f32, f64, bool, &str
 );

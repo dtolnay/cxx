@@ -66,6 +66,8 @@ fn test_maybe_none<T: MaybeItem + PartialEq + Debug>(val: KjMaybe<T>) {
 
 #[cfg(test)]
 pub mod tests {
+    use std::pin::Pin;
+
     use super::{test_maybe_none, test_maybe_some};
     use crate::ffi::{self, OpaqueCxxClass, Shared};
     use kj_rs::repr::{KjMaybe, KjOwn};
@@ -215,6 +217,10 @@ pub mod tests {
         test_maybe_some(ffi::test_maybe_bool_some(), false);
         test_maybe_some(ffi::test_maybe_str_some(), "hello");
         test_maybe_some(ffi::test_maybe_u8_slice_some(), b"abc");
+        assert_eq!(
+            *Option::<Pin<&mut u64>>::from(ffi::test_maybe_pin_mut_some()).unwrap(),
+            15
+        );
 
         test_maybe_none(ffi::test_maybe_u8_none());
         test_maybe_none(ffi::test_maybe_u16_none());
@@ -231,6 +237,7 @@ pub mod tests {
         test_maybe_none(ffi::test_maybe_bool_none());
         test_maybe_none(ffi::test_maybe_str_none());
         test_maybe_none(ffi::test_maybe_u8_slice_none());
+        test_maybe_none(ffi::test_maybe_pin_mut_none());
     }
 
     #[test]
