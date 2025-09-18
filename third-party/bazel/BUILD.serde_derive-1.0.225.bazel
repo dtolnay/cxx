@@ -95,7 +95,7 @@ rust_proc_macro(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "1.0.220",
+    version = "1.0.225",
     deps = [
         "@vendor__proc-macro2-1.0.101//:proc_macro2",
         "@vendor__quote-1.0.40//:quote",
