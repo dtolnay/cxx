@@ -2173,6 +2173,11 @@ fn expand_cxx_vector(
         quote_spanned!(end_span=> &mut)
     };
 
+    let not_move_constructible_err = format!(
+        "{} is not move constructible",
+        display_namespaced(resolve.name),
+    );
+
     quote_spanned! {end_span=>
         #cfg
         #[automatically_derived]
@@ -2217,9 +2222,11 @@ fn expand_cxx_vector(
                     fn __reserve #impl_generics(
                         v: ::cxx::core::pin::Pin<&mut ::cxx::CxxVector<#elem #ty_generics>>,
                         new_cap: usize,
-                    );
+                    ) -> bool;
                 }
-                unsafe { __reserve(v, new_cap) }
+                if !unsafe { __reserve(v, new_cap) } {
+                    ::cxx::core::panic!(#not_move_constructible_err);
+                }
             }
             #by_value_methods
             fn __unique_ptr_null() -> ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void> {
