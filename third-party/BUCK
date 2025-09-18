@@ -219,41 +219,41 @@ cargo.rust_library(
 )
 
 http_archive(
-    name = "hashbrown-0.15.5.crate",
-    sha256 = "9229cfe53dfd69f0609a49f65461bd93001ea1ef889cd5529dd176593f5338a1",
-    strip_prefix = "hashbrown-0.15.5",
-    urls = ["https://static.crates.io/crates/hashbrown/0.15.5/download"],
+    name = "hashbrown-0.16.0.crate",
+    sha256 = "5419bdc4f6a9207fbeba6d11b604d481addf78ecd10c11ad51e76c2f6482748d",
+    strip_prefix = "hashbrown-0.16.0",
+    urls = ["https://static.crates.io/crates/hashbrown/0.16.0/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "hashbrown-0.15.5",
-    srcs = [":hashbrown-0.15.5.crate"],
+    name = "hashbrown-0.16.0",
+    srcs = [":hashbrown-0.16.0.crate"],
     crate = "hashbrown",
-    crate_root = "hashbrown-0.15.5.crate/src/lib.rs",
+    crate_root = "hashbrown-0.16.0.crate/src/lib.rs",
     edition = "2021",
     visibility = [],
 )
 
 alias(
     name = "indexmap",
-    actual = ":indexmap-2.11.1",
+    actual = ":indexmap-2.11.4",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "indexmap-2.11.1.crate",
-    sha256 = "206a8042aec68fa4a62e8d3f7aa4ceb508177d9324faf261e1959e495b7a1921",
-    strip_prefix = "indexmap-2.11.1",
-    urls = ["https://static.crates.io/crates/indexmap/2.11.1/download"],
+    name = "indexmap-2.11.4.crate",
+    sha256 = "4b0f83760fb341a774ed326568e19f5a863af4a952def8c39f9ab92fd95b88e5",
+    strip_prefix = "indexmap-2.11.4",
+    urls = ["https://static.crates.io/crates/indexmap/2.11.4/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "indexmap-2.11.1",
-    srcs = [":indexmap-2.11.1.crate"],
+    name = "indexmap-2.11.4",
+    srcs = [":indexmap-2.11.4.crate"],
     crate = "indexmap",
-    crate_root = "indexmap-2.11.1.crate/src/lib.rs",
+    crate_root = "indexmap-2.11.4.crate/src/lib.rs",
     edition = "2021",
     features = [
         "default",
@@ -262,7 +262,7 @@ cargo.rust_library(
     visibility = [],
     deps = [
         ":equivalent-1.0.2",
-        ":hashbrown-0.15.5",
+        ":hashbrown-0.16.0",
     ],
 )
 

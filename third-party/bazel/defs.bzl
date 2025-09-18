@@ -299,7 +299,7 @@ _NORMAL_DEPENDENCIES = {
             "clap": Label("@vendor//:clap-4.5.47"),
             "codespan-reporting": Label("@vendor//:codespan-reporting-0.12.0"),
             "foldhash": Label("@vendor//:foldhash-0.2.0"),
-            "indexmap": Label("@vendor//:indexmap-2.11.1"),
+            "indexmap": Label("@vendor//:indexmap-2.11.4"),
             "proc-macro2": Label("@vendor//:proc-macro2-1.0.101"),
             "quote": Label("@vendor//:quote-1.0.40"),
             "scratch": Label("@vendor//:scratch-1.0.9"),
@@ -514,22 +514,22 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__hashbrown-0.15.5",
-        sha256 = "9229cfe53dfd69f0609a49f65461bd93001ea1ef889cd5529dd176593f5338a1",
+        name = "vendor__hashbrown-0.16.0",
+        sha256 = "5419bdc4f6a9207fbeba6d11b604d481addf78ecd10c11ad51e76c2f6482748d",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/hashbrown/0.15.5/download"],
-        strip_prefix = "hashbrown-0.15.5",
-        build_file = Label("//third-party/bazel:BUILD.hashbrown-0.15.5.bazel"),
+        urls = ["https://static.crates.io/crates/hashbrown/0.16.0/download"],
+        strip_prefix = "hashbrown-0.16.0",
+        build_file = Label("//third-party/bazel:BUILD.hashbrown-0.16.0.bazel"),
     )
 
     maybe(
         http_archive,
-        name = "vendor__indexmap-2.11.1",
-        sha256 = "206a8042aec68fa4a62e8d3f7aa4ceb508177d9324faf261e1959e495b7a1921",
+        name = "vendor__indexmap-2.11.4",
+        sha256 = "4b0f83760fb341a774ed326568e19f5a863af4a952def8c39f9ab92fd95b88e5",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/indexmap/2.11.1/download"],
-        strip_prefix = "indexmap-2.11.1",
-        build_file = Label("//third-party/bazel:BUILD.indexmap-2.11.1.bazel"),
+        urls = ["https://static.crates.io/crates/indexmap/2.11.4/download"],
+        strip_prefix = "indexmap-2.11.4",
+        build_file = Label("//third-party/bazel:BUILD.indexmap-2.11.4.bazel"),
     )
 
     maybe(
@@ -687,7 +687,7 @@ def crate_repositories():
         struct(repo = "vendor__clap-4.5.47", is_dev_dep = False),
         struct(repo = "vendor__codespan-reporting-0.12.0", is_dev_dep = False),
         struct(repo = "vendor__foldhash-0.2.0", is_dev_dep = False),
-        struct(repo = "vendor__indexmap-2.11.1", is_dev_dep = False),
+        struct(repo = "vendor__indexmap-2.11.4", is_dev_dep = False),
         struct(repo = "vendor__proc-macro2-1.0.101", is_dev_dep = False),
         struct(repo = "vendor__quote-1.0.40", is_dev_dep = False),
         struct(repo = "vendor__rustversion-1.0.22", is_dev_dep = False),
