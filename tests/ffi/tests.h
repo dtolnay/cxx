@@ -41,6 +41,10 @@ private:
   ~Private();
 };
 
+struct Unmovable {
+  Unmovable(Unmovable &&) = delete;
+};
+
 using Array = int[];
 
 struct R;

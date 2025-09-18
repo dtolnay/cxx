@@ -30,6 +30,7 @@ pub mod ffi {
 
         type Undefined;
         type Private;
+        type Unmovable;
         type Array;
     }
 
@@ -383,6 +384,7 @@ pub mod ffi {
     impl CxxVector<SharedString> {}
     impl SharedPtr<Undefined> {}
     impl SharedPtr<Private> {}
+    impl CxxVector<Unmovable> {}
     impl UniquePtr<Array> {}
 }
 
