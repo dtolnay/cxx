@@ -257,7 +257,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                     #[doc(hidden)]
                     #[#UnsafeAttr(#ExportNameAttr = #link_name)]
                     extern "C" fn #local_name #generics(lhs: &#ident #generics, rhs: &#ident #generics) -> ::cxx::core::primitive::bool {
-                        let __fn = concat!("<", module_path!(), #prevent_unwind_label);
+                        let __fn = ::cxx::core::concat!("<", ::cxx::core::module_path!(), #prevent_unwind_label);
                         ::cxx::private::prevent_unwind(__fn, || *lhs == *rhs)
                     }
                 });
@@ -271,7 +271,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                         #[doc(hidden)]
                         #[#UnsafeAttr(#ExportNameAttr = #link_name)]
                         extern "C" fn #local_name #generics(lhs: &#ident #generics, rhs: &#ident #generics) -> ::cxx::core::primitive::bool {
-                            let __fn = concat!("<", module_path!(), #prevent_unwind_label);
+                            let __fn = ::cxx::core::concat!("<", ::cxx::core::module_path!(), #prevent_unwind_label);
                             ::cxx::private::prevent_unwind(__fn, || *lhs != *rhs)
                         }
                     });
@@ -286,7 +286,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                     #[doc(hidden)]
                     #[#UnsafeAttr(#ExportNameAttr = #link_name)]
                     extern "C" fn #local_name #generics(lhs: &#ident #generics, rhs: &#ident #generics) -> ::cxx::core::primitive::bool {
-                        let __fn = concat!("<", module_path!(), #prevent_unwind_label);
+                        let __fn = ::cxx::core::concat!("<", ::cxx::core::module_path!(), #prevent_unwind_label);
                         ::cxx::private::prevent_unwind(__fn, || *lhs < *rhs)
                     }
                 });
@@ -299,7 +299,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                     #[doc(hidden)]
                     #[#UnsafeAttr(#ExportNameAttr = #link_name)]
                     extern "C" fn #local_name #generics(lhs: &#ident #generics, rhs: &#ident #generics) -> ::cxx::core::primitive::bool {
-                        let __fn = concat!("<", module_path!(), #prevent_unwind_label);
+                        let __fn = ::cxx::core::concat!("<", ::cxx::core::module_path!(), #prevent_unwind_label);
                         ::cxx::private::prevent_unwind(__fn, || *lhs <= *rhs)
                     }
                 });
@@ -313,7 +313,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                         #[doc(hidden)]
                         #[#UnsafeAttr(#ExportNameAttr = #link_name)]
                         extern "C" fn #local_name #generics(lhs: &#ident #generics, rhs: &#ident #generics) -> ::cxx::core::primitive::bool {
-                            let __fn = concat!("<", module_path!(), #prevent_unwind_label);
+                            let __fn = ::cxx::core::concat!("<", ::cxx::core::module_path!(), #prevent_unwind_label);
                             ::cxx::private::prevent_unwind(__fn, || *lhs > *rhs)
                         }
                     });
@@ -326,7 +326,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                         #[doc(hidden)]
                         #[#UnsafeAttr(#ExportNameAttr = #link_name)]
                         extern "C" fn #local_name #generics(lhs: &#ident #generics, rhs: &#ident #generics) -> ::cxx::core::primitive::bool {
-                            let __fn = concat!("<", module_path!(), #prevent_unwind_label);
+                            let __fn = ::cxx::core::concat!("<", ::cxx::core::module_path!(), #prevent_unwind_label);
                             ::cxx::private::prevent_unwind(__fn, || *lhs >= *rhs)
                         }
                     });
@@ -342,7 +342,7 @@ fn expand_struct_operators(strct: &Struct) -> TokenStream {
                     #[#UnsafeAttr(#ExportNameAttr = #link_name)]
                     #[allow(clippy::cast_possible_truncation)]
                     extern "C" fn #local_name #generics(this: &#ident #generics) -> ::cxx::core::primitive::usize {
-                        let __fn = concat!("<", module_path!(), #prevent_unwind_label);
+                        let __fn = ::cxx::core::concat!("<", ::cxx::core::module_path!(), #prevent_unwind_label);
                         ::cxx::private::prevent_unwind(__fn, || ::cxx::private::hash(this))
                     }
                 });
@@ -1309,7 +1309,7 @@ fn expand_rust_function_shim_impl(
         #[doc(hidden)]
         #[#UnsafeAttr(#ExportNameAttr = #link_name)]
         unsafe extern "C" fn #local_name #generics(#(#all_args,)* #outparam #pointer) #ret {
-            let __fn = ::cxx::private::concat!(::cxx::private::module_path!(), #prevent_unwind_label);
+            let __fn = ::cxx::core::concat!(::cxx::core::module_path!(), #prevent_unwind_label);
             #wrap_super
             #expr
         }
@@ -1651,7 +1651,7 @@ fn expand_rust_box(
         #[doc(hidden)]
         #[#UnsafeAttr(#ExportNameAttr = #link_drop)]
         unsafe extern "C" fn #local_drop #impl_generics(this: *mut ::cxx::alloc::boxed::Box<#ident #ty_generics>) {
-            let __fn = concat!("<", module_path!(), #prevent_unwind_drop_label);
+            let __fn = ::cxx::core::concat!("<", ::cxx::core::module_path!(), #prevent_unwind_drop_label);
             ::cxx::private::prevent_unwind(__fn, || unsafe { ::cxx::core::ptr::drop_in_place(this) });
         }
     }
@@ -1716,7 +1716,7 @@ fn expand_rust_vec(
         #[doc(hidden)]
         #[#UnsafeAttr(#ExportNameAttr = #link_drop)]
         unsafe extern "C" fn #local_drop #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>) {
-            let __fn = concat!("<", module_path!(), #prevent_unwind_drop_label);
+            let __fn = ::cxx::core::concat!("<", ::cxx::core::module_path!(), #prevent_unwind_drop_label);
             ::cxx::private::prevent_unwind(
                 __fn,
                 || unsafe { ::cxx::core::ptr::drop_in_place(this) },
@@ -1771,7 +1771,7 @@ fn expand_rust_vec(
         #[doc(hidden)]
         #[#UnsafeAttr(#ExportNameAttr = #link_truncate)]
         unsafe extern "C" fn #local_truncate #impl_generics(this: *mut ::cxx::private::RustVec<#elem #ty_generics>, len: ::cxx::core::primitive::usize) {
-            let __fn = concat!("<", module_path!(), #prevent_unwind_drop_label);
+            let __fn = ::cxx::core::concat!("<", ::cxx::core::module_path!(), #prevent_unwind_drop_label);
             ::cxx::private::prevent_unwind(
                 __fn,
                 || unsafe { (*this).truncate(len) },
