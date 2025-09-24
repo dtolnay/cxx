@@ -7,6 +7,7 @@ use crate::syntax::message::Message;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::qualified::QualifiedName;
 use crate::syntax::report::Errors;
+use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::trivial::TrivialReason;
 use crate::syntax::types::ConditionalImpl;
@@ -21,7 +22,6 @@ use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
 use std::fmt::{self, Display};
 use std::mem;
-use syn::punctuated::Punctuated;
 use syn::{parse_quote, punctuated, Generics, Lifetime, Result, Token, Visibility};
 
 pub(crate) fn bridge(mut ffi: Module) -> Result<TokenStream> {
@@ -917,17 +917,26 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                     &elided_generics
                 }
             };
-            let fn_generics = Lifetimes {
-                lt_token: generics.lt_token,
-                lifetimes: Punctuated::new(),
-                gt_token: generics.gt_token,
-            };
+            let mut self_type_lifetimes = UnorderedSet::new();
+            for lifetime in &self_type_generics.lifetimes {
+                if lifetime.ident != "_" {
+                    self_type_lifetimes.insert(lifetime);
+                }
+            }
+            let impl_lifetimes = generics
+                .lifetimes()
+                .filter(|param| self_type_lifetimes.contains(&param.lifetime));
+            let fn_lifetimes = generics
+                .lifetimes()
+                .filter(|param| !self_type_lifetimes.contains(&param.lifetime));
+            let lt_token = generics.lt_token;
+            let gt_token = generics.gt_token;
             quote_spanned! {ident.span()=>
                 #self_type_cfg_attrs
-                impl #generics #self_type #self_type_generics {
+                impl #lt_token #(#impl_lifetimes),* #gt_token #self_type #self_type_generics {
                     #doc
                     #all_attrs
-                    #visibility #unsafety #fn_token #ident #fn_generics #arg_list #ret #fn_body
+                    #visibility #unsafety #fn_token #ident #lt_token #(#fn_lifetimes),* #gt_token #arg_list #ret #fn_body
                 }
             }
         }
