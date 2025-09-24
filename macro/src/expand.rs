@@ -21,6 +21,7 @@ use proc_macro2::{Ident, Span, TokenStream};
 use quote::{format_ident, quote, quote_spanned, ToTokens};
 use std::fmt::{self, Display};
 use std::mem;
+use syn::punctuated::Punctuated;
 use syn::{parse_quote, punctuated, Generics, Lifetime, Result, Token, Visibility};
 
 pub(crate) fn bridge(mut ffi: Module) -> Result<TokenStream> {
@@ -916,12 +917,17 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                     &elided_generics
                 }
             };
+            let fn_generics = Lifetimes {
+                lt_token: generics.lt_token,
+                lifetimes: Punctuated::new(),
+                gt_token: generics.gt_token,
+            };
             quote_spanned! {ident.span()=>
                 #self_type_cfg_attrs
                 impl #generics #self_type #self_type_generics {
                     #doc
                     #all_attrs
-                    #visibility #unsafety #fn_token #ident #arg_list #ret #fn_body
+                    #visibility #unsafety #fn_token #ident #fn_generics #arg_list #ret #fn_body
                 }
             }
         }
