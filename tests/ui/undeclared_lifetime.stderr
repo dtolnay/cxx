@@ -54,8 +54,8 @@ error[E0261]: use of undeclared lifetime name `'b`
   |
 help: consider introducing lifetime `'b` here
   |
-9 |         fn g1<'b><'a>(self: &This, _: &'b CxxString);
-  |              ++++
+9 |         fn g1<'b, 'a>(self: &This, _: &'b CxxString);
+  |               +++
 help: consider introducing lifetime `'b` here
   |
 9 |         fn g1<'b, 'a>(self: &This, _: &'b CxxString);
@@ -106,8 +106,8 @@ error[E0261]: use of undeclared lifetime name `'b`
    |
 help: consider introducing lifetime `'b` here
    |
-11 |         fn g2<'b><'a>(self: &'b This);
-   |              ++++
+11 |         fn g2<'b, 'a>(self: &'b This);
+   |               +++
 help: consider introducing lifetime `'b` here
    |
 11 |         fn g2<'b, 'a>(self: &'b This);
