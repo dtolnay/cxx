@@ -17,7 +17,7 @@ cargo_toml_env_vars(
 )
 
 rust_library(
-    name = "cc",
+    name = "clap_builder",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = True,
@@ -34,8 +34,14 @@ rust_library(
             "WORKSPACE.bazel",
         ],
     ),
+    crate_features = [
+        "error-context",
+        "help",
+        "std",
+        "usage",
+    ],
     crate_root = "src/lib.rs",
-    edition = "2018",
+    edition = "2021",
     rustc_env_files = [
         ":cargo_toml_env_vars",
     ],
@@ -44,7 +50,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=cc",
+        "crate-name=clap_builder",
         "manual",
         "noclippy",
         "norustfmt",
@@ -92,9 +98,9 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "1.2.37",
+    version = "4.5.48",
     deps = [
-        "@vendor__find-msvc-tools-0.1.1//:find_msvc_tools",
-        "@vendor__shlex-1.3.0//:shlex",
+        "@vendor__anstyle-1.0.11//:anstyle",
+        "@vendor__clap_lex-0.7.5//:clap_lex",
     ],
 )
