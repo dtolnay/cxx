@@ -587,7 +587,6 @@ fn expand_extern_shared_struct(ety: &ExternType, ffi: &Module) -> TokenStream {
 }
 
 fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
-    let generics = &efn.generics;
     let receiver = efn.receiver().into_iter().map(|receiver| {
         if types.is_considered_improper_ctype(&receiver.ty) {
             if receiver.mutable {
@@ -629,9 +628,13 @@ fn expand_cxx_function_decl(efn: &ExternFn, types: &Types) -> TokenStream {
     }
     let link_name = mangle::extern_fn(efn, types);
     let local_name = format_ident!("__{}", efn.name.rust);
+    let lt_token = efn.generics.lt_token.unwrap_or_default();
+    let undeclared_lifetimes = efn.undeclared_lifetimes().into_iter();
+    let declared_lifetimes = &efn.generics.params;
+    let gt_token = efn.generics.gt_token.unwrap_or_default();
     quote! {
         #[link_name = #link_name]
-        fn #local_name #generics(#(#all_args,)* #outparam) #ret;
+        fn #local_name #lt_token #(#undeclared_lifetimes,)* #declared_lifetimes #gt_token(#(#all_args,)* #outparam) #ret;
     }
 }
 
