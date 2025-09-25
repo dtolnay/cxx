@@ -34,13 +34,18 @@ build:clippy --aspects=@rules_rust//rust:defs.bzl%rustfmt_aspect
 build:clippy --output_groups=+rustfmt_checks
 build:clippy --@rules_rust//:extra_rustc_flag=-Dwarnings
 
+build:max-debug-info -c dbg
+build:max-debug-info --copt="-O0"
+build:max-debug-info --copt="-g3" --copt="-fstandalone-debug" --copt="-fno-limit-debug-info" --strip=never
+build:max-debug-info --copt="-fno-optimize-sibling-calls"
+build:max-debug-info --copt="-fno-omit-frame-pointer" --copt="-mno-omit-leaf-frame-pointer"
+build:max-debug-info --@rules_rust//:extra_rustc_flag=-Cdebuginfo=2
+build:max-debug-info --@rules_rust//:extra_rustc_flag=-Cforce-frame-pointers=yes
+
 ## Sanitizers
 
+build:sanitizer-common --config=max-debug-info
 build:sanitizer-common --copt="-fsanitize-link-c++-runtime" --linkopt="-fsanitize-link-c++-runtime"
-build:sanitizer-common --copt="-Og"
-build:sanitizer-common --copt="-g" --strip=never
-build:sanitizer-common --copt="-fno-optimize-sibling-calls"
-build:sanitizer-common --copt="-fno-omit-frame-pointer" --copt="-mno-omit-leaf-frame-pointer"
 
 # Address sanitizer (https://github.com/google/sanitizers/wiki/AddressSanitizer)
 build:asan --config=sanitizer-common

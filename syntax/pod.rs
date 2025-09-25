@@ -38,7 +38,9 @@ impl<'a> Types<'a> {
             | Type::SliceRef(_)
             | Type::Ptr(_)
             | Type::KjDate(_) => true,
-            Type::KjMaybe(ty) => self.is_guaranteed_pod(&ty.inner),
+            // kj::Maybe can't be considered to be a POD:
+            // <https://itanium-cxx-abi.github.io/cxx-abi/abi.html#non-trivial>
+            Type::KjMaybe(_) => false,
             Type::Array(array) => self.is_guaranteed_pod(&array.inner),
             Type::Future(_) => false,
         }

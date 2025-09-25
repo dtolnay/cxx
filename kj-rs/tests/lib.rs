@@ -298,6 +298,19 @@ mod ffi {
         async unsafe fn lifetime_arg_void<'a>(buf: &'a [u8]);
         async unsafe fn lifetime_arg_result<'a>(buf: &'a [u8]) -> Result<()>;
     }
+
+    struct StructWithMaybe {
+        b: bool,
+        u: KjMaybe<u64>,
+    }
+
+    extern "Rust" {
+        async unsafe fn pass_struct_with_maybe(x: StructWithMaybe) -> Result<()>;
+    }
+}
+
+async fn pass_struct_with_maybe(_x: ffi::StructWithMaybe) -> Result<()> {
+    Ok(())
 }
 
 unsafe impl Send for ffi::OpaqueAtomicRefcountedClass {}

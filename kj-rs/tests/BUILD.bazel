@@ -170,3 +170,21 @@ cc_test(
         "@capnp-cpp//src/kj:kj-test",
     ],
 )
+
+cc_test(
+    name = "maybe-test",
+    size = "medium",
+    srcs = [
+        "maybe-test.c++",
+    ],
+    linkstatic = select({
+        "@platforms//os:windows": True,
+        "//conditions:default": False,
+    }),
+    deps = [
+        ":bridge",
+        ":tests",
+        "//third-party:runtime",
+        "@capnp-cpp//src/kj:kj-test",
+    ],
+)

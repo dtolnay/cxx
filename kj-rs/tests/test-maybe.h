@@ -1,11 +1,15 @@
 #pragma once
 
-#include "kj-rs-demo/lib.rs.h"
-#include "kj/common.h"
+#include "kj-rs/tests/test-own.h"
+
+#include <kj/common.h>
 
 #include <cstdint>
 
 namespace kj_rs_demo {
+
+struct Shared;
+class OpaqueCxxClass;
 
 kj::Maybe<Shared> return_maybe_shared_some();
 kj::Maybe<Shared> return_maybe_shared_none();
