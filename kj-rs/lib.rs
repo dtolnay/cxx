@@ -5,6 +5,7 @@ pub use crate::ffi::KjWaker;
 pub use awaiter::PromiseAwaiter;
 pub use date::KjDate;
 pub use future::FuturePollStatus;
+pub use future::map_err;
 pub use maybe::repr::KjMaybe;
 pub use own::repr::KjOwn;
 pub use promise::KjPromise;

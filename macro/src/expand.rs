@@ -1300,7 +1300,7 @@ fn expand_rust_function_shim_super(
 
     let mut body = if let Some(Type::Future(fut)) = &sig.ret {
         if fut.throws_tokens.is_some() {
-            quote_spanned!(span=> Box::pin(async move {#call(#(#vars,)*).await.map_err(|e| ::cxx::IntoKjException::into_kj_exception(e, ::cxx::core::file!(), ::cxx::core::line!()))}))
+            quote_spanned!(span=> Box::pin(::kj_rs::map_err(#call(#(#vars,)*), ::cxx::core::file!(), ::cxx::core::line!())))
         } else {
             quote_spanned!(span=> Box::pin(#call(#(#vars,)*)))
         }

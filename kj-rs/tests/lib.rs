@@ -290,6 +290,8 @@ mod ffi {
         async fn new_awaiting_future_i32() -> Result<()>;
         async fn new_ready_future_i32(value: i32) -> Result<i32>;
         async fn new_pass_through_feature_shared() -> Shared;
+
+        async unsafe fn work_before_poll<'a>(target: &'a mut u64) -> Result<()>;
     }
 
     // these are used to check compilation only
@@ -346,6 +348,14 @@ pub async fn new_pass_through_feature_shared() -> ffi::Shared {
 
 async fn new_ready_future_shared_type() -> ffi::Shared {
     ffi::Shared { i: 42 }
+}
+
+fn work_before_poll(target: &mut u64) -> impl Future<Output = Result<()>> {
+    *target = 42;
+
+    async move {
+        unimplemented!("not expected to be polled");
+    }
 }
 
 #[cfg(test)]

@@ -6,6 +6,7 @@
 #include "kj-rs/future.h"
 #include "kj-rs/tests/lib.rs.h"
 #include "kj-rs/waker.h"
+#include <sys/types.h>
 
 #include <kj/test.h>
 
@@ -167,6 +168,17 @@ KJ_TEST("C++ can receive asynchronous wakes after poll()") {
   KJ_EXPECT(!promise.poll(waitScope));
   // But later it is.
   promise.wait(waitScope);
+}
+
+KJ_TEST("Work before poll") {
+  kj::EventLoop loop;
+  kj::WaitScope waitScope(loop);
+
+  uint64_t val = 0;
+  // It should be possible for rust function to do work before returning the future
+  // even if we don't poll or cancel it.
+  auto promise = work_before_poll(val);
+  KJ_EXPECT(val == 42);
 }
 
 // TODO(now): More test cases.

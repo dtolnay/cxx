@@ -1,5 +1,12 @@
 // This file contains boilerplate which must occur once per crate, rather than once per type.
 
+use std::{
+    pin::Pin,
+    task::{Context, Poll},
+};
+
+use cxx::IntoKjException;
+
 // NOTE: FuturePollStatus must be kept in sync with the C++ enum of the same name in future.h
 // Ideally, this would live in kj-rs's `crate::ffi` module, and code which depends on kj-rs would be
 // able to include `kj-rs/src/lib.rs.h`. I couldn't figure out how to expose that generated lib.rs.h
@@ -149,4 +156,50 @@ pub(crate) mod repr {
         let drop = RustInfallibleFuture::<T>::drop_in_place;
         RustInfallibleFuture { fut, poll, drop }
     }
+}
+
+// A future that converts error into `cxx::KjException`
+struct MapErr<F> {
+    fut: F,
+    file: &'static str,
+    line: u32,
+}
+
+impl<F, T, E> Future for MapErr<F>
+where
+    F: Future<Output = Result<T, E>>,
+    E: IntoKjException,
+{
+    type Output = Result<T, cxx::KjException>;
+
+    fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+        let file = self.file;
+        let line = self.line;
+
+        // Safety: self is pinned, so fut is pinned.
+        let inner: Pin<&mut F> = unsafe {
+            let this = self.get_unchecked_mut();
+            Pin::new_unchecked(&mut this.fut)
+        };
+        match inner.poll(cx) {
+            Poll::Pending => Poll::Pending,
+            Poll::Ready(Ok(value)) => Poll::Ready(Ok(value)),
+            Poll::Ready(Err(e)) => Poll::Ready(Err(::cxx::IntoKjException::into_kj_exception(
+                e, file, line,
+            ))),
+        }
+    }
+}
+
+/// Convert a `Future` using any `IntoKjException` error into `cxx::KjException` one.
+pub fn map_err<F, T, E>(
+    fut: F,
+    file: &'static str,
+    line: u32,
+) -> impl Future<Output = Result<T, cxx::KjException>>
+where
+    F: Future<Output = Result<T, E>>,
+    E: IntoKjException,
+{
+    MapErr { fut, file, line }
 }
