@@ -20,7 +20,8 @@ pub(crate) fn get_impl_and_ty_generics<'a>(
     match conditional_impl.explicit_impl {
         Some(explicit_impl) => {
             let impl_generics = &explicit_impl.impl_generics;
-            (impl_generics, None /* already covered via `#inner` */)
+            let ty_generics = None; // already covered via `#inner`
+            (impl_generics, ty_generics)
         }
         None => {
             // Check whether `explicit_generics` are present.  In the example below,
@@ -42,10 +43,8 @@ pub(crate) fn get_impl_and_ty_generics<'a>(
                 let resolved_generics = resolve_generic_lifetimes(inner, types);
                 (resolved_generics, Some(resolved_generics))
             } else {
-                (
-                    explicit_generics,
-                    None, /* already covered via `#inner` */
-                )
+                let ty_generics = None; // already covered via `#inner`
+                (explicit_generics, ty_generics)
             }
         }
     }
@@ -55,7 +54,7 @@ pub(crate) fn get_impl_and_ty_generics<'a>(
 /// return lifetimes in cases like `CxxVector<Borrowed<'a>>`.
 ///
 /// See also: resolve_generic_lifetimes.
-fn get_generic_lifetimes<'a>(ty: &'a Type) -> &'a Lifetimes {
+fn get_generic_lifetimes(ty: &Type) -> &Lifetimes {
     match ty {
         Type::Ident(named_type) => &named_type.generics,
         Type::CxxVector(ty1) => get_generic_lifetimes(&ty1.inner),
@@ -75,7 +74,7 @@ fn get_generic_lifetimes<'a>(ty: &'a Type) -> &'a Lifetimes {
 /// ```
 ///
 /// See also: get_generic_lifetimes.
-fn resolve_generic_lifetimes<'a>(ty: &'a Type, types: &'a Types) -> &'a Lifetimes {
+fn resolve_generic_lifetimes<'a>(ty: &Type, types: &Types<'a>) -> &'a Lifetimes {
     match ty {
         Type::Ident(named_type) => types.resolve(&named_type.rust).generics,
         Type::CxxVector(ty1) => resolve_generic_lifetimes(&ty1.inner, types),

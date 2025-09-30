@@ -1811,13 +1811,13 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: &Type) {
     out.pragma.missing_declarations = true;
 
     let inner = stringify_type(ty, out.types);
-    let instance = crate::syntax::mangle::type_(ty)
+    let instance = mangle::type_(ty)
         .expect("Earlier syntax/check.rs checks should filter out non-mangle-able types");
 
     // Some aliases are to opaque types; some are to trivial types. We can't
     // know at code generation time, so we generate both C++ and Rust side
-    // bindings for a "new" method anyway. But the Rust code can't be called
-    // for Opaque types because the 'new' method is not implemented.
+    // bindings for a "new" method anyway. But the Rust code can't be called for
+    // Opaque types because the 'new' method is not implemented.
     let can_construct_from_value = out.types.is_maybe_trivial(ty);
 
     out.builtin.is_complete = true;

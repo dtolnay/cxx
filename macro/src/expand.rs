@@ -2138,7 +2138,7 @@ fn expand_cxx_vector(
     let link_reserve = format!("{}reserve", prefix);
     let link_push_back = format!("{}push_back", prefix);
     let link_pop_back = format!("{}pop_back", prefix);
-    let unique_ptr_prefix = format!("cxxbridge1$unique_ptr$std$vector${}$", key.symbol,);
+    let unique_ptr_prefix = format!("cxxbridge1$unique_ptr$std$vector${}$", key.symbol);
     let link_unique_ptr_null = format!("{}null", unique_ptr_prefix);
     let link_unique_ptr_raw = format!("{}raw", unique_ptr_prefix);
     let link_unique_ptr_get = format!("{}get", unique_ptr_prefix);

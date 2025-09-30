@@ -38,7 +38,7 @@ impl<'a> ImplKey<'a> {
 
     /// Returns the generic type parameter `T` associated with `self`.
     /// For example, if `self` represents `UniquePtr<u32>` then this will return `u32`.
-    pub(crate) fn inner(&self) -> &'a Type {
+    fn inner(&self) -> &'a Type {
         let named_impl_key = match self {
             ImplKey::RustBox(key)
             | ImplKey::RustVec(key)

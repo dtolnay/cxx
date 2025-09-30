@@ -245,18 +245,17 @@ impl<'a> Types<'a> {
 
         types.toposorted_structs = toposort::sort(cx, apis, &types);
 
-        let implicit_impls = types
-            .all
-            .iter()
-            .filter_map(|(ty, cfg)| Type::impl_key(ty).map(|impl_key| (impl_key, cfg)))
-            .filter(|(impl_key, _cfg)| impl_key.is_implicit_impl_ok(&types))
-            .collect::<Vec<_>>();
-        for (impl_key, cfg) in implicit_impls {
-            match types.impls.entry(impl_key) {
-                Entry::Vacant(entry) => {
-                    entry.insert(ConditionalImpl::from(cfg.clone()));
+        for (ty, cfg) in &types.all {
+            let Some(impl_key) = ty.impl_key() else {
+                continue;
+            };
+            if impl_key.is_implicit_impl_ok(&types) {
+                match types.impls.entry(impl_key) {
+                    Entry::Vacant(entry) => {
+                        entry.insert(ConditionalImpl::from(cfg.clone()));
+                    }
+                    Entry::Occupied(mut entry) => entry.get_mut().cfg.merge_or(cfg.clone()),
                 }
-                Entry::Occupied(mut entry) => entry.get_mut().cfg.merge_or(cfg.clone()),
             }
         }
 
