@@ -87,7 +87,7 @@ KJ_TEST("from<Rust> Vec conversion") {
   rustVec.push_back(3);
 
   // Convert to kj::ArrayPtr
-  auto arrayPtr = from<Rust>(rustVec);
+  auto arrayPtr = kj::from<Rust>(rustVec);
 
   KJ_EXPECT(arrayPtr.size() == 3);
   KJ_EXPECT(arrayPtr[0] == 1);
@@ -101,7 +101,7 @@ KJ_TEST("from<Rust> Slice conversion") {
   ::rust::Slice<int> rustSlice(data, 4);
 
   // Convert to kj::ArrayPtr
-  auto arrayPtr = from<Rust>(rustSlice);
+  auto arrayPtr = kj::from<Rust>(rustSlice);
 
   KJ_EXPECT(arrayPtr.size() == 4);
   KJ_EXPECT(arrayPtr[0] == 10);
@@ -113,7 +113,7 @@ KJ_TEST("from<Rust> Slice conversion") {
 KJ_TEST("from<Rust> String conversion") {
   ::rust::String rustStr("Convert me!");
 
-  auto arrayPtr = from<Rust>(rustStr);
+  auto arrayPtr = kj::from<Rust>(rustStr);
   auto kjStr = kj::str(arrayPtr);
 
   KJ_EXPECT(kjStr == "Convert me!");
@@ -123,7 +123,7 @@ KJ_TEST("from<Rust> String conversion") {
 KJ_TEST("from<Rust> Str conversion") {
   ::rust::Str rustStr("String slice conversion");
 
-  auto arrayPtr = from<Rust>(rustStr);
+  auto arrayPtr = kj::from<Rust>(rustStr);
   auto kjStr = kj::str(arrayPtr);
 
   KJ_EXPECT(kjStr == "String slice conversion");
@@ -134,7 +134,7 @@ KJ_TEST("from<RustCopy> Slice<str> conversion") {
   ::rust::str strings[] = {"first", "second", "third"};
   ::rust::Slice<::rust::str> rustSlice(strings, 3);
 
-  auto kjArray = from<RustCopy>(rustSlice);
+  auto kjArray = kj::from<RustCopy>(rustSlice);
 
   KJ_EXPECT(kjArray.size() == 3);
   KJ_EXPECT(kjArray[0] == "first");
@@ -148,7 +148,7 @@ KJ_TEST("from<RustCopy> Vec<String> conversion") {
   rustVec.emplace_back("second");
   rustVec.emplace_back("third");
 
-  auto kjArray = from<RustCopy>(rustVec);
+  auto kjArray = kj::from<RustCopy>(rustVec);
 
   KJ_EXPECT(kjArray.size() == 3);
   KJ_EXPECT(kjArray[0] == "first");

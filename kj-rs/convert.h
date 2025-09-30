@@ -101,7 +101,7 @@
 // Basic usage patterns:
 //
 // // Convert Rust to C++:
-// kj::ArrayPtr<const int> cppView = from<Rust>(rustVec);
+// kj::ArrayPtr<const int> cppView = kj::from<Rust>(rustVec);
 //
 // // Convert C++ to Rust (read-only, safe):
 // rust::Slice<const char> rustBytes = kjString.as<Rust>();
@@ -183,38 +183,8 @@ namespace kj_rs {
 
 // KJ to Rust conversion utilities with different ownership semantics
 
-/// Template function for nicer syntax: from<Rust>(rustObject) instead of fromRust(rustObject)
-template <typename T, typename U>
-inline auto from(U&& rustObject) {
-  return T::into(std::forward<U>(rustObject));
-}
-
-/// Zero-copy read-only Rust views: kjObject.as<Rust>() and from<Rust>(kjObject)
-struct Rust {
-  // into() methods for from<Rust>(rustObject) - converting Rust to KJ
-
-  /// from<Rust>(rustVec) - Zero-copy read-only view
-  template <typename T>
-  static kj::ArrayPtr<const T> into(const ::rust::Vec<T>& vec) {
-    return kj::ArrayPtr<const T>(vec.data(), vec.size());
-  }
-
-  /// from<Rust>(rustSlice) - Zero-copy slice view
-  template <typename T>
-  static kj::ArrayPtr<T> into(const ::rust::Slice<T>& slice) {
-    return kj::ArrayPtr<T>(slice.data(), slice.size());
-  }
-
-  /// from<Rust>(rustString) - Zero-copy string chars (not null-terminated)
-  static kj::ArrayPtr<const char> into(const ::rust::String& str) {
-    return kj::ArrayPtr<const char>(str.data(), str.size());
-  }
-
-  /// from<Rust>(rustStr) - Zero-copy string slice chars (not null-terminated)
-  static kj::ArrayPtr<const char> into(const ::rust::Str& str) {
-    return kj::ArrayPtr<const char>(str.data(), str.size());
-  }
-};
+/// Zero-copy read-only Rust views: kjObject.as<Rust>() and kj::from<Rust>(kjObject)
+struct Rust {};
 
 /// kjArrayPtr.as<Rust>()
 template <typename T>
@@ -243,26 +213,30 @@ inline ::rust::Slice<const char> asImpl(Rust*, const kj::ConstString& str) {
   return ::rust::Slice(str.begin(), str.size());
 }
 
-/// Owned Rust copies: kjObject.as<RustCopy>() and from<RustCopy>(kjObject)
-struct RustCopy {
-  /// from<RustCopy>(rustSliceOfStrs) - Copy slice of strs to null-terminated KJ strings
-  static kj::Array<kj::String> into(::rust::Slice<::rust::str> slice) {
-    auto res = kj::heapArrayBuilder<kj::String>(slice.size());
-    for (auto& entry: slice) {
-      res.add(kj::str(entry));
-    }
-    return res.finish();
-  }
+/// from<Rust>(rustVec) - Zero-copy read-only view
+template <typename T>
+inline kj::ArrayPtr<const T> fromImpl(Rust*, const ::rust::Vec<T>& vec) {
+  return kj::ArrayPtr<const T>(vec.data(), vec.size());
+}
 
-  /// from<RustCopy>(rustVecOfStrings) - Copy string vector to null-terminated KJ strings
-  static kj::Array<kj::String> into(const ::rust::Vec<::rust::String>& vec) {
-    auto res = kj::heapArrayBuilder<kj::String>(vec.size());
-    for (auto& entry: vec) {
-      res.add(kj::str(entry));
-    }
-    return res.finish();
-  }
-};
+/// from<Rust>(rustSlice) - Zero-copy slice view
+template <typename T>
+inline kj::ArrayPtr<T> fromImpl(Rust*, const ::rust::Slice<T>& slice) {
+  return kj::ArrayPtr<T>(slice.data(), slice.size());
+}
+
+/// from<Rust>(rustString) - Zero-copy string chars (not null-terminated)
+inline kj::ArrayPtr<const char> fromImpl(Rust*, const ::rust::String& str) {
+  return kj::ArrayPtr<const char>(str.data(), str.size());
+}
+
+/// from<Rust>(rustStr) - Zero-copy string slice chars (not null-terminated)
+inline kj::ArrayPtr<const char> fromImpl(Rust*, const ::rust::Str& str) {
+  return kj::ArrayPtr<const char>(str.data(), str.size());
+}
+
+/// Owned Rust copies: kjObject.as<RustCopy>() and from<RustCopy>(kjObject)
+struct RustCopy {};
 
 /// kjArrayPtr.as<RustCopy>()
 template <typename T>
@@ -285,6 +259,24 @@ inline ::rust::Vec<char> asImpl(RustCopy*, const kj::StringPtr& str) {
 inline ::rust::Vec<char> asImpl(RustCopy*, const kj::ConstString& str) {
   auto ptr = str.asArray();
   return asImpl((RustCopy*)nullptr, ptr);
+}
+
+/// from<RustCopy>(rustSliceOfStrs) - Copy slice of strs to null-terminated KJ strings
+inline kj::Array<kj::String> fromImpl(RustCopy*, ::rust::Slice<::rust::str> slice) {
+  auto res = kj::heapArrayBuilder<kj::String>(slice.size());
+  for (auto& entry: slice) {
+    res.add(kj::str(entry));
+  }
+  return res.finish();
+}
+
+/// from<RustCopy>(rustVecOfStrings) - Copy string vector to null-terminated KJ strings
+inline kj::Array<kj::String> fromImpl(RustCopy*, const ::rust::Vec<::rust::String>& vec) {
+  auto res = kj::heapArrayBuilder<kj::String>(vec.size());
+  for (auto& entry: vec) {
+    res.add(kj::str(entry));
+  }
+  return res.finish();
 }
 
 /// Mutable Rust views
