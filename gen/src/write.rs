@@ -10,13 +10,12 @@ use crate::syntax::map::UnorderedMap as Map;
 use crate::syntax::namespace::Namespace;
 use crate::syntax::primitive::{self, PrimitiveKind};
 use crate::syntax::set::UnorderedSet;
-use crate::syntax::symbol::{self, Symbol};
+use crate::syntax::symbol::Symbol;
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::{
     derive, mangle, Api, Doc, Enum, ExternFn, ExternType, FnKind, Lang, Pair, Signature, Struct,
     Trait, Type, TypeAlias, Types, Var,
 };
-use proc_macro2::Ident;
 
 pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u8> {
     let mut out_file = OutFile::new(header, opt, types);
@@ -1409,95 +1408,110 @@ fn write_extern_arg(out: &mut OutFile, arg: &Var) {
 }
 
 fn write_type(out: &mut OutFile, ty: &Type) {
+    write!(out, "{}", stringify_type(ty, out.types));
+}
+
+fn stringify_type(ty: &Type, types: &Types) -> String {
+    let mut s = String::new();
+    write_type_to_generic_writer(&mut s, ty, types).unwrap();
+    s
+}
+
+fn write_type_to_generic_writer(
+    out: &mut impl std::fmt::Write,
+    ty: &Type,
+    types: &Types,
+) -> std::fmt::Result {
     match ty {
         Type::Ident(ident) => match Atom::from(&ident.rust) {
-            Some(atom) => write_atom(out, atom),
-            None => write!(
-                out,
-                "{}",
-                out.types.resolve(ident).name.to_fully_qualified(),
-            ),
+            Some(atom) => write_atom_to_generic_writer(out, atom),
+            None => write!(out, "{}", types.resolve(ident).name.to_fully_qualified()),
         },
         Type::RustBox(ty) => {
-            write!(out, "::rust::Box<");
-            write_type(out, &ty.inner);
-            write!(out, ">");
+            write!(out, "::rust::Box<")?;
+            write_type_to_generic_writer(out, &ty.inner, types)?;
+            write!(out, ">")
         }
         Type::RustVec(ty) => {
-            write!(out, "::rust::Vec<");
-            write_type(out, &ty.inner);
-            write!(out, ">");
+            write!(out, "::rust::Vec<")?;
+            write_type_to_generic_writer(out, &ty.inner, types)?;
+            write!(out, ">")
         }
         Type::UniquePtr(ptr) => {
-            write!(out, "::std::unique_ptr<");
-            write_type(out, &ptr.inner);
-            write!(out, ">");
+            write!(out, "::std::unique_ptr<")?;
+            write_type_to_generic_writer(out, &ptr.inner, types)?;
+            write!(out, ">")
         }
         Type::SharedPtr(ptr) => {
-            write!(out, "::std::shared_ptr<");
-            write_type(out, &ptr.inner);
-            write!(out, ">");
+            write!(out, "::std::shared_ptr<")?;
+            write_type_to_generic_writer(out, &ptr.inner, types)?;
+            write!(out, ">")
         }
         Type::WeakPtr(ptr) => {
-            write!(out, "::std::weak_ptr<");
-            write_type(out, &ptr.inner);
-            write!(out, ">");
+            write!(out, "::std::weak_ptr<")?;
+            write_type_to_generic_writer(out, &ptr.inner, types)?;
+            write!(out, ">")
         }
         Type::CxxVector(ty) => {
-            write!(out, "::std::vector<");
-            write_type(out, &ty.inner);
-            write!(out, ">");
+            write!(out, "::std::vector<")?;
+            write_type_to_generic_writer(out, &ty.inner, types)?;
+            write!(out, ">")
         }
         Type::Ref(r) => {
-            write_type_space(out, &r.inner);
+            write_type_space_to_generic_writer(out, &r.inner, types)?;
             if !r.mutable {
-                write!(out, "const ");
+                write!(out, "const ")?;
             }
-            write!(out, "&");
+            write!(out, "&")
         }
         Type::Ptr(p) => {
-            write_type_space(out, &p.inner);
+            write_type_space_to_generic_writer(out, &p.inner, types)?;
             if !p.mutable {
-                write!(out, "const ");
+                write!(out, "const ")?;
             }
-            write!(out, "*");
+            write!(out, "*")
         }
         Type::Str(_) => {
-            write!(out, "::rust::Str");
+            write!(out, "::rust::Str")
         }
         Type::SliceRef(slice) => {
-            write!(out, "::rust::Slice<");
-            write_type_space(out, &slice.inner);
+            write!(out, "::rust::Slice<")?;
+            write_type_space_to_generic_writer(out, &slice.inner, types)?;
             if slice.mutability.is_none() {
-                write!(out, "const");
+                write!(out, "const")?;
             }
-            write!(out, ">");
+            write!(out, ">")
         }
         Type::Fn(f) => {
-            write!(out, "::rust::Fn<");
+            write!(out, "::rust::Fn<")?;
             match &f.ret {
-                Some(ret) => write_type(out, ret),
-                None => write!(out, "void"),
+                Some(ret) => write_type_to_generic_writer(out, ret, types)?,
+                None => write!(out, "void")?,
             }
-            write!(out, "(");
+            write!(out, "(")?;
             for (i, arg) in f.args.iter().enumerate() {
                 if i > 0 {
-                    write!(out, ", ");
+                    write!(out, ", ")?;
                 }
-                write_type(out, &arg.ty);
+                write_type_to_generic_writer(out, &arg.ty, types)?;
             }
-            write!(out, ")>");
+            write!(out, ")>")
         }
         Type::Array(a) => {
-            write!(out, "::std::array<");
-            write_type(out, &a.inner);
-            write!(out, ", {}>", &a.len);
+            write!(out, "::std::array<")?;
+            write_type_to_generic_writer(out, &a.inner, types)?;
+            write!(out, ", {}>", &a.len)
         }
         Type::Void(_) => unreachable!(),
     }
 }
 
 fn write_atom(out: &mut OutFile, atom: Atom) {
+    // `unwrap`, because `OutFile`'s impl of `fmt::Write` is infallible.
+    write_atom_to_generic_writer(out, atom).unwrap();
+}
+
+fn write_atom_to_generic_writer(out: &mut impl std::fmt::Write, atom: Atom) -> std::fmt::Result {
     match atom {
         Bool => write!(out, "bool"),
         Char => write!(out, "char"),
@@ -1523,7 +1537,24 @@ fn write_type_space(out: &mut OutFile, ty: &Type) {
     write_space_after_type(out, ty);
 }
 
+fn write_type_space_to_generic_writer(
+    out: &mut impl std::fmt::Write,
+    ty: &Type,
+    types: &Types,
+) -> std::fmt::Result {
+    write_type_to_generic_writer(out, ty, types)?;
+    write_space_after_type_to_generic_writer(out, ty)
+}
+
 fn write_space_after_type(out: &mut OutFile, ty: &Type) {
+    // `unwrap`, because `OutFile`'s impl of `fmt::Write` is infallible.
+    write_space_after_type_to_generic_writer(out, ty).unwrap();
+}
+
+fn write_space_after_type_to_generic_writer(
+    out: &mut impl std::fmt::Write,
+    ty: &Type,
+) -> std::fmt::Result {
     match ty {
         Type::Ident(_)
         | Type::RustBox(_)
@@ -1536,56 +1567,8 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
         | Type::SliceRef(_)
         | Type::Fn(_)
         | Type::Array(_) => write!(out, " "),
-        Type::Ref(_) | Type::Ptr(_) => {}
+        Type::Ref(_) | Type::Ptr(_) => Ok(()),
         Type::Void(_) => unreachable!(),
-    }
-}
-
-#[derive(Copy, Clone)]
-enum UniquePtr<'a> {
-    Ident(&'a Ident),
-    CxxVector(&'a Ident),
-}
-
-trait ToTypename {
-    fn to_typename(&self, types: &Types) -> String;
-}
-
-impl ToTypename for Ident {
-    fn to_typename(&self, types: &Types) -> String {
-        types.resolve(self).name.to_fully_qualified()
-    }
-}
-
-impl<'a> ToTypename for UniquePtr<'a> {
-    fn to_typename(&self, types: &Types) -> String {
-        match self {
-            UniquePtr::Ident(ident) => ident.to_typename(types),
-            UniquePtr::CxxVector(element) => {
-                format!("::std::vector<{}>", element.to_typename(types))
-            }
-        }
-    }
-}
-
-trait ToMangled {
-    fn to_mangled(&self, types: &Types) -> Symbol;
-}
-
-impl ToMangled for Ident {
-    fn to_mangled(&self, types: &Types) -> Symbol {
-        types.resolve(self).name.to_symbol()
-    }
-}
-
-impl<'a> ToMangled for UniquePtr<'a> {
-    fn to_mangled(&self, types: &Types) -> Symbol {
-        match self {
-            UniquePtr::Ident(ident) => ident.to_mangled(types),
-            UniquePtr::CxxVector(element) => {
-                symbol::join(&[&"std", &"vector", &element.to_mangled(types)])
-            }
-        }
     }
 }
 
@@ -1624,9 +1607,8 @@ fn write_generic_instantiations(out: &mut OutFile) {
 }
 
 fn write_rust_box_extern(out: &mut OutFile, key: &NamedImplKey) {
-    let resolve = out.types.resolve(key);
-    let inner = resolve.name.to_fully_qualified();
-    let instance = resolve.name.to_symbol();
+    let inner = stringify_type(key.inner, out.types);
+    let instance = &key.symbol;
 
     out.pragma.dollar_in_identifier = true;
 
@@ -1648,9 +1630,8 @@ fn write_rust_box_extern(out: &mut OutFile, key: &NamedImplKey) {
 }
 
 fn write_rust_vec_extern(out: &mut OutFile, key: &NamedImplKey) {
-    let element = key.rust;
-    let inner = element.to_typename(out.types);
-    let instance = element.to_mangled(out.types);
+    let inner = stringify_type(key.inner, out.types);
+    let instance = &key.symbol;
 
     out.include.cstddef = true;
     out.pragma.dollar_in_identifier = true;
@@ -1698,9 +1679,8 @@ fn write_rust_vec_extern(out: &mut OutFile, key: &NamedImplKey) {
 }
 
 fn write_rust_box_impl(out: &mut OutFile, key: &NamedImplKey) {
-    let resolve = out.types.resolve(key);
-    let inner = resolve.name.to_fully_qualified();
-    let instance = resolve.name.to_symbol();
+    let inner = stringify_type(key.inner, out.types);
+    let instance = &key.symbol;
 
     out.pragma.dollar_in_identifier = true;
 
@@ -1732,9 +1712,8 @@ fn write_rust_box_impl(out: &mut OutFile, key: &NamedImplKey) {
 }
 
 fn write_rust_vec_impl(out: &mut OutFile, key: &NamedImplKey) {
-    let element = key.rust;
-    let inner = element.to_typename(out.types);
-    let instance = element.to_mangled(out.types);
+    let inner = stringify_type(key.inner, out.types);
+    let instance = &key.symbol;
 
     out.include.cstddef = true;
     out.pragma.dollar_in_identifier = true;
@@ -1821,28 +1800,25 @@ fn write_rust_vec_impl(out: &mut OutFile, key: &NamedImplKey) {
 }
 
 fn write_unique_ptr(out: &mut OutFile, key: &NamedImplKey) {
-    let ty = UniquePtr::Ident(key.rust);
-    write_unique_ptr_common(out, ty);
+    write_unique_ptr_common(out, key.inner);
 }
 
 // Shared by UniquePtr<T> and UniquePtr<CxxVector<T>>.
-fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
+fn write_unique_ptr_common(out: &mut OutFile, ty: &Type) {
     out.include.new = true;
     out.include.utility = true;
     out.pragma.dollar_in_identifier = true;
     out.pragma.missing_declarations = true;
 
-    let inner = ty.to_typename(out.types);
-    let instance = ty.to_mangled(out.types);
+    let inner = stringify_type(ty, out.types);
+    let instance = crate::syntax::mangle::type_(ty)
+        .expect("Earlier syntax/check.rs checks should filter out non-mangle-able types");
 
-    let can_construct_from_value = match ty {
-        // Some aliases are to opaque types; some are to trivial types. We can't
-        // know at code generation time, so we generate both C++ and Rust side
-        // bindings for a "new" method anyway. But the Rust code can't be called
-        // for Opaque types because the 'new' method is not implemented.
-        UniquePtr::Ident(ident) => out.types.is_maybe_trivial(ident),
-        UniquePtr::CxxVector(_) => false,
-    };
+    // Some aliases are to opaque types; some are to trivial types. We can't
+    // know at code generation time, so we generate both C++ and Rust side
+    // bindings for a "new" method anyway. But the Rust code can't be called
+    // for Opaque types because the 'new' method is not implemented.
+    let can_construct_from_value = out.types.is_maybe_trivial(ty);
 
     out.builtin.is_complete = true;
     writeln!(
@@ -1931,10 +1907,8 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: UniquePtr) {
 }
 
 fn write_shared_ptr(out: &mut OutFile, key: &NamedImplKey) {
-    let ident = key.rust;
-    let resolve = out.types.resolve(ident);
-    let inner = resolve.name.to_fully_qualified();
-    let instance = resolve.name.to_symbol();
+    let inner = stringify_type(key.inner, out.types);
+    let instance = &key.symbol;
 
     out.include.new = true;
     out.include.utility = true;
@@ -1945,7 +1919,7 @@ fn write_shared_ptr(out: &mut OutFile, key: &NamedImplKey) {
     // know at code generation time, so we generate both C++ and Rust side
     // bindings for a "new" method anyway. But the Rust code can't be called for
     // Opaque types because the 'new' method is not implemented.
-    let can_construct_from_value = out.types.is_maybe_trivial(ident);
+    let can_construct_from_value = out.types.is_maybe_trivial(key.inner);
 
     writeln!(
         out,
@@ -2029,9 +2003,8 @@ fn write_shared_ptr(out: &mut OutFile, key: &NamedImplKey) {
 }
 
 fn write_weak_ptr(out: &mut OutFile, key: &NamedImplKey) {
-    let resolve = out.types.resolve(key);
-    let inner = resolve.name.to_fully_qualified();
-    let instance = resolve.name.to_symbol();
+    let inner = stringify_type(key.inner, out.types);
+    let instance = &key.symbol;
 
     out.include.new = true;
     out.include.utility = true;
@@ -2100,9 +2073,8 @@ fn write_weak_ptr(out: &mut OutFile, key: &NamedImplKey) {
 }
 
 fn write_cxx_vector(out: &mut OutFile, key: &NamedImplKey) {
-    let element = key.rust;
-    let inner = element.to_typename(out.types);
-    let instance = element.to_mangled(out.types);
+    let inner = stringify_type(key.inner, out.types);
+    let instance = &key.symbol;
 
     out.include.cstddef = true;
     out.include.utility = true;
@@ -2160,7 +2132,7 @@ fn write_cxx_vector(out: &mut OutFile, key: &NamedImplKey) {
     );
     writeln!(out, "}}");
 
-    if out.types.is_maybe_trivial(element) {
+    if out.types.is_maybe_trivial(key.inner) {
         begin_function_definition(out);
         writeln!(
             out,
@@ -2183,5 +2155,5 @@ fn write_cxx_vector(out: &mut OutFile, key: &NamedImplKey) {
     }
 
     out.include.memory = true;
-    write_unique_ptr_common(out, UniquePtr::CxxVector(element));
+    write_unique_ptr_common(out, key.outer);
 }
