@@ -2435,26 +2435,17 @@ fn display_namespaced(name: &Pair) -> impl Display + '_ {
 }
 
 // #[#UnsafeAttr(#ExportNameAttr = "...")]
-// https://blog.rust-lang.org/2024/10/17/Rust-1.82.0.html#unsafe-attributes
 struct UnsafeAttr;
 struct ExportNameAttr;
 
 impl ToTokens for UnsafeAttr {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        if rustversion::cfg!(since(1.82)) {
-            Token![unsafe](Span::call_site()).to_tokens(tokens);
-        } else {
-            Ident::new("cfg_attr", Span::call_site()).to_tokens(tokens);
-        }
+        Token![unsafe](Span::call_site()).to_tokens(tokens);
     }
 }
 
 impl ToTokens for ExportNameAttr {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        if rustversion::cfg!(since(1.82)) {
-            Ident::new("export_name", Span::call_site()).to_tokens(tokens);
-        } else {
-            tokens.extend(quote!(all(), export_name));
-        }
+        Ident::new("export_name", Span::call_site()).to_tokens(tokens);
     }
 }
