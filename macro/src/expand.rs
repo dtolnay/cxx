@@ -1408,12 +1408,7 @@ fn expand_rust_function_shim_super(
         // Set spans that result in the `Result<...>` written by the user being
         // highlighted as the cause if their error type has no Display impl.
         let result_begin = quote_spanned!(result.span=> ::cxx::core::result::Result<#ok, impl);
-        let result_end = if rustversion::cfg!(since(1.82)) {
-            // https://blog.rust-lang.org/2024/10/17/Rust-1.82.0.html#precise-capturing-use-syntax
-            quote_spanned!(rangle.span=> ::cxx::core::fmt::Display + use<>>)
-        } else {
-            quote_spanned!(rangle.span=> ::cxx::core::fmt::Display>)
-        };
+        let result_end = quote_spanned!(rangle.span=> ::cxx::core::fmt::Display + use<>>);
         quote!(-> #result_begin #result_end)
     } else {
         expand_return_type(&sig.ret)
