@@ -1864,11 +1864,6 @@ fn expand_unique_ptr(
 
     let can_construct_from_value = types.is_maybe_trivial(ident);
     let new_method = if can_construct_from_value {
-        let raw_mut = if rustversion::cfg!(since(1.82)) {
-            quote!(&raw mut)
-        } else {
-            quote!(&mut)
-        };
         Some(quote! {
             fn __new(value: Self) -> ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void> {
                 #UnsafeExtern extern "C" {
@@ -1877,7 +1872,7 @@ fn expand_unique_ptr(
                 }
                 let mut repr = ::cxx::core::mem::MaybeUninit::uninit();
                 unsafe {
-                    __uninit(#raw_mut repr).cast::<#ident #ty_generics>().write(value);
+                    __uninit(&raw mut repr).cast::<#ident #ty_generics>().write(value);
                 }
                 repr
             }
@@ -1894,16 +1889,6 @@ fn expand_unique_ptr(
         .explicit_impl
         .map_or(key.end_span, |explicit| explicit.brace_token.span.join());
     let unsafe_token = format_ident!("unsafe", span = begin_span);
-    let raw_const = if rustversion::cfg!(since(1.82)) {
-        quote_spanned!(end_span=> &raw const)
-    } else {
-        quote_spanned!(end_span=> &)
-    };
-    let raw_mut = if rustversion::cfg!(since(1.82)) {
-        quote_spanned!(end_span=> &raw mut)
-    } else {
-        quote_spanned!(end_span=> &mut)
-    };
 
     quote_spanned! {end_span=>
         #cfg
@@ -1919,7 +1904,7 @@ fn expand_unique_ptr(
                 }
                 let mut repr = ::cxx::core::mem::MaybeUninit::uninit();
                 unsafe {
-                    __null(#raw_mut repr);
+                    __null(&raw mut repr);
                 }
                 repr
             }
@@ -1931,7 +1916,7 @@ fn expand_unique_ptr(
                 }
                 let mut repr = ::cxx::core::mem::MaybeUninit::uninit();
                 unsafe {
-                    __raw(#raw_mut repr, raw.cast());
+                    __raw(&raw mut repr, raw.cast());
                 }
                 repr
             }
@@ -1940,14 +1925,14 @@ fn expand_unique_ptr(
                     #[link_name = #link_get]
                     fn __get(this: *const ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *const ::cxx::core::ffi::c_void;
                 }
-                unsafe { __get(#raw_const repr).cast() }
+                unsafe { __get(&raw const repr).cast() }
             }
             unsafe fn __release(mut repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *mut Self {
                 #UnsafeExtern extern "C" {
                     #[link_name = #link_release]
                     fn __release(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *mut ::cxx::core::ffi::c_void;
                 }
-                unsafe { __release(#raw_mut repr).cast() }
+                unsafe { __release(&raw mut repr).cast() }
             }
             unsafe fn __drop(mut repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) {
                 #UnsafeExtern extern "C" {
@@ -1955,7 +1940,7 @@ fn expand_unique_ptr(
                     fn __drop(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>);
                 }
                 unsafe {
-                    __drop(#raw_mut repr);
+                    __drop(&raw mut repr);
                 }
             }
         }
@@ -2226,17 +2211,6 @@ fn expand_cxx_vector(
         None
     };
 
-    let raw_const = if rustversion::cfg!(since(1.82)) {
-        quote_spanned!(end_span=> &raw const)
-    } else {
-        quote_spanned!(end_span=> &)
-    };
-    let raw_mut = if rustversion::cfg!(since(1.82)) {
-        quote_spanned!(end_span=> &raw mut)
-    } else {
-        quote_spanned!(end_span=> &mut)
-    };
-
     let not_move_constructible_err = format!(
         "{} is not move constructible",
         display_namespaced(resolve.name),
@@ -2300,7 +2274,7 @@ fn expand_cxx_vector(
                 }
                 let mut repr = ::cxx::core::mem::MaybeUninit::uninit();
                 unsafe {
-                    __unique_ptr_null(#raw_mut repr);
+                    __unique_ptr_null(&raw mut repr);
                 }
                 repr
             }
@@ -2311,7 +2285,7 @@ fn expand_cxx_vector(
                 }
                 let mut repr = ::cxx::core::mem::MaybeUninit::uninit();
                 unsafe {
-                    __unique_ptr_raw(#raw_mut repr, raw);
+                    __unique_ptr_raw(&raw mut repr, raw);
                 }
                 repr
             }
@@ -2320,14 +2294,14 @@ fn expand_cxx_vector(
                     #[link_name = #link_unique_ptr_get]
                     fn __unique_ptr_get #impl_generics(this: *const ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *const ::cxx::CxxVector<#elem #ty_generics>;
                 }
-                unsafe { __unique_ptr_get(#raw_const repr) }
+                unsafe { __unique_ptr_get(&raw const repr) }
             }
             unsafe fn __unique_ptr_release(mut repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *mut ::cxx::CxxVector<Self> {
                 #UnsafeExtern extern "C" {
                     #[link_name = #link_unique_ptr_release]
                     fn __unique_ptr_release #impl_generics(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *mut ::cxx::CxxVector<#elem #ty_generics>;
                 }
-                unsafe { __unique_ptr_release(#raw_mut repr) }
+                unsafe { __unique_ptr_release(&raw mut repr) }
             }
             unsafe fn __unique_ptr_drop(mut repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) {
                 #UnsafeExtern extern "C" {
@@ -2335,7 +2309,7 @@ fn expand_cxx_vector(
                     fn __unique_ptr_drop(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>);
                 }
                 unsafe {
-                    __unique_ptr_drop(#raw_mut repr);
+                    __unique_ptr_drop(&raw mut repr);
                 }
             }
         }
