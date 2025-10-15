@@ -19,7 +19,6 @@ proc-macro = true
 indexmap = "2.9.0"
 proc-macro2 = "1.0.74"
 quote = "1.0.35"
-rustversion = "1"
 syn = { version = "2.0.46", features = ["full"] }
 
 [dev-dependencies]
