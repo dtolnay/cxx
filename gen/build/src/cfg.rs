@@ -449,7 +449,7 @@ mod r#impl {
                 cfg
             } else {
                 let cfg = CONST_DEREFS.with(|derefs| -> *mut super::Cfg {
-                    &mut **derefs
+                    &raw mut **derefs
                         .borrow_mut()
                         .entry(self.handle())
                         .or_insert_with(|| Box::new(Cfg::current()))
