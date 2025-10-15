@@ -2435,14 +2435,11 @@ fn display_namespaced(name: &Pair) -> impl Display + '_ {
 }
 
 // #UnsafeExtern extern "C" {...}
-// https://blog.rust-lang.org/2024/10/17/Rust-1.82.0.html#safe-items-with-unsafe-extern
 struct UnsafeExtern;
 
 impl ToTokens for UnsafeExtern {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        if rustversion::cfg!(since(1.82)) {
-            Token![unsafe](Span::call_site()).to_tokens(tokens);
-        }
+        Token![unsafe](Span::call_site()).to_tokens(tokens);
     }
 }
 
