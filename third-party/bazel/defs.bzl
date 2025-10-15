@@ -301,7 +301,7 @@ _NORMAL_DEPENDENCIES = {
             "foldhash": Label("@vendor//:foldhash-0.2.0"),
             "indexmap": Label("@vendor//:indexmap-2.11.4"),
             "proc-macro2": Label("@vendor//:proc-macro2-1.0.101"),
-            "quote": Label("@vendor//:quote-1.0.40"),
+            "quote": Label("@vendor//:quote-1.0.41"),
             "scratch": Label("@vendor//:scratch-1.0.9"),
             "serde": Label("@vendor//:serde-1.0.226"),
             "syn": Label("@vendor//:syn-2.0.106"),
@@ -544,12 +544,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__quote-1.0.40",
-        sha256 = "1885c039570dc00dcb4ff087a89e185fd56bae234ddc7f056a945bf36467248d",
+        name = "vendor__quote-1.0.41",
+        sha256 = "ce25767e7b499d1b604768e7cde645d14cc8584231ea6b295e9c9eb22c02e1d1",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/quote/1.0.40/download"],
-        strip_prefix = "quote-1.0.40",
-        build_file = Label("//third-party/bazel:BUILD.quote-1.0.40.bazel"),
+        urls = ["https://static.crates.io/crates/quote/1.0.41/download"],
+        strip_prefix = "quote-1.0.41",
+        build_file = Label("//third-party/bazel:BUILD.quote-1.0.41.bazel"),
     )
 
     maybe(
@@ -689,7 +689,7 @@ def crate_repositories():
         struct(repo = "vendor__foldhash-0.2.0", is_dev_dep = False),
         struct(repo = "vendor__indexmap-2.11.4", is_dev_dep = False),
         struct(repo = "vendor__proc-macro2-1.0.101", is_dev_dep = False),
-        struct(repo = "vendor__quote-1.0.40", is_dev_dep = False),
+        struct(repo = "vendor__quote-1.0.41", is_dev_dep = False),
         struct(repo = "vendor__rustversion-1.0.22", is_dev_dep = False),
         struct(repo = "vendor__scratch-1.0.9", is_dev_dep = False),
         struct(repo = "vendor__serde-1.0.226", is_dev_dep = False),

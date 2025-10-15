@@ -327,30 +327,58 @@ buildscript_run(
 
 alias(
     name = "quote",
-    actual = ":quote-1.0.40",
+    actual = ":quote-1.0.41",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "quote-1.0.40.crate",
-    sha256 = "1885c039570dc00dcb4ff087a89e185fd56bae234ddc7f056a945bf36467248d",
-    strip_prefix = "quote-1.0.40",
-    urls = ["https://static.crates.io/crates/quote/1.0.40/download"],
+    name = "quote-1.0.41.crate",
+    sha256 = "ce25767e7b499d1b604768e7cde645d14cc8584231ea6b295e9c9eb22c02e1d1",
+    strip_prefix = "quote-1.0.41",
+    urls = ["https://static.crates.io/crates/quote/1.0.41/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "quote-1.0.40",
-    srcs = [":quote-1.0.40.crate"],
+    name = "quote-1.0.41",
+    srcs = [":quote-1.0.41.crate"],
     crate = "quote",
-    crate_root = "quote-1.0.40.crate/src/lib.rs",
+    crate_root = "quote-1.0.41.crate/src/lib.rs",
+    edition = "2018",
+    env = {
+        "OUT_DIR": "$(location :quote-1.0.41-build-script-run[out_dir])",
+    },
+    features = [
+        "default",
+        "proc-macro",
+    ],
+    rustc_flags = ["@$(location :quote-1.0.41-build-script-run[rustc_flags])"],
+    visibility = [],
+    deps = [":proc-macro2-1.0.101"],
+)
+
+cargo.rust_binary(
+    name = "quote-1.0.41-build-script-build",
+    srcs = [":quote-1.0.41.crate"],
+    crate = "build_script_build",
+    crate_root = "quote-1.0.41.crate/build.rs",
     edition = "2018",
     features = [
         "default",
         "proc-macro",
     ],
     visibility = [],
-    deps = [":proc-macro2-1.0.101"],
+)
+
+buildscript_run(
+    name = "quote-1.0.41-build-script-run",
+    package_name = "quote",
+    buildscript_rule = ":quote-1.0.41-build-script-build",
+    features = [
+        "default",
+        "proc-macro",
+    ],
+    version = "1.0.41",
 )
 
 alias(
@@ -590,7 +618,7 @@ cargo.rust_library(
     visibility = [],
     deps = [
         ":proc-macro2-1.0.101",
-        ":quote-1.0.40",
+        ":quote-1.0.41",
         ":syn-2.0.106",
     ],
 )
@@ -648,7 +676,7 @@ cargo.rust_library(
     visibility = [],
     deps = [
         ":proc-macro2-1.0.101",
-        ":quote-1.0.40",
+        ":quote-1.0.41",
         ":unicode-ident-1.0.19",
     ],
 )

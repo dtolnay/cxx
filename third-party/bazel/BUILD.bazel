@@ -104,14 +104,14 @@ alias(
 )
 
 alias(
-    name = "quote-1.0.40",
-    actual = "@vendor__quote-1.0.40//:quote",
+    name = "quote-1.0.41",
+    actual = "@vendor__quote-1.0.41//:quote",
     tags = ["manual"],
 )
 
 alias(
     name = "quote",
-    actual = "@vendor__quote-1.0.40//:quote",
+    actual = "@vendor__quote-1.0.41//:quote",
     tags = ["manual"],
 )
 
