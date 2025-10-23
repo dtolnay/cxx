@@ -9,7 +9,7 @@ rust-version = "1.87"
 [dependencies]
 cc = "1.0.101"
 clap = { version = "4", default-features = false, features = ["error-context", "help", "std", "usage"] }
-codespan-reporting = "0.13"
+codespan-reporting = "0.13.1"
 foldhash = "0.2"
 indexmap = "2.9.0"
 proc-macro2 = { version = "1.0.58", features = ["span-locations"] }

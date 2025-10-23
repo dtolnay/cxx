@@ -97,7 +97,7 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "0.13.0",
+    version = "0.13.1",
     deps = [
         "@vendor__termcolor-1.4.1//:termcolor",
         "@vendor__unicode-width-0.2.2//:unicode_width",
