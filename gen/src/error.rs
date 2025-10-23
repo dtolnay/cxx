@@ -2,8 +2,8 @@ use crate::gen::fs;
 use crate::syntax;
 use codespan_reporting::diagnostic::{Diagnostic, Label};
 use codespan_reporting::files::SimpleFiles;
-use codespan_reporting::term::termcolor::{ColorChoice, StandardStream, WriteColor};
-use codespan_reporting::term::{self, Config};
+use codespan_reporting::term::termcolor::{ColorChoice, StandardStream};
+use codespan_reporting::term::{self, Config, WriteStyle};
 use std::borrow::Cow;
 use std::error::Error as StdError;
 use std::fmt::{self, Display};
@@ -111,7 +111,7 @@ fn sort_syn_errors(error: syn::Error) -> Vec<syn::Error> {
     errors
 }
 
-fn display_syn_error(stderr: &mut dyn WriteColor, path: &Path, source: &str, error: syn::Error) {
+fn display_syn_error(stderr: &mut dyn WriteStyle, path: &Path, source: &str, error: syn::Error) {
     let span = error.span();
     let start = span.start();
     let end = span.end();
