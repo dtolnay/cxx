@@ -18,7 +18,7 @@ parallel = ["cc/parallel"]
 
 [dependencies]
 cc = "1.0.101"
-codespan-reporting = "0.13"
+codespan-reporting = "0.13.1"
 indexmap = "2.9.0"
 proc-macro2 = { version = "1.0.74", default-features = false, features = ["span-locations"] }
 quote = { version = "1.0.35", default-features = false }

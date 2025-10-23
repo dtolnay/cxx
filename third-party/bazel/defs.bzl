@@ -297,7 +297,7 @@ _NORMAL_DEPENDENCIES = {
         _COMMON_CONDITION: {
             "cc": Label("@vendor//:cc-1.2.41"),
             "clap": Label("@vendor//:clap-4.5.49"),
-            "codespan-reporting": Label("@vendor//:codespan-reporting-0.13.0"),
+            "codespan-reporting": Label("@vendor//:codespan-reporting-0.13.1"),
             "foldhash": Label("@vendor//:foldhash-0.2.0"),
             "indexmap": Label("@vendor//:indexmap-2.11.4"),
             "proc-macro2": Label("@vendor//:proc-macro2-1.0.101"),
@@ -474,12 +474,12 @@ def crate_repositories():
 
     maybe(
         http_archive,
-        name = "vendor__codespan-reporting-0.13.0",
-        sha256 = "ba7a06c0b31fff5ff2e1e7d37dbf940864e2a974b336e1a2938d10af6e8fb283",
+        name = "vendor__codespan-reporting-0.13.1",
+        sha256 = "af491d569909a7e4dee0ad7db7f5341fef5c614d5b8ec8cf765732aba3cff681",
         type = "tar.gz",
-        urls = ["https://static.crates.io/crates/codespan-reporting/0.13.0/download"],
-        strip_prefix = "codespan-reporting-0.13.0",
-        build_file = Label("//third-party/bazel:BUILD.codespan-reporting-0.13.0.bazel"),
+        urls = ["https://static.crates.io/crates/codespan-reporting/0.13.1/download"],
+        strip_prefix = "codespan-reporting-0.13.1",
+        build_file = Label("//third-party/bazel:BUILD.codespan-reporting-0.13.1.bazel"),
     )
 
     maybe(
@@ -685,7 +685,7 @@ def crate_repositories():
     return [
         struct(repo = "vendor__cc-1.2.41", is_dev_dep = False),
         struct(repo = "vendor__clap-4.5.49", is_dev_dep = False),
-        struct(repo = "vendor__codespan-reporting-0.13.0", is_dev_dep = False),
+        struct(repo = "vendor__codespan-reporting-0.13.1", is_dev_dep = False),
         struct(repo = "vendor__foldhash-0.2.0", is_dev_dep = False),
         struct(repo = "vendor__indexmap-2.11.4", is_dev_dep = False),
         struct(repo = "vendor__proc-macro2-1.0.101", is_dev_dep = False),

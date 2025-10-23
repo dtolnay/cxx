@@ -56,14 +56,14 @@ alias(
 )
 
 alias(
-    name = "codespan-reporting-0.13.0",
-    actual = "@vendor__codespan-reporting-0.13.0//:codespan_reporting",
+    name = "codespan-reporting-0.13.1",
+    actual = "@vendor__codespan-reporting-0.13.1//:codespan_reporting",
     tags = ["manual"],
 )
 
 alias(
     name = "codespan-reporting",
-    actual = "@vendor__codespan-reporting-0.13.0//:codespan_reporting",
+    actual = "@vendor__codespan-reporting-0.13.1//:codespan_reporting",
     tags = ["manual"],
 )
 
