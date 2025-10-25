@@ -16,6 +16,7 @@ use crate::syntax::{
     derive, mangle, Api, Doc, Enum, ExternFn, ExternType, FnKind, Lang, Pair, Signature, Struct,
     Trait, Type, TypeAlias, Types, Var,
 };
+use std::fmt;
 
 pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u8> {
     let mut out_file = OutFile::new(header, opt, types);
@@ -1418,10 +1419,10 @@ fn stringify_type(ty: &Type, types: &Types) -> String {
 }
 
 fn write_type_to_generic_writer(
-    out: &mut impl std::fmt::Write,
+    out: &mut impl fmt::Write,
     ty: &Type,
     types: &Types,
-) -> std::fmt::Result {
+) -> fmt::Result {
     match ty {
         Type::Ident(ident) => match Atom::from(&ident.rust) {
             Some(atom) => write_atom_to_generic_writer(out, atom),
@@ -1511,7 +1512,7 @@ fn write_atom(out: &mut OutFile, atom: Atom) {
     write_atom_to_generic_writer(out, atom).unwrap();
 }
 
-fn write_atom_to_generic_writer(out: &mut impl std::fmt::Write, atom: Atom) -> std::fmt::Result {
+fn write_atom_to_generic_writer(out: &mut impl fmt::Write, atom: Atom) -> fmt::Result {
     match atom {
         Bool => write!(out, "bool"),
         Char => write!(out, "char"),
@@ -1538,10 +1539,10 @@ fn write_type_space(out: &mut OutFile, ty: &Type) {
 }
 
 fn write_type_space_to_generic_writer(
-    out: &mut impl std::fmt::Write,
+    out: &mut impl fmt::Write,
     ty: &Type,
     types: &Types,
-) -> std::fmt::Result {
+) -> fmt::Result {
     write_type_to_generic_writer(out, ty, types)?;
     write_space_after_type_to_generic_writer(out, ty)
 }
@@ -1551,10 +1552,7 @@ fn write_space_after_type(out: &mut OutFile, ty: &Type) {
     write_space_after_type_to_generic_writer(out, ty).unwrap();
 }
 
-fn write_space_after_type_to_generic_writer(
-    out: &mut impl std::fmt::Write,
-    ty: &Type,
-) -> std::fmt::Result {
+fn write_space_after_type_to_generic_writer(out: &mut impl fmt::Write, ty: &Type) -> fmt::Result {
     match ty {
         Type::Ident(_)
         | Type::RustBox(_)
