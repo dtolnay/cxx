@@ -18,7 +18,7 @@ fn test_extern_c_function() {
     let output = str::from_utf8(&generated.implementation).unwrap();
     // To avoid continual breakage we won't test every byte.
     // Let's look for the major features.
-    assert!(output.contains("void cxxbridge1$do_cpp_thing(::rust::Str foo)"));
+    assert!(output.contains(&format!("void {CXXBRIDGE}$do_cpp_thing(::rust::Str foo)")));
 }
 
 #[test]
@@ -28,8 +28,12 @@ fn test_impl_annotation() {
     let source = BRIDGE0.parse().unwrap();
     let generated = generate_header_and_cc(source, &opt).unwrap();
     let output = str::from_utf8(&generated.implementation).unwrap();
-    assert!(output.contains("ANNOTATION void cxxbridge1$do_cpp_thing(::rust::Str foo)"));
+    assert!(output.contains(&format!(
+        "ANNOTATION void {CXXBRIDGE}$do_cpp_thing(::rust::Str foo)"
+    )));
 }
+
+const CXXBRIDGE: &'static str = concat!("cxxbridge1_", env!("CARGO_PKG_VERSION_PATCH"));
 
 const BRIDGE1: &str = r#"
     #[cxx::bridge]
@@ -66,10 +70,13 @@ fn test_extern_rust_method_on_c_type() {
     assert!(!header.contains("rust_method_cpp_receiver"));
 
     // Check that there is a generated C signature bridging to the Rust method.
-    assert!(implementation
-        .contains("void cxxbridge1$CppType$rust_method_cpp_receiver(::CppType &self) noexcept;"));
+    assert!(implementation.contains(&format!(
+        "void {CXXBRIDGE}$CppType$rust_method_cpp_receiver(::CppType &self) noexcept;"
+    )));
 
     // Check that there is an implementation on the C++ class calling the Rust method.
     assert!(implementation.contains("void CppType::rust_method_cpp_receiver() noexcept {"));
-    assert!(implementation.contains("cxxbridge1$CppType$rust_method_cpp_receiver(*this);"));
+    assert!(implementation.contains(&format!(
+        "{CXXBRIDGE}$CppType$rust_method_cpp_receiver(*this);"
+    )));
 }

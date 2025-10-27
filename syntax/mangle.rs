@@ -76,7 +76,10 @@
 use crate::syntax::symbol::{self, Symbol};
 use crate::syntax::{ExternFn, Pair, Types};
 
-const CXXBRIDGE: &str = "cxxbridge1";
+// Ignoring `CARGO_PKG_VERSION_MAJOR` and `...MINOR`, because they don't agree across
+// all the crates.  For example `gen/lib/Cargo.toml` says `version = "0.7.xxx"`, but
+// `macro/Cargo.toml` says `version = "1.0.xxx"`.
+const CXXBRIDGE: &'static str = concat!("cxxbridge1_", env!("CARGO_PKG_VERSION_PATCH"));
 
 macro_rules! join {
     ($($segment:expr),+ $(,)?) => {
