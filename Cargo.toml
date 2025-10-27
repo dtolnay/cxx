@@ -41,7 +41,7 @@ proc-macro2 = "1.0.95"
 quote = "1.0.40"
 rustversion = "1.0.13"
 scratch = "1"
-target-triple = "0.1"
+target-triple = "1"
 tempfile = "3.8"
 trybuild = { version = "1.0.108", features = ["diff"] }
 
