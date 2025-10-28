@@ -7,6 +7,7 @@
 //          defining characteristics:
 //             - 2 segments
 //             - starts with cxxbridge
+//          TODO: should these also include {CXXVERSION}?
 //
 //   (b) Behavior on a builtin binding without generic parameter.
 //          pattern:  {CXXBRIDGE} $ {TYPE} $ {NAME}
@@ -15,6 +16,7 @@
 //          defining characteristics:
 //             - 3 segments
 //             - starts with cxxbridge
+//          TODO: should these also include {CXXVERSION}?
 //
 //   (c) Behavior on a builtin binding with generic parameter.
 //          pattern:  {CXXBRIDGE} $ {TYPE} $ {PARAM...} $ {NAME}
@@ -24,33 +26,35 @@
 //          defining characteristics:
 //             - 4+ segments
 //             - starts with cxxbridge
+//          TODO: should these also include {CXXVERSION}?  (always?  or only for
+//                 ones implicitly or explicitly `impl`-ed by the user?)
 //
 //   (d) User-defined extern function.
-//          pattern:  {NAMESPACE...} $ {CXXBRIDGE} $ {NAME}
+//          pattern:  {NAMESPACE...} $ {CXXBRIDGE} $ {CXXVERSION} $ {NAME}
 //          examples:
-//             - cxxbridge1$new_client
-//             - org$rust$cxxbridge1$new_client
+//             - cxxbridge1$v187$new_client
+//             - org$rust$cxxbridge1$v187$new_client
 //          defining characteristics:
-//             - cxxbridge is second from end
+//             - cxxbridge is third from end
 //          FIXME: conflict with (a) if they collide with one of our one-off symbol names in the global namespace
 //
 //   (e) User-defined extern member function.
-//          pattern:  {NAMESPACE...} $ {CXXBRIDGE} $ {TYPE} $ {NAME}
+//          pattern:  {NAMESPACE...} $ {CXXBRIDGE} $ {CXXVERSION} $ {TYPE} $ {NAME}
 //          examples:
-//             - org$cxxbridge1$Struct$get
+//             - org$cxxbridge1$v187$Struct$get
 //          defining characteristics:
-//             - cxxbridge is third from end
+//             - cxxbridge is fourth from end
 //          FIXME: conflict with (b) if e.g. user binds a type in global namespace that collides with our builtin type names
 //
 //   (f) Operator overload.
-//          pattern:  {NAMESPACE...} $ {CXXBRIDGE} $ {TYPE} $ operator $ {NAME}
+//          pattern:  {NAMESPACE...} $ {CXXBRIDGE} $ {CXXVERSION} $ {TYPE} $ operator $ {NAME}
 //          examples:
-//             - org$rust$cxxbridge1$Struct$operator$eq
+//             - org$rust$cxxbridge1$v187$Struct$operator$eq
 //          defining characteristics:
 //             - second segment from end is `operator` (not possible in type or namespace names)
 //
 //   (g) Closure trampoline.
-//          pattern:  {NAMESPACE...} $ {CXXBRIDGE} $ {TYPE?} $ {NAME} $ {ARGUMENT} $ {DIRECTION}
+//          pattern:  {NAMESPACE...} $ {CXXBRIDGE} $ {CXXVERSION} $ {TYPE?} $ {NAME} $ {ARGUMENT} $ {DIRECTION}
 //          examples:
 //             - org$rust$cxxbridge1$Struct$invoke$f$0
 //          defining characteristics:
@@ -76,10 +80,12 @@
 use crate::syntax::symbol::{self, Symbol};
 use crate::syntax::{ExternFn, Pair, Types};
 
+const CXXBRIDGE: &str = "cxxbridge1";
+
 // Ignoring `CARGO_PKG_VERSION_MAJOR` and `...MINOR`, because they don't agree across
 // all the crates.  For example `gen/lib/Cargo.toml` says `version = "0.7.xxx"`, but
 // `macro/Cargo.toml` says `version = "1.0.xxx"`.
-const CXXBRIDGE: &'static str = concat!("cxxbridge1_", env!("CARGO_PKG_VERSION_PATCH"));
+const CXXVERSION: &str = concat!("v", env!("CARGO_PKG_VERSION_PATCH"));
 
 macro_rules! join {
     ($($segment:expr),+ $(,)?) => {
@@ -94,11 +100,12 @@ pub(crate) fn extern_fn(efn: &ExternFn, types: &Types) -> Symbol {
             join!(
                 efn.name.namespace,
                 CXXBRIDGE,
+                CXXVERSION,
                 self_type_ident.name.cxx,
                 efn.name.rust,
             )
         }
-        None => join!(efn.name.namespace, CXXBRIDGE, efn.name.rust),
+        None => join!(efn.name.namespace, CXXBRIDGE, CXXVERSION, efn.name.rust),
     }
 }
 
@@ -106,6 +113,7 @@ pub(crate) fn operator(receiver: &Pair, operator: &'static str) -> Symbol {
     join!(
         receiver.namespace,
         CXXBRIDGE,
+        CXXVERSION,
         receiver.cxx,
         "operator",
         operator,
