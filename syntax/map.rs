@@ -27,6 +27,10 @@ mod ordered {
         {
             self.0.contains_key(key)
         }
+
+        pub(crate) fn iter<'a>(&'a self) -> impl Iterator<Item = (&'a K, &'a V)> {
+            self.0.iter()
+        }
     }
 
     impl<K, V> OrderedMap<K, V>
