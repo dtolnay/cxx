@@ -273,8 +273,10 @@ jobs:
       RUSTDOCFLAGS: -Dwarnings
     steps:
       - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/rust-toolchain@master
         with:
+          # https://github.com/rust-lang/rust/issues/148617
+          toolchain: nightly-2025-11-06
           components: rust-src
       - uses: dtolnay/install@cargo-docs-rs
       - run: cargo docs-rs
