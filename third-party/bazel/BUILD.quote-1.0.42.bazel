@@ -100,10 +100,10 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "1.0.41",
+    version = "1.0.42",
     deps = [
-        "@vendor__proc-macro2-1.0.101//:proc_macro2",
-        "@vendor__quote-1.0.41//:build_script_build",
+        "@vendor__proc-macro2-1.0.103//:proc_macro2",
+        "@vendor__quote-1.0.42//:build_script_build",
     ],
 )
 
@@ -159,7 +159,7 @@ cargo_build_script(
         "noclippy",
         "norustfmt",
     ],
-    version = "1.0.41",
+    version = "1.0.42",
     visibility = ["//visibility:private"],
 )
 

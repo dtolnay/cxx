@@ -17,7 +17,7 @@ cargo_toml_env_vars(
 )
 
 rust_library(
-    name = "cc",
+    name = "indexmap",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = True,
@@ -34,8 +34,12 @@ rust_library(
             "WORKSPACE.bazel",
         ],
     ),
+    crate_features = [
+        "default",
+        "std",
+    ],
     crate_root = "src/lib.rs",
-    edition = "2018",
+    edition = "2021",
     rustc_env_files = [
         ":cargo_toml_env_vars",
     ],
@@ -44,7 +48,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=cc",
+        "crate-name=indexmap",
         "manual",
         "noclippy",
         "norustfmt",
@@ -92,9 +96,9 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "1.2.41",
+    version = "2.12.0",
     deps = [
-        "@vendor__find-msvc-tools-0.1.4//:find_msvc_tools",
-        "@vendor__shlex-1.3.0//:shlex",
+        "@vendor__equivalent-1.0.2//:equivalent",
+        "@vendor__hashbrown-0.16.0//:hashbrown",
     ],
 )

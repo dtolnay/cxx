@@ -32,26 +32,26 @@ filegroup(
 
 # Workspace Member Dependencies
 alias(
-    name = "cc-1.2.41",
-    actual = "@vendor__cc-1.2.41//:cc",
+    name = "cc-1.2.45",
+    actual = "@vendor__cc-1.2.45//:cc",
     tags = ["manual"],
 )
 
 alias(
     name = "cc",
-    actual = "@vendor__cc-1.2.41//:cc",
+    actual = "@vendor__cc-1.2.45//:cc",
     tags = ["manual"],
 )
 
 alias(
-    name = "clap-4.5.49",
-    actual = "@vendor__clap-4.5.49//:clap",
+    name = "clap-4.5.51",
+    actual = "@vendor__clap-4.5.51//:clap",
     tags = ["manual"],
 )
 
 alias(
     name = "clap",
-    actual = "@vendor__clap-4.5.49//:clap",
+    actual = "@vendor__clap-4.5.51//:clap",
     tags = ["manual"],
 )
 
@@ -80,38 +80,38 @@ alias(
 )
 
 alias(
-    name = "indexmap-2.11.4",
-    actual = "@vendor__indexmap-2.11.4//:indexmap",
+    name = "indexmap-2.12.0",
+    actual = "@vendor__indexmap-2.12.0//:indexmap",
     tags = ["manual"],
 )
 
 alias(
     name = "indexmap",
-    actual = "@vendor__indexmap-2.11.4//:indexmap",
+    actual = "@vendor__indexmap-2.12.0//:indexmap",
     tags = ["manual"],
 )
 
 alias(
-    name = "proc-macro2-1.0.101",
-    actual = "@vendor__proc-macro2-1.0.101//:proc_macro2",
+    name = "proc-macro2-1.0.103",
+    actual = "@vendor__proc-macro2-1.0.103//:proc_macro2",
     tags = ["manual"],
 )
 
 alias(
     name = "proc-macro2",
-    actual = "@vendor__proc-macro2-1.0.101//:proc_macro2",
+    actual = "@vendor__proc-macro2-1.0.103//:proc_macro2",
     tags = ["manual"],
 )
 
 alias(
-    name = "quote-1.0.41",
-    actual = "@vendor__quote-1.0.41//:quote",
+    name = "quote-1.0.42",
+    actual = "@vendor__quote-1.0.42//:quote",
     tags = ["manual"],
 )
 
 alias(
     name = "quote",
-    actual = "@vendor__quote-1.0.41//:quote",
+    actual = "@vendor__quote-1.0.42//:quote",
     tags = ["manual"],
 )
 
@@ -152,13 +152,13 @@ alias(
 )
 
 alias(
-    name = "syn-2.0.106",
-    actual = "@vendor__syn-2.0.106//:syn",
+    name = "syn-2.0.110",
+    actual = "@vendor__syn-2.0.110//:syn",
     tags = ["manual"],
 )
 
 alias(
     name = "syn",
-    actual = "@vendor__syn-2.0.106//:syn",
+    actual = "@vendor__syn-2.0.110//:syn",
     tags = ["manual"],
 )

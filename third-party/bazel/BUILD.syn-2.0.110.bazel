@@ -6,11 +6,7 @@
 #     bazel run @@//third-party:vendor
 ###############################################################################
 
-load(
-    "@rules_rust//cargo:defs.bzl",
-    "cargo_build_script",
-    "cargo_toml_env_vars",
-)
+load("@rules_rust//cargo:defs.bzl", "cargo_toml_env_vars")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
 package(default_visibility = ["//visibility:public"])
@@ -21,7 +17,7 @@ cargo_toml_env_vars(
 )
 
 rust_library(
-    name = "proc_macro2",
+    name = "syn",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = True,
@@ -39,9 +35,13 @@ rust_library(
         ],
     ),
     crate_features = [
+        "clone-impls",
         "default",
+        "derive",
+        "full",
+        "parsing",
+        "printing",
         "proc-macro",
-        "span-locations",
     ],
     crate_root = "src/lib.rs",
     edition = "2021",
@@ -53,7 +53,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=proc-macro2",
+        "crate-name=syn",
         "manual",
         "noclippy",
         "norustfmt",
@@ -101,72 +101,10 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "1.0.101",
+    version = "2.0.110",
     deps = [
-        "@vendor__proc-macro2-1.0.101//:build_script_build",
-        "@vendor__unicode-ident-1.0.19//:unicode_ident",
+        "@vendor__proc-macro2-1.0.103//:proc_macro2",
+        "@vendor__quote-1.0.42//:quote",
+        "@vendor__unicode-ident-1.0.22//:unicode_ident",
     ],
-)
-
-cargo_build_script(
-    name = "_bs",
-    srcs = glob(
-        include = ["**/*.rs"],
-        allow_empty = True,
-    ),
-    compile_data = glob(
-        include = ["**"],
-        allow_empty = True,
-        exclude = [
-            "**/* *",
-            "**/*.rs",
-            ".tmp_git_root/**/*",
-            "BUILD",
-            "BUILD.bazel",
-            "WORKSPACE",
-            "WORKSPACE.bazel",
-        ],
-    ),
-    crate_features = [
-        "default",
-        "proc-macro",
-        "span-locations",
-    ],
-    crate_name = "build_script_build",
-    crate_root = "build.rs",
-    data = glob(
-        include = ["**"],
-        allow_empty = True,
-        exclude = [
-            "**/* *",
-            ".tmp_git_root/**/*",
-            "BUILD",
-            "BUILD.bazel",
-            "WORKSPACE",
-            "WORKSPACE.bazel",
-        ],
-    ),
-    edition = "2021",
-    pkg_name = "proc-macro2",
-    rustc_env_files = [
-        ":cargo_toml_env_vars",
-    ],
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    tags = [
-        "cargo-bazel",
-        "crate-name=proc-macro2",
-        "manual",
-        "noclippy",
-        "norustfmt",
-    ],
-    version = "1.0.101",
-    visibility = ["//visibility:private"],
-)
-
-alias(
-    name = "build_script_build",
-    actual = ":_bs",
-    tags = ["manual"],
 )
