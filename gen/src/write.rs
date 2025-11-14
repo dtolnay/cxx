@@ -1408,7 +1408,7 @@ fn write_extern_arg(out: &mut OutFile, arg: &Var) {
 }
 
 fn write_type(out: &mut OutFile, ty: &Type) {
-    write!(out, "{}", stringify_type(ty, out.types));
+    write_type_to_generic_writer(out, ty, out.types);
 }
 
 fn stringify_type(ty: &Type, types: &Types) -> String {
@@ -1528,8 +1528,7 @@ fn write_atom_to_generic_writer(out: &mut impl InfallibleWrite, atom: Atom) {
 }
 
 fn write_type_space(out: &mut OutFile, ty: &Type) {
-    write_type(out, ty);
-    write_space_after_type(out, ty);
+    write_type_space_to_generic_writer(out, ty, out.types);
 }
 
 fn write_type_space_to_generic_writer(out: &mut impl InfallibleWrite, ty: &Type, types: &Types) {
