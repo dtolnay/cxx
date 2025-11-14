@@ -1529,14 +1529,10 @@ fn write_type_space(out: &mut OutFile, ty: &Type) {
 
 fn write_type_space_to_generic_writer(out: &mut impl InfallibleWrite, ty: &Type, types: &Types) {
     write_type_to_generic_writer(out, ty, types);
-    write_space_after_type_to_generic_writer(out, ty);
+    write_space_after_type(out, ty);
 }
 
-fn write_space_after_type(out: &mut OutFile, ty: &Type) {
-    write_space_after_type_to_generic_writer(out, ty);
-}
-
-fn write_space_after_type_to_generic_writer(out: &mut impl InfallibleWrite, ty: &Type) {
+fn write_space_after_type(out: &mut impl InfallibleWrite, ty: &Type) {
     match ty {
         Type::Ident(_)
         | Type::RustBox(_)
