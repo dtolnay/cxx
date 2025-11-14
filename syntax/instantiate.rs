@@ -90,7 +90,7 @@ impl<'a> NamedImplKey<'a> {
     fn new(outer: &'a Type, ty1: &'a Ty1) -> Option<Self> {
         let inner = &ty1.inner;
         Some(NamedImplKey {
-            symbol: mangle::type_(inner)?,
+            symbol: mangle::typename(inner)?,
             begin_span: ty1.name.span(),
             outer,
             inner,

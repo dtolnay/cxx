@@ -129,15 +129,15 @@ pub(crate) fn r_trampoline(efn: &ExternFn, var: &Pair, types: &Types) -> Symbol 
 /// because it is used early during construction of the data structures that are
 /// the input to 'syntax/check.rs', and unsupported generic instantiations are
 /// only reported as an error later.
-pub(crate) fn type_(t: &Type) -> Option<Symbol> {
+pub(crate) fn typename(t: &Type) -> Option<Symbol> {
     match t {
         Type::Ident(named_type) => Some(join!(named_type.rust)),
-        Type::RustBox(ty1) => type_(&ty1.inner).map(|s| join!("box", s)),
-        Type::RustVec(ty1) => type_(&ty1.inner).map(|s| join!("rust_vec", s)),
-        Type::UniquePtr(ty1) => type_(&ty1.inner).map(|s| join!("unique_ptr", s)),
-        Type::SharedPtr(ty1) => type_(&ty1.inner).map(|s| join!("shared_ptr", s)),
-        Type::WeakPtr(ty1) => type_(&ty1.inner).map(|s| join!("weak_ptr", s)),
-        Type::CxxVector(ty1) => type_(&ty1.inner).map(|s| join!("std", "vector", s)),
+        Type::RustBox(ty1) => typename(&ty1.inner).map(|s| join!("box", s)),
+        Type::RustVec(ty1) => typename(&ty1.inner).map(|s| join!("rust_vec", s)),
+        Type::UniquePtr(ty1) => typename(&ty1.inner).map(|s| join!("unique_ptr", s)),
+        Type::SharedPtr(ty1) => typename(&ty1.inner).map(|s| join!("shared_ptr", s)),
+        Type::WeakPtr(ty1) => typename(&ty1.inner).map(|s| join!("weak_ptr", s)),
+        Type::CxxVector(ty1) => typename(&ty1.inner).map(|s| join!("std", "vector", s)),
         _ => None,
     }
 }
