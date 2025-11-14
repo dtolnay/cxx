@@ -124,7 +124,7 @@ impl<'a> Write for Content<'a> {
 
 impl<'a> Write for OutFile<'a> {
     fn write_str(&mut self, s: &str) -> fmt::Result {
-        self.content.borrow_mut().write(s);
+        self.content.get_mut().write(s);
         Ok(())
     }
 }
