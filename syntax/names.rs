@@ -13,7 +13,6 @@ pub(crate) struct ForeignName {
 }
 
 impl Pair {
-    #[cfg_attr(proc_macro, expect(dead_code))]
     pub(crate) fn to_symbol(&self) -> Symbol {
         let segments = self
             .namespace

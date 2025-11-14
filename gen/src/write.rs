@@ -1789,7 +1789,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: &Type) {
     out.pragma.missing_declarations = true;
 
     let inner = stringify_type(ty, out.types);
-    let instance = mangle::typename(ty)
+    let instance = mangle::typename(ty, &out.types.resolutions)
         .expect("unexpected UniquePtr generic parameter allowed through by syntax/check.rs");
 
     // Some aliases are to opaque types; some are to trivial types. We can't

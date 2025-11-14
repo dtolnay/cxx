@@ -209,9 +209,14 @@ impl<'a> Types<'a> {
                 }
                 Api::Impl(imp) => {
                     visit(&mut all, &imp.ty, &imp.cfg);
-                    if let Some(key) = imp.ty.impl_key() {
-                        impls.insert(key, ConditionalImpl::from(imp));
-                    }
+                }
+            }
+        }
+
+        for api in apis {
+            if let Api::Impl(imp) = api {
+                if let Some(key) = imp.ty.impl_key(&resolutions) {
+                    impls.insert(key, ConditionalImpl::from(imp));
                 }
             }
         }
@@ -220,8 +225,16 @@ impl<'a> Types<'a> {
         // we check that this is permissible. We do this _after_ scanning all
         // the APIs above, in case some function or struct references a type
         // which is declared subsequently.
-        let required_trivial =
-            trivial::required_trivial_reasons(apis, &all, &structs, &enums, &cxx, &aliases, &impls);
+        let required_trivial = trivial::required_trivial_reasons(
+            apis,
+            &all,
+            &structs,
+            &enums,
+            &cxx,
+            &aliases,
+            &impls,
+            &resolutions,
+        );
 
         let required_unpin =
             unpin::required_unpin_reasons(apis, &all, &structs, &enums, &cxx, &aliases);
@@ -246,7 +259,7 @@ impl<'a> Types<'a> {
         types.toposorted_structs = toposort::sort(cx, apis, &types);
 
         for (ty, cfg) in &types.all {
-            let Some(impl_key) = ty.impl_key() else {
+            let Some(impl_key) = ty.impl_key(&types.resolutions) else {
                 continue;
             };
             if impl_key.is_implicit_impl_ok(&types) {

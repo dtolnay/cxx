@@ -1,6 +1,8 @@
+use crate::syntax::map::UnorderedMap;
+use crate::syntax::resolve::Resolution;
 use crate::syntax::types::Types;
 use crate::syntax::{mangle, Symbol, Ty1, Type};
-use proc_macro2::Span;
+use proc_macro2::{Ident, Span};
 use std::hash::{Hash, Hasher};
 
 #[derive(PartialEq, Eq, Hash)]
@@ -59,14 +61,14 @@ pub(crate) struct NamedImplKey<'a> {
 }
 
 impl Type {
-    pub(crate) fn impl_key(&self) -> Option<ImplKey> {
+    pub(crate) fn impl_key(&self, res: &UnorderedMap<&Ident, Resolution>) -> Option<ImplKey> {
         match self {
-            Type::RustBox(ty) => Some(ImplKey::RustBox(NamedImplKey::new(self, ty)?)),
-            Type::RustVec(ty) => Some(ImplKey::RustVec(NamedImplKey::new(self, ty)?)),
-            Type::UniquePtr(ty) => Some(ImplKey::UniquePtr(NamedImplKey::new(self, ty)?)),
-            Type::SharedPtr(ty) => Some(ImplKey::SharedPtr(NamedImplKey::new(self, ty)?)),
-            Type::WeakPtr(ty) => Some(ImplKey::WeakPtr(NamedImplKey::new(self, ty)?)),
-            Type::CxxVector(ty) => Some(ImplKey::CxxVector(NamedImplKey::new(self, ty)?)),
+            Type::RustBox(ty) => Some(ImplKey::RustBox(NamedImplKey::new(self, ty, res)?)),
+            Type::RustVec(ty) => Some(ImplKey::RustVec(NamedImplKey::new(self, ty, res)?)),
+            Type::UniquePtr(ty) => Some(ImplKey::UniquePtr(NamedImplKey::new(self, ty, res)?)),
+            Type::SharedPtr(ty) => Some(ImplKey::SharedPtr(NamedImplKey::new(self, ty, res)?)),
+            Type::WeakPtr(ty) => Some(ImplKey::WeakPtr(NamedImplKey::new(self, ty, res)?)),
+            Type::CxxVector(ty) => Some(ImplKey::CxxVector(NamedImplKey::new(self, ty, res)?)),
             _ => None,
         }
     }
@@ -87,10 +89,10 @@ impl<'a> Hash for NamedImplKey<'a> {
 }
 
 impl<'a> NamedImplKey<'a> {
-    fn new(outer: &'a Type, ty1: &'a Ty1) -> Option<Self> {
+    fn new(outer: &'a Type, ty1: &'a Ty1, res: &UnorderedMap<&Ident, Resolution>) -> Option<Self> {
         let inner = &ty1.inner;
         Some(NamedImplKey {
-            symbol: mangle::typename(inner)?,
+            symbol: mangle::typename(inner, res)?,
             begin_span: ty1.name.span(),
             outer,
             inner,

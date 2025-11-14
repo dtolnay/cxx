@@ -73,8 +73,11 @@
 //             - CXXBRIDGE1_STRUCT_org$rust$Struct
 //             - CXXBRIDGE1_ENUM_Enabled
 
+use crate::syntax::map::UnorderedMap;
+use crate::syntax::resolve::Resolution;
 use crate::syntax::symbol::{self, Symbol};
 use crate::syntax::{ExternFn, Pair, Type, Types};
+use proc_macro2::Ident;
 
 const CXXBRIDGE: &str = "cxxbridge1";
 
@@ -129,15 +132,15 @@ pub(crate) fn r_trampoline(efn: &ExternFn, var: &Pair, types: &Types) -> Symbol 
 /// because it is used early during construction of the data structures that are
 /// the input to 'syntax/check.rs', and unsupported generic instantiations are
 /// only reported as an error later.
-pub(crate) fn typename(t: &Type) -> Option<Symbol> {
+pub(crate) fn typename(t: &Type, res: &UnorderedMap<&Ident, Resolution>) -> Option<Symbol> {
     match t {
-        Type::Ident(named_type) => Some(join!(named_type.rust)),
-        Type::RustBox(ty1) => typename(&ty1.inner).map(|s| join!("box", s)),
-        Type::RustVec(ty1) => typename(&ty1.inner).map(|s| join!("rust_vec", s)),
-        Type::UniquePtr(ty1) => typename(&ty1.inner).map(|s| join!("unique_ptr", s)),
-        Type::SharedPtr(ty1) => typename(&ty1.inner).map(|s| join!("shared_ptr", s)),
-        Type::WeakPtr(ty1) => typename(&ty1.inner).map(|s| join!("weak_ptr", s)),
-        Type::CxxVector(ty1) => typename(&ty1.inner).map(|s| join!("std", "vector", s)),
+        Type::Ident(named_type) => res.get(&named_type.rust).map(|res| res.name.to_symbol()),
+        Type::RustBox(ty1) => typename(&ty1.inner, res).map(|s| join!("box", s)),
+        Type::RustVec(ty1) => typename(&ty1.inner, res).map(|s| join!("rust_vec", s)),
+        Type::UniquePtr(ty1) => typename(&ty1.inner, res).map(|s| join!("unique_ptr", s)),
+        Type::SharedPtr(ty1) => typename(&ty1.inner, res).map(|s| join!("shared_ptr", s)),
+        Type::WeakPtr(ty1) => typename(&ty1.inner, res).map(|s| join!("weak_ptr", s)),
+        Type::CxxVector(ty1) => typename(&ty1.inner, res).map(|s| join!("std", "vector", s)),
         _ => None,
     }
 }
