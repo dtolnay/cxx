@@ -14,30 +14,23 @@ pub(crate) enum ImplKey<'a> {
 }
 
 impl<'a> ImplKey<'a> {
-    /// Whether to generate an implicit instantiation/monomorphization of a given generic type
-    /// binding.  ("implicit" = without an explicit `impl Foo<T> {}` - see
-    /// <https://cxx.rs/extern-c++.html?highlight=explicit#explicit-shim-trait-impls>).
+    /// Whether to produce FFI symbols instantiating the given generic type even
+    /// when an explicit `impl Foo<T> {}` is not present in the current bridge.
     ///
-    /// The main consideration is avoiding introducing conflicting/overlapping impls:
-    ///
-    /// * The `cxx` crate already provides impls for cases where `T` is a primitive
-    ///   type like `u32`
-    /// * Some generics (e.g. Rust bindings for C++ templates like `CxxVector<T>`, `UniquePtr<T>`,
-    ///   etc.) require an `impl` of a `trait` provided by the `cxx` crate (such as
-    ///   [`cxx::vector::VectorElement`] or [`cxx::memory::UniquePtrTarget`]).  To avoid violating
-    ///   [Rust orphan rule](https://doc.rust-lang.org/reference/items/implementations.html#r-items.impl.trait.orphan-rule.intro)
-    ///   we restrict `T` to be a local type
-    ///   (TODO: or a fundamental type like `Box<LocalType>`).
-    /// * Other generics (e.g. C++ bindings for Rust generics like `Vec<T>` or `Box<T>`)
-    ///   don't necessarily need to follow the orphan rule, but we conservatively also
-    ///   only generate implicit impls if `T` is a local type.  TODO: revisit?
+    /// The main consideration is that the same instantiation must not be
+    /// present in two places, which is accomplished using trait impls and the
+    /// orphan rule. Every instantiation of a C++ template like `CxxVector<T>`
+    /// and Rust generic type like `Vec<T>` requires the implementation of
+    /// traits defined by the `cxx` crate for some local type. (TODO: or for a
+    /// fundamental type like `Box<LocalType>`)
     pub(crate) fn is_implicit_impl_ok(&self, types: &Types) -> bool {
         // TODO: relax this for Rust generics to allow Vec<Vec<T>> etc.
         types.is_local(self.inner())
     }
 
-    /// Returns the generic type parameter `T` associated with `self`.
-    /// For example, if `self` represents `UniquePtr<u32>` then this will return `u32`.
+    /// Returns the type argument in the generic instantiation described by
+    /// `self`. For example, if `self` represents `UniquePtr<u32>` then this
+    /// will return `u32`.
     fn inner(&self) -> &'a Type {
         let named_impl_key = match self {
             ImplKey::RustBox(key)

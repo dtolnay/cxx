@@ -1812,7 +1812,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: &Type) {
 
     let inner = stringify_type(ty, out.types);
     let instance = mangle::type_(ty)
-        .expect("Earlier syntax/check.rs checks should filter out non-mangle-able types");
+        .expect("unexpected UniquePtr generic parameter allowed through by syntax/check.rs");
 
     // Some aliases are to opaque types; some are to trivial types. We can't
     // know at code generation time, so we generate both C++ and Rust side

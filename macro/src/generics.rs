@@ -4,14 +4,12 @@ use proc_macro2::TokenStream;
 use quote::ToTokens;
 use syn::Lifetime;
 
-/// Gets `(impl_generics, ty_generics)` pair that can be used when generating an `impl` for a
-/// generic type using something like:
-/// `quote! { impl #impl_generics SomeTrait for #inner #ty_generics }`.
+/// Gets `(impl_generics, ty_generics)` pair that can be used when generating an
+/// `impl` for a generic type:
 ///
-/// Parameters:
-///
-/// * `inner` is the generic type argument (e.g. `T` in something like `UniquePtr<T>`)
-/// * `explicit_impl` corresponds to https://cxx.rs/extern-c++.html#explicit-shim-trait-impls
+/// ```ignore
+/// quote! { impl #impl_generics SomeTrait for #inner #ty_generics }
+/// ```
 pub(crate) fn get_impl_and_ty_generics<'a>(
     inner: &'a Type,
     conditional_impl: &ConditionalImpl<'a>,
@@ -24,8 +22,8 @@ pub(crate) fn get_impl_and_ty_generics<'a>(
             (impl_generics, ty_generics)
         }
         None => {
-            // Check whether `explicit_generics` are present.  In the example below,
-            // there are not `explicit_generics` in the return type.
+            // Check whether explicit generics are present. In the example
+            // below, there are not explicit generics in the return type.
             //
             //     mod ffi {
             //         unsafe extern "C++" {
@@ -34,7 +32,7 @@ pub(crate) fn get_impl_and_ty_generics<'a>(
             //         }
             //     }
             //
-            // But this could have also been spelled with `explicit_generics`:
+            // But this could have also been spelled with explicit generics:
             //
             //             fn borrowed<'a>(arg: &'a i32) -> UniquePtr<Borrowed<'a>>;
             let explicit_generics = get_generic_lifetimes(inner);
@@ -50,10 +48,8 @@ pub(crate) fn get_impl_and_ty_generics<'a>(
     }
 }
 
-/// Gets explicit / non-inferred generic lifetimes from `ty`.  This will recursively
-/// return lifetimes in cases like `CxxVector<Borrowed<'a>>`.
-///
-/// See also: resolve_generic_lifetimes.
+/// Gets explicit (not elided) lifetimes from `ty`. This will recurse into type
+/// arguments as in `CxxVector<Borrowed<'a>>`.
 fn get_generic_lifetimes(ty: &Type) -> &Lifetimes {
     match ty {
         Type::Ident(named_type) => &named_type.generics,
@@ -62,18 +58,16 @@ fn get_generic_lifetimes(ty: &Type) -> &Lifetimes {
     }
 }
 
-/// Gets generic lifetimes resolved from declaration of `ty`.  For example, this will return `'a`
-/// lifetime when `type_` represents `CxxVector<Borrowed>>` (no explicit lifetime here!) in
-/// presence of the following bridge declaration:
+/// Gets lifetimes from the declaration of `ty`'s local type. For example, if
+/// `ty` represents `CxxVector<Borrowed>` in the following module, this will
+/// return the `<'a>`.
 ///
 /// ```rust,ignore
 /// unsafe extern "C++" {
-///     type Borrowed<'a>;  // <= **this** lifetime will be returned
+///     type Borrowed<'a>;
 ///     fn borrowed(arg: &i32) -> CxxVector<Borrowed>;
 /// }
 /// ```
-///
-/// See also: get_generic_lifetimes.
 fn resolve_generic_lifetimes<'a>(ty: &Type, types: &Types<'a>) -> &'a Lifetimes {
     match ty {
         Type::Ident(named_type) => types.resolve(&named_type.rust).generics,

@@ -351,14 +351,15 @@ impl<'a> Types<'a> {
         }
     }
 
-    /// Returns `true` if `ty` is a defined or declared within the current `#[cxx::bridge]`.
+    /// Whether the current module is responsible for generic type
+    /// instantiations pertaining to the given type.
     pub(crate) fn is_local(&self, ty: &Type) -> bool {
         match ty {
             Type::Ident(ident) => {
                 Atom::from(&ident.rust).is_none() && !self.aliases.contains_key(&ident.rust)
             }
             Type::RustBox(_) => {
-                // TODO: We should treat Box<LocalType> as local to match
+                // TODO: We should treat Box<LocalType> as local.
                 // https://doc.rust-lang.org/reference/items/implementations.html#r-items.impl.trait.fundamental
                 false
             }
