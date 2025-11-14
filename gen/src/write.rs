@@ -1811,7 +1811,7 @@ fn write_rust_vec_impl(out: &mut OutFile, key: &NamedImplKey) {
 
     writeln!(out, "template <>");
     begin_function_definition(out);
-    writeln!(out, "void Vec<{}>::truncate(::std::size_t len) {{", inner,);
+    writeln!(out, "void Vec<{}>::truncate(::std::size_t len) {{", inner);
     writeln!(
         out,
         "  return cxxbridge1$rust_vec${}$truncate(this, len);",
