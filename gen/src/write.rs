@@ -1420,7 +1420,7 @@ fn stringify_type(ty: &Type, types: &Types) -> String {
 fn write_type_to_generic_writer(out: &mut impl InfallibleWrite, ty: &Type, types: &Types) {
     match ty {
         Type::Ident(ident) => match Atom::from(&ident.rust) {
-            Some(atom) => write_atom_to_generic_writer(out, atom),
+            Some(atom) => write_atom(out, atom),
             None => write!(out, "{}", types.resolve(ident).name.to_fully_qualified()),
         },
         Type::RustBox(ty) => {
@@ -1502,11 +1502,7 @@ fn write_type_to_generic_writer(out: &mut impl InfallibleWrite, ty: &Type, types
     }
 }
 
-fn write_atom(out: &mut OutFile, atom: Atom) {
-    write_atom_to_generic_writer(out, atom);
-}
-
-fn write_atom_to_generic_writer(out: &mut impl InfallibleWrite, atom: Atom) {
+fn write_atom(out: &mut impl InfallibleWrite, atom: Atom) {
     match atom {
         Bool => write!(out, "bool"),
         Char => write!(out, "char"),
