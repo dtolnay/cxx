@@ -10,7 +10,7 @@ use syn::Lifetime;
 /// ```ignore
 /// quote! { impl #impl_generics SomeTrait for #inner #ty_generics }
 /// ```
-pub(crate) fn get_impl_and_ty_generics<'a>(
+pub(crate) fn split_for_impl<'a>(
     inner: &'a Type,
     conditional_impl: &ConditionalImpl<'a>,
     types: &'a Types,

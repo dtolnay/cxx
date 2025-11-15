@@ -1662,8 +1662,7 @@ fn expand_rust_box(
     let link_dealloc = format!("{}dealloc", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
 
-    let (impl_generics, ty_generics) =
-        generics::get_impl_and_ty_generics(inner, conditional_impl, types);
+    let (impl_generics, ty_generics) = generics::split_for_impl(inner, conditional_impl, types);
 
     let cfg = conditional_impl.cfg.into_attr();
     let begin_span = conditional_impl
@@ -1727,8 +1726,7 @@ fn expand_rust_vec(
     let link_set_len = format!("{}set_len", link_prefix);
     let link_truncate = format!("{}truncate", link_prefix);
 
-    let (impl_generics, ty_generics) =
-        generics::get_impl_and_ty_generics(inner, conditional_impl, types);
+    let (impl_generics, ty_generics) = generics::split_for_impl(inner, conditional_impl, types);
 
     let cfg = conditional_impl.cfg.into_attr();
     let begin_span = conditional_impl
@@ -1838,8 +1836,7 @@ fn expand_unique_ptr(
     let link_release = format!("{}release", prefix);
     let link_drop = format!("{}drop", prefix);
 
-    let (impl_generics, ty_generics) =
-        generics::get_impl_and_ty_generics(inner, conditional_impl, types);
+    let (impl_generics, ty_generics) = generics::split_for_impl(inner, conditional_impl, types);
 
     let can_construct_from_value = types.is_maybe_trivial(inner);
     let new_method = if can_construct_from_value {
@@ -1940,8 +1937,7 @@ fn expand_shared_ptr(
     let link_get = format!("{}get", prefix);
     let link_drop = format!("{}drop", prefix);
 
-    let (impl_generics, ty_generics) =
-        generics::get_impl_and_ty_generics(inner, conditional_impl, types);
+    let (impl_generics, ty_generics) = generics::split_for_impl(inner, conditional_impl, types);
 
     let can_construct_from_value = types.is_maybe_trivial(inner);
     let new_method = if can_construct_from_value {
@@ -2041,8 +2037,7 @@ fn expand_weak_ptr(
     let link_upgrade = format!("{}upgrade", prefix);
     let link_drop = format!("{}drop", prefix);
 
-    let (impl_generics, ty_generics) =
-        generics::get_impl_and_ty_generics(inner, conditional_impl, types);
+    let (impl_generics, ty_generics) = generics::split_for_impl(inner, conditional_impl, types);
 
     let cfg = conditional_impl.cfg.into_attr();
     let begin_span = conditional_impl
@@ -2130,8 +2125,7 @@ fn expand_cxx_vector(
     let link_unique_ptr_release = format!("{}release", unique_ptr_prefix);
     let link_unique_ptr_drop = format!("{}drop", unique_ptr_prefix);
 
-    let (impl_generics, ty_generics) =
-        generics::get_impl_and_ty_generics(inner, conditional_impl, types);
+    let (impl_generics, ty_generics) = generics::split_for_impl(inner, conditional_impl, types);
 
     let cfg = conditional_impl.cfg.into_attr();
     let begin_span = conditional_impl
