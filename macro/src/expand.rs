@@ -1969,6 +1969,11 @@ fn expand_shared_ptr(
         .map_or(key.end_span, |explicit| explicit.brace_token.span.join());
     let unsafe_token = format_ident!("unsafe", span = begin_span);
 
+    let not_destructible_err = format!(
+        "{} is not destructible",
+        generics::concise_cxx_name(inner, types),
+    );
+
     quote_spanned! {end_span=>
         #cfg
         #[automatically_derived]
@@ -1993,10 +1998,7 @@ fn expand_shared_ptr(
                     fn __raw(new: *const ::cxx::core::ffi::c_void, raw: *mut ::cxx::core::ffi::c_void) -> ::cxx::core::primitive::bool;
                 }
                 if !unsafe { __raw(new, raw as *mut ::cxx::core::ffi::c_void) } {
-                    ::cxx::core::panic!(
-                        "{} provides bindings to a C++ type that is not destructible",
-                        ::std::any::type_name::<Self>(),
-                    );
+                    ::cxx::core::panic!(#not_destructible_err);
                 }
             }
             unsafe fn __clone(this: *const ::cxx::core::ffi::c_void, new: *mut ::cxx::core::ffi::c_void) {
@@ -2186,6 +2188,11 @@ fn expand_cxx_vector(
         None
     };
 
+    let not_move_constructible_err = format!(
+        "{} is not move constructible",
+        generics::concise_cxx_name(inner, types),
+    );
+
     quote_spanned! {end_span=>
         #cfg
         #[automatically_derived]
@@ -2233,10 +2240,7 @@ fn expand_cxx_vector(
                     ) -> ::cxx::core::primitive::bool;
                 }
                 if !unsafe { __reserve(v, new_cap) } {
-                    ::cxx::core::panic!(
-                        "{} provides bindings to a C++ type that is not move constructible",
-                        ::std::any::type_name::<Self>(),
-                    );
+                    ::cxx::core::panic!(#not_move_constructible_err);
                 }
             }
             #by_value_methods
@@ -2397,7 +2401,7 @@ fn expand_extern_return_type(
     quote!(-> #ty)
 }
 
-fn display_namespaced(name: &Pair) -> impl Display + '_ {
+pub(crate) fn display_namespaced(name: &Pair) -> impl Display + '_ {
     struct Namespaced<'a>(&'a Pair);
 
     impl<'a> Display for Namespaced<'a> {

@@ -1,3 +1,4 @@
+use crate::expand::display_namespaced;
 use crate::syntax::types::ConditionalImpl;
 use crate::syntax::{Lifetimes, NamedType, Type, Types};
 use proc_macro2::TokenStream;
@@ -86,6 +87,16 @@ pub(crate) fn local_type(ty: &Type) -> &NamedType {
 pub(crate) fn concise_rust_name(ty: &Type) -> String {
     match ty {
         Type::Ident(named_type) => named_type.rust.to_string(),
+        _ => unreachable!("syntax/check.rs should reject other types"),
+    }
+}
+
+pub(crate) fn concise_cxx_name(ty: &Type, types: &Types) -> String {
+    match ty {
+        Type::Ident(named_type) => {
+            let res = types.resolve(&named_type.rust);
+            display_namespaced(res.name).to_string()
+        }
         _ => unreachable!("syntax/check.rs should reject other types"),
     }
 }
