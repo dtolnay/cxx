@@ -1836,6 +1836,7 @@ fn expand_unique_ptr(
     let link_release = format!("{}release", prefix);
     let link_drop = format!("{}drop", prefix);
 
+    let name = generics::concise_rust_name(inner);
     let (impl_generics, ty_generics) = generics::split_for_impl(inner, conditional_impl, types);
 
     let can_construct_from_value = types.is_maybe_trivial(inner);
@@ -1871,7 +1872,7 @@ fn expand_unique_ptr(
         #[automatically_derived]
         #unsafe_token impl #impl_generics ::cxx::memory::UniquePtrTarget for #inner #ty_generics {
             fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
-                f.write_str(::core::stringify!(#inner))
+                f.write_str(#name)
             }
             fn __null() -> ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void> {
                 unsafe extern "C" {
@@ -1937,6 +1938,7 @@ fn expand_shared_ptr(
     let link_get = format!("{}get", prefix);
     let link_drop = format!("{}drop", prefix);
 
+    let name = generics::concise_rust_name(inner);
     let (impl_generics, ty_generics) = generics::split_for_impl(inner, conditional_impl, types);
 
     let can_construct_from_value = types.is_maybe_trivial(inner);
@@ -1970,7 +1972,7 @@ fn expand_shared_ptr(
         #[automatically_derived]
         #unsafe_token impl #impl_generics ::cxx::memory::SharedPtrTarget for #inner #ty_generics {
             fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
-                f.write_str(::core::stringify!(#inner))
+                f.write_str(#name)
             }
             unsafe fn __null(new: *mut ::cxx::core::ffi::c_void) {
                 unsafe extern "C" {
@@ -2037,6 +2039,7 @@ fn expand_weak_ptr(
     let link_upgrade = format!("{}upgrade", prefix);
     let link_drop = format!("{}drop", prefix);
 
+    let name = generics::concise_rust_name(inner);
     let (impl_generics, ty_generics) = generics::split_for_impl(inner, conditional_impl, types);
 
     let cfg = conditional_impl.cfg.into_attr();
@@ -2053,7 +2056,7 @@ fn expand_weak_ptr(
         #[automatically_derived]
         #unsafe_token impl #impl_generics ::cxx::memory::WeakPtrTarget for #inner #ty_generics {
             fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
-                f.write_str(::core::stringify!(#inner))
+                f.write_str(#name)
             }
             unsafe fn __null(new: *mut ::cxx::core::ffi::c_void) {
                 unsafe extern "C" {
@@ -2125,6 +2128,7 @@ fn expand_cxx_vector(
     let link_unique_ptr_release = format!("{}release", unique_ptr_prefix);
     let link_unique_ptr_drop = format!("{}drop", unique_ptr_prefix);
 
+    let name = generics::concise_rust_name(inner);
     let (impl_generics, ty_generics) = generics::split_for_impl(inner, conditional_impl, types);
 
     let cfg = conditional_impl.cfg.into_attr();
@@ -2185,7 +2189,7 @@ fn expand_cxx_vector(
         #[automatically_derived]
         #unsafe_token impl #impl_generics ::cxx::vector::VectorElement for #inner #ty_generics {
             fn __typename(f: &mut ::cxx::core::fmt::Formatter<'_>) -> ::cxx::core::fmt::Result {
-                f.write_str(::core::stringify!(#inner))
+                f.write_str(#name)
             }
             fn __vector_new() -> *mut ::cxx::CxxVector<Self> {
                 unsafe extern "C" {

@@ -76,6 +76,13 @@ fn resolve_generic_lifetimes<'a>(ty: &Type, types: &Types<'a>) -> &'a Lifetimes 
     }
 }
 
+pub(crate) fn concise_rust_name(ty: &Type) -> String {
+    match ty {
+        Type::Ident(named_type) => named_type.rust.to_string(),
+        _ => unreachable!("syntax/check.rs should reject other types"),
+    }
+}
+
 pub(crate) struct UnderscoreLifetimes<'a> {
     generics: &'a Lifetimes,
 }
