@@ -1952,7 +1952,7 @@ fn expand_shared_ptr(
                     fn __uninit(new: *mut ::cxx::core::ffi::c_void) -> *mut ::cxx::core::ffi::c_void;
                 }
                 unsafe {
-                    __uninit(new).cast::<#inner>().write(value);
+                    __uninit(new).cast::<#inner #ty_generics>().write(value);
                 }
             }
         })
@@ -2152,7 +2152,7 @@ fn expand_cxx_vector(
                 unsafe extern "C" {
                     #[link_name = #link_push_back]
                     fn __push_back #impl_generics(
-                        this: ::cxx::core::pin::Pin<&mut ::cxx::CxxVector<#inner>>,
+                        this: ::cxx::core::pin::Pin<&mut ::cxx::CxxVector<#inner #ty_generics>>,
                         value: *mut ::cxx::core::ffi::c_void,
                     );
                 }
@@ -2170,7 +2170,7 @@ fn expand_cxx_vector(
                 unsafe extern "C" {
                     #[link_name = #link_pop_back]
                     fn __pop_back #impl_generics(
-                        this: ::cxx::core::pin::Pin<&mut ::cxx::CxxVector<#inner>>,
+                        this: ::cxx::core::pin::Pin<&mut ::cxx::CxxVector<#inner #ty_generics>>,
                         out: *mut ::cxx::core::ffi::c_void,
                     );
                 }
@@ -2196,21 +2196,21 @@ fn expand_cxx_vector(
             fn __vector_new() -> *mut ::cxx::CxxVector<Self> {
                 unsafe extern "C" {
                     #[link_name = #link_new]
-                    fn __vector_new #impl_generics() -> *mut ::cxx::CxxVector<#inner>;
+                    fn __vector_new #impl_generics() -> *mut ::cxx::CxxVector<#inner #ty_generics>;
                 }
                 unsafe { __vector_new() }
             }
             fn __vector_size(v: &::cxx::CxxVector<Self>) -> ::cxx::core::primitive::usize {
                 unsafe extern "C" {
                     #[link_name = #link_size]
-                    fn __vector_size #impl_generics(_: &::cxx::CxxVector<#inner>) -> ::cxx::core::primitive::usize;
+                    fn __vector_size #impl_generics(_: &::cxx::CxxVector<#inner #ty_generics>) -> ::cxx::core::primitive::usize;
                 }
                 unsafe { __vector_size(v) }
             }
             fn __vector_capacity(v: &::cxx::CxxVector<Self>) -> ::cxx::core::primitive::usize {
                 unsafe extern "C" {
                     #[link_name = #link_capacity]
-                    fn __vector_capacity #impl_generics(_: &::cxx::CxxVector<#inner>) -> ::cxx::core::primitive::usize;
+                    fn __vector_capacity #impl_generics(_: &::cxx::CxxVector<#inner #ty_generics>) -> ::cxx::core::primitive::usize;
                 }
                 unsafe { __vector_capacity(v) }
             }
@@ -2218,7 +2218,7 @@ fn expand_cxx_vector(
                 unsafe extern "C" {
                     #[link_name = #link_get_unchecked]
                     fn __get_unchecked #impl_generics(
-                        v: *mut ::cxx::CxxVector<#inner>,
+                        v: *mut ::cxx::CxxVector<#inner #ty_generics>,
                         pos: ::cxx::core::primitive::usize,
                     ) -> *mut ::cxx::core::ffi::c_void;
                 }
@@ -2228,7 +2228,7 @@ fn expand_cxx_vector(
                 unsafe extern "C" {
                     #[link_name = #link_reserve]
                     fn __reserve #impl_generics(
-                        v: ::cxx::core::pin::Pin<&mut ::cxx::CxxVector<#inner>>,
+                        v: ::cxx::core::pin::Pin<&mut ::cxx::CxxVector<#inner #ty_generics>>,
                         new_cap: ::cxx::core::primitive::usize,
                     ) -> ::cxx::core::primitive::bool;
                 }
@@ -2254,7 +2254,7 @@ fn expand_cxx_vector(
             unsafe fn __unique_ptr_raw(raw: *mut ::cxx::CxxVector<Self>) -> ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void> {
                 unsafe extern "C" {
                     #[link_name = #link_unique_ptr_raw]
-                    fn __unique_ptr_raw #impl_generics(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>, raw: *mut ::cxx::CxxVector<#inner>);
+                    fn __unique_ptr_raw #impl_generics(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>, raw: *mut ::cxx::CxxVector<#inner #ty_generics>);
                 }
                 let mut repr = ::cxx::core::mem::MaybeUninit::uninit();
                 unsafe {
@@ -2265,14 +2265,14 @@ fn expand_cxx_vector(
             unsafe fn __unique_ptr_get(repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *const ::cxx::CxxVector<Self> {
                 unsafe extern "C" {
                     #[link_name = #link_unique_ptr_get]
-                    fn __unique_ptr_get #impl_generics(this: *const ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *const ::cxx::CxxVector<#inner>;
+                    fn __unique_ptr_get #impl_generics(this: *const ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *const ::cxx::CxxVector<#inner #ty_generics>;
                 }
                 unsafe { __unique_ptr_get(&raw const repr) }
             }
             unsafe fn __unique_ptr_release(mut repr: ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *mut ::cxx::CxxVector<Self> {
                 unsafe extern "C" {
                     #[link_name = #link_unique_ptr_release]
-                    fn __unique_ptr_release #impl_generics(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *mut ::cxx::CxxVector<#inner>;
+                    fn __unique_ptr_release #impl_generics(this: *mut ::cxx::core::mem::MaybeUninit<*mut ::cxx::core::ffi::c_void>) -> *mut ::cxx::CxxVector<#inner #ty_generics>;
                 }
                 unsafe { __unique_ptr_release(&raw mut repr) }
             }
