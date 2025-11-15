@@ -13,7 +13,7 @@ pub(crate) struct ForeignName {
 }
 
 impl Pair {
-    #[allow(dead_code)] // only used by cxx-gen, not cxxbridge-macro
+    #[cfg_attr(proc_macro, expect(dead_code))]
     pub(crate) fn to_symbol(&self) -> Symbol {
         let segments = self
             .namespace

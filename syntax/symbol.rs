@@ -59,7 +59,6 @@ impl Symbol {
         assert!(self.0.len() > len_before);
     }
 
-    #[allow(dead_code)] // only used by cxx-gen, not cxxbridge-macro
     pub(crate) fn from_idents<'a>(it: impl Iterator<Item = &'a dyn Segment>) -> Self {
         let mut symbol = Symbol(String::new());
         for segment in it {

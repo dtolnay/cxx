@@ -57,11 +57,11 @@ pub(crate) struct NamedImplKey<'a> {
     /// Mangled form of the `outer` type.
     pub symbol: Symbol,
     /// Generic type - e.g. `UniquePtr<u8>`.
-    #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
+    #[cfg_attr(proc_macro, expect(dead_code))]
     pub outer: &'a Type,
     /// Generic type argument - e.g. `u8` from `UniquePtr<u8>`.
     pub inner: &'a Type,
-    #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
+    #[cfg_attr(not(proc_macro), expect(dead_code))]
     pub end_span: Span,
 }
 
