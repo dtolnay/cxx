@@ -54,7 +54,7 @@ impl<'a> ImplKey<'a> {
 pub(crate) struct NamedImplKey<'a> {
     #[cfg_attr(not(proc_macro), expect(dead_code))]
     pub begin_span: Span,
-    /// Mangled form of the `outer` type.
+    /// Mangled form of the `inner` type.
     pub symbol: Symbol,
     /// Generic type - e.g. `UniquePtr<u8>`.
     #[cfg_attr(proc_macro, expect(dead_code))]
