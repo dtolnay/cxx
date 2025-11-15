@@ -135,11 +135,6 @@ pub(crate) fn r_trampoline(efn: &ExternFn, var: &Pair, types: &Types) -> Symbol 
 pub(crate) fn typename(t: &Type, res: &UnorderedMap<&Ident, Resolution>) -> Option<Symbol> {
     match t {
         Type::Ident(named_type) => res.get(&named_type.rust).map(|res| res.name.to_symbol()),
-        Type::RustBox(ty1) => typename(&ty1.inner, res).map(|s| join!("box", s)),
-        Type::RustVec(ty1) => typename(&ty1.inner, res).map(|s| join!("rust_vec", s)),
-        Type::UniquePtr(ty1) => typename(&ty1.inner, res).map(|s| join!("unique_ptr", s)),
-        Type::SharedPtr(ty1) => typename(&ty1.inner, res).map(|s| join!("shared_ptr", s)),
-        Type::WeakPtr(ty1) => typename(&ty1.inner, res).map(|s| join!("weak_ptr", s)),
         Type::CxxVector(ty1) => typename(&ty1.inner, res).map(|s| join!("std", "vector", s)),
         _ => None,
     }
