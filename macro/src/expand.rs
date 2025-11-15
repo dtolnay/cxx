@@ -1662,11 +1662,6 @@ fn expand_rust_box(
     let link_dealloc = format!("{}dealloc", link_prefix);
     let link_drop = format!("{}drop", link_prefix);
 
-    let local_prefix = format_ident!("{}__box_", key.symbol);
-    let local_alloc = format_ident!("{}alloc", local_prefix);
-    let local_dealloc = format_ident!("{}dealloc", local_prefix);
-    let local_drop = format_ident!("{}drop", local_prefix);
-
     let (impl_generics, ty_generics) =
         generics::get_impl_and_ty_generics(inner, conditional_impl, types);
 
@@ -1680,7 +1675,7 @@ fn expand_rust_box(
     let unsafe_token = format_ident!("unsafe", span = begin_span);
     let prevent_unwind_drop_label = quote! { #inner }.to_string();
 
-    quote_spanned! {end_span=>
+    quote_spanned!(end_span=> {
         #cfg
         #[automatically_derived]
         #[doc(hidden)]
@@ -1689,7 +1684,7 @@ fn expand_rust_box(
         #cfg
         #[doc(hidden)]
         #[unsafe(export_name = #link_alloc)]
-        unsafe extern "C" fn #local_alloc #impl_generics() -> *mut ::cxx::core::mem::MaybeUninit<#inner #ty_generics> {
+        unsafe extern "C" fn __alloc #impl_generics() -> *mut ::cxx::core::mem::MaybeUninit<#inner #ty_generics> {
             // No prevent_unwind: the global allocator is not allowed to panic.
             //
             // TODO: replace with Box::new_uninit when stable.
@@ -1701,7 +1696,7 @@ fn expand_rust_box(
         #cfg
         #[doc(hidden)]
         #[unsafe(export_name = #link_dealloc)]
-        unsafe extern "C" fn #local_dealloc #impl_generics(ptr: *mut ::cxx::core::mem::MaybeUninit<#inner #ty_generics>) {
+        unsafe extern "C" fn __dealloc #impl_generics(ptr: *mut ::cxx::core::mem::MaybeUninit<#inner #ty_generics>) {
             // No prevent_unwind: the global allocator is not allowed to panic.
             let _ = unsafe { ::cxx::alloc::boxed::Box::from_raw(ptr) };
         }
@@ -1709,11 +1704,11 @@ fn expand_rust_box(
         #cfg
         #[doc(hidden)]
         #[unsafe(export_name = #link_drop)]
-        unsafe extern "C" fn #local_drop #impl_generics(this: *mut ::cxx::alloc::boxed::Box<#inner #ty_generics>) {
+        unsafe extern "C" fn __drop #impl_generics(this: *mut ::cxx::alloc::boxed::Box<#inner #ty_generics>) {
             let __fn = ::cxx::core::concat!("<", ::cxx::core::module_path!(), #prevent_unwind_drop_label);
             ::cxx::private::prevent_unwind(__fn, || unsafe { ::cxx::core::ptr::drop_in_place(this) });
         }
-    }
+    })
 }
 
 fn expand_rust_vec(
@@ -1732,16 +1727,6 @@ fn expand_rust_vec(
     let link_set_len = format!("{}set_len", link_prefix);
     let link_truncate = format!("{}truncate", link_prefix);
 
-    let local_prefix = format_ident!("{}__vec_", key.symbol);
-    let local_new = format_ident!("{}new", local_prefix);
-    let local_drop = format_ident!("{}drop", local_prefix);
-    let local_len = format_ident!("{}len", local_prefix);
-    let local_capacity = format_ident!("{}capacity", local_prefix);
-    let local_data = format_ident!("{}data", local_prefix);
-    let local_reserve_total = format_ident!("{}reserve_total", local_prefix);
-    let local_set_len = format_ident!("{}set_len", local_prefix);
-    let local_truncate = format_ident!("{}truncate", local_prefix);
-
     let (impl_generics, ty_generics) =
         generics::get_impl_and_ty_generics(inner, conditional_impl, types);
 
@@ -1755,7 +1740,7 @@ fn expand_rust_vec(
     let unsafe_token = format_ident!("unsafe", span = begin_span);
     let prevent_unwind_drop_label = quote! { #inner }.to_string();
 
-    quote_spanned! {end_span=>
+    quote_spanned!(end_span=> {
         #cfg
         #[automatically_derived]
         #[doc(hidden)]
@@ -1764,7 +1749,7 @@ fn expand_rust_vec(
         #cfg
         #[doc(hidden)]
         #[unsafe(export_name = #link_new)]
-        unsafe extern "C" fn #local_new #impl_generics(this: *mut ::cxx::private::RustVec<#inner #ty_generics>) {
+        unsafe extern "C" fn __new #impl_generics(this: *mut ::cxx::private::RustVec<#inner #ty_generics>) {
             // No prevent_unwind: cannot panic.
             unsafe {
                 ::cxx::core::ptr::write(this, ::cxx::private::RustVec::new());
@@ -1774,7 +1759,7 @@ fn expand_rust_vec(
         #cfg
         #[doc(hidden)]
         #[unsafe(export_name = #link_drop)]
-        unsafe extern "C" fn #local_drop #impl_generics(this: *mut ::cxx::private::RustVec<#inner #ty_generics>) {
+        unsafe extern "C" fn __drop #impl_generics(this: *mut ::cxx::private::RustVec<#inner #ty_generics>) {
             let __fn = ::cxx::core::concat!("<", ::cxx::core::module_path!(), #prevent_unwind_drop_label);
             ::cxx::private::prevent_unwind(
                 __fn,
@@ -1785,7 +1770,7 @@ fn expand_rust_vec(
         #cfg
         #[doc(hidden)]
         #[unsafe(export_name = #link_len)]
-        unsafe extern "C" fn #local_len #impl_generics(this: *const ::cxx::private::RustVec<#inner #ty_generics>) -> ::cxx::core::primitive::usize {
+        unsafe extern "C" fn __len #impl_generics(this: *const ::cxx::private::RustVec<#inner #ty_generics>) -> ::cxx::core::primitive::usize {
             // No prevent_unwind: cannot panic.
             unsafe { (*this).len() }
         }
@@ -1793,7 +1778,7 @@ fn expand_rust_vec(
         #cfg
         #[doc(hidden)]
         #[unsafe(export_name = #link_capacity)]
-        unsafe extern "C" fn #local_capacity #impl_generics(this: *const ::cxx::private::RustVec<#inner #ty_generics>) -> ::cxx::core::primitive::usize {
+        unsafe extern "C" fn __capacity #impl_generics(this: *const ::cxx::private::RustVec<#inner #ty_generics>) -> ::cxx::core::primitive::usize {
             // No prevent_unwind: cannot panic.
             unsafe { (*this).capacity() }
         }
@@ -1801,7 +1786,7 @@ fn expand_rust_vec(
         #cfg
         #[doc(hidden)]
         #[unsafe(export_name = #link_data)]
-        unsafe extern "C" fn #local_data #impl_generics(this: *const ::cxx::private::RustVec<#inner #ty_generics>) -> *const #inner #ty_generics {
+        unsafe extern "C" fn __data #impl_generics(this: *const ::cxx::private::RustVec<#inner #ty_generics>) -> *const #inner #ty_generics {
             // No prevent_unwind: cannot panic.
             unsafe { (*this).as_ptr() }
         }
@@ -1809,7 +1794,7 @@ fn expand_rust_vec(
         #cfg
         #[doc(hidden)]
         #[unsafe(export_name = #link_reserve_total)]
-        unsafe extern "C" fn #local_reserve_total #impl_generics(this: *mut ::cxx::private::RustVec<#inner #ty_generics>, new_cap: ::cxx::core::primitive::usize) {
+        unsafe extern "C" fn __reserve_total #impl_generics(this: *mut ::cxx::private::RustVec<#inner #ty_generics>, new_cap: ::cxx::core::primitive::usize) {
             // No prevent_unwind: the global allocator is not allowed to panic.
             unsafe {
                 (*this).reserve_total(new_cap);
@@ -1819,7 +1804,7 @@ fn expand_rust_vec(
         #cfg
         #[doc(hidden)]
         #[unsafe(export_name = #link_set_len)]
-        unsafe extern "C" fn #local_set_len #impl_generics(this: *mut ::cxx::private::RustVec<#inner #ty_generics>, len: ::cxx::core::primitive::usize) {
+        unsafe extern "C" fn __set_len #impl_generics(this: *mut ::cxx::private::RustVec<#inner #ty_generics>, len: ::cxx::core::primitive::usize) {
             // No prevent_unwind: cannot panic.
             unsafe {
                 (*this).set_len(len);
@@ -1829,14 +1814,14 @@ fn expand_rust_vec(
         #cfg
         #[doc(hidden)]
         #[unsafe(export_name = #link_truncate)]
-        unsafe extern "C" fn #local_truncate #impl_generics(this: *mut ::cxx::private::RustVec<#inner #ty_generics>, len: ::cxx::core::primitive::usize) {
+        unsafe extern "C" fn __truncate #impl_generics(this: *mut ::cxx::private::RustVec<#inner #ty_generics>, len: ::cxx::core::primitive::usize) {
             let __fn = ::cxx::core::concat!("<", ::cxx::core::module_path!(), #prevent_unwind_drop_label);
             ::cxx::private::prevent_unwind(
                 __fn,
                 || unsafe { (*this).truncate(len) },
             );
         }
-    }
+    })
 }
 
 fn expand_unique_ptr(
