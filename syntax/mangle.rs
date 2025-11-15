@@ -73,8 +73,11 @@
 //             - CXXBRIDGE1_STRUCT_org$rust$Struct
 //             - CXXBRIDGE1_ENUM_Enabled
 
+use crate::syntax::map::UnorderedMap;
+use crate::syntax::resolve::Resolution;
 use crate::syntax::symbol::{self, Symbol};
 use crate::syntax::{ExternFn, Pair, Type, Types};
+use proc_macro2::Ident;
 
 const CXXBRIDGE: &str = "cxxbridge1";
 
@@ -119,24 +122,20 @@ pub(crate) fn r_trampoline(efn: &ExternFn, var: &Pair, types: &Types) -> Symbol 
     join!(extern_fn(efn, types), var.rust, 1)
 }
 
-/// Attempts to mangle the type `t` (e.g. representing `Box<org::rust::Struct>`)
-/// into a symbol (e.g. `box$org$rust$Struct`)
-/// that can be used as a **part** of monomorphized/instantiated thunk names
-/// (e.g. `cxxbridge1$box$org$rust$Struct$alloc`).
+/// Mangles the given type (e.g. `Box<org::rust::Struct>`) into a symbol
+/// fragment (`box$org$rust$Struct`) to be used in the name of generic
+/// instantiations (`cxxbridge1$box$org$rust$Struct$alloc`) pertaining to that
+/// type.
 ///
-/// Not all type names can be mangled at this point - `None` will be returned if
-/// mangling fails.  We have to gracefully handle non-manglable types, because
-/// some callers (e.g. `Type`'s `impl_key` method) call into `mangle::type_`
-/// before `syntax/check.rs` has rejected unsupported generic type parameters.
-pub(crate) fn type_(t: &Type) -> Option<Symbol> {
+/// Generic instantiation is not supported for all types in full generality.
+/// This function must handle unsupported types gracefully by returning `None`
+/// because it is used early during construction of the data structures that are
+/// the input to 'syntax/check.rs', and unsupported generic instantiations are
+/// only reported as an error later.
+pub(crate) fn typename(t: &Type, res: &UnorderedMap<&Ident, Resolution>) -> Option<Symbol> {
     match t {
-        Type::Ident(named_type) => Some(join!(named_type.rust)),
-        Type::RustBox(ty1) => type_(&ty1.inner).map(|s| join!("box", s)),
-        Type::RustVec(ty1) => type_(&ty1.inner).map(|s| join!("rust_vec", s)),
-        Type::UniquePtr(ty1) => type_(&ty1.inner).map(|s| join!("unique_ptr", s)),
-        Type::SharedPtr(ty1) => type_(&ty1.inner).map(|s| join!("shared_ptr", s)),
-        Type::WeakPtr(ty1) => type_(&ty1.inner).map(|s| join!("weak_ptr", s)),
-        Type::CxxVector(ty1) => type_(&ty1.inner).map(|s| join!("std", "vector", s)),
+        Type::Ident(named_type) => res.get(&named_type.rust).map(|res| res.name.to_symbol()),
+        Type::CxxVector(ty1) => typename(&ty1.inner, res).map(|s| join!("std", "vector", s)),
         _ => None,
     }
 }

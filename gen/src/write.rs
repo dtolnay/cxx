@@ -1,7 +1,7 @@
 use crate::gen::block::Block;
 use crate::gen::guard::Guard;
 use crate::gen::nested::NamespaceEntries;
-use crate::gen::out::OutFile;
+use crate::gen::out::{InfallibleWrite, OutFile};
 use crate::gen::{builtin, include, pragma, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::discriminant::{Discriminant, Limits};
@@ -1408,110 +1408,101 @@ fn write_extern_arg(out: &mut OutFile, arg: &Var) {
 }
 
 fn write_type(out: &mut OutFile, ty: &Type) {
-    write!(out, "{}", stringify_type(ty, out.types));
+    write_type_to_generic_writer(out, ty, out.types);
 }
 
 fn stringify_type(ty: &Type, types: &Types) -> String {
     let mut s = String::new();
-    write_type_to_generic_writer(&mut s, ty, types).unwrap();
+    write_type_to_generic_writer(&mut s, ty, types);
     s
 }
 
-fn write_type_to_generic_writer(
-    out: &mut impl std::fmt::Write,
-    ty: &Type,
-    types: &Types,
-) -> std::fmt::Result {
+fn write_type_to_generic_writer(out: &mut impl InfallibleWrite, ty: &Type, types: &Types) {
     match ty {
         Type::Ident(ident) => match Atom::from(&ident.rust) {
-            Some(atom) => write_atom_to_generic_writer(out, atom),
+            Some(atom) => write_atom(out, atom),
             None => write!(out, "{}", types.resolve(ident).name.to_fully_qualified()),
         },
         Type::RustBox(ty) => {
-            write!(out, "::rust::Box<")?;
-            write_type_to_generic_writer(out, &ty.inner, types)?;
-            write!(out, ">")
+            write!(out, "::rust::Box<");
+            write_type_to_generic_writer(out, &ty.inner, types);
+            write!(out, ">");
         }
         Type::RustVec(ty) => {
-            write!(out, "::rust::Vec<")?;
-            write_type_to_generic_writer(out, &ty.inner, types)?;
-            write!(out, ">")
+            write!(out, "::rust::Vec<");
+            write_type_to_generic_writer(out, &ty.inner, types);
+            write!(out, ">");
         }
         Type::UniquePtr(ptr) => {
-            write!(out, "::std::unique_ptr<")?;
-            write_type_to_generic_writer(out, &ptr.inner, types)?;
-            write!(out, ">")
+            write!(out, "::std::unique_ptr<");
+            write_type_to_generic_writer(out, &ptr.inner, types);
+            write!(out, ">");
         }
         Type::SharedPtr(ptr) => {
-            write!(out, "::std::shared_ptr<")?;
-            write_type_to_generic_writer(out, &ptr.inner, types)?;
-            write!(out, ">")
+            write!(out, "::std::shared_ptr<");
+            write_type_to_generic_writer(out, &ptr.inner, types);
+            write!(out, ">");
         }
         Type::WeakPtr(ptr) => {
-            write!(out, "::std::weak_ptr<")?;
-            write_type_to_generic_writer(out, &ptr.inner, types)?;
-            write!(out, ">")
+            write!(out, "::std::weak_ptr<");
+            write_type_to_generic_writer(out, &ptr.inner, types);
+            write!(out, ">");
         }
         Type::CxxVector(ty) => {
-            write!(out, "::std::vector<")?;
-            write_type_to_generic_writer(out, &ty.inner, types)?;
-            write!(out, ">")
+            write!(out, "::std::vector<");
+            write_type_to_generic_writer(out, &ty.inner, types);
+            write!(out, ">");
         }
         Type::Ref(r) => {
-            write_type_space_to_generic_writer(out, &r.inner, types)?;
+            write_type_space_to_generic_writer(out, &r.inner, types);
             if !r.mutable {
-                write!(out, "const ")?;
+                write!(out, "const ");
             }
-            write!(out, "&")
+            write!(out, "&");
         }
         Type::Ptr(p) => {
-            write_type_space_to_generic_writer(out, &p.inner, types)?;
+            write_type_space_to_generic_writer(out, &p.inner, types);
             if !p.mutable {
-                write!(out, "const ")?;
+                write!(out, "const ");
             }
-            write!(out, "*")
+            write!(out, "*");
         }
         Type::Str(_) => {
-            write!(out, "::rust::Str")
+            write!(out, "::rust::Str");
         }
         Type::SliceRef(slice) => {
-            write!(out, "::rust::Slice<")?;
-            write_type_space_to_generic_writer(out, &slice.inner, types)?;
+            write!(out, "::rust::Slice<");
+            write_type_space_to_generic_writer(out, &slice.inner, types);
             if slice.mutability.is_none() {
-                write!(out, "const")?;
+                write!(out, "const");
             }
-            write!(out, ">")
+            write!(out, ">");
         }
         Type::Fn(f) => {
-            write!(out, "::rust::Fn<")?;
+            write!(out, "::rust::Fn<");
             match &f.ret {
-                Some(ret) => write_type_to_generic_writer(out, ret, types)?,
-                None => write!(out, "void")?,
+                Some(ret) => write_type_to_generic_writer(out, ret, types),
+                None => write!(out, "void"),
             }
-            write!(out, "(")?;
+            write!(out, "(");
             for (i, arg) in f.args.iter().enumerate() {
                 if i > 0 {
-                    write!(out, ", ")?;
+                    write!(out, ", ");
                 }
-                write_type_to_generic_writer(out, &arg.ty, types)?;
+                write_type_to_generic_writer(out, &arg.ty, types);
             }
-            write!(out, ")>")
+            write!(out, ")>");
         }
         Type::Array(a) => {
-            write!(out, "::std::array<")?;
-            write_type_to_generic_writer(out, &a.inner, types)?;
-            write!(out, ", {}>", &a.len)
+            write!(out, "::std::array<");
+            write_type_to_generic_writer(out, &a.inner, types);
+            write!(out, ", {}>", &a.len);
         }
         Type::Void(_) => unreachable!(),
     }
 }
 
-fn write_atom(out: &mut OutFile, atom: Atom) {
-    // `unwrap`, because `OutFile`'s impl of `fmt::Write` is infallible.
-    write_atom_to_generic_writer(out, atom).unwrap();
-}
-
-fn write_atom_to_generic_writer(out: &mut impl std::fmt::Write, atom: Atom) -> std::fmt::Result {
+fn write_atom(out: &mut impl InfallibleWrite, atom: Atom) {
     match atom {
         Bool => write!(out, "bool"),
         Char => write!(out, "char"),
@@ -1533,28 +1524,15 @@ fn write_atom_to_generic_writer(out: &mut impl std::fmt::Write, atom: Atom) -> s
 }
 
 fn write_type_space(out: &mut OutFile, ty: &Type) {
-    write_type(out, ty);
+    write_type_space_to_generic_writer(out, ty, out.types);
+}
+
+fn write_type_space_to_generic_writer(out: &mut impl InfallibleWrite, ty: &Type, types: &Types) {
+    write_type_to_generic_writer(out, ty, types);
     write_space_after_type(out, ty);
 }
 
-fn write_type_space_to_generic_writer(
-    out: &mut impl std::fmt::Write,
-    ty: &Type,
-    types: &Types,
-) -> std::fmt::Result {
-    write_type_to_generic_writer(out, ty, types)?;
-    write_space_after_type_to_generic_writer(out, ty)
-}
-
-fn write_space_after_type(out: &mut OutFile, ty: &Type) {
-    // `unwrap`, because `OutFile`'s impl of `fmt::Write` is infallible.
-    write_space_after_type_to_generic_writer(out, ty).unwrap();
-}
-
-fn write_space_after_type_to_generic_writer(
-    out: &mut impl std::fmt::Write,
-    ty: &Type,
-) -> std::fmt::Result {
+fn write_space_after_type(out: &mut impl InfallibleWrite, ty: &Type) {
     match ty {
         Type::Ident(_)
         | Type::RustBox(_)
@@ -1567,7 +1545,7 @@ fn write_space_after_type_to_generic_writer(
         | Type::SliceRef(_)
         | Type::Fn(_)
         | Type::Array(_) => write!(out, " "),
-        Type::Ref(_) | Type::Ptr(_) => Ok(()),
+        Type::Ref(_) | Type::Ptr(_) => {}
         Type::Void(_) => unreachable!(),
     }
 }
@@ -1811,13 +1789,13 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: &Type) {
     out.pragma.missing_declarations = true;
 
     let inner = stringify_type(ty, out.types);
-    let instance = crate::syntax::mangle::type_(ty)
-        .expect("Earlier syntax/check.rs checks should filter out non-mangle-able types");
+    let instance = mangle::typename(ty, &out.types.resolutions)
+        .expect("unexpected UniquePtr generic parameter allowed through by syntax/check.rs");
 
     // Some aliases are to opaque types; some are to trivial types. We can't
     // know at code generation time, so we generate both C++ and Rust side
-    // bindings for a "new" method anyway. But the Rust code can't be called
-    // for Opaque types because the 'new' method is not implemented.
+    // bindings for a "new" method anyway. But the Rust code can't be called for
+    // Opaque types because the 'new' method is not implemented.
     let can_construct_from_value = out.types.is_maybe_trivial(ty);
 
     out.builtin.is_complete = true;

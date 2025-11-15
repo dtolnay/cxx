@@ -209,9 +209,14 @@ impl<'a> Types<'a> {
                 }
                 Api::Impl(imp) => {
                     visit(&mut all, &imp.ty, &imp.cfg);
-                    if let Some(key) = imp.ty.impl_key() {
-                        impls.insert(key, ConditionalImpl::from(imp));
-                    }
+                }
+            }
+        }
+
+        for api in apis {
+            if let Api::Impl(imp) = api {
+                if let Some(key) = imp.ty.impl_key(&resolutions) {
+                    impls.insert(key, ConditionalImpl::from(imp));
                 }
             }
         }
@@ -220,8 +225,16 @@ impl<'a> Types<'a> {
         // we check that this is permissible. We do this _after_ scanning all
         // the APIs above, in case some function or struct references a type
         // which is declared subsequently.
-        let required_trivial =
-            trivial::required_trivial_reasons(apis, &all, &structs, &enums, &cxx, &aliases, &impls);
+        let required_trivial = trivial::required_trivial_reasons(
+            apis,
+            &all,
+            &structs,
+            &enums,
+            &cxx,
+            &aliases,
+            &impls,
+            &resolutions,
+        );
 
         let required_unpin =
             unpin::required_unpin_reasons(apis, &all, &structs, &enums, &cxx, &aliases);
@@ -245,18 +258,17 @@ impl<'a> Types<'a> {
 
         types.toposorted_structs = toposort::sort(cx, apis, &types);
 
-        let implicit_impls = types
-            .all
-            .iter()
-            .filter_map(|(ty, cfg)| Type::impl_key(ty).map(|impl_key| (impl_key, cfg)))
-            .filter(|(impl_key, _cfg)| impl_key.is_implicit_impl_ok(&types))
-            .collect::<Vec<_>>();
-        for (impl_key, cfg) in implicit_impls {
-            match types.impls.entry(impl_key) {
-                Entry::Vacant(entry) => {
-                    entry.insert(ConditionalImpl::from(cfg.clone()));
+        for (ty, cfg) in &types.all {
+            let Some(impl_key) = ty.impl_key(&types.resolutions) else {
+                continue;
+            };
+            if impl_key.is_implicit_impl_ok(&types) {
+                match types.impls.entry(impl_key) {
+                    Entry::Vacant(entry) => {
+                        entry.insert(ConditionalImpl::from(cfg.clone()));
+                    }
+                    Entry::Occupied(mut entry) => entry.get_mut().cfg.merge_or(cfg.clone()),
                 }
-                Entry::Occupied(mut entry) => entry.get_mut().cfg.merge_or(cfg.clone()),
             }
         }
 
@@ -352,14 +364,15 @@ impl<'a> Types<'a> {
         }
     }
 
-    /// Returns `true` if `ty` is a defined or declared within the current `#[cxx::bridge]`.
+    /// Whether the current module is responsible for generic type
+    /// instantiations pertaining to the given type.
     pub(crate) fn is_local(&self, ty: &Type) -> bool {
         match ty {
             Type::Ident(ident) => {
                 Atom::from(&ident.rust).is_none() && !self.aliases.contains_key(&ident.rust)
             }
             Type::RustBox(_) => {
-                // TODO: We should treat Box<LocalType> as local to match
+                // TODO: We should treat Box<LocalType> as local.
                 // https://doc.rust-lang.org/reference/items/implementations.html#r-items.impl.trait.fundamental
                 false
             }

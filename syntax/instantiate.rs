@@ -1,6 +1,8 @@
+use crate::syntax::map::UnorderedMap;
+use crate::syntax::resolve::Resolution;
 use crate::syntax::types::Types;
 use crate::syntax::{mangle, Symbol, Ty1, Type};
-use proc_macro2::Span;
+use proc_macro2::{Ident, Span};
 use std::hash::{Hash, Hasher};
 
 #[derive(PartialEq, Eq, Hash)]
@@ -14,31 +16,24 @@ pub(crate) enum ImplKey<'a> {
 }
 
 impl<'a> ImplKey<'a> {
-    /// Whether to generate an implicit instantiation/monomorphization of a given generic type
-    /// binding.  ("implicit" = without an explicit `impl Foo<T> {}` - see
-    /// <https://cxx.rs/extern-c++.html?highlight=explicit#explicit-shim-trait-impls>).
+    /// Whether to produce FFI symbols instantiating the given generic type even
+    /// when an explicit `impl Foo<T> {}` is not present in the current bridge.
     ///
-    /// The main consideration is avoiding introducing conflicting/overlapping impls:
-    ///
-    /// * The `cxx` crate already provides impls for cases where `T` is a primitive
-    ///   type like `u32`
-    /// * Some generics (e.g. Rust bindings for C++ templates like `CxxVector<T>`, `UniquePtr<T>`,
-    ///   etc.) require an `impl` of a `trait` provided by the `cxx` crate (such as
-    ///   [`cxx::vector::VectorElement`] or [`cxx::memory::UniquePtrTarget`]).  To avoid violating
-    ///   [Rust orphan rule](https://doc.rust-lang.org/reference/items/implementations.html#r-items.impl.trait.orphan-rule.intro)
-    ///   we restrict `T` to be a local type
-    ///   (TODO: or a fundamental type like `Box<LocalType>`).
-    /// * Other generics (e.g. C++ bindings for Rust generics like `Vec<T>` or `Box<T>`)
-    ///   don't necessarily need to follow the orphan rule, but we conservatively also
-    ///   only generate implicit impls if `T` is a local type.  TODO: revisit?
+    /// The main consideration is that the same instantiation must not be
+    /// present in two places, which is accomplished using trait impls and the
+    /// orphan rule. Every instantiation of a C++ template like `CxxVector<T>`
+    /// and Rust generic type like `Vec<T>` requires the implementation of
+    /// traits defined by the `cxx` crate for some local type. (TODO: or for a
+    /// fundamental type like `Box<LocalType>`)
     pub(crate) fn is_implicit_impl_ok(&self, types: &Types) -> bool {
         // TODO: relax this for Rust generics to allow Vec<Vec<T>> etc.
         types.is_local(self.inner())
     }
 
-    /// Returns the generic type parameter `T` associated with `self`.
-    /// For example, if `self` represents `UniquePtr<u32>` then this will return `u32`.
-    pub(crate) fn inner(&self) -> &'a Type {
+    /// Returns the type argument in the generic instantiation described by
+    /// `self`. For example, if `self` represents `UniquePtr<u32>` then this
+    /// will return `u32`.
+    fn inner(&self) -> &'a Type {
         let named_impl_key = match self {
             ImplKey::RustBox(key)
             | ImplKey::RustVec(key)
@@ -54,26 +49,26 @@ impl<'a> ImplKey<'a> {
 pub(crate) struct NamedImplKey<'a> {
     #[cfg_attr(not(proc_macro), expect(dead_code))]
     pub begin_span: Span,
-    /// Mangled form of the `outer` type.
+    /// Mangled form of the `inner` type.
     pub symbol: Symbol,
     /// Generic type - e.g. `UniquePtr<u8>`.
-    #[allow(dead_code)] // only used by cxx-build, not cxxbridge-macro
+    #[cfg_attr(proc_macro, expect(dead_code))]
     pub outer: &'a Type,
     /// Generic type argument - e.g. `u8` from `UniquePtr<u8>`.
     pub inner: &'a Type,
-    #[allow(dead_code)] // only used by cxxbridge-macro, not cxx-build
+    #[cfg_attr(not(proc_macro), expect(dead_code))]
     pub end_span: Span,
 }
 
 impl Type {
-    pub(crate) fn impl_key(&self) -> Option<ImplKey> {
+    pub(crate) fn impl_key(&self, res: &UnorderedMap<&Ident, Resolution>) -> Option<ImplKey> {
         match self {
-            Type::RustBox(ty) => Some(ImplKey::RustBox(NamedImplKey::new(self, ty)?)),
-            Type::RustVec(ty) => Some(ImplKey::RustVec(NamedImplKey::new(self, ty)?)),
-            Type::UniquePtr(ty) => Some(ImplKey::UniquePtr(NamedImplKey::new(self, ty)?)),
-            Type::SharedPtr(ty) => Some(ImplKey::SharedPtr(NamedImplKey::new(self, ty)?)),
-            Type::WeakPtr(ty) => Some(ImplKey::WeakPtr(NamedImplKey::new(self, ty)?)),
-            Type::CxxVector(ty) => Some(ImplKey::CxxVector(NamedImplKey::new(self, ty)?)),
+            Type::RustBox(ty) => Some(ImplKey::RustBox(NamedImplKey::new(self, ty, res)?)),
+            Type::RustVec(ty) => Some(ImplKey::RustVec(NamedImplKey::new(self, ty, res)?)),
+            Type::UniquePtr(ty) => Some(ImplKey::UniquePtr(NamedImplKey::new(self, ty, res)?)),
+            Type::SharedPtr(ty) => Some(ImplKey::SharedPtr(NamedImplKey::new(self, ty, res)?)),
+            Type::WeakPtr(ty) => Some(ImplKey::WeakPtr(NamedImplKey::new(self, ty, res)?)),
+            Type::CxxVector(ty) => Some(ImplKey::CxxVector(NamedImplKey::new(self, ty, res)?)),
             _ => None,
         }
     }
@@ -94,10 +89,10 @@ impl<'a> Hash for NamedImplKey<'a> {
 }
 
 impl<'a> NamedImplKey<'a> {
-    fn new(outer: &'a Type, ty1: &'a Ty1) -> Option<Self> {
+    fn new(outer: &'a Type, ty1: &'a Ty1, res: &UnorderedMap<&Ident, Resolution>) -> Option<Self> {
         let inner = &ty1.inner;
         Some(NamedImplKey {
-            symbol: mangle::type_(inner)?,
+            symbol: mangle::typename(inner, res)?,
             begin_span: ty1.name.span(),
             outer,
             inner,
