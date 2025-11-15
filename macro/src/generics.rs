@@ -1,5 +1,5 @@
 use crate::syntax::types::ConditionalImpl;
-use crate::syntax::{Lifetimes, Type, Types};
+use crate::syntax::{Lifetimes, NamedType, Type, Types};
 use proc_macro2::TokenStream;
 use quote::ToTokens;
 use syn::Lifetime;
@@ -72,6 +72,13 @@ fn resolve_generic_lifetimes<'a>(ty: &Type, types: &Types<'a>) -> &'a Lifetimes 
     match ty {
         Type::Ident(named_type) => types.resolve(&named_type.rust).generics,
         Type::CxxVector(ty1) => resolve_generic_lifetimes(&ty1.inner, types),
+        _ => unreachable!("syntax/check.rs should reject other types"),
+    }
+}
+
+pub(crate) fn local_type(ty: &Type) -> &NamedType {
+    match ty {
+        Type::Ident(named_type) => named_type,
         _ => unreachable!("syntax/check.rs should reject other types"),
     }
 }

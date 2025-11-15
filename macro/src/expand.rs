@@ -1672,7 +1672,8 @@ fn expand_rust_box(
         .explicit_impl
         .map_or(key.end_span, |explicit| explicit.brace_token.span.join());
     let unsafe_token = format_ident!("unsafe", span = begin_span);
-    let prevent_unwind_drop_label = quote! { #inner }.to_string();
+    let prevent_unwind_drop_label =
+        format!("::{} as Drop>::drop", generics::local_type(inner).rust);
 
     quote_spanned!(end_span=> {
         #cfg
@@ -1736,7 +1737,8 @@ fn expand_rust_vec(
         .explicit_impl
         .map_or(key.end_span, |explicit| explicit.brace_token.span.join());
     let unsafe_token = format_ident!("unsafe", span = begin_span);
-    let prevent_unwind_drop_label = quote! { #inner }.to_string();
+    let prevent_unwind_drop_label =
+        format!("::{} as Drop>::drop", generics::local_type(inner).rust);
 
     quote_spanned!(end_span=> {
         #cfg
