@@ -84,3 +84,19 @@ fn test_vec_string() {
     assert!(rs.contains("v: &::cxx::private::RustVec<::cxx::alloc::string::String>"));
     assert!(rs.contains("fn __foo(v: &::cxx::alloc::vec::Vec<::cxx::alloc::string::String>)"));
 }
+
+#[test]
+fn test_mangling_covers_cpp_namespace_of_vec_elements() {
+    let rs = bridge(quote! {
+        mod ffi {
+            #[namespace = "test_namespace"]
+            struct Context { x: i32 }
+            impl Vec<Context> {}
+        }
+    });
+
+    // Mangling of `Context` needs to cover the C++ namespace to avoid conflicts
+    // in thunk names used for two types with the same name, but in a different
+    // namespace.
+    assert!(rs.contains("export_name = \"cxxbridge1$rust_vec$test_namespace$Context$set_len\""));
+}
