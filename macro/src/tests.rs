@@ -137,3 +137,23 @@ fn test_struct_with_lifetime() {
     assert!(rs.contains("fn __f(arg0: ::cxx::UniquePtr<StructWithLifetime>) {"));
     assert!(rs.contains("impl<'a> self::Drop for super::StructWithLifetime<'a>"));
 }
+
+#[test]
+fn test_original_lifetimes_used_in_impls() {
+    let rs = bridge(quote! {
+        mod ffi {
+            struct Context<'sess> {
+                session: &'sess str,
+            }
+            struct Server<'srv> {
+                ctx: UniquePtr<Context<'srv>>,
+            }
+            struct Client<'clt> {
+                ctx: UniquePtr<Context<'clt>>,
+            }
+        }
+    });
+
+    // Verify if `'sess` vs `'clt` vs `'srv` lifetime name will be used in the generated code.
+    assert!(rs.contains("impl<'sess> ::cxx::memory::UniquePtrTarget for Context<'sess> {"));
+}
