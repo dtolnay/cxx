@@ -33,6 +33,9 @@ rust_binary(
         "gen/cmd/src/syntax",
     ],
     edition = "2021",
+    env = {
+        "CARGO_PKG_VERSION_PATCH": "0",
+    },
     deps = [
         "//third-party:clap",
         "//third-party:codespan-reporting",
@@ -59,6 +62,9 @@ rust_library(
     srcs = glob(["macro/src/**/*.rs"]) + ["macro/src/syntax"],
     doctests = False,
     edition = "2021",
+    env = {
+        "CARGO_PKG_VERSION_PATCH": "0",
+    },
     proc_macro = True,
     deps = [
         "//third-party:indexmap",
@@ -80,6 +86,9 @@ rust_library(
     ],
     doctests = False,
     edition = "2021",
+    env = {
+        "CARGO_PKG_VERSION_PATCH": "0",
+    },
     deps = [
         "//third-party:cc",
         "//third-party:codespan-reporting",
@@ -101,6 +110,9 @@ rust_library(
         "gen/lib/src/syntax",
     ],
     edition = "2021",
+    env = {
+        "CARGO_PKG_VERSION_PATCH": "0",
+    },
     visibility = ["PUBLIC"],
     deps = [
         "//third-party:cc",
