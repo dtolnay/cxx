@@ -388,6 +388,19 @@ pub mod ffi {
     impl UniquePtr<Array> {}
 }
 
+#[rustfmt::skip]
+#[cxx::bridge(namespace = "tests")]
+pub mod ffi_no_rustfmt {
+    // Rustfmt would replace `StructWithLifetime2<>` by `StructWithLifetime2`,
+    // but the test is meant to cover specifically the former spelling.
+    pub struct StructWithLifetime2<'a> {
+        s: &'a str,
+    }
+    extern "Rust" {
+        fn r_take_unique_ptr_of_struct_with_lifetime2(_: UniquePtr<StructWithLifetime2<>>);
+    }
+}
+
 mod other {
     use cxx::kind::{Opaque, Trivial};
     use cxx::{type_id, CxxString, ExternType};
@@ -689,6 +702,11 @@ fn r_take_ref_rust_vec_string(v: &Vec<String>) {
 
 fn r_take_enum(e: ffi::Enum) {
     let _ = e;
+}
+
+fn r_take_unique_ptr_of_struct_with_lifetime2(
+    _: cxx::UniquePtr<ffi_no_rustfmt::StructWithLifetime2>,
+) {
 }
 
 fn r_try_return_void() -> Result<(), Error> {
