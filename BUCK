@@ -1,3 +1,7 @@
+load(":Cargo.toml", cargo_toml = "value")
+
+CARGO_PKG_VERSION_PATCH = cargo_toml["package"]["version"].split(".")[2]
+
 rust_library(
     name = "cxx",
     srcs = glob(["src/**/*.rs"]),
@@ -34,7 +38,7 @@ rust_binary(
     ],
     edition = "2021",
     env = {
-        "CARGO_PKG_VERSION_PATCH": "0",
+        "CARGO_PKG_VERSION_PATCH": CARGO_PKG_VERSION_PATCH,
     },
     deps = [
         "//third-party:clap",
@@ -63,7 +67,7 @@ rust_library(
     doctests = False,
     edition = "2021",
     env = {
-        "CARGO_PKG_VERSION_PATCH": "0",
+        "CARGO_PKG_VERSION_PATCH": CARGO_PKG_VERSION_PATCH,
     },
     proc_macro = True,
     deps = [
@@ -87,7 +91,7 @@ rust_library(
     doctests = False,
     edition = "2021",
     env = {
-        "CARGO_PKG_VERSION_PATCH": "0",
+        "CARGO_PKG_VERSION_PATCH": CARGO_PKG_VERSION_PATCH,
     },
     deps = [
         "//third-party:cc",
@@ -111,7 +115,7 @@ rust_library(
     ],
     edition = "2021",
     env = {
-        "CARGO_PKG_VERSION_PATCH": "0",
+        "CARGO_PKG_VERSION_PATCH": CARGO_PKG_VERSION_PATCH,
     },
     visibility = ["PUBLIC"],
     deps = [
