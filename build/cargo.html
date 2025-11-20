@@ -1,0 +1,421 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Cargo-based setup — Rust ♡ C++</title>
+
+
+        <!-- Custom HTML head -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DG41MK6DDN"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-DG41MK6DDN', {anonymize_ip: true, cookie_domain: 'cxx.rs', cookie_flags: 'samesite=strict;secure'});
+        </script>
+
+        <meta name="description" content="CXX — safe interop between Rust and C++ by David Tolnay. This library provides a safe mechanism for calling C++ code from Rust and Rust code from C++.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../css/cxx.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    <meta property="og:image" content="https://cxx.rs/cxx.png"><meta property="og:site_name" content="CXX"><meta property="og:title" content="CXX — safe interop between Rust and C++"><meta name="twitter:image:src" content="https://cxx.rs/cxx.png"><meta name="twitter:site" content="@davidtolnay"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="CXX — safe interop between Rust and C++"></head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>const html = document.documentElement;
+html.classList.add('js');</script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list" style="display:none">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/dtolnay/cxx" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="cargo-based-builds"><a class="header" href="#cargo-based-builds">Cargo-based builds</a></h1>
+<p>As one aspect of delivering a good Rust–C++ interop experience, CXX turns
+Cargo into a quite usable build system for C++ projects published as a
+collection of crates.io packages, including a consistent and frictionless
+experience <code class="hljs">#include</code>-ing C++ headers across dependencies.</p>
+<h2 id="canonical-setup"><a class="header" href="#canonical-setup">Canonical setup</a></h2>
+<p>CXX's integration with Cargo is handled through the <a href="https://docs.rs/cxx-build">cxx-build</a> crate.</p>
+<pre><code class="hidelines=... hidelines hide-boring hljs"><span class="hljs-comment"># Cargo.toml</span>
+<span class="boring"><span class="hljs-section">[package]</span>
+</span><span class="boring"><span class="hljs-attr">name</span> = <span class="hljs-string">&quot;...&quot;</span>
+</span><span class="boring"><span class="hljs-attr">version</span> = <span class="hljs-string">&quot;...&quot;</span>
+</span><span class="boring"><span class="hljs-attr">edition</span> = <span class="hljs-string">&quot;2021&quot;</span>
+</span>
+<span class="hljs-section">[dependencies]</span>
+<span class="hljs-attr">cxx</span> = <span class="hljs-string">&quot;1.0&quot;</span>
+
+<span class="hljs-section">[build-dependencies]</span>
+<span class="hljs-attr">cxx-build</span> = <span class="hljs-string">&quot;1.0&quot;</span>
+</code></pre>
+<p>The canonical build script is as follows. The indicated line returns a
+<a href="https://docs.rs/cc/1.0/cc/struct.Build.html"><code class="hljs">cc::Build</code></a> instance (from the usual widely used <code class="hljs">cc</code> crate) on which you can
+set up any additional source files and compiler flags as normal.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-comment">// build.rs</span>
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    cxx_build::bridge(<span class="hljs-string">&quot;src/main.rs&quot;</span>)  <span class="hljs-comment">// returns a cc::Build</span>
+        .file(<span class="hljs-string">&quot;src/demo.cc&quot;</span>)
+        .std(<span class="hljs-string">&quot;c++11&quot;</span>)
+        .compile(<span class="hljs-string">&quot;cxxbridge-demo&quot;</span>);
+
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;cargo:rerun-if-changed=src/demo.cc&quot;</span>);
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;cargo:rerun-if-changed=include/demo.h&quot;</span>);
+}</code></pre>
+<p>The <code class="hljs">rerun-if-changed</code> lines are optional but make it so that Cargo does not
+spend time recompiling your C++ code when only non-C++ code has changed since
+the previous Cargo build. By default without any <code class="hljs">rerun-if-changed</code>, Cargo will
+re-execute the build script after <em>any</em> file changed in the project.</p>
+<p>If stuck, try comparing what you have against the <em>demo/</em> directory of the CXX
+GitHub repo, which maintains a working Cargo-based setup for the blobstore
+tutorial (chapter 3).</p>
+<h2 id="header-include-paths"><a class="header" href="#header-include-paths">Header include paths</a></h2>
+<p>With cxx-build, by default your include paths always start with the crate name.
+This applies to both <code class="hljs">#include</code> within your C++ code, and <code class="hljs">include!</code> in the
+<code class="hljs">extern "C++"</code> section of your Rust cxx::bridge.</p>
+<p>Your crate name is determined by the <code class="hljs">name</code> entry in Cargo.toml.</p>
+<p>For example if your crate is named <code class="hljs">yourcratename</code> and contains a C++ header
+file <code class="hljs">path/to/header.h</code> relative to Cargo.toml, that file will be includable as:</p>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;yourcratename/path/to/header.h&quot;</span></span>
+</code></pre>
+<p>A crate can choose a prefix for its headers that is different from the crate
+name by modifying <strong><a href="https://docs.rs/cxx-build/*/cxx_build/static.CFG.html"><code class="hljs">CFG.include_prefix</code></a></strong> from build.rs:</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-comment">// build.rs</span>
+
+<span class="hljs-keyword">use</span> cxx_build::CFG;
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    CFG.include_prefix = <span class="hljs-string">&quot;my/project&quot;</span>;
+
+    cxx_build::bridge(...)...
+}</code></pre>
+<p>Subsequently the header located at <code class="hljs">path/to/header.h</code> would now be includable
+as:</p>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;my/project/path/to/header.h&quot;</span></span>
+</code></pre>
+<p>The empty string <code class="hljs">""</code> is a valid include prefix and will make it possible to
+have <code class="hljs">#include "path/to/header.h"</code>. However, if your crate is a library, be
+considerate of possible name collisions that may occur in downstream crates. If
+using an empty include prefix, you'll want to make sure your headers' local path
+within the crate is sufficiently namespaced or unique.</p>
+<h2 id="including-generated-code"><a class="header" href="#including-generated-code">Including generated code</a></h2>
+<p>If your <code class="hljs">#[cxx::bridge]</code> module contains an <code class="hljs">extern "Rust"</code> block i.e. types or
+functions exposed from Rust to C++, or any shared data structures, the
+CXX-generated C++ header declaring those things is available using a <code class="hljs">.rs.h</code>
+extension on the Rust source file's name.</p>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-comment">// the header generated from path/to/lib.rs</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;yourcratename/path/to/lib.rs.h&quot;</span></span>
+</code></pre>
+<p>For giggles, it's also available using just a plain <code class="hljs">.rs</code> extension as if you
+were including the Rust file directly. Use whichever you find more palatable.</p>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;yourcratename/path/to/lib.rs&quot;</span></span>
+</code></pre>
+<h2 id="including-headers-from-dependencies"><a class="header" href="#including-headers-from-dependencies">Including headers from dependencies</a></h2>
+<p>You get to include headers from your dependencies, both handwritten ones
+contained as <code class="hljs">.h</code> files in their Cargo package, as well as CXX-generated ones.</p>
+<p>It works the same as an include of a local header: use the crate name (or their
+include_prefix if their crate changed it) followed by the relative path of the
+header within the crate.</p>
+<pre><code class="hidelines hide-boring hljs">#include &quot;dependencycratename/path/to/their/header.h`
+</code></pre>
+<p>Note that cross-crate imports are only made available between <strong>direct
+dependencies</strong>. You must directly depend on the other crate in order to #include
+its headers; a transitive dependency is not sufficient.</p>
+<p>Additionally, headers from a direct dependency are only importable if the
+dependency's Cargo.toml manifest contains a <code class="hljs">links</code> key. If not, its headers
+will not be importable from outside of the same crate. See <em><a href="https://doc.rust-lang.org/cargo/reference/build-scripts.html#the-links-manifest-key">the <code class="hljs">links</code>
+manifest key</a></em> in the Cargo reference.</p>
+<p><br><br><br></p>
+<h1 id="advanced-features"><a class="header" href="#advanced-features">Advanced features</a></h1>
+<p>The following CFG settings are only relevant to you if you are writing a library
+that needs to support downstream crates <code class="hljs">#include</code>-ing its C++ public headers.</p>
+<h2 id="publicly-exporting-header-directories"><a class="header" href="#publicly-exporting-header-directories">Publicly exporting header directories</a></h2>
+<p><strong><a href="https://docs.rs/cxx-build/*/cxx_build/static.CFG.html"><code class="hljs">CFG.exported_header_dirs</code></a></strong> (vector of absolute paths) defines a set
+of additional directories from which the current crate, directly dependent
+crates, and further crates to which this crate's headers are exported (more
+below) will be able to <code class="hljs">#include</code> headers.</p>
+<p>Adding a directory to <code class="hljs">exported_header_dirs</code> is similar to adding it to the
+current build via the <code class="hljs">cc</code> crate's <a href="https://docs.rs/cc/1/cc/struct.Build.html#method.include"><code class="hljs">Build::include</code></a>, but <em>also</em> makes the
+directory available to downstream crates that want to <code class="hljs">#include</code> one of the
+headers from your crate. If the dir were added only using <code class="hljs">Build::include</code>, the
+downstream crate including your header would need to manually add the same
+directory to their own build as well.</p>
+<p>When using <code class="hljs">exported_header_dirs</code>, your crate must also set a <code class="hljs">links</code> key for
+itself in Cargo.toml. See <a href="https://doc.rust-lang.org/cargo/reference/build-scripts.html#the-links-manifest-key"><em>the <code class="hljs">links</code> manifest key</em></a>. The reason is
+that Cargo imposes no ordering on the execution of build scripts without a
+<code class="hljs">links</code> key, which means the downstream crate's build script might otherwise
+execute before yours decides what to put into <code class="hljs">exported_header_dirs</code>.</p>
+<h3 id="example"><a class="header" href="#example">Example</a></h3>
+<p>One of your crate's headers wants to include a system library, such as <code class="hljs">#include "Python.h"</code>.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-comment">// build.rs</span>
+
+<span class="hljs-keyword">use</span> cxx_build::CFG;
+<span class="hljs-keyword">use</span> std::path::PathBuf;
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> python3 = pkg_config::probe_library(<span class="hljs-string">&quot;python3&quot;</span>).unwrap();
+    <span class="hljs-keyword">let</span> python_include_paths = python3.include_paths.iter().map(PathBuf::as_path);
+    CFG.exported_header_dirs.extend(python_include_paths);
+
+    cxx_build::bridge(<span class="hljs-string">&quot;src/bridge.rs&quot;</span>).compile(<span class="hljs-string">&quot;demo&quot;</span>);
+}</code></pre>
+<h3 id="example-1"><a class="header" href="#example-1">Example</a></h3>
+<p>Your crate wants to rearrange the headers that it exports vs how they're laid
+out locally inside the crate's source directory.</p>
+<p>Suppose the crate as published contains a file at <code class="hljs">./include/myheader.h</code> but
+wants it available to downstream crates as <code class="hljs">#include "foo/v1/public.h"</code>.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-comment">// build.rs</span>
+
+<span class="hljs-keyword">use</span> cxx_build::CFG;
+<span class="hljs-keyword">use</span> std::path::Path;
+<span class="hljs-keyword">use</span> std::{env, fs};
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> out_dir = env::var_os(<span class="hljs-string">&quot;OUT_DIR&quot;</span>).unwrap();
+    <span class="hljs-keyword">let</span> headers = Path::new(&amp;out_dir).join(<span class="hljs-string">&quot;headers&quot;</span>);
+    CFG.exported_header_dirs.push(&amp;headers);
+
+    <span class="hljs-comment">// We contain `include/myheader.h` locally, but</span>
+    <span class="hljs-comment">// downstream will use `#include &quot;foo/v1/public.h&quot;`</span>
+    <span class="hljs-keyword">let</span> foo = headers.join(<span class="hljs-string">&quot;foo&quot;</span>).join(<span class="hljs-string">&quot;v1&quot;</span>);
+    fs::create_dir_all(&amp;foo).unwrap();
+    fs::copy(<span class="hljs-string">&quot;include/myheader.h&quot;</span>, foo.join(<span class="hljs-string">&quot;public.h&quot;</span>)).unwrap();
+
+    cxx_build::bridge(<span class="hljs-string">&quot;src/bridge.rs&quot;</span>).compile(<span class="hljs-string">&quot;demo&quot;</span>);
+}</code></pre>
+<h2 id="publicly-exporting-dependencies"><a class="header" href="#publicly-exporting-dependencies">Publicly exporting dependencies</a></h2>
+<p><strong><a href="https://docs.rs/cxx-build/*/cxx_build/static.CFG.html"><code class="hljs">CFG.exported_header_prefixes</code></a></strong> (vector of strings) each refer to the
+<code class="hljs">include_prefix</code> of one of your direct dependencies, or a prefix thereof. They
+describe which of your dependencies participate in your crate's C++ public API,
+as opposed to private use by your crate's implementation.</p>
+<p>As a general rule, if one of your headers <code class="hljs">#include</code>s something from one of your
+dependencies, you need to put that dependency's <code class="hljs">include_prefix</code> into
+<code class="hljs">CFG.exported_header_prefixes</code> (<em>or</em> their <code class="hljs">links</code> key into
+<code class="hljs">CFG.exported_header_links</code>; see below). On the other hand if only your C++
+implementation files and <em>not</em> your headers are importing from the dependency,
+you do not export that dependency.</p>
+<p>The significance of exported headers is that if downstream code (crate <strong>𝒜</strong>)
+contains an <code class="hljs">#include</code> of a header from your crate (<strong>ℬ</strong>) and your header
+contains an <code class="hljs">#include</code> of something from your dependency (<strong>𝒞</strong>), the exported
+dependency <strong>𝒞</strong> becomes available during the downstream crate <strong>𝒜</strong>'s build.
+Otherwise the downstream crate <strong>𝒜</strong> doesn't know about <strong>𝒞</strong> and wouldn't be
+able to find what header your header is referring to, and would fail to build.</p>
+<p>When using <code class="hljs">exported_header_prefixes</code>, your crate must also set a <code class="hljs">links</code> key
+for itself in Cargo.toml.</p>
+<h3 id="example-2"><a class="header" href="#example-2">Example</a></h3>
+<p>Suppose you have a crate with 5 direct dependencies and the <code class="hljs">include_prefix</code> for
+each one are:</p>
+<ul>
+<li>"crate0"</li>
+<li>"group/api/crate1"</li>
+<li>"group/api/crate2"</li>
+<li>"group/api/contrib/crate3"</li>
+<li>"detail/crate4"</li>
+</ul>
+<p>Your header involves types from the first four so we re-export those as part of
+your public API, while crate4 is only used internally by your cc file not your
+header, so we do not export:</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-comment">// build.rs</span>
+
+<span class="hljs-keyword">use</span> cxx_build::CFG;
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    CFG.exported_header_prefixes = <span class="hljs-built_in">vec!</span>[<span class="hljs-string">&quot;crate0&quot;</span>, <span class="hljs-string">&quot;group/api&quot;</span>];
+
+    cxx_build::bridge(<span class="hljs-string">&quot;src/bridge.rs&quot;</span>)
+        .file(<span class="hljs-string">&quot;src/impl.cc&quot;</span>)
+        .compile(<span class="hljs-string">&quot;demo&quot;</span>);
+}</code></pre>
+<br>
+<p>For more fine grained control, there is <strong><a href="https://docs.rs/cxx-build/*/cxx_build/static.CFG.html"><code class="hljs">CFG.exported_header_links</code></a></strong>
+(vector of strings) which each refer to the <code class="hljs">links</code> attribute (<a href="https://doc.rust-lang.org/cargo/reference/build-scripts.html#the-links-manifest-key"><em>the <code class="hljs">links</code>
+manifest key</em></a>) of one of your crate's direct dependencies.</p>
+<p>This achieves an equivalent result to <code class="hljs">CFG.exported_header_prefixes</code> by
+re-exporting a C++ dependency as part of your crate's public API, except with
+finer control for cases when multiple crates might be sharing the same
+<code class="hljs">include_prefix</code> and you'd like to export some but not others. Links attributes
+are guaranteed to be unique identifiers by Cargo.</p>
+<p>When using <code class="hljs">exported_header_links</code>, your crate must also set a <code class="hljs">links</code> key for
+itself in Cargo.toml.</p>
+<h3 id="example-3"><a class="header" href="#example-3">Example</a></h3>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-comment">// build.rs</span>
+
+<span class="hljs-keyword">use</span> cxx_build::CFG;
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    CFG.exported_header_links.push(<span class="hljs-string">&quot;git2&quot;</span>);
+
+    cxx_build::bridge(<span class="hljs-string">&quot;src/bridge.rs&quot;</span>).compile(<span class="hljs-string">&quot;demo&quot;</span>);
+}</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../building.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../build/bazel.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../building.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../build/bazel.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
