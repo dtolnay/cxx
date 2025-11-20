@@ -1,6 +1,8 @@
 use cxx_gen::{generate_header_and_cc, Opt};
 use std::str;
 
+const CXXPREFIX: &str = concat!("cxxbridge1$", env!("CARGO_PKG_VERSION_PATCH"));
+
 const BRIDGE0: &str = r#"
     #[cxx::bridge]
     mod ffi {
@@ -29,11 +31,9 @@ fn test_impl_annotation() {
     let generated = generate_header_and_cc(source, &opt).unwrap();
     let output = str::from_utf8(&generated.implementation).unwrap();
     assert!(output.contains(&format!(
-        "ANNOTATION void {CXXPREFIX}$do_cpp_thing(::rust::Str foo)"
+        "ANNOTATION void {CXXPREFIX}$do_cpp_thing(::rust::Str foo)",
     )));
 }
-
-const CXXPREFIX: &'static str = concat!("cxxbridge1$v", env!("CARGO_PKG_VERSION_PATCH"));
 
 const BRIDGE1: &str = r#"
     #[cxx::bridge]
@@ -71,12 +71,12 @@ fn test_extern_rust_method_on_c_type() {
 
     // Check that there is a generated C signature bridging to the Rust method.
     assert!(implementation.contains(&format!(
-        "void {CXXPREFIX}$CppType$rust_method_cpp_receiver(::CppType &self) noexcept;"
+        "void {CXXPREFIX}$CppType$rust_method_cpp_receiver(::CppType &self) noexcept;",
     )));
 
     // Check that there is an implementation on the C++ class calling the Rust method.
     assert!(implementation.contains("void CppType::rust_method_cpp_receiver() noexcept {"));
     assert!(implementation.contains(&format!(
-        "{CXXPREFIX}$CppType$rust_method_cpp_receiver(*this);"
+        "{CXXPREFIX}$CppType$rust_method_cpp_receiver(*this);",
     )));
 }
