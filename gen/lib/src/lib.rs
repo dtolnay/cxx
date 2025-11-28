@@ -7,7 +7,7 @@
 //! [dtolnay/cxx#235]: https://github.com/dtolnay/cxx/issues/235
 //! [https://github.com/google/autocxx]: https://github.com/google/autocxx
 
-#![doc(html_root_url = "https://docs.rs/cxx-gen/0.7.189")]
+#![doc(html_root_url = "https://docs.rs/cxx-gen/0.7.190")]
 #![deny(missing_docs)]
 #![expect(dead_code)]
 #![cfg_attr(not(check_cfg), allow(unexpected_cfgs))]
