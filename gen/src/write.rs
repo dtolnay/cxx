@@ -480,7 +480,7 @@ fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
     for variant in &enm.variants {
         write!(out, "static_assert(static_cast<");
         write_atom(out, enm.repr.atom);
-        writeln!(out, ">({}::{}) == ", enm.name.cxx, variant.name.cxx);
+        write!(out, ">({}::{}) == ", enm.name.cxx, variant.name.cxx);
         write_discriminant(out, enm.repr.atom, variant.discriminant);
         writeln!(out, ", \"disagrees with the value in #[cxx::bridge]\");");
     }
