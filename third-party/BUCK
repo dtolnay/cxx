@@ -26,23 +26,23 @@ cargo.rust_library(
 
 alias(
     name = "cc",
-    actual = ":cc-1.2.46",
+    actual = ":cc-1.2.48",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "cc-1.2.46.crate",
-    sha256 = "b97463e1064cb1b1c1384ad0a0b9c8abd0988e2a91f52606c80ef14aadb63e36",
-    strip_prefix = "cc-1.2.46",
-    urls = ["https://static.crates.io/crates/cc/1.2.46/download"],
+    name = "cc-1.2.48.crate",
+    sha256 = "c481bdbf0ed3b892f6f806287d72acd515b352a4ec27a208489b8c1bc839633a",
+    strip_prefix = "cc-1.2.48",
+    urls = ["https://static.crates.io/crates/cc/1.2.48/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "cc-1.2.46",
-    srcs = [":cc-1.2.46.crate"],
+    name = "cc-1.2.48",
+    srcs = [":cc-1.2.48.crate"],
     crate = "cc",
-    crate_root = "cc-1.2.46.crate/src/lib.rs",
+    crate_root = "cc-1.2.48.crate/src/lib.rs",
     edition = "2018",
     visibility = [],
     deps = [
@@ -619,7 +619,7 @@ cargo.rust_library(
     deps = [
         ":proc-macro2-1.0.103",
         ":quote-1.0.42",
-        ":syn-2.0.110",
+        ":syn-2.0.111",
     ],
 )
 
@@ -646,23 +646,23 @@ cargo.rust_library(
 
 alias(
     name = "syn",
-    actual = ":syn-2.0.110",
+    actual = ":syn-2.0.111",
     visibility = ["PUBLIC"],
 )
 
 http_archive(
-    name = "syn-2.0.110.crate",
-    sha256 = "a99801b5bd34ede4cf3fc688c5919368fea4e4814a4664359503e6015b280aea",
-    strip_prefix = "syn-2.0.110",
-    urls = ["https://static.crates.io/crates/syn/2.0.110/download"],
+    name = "syn-2.0.111.crate",
+    sha256 = "390cc9a294ab71bdb1aa2e99d13be9c753cd2d7bd6560c77118597410c4d2e87",
+    strip_prefix = "syn-2.0.111",
+    urls = ["https://static.crates.io/crates/syn/2.0.111/download"],
     visibility = [],
 )
 
 cargo.rust_library(
-    name = "syn-2.0.110",
-    srcs = [":syn-2.0.110.crate"],
+    name = "syn-2.0.111",
+    srcs = [":syn-2.0.111.crate"],
     crate = "syn",
-    crate_root = "syn-2.0.110.crate/src/lib.rs",
+    crate_root = "syn-2.0.111.crate/src/lib.rs",
     edition = "2021",
     features = [
         "clone-impls",

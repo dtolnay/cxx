@@ -99,6 +99,6 @@ rust_proc_macro(
     deps = [
         "@vendor__proc-macro2-1.0.103//:proc_macro2",
         "@vendor__quote-1.0.42//:quote",
-        "@vendor__syn-2.0.110//:syn",
+        "@vendor__syn-2.0.111//:syn",
     ],
 )
