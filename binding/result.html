@@ -1,0 +1,323 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Result&lt;T&gt; — Rust ♡ C++</title>
+
+
+        <!-- Custom HTML head -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DG41MK6DDN"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-DG41MK6DDN', {anonymize_ip: true, cookie_domain: 'cxx.rs', cookie_flags: 'samesite=strict;secure'});
+        </script>
+
+        <meta name="description" content="CXX — safe interop between Rust and C++ by David Tolnay. This library provides a safe mechanism for calling C++ code from Rust and Rust code from C++.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../css/cxx.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    <meta property="og:image" content="https://cxx.rs/cxx.png"><meta property="og:site_name" content="CXX"><meta property="og:title" content="CXX — safe interop between Rust and C++"><meta name="twitter:image:src" content="https://cxx.rs/cxx.png"><meta name="twitter:site" content="@davidtolnay"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="CXX — safe interop between Rust and C++"></head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>const html = document.documentElement;
+html.classList.add('js');</script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list" style="display:none">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/dtolnay/cxx" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="resultt"><a class="header" href="#resultt">Result&lt;T&gt;</a></h1>
+<p>Result&lt;T&gt; is allowed as the return type of an extern function in either
+direction. Its behavior is to translate to/from C++ exceptions. If your codebase
+does not use C++ exceptions, or prefers to represent fallibility using something
+like outcome&lt;T&gt;, leaf::result&lt;T&gt;, StatusOr&lt;T&gt;, etc then you'll need to
+handle the translation of those to Rust Result&lt;T&gt; using your own shims for
+now. Better support for this is planned.</p>
+<p>If an exception is thrown from an <code class="hljs">extern "C++"</code> function that is <em>not</em> declared
+by the CXX bridge to return Result, the program calls C++'s <code class="hljs">std::terminate</code>.
+The behavior is equivalent to the same exception being thrown through a
+<code class="hljs">noexcept</code> C++ function.</p>
+<p>If a panic occurs in <em>any</em> <code class="hljs">extern "Rust"</code> function, regardless of whether it is
+declared by the CXX bridge to return Result, a message is logged and the program
+calls Rust's <code class="hljs">std::process::abort</code>.</p>
+<h2 id="returning-result-from-rust-to-c"><a class="header" href="#returning-result-from-rust-to-c">Returning Result from Rust to C++</a></h2>
+<p>An <code class="hljs">extern "Rust"</code> function returning a Result turns into a <code class="hljs">throw</code> in C++ if
+the Rust side produces an error.</p>
+<p>Note that the return type written inside of cxx::bridge must be written without
+a second type parameter. Only the Ok type is specified for the purpose of the
+FFI. The Rust <em>implementation</em> (outside of the bridge module) may pick any error
+type as long as it has a std::fmt::Display impl.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="boring"><span class="hljs-keyword">use</span> std::io;
+</span><span class="boring">
+</span><span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;Rust&quot;</span> {
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">fallible1</span></span>(depth: <span class="hljs-built_in">usize</span>) -&gt; <span class="hljs-built_in">Result</span>&lt;<span class="hljs-built_in">String</span>&gt;;
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">fallible2</span></span>() -&gt; <span class="hljs-built_in">Result</span>&lt;()&gt;;
+    }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">fallible1</span></span>(depth: <span class="hljs-built_in">usize</span>) -&gt; anyhow::<span class="hljs-built_in">Result</span>&lt;<span class="hljs-built_in">String</span>&gt; {
+    <span class="hljs-keyword">if</span> depth == <span class="hljs-number">0</span> {
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">Err</span>(anyhow::Error::msg(<span class="hljs-string">&quot;fallible1 requires depth &gt; 0&quot;</span>));
+    }
+    ...
+}
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">fallible2</span></span>() -&gt; <span class="hljs-built_in">Result</span>&lt;(), io::Error&gt; {
+    ...
+    <span class="hljs-literal">Ok</span>(())
+}</code></pre>
+<p>The exception that gets thrown by CXX on the C++ side is always of type
+<code class="hljs">rust::Error</code> and has the following C++ public API. The <code class="hljs">what()</code> member function
+gives the error message according to the Rust error's std::fmt::Display impl.</p>
+<pre><code class="hidelines=... hidelines hide-boring hljs"><span class="hljs-comment">// rust/cxx.h</span>
+<span class="boring">
+</span><span class="boring"><span class="hljs-keyword">namespace</span> rust {
+</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Error</span> <span class="hljs-title">final</span> :</span> <span class="hljs-keyword">public</span> <span class="hljs-built_in">std</span>::exception {
+<span class="hljs-keyword">public</span>:
+  Error(<span class="hljs-keyword">const</span> Error &amp;);
+  Error(Error &amp;&amp;) <span class="hljs-keyword">noexcept</span>;
+  ~Error() <span class="hljs-keyword">noexcept</span>;
+
+  Error &amp;<span class="hljs-keyword">operator</span>=(<span class="hljs-keyword">const</span> Error &amp;) &amp;;
+  Error &amp;<span class="hljs-keyword">operator</span>=(Error &amp;&amp;) &amp; <span class="hljs-keyword">noexcept</span>;
+
+  <span class="hljs-function"><span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *<span class="hljs-title">what</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span> <span class="hljs-keyword">override</span></span>;
+};
+<span class="boring">
+</span><span class="boring">} <span class="hljs-comment">// namespace rust</span>
+</span></code></pre>
+<h2 id="returning-result-from-c-to-rust"><a class="header" href="#returning-result-from-c-to-rust">Returning Result from C++ to Rust</a></h2>
+<p>An <code class="hljs">extern "C++"</code> function returning a Result turns into a <code class="hljs">catch</code> in C++ that
+converts the exception into an Err for Rust.</p>
+<p>Note that the return type written inside of cxx::bridge must be written without
+a second type parameter. Only the Ok type is specified for the purpose of the
+FFI. The resulting error type created by CXX when an <code class="hljs">extern "C++"</code> function
+throws will always be of type <strong><a href="https://docs.rs/cxx/*/cxx/struct.Exception.html"><code class="hljs">cxx::Exception</code></a></strong>.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="boring"><span class="hljs-keyword">use</span> std::process;
+</span><span class="boring">
+</span><span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        include!(<span class="hljs-string">&quot;example/include/example.h&quot;</span>);
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">fallible1</span></span>(depth: <span class="hljs-built_in">usize</span>) -&gt; <span class="hljs-built_in">Result</span>&lt;<span class="hljs-built_in">String</span>&gt;;
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">fallible2</span></span>() -&gt; <span class="hljs-built_in">Result</span>&lt;()&gt;;
+    }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">let</span> <span class="hljs-literal">Err</span>(err) = ffi::fallible1(<span class="hljs-number">99</span>) {
+        eprintln!(<span class="hljs-string">&quot;Error: {}&quot;</span>, err);
+        process::exit(<span class="hljs-number">1</span>);
+    }
+}</code></pre>
+<p>The specific set of caught exceptions and the conversion to error message are
+both customizable. The way you do this is by defining a template function
+<code class="hljs">rust::behavior::trycatch</code> with a suitable signature inside any one of the
+headers <code class="hljs">include!</code>'d by your cxx::bridge.</p>
+<p>The template signature is required to be:</p>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-keyword">namespace</span> rust {
+<span class="hljs-keyword">namespace</span> behavior {
+
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> Try, <span class="hljs-keyword">typename</span> Fail&gt;
+<span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">trycatch</span><span class="hljs-params">(Try &amp;&amp;func, Fail &amp;&amp;fail)</span> <span class="hljs-keyword">noexcept</span></span>;
+
+} <span class="hljs-comment">// namespace behavior</span>
+} <span class="hljs-comment">// namespace rust</span>
+</code></pre>
+<p>The default <code class="hljs">trycatch</code> used by CXX if you have not provided your own is the
+following. You must follow the same pattern: invoke <code class="hljs">func</code> with no arguments,
+catch whatever exception(s) you want, and invoke <code class="hljs">fail</code> with the error message
+you'd like for the Rust error to have.</p>
+<pre><code class="hidelines=... hidelines hide-boring hljs"><span class="boring"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;exception&gt;</span></span>
+</span><span class="boring">
+</span><span class="boring"><span class="hljs-keyword">namespace</span> rust {
+</span><span class="boring"><span class="hljs-keyword">namespace</span> behavior {
+</span><span class="boring">
+</span><span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> Try, <span class="hljs-keyword">typename</span> Fail&gt;
+<span class="hljs-function"><span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">trycatch</span><span class="hljs-params">(Try &amp;&amp;func, Fail &amp;&amp;fail)</span> <span class="hljs-keyword">noexcept</span> <span class="hljs-keyword">try</span> </span>{
+  func();
+} <span class="hljs-keyword">catch</span> (<span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::exception &amp;e) {
+  fail(e.what());
+}
+<span class="boring">
+</span><span class="boring">} <span class="hljs-comment">// namespace behavior</span>
+</span><span class="boring">} <span class="hljs-comment">// namespace rust</span>
+</span></code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../async.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../bindings.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../async.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../bindings.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

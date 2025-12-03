@@ -1,0 +1,776 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Tutorial — Rust ♡ C++</title>
+
+
+        <!-- Custom HTML head -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DG41MK6DDN"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-DG41MK6DDN', {anonymize_ip: true, cookie_domain: 'cxx.rs', cookie_flags: 'samesite=strict;secure'});
+        </script>
+
+        <meta name="description" content="CXX — safe interop between Rust and C++ by David Tolnay. This library provides a safe mechanism for calling C++ code from Rust and Rust code from C++.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css" disabled="true">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css" disabled="true">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="css/cxx.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    <meta property="og:image" content="https://cxx.rs/cxx.png"><meta property="og:site_name" content="CXX"><meta property="og:title" content="CXX — safe interop between Rust and C++"><meta name="twitter:image:src" content="https://cxx.rs/cxx.png"><meta name="twitter:site" content="@davidtolnay"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="CXX — safe interop between Rust and C++"></head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>const html = document.documentElement;
+html.classList.add('js');</script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list" style="display:none">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/dtolnay/cxx" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="tutorial-cxx-blobstore-client"><a class="header" href="#tutorial-cxx-blobstore-client">Tutorial: CXX blobstore client</a></h1>
+<p>This example walks through a Rust application that calls into a C++ client of a
+blobstore service. In fact we'll see calls going in both directions: Rust to C++
+as well as C++ to Rust. For your own use case it may be that you need just one
+of these directions.</p>
+<p>All of the code involved in the example is shown on this page, but it's also
+provided in runnable form in the <em>demo</em> directory of
+<a href="https://github.com/dtolnay/cxx">https://github.com/dtolnay/cxx</a>. To try it out directly, run <code class="hljs">cargo run</code> from
+that directory.</p>
+<p>This tutorial assumes you've read briefly about <strong>shared structs</strong>, <strong>opaque
+types</strong>, and <strong>functions</strong> in the <a href="concepts.html"><em>Core concepts</em></a> page.</p>
+<h2 id="creating-the-project"><a class="header" href="#creating-the-project">Creating the project</a></h2>
+<p>We'll use Cargo, which is the build system commonly used by open source Rust
+projects. (CXX works with other build systems too; refer to chapter 5.)</p>
+<p>Create a blank Cargo project: <code class="hljs">mkdir cxx-demo</code>; <code class="hljs">cd cxx-demo</code>; <code class="hljs">cargo init</code>.</p>
+<p>Edit the Cargo.toml to add a dependency on the <code class="hljs">cxx</code> crate:</p>
+<pre><code class="hidelines=... hidelines hide-boring hljs"><span class="hljs-comment"># Cargo.toml</span>
+<span class="boring"><span class="hljs-section">[package]</span>
+</span><span class="boring"><span class="hljs-attr">name</span> = <span class="hljs-string">&quot;cxx-demo&quot;</span>
+</span><span class="boring"><span class="hljs-attr">version</span> = <span class="hljs-string">&quot;0.1.0&quot;</span>
+</span><span class="boring"><span class="hljs-attr">edition</span> = <span class="hljs-string">&quot;2021&quot;</span>
+</span>
+<span class="hljs-section">[dependencies]</span>
+<span class="hljs-attr">cxx</span> = <span class="hljs-string">&quot;1.0&quot;</span>
+</code></pre>
+<p>We'll revisit this Cargo.toml later when we get to compiling some C++ code.</p>
+<h2 id="defining-the-language-boundary"><a class="header" href="#defining-the-language-boundary">Defining the language boundary</a></h2>
+<p>CXX relies on a description of the function signatures that will be exposed from
+each language to the other. You provide this description using <code class="hljs">extern</code> blocks
+in a Rust module annotated with the <code class="hljs">#[cxx::bridge]</code> attribute macro.</p>
+<p>We'll open with just the following at the top of src/main.rs and walk through
+each item in detail.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-comment">// src/main.rs</span>
+
+<span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+
+}
+<span class="boring">
+</span><span class="boring"><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {}</span></code></pre>
+<p>The contents of this module will be everything that needs to be agreed upon by
+both sides of the FFI boundary.</p>
+<h2 id="calling-a-c-function-from-rust"><a class="header" href="#calling-a-c-function-from-rust">Calling a C++ function from Rust</a></h2>
+<p>Let's obtain an instance of the C++ blobstore client, a class <code class="hljs">BlobstoreClient</code>
+defined in C++.</p>
+<p>We'll treat <code class="hljs">BlobstoreClient</code> as an <em>opaque type</em> in CXX's classification so
+that Rust does not need to assume anything about its implementation, not even
+its size or alignment. In general, a C++ type might have a move-constructor
+which is incompatible with Rust's move semantics, or may hold internal
+references which cannot be modeled by Rust's borrowing system. Though there are
+alternatives, the easiest way to not care about any such thing on an FFI
+boundary is to require no knowledge about a type by treating it as opaque.</p>
+<p>Opaque types may only be manipulated behind an indirection such as a reference
+<code class="hljs">&amp;</code>, a Rust <code class="hljs">Box</code>, or a <code class="hljs">UniquePtr</code> (Rust binding of <code class="hljs">std::unique_ptr</code>). We'll
+add a function through which C++ can return a <code class="hljs">std::unique_ptr&lt;BlobstoreClient&gt;</code>
+to Rust.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-comment">// src/main.rs</span>
+
+<span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        include!(<span class="hljs-string">&quot;cxx-demo/include/blobstore.h&quot;</span>);
+
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">BlobstoreClient</span></span>;
+
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new_blobstore_client</span></span>() -&gt; UniquePtr&lt;BlobstoreClient&gt;;
+    }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> client = ffi::new_blobstore_client();
+}</code></pre>
+<p>The nature of <code class="hljs">unsafe</code> extern blocks is clarified in more detail in the
+<a href="extern-c++.html"><em>extern "C++"</em></a> chapter. In brief: the programmer is <strong>not</strong>
+promising that the signatures they have typed in are accurate; that would be
+unreasonable. CXX performs static assertions that the signatures exactly match
+what is declared in C++. Rather, the programmer is only on the hook for things
+that C++'s semantics are not precise enough to capture, i.e. things that would
+only be represented at most by comments in the C++ code. In this case, it's
+whether <code class="hljs">new_blobstore_client</code> is safe or unsafe to call. If that function said
+something like "must be called at most once or we'll stomp yer memery", Rust
+would instead want to expose it as <code class="hljs">unsafe fn new_blobstore_client</code>, this time
+inside a safe <code class="hljs">extern "C++"</code> block because the programmer is no longer on the
+hook for any safety claim about the signature.</p>
+<p>If you build this file right now with <code class="hljs">cargo build</code>, it won't build because we
+haven't written a C++ implementation of <code class="hljs">new_blobstore_client</code> nor instructed
+Cargo about how to link it into the resulting binary. You'll see an error from
+the linker like this:</p>
+<pre><code class="hidelines hide-boring hljs">error: linking with `cc` failed: exit code: 1
+ |
+ = /bin/ld: target/debug/deps/cxx-demo-7cb7fddf3d67d880.rcgu.o: in function `cxx_demo::ffi::new_blobstore_client&#x27;:
+   src/main.rs:1: undefined reference to `cxxbridge1$new_blobstore_client&#x27;
+   collect2: error: ld returned 1 exit status
+</code></pre>
+<h2 id="adding-in-the-c-code"><a class="header" href="#adding-in-the-c-code">Adding in the C++ code</a></h2>
+<p>In CXX's integration with Cargo, all #include paths begin with a crate name by
+default (when not explicitly selected otherwise by a crate; see
+<code class="hljs">CFG.include_prefix</code> in chapter 5). That's why we see
+<code class="hljs">include!("cxx-demo/include/blobstore.h")</code> above — we'll be putting the
+C++ header at relative path <code class="hljs">include/blobstore.h</code> within the Rust crate. If your
+crate is named something other than <code class="hljs">cxx-demo</code> according to the <code class="hljs">name</code> field in
+Cargo.toml, you will need to use that name everywhere in place of <code class="hljs">cxx-demo</code>
+throughout this tutorial.</p>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-comment">// include/blobstore.h</span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">pragma</span> once</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;memory&gt;</span></span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BlobstoreClient</span> {</span>
+<span class="hljs-keyword">public</span>:
+  BlobstoreClient();
+};
+
+<span class="hljs-function"><span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;BlobstoreClient&gt; <span class="hljs-title">new_blobstore_client</span><span class="hljs-params">()</span></span>;
+</code></pre>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-comment">// src/blobstore.cc</span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;cxx-demo/include/blobstore.h&quot;</span></span>
+
+BlobstoreClient::BlobstoreClient() {}
+
+<span class="hljs-function"><span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;BlobstoreClient&gt; <span class="hljs-title">new_blobstore_client</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;BlobstoreClient&gt;(<span class="hljs-keyword">new</span> BlobstoreClient());
+}
+</code></pre>
+<p>Using <code class="hljs">std::make_unique</code> would work too, as long as you pass <code class="hljs">std("c++14")</code> to
+the C++ compiler as described later on.</p>
+<p>The placement in <em>include/</em> and <em>src/</em> is not significant; you can place C++
+code anywhere else in the crate as long as you use the right paths throughout
+the tutorial.</p>
+<p>Be aware that <em>CXX does not look at any of these files.</em> You're free to put
+arbitrary C++ code in here, #include your own libraries, etc. All we do is emit
+static assertions against what you provide in the headers.</p>
+<h2 id="compiling-the-c-code-with-cargo"><a class="header" href="#compiling-the-c-code-with-cargo">Compiling the C++ code with Cargo</a></h2>
+<p>Cargo has a <a href="https://doc.rust-lang.org/cargo/reference/build-scripts.html">build scripts</a> feature suitable for compiling non-Rust code.</p>
+<p>We need to introduce a new build-time dependency on CXX's C++ code generator in
+Cargo.toml:</p>
+<pre><code class="hidelines=... hidelines hide-boring hljs"><span class="hljs-comment"># Cargo.toml</span>
+<span class="boring"><span class="hljs-section">[package]</span>
+</span><span class="boring"><span class="hljs-attr">name</span> = <span class="hljs-string">&quot;cxx-demo&quot;</span>
+</span><span class="boring"><span class="hljs-attr">version</span> = <span class="hljs-string">&quot;0.1.0&quot;</span>
+</span><span class="boring"><span class="hljs-attr">edition</span> = <span class="hljs-string">&quot;2021&quot;</span>
+</span>
+<span class="hljs-section">[dependencies]</span>
+<span class="hljs-attr">cxx</span> = <span class="hljs-string">&quot;1.0&quot;</span>
+
+<span class="hljs-section">[build-dependencies]</span>
+<span class="hljs-attr">cxx-build</span> = <span class="hljs-string">&quot;1.0&quot;</span>
+</code></pre>
+<p>Then add a build.rs build script adjacent to Cargo.toml to run the cxx-build
+code generator and C++ compiler. The relevant arguments are the path to the Rust
+source file containing the cxx::bridge language boundary definition, and the
+paths to any additional C++ source files to be compiled during the Rust crate's
+build.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-comment">// build.rs</span>
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    cxx_build::bridge(<span class="hljs-string">&quot;src/main.rs&quot;</span>)
+        .file(<span class="hljs-string">&quot;src/blobstore.cc&quot;</span>)
+        .compile(<span class="hljs-string">&quot;cxx-demo&quot;</span>);
+
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;cargo:rerun-if-changed=src/blobstore.cc&quot;</span>);
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;cargo:rerun-if-changed=include/blobstore.h&quot;</span>);
+}</code></pre>
+<p>This build.rs would also be where you set up C++ compiler flags, for example if
+you'd like to have access to <code class="hljs">std::make_unique</code> from C++14. See the page on
+<em><strong><a href="build/cargo.html">Cargo-based builds</a></strong></em> for more details about CXX's Cargo
+integration.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="boring"><span class="hljs-comment">// build.rs</span>
+</span><span class="boring">
+</span><span class="boring"><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+</span>    cxx_build::bridge(<span class="hljs-string">&quot;src/main.rs&quot;</span>)
+        .file(<span class="hljs-string">&quot;src/blobstore.cc&quot;</span>)
+        .std(<span class="hljs-string">&quot;c++14&quot;</span>)
+        .compile(<span class="hljs-string">&quot;cxx-demo&quot;</span>);
+<span class="boring">}</span></code></pre>
+<p>The project should now build and run successfully, though not do anything useful
+yet.</p>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-meta">cxx-demo$</span><span class="bash">  cargo run</span>
+  Compiling cxx-demo v0.1.0
+  Finished dev [unoptimized + debuginfo] target(s) in 0.34s
+  Running `target/debug/cxx-demo`
+<span class="hljs-meta">
+cxx-demo$</span>
+</code></pre>
+<h2 id="calling-a-rust-function-from-c"><a class="header" href="#calling-a-rust-function-from-c">Calling a Rust function from C++</a></h2>
+<p>Our C++ blobstore supports a <code class="hljs">put</code> operation for a discontiguous buffer upload.
+For example we might be uploading snapshots of a circular buffer which would
+tend to consist of 2 pieces, or fragments of a file spread across memory for
+some other reason (like a rope data structure).</p>
+<p>We'll express this by handing off an iterator over contiguous borrowed chunks.
+This loosely resembles the API of the widely used <code class="hljs">bytes</code> crate's <code class="hljs">Buf</code> trait.
+During a <code class="hljs">put</code>, we'll make C++ call back into Rust to obtain contiguous chunks
+of the upload (all with no copying or allocation on the language boundary). In
+reality the C++ client might contain some sophisticated batching of chunks
+and/or parallel uploading that all of this ties into.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-comment">// src/main.rs</span>
+
+<span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;Rust&quot;</span> {
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">MultiBuf</span></span>;
+
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">next_chunk</span></span>(buf: &amp;<span class="hljs-keyword">mut</span> MultiBuf) -&gt; &amp;[<span class="hljs-built_in">u8</span>];
+    }
+
+    <span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        include!(<span class="hljs-string">&quot;cxx-demo/include/blobstore.h&quot;</span>);
+
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">BlobstoreClient</span></span>;
+
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new_blobstore_client</span></span>() -&gt; UniquePtr&lt;BlobstoreClient&gt;;
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">put</span></span>(&amp;<span class="hljs-keyword">self</span>, parts: &amp;<span class="hljs-keyword">mut</span> MultiBuf) -&gt; <span class="hljs-built_in">u64</span>;
+    }
+}
+<span class="boring">
+</span><span class="boring"><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+</span><span class="boring">    <span class="hljs-keyword">let</span> client = ffi::new_blobstore_client();
+</span><span class="boring">}</span></code></pre>
+<p>Any signature having a <code class="hljs">self</code> parameter (the Rust name for C++'s <code class="hljs">this</code>) is
+considered a method / non-static member function. If there is only one <code class="hljs">type</code> in
+the surrounding extern block, it'll be a method of that type. If there is more
+than one <code class="hljs">type</code>, you can disambiguate which one a method belongs to by writing
+<code class="hljs">self: &amp;BlobstoreClient</code> in the argument list.</p>
+<p>As usual, now we need to provide Rust definitions of everything declared by the
+<code class="hljs">extern "Rust"</code> block and a C++ definition of the new signature declared by the
+<code class="hljs">extern "C++"</code> block.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-comment">// src/main.rs</span>
+<span class="boring">
+</span><span class="boring"><span class="hljs-meta">#[cxx::bridge]</span>
+</span><span class="boring"><span class="hljs-keyword">mod</span> ffi {
+</span><span class="boring">    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;Rust&quot;</span> {
+</span><span class="boring">        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">MultiBuf</span></span>;
+</span><span class="boring">
+</span><span class="boring">        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">next_chunk</span></span>(buf: &amp;<span class="hljs-keyword">mut</span> MultiBuf) -&gt; &amp;[<span class="hljs-built_in">u8</span>];
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    <span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+</span><span class="boring">        include!(<span class="hljs-string">&quot;cxx-demo/include/blobstore.h&quot;</span>);
+</span><span class="boring">
+</span><span class="boring">        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">BlobstoreClient</span></span>;
+</span><span class="boring">
+</span><span class="boring">        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new_blobstore_client</span></span>() -&gt; UniquePtr&lt;BlobstoreClient&gt;;
+</span><span class="boring">        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">put</span></span>(&amp;<span class="hljs-keyword">self</span>, parts: &amp;<span class="hljs-keyword">mut</span> MultiBuf) -&gt; <span class="hljs-built_in">u64</span>;
+</span><span class="boring">    }
+</span><span class="boring">}
+</span>
+<span class="hljs-comment">// An iterator over contiguous chunks of a discontiguous file object. Toy</span>
+<span class="hljs-comment">// implementation uses a Vec&lt;Vec&lt;u8&gt;&gt; but in reality this might be iterating</span>
+<span class="hljs-comment">// over some more complex Rust data structure like a rope, or maybe loading</span>
+<span class="hljs-comment">// chunks lazily from somewhere.</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">MultiBuf</span></span> {
+    chunks: <span class="hljs-built_in">Vec</span>&lt;<span class="hljs-built_in">Vec</span>&lt;<span class="hljs-built_in">u8</span>&gt;&gt;,
+    pos: <span class="hljs-built_in">usize</span>,
+}
+
+<span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">next_chunk</span></span>(buf: &amp;<span class="hljs-keyword">mut</span> MultiBuf) -&gt; &amp;[<span class="hljs-built_in">u8</span>] {
+    <span class="hljs-keyword">let</span> next = buf.chunks.get(buf.pos);
+    buf.pos += <span class="hljs-number">1</span>;
+    next.map_or(&amp;[], <span class="hljs-built_in">Vec</span>::as_slice)
+}
+<span class="boring">
+</span><span class="boring"><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+</span><span class="boring">    <span class="hljs-keyword">let</span> client = ffi::new_blobstore_client();
+</span><span class="boring">}</span></code></pre>
+<pre><code class="hidelines=... hidelines hide-boring hljs"><span class="hljs-comment">// include/blobstore.h</span>
+
+<span class="boring"><span class="hljs-meta">#<span class="hljs-meta-keyword">pragma</span> once</span>
+</span><span class="boring"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;memory&gt;</span></span>
+</span><span class="boring">
+</span><span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">MultiBuf</span>;</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BlobstoreClient</span> {</span>
+<span class="hljs-keyword">public</span>:
+  BlobstoreClient();
+  <span class="hljs-function"><span class="hljs-keyword">uint64_t</span> <span class="hljs-title">put</span><span class="hljs-params">(MultiBuf &amp;buf)</span> <span class="hljs-keyword">const</span></span>;
+};
+<span class="boring">
+</span><span class="boring"><span class="hljs-function"><span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;BlobstoreClient&gt; <span class="hljs-title">new_blobstore_client</span><span class="hljs-params">()</span></span>;
+</span></code></pre>
+<p>In blobstore.cc we're able to call the Rust <code class="hljs">next_chunk</code> function, exposed to
+C++ by a header <code class="hljs">main.rs.h</code> generated by the CXX code generator. In CXX's Cargo
+integration this generated header has a path containing the crate name, the
+relative path of the Rust source file within the crate, and a <code class="hljs">.rs.h</code> extension.</p>
+<pre><code class="hidelines=... hidelines hide-boring hljs"><span class="hljs-comment">// src/blobstore.cc</span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;cxx-demo/include/blobstore.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;cxx-demo/src/main.rs.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;functional&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;string&gt;</span></span>
+<span class="boring">
+</span><span class="boring">BlobstoreClient::BlobstoreClient() {}
+</span><span class="boring">
+</span><span class="boring"><span class="hljs-function"><span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;BlobstoreClient&gt; <span class="hljs-title">new_blobstore_client</span><span class="hljs-params">()</span> </span>{
+</span><span class="boring">  <span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::make_unique&lt;BlobstoreClient&gt;();
+</span><span class="boring">}
+</span>
+<span class="hljs-comment">// Upload a new blob and return a blobid that serves as a handle to the blob.</span>
+<span class="hljs-function"><span class="hljs-keyword">uint64_t</span> <span class="hljs-title">BlobstoreClient::put</span><span class="hljs-params">(MultiBuf &amp;buf)</span> <span class="hljs-keyword">const</span> </span>{
+  <span class="hljs-comment">// Traverse the caller&#x27;s chunk iterator.</span>
+  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span> contents;
+  <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) {
+    <span class="hljs-keyword">auto</span> chunk = next_chunk(buf);
+    <span class="hljs-keyword">if</span> (chunk.size() == <span class="hljs-number">0</span>) {
+      <span class="hljs-keyword">break</span>;
+    }
+    contents.append(<span class="hljs-keyword">reinterpret_cast</span>&lt;<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *&gt;(chunk.data()), chunk.size());
+  }
+
+  <span class="hljs-comment">// Pretend we did something useful to persist the data.</span>
+  <span class="hljs-keyword">auto</span> blobid = <span class="hljs-built_in">std</span>::hash&lt;<span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span>&gt;{}(contents);
+  <span class="hljs-keyword">return</span> blobid;
+}
+</code></pre>
+<p>This is now ready to use. :)</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-comment">// src/main.rs</span>
+<span class="boring">
+</span><span class="boring"><span class="hljs-meta">#[cxx::bridge]</span>
+</span><span class="boring"><span class="hljs-keyword">mod</span> ffi {
+</span><span class="boring">    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;Rust&quot;</span> {
+</span><span class="boring">        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">MultiBuf</span></span>;
+</span><span class="boring">
+</span><span class="boring">        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">next_chunk</span></span>(buf: &amp;<span class="hljs-keyword">mut</span> MultiBuf) -&gt; &amp;[<span class="hljs-built_in">u8</span>];
+</span><span class="boring">    }
+</span><span class="boring">
+</span><span class="boring">    <span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+</span><span class="boring">        include!(<span class="hljs-string">&quot;cxx-demo/include/blobstore.h&quot;</span>);
+</span><span class="boring">
+</span><span class="boring">        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">BlobstoreClient</span></span>;
+</span><span class="boring">
+</span><span class="boring">        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new_blobstore_client</span></span>() -&gt; UniquePtr&lt;BlobstoreClient&gt;;
+</span><span class="boring">        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">put</span></span>(&amp;<span class="hljs-keyword">self</span>, parts: &amp;<span class="hljs-keyword">mut</span> MultiBuf) -&gt; <span class="hljs-built_in">u64</span>;
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="boring"><span class="hljs-keyword">pub</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">MultiBuf</span></span> {
+</span><span class="boring">    chunks: <span class="hljs-built_in">Vec</span>&lt;<span class="hljs-built_in">Vec</span>&lt;<span class="hljs-built_in">u8</span>&gt;&gt;,
+</span><span class="boring">    pos: <span class="hljs-built_in">usize</span>,
+</span><span class="boring">}
+</span><span class="boring"><span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">next_chunk</span></span>(buf: &amp;<span class="hljs-keyword">mut</span> MultiBuf) -&gt; &amp;[<span class="hljs-built_in">u8</span>] {
+</span><span class="boring">    <span class="hljs-keyword">let</span> next = buf.chunks.get(buf.pos);
+</span><span class="boring">    buf.pos += <span class="hljs-number">1</span>;
+</span><span class="boring">    next.map_or(&amp;[], <span class="hljs-built_in">Vec</span>::as_slice)
+</span><span class="boring">}
+</span>
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> client = ffi::new_blobstore_client();
+
+    <span class="hljs-comment">// Upload a blob.</span>
+    <span class="hljs-keyword">let</span> chunks = <span class="hljs-built_in">vec!</span>[<span class="hljs-string">b&quot;fearless&quot;</span>.to_vec(), <span class="hljs-string">b&quot;concurrency&quot;</span>.to_vec()];
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> buf = MultiBuf { chunks, pos: <span class="hljs-number">0</span> };
+    <span class="hljs-keyword">let</span> blobid = client.put(&amp;<span class="hljs-keyword">mut</span> buf);
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;blobid = {blobid}&quot;</span>);
+}</code></pre>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-meta">cxx-demo$</span><span class="bash">  cargo run</span>
+  Compiling cxx-demo v0.1.0
+  Finished dev [unoptimized + debuginfo] target(s) in 0.41s
+  Running `target/debug/cxx-demo`
+
+blobid = 9851996977040795552
+</code></pre>
+<h2 id="interlude-what-gets-generated"><a class="header" href="#interlude-what-gets-generated">Interlude: What gets generated?</a></h2>
+<p>For the curious, it's easy to look behind the scenes at what CXX has done to
+make these function calls work. You shouldn't need to do this during normal
+usage of CXX, but for the purpose of this tutorial it can be educative.</p>
+<p>CXX comprises <em>two</em> code generators: a Rust one (which is the cxx::bridge
+attribute procedural macro) and a C++ one.</p>
+<h3 id="rust-generated-code"><a class="header" href="#rust-generated-code">Rust generated code</a></h3>
+<p>It's easiest to view the output of the procedural macro by installing
+<a href="https://github.com/dtolnay/cargo-expand">cargo-expand</a>. Then run <code class="hljs">cargo expand ::ffi</code> to macro-expand the <code class="hljs">mod ffi</code>
+module.</p>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-meta">cxx-demo$</span><span class="bash">  cargo install cargo-expand</span>
+<span class="hljs-meta">cxx-demo$</span><span class="bash">  cargo expand ::ffi</span>
+</code></pre>
+<p>You'll see some deeply unpleasant code involving <code class="hljs">#[repr(C)]</code>, <code class="hljs">#[link_name]</code>,
+and <code class="hljs">#[export_name]</code>.</p>
+<h3 id="c-generated-code"><a class="header" href="#c-generated-code">C++ generated code</a></h3>
+<p>For debugging convenience, <code class="hljs">cxx_build</code> links all generated C++ code into Cargo's
+target directory under <em>target/cxxbridge/</em>.</p>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-meta">cxx-demo$</span><span class="bash">  exa -T target/cxxbridge/</span>
+target/cxxbridge
+├── cxx-demo
+│  └── src
+│     ├── main.rs.cc -&gt; ../../../debug/build/cxx-demo-11c6f678ce5c3437/out/cxxbridge/sources/cxx-demo/src/main.rs.cc
+│     └── main.rs.h -&gt; ../../../debug/build/cxx-demo-11c6f678ce5c3437/out/cxxbridge/include/cxx-demo/src/main.rs.h
+└── rust
+   └── cxx.h -&gt; ~/.cargo/registry/src/github.com-1ecc6299db9ec823/cxx-1.0.0/include/cxx.h
+</code></pre>
+<p>In those files you'll see declarations or templates of any CXX Rust types
+present in your language boundary (like <code class="hljs">rust::Slice&lt;T&gt;</code> for <code class="hljs">&amp;[T]</code>) and <code class="hljs">extern "C"</code> signatures corresponding to your extern functions.</p>
+<p>If it fits your workflow better, the CXX C++ code generator is also available as
+a standalone executable which outputs generated code to stdout.</p>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-meta">cxx-demo$</span><span class="bash">  cargo install cxxbridge-cmd</span>
+<span class="hljs-meta">cxx-demo$</span><span class="bash">  cxxbridge src/main.rs</span>
+</code></pre>
+<h2 id="shared-data-structures"><a class="header" href="#shared-data-structures">Shared data structures</a></h2>
+<p>So far the calls in both directions above only used <strong>opaque types</strong>, not
+<strong>shared structs</strong>.</p>
+<p>Shared structs are data structures whose complete definition is visible to both
+languages, making it possible to pass them by value across the language
+boundary. Shared structs translate to a C++ aggregate-initialization compatible
+struct exactly matching the layout of the Rust one.</p>
+<p>As the last step of this demo, we'll use a shared struct <code class="hljs">BlobMetadata</code> to pass
+metadata about blobs between our Rust application and C++ blobstore client.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-comment">// src/main.rs</span>
+
+<span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">BlobMetadata</span></span> {
+        size: <span class="hljs-built_in">usize</span>,
+        tags: <span class="hljs-built_in">Vec</span>&lt;<span class="hljs-built_in">String</span>&gt;,
+    }
+
+    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;Rust&quot;</span> {
+<span class="ellipsis">        <span class="hljs-comment">// ...</span>
+</span><span class="boring">        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">MultiBuf</span></span>;
+</span><span class="boring">
+</span><span class="boring">        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">next_chunk</span></span>(buf: &amp;<span class="hljs-keyword">mut</span> MultiBuf) -&gt; &amp;[<span class="hljs-built_in">u8</span>];
+</span>    }
+
+    <span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+<span class="ellipsis">        <span class="hljs-comment">// ...</span>
+</span><span class="boring">        include!(<span class="hljs-string">&quot;cxx-demo/include/blobstore.h&quot;</span>);
+</span><span class="boring">
+</span><span class="boring">        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">BlobstoreClient</span></span>;
+</span><span class="boring">
+</span><span class="boring">        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new_blobstore_client</span></span>() -&gt; UniquePtr&lt;BlobstoreClient&gt;;
+</span><span class="boring">        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">put</span></span>(&amp;<span class="hljs-keyword">self</span>, parts: &amp;<span class="hljs-keyword">mut</span> MultiBuf) -&gt; <span class="hljs-built_in">u64</span>;
+</span>        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">tag</span></span>(&amp;<span class="hljs-keyword">self</span>, blobid: <span class="hljs-built_in">u64</span>, tag: &amp;<span class="hljs-built_in">str</span>);
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">metadata</span></span>(&amp;<span class="hljs-keyword">self</span>, blobid: <span class="hljs-built_in">u64</span>) -&gt; BlobMetadata;
+    }
+}
+<span class="boring">
+</span><span class="boring"><span class="hljs-keyword">pub</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">MultiBuf</span></span> {
+</span><span class="boring">    chunks: <span class="hljs-built_in">Vec</span>&lt;<span class="hljs-built_in">Vec</span>&lt;<span class="hljs-built_in">u8</span>&gt;&gt;,
+</span><span class="boring">    pos: <span class="hljs-built_in">usize</span>,
+</span><span class="boring">}
+</span><span class="boring"><span class="hljs-keyword">pub</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">next_chunk</span></span>(buf: &amp;<span class="hljs-keyword">mut</span> MultiBuf) -&gt; &amp;[<span class="hljs-built_in">u8</span>] {
+</span><span class="boring">    <span class="hljs-keyword">let</span> next = buf.chunks.get(buf.pos);
+</span><span class="boring">    buf.pos += <span class="hljs-number">1</span>;
+</span><span class="boring">    next.map_or(&amp;[], <span class="hljs-built_in">Vec</span>::as_slice)
+</span><span class="boring">}
+</span>
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> client = ffi::new_blobstore_client();
+
+    <span class="hljs-comment">// Upload a blob.</span>
+    <span class="hljs-keyword">let</span> chunks = <span class="hljs-built_in">vec!</span>[<span class="hljs-string">b&quot;fearless&quot;</span>.to_vec(), <span class="hljs-string">b&quot;concurrency&quot;</span>.to_vec()];
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> buf = MultiBuf { chunks, pos: <span class="hljs-number">0</span> };
+    <span class="hljs-keyword">let</span> blobid = client.put(&amp;<span class="hljs-keyword">mut</span> buf);
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;blobid = {blobid}&quot;</span>);
+
+    <span class="hljs-comment">// Add a tag.</span>
+    client.tag(blobid, <span class="hljs-string">&quot;rust&quot;</span>);
+
+    <span class="hljs-comment">// Read back the tags.</span>
+    <span class="hljs-keyword">let</span> metadata = client.metadata(blobid);
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;tags = {:?}&quot;</span>, metadata.tags);
+}</code></pre>
+<pre><code class="hidelines=... hidelines hide-boring hljs"><span class="hljs-comment">// include/blobstore.h</span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">pragma</span> once</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;rust/cxx.h&quot;</span></span>
+<span class="boring"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;memory&gt;</span></span>
+</span>
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">MultiBuf</span>;</span>
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">BlobMetadata</span>;</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BlobstoreClient</span> {</span>
+<span class="hljs-keyword">public</span>:
+  BlobstoreClient();
+  <span class="hljs-function"><span class="hljs-keyword">uint64_t</span> <span class="hljs-title">put</span><span class="hljs-params">(MultiBuf &amp;buf)</span> <span class="hljs-keyword">const</span></span>;
+  <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">tag</span><span class="hljs-params">(<span class="hljs-keyword">uint64_t</span> blobid, rust::Str tag)</span> <span class="hljs-keyword">const</span></span>;
+  <span class="hljs-function">BlobMetadata <span class="hljs-title">metadata</span><span class="hljs-params">(<span class="hljs-keyword">uint64_t</span> blobid)</span> <span class="hljs-keyword">const</span></span>;
+
+<span class="hljs-keyword">private</span>:
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">impl</span>;</span>
+  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">shared_ptr</span>&lt;impl&gt; impl;
+};
+<span class="boring">
+</span><span class="boring"><span class="hljs-function"><span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;BlobstoreClient&gt; <span class="hljs-title">new_blobstore_client</span><span class="hljs-params">()</span></span>;
+</span></code></pre>
+<pre><code class="hidelines=... hidelines hide-boring hljs"><span class="hljs-comment">// src/blobstore.cc</span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;cxx-demo/include/blobstore.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;cxx-demo/src/main.rs.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;algorithm&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;functional&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;set&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;string&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;unordered_map&gt;</span></span>
+
+<span class="hljs-comment">// Toy implementation of an in-memory blobstore.</span>
+<span class="hljs-comment">//</span>
+<span class="hljs-comment">// In reality the implementation of BlobstoreClient could be a large</span>
+<span class="hljs-comment">// complex C++ library.</span>
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BlobstoreClient</span>:</span>:impl {
+  <span class="hljs-keyword">friend</span> BlobstoreClient;
+  <span class="hljs-keyword">using</span> Blob = struct {
+    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span> data;
+    <span class="hljs-built_in">std</span>::<span class="hljs-built_in">set</span>&lt;<span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span>&gt; tags;
+  };
+  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">unordered_map</span>&lt;<span class="hljs-keyword">uint64_t</span>, Blob&gt; blobs;
+};
+
+BlobstoreClient::BlobstoreClient() : impl(<span class="hljs-keyword">new</span> class BlobstoreClient::impl) {}
+<span class="boring">
+</span><span class="boring"><span class="hljs-comment">// Upload a new blob and return a blobid that serves as a handle to the blob.</span>
+</span><span class="boring"><span class="hljs-function"><span class="hljs-keyword">uint64_t</span> <span class="hljs-title">BlobstoreClient::put</span><span class="hljs-params">(MultiBuf &amp;buf)</span> <span class="hljs-keyword">const</span> </span>{
+</span><span class="boring">  <span class="hljs-comment">// Traverse the caller&#x27;s chunk iterator.</span>
+</span><span class="boring">  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span> contents;
+</span><span class="boring">  <span class="hljs-keyword">while</span> (<span class="hljs-literal">true</span>) {
+</span><span class="boring">    <span class="hljs-keyword">auto</span> chunk = next_chunk(buf);
+</span><span class="boring">    <span class="hljs-keyword">if</span> (chunk.size() == <span class="hljs-number">0</span>) {
+</span><span class="boring">      <span class="hljs-keyword">break</span>;
+</span><span class="boring">    }
+</span><span class="boring">    contents.append(<span class="hljs-keyword">reinterpret_cast</span>&lt;<span class="hljs-keyword">const</span> <span class="hljs-keyword">char</span> *&gt;(chunk.data()), chunk.size());
+</span><span class="boring">  }
+</span><span class="boring">
+</span><span class="boring">  <span class="hljs-comment">// Insert into map and provide caller the handle.</span>
+</span><span class="boring">  <span class="hljs-keyword">auto</span> blobid = <span class="hljs-built_in">std</span>::hash&lt;<span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span>&gt;{}(contents);
+</span><span class="boring">  impl-&gt;blobs[blobid] = {<span class="hljs-built_in">std</span>::move(contents), {}};
+</span><span class="boring">  <span class="hljs-keyword">return</span> blobid;
+</span><span class="boring">}
+</span>
+<span class="hljs-comment">// Add tag to an existing blob.</span>
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">BlobstoreClient::tag</span><span class="hljs-params">(<span class="hljs-keyword">uint64_t</span> blobid, rust::Str tag)</span> <span class="hljs-keyword">const</span> </span>{
+  impl-&gt;blobs[blobid].tags.emplace(tag);
+}
+
+<span class="hljs-comment">// Retrieve metadata about a blob.</span>
+<span class="hljs-function">BlobMetadata <span class="hljs-title">BlobstoreClient::metadata</span><span class="hljs-params">(<span class="hljs-keyword">uint64_t</span> blobid)</span> <span class="hljs-keyword">const</span> </span>{
+  BlobMetadata metadata{};
+  <span class="hljs-keyword">auto</span> blob = impl-&gt;blobs.find(blobid);
+  <span class="hljs-keyword">if</span> (blob != impl-&gt;blobs.end()) {
+    metadata.size = blob-&gt;second.data.size();
+    <span class="hljs-built_in">std</span>::for_each(blob-&gt;second.tags.cbegin(), blob-&gt;second.tags.cend(),
+                  [&amp;](<span class="hljs-keyword">auto</span> &amp;t) { metadata.tags.emplace_back(t); });
+  }
+  <span class="hljs-keyword">return</span> metadata;
+}
+<span class="boring">
+</span><span class="boring"><span class="hljs-function"><span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;BlobstoreClient&gt; <span class="hljs-title">new_blobstore_client</span><span class="hljs-params">()</span> </span>{
+</span><span class="boring">  <span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::make_unique&lt;BlobstoreClient&gt;();
+</span><span class="boring">}
+</span></code></pre>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-meta">cxx-demo$</span><span class="bash">  cargo run</span>
+  Running `target/debug/cxx-demo`
+
+blobid = 9851996977040795552
+tags = [&quot;rust&quot;]
+</code></pre>
+<p><em>You've now seen all the code involved in the tutorial. It's available all
+together in runnable form in the</em> demo <em>directory of
+<a href="https://github.com/dtolnay/cxx">https://github.com/dtolnay/cxx</a>. You can run it directly without stepping
+through the steps above by running <code class="hljs">cargo run</code> from that directory.</em></p>
+<br>
+<h1 id="takeaways"><a class="header" href="#takeaways">Takeaways</a></h1>
+<p>The key contribution of CXX is it gives you Rust–C++ interop in which
+<em>all</em> of the Rust side of the code you write <em>really</em> looks like you are just
+writing normal Rust, and the C++ side <em>really</em> looks like you are just writing
+normal C++.</p>
+<p>You've seen in this tutorial that none of the code involved feels like C or like
+the usual perilous "FFI glue" prone to leaks or memory safety flaws.</p>
+<p>An expressive system of opaque types, shared types, and key standard library
+type bindings enables API design on the language boundary that captures the
+proper ownership and borrowing contracts of the interface.</p>
+<p>CXX plays to the strengths of the Rust type system <em>and</em> C++ type system <em>and</em>
+the programmer's intuitions. An individual working on the C++ side without a
+Rust background, or the Rust side without a C++ background, will be able to
+apply all their usual intuitions and best practices about development in their
+language to maintain a correct FFI.</p>
+<p><br><br></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="concepts.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="context.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="concepts.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="context.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
