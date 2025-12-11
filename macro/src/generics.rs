@@ -1,9 +1,9 @@
 use crate::expand::display_namespaced;
 use crate::syntax::instantiate::NamedImplKey;
 use crate::syntax::types::ConditionalImpl;
-use crate::syntax::{Lifetimes, NamedType, Type, Types};
+use crate::syntax::{Lifetimes, Type, Types};
 use proc_macro2::TokenStream;
-use quote::ToTokens;
+use quote::{quote_spanned, ToTokens};
 use syn::{Lifetime, Token};
 
 pub(crate) struct ResolvedGenericType<'a> {
@@ -26,7 +26,7 @@ pub(crate) fn split_for_impl<'a>(
     let impl_generics = if let Some(explicit_impl) = conditional_impl.explicit_impl {
         &explicit_impl.impl_generics
     } else {
-        types.resolve(local_type(key.inner)).generics
+        get_impl_generics(key.inner, types)
     };
     let ty_generics = ResolvedGenericType {
         ty: key.inner,
@@ -66,9 +66,22 @@ impl<'a> ToTokens for ResolvedGenericType<'a> {
     }
 }
 
-pub(crate) fn local_type(ty: &Type) -> &NamedType {
+fn get_impl_generics<'a>(ty: &Type, types: &'a Types<'a>) -> &'a Lifetimes {
     match ty {
-        Type::Ident(named_type) => named_type,
+        Type::Ident(named_type) => types.resolve(named_type).generics,
+        _ => unreachable!("syntax/check.rs should reject other types"),
+    }
+}
+
+pub(crate) fn format_for_prevent_unwind_label(ty: &Type) -> TokenStream {
+    match ty {
+        Type::Ident(named_type) => {
+            let span = named_type.rust.span();
+            let rust_name = named_type.rust.to_string();
+            quote_spanned! {span=>
+                ::cxx::core::concat!(::cxx::core::module_path!(), "::", #rust_name)
+            }
+        }
         _ => unreachable!("syntax/check.rs should reject other types"),
     }
 }
