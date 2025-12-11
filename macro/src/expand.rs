@@ -1686,11 +1686,7 @@ fn expand_rust_box(
         #[unsafe(export_name = #link_alloc)]
         unsafe extern "C" fn __alloc #impl_generics() -> *mut ::cxx::core::mem::MaybeUninit<#inner_with_generics> {
             // No prevent_unwind: the global allocator is not allowed to panic.
-            //
-            // TODO: replace with Box::new_uninit when stable.
-            // https://doc.rust-lang.org/std/boxed/struct.Box.html#method.new_uninit
-            // https://github.com/rust-lang/rust/issues/63291
-            ::cxx::alloc::boxed::Box::into_raw(::cxx::alloc::boxed::Box::new(::cxx::core::mem::MaybeUninit::uninit()))
+            ::cxx::alloc::boxed::Box::into_raw(::cxx::alloc::boxed::Box::new_uninit())
         }
 
         #cfg
