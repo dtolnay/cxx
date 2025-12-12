@@ -306,6 +306,8 @@ pub mod ffi {
         fn r_return_rust_vec() -> Vec<u8>;
         fn r_return_rust_vec_string() -> Vec<String>;
         fn r_return_rust_vec_extern_struct() -> Vec<Job>;
+        #[allow(clippy::vec_box)]
+        fn r_return_rust_vec_box() -> Vec<Box<R>>;
         fn r_return_ref_rust_vec(shared: &Shared) -> &Vec<u8>;
         fn r_return_mut_rust_vec(shared: &mut Shared) -> &mut Vec<u8>;
         fn r_return_identity(_: usize) -> usize;
@@ -598,6 +600,11 @@ fn r_return_rust_vec_string() -> Vec<String> {
 
 fn r_return_rust_vec_extern_struct() -> Vec<ffi::Job> {
     Vec::new()
+}
+
+#[allow(clippy::vec_box)]
+fn r_return_rust_vec_box() -> Vec<Box<R>> {
+    vec![Box::new(R(2020))]
 }
 
 fn r_return_ref_rust_vec(shared: &ffi::Shared) -> &Vec<u8> {

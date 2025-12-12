@@ -133,6 +133,10 @@ fn check_type_rust_vec(cx: &mut Check, ty: &Ty1) {
             }
         }
         Type::Str(_) => return,
+        Type::RustBox(ty1) => {
+            check_type_box(cx, ty1);
+            return;
+        }
         _ => {}
     }
 
