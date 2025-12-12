@@ -3,7 +3,7 @@ use crate::syntax::instantiate::NamedImplKey;
 use crate::syntax::types::ConditionalImpl;
 use crate::syntax::{Lifetimes, Type, Types};
 use proc_macro2::TokenStream;
-use quote::{quote_spanned, ToTokens};
+use quote::{quote, ToTokens};
 use syn::{Lifetime, Token};
 
 pub(crate) struct ResolvedGenericType<'a> {
@@ -62,13 +62,12 @@ impl<'a> ToTokens for ResolvedGenericType<'a> {
                 }
             }
             Type::RustBox(ty1) => {
-                let span = ty1.name.span();
                 let inner = ResolvedGenericType {
                     ty: &ty1.inner,
                     explicit_impl: self.explicit_impl,
                     types: self.types,
                 };
-                tokens.extend(quote_spanned! {span=>
+                tokens.extend(quote! {
                     ::cxx::alloc::boxed::Box<#inner>
                 });
             }
@@ -77,7 +76,7 @@ impl<'a> ToTokens for ResolvedGenericType<'a> {
     }
 }
 
-fn get_impl_generics<'a>(ty: &Type, types: &'a Types<'a>) -> &'a Lifetimes {
+fn get_impl_generics<'a>(ty: &Type, types: &Types<'a>) -> &'a Lifetimes {
     match ty {
         Type::Ident(named_type) => types.resolve(named_type).generics,
         Type::RustBox(ty1) => get_impl_generics(&ty1.inner, types),
@@ -88,16 +87,14 @@ fn get_impl_generics<'a>(ty: &Type, types: &'a Types<'a>) -> &'a Lifetimes {
 pub(crate) fn format_for_prevent_unwind_label(ty: &Type) -> TokenStream {
     match ty {
         Type::Ident(named_type) => {
-            let span = named_type.rust.span();
             let rust_name = named_type.rust.to_string();
-            quote_spanned! {span=>
+            quote! {
                 ::cxx::core::concat!(::cxx::core::module_path!(), "::", #rust_name)
             }
         }
         Type::RustBox(ty1) => {
-            let span = ty1.name.span();
             let inner = format_for_prevent_unwind_label(&ty1.inner);
-            quote_spanned! {span=>
+            quote! {
                 ::cxx::core::concat!("Box<", #inner, ">")
             }
         }

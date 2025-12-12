@@ -168,14 +168,14 @@ fn test_vec_of_box() {
             }
         }
     });
+
     assert!(rs.contains("unsafe impl ::cxx::private::ImplBox for R {}"));
     assert!(rs.contains("export_name = \"cxxbridge1$box$R$drop\""));
 
-    assert!(rs.contains("unsafe impl ::cxx::private::ImplVec for ::cxx::alloc::boxed::Box<R> {}"),);
+    assert!(rs.contains("unsafe impl ::cxx::private::ImplVec for ::cxx::alloc::boxed::Box<R> {}"));
     assert!(rs.contains("export_name = \"cxxbridge1$rust_vec$box$R$set_len\""));
 
-    // Covering these lines, because an early WIP incorrectly said
-    // `RustVec<*mut R>` instead of `RustVec<Box<R>>` in *some* of these lines.
+    // Not supposed to be `RustVec<*mut R>` (which happened in an early draft).
     assert!(rs.contains("__return: *mut ::cxx::private::RustVec<::cxx::alloc::boxed::Box<R>>"));
     assert!(rs.contains("fn __foo() -> ::cxx::alloc::vec::Vec<::cxx::alloc::boxed::Box<R>>"));
 }
