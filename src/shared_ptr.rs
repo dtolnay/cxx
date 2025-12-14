@@ -128,7 +128,7 @@ where
     ///
     /// </div>
     pub fn is_null(&self) -> bool {
-        let this = self as *const Self as *const c_void;
+        let this = (self as *const Self).cast::<c_void>();
         let ptr = unsafe { T::__get(this) };
         ptr.is_null()
     }
@@ -191,7 +191,7 @@ where
 
     /// Returns the SharedPtr's stored pointer as a raw const pointer.
     pub fn as_ptr(&self) -> *const T {
-        let this = self as *const Self as *const c_void;
+        let this = (self as *const Self).cast::<c_void>();
         unsafe { T::__get(this) }
     }
 
@@ -214,7 +214,7 @@ where
     where
         T: WeakPtrTarget,
     {
-        let this = self as *const Self as *const c_void;
+        let this = (self as *const Self).cast::<c_void>();
         let mut weak_ptr = MaybeUninit::<WeakPtr<T>>::uninit();
         let new = weak_ptr.as_mut_ptr().cast();
         unsafe {
@@ -234,7 +234,7 @@ where
     fn clone(&self) -> Self {
         let mut shared_ptr = MaybeUninit::<SharedPtr<T>>::uninit();
         let new = shared_ptr.as_mut_ptr().cast();
-        let this = self as *const Self as *mut c_void;
+        let this = (self as *const Self).cast::<c_void>();
         unsafe {
             T::__clone(this, new);
             shared_ptr.assume_init()
@@ -251,7 +251,7 @@ where
     T: SharedPtrTarget,
 {
     fn drop(&mut self) {
-        let this = self as *mut Self as *mut c_void;
+        let this = (self as *mut Self).cast::<c_void>();
         unsafe { T::__drop(this) }
     }
 }
@@ -423,7 +423,7 @@ macro_rules! impl_shared_ptr_target {
                     #[link_name = concat!("cxxbridge1$std$shared_ptr$", $segment, "$raw")]
                     fn __raw(new: *mut c_void, raw: *mut c_void);
                 }
-                unsafe { __raw(new, raw as *mut c_void) }
+                unsafe { __raw(new, raw.cast::<c_void>()) }
             }
             unsafe fn __clone(this: *const c_void, new: *mut c_void) {
                 extern "C" {

@@ -17,11 +17,11 @@ impl RustString {
     }
 
     pub fn from_ref(s: &String) -> &Self {
-        unsafe { &*(s as *const String as *const RustString) }
+        unsafe { &*((s as *const String).cast::<RustString>()) }
     }
 
     pub fn from_mut(s: &mut String) -> &mut Self {
-        unsafe { &mut *(s as *mut String as *mut RustString) }
+        unsafe { &mut *((s as *mut String).cast::<RustString>()) }
     }
 
     pub fn into_string(self) -> String {
@@ -29,11 +29,11 @@ impl RustString {
     }
 
     pub fn as_string(&self) -> &String {
-        unsafe { &*(self as *const RustString as *const String) }
+        unsafe { &*((self as *const RustString).cast::<String>()) }
     }
 
     pub fn as_mut_string(&mut self) -> &mut String {
-        unsafe { &mut *(self as *mut RustString as *mut String) }
+        unsafe { &mut *((self as *mut RustString).cast::<String>()) }
     }
 }
 

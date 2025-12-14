@@ -161,7 +161,6 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
             clippy::extra_unused_type_parameters,
             clippy::items_after_statements,
             clippy::no_effect_underscore_binding,
-            clippy::ptr_as_ptr,
             clippy::ref_as_ptr,
             clippy::unsafe_derive_deserialize,
             clippy::upper_case_acronyms,
@@ -760,11 +759,11 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
             let resolve = types.resolve(ty);
             let lifetimes = resolve.generics.to_underscore_lifetimes();
             if receiver.pinned {
-                quote!(::cxx::core::pin::Pin::into_inner_unchecked(#var) as *mut #ty #lifetimes as *mut ::cxx::core::ffi::c_void)
+                quote!((::cxx::core::pin::Pin::into_inner_unchecked(#var) as *mut #ty #lifetimes).cast::<::cxx::core::ffi::c_void>())
             } else if receiver.mutable {
-                quote!(#var as *mut #ty #lifetimes as *mut ::cxx::core::ffi::c_void)
+                quote!((#var as *mut #ty #lifetimes).cast::<::cxx::core::ffi::c_void>())
             } else {
-                quote!(#var as *const #ty #lifetimes as *const ::cxx::core::ffi::c_void)
+                quote!((#var as *const #ty #lifetimes).cast::<::cxx::core::ffi::c_void>())
             }
         } else {
             receiver.var.to_token_stream()
@@ -775,7 +774,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         let span = var.span();
         match &arg.ty {
             Type::Ident(ident) if ident.rust == RustString => {
-                quote_spanned!(span=> #var.as_mut_ptr() as *const ::cxx::private::RustString)
+                quote_spanned!(span=> #var.as_mut_ptr().cast::<::cxx::private::RustString>() as *const ::cxx::private::RustString)
             }
             Type::RustBox(ty) => {
                 if types.is_considered_improper_ctype(&ty.inner) {
@@ -791,7 +790,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                     quote_spanned!(span=> ::cxx::UniquePtr::into_raw(#var))
                 }
             }
-            Type::RustVec(_) => quote_spanned!(span=> #var.as_mut_ptr() as *const ::cxx::private::RustVec<_>),
+            Type::RustVec(_) => quote_spanned!(span=> #var.as_mut_ptr().cast::<::cxx::private::RustVec<_>>() as *const ::cxx::private::RustVec<_>),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(ident) if ident.rust == RustString => match ty.mutable {
                     false => quote_spanned!(span=> ::cxx::private::RustString::from_ref(#var)),
@@ -808,9 +807,9 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                     };
                     match ty.mutable {
                         false => {
-                            quote_spanned!(span=> #var as *const #inner as *const ::cxx::core::ffi::c_void)
+                            quote_spanned!(span=> (#var as *const #inner).cast::<::cxx::core::ffi::c_void>())
                         }
-                        true => quote_spanned!(span=> #var as *mut #inner as *mut ::cxx::core::ffi::c_void),
+                        true => quote_spanned!(span=> (#var as *mut #inner).cast::<::cxx::core::ffi::c_void>()),
                     }
                 }
                 _ => quote!(#var),
@@ -1993,7 +1992,7 @@ fn expand_shared_ptr(
                     #[link_name = #link_raw]
                     fn __raw(new: *const ::cxx::core::ffi::c_void, raw: *mut ::cxx::core::ffi::c_void) -> ::cxx::core::primitive::bool;
                 }
-                if !unsafe { __raw(new, raw as *mut ::cxx::core::ffi::c_void) } {
+                if !unsafe { __raw(new, raw.cast::<::cxx::core::ffi::c_void>()) } {
                     ::cxx::core::panic!(#not_destructible_err);
                 }
             }
@@ -2157,7 +2156,7 @@ fn expand_cxx_vector(
                 unsafe {
                     __push_back(
                         this,
-                        value as *mut ::cxx::core::mem::ManuallyDrop<Self> as *mut ::cxx::core::ffi::c_void,
+                        (value as *mut ::cxx::core::mem::ManuallyDrop<Self>).cast::<::cxx::core::ffi::c_void>(),
                     );
                 }
             }
@@ -2175,7 +2174,7 @@ fn expand_cxx_vector(
                 unsafe {
                     __pop_back(
                         this,
-                        out as *mut ::cxx::core::mem::MaybeUninit<Self> as *mut ::cxx::core::ffi::c_void,
+                        (out as *mut ::cxx::core::mem::MaybeUninit<Self>).cast::<::cxx::core::ffi::c_void>(),
                     );
                 }
             }
@@ -2225,7 +2224,7 @@ fn expand_cxx_vector(
                         pos: ::cxx::core::primitive::usize,
                     ) -> *mut ::cxx::core::ffi::c_void;
                 }
-                unsafe { __get_unchecked(v, pos) as *mut Self }
+                unsafe { __get_unchecked(v, pos).cast::<Self>() }
             }
             unsafe fn __reserve(v: ::cxx::core::pin::Pin<&mut ::cxx::CxxVector<Self>>, new_cap: ::cxx::core::primitive::usize) {
                 unsafe extern "C" {

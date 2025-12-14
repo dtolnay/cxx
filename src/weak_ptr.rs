@@ -44,7 +44,7 @@ where
     where
         T: SharedPtrTarget,
     {
-        let this = self as *const Self as *const c_void;
+        let this = (self as *const Self).cast::<c_void>();
         let mut shared_ptr = MaybeUninit::<SharedPtr<T>>::uninit();
         let new = shared_ptr.as_mut_ptr().cast();
         unsafe {
@@ -64,7 +64,7 @@ where
     fn clone(&self) -> Self {
         let mut weak_ptr = MaybeUninit::<WeakPtr<T>>::uninit();
         let new = weak_ptr.as_mut_ptr().cast();
-        let this = self as *const Self as *mut c_void;
+        let this = (self as *const Self).cast::<c_void>();
         unsafe {
             T::__clone(this, new);
             weak_ptr.assume_init()
@@ -77,7 +77,7 @@ where
     T: WeakPtrTarget,
 {
     fn drop(&mut self) {
-        let this = self as *mut Self as *mut c_void;
+        let this = (self as *mut Self).cast::<c_void>();
         unsafe { T::__drop(this) }
     }
 }
