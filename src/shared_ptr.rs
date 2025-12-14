@@ -12,6 +12,7 @@ use core::marker::PhantomData;
 use core::mem::MaybeUninit;
 use core::ops::Deref;
 use core::pin::Pin;
+use core::ptr;
 
 /// Binding to C++ `std::shared_ptr<T>`.
 ///
@@ -128,7 +129,7 @@ where
     ///
     /// </div>
     pub fn is_null(&self) -> bool {
-        let this = (self as *const Self).cast::<c_void>();
+        let this = ptr::from_ref::<Self>(self).cast::<c_void>();
         let ptr = unsafe { T::__get(this) };
         ptr.is_null()
     }
@@ -191,7 +192,7 @@ where
 
     /// Returns the SharedPtr's stored pointer as a raw const pointer.
     pub fn as_ptr(&self) -> *const T {
-        let this = (self as *const Self).cast::<c_void>();
+        let this = ptr::from_ref::<Self>(self).cast::<c_void>();
         unsafe { T::__get(this) }
     }
 
@@ -214,7 +215,7 @@ where
     where
         T: WeakPtrTarget,
     {
-        let this = (self as *const Self).cast::<c_void>();
+        let this = ptr::from_ref::<Self>(self).cast::<c_void>();
         let mut weak_ptr = MaybeUninit::<WeakPtr<T>>::uninit();
         let new = weak_ptr.as_mut_ptr().cast();
         unsafe {
@@ -234,7 +235,7 @@ where
     fn clone(&self) -> Self {
         let mut shared_ptr = MaybeUninit::<SharedPtr<T>>::uninit();
         let new = shared_ptr.as_mut_ptr().cast();
-        let this = (self as *const Self).cast::<c_void>();
+        let this = ptr::from_ref::<Self>(self).cast::<c_void>();
         unsafe {
             T::__clone(this, new);
             shared_ptr.assume_init()
@@ -251,7 +252,7 @@ where
     T: SharedPtrTarget,
 {
     fn drop(&mut self) {
-        let this = (self as *mut Self).cast::<c_void>();
+        let this = ptr::from_mut::<Self>(self).cast::<c_void>();
         unsafe { T::__drop(this) }
     }
 }

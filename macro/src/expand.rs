@@ -161,7 +161,6 @@ fn expand(ffi: Module, doc: Doc, attrs: OtherAttrs, apis: &[Api], types: &Types)
             clippy::extra_unused_type_parameters,
             clippy::items_after_statements,
             clippy::no_effect_underscore_binding,
-            clippy::ref_as_ptr,
             clippy::unsafe_derive_deserialize,
             clippy::upper_case_acronyms,
             clippy::use_self,
@@ -759,11 +758,11 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
             let resolve = types.resolve(ty);
             let lifetimes = resolve.generics.to_underscore_lifetimes();
             if receiver.pinned {
-                quote!((::cxx::core::pin::Pin::into_inner_unchecked(#var) as *mut #ty #lifetimes).cast::<::cxx::core::ffi::c_void>())
+                quote!(::cxx::core::ptr::from_mut::<#ty #lifetimes>(::cxx::core::pin::Pin::into_inner_unchecked(#var)).cast::<::cxx::core::ffi::c_void>())
             } else if receiver.mutable {
-                quote!((#var as *mut #ty #lifetimes).cast::<::cxx::core::ffi::c_void>())
+                quote!(::cxx::core::ptr::from_mut::<#ty #lifetimes>(#var).cast::<::cxx::core::ffi::c_void>())
             } else {
-                quote!((#var as *const #ty #lifetimes).cast::<::cxx::core::ffi::c_void>())
+                quote!(::cxx::core::ptr::from_ref::<#ty #lifetimes>(#var).cast::<::cxx::core::ffi::c_void>())
             }
         } else {
             receiver.var.to_token_stream()
@@ -807,9 +806,9 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                     };
                     match ty.mutable {
                         false => {
-                            quote_spanned!(span=> (#var as *const #inner).cast::<::cxx::core::ffi::c_void>())
+                            quote_spanned!(span=> ::cxx::core::ptr::from_ref::<#inner>(#var).cast::<::cxx::core::ffi::c_void>())
                         }
-                        true => quote_spanned!(span=> (#var as *mut #inner).cast::<::cxx::core::ffi::c_void>()),
+                        true => quote_spanned!(span=> ::cxx::core::ptr::from_mut::<#inner>(#var).cast::<::cxx::core::ffi::c_void>()),
                     }
                 }
                 _ => quote!(#var),
@@ -2156,7 +2155,7 @@ fn expand_cxx_vector(
                 unsafe {
                     __push_back(
                         this,
-                        (value as *mut ::cxx::core::mem::ManuallyDrop<Self>).cast::<::cxx::core::ffi::c_void>(),
+                        ::cxx::core::ptr::from_mut::<::cxx::core::mem::ManuallyDrop<Self>>(value).cast::<::cxx::core::ffi::c_void>(),
                     );
                 }
             }
@@ -2174,7 +2173,7 @@ fn expand_cxx_vector(
                 unsafe {
                     __pop_back(
                         this,
-                        (out as *mut ::cxx::core::mem::MaybeUninit<Self>).cast::<::cxx::core::ffi::c_void>(),
+                        ::cxx::core::ptr::from_mut::<::cxx::core::mem::MaybeUninit<Self>>(out).cast::<::cxx::core::ffi::c_void>(),
                     );
                 }
             }
