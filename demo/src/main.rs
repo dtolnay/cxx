@@ -11,6 +11,7 @@ mod ffi {
         type MultiBuf;
 
         fn next_chunk(buf: &mut MultiBuf) -> &[u8];
+        fn api_read_zones() -> Result<UniquePtr<ApiZones>>;
     }
 
     // C++ types and signatures exposed to Rust.
@@ -23,6 +24,10 @@ mod ffi {
         fn put(&self, parts: &mut MultiBuf) -> u64;
         fn tag(&self, blobid: u64, tag: &str);
         fn metadata(&self, blobid: u64) -> BlobMetadata;
+    }
+
+    struct ApiZones {
+        field: i32,
     }
 }
 
@@ -56,4 +61,9 @@ fn main() {
     // Read back the tags.
     let metadata = client.metadata(blobid);
     println!("tags = {:?}", metadata.tags);
+}
+
+pub fn api_read_zones() -> Result<cxx::UniquePtr<ffi::ApiZones>, std::io::Error> {
+    let zones = ffi::ApiZones { field: 0 };
+    Ok(cxx::UniquePtr::new(zones))
 }
