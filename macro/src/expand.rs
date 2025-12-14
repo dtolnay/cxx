@@ -774,7 +774,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
         let span = var.span();
         match &arg.ty {
             Type::Ident(ident) if ident.rust == RustString => {
-                quote_spanned!(span=> #var.as_mut_ptr().cast::<::cxx::private::RustString>() as *const ::cxx::private::RustString)
+                quote_spanned!(span=> #var.as_mut_ptr().cast::<::cxx::private::RustString>().cast_const())
             }
             Type::RustBox(ty) => {
                 if types.is_considered_improper_ctype(&ty.inner) {
@@ -790,7 +790,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                     quote_spanned!(span=> ::cxx::UniquePtr::into_raw(#var))
                 }
             }
-            Type::RustVec(_) => quote_spanned!(span=> #var.as_mut_ptr().cast::<::cxx::private::RustVec<_>>() as *const ::cxx::private::RustVec<_>),
+            Type::RustVec(_) => quote_spanned!(span=> #var.as_mut_ptr().cast::<::cxx::private::RustVec<_>>().cast_const()),
             Type::Ref(ty) => match &ty.inner {
                 Type::Ident(ident) if ident.rust == RustString => match ty.mutable {
                     false => quote_spanned!(span=> ::cxx::private::RustString::from_ref(#var)),

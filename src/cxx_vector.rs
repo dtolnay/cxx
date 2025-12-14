@@ -106,9 +106,9 @@ where
     ///
     /// [operator_at]: https://en.cppreference.com/w/cpp/container/vector/operator_at
     pub unsafe fn get_unchecked(&self, pos: usize) -> &T {
-        let this = self as *const CxxVector<T> as *mut CxxVector<T>;
+        let this = (self as *const CxxVector<T>).cast_mut();
         unsafe {
-            let ptr = T::__get_unchecked(this, pos) as *const T;
+            let ptr = T::__get_unchecked(this, pos).cast_const();
             &*ptr
         }
     }
@@ -150,7 +150,7 @@ where
             // which upholds the invariants.
             &[]
         } else {
-            let this = self as *const CxxVector<T> as *mut CxxVector<T>;
+            let this = (self as *const CxxVector<T>).cast_mut();
             let ptr = unsafe { T::__get_unchecked(this, 0) };
             unsafe { slice::from_raw_parts(ptr, len) }
         }
