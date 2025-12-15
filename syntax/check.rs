@@ -605,15 +605,15 @@ fn check_api_impl(cx: &mut Check, imp: &Impl) {
         | Type::WeakPtr(ty)
         | Type::CxxVector(ty) => {
             if let Type::Ident(inner) = &ty.inner {
-                if Atom::from(&inner.rust).is_none() {
-                    return;
+                // Reject `impl Vec<u8>` and other built-in impls.
+                if Atom::from(&inner.rust).is_some() {
+                    cx.error(imp, "unsupported Self type of explicit impl");
                 }
             }
         }
-        _ => {}
+        // Reject `impl fn() -> &S {}`, `impl [S]`, etc.
+        _ => cx.error(imp, "unsupported Self type of explicit impl"),
     }
-
-    cx.error(imp, "unsupported Self type of explicit impl");
 }
 
 fn check_mut_return_restriction(cx: &mut Check, efn: &ExternFn) {
