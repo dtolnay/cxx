@@ -26,6 +26,7 @@ pub mod ffi {
     impl Vec<Job> {}
     impl Box<OpaqueRust> {}
     impl Vec<OpaqueRust> {}
+    impl Vec<Box<OpaqueRust>> {}
 }
 
 #[cxx::bridge(namespace = "tests")]
