@@ -4,11 +4,14 @@ use crate::syntax::report::Errors;
 use crate::syntax::visit::{self, Visit};
 use crate::syntax::{
     error, ident, trivial, Api, Array, Enum, ExternFn, ExternType, FnKind, Impl, Lang, Lifetimes,
-    NamedType, Ptr, Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias, Types,
+    NamedType, Pair, Ptr, Receiver, Ref, Signature, SliceRef, Struct, Trait, Ty1, Type, TypeAlias,
+    Types,
 };
-use proc_macro2::{Delimiter, Group, Ident, TokenStream};
+use proc_macro2::{Delimiter, Group, TokenStream};
 use quote::{quote, ToTokens};
+use std::collections::HashSet;
 use std::fmt::Display;
+use std::sync::LazyLock;
 use syn::{GenericParam, Generics, Lifetime};
 
 pub(crate) struct Check<'a> {
@@ -331,7 +334,7 @@ fn check_type_fn(cx: &mut Check, ty: &Signature) {
 
 fn check_api_struct(cx: &mut Check, strct: &Struct) {
     let name = &strct.name;
-    check_reserved_name(cx, &name.rust);
+    check_type_name(cx, name);
     check_lifetimes(cx, &strct.generics);
 
     if strct.fields.is_empty() {
@@ -374,6 +377,7 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
     }
 
     for field in &strct.fields {
+        check_name(cx, &field.name);
         if let Type::Fn(_) = field.ty {
             cx.error(
                 field,
@@ -388,7 +392,7 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
 }
 
 fn check_api_enum(cx: &mut Check, enm: &Enum) {
-    check_reserved_name(cx, &enm.name.rust);
+    check_type_name(cx, &enm.name);
     check_lifetimes(cx, &enm.generics);
 
     if enm.variants.is_empty() && !enm.explicit_repr {
@@ -397,6 +401,10 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
             span,
             "explicit #[repr(...)] is required for enum without any variants",
         );
+    }
+
+    for variant in &enm.variants {
+        check_name(cx, &variant.name);
     }
 
     for derive in &enm.derives {
@@ -434,7 +442,7 @@ fn check_api_enum(cx: &mut Check, enm: &Enum) {
 }
 
 fn check_api_type(cx: &mut Check, ety: &ExternType) {
-    check_reserved_name(cx, &ety.name.rust);
+    check_type_name(cx, &ety.name);
     check_lifetimes(cx, &ety.generics);
 
     for derive in &ety.derives {
@@ -468,6 +476,7 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
 }
 
 fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
+    check_name(cx, &efn.name);
     match efn.lang {
         Lang::Cxx | Lang::CxxUnwind => {
             if !efn.generics.params.is_empty() && !efn.trusted {
@@ -582,6 +591,7 @@ fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
 }
 
 fn check_api_type_alias(cx: &mut Check, alias: &TypeAlias) {
+    check_type_name(cx, &alias.name);
     check_lifetimes(cx, &alias.generics);
 
     for derive in &alias.derives {
@@ -682,7 +692,44 @@ fn check_mut_return_restriction(cx: &mut Check, efn: &ExternFn) {
     );
 }
 
-fn check_reserved_name(cx: &mut Check, ident: &Ident) {
+/// Checks an API `name` (e.g. name of a type, function, method, etc.).
+fn check_name(cx: &mut Check, name: &Pair) {
+    let cxx_name = name.cxx.as_str();
+    let mut report_error = move |msg: String| {
+        let mut tokens = name.rust.clone();
+        tokens.set_span(name.cxx.span());
+        cx.error(tokens, msg);
+    };
+
+    #[rustfmt::skip]
+    static CPP_RESERVED_KEYWORDS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
+        // Taken from https://en.cppreference.com/w/cpp/keywords.html
+        [
+            "alignas", "alignof", "and", "and_eq", "asm", "atomic_cancel", "atomic_commit",
+            "atomic_noexcept", "auto", "bitand", "bitor", "bool", "break", "case", "catch",
+            "char", "char8_t", "char16_t", "char32_t", "class", "compl", "concept", "const",
+            "consteval", "constexpr", "constinit", "const_cast", "continue", "contract_assert",
+            "co_await", "co_return", "co_yield", "", "decltype", "default", "delete", "do",
+            "double", "dynamic_cast", "else", "enum", "explicit", "export", "extern", "false",
+            "float", "for", "friend", "goto", "if", "inline", "int", "long", "mutable",
+            "namespace", "new", "noexcept", "not", "not_eq", "nullptr", "operator", "or",
+            "or_eq", "private", "protected", "public", "", "reflexpr", "register",
+            "reinterpret_cast", "requires", "return", "short", "signed", "sizeof", "static",
+            "static_assert", "static_cast", "struct", "switch", "synchronized", "template",
+            "this", "thread_local", "throw", "true", "try", "typedef", "typeid", "typename",
+            "union", "unsigned", "using", "virtual", "void", "volatile", "wchar_t", "while",
+            "xor", "xor_eq",
+        ].into_iter().collect()
+    });
+    if CPP_RESERVED_KEYWORDS.contains(cxx_name) {
+        let msg = format!("C++ reserved keyword can't be used as a C++ identifier: {cxx_name}");
+        report_error(msg);
+    }
+}
+
+/// Checks `name` of a type (e.g. a struct, enum, or a type alias).
+fn check_type_name(cx: &mut Check, name: &Pair) {
+    let ident = &name.rust;
     if ident == "Box"
         || ident == "UniquePtr"
         || ident == "SharedPtr"
@@ -694,6 +741,8 @@ fn check_reserved_name(cx: &mut Check, ident: &Ident) {
     {
         cx.error(ident, "reserved name");
     }
+
+    check_name(cx, name);
 }
 
 fn check_reserved_lifetime(cx: &mut Check, lifetime: &Lifetime) {

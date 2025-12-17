@@ -10,6 +10,7 @@ use syn::punctuated::Punctuated;
 #[derive(Clone)]
 pub(crate) struct ForeignName {
     text: String,
+    span: Span,
 }
 
 impl Pair {
@@ -41,10 +42,18 @@ impl ForeignName {
         match Ident::parse_any.parse_str(text) {
             Ok(ident) => {
                 let text = ident.to_string();
-                Ok(ForeignName { text })
+                Ok(ForeignName { text, span })
             }
             Err(err) => Err(Error::new(span, err)),
         }
+    }
+
+    pub(crate) fn as_str(&self) -> &str {
+        &self.text
+    }
+
+    pub(crate) fn span(&self) -> Span {
+        self.span
     }
 }
 
