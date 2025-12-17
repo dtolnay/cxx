@@ -1,8 +1,10 @@
 use crate::syntax::symbol::Segment;
 use crate::syntax::{Lifetimes, NamedType, Pair, Symbol};
 use proc_macro2::{Ident, Span};
+use std::collections::HashSet;
 use std::fmt::{self, Display};
 use std::iter;
+use std::sync::LazyLock;
 use syn::ext::IdentExt;
 use syn::parse::{Error, Parser, Result};
 use syn::punctuated::Punctuated;
@@ -37,8 +39,13 @@ impl NamedType {
 
 impl ForeignName {
     pub(crate) fn parse(text: &str, span: Span) -> Result<Self> {
-        // TODO: support C++ names containing whitespace (`unsigned int`) or
-        // non-alphanumeric characters (`operator++`).
+        if ForeignName::is_valid_operator_name(text) {
+            return Ok(ForeignName {
+                text: text.to_string(),
+                span,
+            });
+        }
+
         match Ident::parse_any.parse_str(text) {
             Ok(ident) => {
                 let text = ident.to_string();
@@ -54,6 +61,26 @@ impl ForeignName {
 
     pub(crate) fn span(&self) -> Span {
         self.span
+    }
+
+    pub(crate) fn is_valid_operator_name(name: &str) -> bool {
+        #[rustfmt::skip]
+        static CPP_OPERATORS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
+            // Based on `llvm/llvm-project/clang/include/clang/Basic/OperatorKinds.def`.
+            // Excluding `?` because it is not overridable.
+            //
+            // TODO: Consider also allowing `operator <type>`
+            // (see https://en.cppreference.com/w/cpp/language/cast_operator.html).
+            [
+                " new", " delete", " new[]", " delete[]", " co_await",
+                "+", "-", "*", "/", "%", "^", "&", "|", "~", "!", "=", "<", ">",
+                "+=", "-=", "*=", "/=", "%=", "^=", "&=", "|=",
+                "<<", ">>", "<<=", ">>=", "==", "!=", "<=", ">=", "<=>",
+                "&&", "||", "++", "--", ",", "->*", "->", "()", "[]",
+            ].into_iter().collect()
+        });
+        name.strip_prefix("operator")
+            .is_some_and(|suffix| CPP_OPERATORS.contains(suffix))
     }
 }
 

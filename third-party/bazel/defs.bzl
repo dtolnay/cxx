@@ -305,6 +305,7 @@ _NORMAL_DEPENDENCIES = {
             "scratch": Label("@vendor//:scratch-1.0.9"),
             "serde": Label("@vendor//:serde-1.0.228"),
             "syn": Label("@vendor//:syn-2.0.111"),
+            "unicode-ident": Label("@vendor//:unicode-ident-1.0.22"),
         },
     },
 }
@@ -694,4 +695,5 @@ def crate_repositories():
         struct(repo = "vendor__scratch-1.0.9", is_dev_dep = False),
         struct(repo = "vendor__serde-1.0.228", is_dev_dep = False),
         struct(repo = "vendor__syn-2.0.111", is_dev_dep = False),
+        struct(repo = "vendor__unicode-ident-1.0.22", is_dev_dep = False),
     ]

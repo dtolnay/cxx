@@ -1,5 +1,6 @@
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::message::Message;
+use crate::syntax::names::ForeignName;
 use crate::syntax::report::Errors;
 use crate::syntax::visit::{self, Visit};
 use crate::syntax::{
@@ -12,7 +13,9 @@ use quote::{quote, ToTokens};
 use std::collections::HashSet;
 use std::fmt::Display;
 use std::sync::LazyLock;
-use syn::{GenericParam, Generics, Lifetime};
+use syn::ext::IdentExt;
+use syn::parse::Parser;
+use syn::{GenericParam, Generics, Ident, Lifetime};
 
 pub(crate) struct Check<'a> {
     apis: &'a [Api],
@@ -476,7 +479,7 @@ fn check_api_type(cx: &mut Check, ety: &ExternType) {
 }
 
 fn check_api_fn(cx: &mut Check, efn: &ExternFn) {
-    check_name(cx, &efn.name);
+    check_fn_name(cx, &efn.name);
     match efn.lang {
         Lang::Cxx | Lang::CxxUnwind => {
             if !efn.generics.params.is_empty() && !efn.trusted {
@@ -725,6 +728,24 @@ fn check_name(cx: &mut Check, name: &Pair) {
         let msg = format!("C++ reserved keyword can't be used as a C++ identifier: {cxx_name}");
         report_error(msg);
     }
+
+    // Most API names need to have a form of a valid C++ identifier.  API names
+    // that allow other forms (e.g. `operator==` for function names) should
+    // check and allow those forms first (e.g. by `check_fn_name`), before
+    // deciding to call `check_name`.
+    if let Err(e) = Ident::parse_any.parse_str(cxx_name) {
+        let msg = format!("Invalid C++ identifier: {e}");
+        report_error(msg);
+    }
+}
+
+/// Checks `name` of a function or a method.
+fn check_fn_name(cx: &mut Check, name: &Pair) {
+    if ForeignName::is_valid_operator_name(name.cxx.as_str()) {
+        return;
+    }
+
+    check_name(cx, name);
 }
 
 /// Checks `name` of a type (e.g. a struct, enum, or a type alias).
