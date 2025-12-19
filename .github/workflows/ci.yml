@@ -138,7 +138,7 @@ jobs:
       - run: cargo check --no-default-features
         env:
           RUSTFLAGS: --cfg compile_error_if_alloc --cfg cxx_experimental_no_alloc ${{env.RUSTFLAGS}}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: matrix.os == 'ubuntu' && matrix.rust == 'nightly' && matrix.cc == '' && matrix.flags == '' && always()
         with:
           name: Cargo.lock
