@@ -18,3 +18,4 @@ rustversion = "1"
 scratch = "1"
 serde = { version = "1", features = ["derive"] }
 syn = { version = "2.0.1", features = ["full"] }
+unicode-ident = "1.0.22"

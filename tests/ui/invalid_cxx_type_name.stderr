@@ -1,0 +1,41 @@
+error: Invalid C++ identifier: unexpected token
+ --> tests/ui/invalid_cxx_type_name.rs:3:18
+  |
+3 |     #[cxx_name = "operator=="]
+  |                  ^^^^^^^^^^^^
+
+error: Invalid C++ identifier: unexpected token
+ --> tests/ui/invalid_cxx_type_name.rs:5:22
+  |
+5 |         #[cxx_name = "operator<"]
+  |                      ^^^^^^^^^^^
+
+error: Invalid C++ identifier: unexpected token
+ --> tests/ui/invalid_cxx_type_name.rs:9:18
+  |
+9 |     #[cxx_name = "operator>"]
+  |                  ^^^^^^^^^^^
+
+error: Invalid C++ identifier: unexpected token
+  --> tests/ui/invalid_cxx_type_name.rs:12:22
+   |
+12 |         #[cxx_name = "operator!"]
+   |                      ^^^^^^^^^^^
+
+error: Invalid C++ identifier: unexpected token
+  --> tests/ui/invalid_cxx_type_name.rs:18:22
+   |
+18 |         #[cxx_name = "operator+"]
+   |                      ^^^^^^^^^^^
+
+error: Invalid C++ identifier: unexpected token
+  --> tests/ui/invalid_cxx_type_name.rs:21:22
+   |
+21 |         #[cxx_name = "operator*"]
+   |                      ^^^^^^^^^^^
+
+error: Invalid C++ identifier: unexpected token
+  --> tests/ui/invalid_cxx_type_name.rs:26:22
+   |
+26 |         #[cxx_name = "operator/"]
+   |                      ^^^^^^^^^^^

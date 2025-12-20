@@ -1,0 +1,71 @@
+error: C++ reserved keyword can't be used as a C++ identifier: constinit
+ --> tests/ui/reserved_cxx_name.rs:3:18
+  |
+3 |     #[cxx_name = "constinit"]
+  |                  ^^^^^^^^^^^
+
+error: C++ reserved keyword can't be used as a C++ identifier: consteval
+ --> tests/ui/reserved_cxx_name.rs:5:9
+  |
+5 |         consteval: usize,
+  |         ^^^^^^^^^
+
+error: C++ reserved keyword can't be used as a C++ identifier: constexpr
+ --> tests/ui/reserved_cxx_name.rs:7:22
+  |
+7 |         #[cxx_name = "constexpr"]
+  |                      ^^^^^^^^^^^
+
+error: C++ reserved keyword can't be used as a C++ identifier: bitand
+  --> tests/ui/reserved_cxx_name.rs:11:18
+   |
+11 |     #[cxx_name = "bitand"]
+   |                  ^^^^^^^^
+
+error: C++ reserved keyword can't be used as a C++ identifier: bitor
+  --> tests/ui/reserved_cxx_name.rs:14:9
+   |
+14 |         bitor,
+   |         ^^^^^
+
+error: C++ reserved keyword can't be used as a C++ identifier: const_cast
+  --> tests/ui/reserved_cxx_name.rs:19:12
+   |
+19 |         fn const_cast();
+   |            ^^^^^^^^^^
+
+error: C++ reserved keyword can't be used as a C++ identifier: reinterpret_cast
+  --> tests/ui/reserved_cxx_name.rs:22:12
+   |
+22 |         fn reinterpret_cast(self: &C);
+   |            ^^^^^^^^^^^^^^^^
+
+error: C++ reserved keyword can't be used as a C++ identifier: static_cast
+  --> tests/ui/reserved_cxx_name.rs:24:22
+   |
+24 |         #[cxx_name = "static_cast"]
+   |                      ^^^^^^^^^^^^^
+
+error: C++ reserved keyword can't be used as a C++ identifier: dynamic_cast
+  --> tests/ui/reserved_cxx_name.rs:27:22
+   |
+27 |         #[cxx_name = "dynamic_cast"]
+   |                      ^^^^^^^^^^^^^^
+
+error: C++ reserved keyword can't be used as a C++ identifier: private
+  --> tests/ui/reserved_cxx_name.rs:32:12
+   |
+32 |         fn private();
+   |            ^^^^^^^
+
+error: C++ reserved keyword can't be used as a C++ identifier: protected
+  --> tests/ui/reserved_cxx_name.rs:35:12
+   |
+35 |         fn protected(self: &R);
+   |            ^^^^^^^^^
+
+error: C++ reserved keyword can't be used as a C++ identifier: public
+  --> tests/ui/reserved_cxx_name.rs:37:22
+   |
+37 |         #[cxx_name = "public"]
+   |                      ^^^^^^^^
