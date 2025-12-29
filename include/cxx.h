@@ -438,7 +438,7 @@ private:
 
 #ifndef CXXBRIDGE1_RUST_ISIZE
 #define CXXBRIDGE1_RUST_ISIZE
-using isize = std::make_signed<std::size_t>::type;
+using isize = intptr_t;
 #endif // CXXBRIDGE1_RUST_ISIZE
 
 std::ostream &operator<<(std::ostream &, const String &);
