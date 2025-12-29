@@ -14,10 +14,6 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
-#if defined(_WIN32)
-#include <basetsd.h>
-#else
-#include <sys/types.h>
 #endif
 
 #if __cplusplus >= 201703L
@@ -442,11 +438,7 @@ private:
 
 #ifndef CXXBRIDGE1_RUST_ISIZE
 #define CXXBRIDGE1_RUST_ISIZE
-#if defined(_WIN32)
-using isize = SSIZE_T;
-#else
-using isize = ssize_t;
-#endif
+using isize = std::make_signed<std::size_t>::type;
 #endif // CXXBRIDGE1_RUST_ISIZE
 
 std::ostream &operator<<(std::ostream &, const String &);
