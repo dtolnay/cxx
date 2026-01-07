@@ -18,7 +18,6 @@ use crate::syntax::{
 };
 
 pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u8> {
-    println!("genn");
     let mut out_file = OutFile::new(header, opt, types);
     let out = &mut out_file;
 
