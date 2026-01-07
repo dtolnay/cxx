@@ -29,7 +29,7 @@ static constexpr char SLICE_DATA[] = "2020";
 
 C::C() : n(0) {}
 C::C(size_t n) : n(n) {}
-C::C(size_t n, size_t m) : n(n) {}
+C::C(size_t n, size_t m) : n(n + m) {}
 
 size_t C::get() const { return this->n; }
 
