@@ -18,6 +18,7 @@ use crate::syntax::{
 };
 
 pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u8> {
+    println!("genn");
     let mut out_file = OutFile::new(header, opt, types);
     let out = &mut out_file;
 
@@ -899,7 +900,12 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         Lang::Rust => unreachable!(),
     }
     writeln!(out, " {{");
-    write_default_function_body(out, efn, indirect_return);
+
+    if efn.is_constructor {
+        write_constructor_function_body(out, efn);
+    } else {
+        write_default_function_body(out, efn, indirect_return);
+    }
     writeln!(out, "}}");
     for arg in &efn.args {
         if let Type::Fn(f) = &arg.ty {
@@ -908,6 +914,21 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         }
     }
     out.end_block(Block::ExternC);
+}
+
+fn write_constructor_function_body<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
+    write!(out, "  return new ");
+    if let Some(Type::UniquePtr(ty)) = &efn.sig.ret {
+        write_type_to_generic_writer(out, &ty.inner, out.types)
+    } else {
+        panic!(
+            "Constructor: '{}' must return a  UniquePtr<T>",
+            efn.name.rust
+        );
+    }
+    write!(out, "(");
+    write_args_punctuated(out, efn);
+    writeln!(out, ");");
 }
 
 fn write_default_function_body<'a>(

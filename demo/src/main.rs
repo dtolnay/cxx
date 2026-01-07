@@ -19,6 +19,7 @@ mod ffi {
 
         type BlobstoreClient;
 
+        #[constructor]
         fn new_blobstore_client() -> UniquePtr<BlobstoreClient>;
         fn put(&self, parts: &mut MultiBuf) -> u64;
         fn tag(&self, blobid: u64, tag: &str);
