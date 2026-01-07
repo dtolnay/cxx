@@ -27,7 +27,9 @@ static_assert(4 == alignof(OveralignedStruct), "expected 4 byte alignment");
 
 static constexpr char SLICE_DATA[] = "2020";
 
+C::C() : n(0) {}
 C::C(size_t n) : n(n) {}
+C::C(size_t n, size_t m) : n(n) {}
 
 size_t C::get() const { return this->n; }
 
