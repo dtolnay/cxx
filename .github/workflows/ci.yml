@@ -14,76 +14,92 @@ jobs:
     uses: dtolnay/.github/.github/workflows/pre_ci.yml@master
 
   test:
-    name: ${{matrix.name || format('Rust {0}', matrix.rust)}}
+    # https://github.com/rust-lang/cargo/issues/16493
+    name: ${{matrix.name || format('Rust {0}', matrix.rust == 'nightly-2026-01-09' && 'nightly' || matrix.rust)}}
     needs: pre_ci
     if: needs.pre_ci.outputs.continue
     runs-on: ${{matrix.runs-on || format('{0}-latest', matrix.os)}}
     strategy:
       fail-fast: false
       matrix:
-        rust: [nightly, beta, stable, 1.82.0]
+        # https://github.com/rust-lang/cargo/issues/16493
+        rust: [nightly-2026-01-09, beta, stable, 1.82.0]
         os: [ubuntu]
         cc: [g++]
         flags: ['']
         include:
           - name: Cargo on macOS
-            rust: nightly
+            # https://github.com/rust-lang/cargo/issues/16493
+            rust: nightly-2026-01-09
             os: macos
           - name: Cargo on Windows (msvc)
-            rust: nightly-x86_64-pc-windows-msvc
+            # https://github.com/rust-lang/cargo/issues/16493
+            rust: nightly-2026-01-09-x86_64-pc-windows-msvc
             os: windows
           - name: Clang
-            rust: nightly
+            # https://github.com/rust-lang/cargo/issues/16493
+            rust: nightly-2026-01-09
             os: ubuntu
             cc: clang++
             flags: -std=c++20
           - name: Clang (no exceptions)
-            rust: nightly
+            # https://github.com/rust-lang/cargo/issues/16493
+            rust: nightly-2026-01-09
             os: ubuntu
             cc: clang++
             flags: -std=c++20 -fno-exceptions
           - name: C++14 on Linux
-            rust: nightly
+            # https://github.com/rust-lang/cargo/issues/16493
+            rust: nightly-2026-01-09
             os: ubuntu
             cc: g++
             flags: -std=c++14
           - name: C++14 on macOS
-            rust: nightly
+            # https://github.com/rust-lang/cargo/issues/16493
+            rust: nightly-2026-01-09
             os: macos
             flags: -std=c++14
           - name: C++14 on Windows
-            rust: nightly-x86_64-pc-windows-msvc
+            # https://github.com/rust-lang/cargo/issues/16493
+            rust: nightly-2026-01-09-x86_64-pc-windows-msvc
             os: windows
             flags: /std:c++14
           - name: C++17 on Linux
-            rust: nightly
+            # https://github.com/rust-lang/cargo/issues/16493
+            rust: nightly-2026-01-09
             os: ubuntu
             cc: g++
             flags: -std=c++17
           - name: C++17 on macOS
-            rust: nightly
+            # https://github.com/rust-lang/cargo/issues/16493
+            rust: nightly-2026-01-09
             os: macos
             flags: -std=c++17
           - name: C++17 on Windows
-            rust: nightly-x86_64-pc-windows-msvc
+            # https://github.com/rust-lang/cargo/issues/16493
+            rust: nightly-2026-01-09-x86_64-pc-windows-msvc
             os: windows
             flags: /std:c++17
           - name: C++20 on Linux
-            rust: nightly
+            # https://github.com/rust-lang/cargo/issues/16493
+            rust: nightly-2026-01-09
             os: ubuntu
             cc: g++
             flags: -std=c++20
           - name: C++20 on macOS
-            rust: nightly
+            # https://github.com/rust-lang/cargo/issues/16493
+            rust: nightly-2026-01-09
             os: macos
             flags: -std=c++20
             runs-on: macos-15
           - name: C++20 on Windows
-            rust: nightly-x86_64-pc-windows-msvc
+            # https://github.com/rust-lang/cargo/issues/16493
+            rust: nightly-2026-01-09-x86_64-pc-windows-msvc
             os: windows
             flags: /std:c++20
           - name: Pedantic
-            rust: nightly
+            # https://github.com/rust-lang/cargo/issues/16493
+            rust: nightly-2026-01-09
             os: ubuntu
             cc: clang++
             flags:
@@ -139,7 +155,8 @@ jobs:
         env:
           RUSTFLAGS: --cfg compile_error_if_alloc --cfg cxx_experimental_no_alloc ${{env.RUSTFLAGS}}
       - uses: actions/upload-artifact@v6
-        if: matrix.os == 'ubuntu' && matrix.rust == 'nightly' && matrix.cc == '' && matrix.flags == '' && always()
+        # https://github.com/rust-lang/cargo/issues/16493
+        if: matrix.os == 'ubuntu' && matrix.rust == 'nightly-2026-01-09' && matrix.cc == '' && matrix.flags == '' && always()
         with:
           name: Cargo.lock
           path: Cargo.lock
@@ -151,8 +168,10 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v6
-      - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/rust-toolchain@master
         with:
+          # https://github.com/rust-lang/cargo/issues/16493
+          toolchain: nightly-2026-01-09
           targets: wasm32-wasip1
           components: rust-src
       - uses: dtolnay/install@wasmtime-cli
@@ -174,8 +193,10 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v6
-      - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/rust-toolchain@master
         with:
+          # https://github.com/rust-lang/cargo/issues/16493
+          toolchain: nightly-2026-01-09
           targets: wasm32-unknown-emscripten
           components: rust-src
       - name: Disable initramfs update
@@ -259,7 +280,10 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v6
-      - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          # https://github.com/rust-lang/cargo/issues/16493
+          toolchain: nightly-2026-01-09
       - run: cargo generate-lockfile -Z minimal-versions
       - run: cargo check --locked --workspace
 
@@ -294,8 +318,10 @@ jobs:
       RUSTFLAGS: -Dwarnings
     steps:
       - uses: actions/checkout@v6
-      - uses: dtolnay/rust-toolchain@nightly
+      - uses: dtolnay/rust-toolchain@master
         with:
+          # https://github.com/rust-lang/cargo/issues/16493
+          toolchain: nightly-2026-01-09
           components: clippy, rust-src
       - run: cargo clippy --workspace --tests --exclude demo -- -Dclippy::all -Dclippy::pedantic
       - run: cargo clippy --manifest-path demo/Cargo.toml -- -Dclippy::all
