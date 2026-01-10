@@ -39,6 +39,7 @@ rust_binary(
         "@crates.io//:proc-macro2",
         "@crates.io//:quote",
         "@crates.io//:syn",
+        "@crates.io//:unicode-ident",
     ],
 )
 
@@ -70,6 +71,7 @@ rust_proc_macro(
         "@crates.io//:proc-macro2",
         "@crates.io//:quote",
         "@crates.io//:syn",
+        "@crates.io//:unicode-ident",
     ],
 )
 
@@ -87,6 +89,7 @@ rust_library(
         "@crates.io//:quote",
         "@crates.io//:scratch",
         "@crates.io//:syn",
+        "@crates.io//:unicode-ident",
     ],
 )
 
@@ -104,5 +107,6 @@ rust_library(
         "@crates.io//:proc-macro2",
         "@crates.io//:quote",
         "@crates.io//:syn",
+        "@crates.io//:unicode-ident",
     ],
 )

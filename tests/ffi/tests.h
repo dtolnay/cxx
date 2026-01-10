@@ -73,6 +73,10 @@ public:
   // in an `impl ffi::C` block.
   size_t &r_method_on_c_get_mut() noexcept;
 
+  bool operator==(size_t other_n) const {
+    return n == other_n;
+  }
+
 private:
   size_t n;
   std::vector<uint8_t> v;

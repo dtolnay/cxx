@@ -234,6 +234,9 @@ pub mod ffi {
         #[rust_name = "str_overloaded_function"]
         fn cOverloadedFunction(x: &str) -> String;
 
+        #[cxx_name = "operator=="]
+        fn cpp_eq_operator(&self, other_n: usize) -> bool;
+
         #[namespace = "other"]
         fn ns_c_take_ns_shared(shared: AShared);
 
@@ -351,6 +354,9 @@ pub mod ffi {
 
         #[cxx_name = "rAliasedFunction"]
         fn r_aliased_function(x: i32) -> String;
+
+        #[cxx_name = "operator=="]
+        fn r_operator_eq_for_usize_operand(self: &R, rhs: usize) -> bool;
 
         #[Self = "Shared"]
         fn r_static_method_on_shared() -> usize;
@@ -472,6 +478,10 @@ impl R {
 
     fn r_static_method() -> usize {
         2024
+    }
+
+    fn r_operator_eq_for_usize_operand(&self, rhs: usize) -> bool {
+        self.0 == rhs
     }
 }
 

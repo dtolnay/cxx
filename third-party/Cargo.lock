@@ -189,6 +189,7 @@ dependencies = [
  "scratch",
  "serde",
  "syn",
+ "unicode-ident",
 ]
 
 [[package]]

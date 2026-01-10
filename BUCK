@@ -47,6 +47,7 @@ rust_binary(
         "//third-party:proc-macro2",
         "//third-party:quote",
         "//third-party:syn",
+        "//third-party:unicode-ident",
     ],
 )
 
@@ -76,6 +77,7 @@ rust_library(
         "//third-party:quote",
         "//third-party:rustversion",
         "//third-party:syn",
+        "//third-party:unicode-ident",
     ],
 )
 
@@ -101,6 +103,7 @@ rust_library(
         "//third-party:quote",
         "//third-party:scratch",
         "//third-party:syn",
+        "//third-party:unicode-ident",
     ],
 )
 
@@ -125,5 +128,6 @@ rust_library(
         "//third-party:proc-macro2",
         "//third-party:quote",
         "//third-party:syn",
+        "//third-party:unicode-ident",
     ],
 )
