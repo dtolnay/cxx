@@ -36,6 +36,7 @@ pub(crate) struct Parser<'a> {
     pub cxx_name: Option<&'a mut Option<ForeignName>>,
     pub rust_name: Option<&'a mut Option<Ident>>,
     pub self_type: Option<&'a mut Option<Ident>>,
+    pub is_constructor: Option<&'a mut bool>,
     pub ignore_unrecognized: bool,
 
     // Suppress clippy needless_update lint ("struct update has no effect, all
@@ -190,6 +191,11 @@ pub(crate) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) 
                 continue;
             } else if tool == "clippy" {
                 other_attrs.lint.push(attr);
+                continue;
+            }
+        } else if attr_path.is_ident("constructor") {
+            if let Some(constructor) = &mut parser.is_constructor {
+                **constructor = true;
                 continue;
             }
         }
