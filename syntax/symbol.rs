@@ -91,9 +91,34 @@ impl Segment for Pair {
 
 impl Segment for ForeignName {
     fn write(&self, symbol: &mut Symbol) {
-        // TODO: support C++ names containing whitespace (`unsigned int`) or
-        // non-alphanumeric characters (`operator++`).
-        self.to_string().write(symbol);
+        /// Escapes arbitrary C++ name (e.g. `operator==`) into a String
+        /// that is a valid C identifier.  It is important that this is an
+        /// [injective function](https://en.wikipedia.org/wiki/Injective_function)
+        /// (i.e. distinct `name`s need to map to distinct results).
+        fn escape(name: &str) -> String {
+            let mut result = String::with_capacity(name.len());
+            for (index, ch) in name.chars().enumerate() {
+                if ch == '_' {
+                    write!(&mut result, "_u").unwrap();
+                    continue;
+                }
+
+                let should_escape = if index == 0 {
+                    !unicode_ident::is_xid_start(ch)
+                } else {
+                    !unicode_ident::is_xid_continue(ch)
+                };
+                if should_escape {
+                    write!(&mut result, "_{:x}h", ch as u32).unwrap();
+                    continue;
+                }
+
+                write!(&mut result, "{ch}").unwrap();
+            }
+            result
+        }
+
+        escape(self.as_str()).write(symbol);
     }
 }
 
@@ -113,4 +138,34 @@ pub(crate) fn join(segments: &[&dyn Segment]) -> Symbol {
     }
     assert!(!symbol.0.is_empty());
     symbol
+}
+
+#[cfg(test)]
+mod test {
+    use super::join;
+    use crate::syntax::ForeignName;
+    use proc_macro2::Span;
+
+    #[test]
+    fn test_impl_segment_for_foreign_name() {
+        fn t(foreign_name_str: &str, expected_symbol_str: &str) {
+            let foreign_name = ForeignName::parse(foreign_name_str, Span::call_site()).unwrap();
+            let symbol = join(&[&foreign_name]);
+            let actual_symbol_str = symbol.to_string();
+            assert_eq!(
+                actual_symbol_str, expected_symbol_str,
+                "Expecting `{foreign_name_str}` to mangle as `{expected_symbol_str}` \
+                 but got `{actual_symbol_str}` instead.",
+            );
+        }
+
+        t("foo", "foo");
+
+        // Escaping of non-identifier characters like `=`.
+        t("operator==", "operator_3dh_3dh");
+
+        // Feeble attempt of testing injectivity
+        // (need to escape `_` to avoid a conflict with result of the previous test).
+        t("operator_3dh_3dh", "operator_u3dh_u3dh");
+    }
 }

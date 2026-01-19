@@ -391,12 +391,20 @@ unsafe extern "C" fn cxx_test_suite_r_is_correct(r: *const R) -> bool {
 }
 
 #[test]
-fn test_rust_name_attribute() {
+fn test_cxx_name_attribute() {
     assert_eq!("2020", ffi::i32_overloaded_function(2020));
     assert_eq!("2020", ffi::str_overloaded_function("2020"));
     let unique_ptr = ffi::c_return_unique_ptr();
     assert_eq!("2020", unique_ptr.i32_overloaded_method(2020));
     assert_eq!("2020", unique_ptr.str_overloaded_method("2020"));
+}
+
+#[test]
+fn test_rust_name_attribute() {
+    let mut c = ffi::c_return_unique_ptr();
+    c.pin_mut().set(123);
+    assert!(c.cpp_eq_operator(123));
+    assert!(!c.cpp_eq_operator(456));
 }
 
 #[test]

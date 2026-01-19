@@ -162,3 +162,15 @@ alias(
     actual = "@vendor__syn-2.0.111//:syn",
     tags = ["manual"],
 )
+
+alias(
+    name = "unicode-ident-1.0.22",
+    actual = "@vendor__unicode-ident-1.0.22//:unicode_ident",
+    tags = ["manual"],
+)
+
+alias(
+    name = "unicode-ident",
+    actual = "@vendor__unicode-ident-1.0.22//:unicode_ident",
+    tags = ["manual"],
+)
