@@ -1,3 +1,5 @@
+load("@apple_support//xcode:xcode_config.bzl", "xcode_config")
+load("@apple_support//xcode:xcode_version.bzl", "xcode_version")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
 bzl_library(
