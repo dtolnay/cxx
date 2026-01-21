@@ -17,7 +17,7 @@ cargo_toml_env_vars(
 )
 
 rust_library(
-    name = "indexmap",
+    name = "clap",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = True,
@@ -35,8 +35,10 @@ rust_library(
         ],
     ),
     crate_features = [
-        "default",
+        "error-context",
+        "help",
         "std",
+        "usage",
     ],
     crate_root = "src/lib.rs",
     edition = "2021",
@@ -48,7 +50,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=indexmap",
+        "crate-name=clap",
         "manual",
         "noclippy",
         "norustfmt",
@@ -96,9 +98,8 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "2.12.1",
+    version = "4.5.54",
     deps = [
-        "@vendor__equivalent-1.0.2//:equivalent",
-        "@vendor__hashbrown-0.16.1//:hashbrown",
+        "@vendor__clap_builder-4.5.54//:clap_builder",
     ],
 )
