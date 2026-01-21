@@ -65,6 +65,7 @@ rustdoc-args = [
 
 [package.metadata.bazel]
 additive_build_file_content = """
+load("@rules_cc//cc:defs.bzl", "cc_library")
 cc_library(
     name = "cxx_cc",
     srcs = ["src/cxx.cc"],
