@@ -20,7 +20,5 @@ private:
   std::shared_ptr<impl> impl;
 };
 
-std::unique_ptr<BlobstoreClient> new_blobstore_client();
-
 } // namespace blobstore
 } // namespace org
