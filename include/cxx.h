@@ -124,6 +124,9 @@ public:
   Str(const std::string &);
   Str(const char *);
   Str(const char *, std::size_t);
+#if __cplusplus >= 201703L
+  Str(std::string_view);
+#endif
 
   Str &operator=(const Str &) & noexcept = default;
 
