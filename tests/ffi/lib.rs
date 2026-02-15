@@ -225,6 +225,8 @@ pub mod ffi {
 
         fn c_get_use_count(weak: &WeakPtr<C>) -> usize;
 
+        unsafe fn c_takes_void_star(value: *const c_void);
+
         #[rust_name = "i32_overloaded_method"]
         fn cOverloadedMethod(&self, x: i32) -> String;
         #[rust_name = "str_overloaded_method"]

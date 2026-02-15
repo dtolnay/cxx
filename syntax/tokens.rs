@@ -20,6 +20,9 @@ impl ToTokens for Type {
                 } else if ident.rust == RustString {
                     let span = ident.rust.span();
                     tokens.extend(quote_spanned!(span=> ::cxx::alloc::string::));
+                } else if ident.rust == Cvoid {
+                    let span = ident.rust.span();
+                    tokens.extend(quote_spanned!(span=> ::core::ffi::));
                 }
                 ident.to_tokens(tokens);
             }
