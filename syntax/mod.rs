@@ -150,6 +150,8 @@ pub(crate) struct ExternFn {
     pub attrs: OtherAttrs,
     #[cfg_attr(not(proc_macro), expect(dead_code))]
     pub visibility: Token![pub],
+    #[cfg_attr(proc_macro, expect(dead_code))]
+    pub is_constructor: bool,
     pub name: Pair,
     pub sig: Signature,
     pub semi_token: Token![;],

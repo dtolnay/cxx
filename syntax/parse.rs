@@ -547,6 +547,7 @@ fn parse_extern_fn(
     let mut rust_name = None;
     let mut self_type = None;
     let mut attrs = attrs.clone();
+    let mut is_constructor = false;
     attrs.extend(attrs::parse(
         cx,
         mem::take(&mut foreign_fn.attrs),
@@ -557,6 +558,7 @@ fn parse_extern_fn(
             cxx_name: Some(&mut cxx_name),
             rust_name: Some(&mut rust_name),
             self_type: Some(&mut self_type),
+            is_constructor: Some(&mut is_constructor),
             ..Default::default()
         },
     ));
@@ -725,6 +727,7 @@ fn parse_extern_fn(
             paren_token,
             throws_tokens,
         },
+        is_constructor,
         semi_token,
         trusted,
     }))
