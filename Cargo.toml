@@ -51,7 +51,7 @@ cxx-build = { version = "=1.0.203", path = "bridge/build" }
 cxxbridge-cmd = { version = "=1.0.203", path = "bridge/cmd" }
 
 [workspace]
-members = ["demo", "flags", "bridge/build", "bridge/cmd", "bridge/lib", "macro", "tests/ffi"]
+members = ["demo", "flags", "bridge/build", "bridge/cmd", "bridge/lib", "macro", "tests/ffi", "tests/shared_library"]
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
