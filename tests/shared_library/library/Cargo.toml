@@ -1,0 +1,20 @@
+[package]
+name = "test-library"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+# Exclude from parent workspace - this is a standalone test library
+[workspace]
+
+[lib]
+crate-type = ["cdylib"]
+path = "lib.rs"
+
+[dependencies]
+cxx = { path = "../../.." }
+
+[build-dependencies]
+cxx-gen = { path = "../../../gen/lib" }
+cc = "1.0"
+proc-macro2 = "1.0"

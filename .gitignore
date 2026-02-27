@@ -11,3 +11,5 @@
 /expand.rs
 /target/
 /Cargo.lock
+/tests/shared_library/library/target/
+/tests/shared_library/library/Cargo.lock
