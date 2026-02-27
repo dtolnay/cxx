@@ -5,6 +5,10 @@ use std::ops::{Deref, DerefMut};
 /// The complete contents of the "rust/cxx.h" header.
 pub static HEADER: &str = include_str!("include/cxx.h");
 
+/// The complete contents of the "rust/cxx.cc" implementation.
+#[allow(dead_code)]
+pub static IMPLEMENTATION: &str = include_str!("src/cxx.cc");
+
 /// A header to #include.
 ///
 /// The cxxbridge tool does not parse or even require the given paths to exist;
