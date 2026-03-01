@@ -17,7 +17,12 @@ use crate::syntax::{
     TypeAlias, Types, Var, derive, mangle,
 };
 
-pub(super) fn generate(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u8> {
+pub(super) fn generate<'a>(
+    apis: &'a [Api],
+    types: &'a Types<'a>,
+    opt: &'a Opt,
+    header: bool,
+) -> OutFile<'a> {
     let mut out_file = OutFile::new(header, opt, types);
     let out = &mut out_file;
 
@@ -34,7 +39,7 @@ pub(super) fn generate(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> 
     pragma::write(out);
     include::write(out);
 
-    out_file.content()
+    out_file
 }
 
 fn write_macros(out: &mut OutFile, apis: &[Api]) {
@@ -899,6 +904,20 @@ fn get_extern_function_signature_parts(out: &mut OutFile, efn: &ExternFn) -> (St
     (return_type, signature_args, noexcept.to_string())
 }
 
+fn get_extern_function_call_args(out: &OutFile, efn: &ExternFn) -> String {
+    let mut args = Vec::new();
+    if matches!(efn.kind, FnKind::Method(_)) {
+        args.push("self".to_string());
+    }
+    for arg in &efn.args {
+        args.push(arg.name.cxx.to_string());
+    }
+    if indirect_return(efn, out.types, efn.lang) {
+        args.push("return$".to_string());
+    }
+    args.join(", ")
+}
+
 fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     out.pragma.dollar_in_identifier = true;
     out.pragma.missing_declarations = true;
@@ -1032,6 +1051,9 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         }
     }
     out.end_block(Block::ExternC);
+
+    let call_args = get_extern_function_call_args(out, efn);
+    out.add_import(mangled.to_string(), &return_type, &signature_args, &noexcept, &call_args);
 }
 
 fn write_function_pointer_trampoline(out: &mut OutFile, efn: &ExternFn, var: &Pair, f: &Signature) {
@@ -1063,6 +1085,7 @@ fn write_rust_function_decl<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     let indirect_call = false;
     write_rust_function_decl_impl(out, &link_name, efn, indirect_call);
     out.end_block(Block::ExternC);
+    out.add_export(link_name.to_string());
 }
 
 fn write_rust_function_decl_impl(
@@ -1602,10 +1625,13 @@ fn write_rust_box_extern(out: &mut OutFile, key: &NamedImplKey) {
 
     let export = format!("cxxbridge1$box${}$alloc", instance);
     writeln!(out, "{inner} *{export}() noexcept;");
+    out.add_export(export);
     let export = format!("cxxbridge1$box${}$dealloc", instance);
     writeln!(out, "void {export}({inner} *) noexcept;");
+    out.add_export(export);
     let export = format!("cxxbridge1$box${}$drop", instance);
     writeln!(out, "void {export}(::rust::Box<{inner}> *ptr) noexcept;");
+    out.add_export(export);
 }
 
 fn write_rust_vec_extern(out: &mut OutFile, key: &NamedImplKey) {
@@ -1617,20 +1643,28 @@ fn write_rust_vec_extern(out: &mut OutFile, key: &NamedImplKey) {
 
     let export = format!("cxxbridge1$rust_vec${}$new", instance);
     writeln!(out, "void {export}(::rust::Vec<{inner}> const *ptr) noexcept;");
+    out.add_export(export);
     let export = format!("cxxbridge1$rust_vec${}$drop", instance);
     writeln!(out, "void {export}(::rust::Vec<{inner}> *ptr) noexcept;");
+    out.add_export(export);
     let export = format!("cxxbridge1$rust_vec${}$len", instance);
     writeln!(out, "::std::size_t {export}(::rust::Vec<{inner}> const *ptr) noexcept;");
+    out.add_export(export);
     let export = format!("cxxbridge1$rust_vec${}$capacity", instance);
     writeln!(out, "::std::size_t {export}(::rust::Vec<{inner}> const *ptr) noexcept;");
+    out.add_export(export);
     let export = format!("cxxbridge1$rust_vec${}$data", instance);
     writeln!(out, "{inner} const *{export}(::rust::Vec<{inner}> const *ptr) noexcept;");
+    out.add_export(export);
     let export = format!("cxxbridge1$rust_vec${}$reserve_total", instance);
     writeln!(out, "void {export}(::rust::Vec<{inner}> *ptr, ::std::size_t new_cap) noexcept;");
+    out.add_export(export);
     let export = format!("cxxbridge1$rust_vec${}$set_len", instance);
     writeln!(out, "void {export}(::rust::Vec<{inner}> *ptr, ::std::size_t len) noexcept;");
+    out.add_export(export);
     let export = format!("cxxbridge1$rust_vec${}$truncate", instance);
     writeln!(out, "void {export}(::rust::Vec<{inner}> *ptr, ::std::size_t len) noexcept;");
+    out.add_export(export);
 }
 
 fn write_rust_box_impl(out: &mut OutFile, key: &NamedImplKey) {
@@ -1797,6 +1831,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: &Type) {
     writeln!(out, "void {symbol}(::std::unique_ptr<{inner}> *ptr) noexcept {{");
     writeln!(out, "  ::new (ptr) ::std::unique_ptr<{inner}>();");
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), "void ", &format!("::std::unique_ptr<{inner}> *ptr"), " noexcept", "ptr");
 
     if can_construct_from_value {
         out.builtin.maybe_uninit = true;
@@ -1811,6 +1846,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: &Type) {
         writeln!(out, "  ::new (ptr) ::std::unique_ptr<{inner}>(uninit);");
         writeln!(out, "  return uninit;");
         writeln!(out, "}}");
+        out.add_import(symbol.clone(), &format!("{inner} *"), &format!("::std::unique_ptr<{inner}> *ptr"), " noexcept", "ptr");
     }
 
     let symbol = format!("cxxbridge1$unique_ptr${}$raw", instance);
@@ -1821,6 +1857,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: &Type) {
     );
     writeln!(out, "  ::new (ptr) ::std::unique_ptr<{inner}>(raw);");
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), "void ", &format!("::std::unique_ptr<{inner}> *ptr, ::std::unique_ptr<{inner}>::pointer raw"), " noexcept", "ptr, raw");
 
     let symbol = format!("cxxbridge1$unique_ptr${}$get", instance);
     begin_function_definition(out);
@@ -1830,6 +1867,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: &Type) {
     );
     writeln!(out, "  return ptr.get();");
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), &format!("::std::unique_ptr<{inner}>::element_type const *"), &format!("::std::unique_ptr<{inner}> const &ptr"), " noexcept", "ptr");
 
     let symbol = format!("cxxbridge1$unique_ptr${}$release", instance);
     begin_function_definition(out);
@@ -1839,6 +1877,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: &Type) {
     );
     writeln!(out, "  return ptr.release();");
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), &format!("::std::unique_ptr<{inner}>::pointer "), &format!("::std::unique_ptr<{inner}> &ptr"), " noexcept", "ptr");
 
     let symbol = format!("cxxbridge1$unique_ptr${}$drop", instance);
     begin_function_definition(out);
@@ -1849,6 +1888,7 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: &Type) {
         "  ::rust::deleter_if<::rust::detail::is_complete<{inner}>::value>{{}}(ptr);",
     );
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), "void ", &format!("::std::unique_ptr<{inner}> *ptr"), " noexcept", "ptr");
 }
 
 fn write_shared_ptr(out: &mut OutFile, key: &NamedImplKey) {
@@ -1882,6 +1922,7 @@ fn write_shared_ptr(out: &mut OutFile, key: &NamedImplKey) {
     writeln!(out, "void {symbol}(::std::shared_ptr<{inner}> *ptr) noexcept {{");
     writeln!(out, "  ::new (ptr) ::std::shared_ptr<{inner}>();");
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), "void ", &format!("::std::shared_ptr<{inner}> *ptr"), " noexcept", "ptr");
 
     if can_construct_from_value {
         out.builtin.maybe_uninit = true;
@@ -1896,6 +1937,7 @@ fn write_shared_ptr(out: &mut OutFile, key: &NamedImplKey) {
         writeln!(out, "  ::new (ptr) ::std::shared_ptr<{inner}>(uninit);");
         writeln!(out, "  return uninit;");
         writeln!(out, "}}");
+        out.add_import(symbol.clone(), &format!("{inner} *"), &format!("::std::shared_ptr<{inner}> *ptr"), " noexcept", "ptr");
     }
 
     out.builtin.shared_ptr = true;
@@ -1911,6 +1953,7 @@ fn write_shared_ptr(out: &mut OutFile, key: &NamedImplKey) {
     );
     writeln!(out, "  return ::rust::is_destructible<{inner}>::value;");
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), "bool ", &format!("::std::shared_ptr<{inner}> *ptr, ::std::shared_ptr<{inner}>::element_type *raw"), " noexcept", "ptr, raw");
 
     let symbol = format!("cxxbridge1$shared_ptr${}$clone", instance);
     begin_function_definition(out);
@@ -1920,6 +1963,7 @@ fn write_shared_ptr(out: &mut OutFile, key: &NamedImplKey) {
     );
     writeln!(out, "  ::new (ptr) ::std::shared_ptr<{inner}>(self);");
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), "void ", &format!("::std::shared_ptr<{inner}> const &self, ::std::shared_ptr<{inner}> *ptr"), " noexcept", "self, ptr");
 
     let symbol = format!("cxxbridge1$shared_ptr${}$get", instance);
     begin_function_definition(out);
@@ -1929,12 +1973,14 @@ fn write_shared_ptr(out: &mut OutFile, key: &NamedImplKey) {
     );
     writeln!(out, "  return self.get();");
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), &format!("::std::shared_ptr<{inner}>::element_type const *"), &format!("::std::shared_ptr<{inner}> const &self"), " noexcept", "self");
 
     let symbol = format!("cxxbridge1$shared_ptr${}$drop", instance);
     begin_function_definition(out);
     writeln!(out, "void {symbol}(::std::shared_ptr<{inner}> *self) noexcept {{");
     writeln!(out, "  self->~shared_ptr();");
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), "void ", &format!("::std::shared_ptr<{inner}> *self"), " noexcept", "self");
 }
 
 fn write_weak_ptr(out: &mut OutFile, key: &NamedImplKey) {
@@ -1962,6 +2008,7 @@ fn write_weak_ptr(out: &mut OutFile, key: &NamedImplKey) {
     writeln!(out, "void {symbol}(::std::weak_ptr<{inner}> *ptr) noexcept {{");
     writeln!(out, "  ::new (ptr) ::std::weak_ptr<{inner}>();");
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), "void ", &format!("::std::weak_ptr<{inner}> *ptr"), " noexcept", "ptr");
 
     let symbol = format!("cxxbridge1$weak_ptr${}$clone", instance);
     begin_function_definition(out);
@@ -1971,6 +2018,7 @@ fn write_weak_ptr(out: &mut OutFile, key: &NamedImplKey) {
     );
     writeln!(out, "  ::new (ptr) ::std::weak_ptr<{inner}>(self);");
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), "void ", &format!("::std::weak_ptr<{inner}> const &self, ::std::weak_ptr<{inner}> *ptr"), " noexcept", "self, ptr");
 
     let symbol = format!("cxxbridge1$weak_ptr${}$downgrade", instance);
     begin_function_definition(out);
@@ -1980,6 +2028,7 @@ fn write_weak_ptr(out: &mut OutFile, key: &NamedImplKey) {
     );
     writeln!(out, "  ::new (weak) ::std::weak_ptr<{inner}>(shared);");
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), "void ", &format!("::std::shared_ptr<{inner}> const &shared, ::std::weak_ptr<{inner}> *weak"), " noexcept", "shared, weak");
 
     let symbol = format!("cxxbridge1$weak_ptr${}$upgrade", instance);
     begin_function_definition(out);
@@ -1989,12 +2038,14 @@ fn write_weak_ptr(out: &mut OutFile, key: &NamedImplKey) {
     );
     writeln!(out, "  ::new (shared) ::std::shared_ptr<{inner}>(weak.lock());");
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), "void ", &format!("::std::weak_ptr<{inner}> const &weak, ::std::shared_ptr<{inner}> *shared"), " noexcept", "weak, shared");
 
     let symbol = format!("cxxbridge1$weak_ptr${}$drop", instance);
     begin_function_definition(out);
     writeln!(out, "void {symbol}(::std::weak_ptr<{inner}> *self) noexcept {{");
     writeln!(out, "  self->~weak_ptr();");
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), "void ", &format!("::std::weak_ptr<{inner}> *self"), " noexcept", "self");
 }
 
 fn write_cxx_vector(out: &mut OutFile, key: &NamedImplKey) {
@@ -2013,30 +2064,35 @@ fn write_cxx_vector(out: &mut OutFile, key: &NamedImplKey) {
     writeln!(out, "::std::vector<{inner}> *{symbol}() noexcept {{");
     writeln!(out, "  return new ::std::vector<{inner}>();");
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), &format!("::std::vector<{inner}> *"), "", " noexcept", "");
 
     let symbol = format!("cxxbridge1$std$vector${}$size", instance);
     begin_function_definition(out);
     writeln!(out, "::std::size_t {symbol}(::std::vector<{inner}> const &s) noexcept {{");
     writeln!(out, "  return s.size();");
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), "::std::size_t ", &format!("::std::vector<{inner}> const &s"), " noexcept", "s");
 
     let symbol = format!("cxxbridge1$std$vector${}$capacity", instance);
     begin_function_definition(out);
     writeln!(out, "::std::size_t {symbol}(::std::vector<{inner}> const &s) noexcept {{");
     writeln!(out, "  return s.capacity();");
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), "::std::size_t ", &format!("::std::vector<{inner}> const &s"), " noexcept", "s");
 
     let symbol = format!("cxxbridge1$std$vector${}$get_unchecked", instance);
     begin_function_definition(out);
     writeln!(out, "{inner} *{symbol}(::std::vector<{inner}> *s, ::std::size_t pos) noexcept {{");
     writeln!(out, "  return &(*s)[pos];");
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), &format!("{inner} *"), &format!("::std::vector<{inner}> *s, ::std::size_t pos"), " noexcept", "s, pos");
 
     let symbol = format!("cxxbridge1$std$vector${}$reserve", instance);
     begin_function_definition(out);
     writeln!(out, "bool {symbol}(::std::vector<{inner}> *s, ::std::size_t new_cap) noexcept {{");
     writeln!(out, "  return ::rust::if_move_constructible<{inner}>::reserve(*s, new_cap);");
     writeln!(out, "}}");
+    out.add_import(symbol.clone(), "bool ", &format!("::std::vector<{inner}> *s, ::std::size_t new_cap"), " noexcept", "s, new_cap");
 
     if out.types.is_maybe_trivial(key.inner) {
         let symbol = format!("cxxbridge1$std$vector${}$push_back", instance);
@@ -2045,6 +2101,7 @@ fn write_cxx_vector(out: &mut OutFile, key: &NamedImplKey) {
         writeln!(out, "  v->push_back(::std::move(*value));");
         writeln!(out, "  ::rust::destroy(value);");
         writeln!(out, "}}");
+        out.add_import(symbol.clone(), "void ", &format!("::std::vector<{inner}> *v, {inner} *value"), " noexcept", "v, value");
 
         let symbol = format!("cxxbridge1$std$vector${}$pop_back", instance);
         begin_function_definition(out);
@@ -2052,6 +2109,7 @@ fn write_cxx_vector(out: &mut OutFile, key: &NamedImplKey) {
         writeln!(out, "  ::new (out) {inner}(::std::move(v->back()));");
         writeln!(out, "  v->pop_back();");
         writeln!(out, "}}");
+        out.add_import(symbol.clone(), "void ", &format!("::std::vector<{inner}> *v, {inner} *out"), " noexcept", "v, out");
     }
 
     out.include.memory = true;
