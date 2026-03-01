@@ -93,6 +93,23 @@ pub struct GeneratedCode {
     pub header: Vec<u8>,
     /// The bytes of a C++ implementation file (e.g. .cc, cpp etc.)
     pub implementation: Vec<u8>,
+    /// Export and import data (unused in cxx_build).
+    #[allow(dead_code)]
+    ctx: GenContext,
+}
+
+/// Export and import data used by cxx_gen but not cxx_build.
+#[derive(Default)]
+pub struct GenContext {
+    /// Symbols exported by the library. Access via `export_symbols()`.
+    exports: Vec<String>,
+    /// Import information for symbols the library needs from the executable.
+    /// Access symbols via `import_symbols()` or generate thunks via `generate_import_thunks()`.
+    imports: Vec<out::ImportInfo>,
+    /// Prefix to prepend to generated thunks (includes, pragmas, builtins).
+    thunk_prefix: String,
+    /// Postfix to append to generated thunks (pragma end).
+    thunk_postfix: String,
 }
 
 impl Default for Opt {
@@ -188,14 +205,81 @@ pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
     // same token stream to avoid parsing twice. Others only need to generate
     // one or the other.
     let (mut header, mut implementation) = Default::default();
+    let mut ctx = GenContext::default();
     if opt.gen_header {
-        header = write::gen(apis, types, opt, true);
+        let mut out_file = write::gen(apis, types, opt, true);
+        header = out_file.content();
     }
     if opt.gen_implementation {
-        implementation = write::gen(apis, types, opt, false);
+        let mut out_file = write::gen(apis, types, opt, false);
+        implementation = out_file.content();
+        ctx.exports = out_file.exports();
+        ctx.imports = out_file.imports();
+        ctx.thunk_prefix = out_file.thunk_prefix();
+        ctx.thunk_postfix = out_file.thunk_postfix();
     }
     Ok(GeneratedCode {
         header,
         implementation,
+        ctx,
     })
+}
+
+impl GeneratedCode {
+    /// Get the list of symbols exported by the library.
+    ///
+    /// These are the functions and types that the library provides to other code.
+    #[allow(dead_code)]
+    pub fn export_symbols(&self) -> Vec<String> {
+        self.ctx.exports.clone()
+    }
+
+    /// Get the list of symbols imported by the library from the executable.
+    ///
+    /// These are the functions that the library calls which are defined in the
+    /// executable that loads it.
+    #[allow(dead_code)]
+    pub fn import_symbols(&self) -> Vec<String> {
+        self.ctx.imports.iter().map(|import| import.symbol.clone()).collect()
+    }
+
+    /// Generate Windows-specific import thunks for runtime symbol resolution.
+    ///
+    /// This is only needed when building shared libraries on Windows where the library
+    /// imports functions from the executable. The thunks use GetProcAddress to resolve
+    /// symbols at runtime.
+    ///
+    /// Returns an empty string if there are no imports or if the target OS is not Windows.
+    #[allow(dead_code)]
+    pub fn generate_import_thunks(&self, target_os: &str) -> String {
+        if target_os != "windows" || self.ctx.imports.is_empty() {
+            return String::new();
+        }
+
+        let mut out = String::new();
+        out.push_str(&self.ctx.thunk_prefix);
+        if !self.ctx.thunk_prefix.is_empty() {
+            out.push('\n');
+        }
+        out.push_str("#include <cstdio>\n");
+        out.push_str("#include <exception>\n");
+        out.push_str("#include <windows.h>\n");
+
+        for import in &self.ctx.imports {
+            let out::ImportInfo { symbol, return_type, signature_args, noexcept, call_args } = import;
+            out.push_str(&format!(
+                r#"extern "C" {return_type}{symbol}({signature_args}){noexcept} {{
+    static auto fn = reinterpret_cast<{return_type}(*)({signature_args})>(
+        reinterpret_cast<void*>(GetProcAddress(GetModuleHandle(NULL), "{symbol}")));
+    if (fn) return fn({call_args});
+    fprintf(stderr, "FATAL: Host EXE missing required export: {symbol}\n");
+    std::terminate();
+}}
+"#,
+            ));
+        }
+
+        out.push_str(&self.ctx.thunk_postfix);
+        out
+    }
 }

@@ -60,3 +60,92 @@ pub fn generate_header_and_cc(rust_source: TokenStream, opt: &Opt) -> Result<Gen
         .map_err(Error::from)?;
     gen::generate(syntax, opt).map_err(Error::from)
 }
+
+/// Format import symbols into OS-appropriate linker file content.
+fn format_symbols_for_linker(symbols: &[String], target_os: &str) -> String {
+    match target_os {
+        "windows" => {
+            let mut result = String::from("EXPORTS\n");
+            for sym in symbols {
+                result.push_str("    ");
+                result.push_str(sym);
+                result.push('\n');
+            }
+            result
+        }
+        "macos" => {
+            let mut result = String::new();
+            for sym in symbols {
+                result.push_str("-U _");
+                result.push_str(sym);
+                result.push('\n');
+            }
+            result
+        }
+        _ => {
+            // Linux and other Unix-like systems
+            let mut result = String::from("{\n");
+            for sym in symbols {
+                result.push_str("  ");
+                result.push_str(sym);
+                result.push_str(";\n");
+            }
+            result.push_str("};");
+            result
+        }
+    }
+}
+
+/// Format symbols that a shared library imports from an executable into the appropriate linker file format.
+///
+/// When a shared library calls functions defined in the executable that loads it, those symbols
+/// must be declared as available to the linker. This function generates the platform-specific
+/// files needed:
+/// - **Windows**: `.def` file format (EXPORTS section) - used with `/DEF:` linker flag
+/// - **macOS**: Linker arguments (`-U _symbol` for each) - marks symbols as dynamic_lookup
+/// - **Linux**: Dynamic list format (`{ symbol; }`) - used with `--dynamic-list`
+///
+/// # Arguments
+/// * `symbols` - The list of symbol names the library imports from the executable
+/// * `target_os` - The target operating system ("windows", "macos", or "linux")
+///
+/// # Example
+/// ```
+/// let import_symbols = vec!["exe_callback".to_string(), "exe_get_constant".to_string()];
+/// let content = cxx_gen::format_import_symbols_for_linker(&import_symbols, "linux");
+/// // content will be "{\n  exe_callback;\n  exe_get_constant;\n};"
+/// ```
+pub fn format_import_symbols_for_linker(symbols: &[String], target_os: &str) -> String {
+    format_symbols_for_linker(symbols, target_os)
+}
+
+/// Format symbols that a shared library exports into a Windows `.def` file format.
+///
+/// On Windows, shared libraries (DLLs) use `.def` files to explicitly list exported symbols.
+/// This function generates the EXPORTS section needed for the library's `.def` file.
+///
+/// Note: This is Windows-specific. On Unix systems, exports are typically controlled via
+/// version scripts (Linux) or visibility attributes, not separate export files.
+///
+/// # Arguments
+/// * `symbols` - The list of symbol names the library exports
+/// * `target_os` - Must be "windows"
+///
+/// # Panics
+/// Panics if `target_os` is not "windows"
+///
+/// # Example
+/// ```
+/// let export_symbols = vec!["lib_process".to_string(), "lib_get_data".to_string()];
+/// let content = cxx_gen::format_export_symbols_for_linker(&export_symbols, "windows");
+/// // content will be "EXPORTS\n    lib_process\n    lib_get_data\n"
+/// ```
+pub fn format_export_symbols_for_linker(symbols: &[String], target_os: &str) -> String {
+    if target_os != "windows" {
+        panic!(
+            "format_export_symbols_for_linker is only supported for Windows targets, got: {}",
+            target_os
+        );
+    }
+    format_symbols_for_linker(symbols, target_os)
+}
