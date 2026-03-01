@@ -844,6 +844,61 @@ fn begin_function_definition(out: &mut OutFile) {
     }
 }
 
+fn get_extern_function_signature_parts(out: &mut OutFile, efn: &ExternFn) -> (String, String, String) {
+    let (_, return_type) = out.with_buffer(|out| {
+        if efn.throws {
+            out.builtin.ptr_len = true;
+            write!(out, "::rust::repr::PtrLen ");
+        } else {
+            write_extern_return_type_space(out, efn, efn.lang);
+        }
+    });
+
+    let (_, signature_args) = out.with_buffer(|out| {
+        if let FnKind::Method(receiver) = &efn.kind {
+            write!(
+                out,
+                "{}",
+                out.types.resolve(&receiver.ty).name.to_fully_qualified(),
+            );
+            if !receiver.mutable {
+                write!(out, " const");
+            }
+            write!(out, " &self");
+        }
+        for (i, arg) in efn.args.iter().enumerate() {
+            if i > 0 || matches!(efn.kind, FnKind::Method(_)) {
+                write!(out, ", ");
+            }
+            if arg.ty == RustString {
+                write_type_space(out, &arg.ty);
+                write!(out, "const *{}", arg.name.cxx);
+            } else if let Type::RustVec(_) = arg.ty {
+                write_type_space(out, &arg.ty);
+                write!(out, "const *{}", arg.name.cxx);
+            } else {
+                write_extern_arg(out, arg);
+            }
+        }
+        let indirect_return = indirect_return(efn, out.types, efn.lang);
+        if indirect_return {
+            if !efn.args.is_empty() || matches!(efn.kind, FnKind::Method(_)) {
+                write!(out, ", ");
+            }
+            write_indirect_return_type_space(out, efn.ret.as_ref().unwrap());
+            write!(out, "*return$");
+        }
+    });
+
+    let noexcept = match efn.lang {
+        Lang::Cxx => " noexcept",
+        Lang::CxxUnwind => "",
+        Lang::Rust => unreachable!(),
+    };
+
+    (return_type, signature_args, noexcept.to_string())
+}
+
 fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     out.pragma.dollar_in_identifier = true;
     out.pragma.missing_declarations = true;
@@ -851,54 +906,10 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     out.set_namespace(&efn.name.namespace);
     out.begin_block(Block::ExternC);
     begin_function_definition(out);
-    if efn.throws {
-        out.builtin.ptr_len = true;
-        write!(out, "::rust::repr::PtrLen ");
-    } else {
-        write_extern_return_type_space(out, efn, efn.lang);
-    }
     let mangled = mangle::extern_fn(efn, out.types);
-    write!(out, "{}(", mangled);
-    if let FnKind::Method(receiver) = &efn.kind {
-        write!(
-            out,
-            "{}",
-            out.types.resolve(&receiver.ty).name.to_fully_qualified(),
-        );
-        if !receiver.mutable {
-            write!(out, " const");
-        }
-        write!(out, " &self");
-    }
-    for (i, arg) in efn.args.iter().enumerate() {
-        if i > 0 || matches!(efn.kind, FnKind::Method(_)) {
-            write!(out, ", ");
-        }
-        if arg.ty == RustString {
-            write_type_space(out, &arg.ty);
-            write!(out, "const *{}", arg.name.cxx);
-        } else if let Type::RustVec(_) = arg.ty {
-            write_type_space(out, &arg.ty);
-            write!(out, "const *{}", arg.name.cxx);
-        } else {
-            write_extern_arg(out, arg);
-        }
-    }
+    let (return_type, signature_args, noexcept) = get_extern_function_signature_parts(out, efn);
     let indirect_return = indirect_return(efn, out.types, efn.lang);
-    if indirect_return {
-        if !efn.args.is_empty() || matches!(efn.kind, FnKind::Method(_)) {
-            write!(out, ", ");
-        }
-        write_indirect_return_type_space(out, efn.ret.as_ref().unwrap());
-        write!(out, "*return$");
-    }
-    write!(out, ")");
-    match efn.lang {
-        Lang::Cxx => write!(out, " noexcept"),
-        Lang::CxxUnwind => {}
-        Lang::Rust => unreachable!(),
-    }
-    writeln!(out, " {{");
+    writeln!(out, "{return_type}{mangled}({signature_args}){noexcept} {{");
     write!(out, "  ");
     write_return_type(out, &efn.ret);
     match efn.receiver() {
@@ -1590,21 +1601,12 @@ fn write_rust_box_extern(out: &mut OutFile, key: &NamedImplKey) {
 
     out.pragma.dollar_in_identifier = true;
 
-    writeln!(
-        out,
-        "{} *cxxbridge1$box${}$alloc() noexcept;",
-        inner, instance,
-    );
-    writeln!(
-        out,
-        "void cxxbridge1$box${}$dealloc({} *) noexcept;",
-        instance, inner,
-    );
-    writeln!(
-        out,
-        "void cxxbridge1$box${}$drop(::rust::Box<{}> *ptr) noexcept;",
-        instance, inner,
-    );
+    let export = format!("cxxbridge1$box${}$alloc", instance);
+    writeln!(out, "{inner} *{export}() noexcept;");
+    let export = format!("cxxbridge1$box${}$dealloc", instance);
+    writeln!(out, "void {export}({inner} *) noexcept;");
+    let export = format!("cxxbridge1$box${}$drop", instance);
+    writeln!(out, "void {export}(::rust::Box<{inner}> *ptr) noexcept;");
 }
 
 fn write_rust_vec_extern(out: &mut OutFile, key: &NamedImplKey) {
@@ -1614,46 +1616,22 @@ fn write_rust_vec_extern(out: &mut OutFile, key: &NamedImplKey) {
     out.include.cstddef = true;
     out.pragma.dollar_in_identifier = true;
 
-    writeln!(
-        out,
-        "void cxxbridge1$rust_vec${}$new(::rust::Vec<{}> const *ptr) noexcept;",
-        instance, inner,
-    );
-    writeln!(
-        out,
-        "void cxxbridge1$rust_vec${}$drop(::rust::Vec<{}> *ptr) noexcept;",
-        instance, inner,
-    );
-    writeln!(
-        out,
-        "::std::size_t cxxbridge1$rust_vec${}$len(::rust::Vec<{}> const *ptr) noexcept;",
-        instance, inner,
-    );
-    writeln!(
-        out,
-        "::std::size_t cxxbridge1$rust_vec${}$capacity(::rust::Vec<{}> const *ptr) noexcept;",
-        instance, inner,
-    );
-    writeln!(
-        out,
-        "{} const *cxxbridge1$rust_vec${}$data(::rust::Vec<{0}> const *ptr) noexcept;",
-        inner, instance,
-    );
-    writeln!(
-        out,
-        "void cxxbridge1$rust_vec${}$reserve_total(::rust::Vec<{}> *ptr, ::std::size_t new_cap) noexcept;",
-        instance, inner,
-    );
-    writeln!(
-        out,
-        "void cxxbridge1$rust_vec${}$set_len(::rust::Vec<{}> *ptr, ::std::size_t len) noexcept;",
-        instance, inner,
-    );
-    writeln!(
-        out,
-        "void cxxbridge1$rust_vec${}$truncate(::rust::Vec<{}> *ptr, ::std::size_t len) noexcept;",
-        instance, inner,
-    );
+    let export = format!("cxxbridge1$rust_vec${}$new", instance);
+    writeln!(out, "void {export}(::rust::Vec<{inner}> const *ptr) noexcept;");
+    let export = format!("cxxbridge1$rust_vec${}$drop", instance);
+    writeln!(out, "void {export}(::rust::Vec<{inner}> *ptr) noexcept;");
+    let export = format!("cxxbridge1$rust_vec${}$len", instance);
+    writeln!(out, "::std::size_t {export}(::rust::Vec<{inner}> const *ptr) noexcept;");
+    let export = format!("cxxbridge1$rust_vec${}$capacity", instance);
+    writeln!(out, "::std::size_t {export}(::rust::Vec<{inner}> const *ptr) noexcept;");
+    let export = format!("cxxbridge1$rust_vec${}$data", instance);
+    writeln!(out, "{inner} const *{export}(::rust::Vec<{inner}> const *ptr) noexcept;");
+    let export = format!("cxxbridge1$rust_vec${}$reserve_total", instance);
+    writeln!(out, "void {export}(::rust::Vec<{inner}> *ptr, ::std::size_t new_cap) noexcept;");
+    let export = format!("cxxbridge1$rust_vec${}$set_len", instance);
+    writeln!(out, "void {export}(::rust::Vec<{inner}> *ptr, ::std::size_t len) noexcept;");
+    let export = format!("cxxbridge1$rust_vec${}$truncate", instance);
+    writeln!(out, "void {export}(::rust::Vec<{inner}> *ptr, ::std::size_t len) noexcept;");
 }
 
 fn write_rust_box_impl(out: &mut OutFile, key: &NamedImplKey) {
@@ -1815,72 +1793,61 @@ fn write_unique_ptr_common(out: &mut OutFile, ty: &Type) {
         inner,
     );
 
+    let symbol = format!("cxxbridge1$unique_ptr${}$null", instance);
     begin_function_definition(out);
-    writeln!(
-        out,
-        "void cxxbridge1$unique_ptr${}$null(::std::unique_ptr<{}> *ptr) noexcept {{",
-        instance, inner,
-    );
-    writeln!(out, "  ::new (ptr) ::std::unique_ptr<{}>();", inner);
+    writeln!(out, "void {symbol}(::std::unique_ptr<{inner}> *ptr) noexcept {{");
+    writeln!(out, "  ::new (ptr) ::std::unique_ptr<{inner}>();");
     writeln!(out, "}}");
 
     if can_construct_from_value {
         out.builtin.maybe_uninit = true;
         out.pragma.mismatched_new_delete = true;
+        let symbol = format!("cxxbridge1$unique_ptr${}$uninit", instance);
         begin_function_definition(out);
+        writeln!(out, "{inner} *{symbol}(::std::unique_ptr<{inner}> *ptr) noexcept {{");
         writeln!(
             out,
-            "{} *cxxbridge1$unique_ptr${}$uninit(::std::unique_ptr<{}> *ptr) noexcept {{",
-            inner, instance, inner,
+            "  {inner} *uninit = reinterpret_cast<{inner} *>(new ::rust::MaybeUninit<{inner}>);",
         );
-        writeln!(
-            out,
-            "  {} *uninit = reinterpret_cast<{} *>(new ::rust::MaybeUninit<{}>);",
-            inner, inner, inner,
-        );
-        writeln!(out, "  ::new (ptr) ::std::unique_ptr<{}>(uninit);", inner);
+        writeln!(out, "  ::new (ptr) ::std::unique_ptr<{inner}>(uninit);");
         writeln!(out, "  return uninit;");
         writeln!(out, "}}");
     }
 
+    let symbol = format!("cxxbridge1$unique_ptr${}$raw", instance);
     begin_function_definition(out);
     writeln!(
         out,
-        "void cxxbridge1$unique_ptr${}$raw(::std::unique_ptr<{}> *ptr, ::std::unique_ptr<{}>::pointer raw) noexcept {{",
-        instance, inner, inner,
+        "void {symbol}(::std::unique_ptr<{inner}> *ptr, ::std::unique_ptr<{inner}>::pointer raw) noexcept {{",
     );
-    writeln!(out, "  ::new (ptr) ::std::unique_ptr<{}>(raw);", inner);
+    writeln!(out, "  ::new (ptr) ::std::unique_ptr<{inner}>(raw);");
     writeln!(out, "}}");
 
+    let symbol = format!("cxxbridge1$unique_ptr${}$get", instance);
     begin_function_definition(out);
     writeln!(
         out,
-        "::std::unique_ptr<{}>::element_type const *cxxbridge1$unique_ptr${}$get(::std::unique_ptr<{}> const &ptr) noexcept {{",
-        inner, instance, inner,
+        "::std::unique_ptr<{inner}>::element_type const *{symbol}(::std::unique_ptr<{inner}> const &ptr) noexcept {{",
     );
     writeln!(out, "  return ptr.get();");
     writeln!(out, "}}");
 
+    let symbol = format!("cxxbridge1$unique_ptr${}$release", instance);
     begin_function_definition(out);
     writeln!(
         out,
-        "::std::unique_ptr<{}>::pointer cxxbridge1$unique_ptr${}$release(::std::unique_ptr<{}> &ptr) noexcept {{",
-        inner, instance, inner,
+        "::std::unique_ptr<{inner}>::pointer {symbol}(::std::unique_ptr<{inner}> &ptr) noexcept {{",
     );
     writeln!(out, "  return ptr.release();");
     writeln!(out, "}}");
 
+    let symbol = format!("cxxbridge1$unique_ptr${}$drop", instance);
     begin_function_definition(out);
-    writeln!(
-        out,
-        "void cxxbridge1$unique_ptr${}$drop(::std::unique_ptr<{}> *ptr) noexcept {{",
-        instance, inner,
-    );
+    writeln!(out, "void {symbol}(::std::unique_ptr<{inner}> *ptr) noexcept {{");
     out.builtin.deleter_if = true;
     writeln!(
         out,
-        "  ::rust::deleter_if<::rust::detail::is_complete<{}>::value>{{}}(ptr);",
-        inner,
+        "  ::rust::deleter_if<::rust::detail::is_complete<{inner}>::value>{{}}(ptr);",
     );
     writeln!(out, "}}");
 }
@@ -1911,73 +1878,62 @@ fn write_shared_ptr(out: &mut OutFile, key: &NamedImplKey) {
         inner,
     );
 
+    let symbol = format!("cxxbridge1$shared_ptr${}$null", instance);
     begin_function_definition(out);
-    writeln!(
-        out,
-        "void cxxbridge1$shared_ptr${}$null(::std::shared_ptr<{}> *ptr) noexcept {{",
-        instance, inner,
-    );
-    writeln!(out, "  ::new (ptr) ::std::shared_ptr<{}>();", inner);
+    writeln!(out, "void {symbol}(::std::shared_ptr<{inner}> *ptr) noexcept {{");
+    writeln!(out, "  ::new (ptr) ::std::shared_ptr<{inner}>();");
     writeln!(out, "}}");
 
     if can_construct_from_value {
         out.builtin.maybe_uninit = true;
         out.pragma.mismatched_new_delete = true;
+        let symbol = format!("cxxbridge1$shared_ptr${}$uninit", instance);
         begin_function_definition(out);
+        writeln!(out, "{inner} *{symbol}(::std::shared_ptr<{inner}> *ptr) noexcept {{");
         writeln!(
             out,
-            "{} *cxxbridge1$shared_ptr${}$uninit(::std::shared_ptr<{}> *ptr) noexcept {{",
-            inner, instance, inner,
+            "  {inner} *uninit = reinterpret_cast<{inner} *>(new ::rust::MaybeUninit<{inner}>);",
         );
-        writeln!(
-            out,
-            "  {} *uninit = reinterpret_cast<{} *>(new ::rust::MaybeUninit<{}>);",
-            inner, inner, inner,
-        );
-        writeln!(out, "  ::new (ptr) ::std::shared_ptr<{}>(uninit);", inner);
+        writeln!(out, "  ::new (ptr) ::std::shared_ptr<{inner}>(uninit);");
         writeln!(out, "  return uninit;");
         writeln!(out, "}}");
     }
 
     out.builtin.shared_ptr = true;
+    let symbol = format!("cxxbridge1$shared_ptr${}$raw", instance);
     begin_function_definition(out);
     writeln!(
         out,
-        "bool cxxbridge1$shared_ptr${}$raw(::std::shared_ptr<{}> *ptr, ::std::shared_ptr<{}>::element_type *raw) noexcept {{",
-        instance, inner, inner,
+        "bool {symbol}(::std::shared_ptr<{inner}> *ptr, ::std::shared_ptr<{inner}>::element_type *raw) noexcept {{",
     );
     writeln!(
         out,
-        "  ::new (ptr) ::rust::shared_ptr_if_destructible<{}>(raw);",
-        inner,
+        "  ::new (ptr) ::rust::shared_ptr_if_destructible<{inner}>(raw);",
     );
-    writeln!(out, "  return ::rust::is_destructible<{}>::value;", inner);
+    writeln!(out, "  return ::rust::is_destructible<{inner}>::value;");
     writeln!(out, "}}");
 
+    let symbol = format!("cxxbridge1$shared_ptr${}$clone", instance);
     begin_function_definition(out);
     writeln!(
         out,
-        "void cxxbridge1$shared_ptr${}$clone(::std::shared_ptr<{}> const &self, ::std::shared_ptr<{}> *ptr) noexcept {{",
-        instance, inner, inner,
+        "void {symbol}(::std::shared_ptr<{inner}> const &self, ::std::shared_ptr<{inner}> *ptr) noexcept {{",
     );
-    writeln!(out, "  ::new (ptr) ::std::shared_ptr<{}>(self);", inner);
+    writeln!(out, "  ::new (ptr) ::std::shared_ptr<{inner}>(self);");
     writeln!(out, "}}");
 
+    let symbol = format!("cxxbridge1$shared_ptr${}$get", instance);
     begin_function_definition(out);
     writeln!(
         out,
-        "::std::shared_ptr<{}>::element_type const *cxxbridge1$shared_ptr${}$get(::std::shared_ptr<{}> const &self) noexcept {{",
-        inner, instance, inner,
+        "::std::shared_ptr<{inner}>::element_type const *{symbol}(::std::shared_ptr<{inner}> const &self) noexcept {{",
     );
     writeln!(out, "  return self.get();");
     writeln!(out, "}}");
 
+    let symbol = format!("cxxbridge1$shared_ptr${}$drop", instance);
     begin_function_definition(out);
-    writeln!(
-        out,
-        "void cxxbridge1$shared_ptr${}$drop(::std::shared_ptr<{}> *self) noexcept {{",
-        instance, inner,
-    );
+    writeln!(out, "void {symbol}(::std::shared_ptr<{inner}> *self) noexcept {{");
     writeln!(out, "  self->~shared_ptr();");
     writeln!(out, "}}");
 }
@@ -2002,52 +1958,42 @@ fn write_weak_ptr(out: &mut OutFile, key: &NamedImplKey) {
         inner,
     );
 
+    let symbol = format!("cxxbridge1$weak_ptr${}$null", instance);
     begin_function_definition(out);
-    writeln!(
-        out,
-        "void cxxbridge1$weak_ptr${}$null(::std::weak_ptr<{}> *ptr) noexcept {{",
-        instance, inner,
-    );
-    writeln!(out, "  ::new (ptr) ::std::weak_ptr<{}>();", inner);
+    writeln!(out, "void {symbol}(::std::weak_ptr<{inner}> *ptr) noexcept {{");
+    writeln!(out, "  ::new (ptr) ::std::weak_ptr<{inner}>();");
     writeln!(out, "}}");
 
+    let symbol = format!("cxxbridge1$weak_ptr${}$clone", instance);
     begin_function_definition(out);
     writeln!(
         out,
-        "void cxxbridge1$weak_ptr${}$clone(::std::weak_ptr<{}> const &self, ::std::weak_ptr<{}> *ptr) noexcept {{",
-        instance, inner, inner,
+        "void {symbol}(::std::weak_ptr<{inner}> const &self, ::std::weak_ptr<{inner}> *ptr) noexcept {{",
     );
-    writeln!(out, "  ::new (ptr) ::std::weak_ptr<{}>(self);", inner);
+    writeln!(out, "  ::new (ptr) ::std::weak_ptr<{inner}>(self);");
     writeln!(out, "}}");
 
+    let symbol = format!("cxxbridge1$weak_ptr${}$downgrade", instance);
     begin_function_definition(out);
     writeln!(
         out,
-        "void cxxbridge1$weak_ptr${}$downgrade(::std::shared_ptr<{}> const &shared, ::std::weak_ptr<{}> *weak) noexcept {{",
-        instance, inner, inner,
+        "void {symbol}(::std::shared_ptr<{inner}> const &shared, ::std::weak_ptr<{inner}> *weak) noexcept {{",
     );
-    writeln!(out, "  ::new (weak) ::std::weak_ptr<{}>(shared);", inner);
+    writeln!(out, "  ::new (weak) ::std::weak_ptr<{inner}>(shared);");
     writeln!(out, "}}");
 
+    let symbol = format!("cxxbridge1$weak_ptr${}$upgrade", instance);
     begin_function_definition(out);
     writeln!(
         out,
-        "void cxxbridge1$weak_ptr${}$upgrade(::std::weak_ptr<{}> const &weak, ::std::shared_ptr<{}> *shared) noexcept {{",
-        instance, inner, inner,
+        "void {symbol}(::std::weak_ptr<{inner}> const &weak, ::std::shared_ptr<{inner}> *shared) noexcept {{",
     );
-    writeln!(
-        out,
-        "  ::new (shared) ::std::shared_ptr<{}>(weak.lock());",
-        inner,
-    );
+    writeln!(out, "  ::new (shared) ::std::shared_ptr<{inner}>(weak.lock());");
     writeln!(out, "}}");
 
+    let symbol = format!("cxxbridge1$weak_ptr${}$drop", instance);
     begin_function_definition(out);
-    writeln!(
-        out,
-        "void cxxbridge1$weak_ptr${}$drop(::std::weak_ptr<{}> *self) noexcept {{",
-        instance, inner,
-    );
+    writeln!(out, "void {symbol}(::std::weak_ptr<{inner}> *self) noexcept {{");
     writeln!(out, "  self->~weak_ptr();");
     writeln!(out, "}}");
 }
@@ -2063,73 +2009,48 @@ fn write_cxx_vector(out: &mut OutFile, key: &NamedImplKey) {
     out.pragma.dollar_in_identifier = true;
     out.pragma.missing_declarations = true;
 
+    let symbol = format!("cxxbridge1$std$vector${}$new", instance);
     begin_function_definition(out);
-    writeln!(
-        out,
-        "::std::vector<{}> *cxxbridge1$std$vector${}$new() noexcept {{",
-        inner, instance,
-    );
-    writeln!(out, "  return new ::std::vector<{}>();", inner);
+    writeln!(out, "::std::vector<{inner}> *{symbol}() noexcept {{");
+    writeln!(out, "  return new ::std::vector<{inner}>();");
     writeln!(out, "}}");
 
+    let symbol = format!("cxxbridge1$std$vector${}$size", instance);
     begin_function_definition(out);
-    writeln!(
-        out,
-        "::std::size_t cxxbridge1$std$vector${}$size(::std::vector<{}> const &s) noexcept {{",
-        instance, inner,
-    );
+    writeln!(out, "::std::size_t {symbol}(::std::vector<{inner}> const &s) noexcept {{");
     writeln!(out, "  return s.size();");
     writeln!(out, "}}");
 
+    let symbol = format!("cxxbridge1$std$vector${}$capacity", instance);
     begin_function_definition(out);
-    writeln!(
-        out,
-        "::std::size_t cxxbridge1$std$vector${}$capacity(::std::vector<{}> const &s) noexcept {{",
-        instance, inner,
-    );
+    writeln!(out, "::std::size_t {symbol}(::std::vector<{inner}> const &s) noexcept {{");
     writeln!(out, "  return s.capacity();");
     writeln!(out, "}}");
 
+    let symbol = format!("cxxbridge1$std$vector${}$get_unchecked", instance);
     begin_function_definition(out);
-    writeln!(
-        out,
-        "{} *cxxbridge1$std$vector${}$get_unchecked(::std::vector<{}> *s, ::std::size_t pos) noexcept {{",
-        inner, instance, inner,
-    );
+    writeln!(out, "{inner} *{symbol}(::std::vector<{inner}> *s, ::std::size_t pos) noexcept {{");
     writeln!(out, "  return &(*s)[pos];");
     writeln!(out, "}}");
 
+    let symbol = format!("cxxbridge1$std$vector${}$reserve", instance);
     begin_function_definition(out);
-    writeln!(
-        out,
-        "bool cxxbridge1$std$vector${}$reserve(::std::vector<{}> *s, ::std::size_t new_cap) noexcept {{",
-        instance, inner,
-    );
-    writeln!(
-        out,
-        "  return ::rust::if_move_constructible<{}>::reserve(*s, new_cap);",
-        inner,
-    );
+    writeln!(out, "bool {symbol}(::std::vector<{inner}> *s, ::std::size_t new_cap) noexcept {{");
+    writeln!(out, "  return ::rust::if_move_constructible<{inner}>::reserve(*s, new_cap);");
     writeln!(out, "}}");
 
     if out.types.is_maybe_trivial(key.inner) {
+        let symbol = format!("cxxbridge1$std$vector${}$push_back", instance);
         begin_function_definition(out);
-        writeln!(
-            out,
-            "void cxxbridge1$std$vector${}$push_back(::std::vector<{}> *v, {} *value) noexcept {{",
-            instance, inner, inner,
-        );
+        writeln!(out, "void {symbol}(::std::vector<{inner}> *v, {inner} *value) noexcept {{");
         writeln!(out, "  v->push_back(::std::move(*value));");
         writeln!(out, "  ::rust::destroy(value);");
         writeln!(out, "}}");
 
+        let symbol = format!("cxxbridge1$std$vector${}$pop_back", instance);
         begin_function_definition(out);
-        writeln!(
-            out,
-            "void cxxbridge1$std$vector${}$pop_back(::std::vector<{}> *v, {} *out) noexcept {{",
-            instance, inner, inner,
-        );
-        writeln!(out, "  ::new (out) {}(::std::move(v->back()));", inner);
+        writeln!(out, "void {symbol}(::std::vector<{inner}> *v, {inner} *out) noexcept {{");
+        writeln!(out, "  ::new (out) {inner}(::std::move(v->back()));");
         writeln!(out, "  v->pop_back();");
         writeln!(out, "}}");
     }
