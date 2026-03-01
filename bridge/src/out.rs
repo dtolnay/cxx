@@ -169,7 +169,6 @@ impl<'a> Content<'a> {
             self.bytes.push_str(b);
             self.suppress_next_section = false;
             self.section_pending = false;
-            self.blocks_pending = 0;
         }
     }
 
@@ -218,6 +217,7 @@ impl<'a> Content<'a> {
         }
 
         self.blocks.truncate(write);
+        self.blocks_pending = 0;
     }
 }
 
