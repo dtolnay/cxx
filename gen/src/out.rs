@@ -16,6 +16,7 @@ pub(crate) struct OutFile<'a> {
     pub pragma: Pragma<'a>,
     pub builtin: Builtins<'a>,
     content: RefCell<Content<'a>>,
+    write_override: RefCell<Option<String>>,
 }
 
 #[derive(Default)]
@@ -44,6 +45,7 @@ impl<'a> OutFile<'a> {
             pragma: Pragma::new(),
             builtin: Builtins::new(),
             content: RefCell::new(Content::new()),
+            write_override: RefCell::new(None),
         }
     }
 
@@ -107,6 +109,17 @@ impl<'a> OutFile<'a> {
         self.builtin.content.flush();
         self.content.get_mut().flush();
         self.pragma.end.flush();
+    }
+
+    /// Temporarily redirect writes to a buffer, returning the result and captured output
+    pub(crate) fn with_buffer<F, R>(&mut self, f: F) -> (R, String)
+    where
+        F: FnOnce(&mut Self) -> R,
+    {
+        *self.write_override.borrow_mut() = Some(String::new());
+        let result = f(self);
+        let buffer = self.write_override.borrow_mut().take().unwrap();
+        (result, buffer)
     }
 }
 
