@@ -2,6 +2,7 @@ use std::env;
 use std::fs;
 use std::io::Write;
 use std::path::PathBuf;
+use rustc_version::{version, Version};
 
 fn main() {
     let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
@@ -90,7 +91,11 @@ fn main() {
         let version_script_path = out_dir.join("libtest_library.version");
         fs::write(&version_script_path, version_script).unwrap();
 
-        println!("cargo:rustc-cdylib-link-arg=-Wl,--version-script={}", version_script_path.display());
+        let curr = version().unwrap();
+        let is_broken_version_script = curr < Version::parse("1.90.0").unwrap();
+        if !is_broken_version_script {
+            println!("cargo:rustc-cdylib-link-arg=-Wl,--version-script={}", version_script_path.display());
+        }
         println!("cargo:rustc-cdylib-link-arg=-Wl,--allow-shlib-undefined");
     }
 
