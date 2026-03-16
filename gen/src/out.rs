@@ -16,6 +16,7 @@ pub(crate) struct OutFile<'a> {
     pub pragma: Pragma<'a>,
     pub builtin: Builtins<'a>,
     content: RefCell<Content<'a>>,
+    write_override: RefCell<Option<String>>,
 }
 
 #[derive(Default)]
@@ -26,12 +27,24 @@ pub(crate) struct Content<'a> {
     suppress_next_section: bool,
     section_pending: bool,
     blocks_pending: usize,
+    imports: Vec<ImportInfo>,
+    exports: Vec<String>,
 }
 
 #[derive(Copy, Clone, PartialEq, Debug)]
 enum BlockBoundary<'a> {
     Begin(Block<'a>),
     End(Block<'a>),
+}
+
+#[derive(Clone)]
+#[allow(dead_code)]
+pub(crate) struct ImportInfo {
+    pub symbol: String,
+    pub return_type: String,
+    pub signature_args: String,
+    pub noexcept: String,
+    pub call_args: String,
 }
 
 impl<'a> OutFile<'a> {
@@ -44,6 +57,7 @@ impl<'a> OutFile<'a> {
             pragma: Pragma::new(),
             builtin: Builtins::new(),
             content: RefCell::new(Content::new()),
+            write_override: RefCell::new(None),
         }
     }
 
@@ -108,6 +122,68 @@ impl<'a> OutFile<'a> {
         self.content.get_mut().flush();
         self.pragma.end.flush();
     }
+
+    pub(crate) fn add_export(&mut self, export: String) {
+        if self.header { return; }
+
+        self.content.get_mut().exports.push(export);
+    }
+
+    pub(crate) fn exports(&mut self) -> Vec<String> {
+        std::mem::take(&mut self.content.get_mut().exports)
+    }
+
+    pub(crate) fn add_import(&mut self, symbol: String, return_type: &str, signature_args: &str, noexcept: &str, call_args: &str) {
+        if self.header { return; }
+
+        self.content.get_mut().imports.push(ImportInfo {
+            symbol,
+            return_type: return_type.to_string(),
+            signature_args: signature_args.to_string(),
+            noexcept: noexcept.to_string(),
+            call_args: call_args.to_string(),
+        });
+    }
+
+    pub(crate) fn imports(&mut self) -> Vec<ImportInfo> {
+        std::mem::take(&mut self.content.get_mut().imports)
+    }
+
+    pub(crate) fn thunk_prefix(&mut self) -> String {
+        self.flush();
+
+        let include = &self.include.content.bytes;
+        let pragma_begin = &self.pragma.begin.bytes;
+        let builtin = &self.builtin.content.bytes;
+
+        let mut out = String::new();
+        out.push_str(include);
+        if !out.is_empty() && !pragma_begin.is_empty() {
+            out.push('\n');
+        }
+        out.push_str(pragma_begin);
+        if !out.is_empty() && !builtin.is_empty() {
+            out.push('\n');
+        }
+        out.push_str(builtin);
+        out
+    }
+
+    pub(crate) fn thunk_postfix(&mut self) -> String {
+        self.flush();
+        self.pragma.end.bytes.clone()
+    }
+
+    /// Temporarily redirect writes to a buffer, returning the result and captured output
+    pub(crate) fn with_buffer<F, R>(&mut self, f: F) -> (R, String)
+    where
+        F: FnOnce(&mut Self) -> R,
+    {
+        *self.write_override.borrow_mut() = Some(String::new());
+        let result = f(self);
+        let buffer = self.write_override.borrow_mut().take().unwrap();
+        (result, buffer)
+    }
 }
 
 impl<'a> Write for Content<'a> {
@@ -169,7 +245,6 @@ impl<'a> Content<'a> {
             self.bytes.push_str(b);
             self.suppress_next_section = false;
             self.section_pending = false;
-            self.blocks_pending = 0;
         }
     }
 
@@ -218,6 +293,7 @@ impl<'a> Content<'a> {
         }
 
         self.blocks.truncate(write);
+        self.blocks_pending = 0;
     }
 }
 
@@ -248,6 +324,10 @@ impl<'a> InfallibleWrite for Content<'a> {
 
 impl<'a> InfallibleWrite for OutFile<'a> {
     fn write_fmt(&mut self, args: Arguments) {
-        InfallibleWrite::write_fmt(self.content.get_mut(), args);
+        if let Some(buf) = self.write_override.borrow_mut().as_mut() {
+            Write::write_fmt(buf, args).unwrap();
+        } else {
+            InfallibleWrite::write_fmt(self.content.get_mut(), args);
+        }
     }
 }

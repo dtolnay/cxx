@@ -1,0 +1,13 @@
+[package]
+name = "cxx-test-shared-library"
+version = "0.0.0"
+edition = "2021"
+publish = false
+
+[[test]]
+name = "test_shared_library"
+harness = true
+
+[dev-dependencies]
+cc = "1.0"
+cargo_metadata = "0.19"
