@@ -124,6 +124,63 @@ public:
   Str(const std::string &);
   Str(const char *);
   Str(const char *, std::size_t);
+#if defined(__cpp_char8_t) && __cplusplus >= 202002L
+  struct utf8_literal {
+  private:
+    friend class Str;
+    friend consteval utf8_literal operator""_utf8(const char8_t *s,
+                                                  std::size_t len) noexcept;
+    inline consteval utf8_literal(const char8_t *s, std::size_t len) noexcept
+        : ptr(s), len(len) {
+      assert_utf8(s, len);
+    }
+    const char8_t *const ptr;
+    const std::size_t len;
+    // This can only be called from a user-defined literal initialization and it's
+    // always evaluated at compile time.
+    static consteval void assert_utf8(const char8_t *s, std::size_t len) {
+      for (std::size_t i = 0; i < len;) {
+        auto c = static_cast<unsigned char>(s[i]);
+        std::size_t seq;
+        if (c <= 0x7F) {
+          seq = 1;
+        } else if ((c & 0xE0) == 0xC0) {
+          seq = 2;
+          if (c < 0xC2)
+            throw "overlong UTF-8 sequence";
+        } else if ((c & 0xF0) == 0xE0) {
+          seq = 3;
+        } else if ((c & 0xF8) == 0xF0) {
+          seq = 4;
+          if (c > 0xF4)
+            throw "codepoint out of range";
+        } else {
+          throw "invalid UTF-8 start byte";
+        }
+        if (i + seq > len)
+          throw "truncated UTF-8 sequence";
+        for (std::size_t j = 1; j < seq; ++j)
+          if ((static_cast<unsigned char>(s[i + j]) & 0xC0) != 0x80)
+            throw "invalid UTF-8 continuation byte";
+        if (seq == 3) {
+          auto c1 = static_cast<unsigned char>(s[i + 1]);
+          if (c == 0xE0 && c1 < 0xA0)
+            throw "overlong UTF-8 sequence";
+          if (c == 0xED && c1 >= 0xA0)
+            throw "UTF-16 surrogate in UTF-8";
+        } else if (seq == 4) {
+          auto c1 = static_cast<unsigned char>(s[i + 1]);
+          if (c == 0xF0 && c1 < 0x90)
+            throw "overlong UTF-8 sequence";
+          if (c == 0xF4 && c1 > 0x8F)
+            throw "codepoint out of range";
+        }
+        i += seq;
+      }
+    }
+  };
+  Str(const utf8_literal lit) noexcept;
+#endif
 
   Str &operator=(const Str &) & noexcept = default;
 
@@ -165,6 +222,13 @@ private:
 
   std::array<std::uintptr_t, 2> repr;
 };
+
+#if defined(__cpp_char8_t) && __cplusplus >= 202002L
+inline consteval Str::utf8_literal operator""_utf8(const char8_t *s,
+                                                   std::size_t len) noexcept {
+  return Str::utf8_literal(s, len);
+}
+#endif
 #endif // CXXBRIDGE1_RUST_STR
 
 #ifndef CXXBRIDGE1_RUST_SLICE

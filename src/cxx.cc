@@ -87,6 +87,8 @@ void cxxbridge1$str$new(rust::Str *self) noexcept;
 void cxxbridge1$str$ref(rust::Str *self, const rust::String *string) noexcept;
 bool cxxbridge1$str$from(rust::Str *self, const char *ptr,
                          std::size_t len) noexcept;
+void cxxbridge1$str$from_utf8_unchecked(rust::Str *self, const char *ptr,
+                                        std::size_t len) noexcept;
 const char *cxxbridge1$str$ptr(const rust::Str *self) noexcept;
 std::size_t cxxbridge1$str$len(const rust::Str *self) noexcept;
 
@@ -346,6 +348,17 @@ Str::Str(const char *s, std::size_t len) {
           s == nullptr && len == 0 ? reinterpret_cast<const char *>(1) : s,
           len);
 }
+
+#if defined(__cpp_char8_t) && __cplusplus >= 202002L
+static void initStrUnchecked(Str *self, const char *ptr,
+                             std::size_t len) noexcept {
+  cxxbridge1$str$from_utf8_unchecked(self, ptr, len);
+}
+
+Str::Str(const utf8_literal lit) noexcept {
+  initStrUnchecked(this, reinterpret_cast<const char *>(lit.ptr), lit.len);
+}
+#endif
 
 Str::operator std::string() const {
   return std::string(this->data(), this->size());
