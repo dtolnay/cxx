@@ -32,6 +32,18 @@ unsafe extern "C" fn str_from(this: &mut MaybeUninit<&str>, ptr: *const u8, len:
     }
 }
 
+#[export_name = "cxxbridge1$str$from_utf8_unchecked"]
+unsafe extern "C" fn str_from_utf8_unchecked(
+    this: &mut MaybeUninit<&str>,
+    ptr: *const u8,
+    len: usize,
+) {
+    let slice = unsafe { slice::from_raw_parts(ptr, len) };
+    let s = unsafe { str::from_utf8_unchecked(slice) };
+    let this = this.as_mut_ptr();
+    unsafe { ptr::write(this, s) }
+}
+
 #[export_name = "cxxbridge1$str$ptr"]
 unsafe extern "C" fn str_ptr(this: &&str) -> *const u8 {
     this.as_ptr()
