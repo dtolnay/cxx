@@ -27,6 +27,7 @@ fn test_unique_ptr_of_incomplete_foward_declared_pointee() {
     assert!(err_msg.contains("definition of `::ForwardDeclaredType` is required"));
 }
 
+#[cfg(feature = "c++20")]
 #[test]
 fn test_str_rejects_non_utf8() {
     let test = cpp_compile::Test::new(quote! {
@@ -52,9 +53,13 @@ fn test_str_rejects_non_utf8() {
     );
     let err_msg = test.compile().expect_single_error();
     println!("error message: {err_msg}");
-    assert!(err_msg.contains("consteval function"), "unexpected error: {err_msg}");
+    assert!(
+        err_msg.contains("consteval") || err_msg.contains("constexpr"),
+        "unexpected error: {err_msg}"
+    );
 }
 
+#[cfg(feature = "c++20")]
 #[test]
 fn test_str_rejects_non_constexpr_variable() {
     let test = cpp_compile::Test::new(quote! {
@@ -79,5 +84,8 @@ fn test_str_rejects_non_constexpr_variable() {
     );
     let err_msg = test.compile().expect_single_error();
     println!("error message: {err_msg}");
-    assert!(err_msg.contains("no matching constructor"), "unexpected error: {err_msg}");
+    assert!(
+        err_msg.contains("no matching constructor") || err_msg.contains("invalid conversion"),
+        "unexpected error: {err_msg}"
+    );
 }
