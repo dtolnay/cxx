@@ -86,6 +86,18 @@ pub mod tests {
     }
 
     #[test]
+    fn test_result_returning_own_ok() {
+        let own = ffi::cxx_try_return_own().unwrap();
+        assert_eq!(own.get_data(), 5150);
+    }
+
+    #[test]
+    fn test_result_returning_own_err() {
+        let err = ffi::cxx_fail_return_own().unwrap_err();
+        assert_eq!(err.what(), "std::exception: cxx_fail_return_own");
+    }
+
+    #[test]
     fn heap_alloc() {
         let mut nodes = vec![];
         for i in 0..1456 {

@@ -91,6 +91,11 @@ mod ffi {
         fn own_integer_attached() -> KjOwn<i64>;
 
         #[allow(dead_code)]
+        fn cxx_try_return_own() -> Result<KjOwn<OpaqueCxxClass>>;
+        #[allow(dead_code)]
+        fn cxx_fail_return_own() -> Result<KjOwn<OpaqueCxxClass>>;
+
+        #[allow(dead_code)]
         fn null_exception_test_driver_1() -> String;
         #[allow(dead_code)]
         fn null_exception_test_driver_2() -> String;

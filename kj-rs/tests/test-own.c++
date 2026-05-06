@@ -5,6 +5,7 @@
 #include "kj/string.h"
 
 #include <exception>
+#include <stdexcept>
 
 using namespace kj_rs;
 
@@ -34,6 +35,14 @@ kj::Own<OpaqueCxxClass> breaking_things() {
   auto own1 = kj::heap<OpaqueCxxClass>(72);
   auto own2 = own0.attach(kj::mv(own1));
   return own2;
+}
+
+kj::Own<OpaqueCxxClass> cxx_try_return_own() {
+  return kj::heap<OpaqueCxxClass>(5150);
+}
+
+kj::Own<OpaqueCxxClass> cxx_fail_return_own() {
+  throw std::runtime_error("cxx_fail_return_own");
 }
 
 kj::Own<int64_t> own_integer() {

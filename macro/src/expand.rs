@@ -738,11 +738,11 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                         true => quote_spanned!(span=> #call.as_mut_slice::<#inner>()),
                     }
                 }
-                Type::KjOwn(_) => quote_spanned! {span=>
+                Type::KjOwn(_) => quote_spanned! {span=> {
                     let __temp = #call;
                     assert!(!__temp.as_ptr().is_null(), "Returning a Null kj::Own to Rust is not valid");
                     __temp
-                },
+                }},
                 Type::Future(_) => {
                     quote_spanned!(span=> ::kj_rs::new_callbacks_promise_future(#call))
                 }
