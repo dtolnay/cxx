@@ -13,6 +13,7 @@ use cxx_test_suite::module::ffi2;
 use cxx_test_suite::{cast, ffi, R};
 use std::cell::Cell;
 use std::ffi::CStr;
+use std::mem::{align_of, size_of};
 use std::panic::{self, RefUnwindSafe, UnwindSafe};
 
 thread_local! {
@@ -99,6 +100,58 @@ fn test_c_return() {
         enm @ ffi::ABEnum::ABAVal => assert_eq!(0, enm.repr),
         _ => assert!(false),
     }
+}
+
+#[test]
+fn test_kj_own_shared_struct_abi() {
+    assert_eq!(
+        size_of::<ffi::SharedWithKjOwn>(),
+        ffi::c_sizeof_shared_with_kj_own()
+    );
+    assert_eq!(
+        align_of::<ffi::SharedWithKjOwn>(),
+        ffi::c_alignof_shared_with_kj_own()
+    );
+    assert_eq!(
+        size_of::<ffi::SharedWithMultipleKjOwns>(),
+        ffi::c_sizeof_shared_with_multiple_kj_owns()
+    );
+    assert_eq!(
+        align_of::<ffi::SharedWithMultipleKjOwns>(),
+        ffi::c_alignof_shared_with_multiple_kj_owns()
+    );
+}
+
+#[test]
+fn test_kj_own_shared_struct_roundtrip() {
+    let shared = ffi::c_return_shared_with_kj_own(3030);
+    assert_eq!(3030, shared.own.get());
+    assert_eq!(3030, ffi::c_take_shared_with_kj_own_by_ref(&shared));
+    assert_eq!(3030, ffi::c_take_shared_with_kj_own_by_value(shared));
+
+    let shared = ffi::c_return_shared_with_multiple_kj_owns(1010, 2020);
+    assert_eq!(
+        3030,
+        ffi::c_take_shared_with_multiple_kj_owns_by_ref(&shared)
+    );
+    assert_eq!(
+        3030,
+        ffi::c_take_shared_with_multiple_kj_owns_by_value(shared)
+    );
+
+    let shared = ffi::SharedWithKjOwn {
+        own: ffi::c_return_kj_own(2020),
+    };
+    let shared = ffi::c_roundtrip_shared_with_kj_own(shared);
+    assert_eq!(2021, shared.own.get());
+
+    let shared = ffi::SharedWithMultipleKjOwns {
+        first: ffi::c_return_kj_own(1010),
+        second: ffi::c_return_kj_own(2020),
+    };
+    let shared = ffi::c_roundtrip_shared_with_multiple_kj_owns(shared);
+    assert_eq!(1020, shared.first.get());
+    assert_eq!(2040, shared.second.get());
 }
 
 #[test]

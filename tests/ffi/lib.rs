@@ -21,6 +21,10 @@ use core::fmt;
 use cxx::{
     type_id, CxxString, CxxVector, ExternType, KjError, KjExceptionType, SharedPtr, UniquePtr,
 };
+// The bridge parser accepts the unqualified smart-pointer name, while expansion
+// fully qualifies the emitted Rust field type.
+#[allow(unused_imports)]
+use kj_rs::KjOwn;
 use std::fmt::Display;
 use std::mem::MaybeUninit;
 use std::os::raw::c_char;
@@ -43,6 +47,15 @@ pub mod ffi {
         critical: u8,
         field: String,
         value: String,
+    }
+
+    struct SharedWithKjOwn {
+        own: KjOwn<C>,
+    }
+
+    struct SharedWithMultipleKjOwns {
+        first: KjOwn<C>,
+        second: KjOwn<C>,
     }
 
     #[derive(Debug, Hash, PartialOrd, Ord)]
@@ -141,6 +154,24 @@ pub mod ffi {
         fn c_return_nested_ns_enum(n: u16) -> ABEnum;
         fn c_return_const_ptr(n: usize) -> *const C;
         fn c_return_mut_ptr(n: usize) -> *mut C;
+        fn c_return_kj_own(n: usize) -> KjOwn<C>;
+        fn c_sizeof_shared_with_kj_own() -> usize;
+        fn c_alignof_shared_with_kj_own() -> usize;
+        fn c_sizeof_shared_with_multiple_kj_owns() -> usize;
+        fn c_alignof_shared_with_multiple_kj_owns() -> usize;
+        fn c_return_shared_with_kj_own(n: usize) -> SharedWithKjOwn;
+        fn c_return_shared_with_multiple_kj_owns(
+            first: usize,
+            second: usize,
+        ) -> SharedWithMultipleKjOwns;
+        fn c_take_shared_with_kj_own_by_value(shared: SharedWithKjOwn) -> usize;
+        fn c_take_shared_with_kj_own_by_ref(shared: &SharedWithKjOwn) -> usize;
+        fn c_take_shared_with_multiple_kj_owns_by_value(shared: SharedWithMultipleKjOwns) -> usize;
+        fn c_take_shared_with_multiple_kj_owns_by_ref(shared: &SharedWithMultipleKjOwns) -> usize;
+        fn c_roundtrip_shared_with_kj_own(shared: SharedWithKjOwn) -> SharedWithKjOwn;
+        fn c_roundtrip_shared_with_multiple_kj_owns(
+            shared: SharedWithMultipleKjOwns,
+        ) -> SharedWithMultipleKjOwns;
 
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);

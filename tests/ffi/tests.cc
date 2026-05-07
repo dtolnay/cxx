@@ -25,6 +25,11 @@ namespace tests {
 
 static constexpr char SLICE_DATA[] = "2020";
 
+static_assert(sizeof(SharedWithKjOwn) == sizeof(kj::Own<C>));
+static_assert(alignof(SharedWithKjOwn) == alignof(kj::Own<C>));
+static_assert(sizeof(SharedWithMultipleKjOwns) == 2 * sizeof(kj::Own<C>));
+static_assert(alignof(SharedWithMultipleKjOwns) == alignof(kj::Own<C>));
+
 C::C(size_t n) : n(n) {}
 
 size_t C::get() const { return this->n; }
@@ -228,6 +233,59 @@ Enum c_return_enum(uint16_t n) {
 const C *c_return_const_ptr(size_t c) { return new C(c); }
 
 C *c_return_mut_ptr(size_t c) { return new C(c); }
+
+kj::Own<C> c_return_kj_own(size_t n) { return kj::heap<C>(n); }
+
+size_t c_sizeof_shared_with_kj_own() { return sizeof(SharedWithKjOwn); }
+
+size_t c_alignof_shared_with_kj_own() { return alignof(SharedWithKjOwn); }
+
+size_t c_sizeof_shared_with_multiple_kj_owns() {
+  return sizeof(SharedWithMultipleKjOwns);
+}
+
+size_t c_alignof_shared_with_multiple_kj_owns() {
+  return alignof(SharedWithMultipleKjOwns);
+}
+
+SharedWithKjOwn c_return_shared_with_kj_own(size_t n) {
+  return SharedWithKjOwn{kj::heap<C>(n)};
+}
+
+SharedWithMultipleKjOwns c_return_shared_with_multiple_kj_owns(size_t first,
+                                                               size_t second) {
+  return SharedWithMultipleKjOwns{kj::heap<C>(first), kj::heap<C>(second)};
+}
+
+size_t c_take_shared_with_kj_own_by_value(SharedWithKjOwn shared) {
+  return shared.own->get();
+}
+
+size_t c_take_shared_with_kj_own_by_ref(const SharedWithKjOwn &shared) {
+  return shared.own->get();
+}
+
+size_t
+c_take_shared_with_multiple_kj_owns_by_value(SharedWithMultipleKjOwns shared) {
+  return shared.first->get() + shared.second->get();
+}
+
+size_t c_take_shared_with_multiple_kj_owns_by_ref(
+    const SharedWithMultipleKjOwns &shared) {
+  return shared.first->get() + shared.second->get();
+}
+
+SharedWithKjOwn c_roundtrip_shared_with_kj_own(SharedWithKjOwn shared) {
+  shared.own->set(shared.own->get() + 1);
+  return shared;
+}
+
+SharedWithMultipleKjOwns
+c_roundtrip_shared_with_multiple_kj_owns(SharedWithMultipleKjOwns shared) {
+  shared.first->set(shared.first->get() + 10);
+  shared.second->set(shared.second->get() + 20);
+  return shared;
+}
 
 Borrow::Borrow(const std::string &s) : s(s) {}
 

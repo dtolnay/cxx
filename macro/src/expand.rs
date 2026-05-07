@@ -760,6 +760,10 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
     let fn_token = efn.sig.fn_token;
     let ident = &efn.name.rust;
     let generics = &efn.generics;
+    let missing_panics_doc = match &efn.ret {
+        Some(Type::KjOwn(_)) => quote!(#[allow(clippy::missing_panics_doc)]),
+        _ => quote!(),
+    };
     let arg_list = quote_spanned!(efn.sig.paren_token.span=> (#(#all_args,)*));
     let fn_body = quote_spanned!(span=> {
         #UnsafeExtern extern "C" {
@@ -773,6 +777,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
             quote! {
                 #doc
                 #attrs
+                #missing_panics_doc
                 #visibility #unsafety #fn_token #ident #generics #arg_list #ret #fn_body
             }
         }
@@ -803,6 +808,7 @@ fn expand_cxx_function_shim(efn: &ExternFn, types: &Types) -> TokenStream {
                 impl #generics #receiver_ident #receiver_generics {
                     #doc
                     #attrs
+                    #missing_panics_doc
                     #visibility #unsafety #fn_token #ident #arg_list #ret #fn_body
                 }
             }

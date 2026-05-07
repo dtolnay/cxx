@@ -29,14 +29,16 @@ impl<'a> Types<'a> {
             | Type::Void(_)
             | Type::KjDate(_)
             | Type::SliceRef(_) => Definite(true),
-            Type::UniquePtr(_) | Type::SharedPtr(_) | Type::WeakPtr(_) | Type::CxxVector(_) => {
-                Definite(false)
-            }
+            Type::UniquePtr(_)
+            | Type::KjOwn(_)
+            | Type::SharedPtr(_)
+            | Type::WeakPtr(_)
+            | Type::CxxVector(_) => Definite(false),
             Type::Ref(ty) => self.determine_improper_ctype(&ty.inner),
             Type::Ptr(ty) => self.determine_improper_ctype(&ty.inner),
             Type::Array(ty) => self.determine_improper_ctype(&ty.inner),
             Type::KjMaybe(ty) => self.determine_improper_ctype(&ty.inner),
-            Type::Future(_) | Type::KjOwn(_) | Type::KjRc(_) | Type::KjArc(_) => {
+            Type::Future(_) | Type::KjRc(_) | Type::KjArc(_) => {
                 todo!("file a workerd-cxx ticket")
             }
         }

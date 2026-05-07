@@ -1,6 +1,8 @@
 #pragma once
 #include "rust/cxx.h"
 
+#include <kj/memory.h>
+
 #include <memory>
 #include <string>
 
@@ -38,6 +40,8 @@ namespace tests {
 struct R;
 struct Shared;
 struct SharedString;
+struct SharedWithKjOwn;
+struct SharedWithMultipleKjOwns;
 enum class Enum : uint16_t;
 
 class C {
@@ -126,6 +130,23 @@ Enum c_return_enum(uint16_t n);
 std::unique_ptr<Borrow> c_return_borrow(const std::string &s);
 const C *c_return_const_ptr(size_t n);
 C *c_return_mut_ptr(size_t n);
+kj::Own<C> c_return_kj_own(size_t n);
+size_t c_sizeof_shared_with_kj_own();
+size_t c_alignof_shared_with_kj_own();
+size_t c_sizeof_shared_with_multiple_kj_owns();
+size_t c_alignof_shared_with_multiple_kj_owns();
+SharedWithKjOwn c_return_shared_with_kj_own(size_t n);
+SharedWithMultipleKjOwns c_return_shared_with_multiple_kj_owns(size_t first,
+                                                               size_t second);
+size_t c_take_shared_with_kj_own_by_value(SharedWithKjOwn shared);
+size_t c_take_shared_with_kj_own_by_ref(const SharedWithKjOwn &shared);
+size_t
+c_take_shared_with_multiple_kj_owns_by_value(SharedWithMultipleKjOwns shared);
+size_t c_take_shared_with_multiple_kj_owns_by_ref(
+    const SharedWithMultipleKjOwns &shared);
+SharedWithKjOwn c_roundtrip_shared_with_kj_own(SharedWithKjOwn shared);
+SharedWithMultipleKjOwns
+c_roundtrip_shared_with_multiple_kj_owns(SharedWithMultipleKjOwns shared);
 
 void c_take_primitive(size_t n);
 void c_take_shared(Shared shared);

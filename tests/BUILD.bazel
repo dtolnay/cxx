@@ -81,6 +81,7 @@ rust_cxx_bridge(
         ":jsg-mock",
         ":module",
         "//:core",
+        "//kj-rs:kj-rs-lib",
     ],
 )
 
