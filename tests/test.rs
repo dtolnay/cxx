@@ -155,6 +155,59 @@ fn test_kj_own_shared_struct_roundtrip() {
 }
 
 #[test]
+fn test_kj_rc_shared_struct_abi() {
+    assert_eq!(
+        size_of::<ffi::SharedWithKjRc>(),
+        ffi::c_sizeof_shared_with_kj_rc()
+    );
+    assert_eq!(
+        align_of::<ffi::SharedWithKjRc>(),
+        ffi::c_alignof_shared_with_kj_rc()
+    );
+    assert_eq!(
+        size_of::<ffi::SharedWithMultipleKjRcs>(),
+        ffi::c_sizeof_shared_with_multiple_kj_rcs()
+    );
+    assert_eq!(
+        align_of::<ffi::SharedWithMultipleKjRcs>(),
+        ffi::c_alignof_shared_with_multiple_kj_rcs()
+    );
+}
+
+#[test]
+fn test_kj_rc_shared_struct_roundtrip() {
+    let shared = ffi::c_return_shared_with_kj_rc(3030);
+    assert_eq!(3030, ffi::c_take_shared_with_kj_rc_by_ref(&shared));
+    assert_eq!(3030, ffi::c_take_shared_with_kj_rc_by_value(shared));
+
+    let shared = ffi::c_return_shared_with_multiple_kj_rcs(1010, 2020);
+    assert_eq!(
+        3030,
+        ffi::c_take_shared_with_multiple_kj_rcs_by_ref(&shared)
+    );
+    assert_eq!(
+        3030,
+        ffi::c_take_shared_with_multiple_kj_rcs_by_value(shared)
+    );
+
+    let shared = ffi::SharedWithKjRc {
+        rc: ffi::c_return_kj_rc(2020),
+    };
+    let shared = ffi::c_roundtrip_shared_with_kj_rc(shared);
+    assert_eq!(2021, ffi::c_take_shared_with_kj_rc_by_ref(&shared));
+
+    let shared = ffi::SharedWithMultipleKjRcs {
+        first: ffi::c_return_kj_rc(1010),
+        second: ffi::c_return_kj_rc(2020),
+    };
+    let shared = ffi::c_roundtrip_shared_with_multiple_kj_rcs(shared);
+    assert_eq!(
+        3060,
+        ffi::c_take_shared_with_multiple_kj_rcs_by_ref(&shared)
+    );
+}
+
+#[test]
 fn test_c_try_return() {
     assert_eq!((), ffi::c_try_return_void().unwrap());
     assert_eq!(2020, ffi::c_try_return_primitive().unwrap());

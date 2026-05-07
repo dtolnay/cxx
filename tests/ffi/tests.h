@@ -2,6 +2,7 @@
 #include "rust/cxx.h"
 
 #include <kj/memory.h>
+#include <kj/refcount.h>
 
 #include <memory>
 #include <string>
@@ -42,6 +43,8 @@ struct Shared;
 struct SharedString;
 struct SharedWithKjOwn;
 struct SharedWithMultipleKjOwns;
+struct SharedWithKjRc;
+struct SharedWithMultipleKjRcs;
 enum class Enum : uint16_t;
 
 class C {
@@ -62,6 +65,16 @@ public:
 private:
   size_t n;
   std::vector<uint8_t> v;
+};
+
+class RcC : public kj::Refcounted {
+public:
+  explicit RcC(size_t n);
+  size_t get() const;
+  void set(size_t n);
+
+private:
+  size_t n;
 };
 
 struct D {
@@ -147,6 +160,23 @@ size_t c_take_shared_with_multiple_kj_owns_by_ref(
 SharedWithKjOwn c_roundtrip_shared_with_kj_own(SharedWithKjOwn shared);
 SharedWithMultipleKjOwns
 c_roundtrip_shared_with_multiple_kj_owns(SharedWithMultipleKjOwns shared);
+kj::Rc<RcC> c_return_kj_rc(size_t n);
+size_t c_sizeof_shared_with_kj_rc();
+size_t c_alignof_shared_with_kj_rc();
+size_t c_sizeof_shared_with_multiple_kj_rcs();
+size_t c_alignof_shared_with_multiple_kj_rcs();
+SharedWithKjRc c_return_shared_with_kj_rc(size_t n);
+SharedWithMultipleKjRcs c_return_shared_with_multiple_kj_rcs(size_t first,
+                                                             size_t second);
+size_t c_take_shared_with_kj_rc_by_value(SharedWithKjRc shared);
+size_t c_take_shared_with_kj_rc_by_ref(const SharedWithKjRc &shared);
+size_t
+c_take_shared_with_multiple_kj_rcs_by_value(SharedWithMultipleKjRcs shared);
+size_t c_take_shared_with_multiple_kj_rcs_by_ref(
+    const SharedWithMultipleKjRcs &shared);
+SharedWithKjRc c_roundtrip_shared_with_kj_rc(SharedWithKjRc shared);
+SharedWithMultipleKjRcs
+c_roundtrip_shared_with_multiple_kj_rcs(SharedWithMultipleKjRcs shared);
 
 void c_take_primitive(size_t n);
 void c_take_shared(Shared shared);

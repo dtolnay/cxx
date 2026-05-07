@@ -29,6 +29,10 @@ static_assert(sizeof(SharedWithKjOwn) == sizeof(kj::Own<C>));
 static_assert(alignof(SharedWithKjOwn) == alignof(kj::Own<C>));
 static_assert(sizeof(SharedWithMultipleKjOwns) == 2 * sizeof(kj::Own<C>));
 static_assert(alignof(SharedWithMultipleKjOwns) == alignof(kj::Own<C>));
+static_assert(sizeof(SharedWithKjRc) == sizeof(kj::Rc<RcC>));
+static_assert(alignof(SharedWithKjRc) == alignof(kj::Rc<RcC>));
+static_assert(sizeof(SharedWithMultipleKjRcs) == 2 * sizeof(kj::Rc<RcC>));
+static_assert(alignof(SharedWithMultipleKjRcs) == alignof(kj::Rc<RcC>));
 
 C::C(size_t n) : n(n) {}
 
@@ -48,6 +52,12 @@ size_t C::set(size_t n) {
 size_t C::set_succeed(size_t n) { return this->set(n); }
 
 size_t C::get_fail() { throw std::runtime_error("unimplemented"); }
+
+RcC::RcC(size_t n) : n(n) {}
+
+size_t RcC::get() const { return this->n; }
+
+void RcC::set(size_t n) { this->n = n; }
 
 size_t Shared::c_method_on_shared() const noexcept { return 2021; }
 
@@ -282,6 +292,59 @@ SharedWithKjOwn c_roundtrip_shared_with_kj_own(SharedWithKjOwn shared) {
 
 SharedWithMultipleKjOwns
 c_roundtrip_shared_with_multiple_kj_owns(SharedWithMultipleKjOwns shared) {
+  shared.first->set(shared.first->get() + 10);
+  shared.second->set(shared.second->get() + 20);
+  return shared;
+}
+
+kj::Rc<RcC> c_return_kj_rc(size_t n) { return kj::rc<RcC>(n); }
+
+size_t c_sizeof_shared_with_kj_rc() { return sizeof(SharedWithKjRc); }
+
+size_t c_alignof_shared_with_kj_rc() { return alignof(SharedWithKjRc); }
+
+size_t c_sizeof_shared_with_multiple_kj_rcs() {
+  return sizeof(SharedWithMultipleKjRcs);
+}
+
+size_t c_alignof_shared_with_multiple_kj_rcs() {
+  return alignof(SharedWithMultipleKjRcs);
+}
+
+SharedWithKjRc c_return_shared_with_kj_rc(size_t n) {
+  return SharedWithKjRc{kj::rc<RcC>(n)};
+}
+
+SharedWithMultipleKjRcs c_return_shared_with_multiple_kj_rcs(size_t first,
+                                                             size_t second) {
+  return SharedWithMultipleKjRcs{kj::rc<RcC>(first), kj::rc<RcC>(second)};
+}
+
+size_t c_take_shared_with_kj_rc_by_value(SharedWithKjRc shared) {
+  return shared.rc->get();
+}
+
+size_t c_take_shared_with_kj_rc_by_ref(const SharedWithKjRc &shared) {
+  return shared.rc->get();
+}
+
+size_t
+c_take_shared_with_multiple_kj_rcs_by_value(SharedWithMultipleKjRcs shared) {
+  return shared.first->get() + shared.second->get();
+}
+
+size_t c_take_shared_with_multiple_kj_rcs_by_ref(
+    const SharedWithMultipleKjRcs &shared) {
+  return shared.first->get() + shared.second->get();
+}
+
+SharedWithKjRc c_roundtrip_shared_with_kj_rc(SharedWithKjRc shared) {
+  shared.rc->set(shared.rc->get() + 1);
+  return shared;
+}
+
+SharedWithMultipleKjRcs
+c_roundtrip_shared_with_multiple_kj_rcs(SharedWithMultipleKjRcs shared) {
   shared.first->set(shared.first->get() + 10);
   shared.second->set(shared.second->get() + 20);
   return shared;

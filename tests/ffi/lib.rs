@@ -24,7 +24,7 @@ use cxx::{
 // The bridge parser accepts the unqualified smart-pointer name, while expansion
 // fully qualifies the emitted Rust field type.
 #[allow(unused_imports)]
-use kj_rs::KjOwn;
+use kj_rs::{KjOwn, KjRc};
 use std::fmt::Display;
 use std::mem::MaybeUninit;
 use std::os::raw::c_char;
@@ -56,6 +56,15 @@ pub mod ffi {
     struct SharedWithMultipleKjOwns {
         first: KjOwn<C>,
         second: KjOwn<C>,
+    }
+
+    struct SharedWithKjRc {
+        rc: KjRc<RcC>,
+    }
+
+    struct SharedWithMultipleKjRcs {
+        first: KjRc<RcC>,
+        second: KjRc<RcC>,
     }
 
     #[derive(Debug, Hash, PartialOrd, Ord)]
@@ -172,6 +181,24 @@ pub mod ffi {
         fn c_roundtrip_shared_with_multiple_kj_owns(
             shared: SharedWithMultipleKjOwns,
         ) -> SharedWithMultipleKjOwns;
+        fn c_return_kj_rc(n: usize) -> KjRc<RcC>;
+        fn c_sizeof_shared_with_kj_rc() -> usize;
+        fn c_alignof_shared_with_kj_rc() -> usize;
+        fn c_sizeof_shared_with_multiple_kj_rcs() -> usize;
+        fn c_alignof_shared_with_multiple_kj_rcs() -> usize;
+        fn c_return_shared_with_kj_rc(n: usize) -> SharedWithKjRc;
+        fn c_return_shared_with_multiple_kj_rcs(
+            first: usize,
+            second: usize,
+        ) -> SharedWithMultipleKjRcs;
+        fn c_take_shared_with_kj_rc_by_value(shared: SharedWithKjRc) -> usize;
+        fn c_take_shared_with_kj_rc_by_ref(shared: &SharedWithKjRc) -> usize;
+        fn c_take_shared_with_multiple_kj_rcs_by_value(shared: SharedWithMultipleKjRcs) -> usize;
+        fn c_take_shared_with_multiple_kj_rcs_by_ref(shared: &SharedWithMultipleKjRcs) -> usize;
+        fn c_roundtrip_shared_with_kj_rc(shared: SharedWithKjRc) -> SharedWithKjRc;
+        fn c_roundtrip_shared_with_multiple_kj_rcs(
+            shared: SharedWithMultipleKjRcs,
+        ) -> SharedWithMultipleKjRcs;
 
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);
@@ -267,6 +294,12 @@ pub mod ffi {
 
         #[namespace = "other"]
         fn ns_c_take_ns_shared(shared: AShared);
+    }
+
+    unsafe extern "C++" {
+        include!("tests/ffi/tests.h");
+
+        type RcC;
     }
 
     extern "C++" {
