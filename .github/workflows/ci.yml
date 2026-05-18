@@ -156,15 +156,15 @@ jobs:
           targets: wasm32-wasip1
           components: rust-src
       - uses: dtolnay/install@wasmtime-cli
-      - run: curl https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-32/wasi-sdk-32.0-x86_64-linux.tar.gz --location --silent --show-error --fail --retry 2 --output ${{runner.temp}}/wasi-sdk-32.0-x86_64-linux.tar.gz
-      - run: tar xf ${{runner.temp}}/wasi-sdk-32.0-x86_64-linux.tar.gz -C ${{runner.temp}}
+      - run: curl https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-33/wasi-sdk-33.0-x86_64-linux.tar.gz --location --silent --show-error --fail --retry 2 --output ${{runner.temp}}/wasi-sdk-33.0-x86_64-linux.tar.gz
+      - run: tar xf ${{runner.temp}}/wasi-sdk-33.0-x86_64-linux.tar.gz -C ${{runner.temp}}
       - run: cargo build --target=wasm32-wasip1 --manifest-path=demo/Cargo.toml --release
-          --config='target.wasm32-wasip1.linker="${{runner.temp}}/wasi-sdk-32.0-x86_64-linux/bin/lld"'
-          --config='target.wasm32-wasip1.rustflags=["-Clink-args=-L${{runner.temp}}/wasi-sdk-32.0-x86_64-linux/share/wasi-sysroot/lib/wasm32-wasip1", "-Clink-args=-lc++abi"]'
+          --config='target.wasm32-wasip1.linker="${{runner.temp}}/wasi-sdk-33.0-x86_64-linux/bin/lld"'
+          --config='target.wasm32-wasip1.rustflags=["-Clink-args=-L${{runner.temp}}/wasi-sdk-33.0-x86_64-linux/share/wasi-sysroot/lib/wasm32-wasip1/eh", "-Clink-args=-lc++abi", "-Clink-args=-lunwind"]'
         env:
-          CXX: ${{runner.temp}}/wasi-sdk-32.0-x86_64-linux/bin/clang++
-          CXXFLAGS: --sysroot=${{runner.temp}}/wasi-sdk-32.0-x86_64-linux/share/wasi-sysroot
-      - run: wasmtime target/wasm32-wasip1/release/demo.wasm
+          CXX: ${{runner.temp}}/wasi-sdk-33.0-x86_64-linux/bin/clang++
+          CXXFLAGS: --sysroot=${{runner.temp}}/wasi-sdk-33.0-x86_64-linux/share/wasi-sysroot
+      - run: wasmtime --wasm=exceptions target/wasm32-wasip1/release/demo.wasm
 
   emscripten:
     name: Emscripten
