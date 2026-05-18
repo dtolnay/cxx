@@ -1496,7 +1496,7 @@ fn write_type_to_generic_writer(out: &mut impl InfallibleWrite, ty: &Type, types
         Type::Array(a) => {
             write!(out, "::std::array<");
             write_type_to_generic_writer(out, &a.inner, types);
-            write!(out, ", {}>", &a.len);
+            write!(out, ", {}>", a.len);
         }
         Type::Void(_) => unreachable!(),
     }
