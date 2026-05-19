@@ -147,6 +147,8 @@ jobs:
 
   wasi:
     name: WebAssembly
+    needs: pre_ci
+    if: needs.pre_ci.outputs.continue
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
