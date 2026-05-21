@@ -1,53 +1,47 @@
 error[E0277]: mutable reference to C++ type requires a pin -- use Pin<&mut Arg>
-  --> tests/ui/pin_mut_alias.rs:19:5
+  --> tests/ui/pin_mut_alias.rs:23:23
    |
-19 |     #[cxx::bridge]
-   |     ^^^^^^^^^^^^^^ use `Pin<&mut Arg>`
+23 |             fn f(arg: &mut Arg);
+   |                       ^^^^^^^^ use `Pin<&mut Arg>`
    |
    = help: the trait `ReferenceToUnpin_Arg` is not implemented for `&mut arg::Arg`
-   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: mutable reference to C++ type requires a pin -- use Pin<&mut ArgLife>
-  --> tests/ui/pin_mut_alias.rs:27:5
+  --> tests/ui/pin_mut_alias.rs:31:32
    |
-27 |     #[cxx::bridge]
-   |     ^^^^^^^^^^^^^^ use `Pin<&'b mut ArgLife<'c>>`
+31 |             fn fl<'b, 'c>(arg: &'b mut ArgLife<'c>);
+   |                                ^^^^^^^^^^^^^^^^^^^ use `Pin<&'b mut ArgLife<'c>>`
    |
    = help: the trait `ReferenceToUnpin_ArgLife` is not implemented for `&mut arg::ArgLife<'_>`
-   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: mutable reference to C++ type requires a pin -- use Pin<&mut Receiver>
-  --> tests/ui/pin_mut_alias.rs:54:5
+  --> tests/ui/pin_mut_alias.rs:58:18
    |
-54 |     #[cxx::bridge]
-   |     ^^^^^^^^^^^^^^ use `self: Pin<&mut Receiver>`
+58 |             fn g(&mut self);
+   |                  ^^^^^^^^^ use `self: Pin<&mut Receiver>`
    |
    = help: the trait `ReferenceToUnpin_Receiver` is not implemented for `&mut receiver::Receiver`
-   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: mutable reference to C++ type requires a pin -- use Pin<&mut ReceiverLife>
-  --> tests/ui/pin_mut_alias.rs:62:5
+  --> tests/ui/pin_mut_alias.rs:66:22
    |
-62 |     #[cxx::bridge]
-   |     ^^^^^^^^^^^^^^ use `self: Pin<&'b mut ReceiverLife<'_>>`
+66 |             fn g<'b>(&'b mut self);
+   |                      ^^^^^^^^^^^^ use `self: Pin<&'b mut ReceiverLife<'_>>`
    |
    = help: the trait `ReferenceToUnpin_ReceiverLife` is not implemented for `&mut receiver::ReceiverLife<'_>`
-   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: mutable reference to C++ type requires a pin -- use Pin<&mut Receiver2>
-  --> tests/ui/pin_mut_alias.rs:89:5
+  --> tests/ui/pin_mut_alias.rs:93:24
    |
-89 |     #[cxx::bridge]
-   |     ^^^^^^^^^^^^^^ use `Pin<&mut Receiver2>`
+93 |             fn h(self: &mut Receiver2);
+   |                        ^^^^^^^^^^^^^^ use `Pin<&mut Receiver2>`
    |
    = help: the trait `ReferenceToUnpin_Receiver2` is not implemented for `&mut receiver2::Receiver2`
-   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: mutable reference to C++ type requires a pin -- use Pin<&mut ReveiverLife2>
-  --> tests/ui/pin_mut_alias.rs:97:5
-   |
-97 |     #[cxx::bridge]
-   |     ^^^^^^^^^^^^^^ use `Pin<&'b mut ReveiverLife2<'c>>`
-   |
-   = help: the trait `ReferenceToUnpin_ReveiverLife2` is not implemented for `&mut receiver2::ReveiverLife2<'_>`
-   = note: this error originates in the attribute macro `cxx::bridge` (in Nightly builds, run with -Z macro-backtrace for more info)
+   --> tests/ui/pin_mut_alias.rs:101:32
+    |
+101 |             fn h<'b, 'c>(self: &'b mut ReveiverLife2<'c>);
+    |                                ^^^^^^^^^^^^^^^^^^^^^^^^^ use `Pin<&'b mut ReveiverLife2<'c>>`
+    |
+    = help: the trait `ReferenceToUnpin_ReveiverLife2` is not implemented for `&mut receiver2::ReveiverLife2<'_>`
