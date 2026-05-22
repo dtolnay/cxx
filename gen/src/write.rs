@@ -113,7 +113,11 @@ fn write_data_structures<'a>(out: &mut OutFile<'a>, apis: &'a [Api]) {
         match api {
             Api::Struct(strct) if !structs_written.contains(&strct.name.rust) => {
                 for next in &mut toposorted_structs {
-                    if !out.types.cxx.contains(&next.name.rust) {
+                    if strct.safe_shared_extern {
+                        check_struct_strong(out, strct);
+                    } else if out.types.cxx.contains(&next.name.rust) {
+                        /* Unsafe shared extern: do not generate anything on the C++ side. */
+                    } else {
                         out.next_section();
                         let methods = methods_for_type
                             .get(&next.name.rust)
@@ -497,6 +501,64 @@ fn check_enum<'a>(out: &mut OutFile<'a>, enm: &'a Enum) {
         out.suppress_next_section();
         write_enum_operators(out, enm);
         writeln!(out, "#endif // {}", guard);
+    }
+}
+
+/// Asserts that:
+/// - All members present in the Rust struct definition are also present in the
+///   C++ definition, are public in C++, and have identical types;
+/// - The order of the members in the layout is the same as in the Rust struct;
+/// - The struct is trivial (could be relaxed for structs that don't require it);
+/// - The size of the struct is eqaul to the total size of all fields defined
+///   in Rust. This guarantees that no new fields are added on the C++ side.
+///   As a side effect, requires that the struct layout has no padding.
+fn check_struct_strong<'a>(out: &mut OutFile<'a>, strct: &'a Struct) {
+    out.set_namespace(&strct.name.namespace);
+    out.include.cstddef = true;
+    out.include.type_traits = true;
+    out.include.utility = true;
+    out.builtin.relocatable = true;
+
+    // Ensure that the type is a class/struct
+    writeln!(
+        out,
+        "static_assert(::std::is_class<{}>::value, \"expected a struct/class\");",
+        strct.name.cxx,
+    );
+
+    // Ensure that it is trivial
+    writeln!(out, "static_assert(::rust::IsRelocatable<{}>::value, \"cxx does not yet support non-trivial structs as safe shared extern\");", strct.name.cxx);
+
+    // Ensure that the struct is of expected size, i.e., sum of all fields sizes.
+    // Structs with padding are not supported, since we cannot reliably detect
+    // if new fields are added on the C++ side :(
+    write!(out, "static_assert(sizeof({}) == (0", strct.name.cxx);
+    for field in &strct.fields {
+        write!(out, ") + sizeof(");
+        write_type(out, &field.ty);
+    }
+    writeln!(out, "), \"unexpected struct size; note that structs with padding in the layout are not supported\");");
+
+    for (idx, field) in strct.fields.iter().enumerate() {
+        // Ensure that every field has the right type and is public (thus the use of `std::declval`)
+        write!(out, "static_assert(::std::is_same<");
+        write_type(out, &field.ty);
+        writeln!(
+            out,
+            ", decltype(std::declval<{}>().{})>::value, \"wrong field type\");",
+            strct.name.cxx, field.name.cxx
+        );
+
+        // Ensure that the order is correct
+        if idx > 0 {
+            writeln!(
+                out,
+                "static_assert(offsetof({strct}, {field0}) < offsetof({strct}, {field1}), \"wrong fields order\");",
+                strct = strct.name.cxx,
+                field0 = strct.fields[idx - 1].name.cxx,
+                field1 = field.name.cxx,
+            );
+        }
     }
 }
 

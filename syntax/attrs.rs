@@ -36,6 +36,7 @@ pub(crate) struct Parser<'a> {
     pub cxx_name: Option<&'a mut Option<ForeignName>>,
     pub rust_name: Option<&'a mut Option<Ident>>,
     pub self_type: Option<&'a mut Option<Ident>>,
+    pub safe_shared_extern: Option<&'a mut bool>,
     pub ignore_unrecognized: bool,
 
     // Suppress clippy needless_update lint ("struct update has no effect, all
@@ -192,6 +193,20 @@ pub(crate) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) 
                 other_attrs.lint.push(attr);
                 continue;
             }
+        } else if attr_path.is_ident("safe_shared_extern") {
+            // Only effective for an extern struct.
+            // Causes `cxx` to generate assertions that ensure correctnes of the defined type,
+            // but only supports structs without padding in the layout.
+            if let Some(safe_shared_extern) = &mut parser.safe_shared_extern {
+                **safe_shared_extern = true;
+            } else {
+                cx.error(
+                    attr,
+                    "unexpected #[safe_shared_extern]: it is only effective for structs",
+                );
+                break;
+            }
+            continue;
         }
         if !parser.ignore_unrecognized {
             cx.error(attr, "unsupported attribute");
