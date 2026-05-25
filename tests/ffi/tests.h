@@ -105,6 +105,12 @@ struct Borrow {
 
 typedef char Buffer[12];
 
+struct SafeSharedStruct {
+  unsigned char a;
+  std::array<signed char, 3> b;
+  int16_t c;
+};
+
 size_t c_return_primitive();
 Shared c_return_shared();
 ::A::AShared c_return_ns_shared();

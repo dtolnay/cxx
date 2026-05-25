@@ -363,6 +363,13 @@ pub mod ffi {
         fn c_member_function_on_rust_type(self: &R);
     }
 
+    #[safe_shared_extern]
+    struct SafeSharedStruct {
+        a: u8,
+        b: [i8; 3],
+        c: i16,
+    }
+
     struct Dag0 {
         i: i32,
     }

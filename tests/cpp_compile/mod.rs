@@ -135,7 +135,7 @@ impl CompilationResult {
         panic!("{msg}");
     }
 
-    fn error_lines(&self) -> Vec<String> {
+    pub fn error_lines(&self) -> Vec<String> {
         assert!(!self.0.status.success());
 
         // MSVC reports errors to stdout rather than stderr, so consider both.
