@@ -78,7 +78,13 @@ fn write_forward_declarations(out: &mut OutFile, apis: &[Api]) {
         for api in apis {
             write!(out, "{:1$}", "", indent);
             match api {
-                Api::Struct(strct) => write_struct_decl(out, &strct.name),
+                Api::Struct(strct) => {
+                    if strct.safe_shared_extern {
+                        write_struct_using(out, &strct.name);
+                    } else {
+                        write_struct_decl(out, &strct.name)
+                    }
+                }
                 Api::Enum(enm) => write_enum_decl(out, enm),
                 Api::CxxType(ety) => write_struct_using(out, &ety.name),
                 Api::RustType(ety) => write_struct_decl(out, &ety.name),

@@ -283,3 +283,32 @@ fn test_safe_shared_extern_with_nontrivial_struct() {
     );
     compiled.assert_success();
 }
+
+#[test]
+fn test_safe_shared_extern_with_typedefed() {
+    let compiled = compile_test(
+        quote! {
+            #[cxx::bridge]
+            mod ffi {
+                #[safe_shared_extern]
+                struct A {
+                    a: u8,
+                }
+
+                extern "C++" {
+                    include!("include.h");
+
+                    unsafe fn a() -> A;
+                }
+            }
+        },
+        indoc! {"
+            typedef struct {
+                unsigned char a;
+            } A;
+
+            A a();
+        "},
+    );
+    compiled.assert_success();
+}
