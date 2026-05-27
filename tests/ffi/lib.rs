@@ -109,6 +109,10 @@ pub mod ffi {
         s: &'a str,
     }
 
+    struct WithVoidPtr {
+        ptr: *mut (),
+    }
+
     unsafe extern "C++" {
         type C;
 
@@ -194,6 +198,7 @@ pub mod ffi {
         fn c_take_rust_vec_nested_ns_shared(v: Vec<ABShared>);
         unsafe fn c_take_const_ptr(c: *const C) -> usize;
         unsafe fn c_take_mut_ptr(c: *mut C) -> usize;
+        unsafe fn c_take_void_ptrs(a: WithVoidPtr, b: *mut (), c: *const ());
 
         fn c_try_return_void() -> Result<()>;
         fn c_try_return_primitive() -> Result<usize>;

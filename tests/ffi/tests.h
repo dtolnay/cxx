@@ -192,6 +192,8 @@ void c_take_ns_enum(::A::AEnum e);
 void c_take_nested_ns_enum(::A::B::ABEnum e);
 size_t c_take_const_ptr(const C *c);
 size_t c_take_mut_ptr(C *c);
+struct WithVoidPtr;
+void c_take_void_ptrs(WithVoidPtr a, void *b, const void *c);
 
 void c_try_return_void();
 size_t c_try_return_primitive();
