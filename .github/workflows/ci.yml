@@ -167,6 +167,8 @@ jobs:
           CXX: ${{runner.temp}}/wasi-sdk-33.0-x86_64-linux/bin/clang++
           CXXFLAGS: --sysroot=${{runner.temp}}/wasi-sdk-33.0-x86_64-linux/share/wasi-sysroot
       - run: wasmtime --wasm=exceptions target/wasm32-wasip1/release/demo.wasm
+      # Ensure that `cxx` can compile for wasm32-wasip1 without wasi-sdk, supporting projects that only provide wasi-sdk at the bridge generation stage
+      - run: cargo build --target=wasm32-wasip1
 
   emscripten:
     name: Emscripten
