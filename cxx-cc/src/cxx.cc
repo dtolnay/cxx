@@ -1,4 +1,4 @@
-#include "../include/cxx.h"
+#include "cxx.h"
 #include <cstdio>
 #include <cstring>
 #include <iostream>

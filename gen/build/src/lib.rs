@@ -77,7 +77,7 @@
     clippy::uninlined_format_args,
     clippy::upper_case_acronyms
 )]
-#![allow(unknown_lints, mismatched_lifetime_syntaxes)]
+#![allow(unknown_lints, mismatched_lifetime_syntaxes, unexpected_cfgs)]
 
 mod cargo;
 mod cfg;
@@ -213,6 +213,11 @@ fn build(rust_source_files: &mut dyn Iterator<Item = impl AsRef<Path>>) -> Resul
     let ref prj = Project::init()?;
     validate_cfg(prj)?;
     let this_crate = make_this_crate(prj)?;
+
+    // Note: if built with a build system other than cargo, cxx.cc is linked in separately
+    // TODO: return, not panic
+    #[cfg(not(non_cargo_build))]
+    cxx_cc::build_cxxcc_if_bridge_stage(&prj.out_dir).expect("failed to compile cxx.cc");
 
     let mut build = Build::new();
     build.cpp(true);
