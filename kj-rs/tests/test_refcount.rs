@@ -5,7 +5,7 @@ pub fn modify_own_ret_rc(
     mut rc: KjRc<ffi::OpaqueRefcountedClass>,
 ) -> KjRc<ffi::OpaqueRefcountedClass> {
     let mut_ref = rc.get_mut();
-    mut_ref.unwrap().pin_mut().set_data(467);
+    mut_ref.unwrap().set_data(467);
     rc
 }
 
@@ -19,7 +19,7 @@ pub fn modify_own_ret_arc(
 
 #[cfg(test)]
 pub mod tests {
-    use kj_rs::refcount::{AtomicRefcounted, Refcounted};
+    use kj_rs::refcount::AtomicRefcounted;
 
     use crate::ffi;
 

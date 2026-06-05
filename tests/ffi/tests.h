@@ -77,6 +77,15 @@ private:
   size_t n;
 };
 
+class NonRefcountedRcC {
+public:
+  explicit NonRefcountedRcC(size_t n);
+  size_t get() const;
+
+private:
+  size_t n;
+};
+
 struct D {
   uint64_t d;
   void c_take_trivial_ref_method() const;
@@ -161,6 +170,8 @@ SharedWithKjOwn c_roundtrip_shared_with_kj_own(SharedWithKjOwn shared);
 SharedWithMultipleKjOwns
 c_roundtrip_shared_with_multiple_kj_owns(SharedWithMultipleKjOwns shared);
 kj::Rc<RcC> c_return_kj_rc(size_t n);
+kj::Rc<NonRefcountedRcC> c_return_non_refcounted_kj_rc(size_t n);
+size_t c_take_non_refcounted_kj_rc_by_ref(const kj::Rc<NonRefcountedRcC> &rc);
 size_t c_sizeof_shared_with_kj_rc();
 size_t c_alignof_shared_with_kj_rc();
 size_t c_sizeof_shared_with_multiple_kj_rcs();

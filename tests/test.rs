@@ -208,6 +208,23 @@ fn test_kj_rc_shared_struct_roundtrip() {
 }
 
 #[test]
+fn test_non_refcounted_kj_rc() {
+    let mut rc = ffi::c_return_non_refcounted_kj_rc(4040);
+    assert_eq!(4040, ffi::c_take_non_refcounted_kj_rc_by_ref(&rc));
+    assert!(!rc.is_shared());
+    assert!(rc.get_mut().is_some());
+
+    let clone = rc.clone();
+    assert!(rc.is_shared());
+    assert!(rc.get_mut().is_none());
+    assert_eq!(4040, ffi::c_take_non_refcounted_kj_rc_by_ref(&clone));
+
+    drop(clone);
+    assert!(!rc.is_shared());
+    assert!(rc.get_mut().is_some());
+}
+
+#[test]
 fn test_c_try_return() {
     assert_eq!((), ffi::c_try_return_void().unwrap());
     assert_eq!(2020, ffi::c_try_return_primitive().unwrap());

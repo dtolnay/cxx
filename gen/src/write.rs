@@ -1767,45 +1767,21 @@ fn write_kj_rc(out: &mut OutFile, key: NamedImplKey) {
     let ident = key.rust;
     let resolve = out.types.resolve(ident);
     let inner = resolve.name.to_fully_qualified();
-    let instance = resolve.name.to_symbol();
 
     out.include.utility = true;
     out.include.kj_rs = true;
 
-    // Static disposers are not supported, only Owns containing 2 pointers are allowed
+    // Rust mirrors the two-pointer `kj::Rc` layout: refcount control object, then pointee.
     writeln!(
         out,
-        "static_assert(sizeof(::kj::Rc<{}>) == 2 * sizeof(void *), \"Static disposers for Own are not supported in workerd-cxx\");",
+        "static_assert(sizeof(::kj::Rc<{}>) == 2 * sizeof(void *), \"unexpected kj::Rc layout\");",
         inner,
     );
     writeln!(
         out,
-        "static_assert(alignof(::kj::Rc<{}>) == sizeof(void *), \"Static disposers for Own are not supported in workerd-cxx\");",
+        "static_assert(alignof(::kj::Rc<{}>) == sizeof(void *), \"unexpected kj::Rc alignment\");",
         inner,
     );
-    writeln!(
-        out,
-        "static_assert(::std::is_base_of<::kj::Refcounted, {}>::value, \"Value must inherit kj::Refcounted\");",
-        inner
-    );
-
-    begin_function_definition(out);
-    writeln!(
-        out,
-        "void cxxbridge1$kj_rs$rc${}$is_shared(::kj::Refcounted *ptr, bool *ret) noexcept {{",
-        instance,
-    );
-    writeln!(out, "  *ret = ptr->isShared();");
-    writeln!(out, "}}");
-
-    begin_function_definition(out);
-    writeln!(
-        out,
-        "void cxxbridge1$kj_rs$rc${}$add_ref(::kj::Rc<{}> *ptr, ::kj::Rc<{}> *ret) noexcept {{",
-        instance, inner, inner
-    );
-    writeln!(out, "  ::new (ret) ::kj::Rc<{}>(ptr->addRef());", inner);
-    writeln!(out, "}}");
 }
 
 // Writes assertions to make sure the internal Own is valid and writes fucntions to support

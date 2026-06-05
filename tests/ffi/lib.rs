@@ -128,7 +128,6 @@ pub mod ffi {
         include!("tests/ffi/tests.h");
 
         type C;
-
         fn c_return_primitive() -> usize;
         fn c_return_shared() -> Shared;
         fn c_return_box() -> Box<R>;
@@ -182,6 +181,8 @@ pub mod ffi {
             shared: SharedWithMultipleKjOwns,
         ) -> SharedWithMultipleKjOwns;
         fn c_return_kj_rc(n: usize) -> KjRc<RcC>;
+        fn c_return_non_refcounted_kj_rc(n: usize) -> KjRc<NonRefcountedRcC>;
+        fn c_take_non_refcounted_kj_rc_by_ref(rc: &KjRc<NonRefcountedRcC>) -> usize;
         fn c_sizeof_shared_with_kj_rc() -> usize;
         fn c_alignof_shared_with_kj_rc() -> usize;
         fn c_sizeof_shared_with_multiple_kj_rcs() -> usize;
@@ -299,6 +300,7 @@ pub mod ffi {
     unsafe extern "C++" {
         include!("tests/ffi/tests.h");
 
+        type NonRefcountedRcC;
         type RcC;
     }
 

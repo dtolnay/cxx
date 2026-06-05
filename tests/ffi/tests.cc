@@ -59,6 +59,10 @@ size_t RcC::get() const { return this->n; }
 
 void RcC::set(size_t n) { this->n = n; }
 
+NonRefcountedRcC::NonRefcountedRcC(size_t n) : n(n) {}
+
+size_t NonRefcountedRcC::get() const { return this->n; }
+
 size_t Shared::c_method_on_shared() const noexcept { return 2021; }
 
 const size_t &Shared::c_method_ref_on_shared() const noexcept {
@@ -298,6 +302,14 @@ c_roundtrip_shared_with_multiple_kj_owns(SharedWithMultipleKjOwns shared) {
 }
 
 kj::Rc<RcC> c_return_kj_rc(size_t n) { return kj::rc<RcC>(n); }
+
+kj::Rc<NonRefcountedRcC> c_return_non_refcounted_kj_rc(size_t n) {
+  return kj::rc<NonRefcountedRcC>(n);
+}
+
+size_t c_take_non_refcounted_kj_rc_by_ref(const kj::Rc<NonRefcountedRcC> &rc) {
+  return rc->get();
+}
 
 size_t c_sizeof_shared_with_kj_rc() { return sizeof(SharedWithKjRc); }
 
