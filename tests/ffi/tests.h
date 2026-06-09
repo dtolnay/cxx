@@ -4,6 +4,7 @@
 #include <kj/memory.h>
 #include <kj/refcount.h>
 
+#include <atomic>
 #include <memory>
 #include <string>
 
@@ -45,6 +46,8 @@ struct SharedWithKjOwn;
 struct SharedWithMultipleKjOwns;
 struct SharedWithKjRc;
 struct SharedWithMultipleKjRcs;
+struct SharedWithKjArc;
+struct SharedWithMultipleKjArcs;
 enum class Enum : uint16_t;
 
 class C {
@@ -84,6 +87,16 @@ public:
 
 private:
   size_t n;
+};
+
+class ArcC : public kj::AtomicRefcounted {
+public:
+  explicit ArcC(size_t n);
+  size_t get() const;
+  void set(size_t n) const;
+
+private:
+  mutable std::atomic<size_t> n;
 };
 
 struct D {
@@ -188,6 +201,23 @@ size_t c_take_shared_with_multiple_kj_rcs_by_ref(
 SharedWithKjRc c_roundtrip_shared_with_kj_rc(SharedWithKjRc shared);
 SharedWithMultipleKjRcs
 c_roundtrip_shared_with_multiple_kj_rcs(SharedWithMultipleKjRcs shared);
+kj::Arc<ArcC> c_return_kj_arc(size_t n);
+size_t c_sizeof_shared_with_kj_arc();
+size_t c_alignof_shared_with_kj_arc();
+size_t c_sizeof_shared_with_multiple_kj_arcs();
+size_t c_alignof_shared_with_multiple_kj_arcs();
+SharedWithKjArc c_return_shared_with_kj_arc(size_t n);
+SharedWithMultipleKjArcs c_return_shared_with_multiple_kj_arcs(size_t first,
+                                                               size_t second);
+size_t c_take_shared_with_kj_arc_by_value(SharedWithKjArc shared);
+size_t c_take_shared_with_kj_arc_by_ref(const SharedWithKjArc &shared);
+size_t
+c_take_shared_with_multiple_kj_arcs_by_value(SharedWithMultipleKjArcs shared);
+size_t c_take_shared_with_multiple_kj_arcs_by_ref(
+    const SharedWithMultipleKjArcs &shared);
+SharedWithKjArc c_roundtrip_shared_with_kj_arc(SharedWithKjArc shared);
+SharedWithMultipleKjArcs
+c_roundtrip_shared_with_multiple_kj_arcs(SharedWithMultipleKjArcs shared);
 
 void c_take_primitive(size_t n);
 void c_take_shared(Shared shared);

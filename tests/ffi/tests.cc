@@ -33,6 +33,10 @@ static_assert(sizeof(SharedWithKjRc) == sizeof(kj::Rc<RcC>));
 static_assert(alignof(SharedWithKjRc) == alignof(kj::Rc<RcC>));
 static_assert(sizeof(SharedWithMultipleKjRcs) == 2 * sizeof(kj::Rc<RcC>));
 static_assert(alignof(SharedWithMultipleKjRcs) == alignof(kj::Rc<RcC>));
+static_assert(sizeof(SharedWithKjArc) == sizeof(kj::Arc<ArcC>));
+static_assert(alignof(SharedWithKjArc) == alignof(kj::Arc<ArcC>));
+static_assert(sizeof(SharedWithMultipleKjArcs) == 2 * sizeof(kj::Arc<ArcC>));
+static_assert(alignof(SharedWithMultipleKjArcs) == alignof(kj::Arc<ArcC>));
 
 C::C(size_t n) : n(n) {}
 
@@ -62,6 +66,12 @@ void RcC::set(size_t n) { this->n = n; }
 NonRefcountedRcC::NonRefcountedRcC(size_t n) : n(n) {}
 
 size_t NonRefcountedRcC::get() const { return this->n; }
+
+ArcC::ArcC(size_t n) : n(n) {}
+
+size_t ArcC::get() const { return this->n.load(); }
+
+void ArcC::set(size_t n) const { this->n.store(n); }
 
 size_t Shared::c_method_on_shared() const noexcept { return 2021; }
 
@@ -357,6 +367,59 @@ SharedWithKjRc c_roundtrip_shared_with_kj_rc(SharedWithKjRc shared) {
 
 SharedWithMultipleKjRcs
 c_roundtrip_shared_with_multiple_kj_rcs(SharedWithMultipleKjRcs shared) {
+  shared.first->set(shared.first->get() + 10);
+  shared.second->set(shared.second->get() + 20);
+  return shared;
+}
+
+kj::Arc<ArcC> c_return_kj_arc(size_t n) { return kj::arc<ArcC>(n); }
+
+size_t c_sizeof_shared_with_kj_arc() { return sizeof(SharedWithKjArc); }
+
+size_t c_alignof_shared_with_kj_arc() { return alignof(SharedWithKjArc); }
+
+size_t c_sizeof_shared_with_multiple_kj_arcs() {
+  return sizeof(SharedWithMultipleKjArcs);
+}
+
+size_t c_alignof_shared_with_multiple_kj_arcs() {
+  return alignof(SharedWithMultipleKjArcs);
+}
+
+SharedWithKjArc c_return_shared_with_kj_arc(size_t n) {
+  return SharedWithKjArc{kj::arc<ArcC>(n)};
+}
+
+SharedWithMultipleKjArcs c_return_shared_with_multiple_kj_arcs(size_t first,
+                                                               size_t second) {
+  return SharedWithMultipleKjArcs{kj::arc<ArcC>(first), kj::arc<ArcC>(second)};
+}
+
+size_t c_take_shared_with_kj_arc_by_value(SharedWithKjArc shared) {
+  return shared.arc->get();
+}
+
+size_t c_take_shared_with_kj_arc_by_ref(const SharedWithKjArc &shared) {
+  return shared.arc->get();
+}
+
+size_t
+c_take_shared_with_multiple_kj_arcs_by_value(SharedWithMultipleKjArcs shared) {
+  return shared.first->get() + shared.second->get();
+}
+
+size_t c_take_shared_with_multiple_kj_arcs_by_ref(
+    const SharedWithMultipleKjArcs &shared) {
+  return shared.first->get() + shared.second->get();
+}
+
+SharedWithKjArc c_roundtrip_shared_with_kj_arc(SharedWithKjArc shared) {
+  shared.arc->set(shared.arc->get() + 1);
+  return shared;
+}
+
+SharedWithMultipleKjArcs
+c_roundtrip_shared_with_multiple_kj_arcs(SharedWithMultipleKjArcs shared) {
   shared.first->set(shared.first->get() + 10);
   shared.second->set(shared.second->get() + 20);
   return shared;

@@ -32,6 +32,7 @@ impl<'a> Types<'a> {
             Type::UniquePtr(_)
             | Type::KjOwn(_)
             | Type::KjRc(_)
+            | Type::KjArc(_)
             | Type::SharedPtr(_)
             | Type::WeakPtr(_)
             | Type::CxxVector(_) => Definite(false),
@@ -39,7 +40,7 @@ impl<'a> Types<'a> {
             Type::Ptr(ty) => self.determine_improper_ctype(&ty.inner),
             Type::Array(ty) => self.determine_improper_ctype(&ty.inner),
             Type::KjMaybe(ty) => self.determine_improper_ctype(&ty.inner),
-            Type::Future(_) | Type::KjArc(_) => {
+            Type::Future(_) => {
                 todo!("file a workerd-cxx ticket")
             }
         }

@@ -24,7 +24,7 @@ use cxx::{
 // The bridge parser accepts the unqualified smart-pointer name, while expansion
 // fully qualifies the emitted Rust field type.
 #[allow(unused_imports)]
-use kj_rs::{KjOwn, KjRc};
+use kj_rs::{KjArc, KjOwn, KjRc};
 use std::fmt::Display;
 use std::mem::MaybeUninit;
 use std::os::raw::c_char;
@@ -65,6 +65,15 @@ pub mod ffi {
     struct SharedWithMultipleKjRcs {
         first: KjRc<RcC>,
         second: KjRc<RcC>,
+    }
+
+    struct SharedWithKjArc {
+        arc: KjArc<ArcC>,
+    }
+
+    struct SharedWithMultipleKjArcs {
+        first: KjArc<ArcC>,
+        second: KjArc<ArcC>,
     }
 
     #[derive(Debug, Hash, PartialOrd, Ord)]
@@ -200,6 +209,24 @@ pub mod ffi {
         fn c_roundtrip_shared_with_multiple_kj_rcs(
             shared: SharedWithMultipleKjRcs,
         ) -> SharedWithMultipleKjRcs;
+        fn c_return_kj_arc(n: usize) -> KjArc<ArcC>;
+        fn c_sizeof_shared_with_kj_arc() -> usize;
+        fn c_alignof_shared_with_kj_arc() -> usize;
+        fn c_sizeof_shared_with_multiple_kj_arcs() -> usize;
+        fn c_alignof_shared_with_multiple_kj_arcs() -> usize;
+        fn c_return_shared_with_kj_arc(n: usize) -> SharedWithKjArc;
+        fn c_return_shared_with_multiple_kj_arcs(
+            first: usize,
+            second: usize,
+        ) -> SharedWithMultipleKjArcs;
+        fn c_take_shared_with_kj_arc_by_value(shared: SharedWithKjArc) -> usize;
+        fn c_take_shared_with_kj_arc_by_ref(shared: &SharedWithKjArc) -> usize;
+        fn c_take_shared_with_multiple_kj_arcs_by_value(shared: SharedWithMultipleKjArcs) -> usize;
+        fn c_take_shared_with_multiple_kj_arcs_by_ref(shared: &SharedWithMultipleKjArcs) -> usize;
+        fn c_roundtrip_shared_with_kj_arc(shared: SharedWithKjArc) -> SharedWithKjArc;
+        fn c_roundtrip_shared_with_multiple_kj_arcs(
+            shared: SharedWithMultipleKjArcs,
+        ) -> SharedWithMultipleKjArcs;
 
         fn c_take_primitive(n: usize);
         fn c_take_shared(shared: Shared);
@@ -302,6 +329,12 @@ pub mod ffi {
 
         type NonRefcountedRcC;
         type RcC;
+    }
+
+    unsafe extern "C++" {
+        include!("tests/ffi/tests.h");
+
+        type ArcC;
     }
 
     extern "C++" {

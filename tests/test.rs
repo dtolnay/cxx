@@ -225,6 +225,59 @@ fn test_non_refcounted_kj_rc() {
 }
 
 #[test]
+fn test_kj_arc_shared_struct_abi() {
+    assert_eq!(
+        size_of::<ffi::SharedWithKjArc>(),
+        ffi::c_sizeof_shared_with_kj_arc()
+    );
+    assert_eq!(
+        align_of::<ffi::SharedWithKjArc>(),
+        ffi::c_alignof_shared_with_kj_arc()
+    );
+    assert_eq!(
+        size_of::<ffi::SharedWithMultipleKjArcs>(),
+        ffi::c_sizeof_shared_with_multiple_kj_arcs()
+    );
+    assert_eq!(
+        align_of::<ffi::SharedWithMultipleKjArcs>(),
+        ffi::c_alignof_shared_with_multiple_kj_arcs()
+    );
+}
+
+#[test]
+fn test_kj_arc_shared_struct_roundtrip() {
+    let shared = ffi::c_return_shared_with_kj_arc(3030);
+    assert_eq!(3030, ffi::c_take_shared_with_kj_arc_by_ref(&shared));
+    assert_eq!(3030, ffi::c_take_shared_with_kj_arc_by_value(shared));
+
+    let shared = ffi::c_return_shared_with_multiple_kj_arcs(1010, 2020);
+    assert_eq!(
+        3030,
+        ffi::c_take_shared_with_multiple_kj_arcs_by_ref(&shared)
+    );
+    assert_eq!(
+        3030,
+        ffi::c_take_shared_with_multiple_kj_arcs_by_value(shared)
+    );
+
+    let shared = ffi::SharedWithKjArc {
+        arc: ffi::c_return_kj_arc(2020),
+    };
+    let shared = ffi::c_roundtrip_shared_with_kj_arc(shared);
+    assert_eq!(2021, ffi::c_take_shared_with_kj_arc_by_ref(&shared));
+
+    let shared = ffi::SharedWithMultipleKjArcs {
+        first: ffi::c_return_kj_arc(1010),
+        second: ffi::c_return_kj_arc(2020),
+    };
+    let shared = ffi::c_roundtrip_shared_with_multiple_kj_arcs(shared);
+    assert_eq!(
+        3060,
+        ffi::c_take_shared_with_multiple_kj_arcs_by_ref(&shared)
+    );
+}
+
+#[test]
 fn test_c_try_return() {
     assert_eq!((), ffi::c_try_return_void().unwrap());
     assert_eq!(2020, ffi::c_try_return_primitive().unwrap());
