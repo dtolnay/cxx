@@ -27,7 +27,7 @@ use test_maybe::{
     take_maybe_shared_ret,
 };
 
-use test_refcount::{modify_own_ret_arc, modify_own_ret_rc};
+use test_refcount::{modify_own_ret_arc, modify_own_ret_rc, take_maybe_rc_ret};
 
 use kj_rs::KjOwn;
 
@@ -119,6 +119,15 @@ mod ffi {
 
         #[allow(dead_code)]
         fn give_rc_back(rc: KjRc<OpaqueRefcountedClass>);
+
+        #[allow(dead_code)]
+        fn return_maybe_rc_some() -> KjMaybe<KjRc<OpaqueRefcountedClass>>;
+        #[allow(dead_code)]
+        fn return_maybe_rc_none() -> KjMaybe<KjRc<OpaqueRefcountedClass>>;
+        #[allow(dead_code)]
+        fn take_maybe_rc(maybe: KjMaybe<KjRc<OpaqueRefcountedClass>>);
+        #[allow(dead_code)]
+        fn maybe_rc_rust_driver();
     }
 
     unsafe extern "C++" {
@@ -138,6 +147,11 @@ mod ffi {
 
         #[allow(dead_code)]
         fn give_arc_back(arc: KjArc<OpaqueAtomicRefcountedClass>);
+
+        #[allow(dead_code)]
+        fn return_maybe_arc_some() -> KjMaybe<KjArc<OpaqueAtomicRefcountedClass>>;
+        #[allow(dead_code)]
+        fn return_maybe_arc_none() -> KjMaybe<KjArc<OpaqueAtomicRefcountedClass>>;
     }
 
     extern "Rust" {
@@ -145,6 +159,12 @@ mod ffi {
         fn modify_own_ret_arc(
             arc: KjArc<OpaqueAtomicRefcountedClass>,
         ) -> KjArc<OpaqueAtomicRefcountedClass>;
+
+        // Receives a `Maybe<Rc>` from C++ and returns one back, mutating the
+        // pointee when present. Exercises `kj::Maybe<kj::Rc>` as a Rust return type.
+        fn take_maybe_rc_ret(
+            maybe: KjMaybe<KjRc<OpaqueRefcountedClass>>,
+        ) -> KjMaybe<KjRc<OpaqueRefcountedClass>>;
     }
 
     // Helper function to test moving `Own` to C++
