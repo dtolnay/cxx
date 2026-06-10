@@ -211,6 +211,66 @@ unsafe impl<T> MaybeItem for &[T] {
     }
 }
 
+// Unlike `kj::Own<T>`, the `kj::Rc<T>` and `kj::Arc<T>` types do NOT define
+// `kj::MaybeTraits` niche members (`initNone`/`isNone`). This means
+// `kj::Maybe<kj::Rc<T>>` does not use niche-value optimization: it uses the
+// non-niche `kj::_::NullableValue<T>` representation, which stores a separate
+// `bool` flag followed by the value (`bool isSet; union { T value; };`).
+//
+// We therefore mirror that layout with a `bool` discriminant here, exactly like
+// the primitive types above, rather than implementing [`HasNiche`].
+unsafe impl<T> MaybeItem for crate::KjRc<T> {
+    type Discriminant = bool;
+
+    fn is_some(value: &KjMaybe<Self>) -> bool {
+        value.is_set
+    }
+
+    fn is_none(value: &KjMaybe<Self>) -> bool {
+        !value.is_set
+    }
+
+    const NONE: KjMaybe<Self> = {
+        KjMaybe {
+            is_set: false,
+            some: MaybeUninit::uninit(),
+        }
+    };
+
+    fn some(value: Self) -> KjMaybe<Self> {
+        KjMaybe {
+            is_set: true,
+            some: MaybeUninit::new(value),
+        }
+    }
+}
+
+unsafe impl<T: crate::refcount::AtomicRefcounted> MaybeItem for crate::KjArc<T> {
+    type Discriminant = bool;
+
+    fn is_some(value: &KjMaybe<Self>) -> bool {
+        value.is_set
+    }
+
+    fn is_none(value: &KjMaybe<Self>) -> bool {
+        !value.is_set
+    }
+
+    const NONE: KjMaybe<Self> = {
+        KjMaybe {
+            is_set: false,
+            some: MaybeUninit::uninit(),
+        }
+    };
+
+    fn some(value: Self) -> KjMaybe<Self> {
+        KjMaybe {
+            is_set: true,
+            some: MaybeUninit::new(value),
+        }
+    }
+}
+
 pub(crate) mod repr {
     use super::MaybeItem;
     use static_assertions::assert_eq_size;
@@ -238,6 +298,9 @@ pub(crate) mod repr {
     assert_eq_size!(KjMaybe<isize>, [usize; 2]);
     assert_eq_size!(KjMaybe<&isize>, usize);
     assert_eq_size!(KjMaybe<crate::KjOwn<isize>>, [usize; 2]);
+    // `kj::Rc<T>` has no niche, so `kj::Maybe<kj::Rc<T>>` carries a separate flag:
+    // a `bool` discriminant followed by the two-pointer `kj::Rc` value.
+    assert_eq_size!(KjMaybe<crate::KjRc<isize>>, [usize; 3]);
 
     impl<T: MaybeItem> KjMaybe<T> {
         /// # Safety

@@ -305,6 +305,14 @@ fn check_type_kj_maybe(cx: &mut Check, ptr: &Ty1) {
             check_type_kj_own(cx, own);
             return;
         }
+        Type::KjRc(rc) => {
+            check_type_kj_rc(cx, rc);
+            return;
+        }
+        Type::KjArc(arc) => {
+            check_type_kj_arc(cx, arc);
+            return;
+        }
         Type::SliceRef(_) | Type::Str(_) => return,
         _ => (),
     }

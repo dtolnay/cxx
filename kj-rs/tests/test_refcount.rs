@@ -1,5 +1,5 @@
 use crate::ffi;
-use kj_rs::{KjArc, KjRc};
+use kj_rs::{KjArc, KjMaybe, KjRc};
 
 pub fn modify_own_ret_rc(
     mut rc: KjRc<ffi::OpaqueRefcountedClass>,
@@ -7,6 +7,18 @@ pub fn modify_own_ret_rc(
     let mut_ref = rc.get_mut();
     mut_ref.unwrap().set_data(467);
     rc
+}
+
+pub fn take_maybe_rc_ret(
+    maybe: KjMaybe<KjRc<ffi::OpaqueRefcountedClass>>,
+) -> KjMaybe<KjRc<ffi::OpaqueRefcountedClass>> {
+    let option: Option<KjRc<ffi::OpaqueRefcountedClass>> = maybe.into();
+    option
+        .map(|mut rc| {
+            rc.get_mut().unwrap().set_data(467);
+            rc
+        })
+        .into()
 }
 
 pub fn modify_own_ret_arc(
@@ -53,6 +65,68 @@ pub mod tests {
         let arc = ffi::get_arc();
         ffi::give_rc_back(rc);
         ffi::give_arc_back(arc);
+    }
+
+    #[test]
+    fn test_maybe_rc_some() {
+        let maybe = ffi::return_maybe_rc_some();
+        assert!(maybe.is_some());
+        assert!(!maybe.is_none());
+
+        let opt: Option<kj_rs::KjRc<ffi::OpaqueRefcountedClass>> = maybe.into();
+        let rc = opt.unwrap();
+        assert_eq!(rc.get_data(), 111);
+    }
+
+    #[test]
+    fn test_maybe_rc_none() {
+        let maybe = ffi::return_maybe_rc_none();
+        assert!(maybe.is_none());
+        assert!(!maybe.is_some());
+
+        let opt: Option<kj_rs::KjRc<ffi::OpaqueRefcountedClass>> = maybe.into();
+        assert!(opt.is_none());
+    }
+
+    #[test]
+    fn test_maybe_arc_some() {
+        let maybe = ffi::return_maybe_arc_some();
+        assert!(maybe.is_some());
+
+        let opt: Option<kj_rs::KjArc<ffi::OpaqueAtomicRefcountedClass>> = maybe.into();
+        assert_eq!(opt.unwrap().get_data(), 222);
+    }
+
+    #[test]
+    fn test_maybe_arc_none() {
+        let maybe = ffi::return_maybe_arc_none();
+        assert!(maybe.is_none());
+
+        let opt: Option<kj_rs::KjArc<ffi::OpaqueAtomicRefcountedClass>> = maybe.into();
+        assert!(opt.is_none());
+    }
+
+    #[test]
+    fn test_maybe_rc_pass_cxx() {
+        // Construct a `Maybe<Rc>` in Rust and hand it to C++.
+        let mut rc = ffi::get_rc();
+        // `take_maybe_rc` asserts the pointee data is 111.
+        rc.get_mut().unwrap().set_data(111);
+        let maybe = kj_rs::KjMaybe::Some(rc);
+        ffi::take_maybe_rc(maybe);
+    }
+
+    #[test]
+    fn test_maybe_rc_none_pass_cxx() {
+        let none: kj_rs::KjMaybe<kj_rs::KjRc<ffi::OpaqueRefcountedClass>> = kj_rs::KjMaybe::None;
+        assert!(none.is_none());
+        // Dropping a None must not touch the uninitialized Rc storage.
+        std::mem::drop(none);
+    }
+
+    #[test]
+    fn test_maybe_rc_rust_return_driver() {
+        ffi::maybe_rc_rust_driver();
     }
 
     #[test]
