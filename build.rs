@@ -10,6 +10,7 @@ fn main() {
 
     cc::Build::new()
         .file(manifest_dir.join("src/cxx.cc"))
+        .include(manifest_dir.join("include"))
         .cpp(true)
         .cpp_link_stdlib(None) // linked via link-cplusplus crate
         .std(cxxbridge_flags::STD)
