@@ -192,6 +192,8 @@ pub mod ffi {
         fn c_return_kj_rc(n: usize) -> KjRc<RcC>;
         fn c_return_non_refcounted_kj_rc(n: usize) -> KjRc<NonRefcountedRcC>;
         fn c_take_non_refcounted_kj_rc_by_ref(rc: &KjRc<NonRefcountedRcC>) -> usize;
+        fn c_return_non_atomic_kj_arc(n: usize) -> KjArc<NonAtomicArcC>;
+        fn c_take_non_atomic_kj_arc_by_ref(arc: &KjArc<NonAtomicArcC>) -> usize;
         fn c_sizeof_shared_with_kj_rc() -> usize;
         fn c_alignof_shared_with_kj_rc() -> usize;
         fn c_sizeof_shared_with_multiple_kj_rcs() -> usize;
@@ -335,6 +337,7 @@ pub mod ffi {
         include!("tests/ffi/tests.h");
 
         type ArcC;
+        type NonAtomicArcC;
     }
 
     extern "C++" {

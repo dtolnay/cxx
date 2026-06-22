@@ -99,6 +99,15 @@ private:
   mutable std::atomic<size_t> n;
 };
 
+class NonAtomicArcC {
+public:
+  explicit NonAtomicArcC(size_t n);
+  size_t get() const;
+
+private:
+  size_t n;
+};
+
 struct D {
   uint64_t d;
   void c_take_trivial_ref_method() const;
@@ -202,6 +211,8 @@ SharedWithKjRc c_roundtrip_shared_with_kj_rc(SharedWithKjRc shared);
 SharedWithMultipleKjRcs
 c_roundtrip_shared_with_multiple_kj_rcs(SharedWithMultipleKjRcs shared);
 kj::Arc<ArcC> c_return_kj_arc(size_t n);
+kj::Arc<NonAtomicArcC> c_return_non_atomic_kj_arc(size_t n);
+size_t c_take_non_atomic_kj_arc_by_ref(const kj::Arc<NonAtomicArcC> &arc);
 size_t c_sizeof_shared_with_kj_arc();
 size_t c_alignof_shared_with_kj_arc();
 size_t c_sizeof_shared_with_multiple_kj_arcs();

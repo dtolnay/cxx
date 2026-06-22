@@ -159,5 +159,10 @@ fn test_kj_arc_in_shared_struct() {
     assert!(header.contains("::kj::Arc<::Thing> first;"));
     assert!(header.contains("::kj::Arc<::Thing> second;"));
     assert!(header.contains("kj-rs/kj-rs.h"));
+    assert!(
+        implementation.contains("static_assert(sizeof(::kj::Arc<::Thing>) == 2 * sizeof(void *)")
+    );
+    assert!(!implementation.contains("is_base_of<::kj::AtomicRefcounted"));
+    assert!(!implementation.contains("cxxbridge1$kj_rs$arc$"));
     assert!(implementation.contains("::rust::ManuallyDrop<::Holder> holder$(::std::move(holder));"));
 }

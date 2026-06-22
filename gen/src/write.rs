@@ -1784,51 +1784,26 @@ fn write_kj_rc(out: &mut OutFile, key: NamedImplKey) {
     );
 }
 
-// Writes assertions to make sure the internal Own is valid and writes fucntions to support
-// necessary refcounted behavior
+// Writes assertions to make sure Rust's raw `KjArc` representation matches KJ's two-pointer
+// control-object plus pointee layout.
 fn write_kj_arc(out: &mut OutFile, key: NamedImplKey) {
     let ident = key.rust;
     let resolve = out.types.resolve(ident);
     let inner = resolve.name.to_fully_qualified();
-    let instance = resolve.name.to_symbol();
 
     out.include.utility = true;
     out.include.kj_rs = true;
 
-    // Static disposers are not supported, only Owns containing 2 pointers are allowed
     writeln!(
         out,
-        "static_assert(sizeof(::kj::Arc<{}>) == 2 * sizeof(void *), \"Static disposers for Own are not supported in workerd-cxx\");",
+        "static_assert(sizeof(::kj::Arc<{}>) == 2 * sizeof(void *), \"unexpected kj::Arc layout\");",
         inner,
     );
     writeln!(
         out,
-        "static_assert(alignof(::kj::Arc<{}>) == sizeof(void *), \"Static disposers for Own are not supported in workerd-cxx\");",
+        "static_assert(alignof(::kj::Arc<{}>) == sizeof(void *), \"unexpected kj::Arc alignment\");",
         inner,
     );
-    writeln!(
-        out,
-        "static_assert(::std::is_base_of<::kj::AtomicRefcounted, {}>::value, \"Value must inherit kj::AtomicRefcounted\");",
-        inner
-    );
-
-    begin_function_definition(out);
-    writeln!(
-        out,
-        "void cxxbridge1$kj_rs$arc${}$is_shared(::kj::AtomicRefcounted *ptr, bool *ret) noexcept {{",
-        instance,
-    );
-    writeln!(out, "  *ret = ptr->isShared();");
-    writeln!(out, "}}");
-
-    begin_function_definition(out);
-    writeln!(
-        out,
-        "void cxxbridge1$kj_rs$arc${}$add_ref(::kj::Arc<{}> *ptr, ::kj::Arc<{}> *ret) noexcept {{",
-        instance, inner, inner
-    );
-    writeln!(out, "  ::new (ret) ::kj::Arc<{}>(ptr->addRef());", inner);
-    writeln!(out, "}}");
 }
 
 fn write_unique_ptr(out: &mut OutFile, key: NamedImplKey) {

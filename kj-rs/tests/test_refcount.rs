@@ -25,14 +25,12 @@ pub fn modify_own_ret_arc(
     mut arc: KjArc<ffi::OpaqueAtomicRefcountedClass>,
 ) -> KjArc<ffi::OpaqueAtomicRefcountedClass> {
     let mut_ref = arc.get_mut();
-    mut_ref.unwrap().pin_mut().set_data(328);
+    mut_ref.unwrap().set_data(328);
     arc
 }
 
 #[cfg(test)]
 pub mod tests {
-    use kj_rs::refcount::AtomicRefcounted;
-
     use crate::ffi;
 
     #[test]
@@ -154,7 +152,7 @@ pub mod tests {
 
         let mut_ref = arc.get_mut();
         assert!(mut_ref.is_some());
-        mut_ref.unwrap().pin_mut().set_data(35643);
+        mut_ref.unwrap().set_data(35643);
         assert_eq!(arc.get_data(), 35643);
     }
 }

@@ -73,6 +73,10 @@ size_t ArcC::get() const { return this->n.load(); }
 
 void ArcC::set(size_t n) const { this->n.store(n); }
 
+NonAtomicArcC::NonAtomicArcC(size_t n) : n(n) {}
+
+size_t NonAtomicArcC::get() const { return this->n; }
+
 size_t Shared::c_method_on_shared() const noexcept { return 2021; }
 
 const size_t &Shared::c_method_ref_on_shared() const noexcept {
@@ -373,6 +377,14 @@ c_roundtrip_shared_with_multiple_kj_rcs(SharedWithMultipleKjRcs shared) {
 }
 
 kj::Arc<ArcC> c_return_kj_arc(size_t n) { return kj::arc<ArcC>(n); }
+
+kj::Arc<NonAtomicArcC> c_return_non_atomic_kj_arc(size_t n) {
+  return kj::arc<NonAtomicArcC>(n);
+}
+
+size_t c_take_non_atomic_kj_arc_by_ref(const kj::Arc<NonAtomicArcC> &arc) {
+  return arc->get();
+}
 
 size_t c_sizeof_shared_with_kj_arc() { return sizeof(SharedWithKjArc); }
 

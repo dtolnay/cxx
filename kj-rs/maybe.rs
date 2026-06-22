@@ -245,7 +245,7 @@ unsafe impl<T> MaybeItem for crate::KjRc<T> {
     }
 }
 
-unsafe impl<T: crate::refcount::AtomicRefcounted> MaybeItem for crate::KjArc<T> {
+unsafe impl<T> MaybeItem for crate::KjArc<T> {
     type Discriminant = bool;
 
     fn is_some(value: &KjMaybe<Self>) -> bool {

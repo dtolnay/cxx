@@ -1731,44 +1731,8 @@ fn expand_kj_rc(_key: NamedImplKey, _types: &Types, _explicit_impl: Option<&Impl
     TokenStream::new()
 }
 
-fn expand_kj_arc(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {
-    let ident = key.rust;
-    let resolve = types.resolve(ident);
-    let prefix = format!("cxxbridge1$kj_rs$arc${}$", resolve.name.to_symbol());
-    let is_shared = format!("{}is_shared", prefix);
-    let add_ref = format!("{}add_ref", prefix);
-
-    let begin_span = explicit_impl.map_or(key.begin_span, |explicit| explicit.impl_token.span);
-    let end_span = explicit_impl.map_or(key.end_span, |explicit| explicit.brace_token.span.join());
-    let unsafe_token = format_ident!("unsafe", span = begin_span);
-
-    quote_spanned! {end_span=>
-        #[automatically_derived]
-        #unsafe_token impl ::kj_rs::repr::AtomicRefcounted for #ident {
-            fn is_shared(&self) -> bool {
-                #UnsafeExtern extern "C" {
-                    #[link_name = #is_shared]
-                    fn __is_shared(ptr: *const #ident, ret: *mut bool);
-                }
-                let mut ret = ::cxx::core::mem::MaybeUninit::uninit();
-                unsafe {
-                    __is_shared(self as *const #ident, ret.as_mut_ptr());
-                    ret.assume_init()
-                }
-            }
-            unsafe fn add_ref(arc: &::kj_rs::repr::KjArc<#ident>) -> ::kj_rs::repr::KjArc<#ident> {
-                #UnsafeExtern extern "C" {
-                    #[link_name = #add_ref]
-                    fn __add_ref(refcounted: *const ::kj_rs::repr::KjArc<#ident>, ptr: *const ::kj_rs::repr::KjArc<#ident>);
-                }
-                let mut ret = ::cxx::core::mem::MaybeUninit::uninit();
-                unsafe {
-                    __add_ref(arc as *const ::kj_rs::repr::KjArc<#ident>, ret.as_mut_ptr());
-                    ret.assume_init()
-                }
-            }
-        }
-    }
+fn expand_kj_arc(_key: NamedImplKey, _types: &Types, _explicit_impl: Option<&Impl>) -> TokenStream {
+    TokenStream::new()
 }
 
 fn expand_weak_ptr(key: NamedImplKey, types: &Types, explicit_impl: Option<&Impl>) -> TokenStream {

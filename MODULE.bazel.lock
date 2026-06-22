@@ -197,7 +197,7 @@
   "moduleExtensions": {
     "//:capnp_cpp.bzl%capnp_cpp": {
       "general": {
-        "bzlTransitiveDigest": "R9vV/OFmanOwhuV1VRVneM+YYGxwfNwBdwl3FLUt2Q4=",
+        "bzlTransitiveDigest": "vGZ/7Qn+9oFjLoCOXAIwMpFuQ5HPoeOQejYFkMre6ls=",
         "usagesDigest": "NcY49Lqyy8czgriyQfqodZtzPlf0EyttkWX8b7osJtY=",
         "recordedInputs": [
           "REPO_MAPPING:,bazel_tools bazel_tools"
@@ -206,10 +206,10 @@
           "capnp-cpp": {
             "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
             "attributes": {
-              "url": "https://github.com/capnproto/capnproto/tarball/fd6aad7ca96cf4c9e2bcbd74d4132691bfa8e898",
-              "strip_prefix": "capnproto-capnproto-fd6aad7/c++",
+              "url": "https://github.com/capnproto/capnproto/tarball/982233268af236543df3250bac114b04bcfdc63e",
+              "strip_prefix": "capnproto-capnproto-9822332/c++",
               "type": "tgz",
-              "sha256": "b2c065b37cd6daac4d30943bd1574f6e70b59ac1a217c859cef7d0cf7ba94efa"
+              "sha256": "19f33e14e41cba44fb12eb3f883cf39b1dd5c84c94165c587b9271ceb66c8d47"
             }
           }
         }

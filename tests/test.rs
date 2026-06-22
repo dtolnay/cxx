@@ -225,6 +225,23 @@ fn test_non_refcounted_kj_rc() {
 }
 
 #[test]
+fn test_non_atomic_kj_arc() {
+    let mut arc = ffi::c_return_non_atomic_kj_arc(5050);
+    assert_eq!(5050, ffi::c_take_non_atomic_kj_arc_by_ref(&arc));
+    assert!(!arc.is_shared());
+    assert!(arc.get_mut().is_some());
+
+    let clone = arc.clone();
+    assert!(arc.is_shared());
+    assert!(arc.get_mut().is_none());
+    assert_eq!(5050, ffi::c_take_non_atomic_kj_arc_by_ref(&clone));
+
+    drop(clone);
+    assert!(!arc.is_shared());
+    assert!(arc.get_mut().is_some());
+}
+
+#[test]
 fn test_kj_arc_shared_struct_abi() {
     assert_eq!(
         size_of::<ffi::SharedWithKjArc>(),
