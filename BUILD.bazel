@@ -52,8 +52,9 @@ cc_library(
 
 cc_library(
     name = "core-lib",
-    srcs = ["src/cxx.cc"],
+    srcs = ["cxx-cc/src/cxx.cc"],
     hdrs = ["include/cxx.h"],
+    includes = ["include/"],
     linkstatic = True,
 )
 
@@ -78,6 +79,7 @@ rust_library(
     srcs = glob(["gen/build/src/**/*.rs"]),
     compile_data = glob(["gen/build/src/gen/**/*.h"]),
     edition = "2021",
+    rustc_flags = ["--cfg", "non_cargo_build"],
     version = module_version(),
     deps = [
         "@crates.io//:cc",

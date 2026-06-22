@@ -25,6 +25,9 @@ quote = { version = "1.0.35", default-features = false }
 scratch = "1.0.5"
 syn = { version = "2.0.46", default-features = false, features = ["clone-impls", "full", "parsing", "printing"] }
 
+[target.'cfg(not(non_cargo_build))'.dependencies]
+cxx-cc = { version = "=1.0.194", path = "../../cxx-cc", default-features = false }
+
 [dev-dependencies]
 cxx = { version = "1.0", path = "../.." }
 cxx-gen = { version = "0.7", path = "../lib" }

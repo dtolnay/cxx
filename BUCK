@@ -52,7 +52,8 @@ rust_binary(
 
 cxx_library(
     name = "core",
-    srcs = ["src/cxx.cc"],
+    srcs = ["cxx-cc/src/cxx.cc"],
+    include_directories = ["include/"],
     exported_headers = {
         "cxx.h": "include/cxx.h",
     },
@@ -90,6 +91,7 @@ rust_library(
     ],
     doctests = False,
     edition = "2021",
+    rustc_flags = ["--cfg", "non_cargo_build"],
     env = {
         "CARGO_PKG_VERSION_PATCH": CARGO_PKG_VERSION_PATCH,
     },

@@ -167,6 +167,16 @@ jobs:
           CXX: ${{runner.temp}}/wasi-sdk-33.0-x86_64-linux/bin/clang++
           CXXFLAGS: --sysroot=${{runner.temp}}/wasi-sdk-33.0-x86_64-linux/share/wasi-sysroot
       - run: wasmtime --wasm=exceptions target/wasm32-wasip1/release/demo.wasm
+      # Verify that `cxx` can compile for wasm32-wasip1 without wasi-sdk, supporting projects that only provide wasi-sdk at the bridge generation stage
+      - run: cargo build --target=wasm32-wasip1 --features compile-builtins-at-bridge-stage
+      # Test that the final binary is compiled correctly with builtins compiled at the bridge stage
+      - run: cargo build --target=wasm32-wasip1 --manifest-path=demo/Cargo.toml --release --features cxx/compile-builtins-at-bridge-stage
+          --config='target.wasm32-wasip1.linker="${{runner.temp}}/wasi-sdk-33.0-x86_64-linux/bin/lld"'
+          --config='target.wasm32-wasip1.rustflags=["-Clink-args=-L${{runner.temp}}/wasi-sdk-33.0-x86_64-linux/share/wasi-sysroot/lib/wasm32-wasip1/eh", "-Clink-args=-lc++abi", "-Clink-args=-lunwind"]'
+        env:
+          CXX: ${{runner.temp}}/wasi-sdk-33.0-x86_64-linux/bin/clang++
+          CXXFLAGS: --sysroot=${{runner.temp}}/wasi-sdk-33.0-x86_64-linux/share/wasi-sysroot
+      - run: wasmtime --wasm=exceptions target/wasm32-wasip1/release/demo.wasm
 
   emscripten:
     name: Emscripten
@@ -315,7 +325,7 @@ jobs:
       - name: Install clang-tidy
         run: sudo apt-get update && sudo apt-get install clang-tidy-20
       - name: Run clang-tidy
-        run: clang-tidy-20 src/cxx.cc --warnings-as-errors=*
+        run: clang-tidy-20 cxx-cc/src/cxx.cc --warnings-as-errors=* -- -Iinclude
 
   eslint:
     name: ESLint

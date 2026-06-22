@@ -1,27 +1,18 @@
-#![expect(unexpected_cfgs)]
-
 use std::env;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::process::Command;
 
 fn main() {
     let manifest_dir_opt = env::var_os("CARGO_MANIFEST_DIR").map(PathBuf::from);
-    let manifest_dir = manifest_dir_opt.as_deref().unwrap_or(Path::new(""));
 
-    cc::Build::new()
-        .file(manifest_dir.join("src/cxx.cc"))
-        .cpp(true)
-        .cpp_link_stdlib(None) // linked via link-cplusplus crate
-        .std(cxxbridge_flags::STD)
-        .warnings_into_errors(cfg!(deny_warnings))
-        .compile("cxxbridge1");
+    let out_dir = PathBuf::from(env::var_os("OUT_DIR").expect("OUT_DIR shall be set by cargo"));
+    cxx_cc::build_cxxcc_if_cc_stage(&PathBuf::from(&out_dir)).expect("failed to compile cxx.cc");
 
-    println!("cargo:rerun-if-changed=src/cxx.cc");
     println!("cargo:rerun-if-changed=include/cxx.h");
     println!("cargo:rustc-cfg=built_with_cargo");
 
     if let Some(manifest_dir) = &manifest_dir_opt {
-        let cxx_h = manifest_dir.join("include").join("cxx.h");
+        let cxx_h = manifest_dir.join("include/cxx.h");
         println!("cargo:HEADER={}", cxx_h.to_string_lossy());
     }
 
