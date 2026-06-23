@@ -53,6 +53,12 @@ cxxbridge-cmd = { version = "=1.0.194", path = "gen/cmd" }
 [workspace]
 members = ["demo", "flags", "gen/build", "gen/cmd", "gen/lib", "macro", "tests/ffi"]
 
+[lints.rust.unexpected_cfgs]
+level = "deny"
+check-cfg = ['cfg(built_with_cargo)', 'cfg(compile_error_if_alloc)',
+             'cfg(compile_error_if_std)', 'cfg(cxx_experimental_no_alloc)',
+             'cfg(skip_ui_tests)']
+
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
 rustdoc-args = [

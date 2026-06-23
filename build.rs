@@ -25,11 +25,6 @@ fn main() {
         println!("cargo:HEADER={}", cxx_h.to_string_lossy());
     }
 
-    println!("cargo:rustc-check-cfg=cfg(built_with_cargo)");
-    println!("cargo:rustc-check-cfg=cfg(compile_error_if_alloc)");
-    println!("cargo:rustc-check-cfg=cfg(compile_error_if_std)");
-    println!("cargo:rustc-check-cfg=cfg(cxx_experimental_no_alloc)");
-    println!("cargo:rustc-check-cfg=cfg(skip_ui_tests)");
 
     if let Some(rustc) = rustc_version() {
         if rustc.minor < 85 {
