@@ -64,6 +64,7 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
     let mut namespace = namespace.clone();
     let mut cxx_name = None;
     let mut rust_name = None;
+    let mut safe_shared_extern = false;
     let attrs = attrs::parse(
         cx,
         mem::take(&mut item.attrs),
@@ -75,6 +76,7 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
             namespace: Some(&mut namespace),
             cxx_name: Some(&mut cxx_name),
             rust_name: Some(&mut rust_name),
+            safe_shared_extern: Some(&mut safe_shared_extern),
             ..Default::default()
         },
     );
@@ -197,6 +199,7 @@ fn parse_struct(cx: &mut Errors, mut item: ItemStruct, namespace: &Namespace) ->
         generics,
         brace_token,
         fields,
+        safe_shared_extern,
     }))
 }
 

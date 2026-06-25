@@ -341,8 +341,13 @@ fn check_api_struct(cx: &mut Check, strct: &Struct) {
 
     if cx.types.cxx.contains(&name.rust) {
         if let Some(ety) = cx.types.untrusted.get(&name.rust) {
-            let msg = "extern shared struct must be declared in an `unsafe extern` block";
-            cx.error(ety, msg);
+            if strct.safe_shared_extern {
+                let msg = "a `#[safe_shared_extern]` struct does not need a `type` entry in the `extern \"C++\"` block";
+                cx.error(ety, msg);
+            } else {
+                let msg = "extern shared struct must be declared in an `unsafe extern` block or marked with `#[safe_shared_extern]`";
+                cx.error(ety, msg);
+            }
         }
     }
 

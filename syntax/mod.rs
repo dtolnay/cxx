@@ -119,6 +119,7 @@ pub(crate) struct Struct {
     pub generics: Lifetimes,
     pub brace_token: Brace,
     pub fields: Vec<Var>,
+    pub safe_shared_extern: bool,
 }
 
 pub(crate) struct Enum {
