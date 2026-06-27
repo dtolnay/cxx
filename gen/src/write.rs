@@ -1498,7 +1498,7 @@ fn write_type_to_generic_writer(out: &mut impl InfallibleWrite, ty: &Type, types
             write_type_to_generic_writer(out, &a.inner, types);
             write!(out, ", {}>", a.len);
         }
-        Type::Void(_) => unreachable!(),
+        Type::Void(_) => write!(out, "void"),
     }
 }
 
@@ -1544,9 +1544,9 @@ fn write_space_after_type(out: &mut impl InfallibleWrite, ty: &Type) {
         | Type::RustVec(_)
         | Type::SliceRef(_)
         | Type::Fn(_)
-        | Type::Array(_) => write!(out, " "),
+        | Type::Array(_)
+        | Type::Void(_) => write!(out, " "),
         Type::Ref(_) | Type::Ptr(_) => {}
-        Type::Void(_) => unreachable!(),
     }
 }
 

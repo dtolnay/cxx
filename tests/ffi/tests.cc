@@ -567,6 +567,12 @@ size_t c_take_mut_ptr(C *c) {
   return result;
 }
 
+void c_take_void_ptrs(WithVoidPtr a, void *b, const void *c) {
+  (void)a;
+  (void)b;
+  (void)c;
+}
+
 void c_try_return_void() {}
 
 size_t c_try_return_primitive() { return 2020; }
