@@ -22,10 +22,12 @@ rust_library(
     srcs = glob(["*.rs"]),
     compile_data = glob(["*.h"]),
     edition = "2024",
-    visibility = ["//visibility:public"],
-    deps = [
+    link_deps = [
         ":bridge",
         ":kj-rs-lib",
+    ],
+    visibility = ["//visibility:public"],
+    deps = [
         "@crates.io//:static_assertions",
         "@workerd-cxx//:cxx",
     ],

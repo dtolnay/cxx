@@ -34,11 +34,13 @@ rust_library(
         "ffi/module.rs",
     ],
     edition = "2021",
+    link_deps = [
+        ":impl",
+    ],
     proc_macro_deps = [
         "//:cxxbridge-macro",
     ],
     deps = [
-        ":impl",
         "//:cxx",
         "//kj-rs",
     ],
