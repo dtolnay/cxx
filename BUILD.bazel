@@ -5,12 +5,14 @@ rust_library(
     name = "cxx",
     srcs = glob(["src/**/*.rs"]),
     edition = "2021",
+    link_deps = [
+        ":core",
+    ],
     proc_macro_deps = [
         ":cxxbridge-macro",
     ],
     visibility = ["//visibility:public"],
     deps = [
-        ":core",
         "@crates.io//:foldhash",
     ],
 )
