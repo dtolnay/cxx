@@ -924,6 +924,13 @@ extern "C" const char *cxx_run_test() noexcept {
   rust::String bad_utf16_rstring = rust::String::lossy(bad_utf16_literal);
   ASSERT(bad_utf8_rstring == bad_utf16_rstring);
 
+#if defined(__cpp_char8_t) && __cplusplus >= 202002L
+  using rust::operator""_utf8;
+  rust::Str utf8_rstr{u8"Test string"_utf8};
+  ASSERT(std::string(utf8_rstr) == "Test string");
+  ASSERT(utf8_rstr.size() == 11);
+#endif
+
   // Test Slice<T> explicit constructor from container
   {
     std::vector<int> cpp_vec{1, 2, 3};
