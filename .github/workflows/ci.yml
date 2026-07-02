@@ -265,6 +265,7 @@ jobs:
       - run: go install github.com/bazelbuild/buildtools/buildifier@latest
       - run: echo $(go env GOPATH)/bin >> $GITHUB_PATH
       - run: git ls-files '*.bzl' '*.bazel' | xargs buildifier
+      - run: git ls-files ':(glob)**/BUCK' | xargs -n1 buildifier -path BUILD.bazel -lint fix
       - name: Check that buildifier wanted no changes
         run: git diff --exit-code
 
