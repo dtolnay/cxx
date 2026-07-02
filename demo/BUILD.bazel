@@ -6,9 +6,11 @@ rust_binary(
     name = "demo",
     srcs = glob(["src/**/*.rs"]),
     edition = "2021",
-    deps = [
+    link_deps = [
         ":blobstore-sys",
         ":bridge",
+    ],
+    deps = [
         "//:cxx",
     ],
 )

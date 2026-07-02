@@ -9,13 +9,15 @@ rust_library(
         "std",
     ],
     edition = "2021",
+    link_deps = [
+        ":core-lib",
+    ],
     proc_macro_deps = [
         ":cxxbridge-macro",
     ],
     version = module_version(),
     visibility = ["//visibility:public"],
     deps = [
-        ":core-lib",
         "@crates.io//:foldhash",
     ],
 )

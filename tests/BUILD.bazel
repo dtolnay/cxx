@@ -22,8 +22,10 @@ rust_library(
         "ffi/module.rs",
     ],
     edition = "2021",
-    deps = [
+    link_deps = [
         ":impl",
+    ],
+    deps = [
         "//:cxx",
         "@crates.io//:serde",
     ],
