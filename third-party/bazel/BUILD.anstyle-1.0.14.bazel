@@ -17,7 +17,7 @@ cargo_toml_env_vars(
 )
 
 rust_library(
-    name = "syn",
+    name = "anstyle",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = True,
@@ -35,13 +35,8 @@ rust_library(
         ],
     ),
     crate_features = [
-        "clone-impls",
         "default",
-        "derive",
-        "full",
-        "parsing",
-        "printing",
-        "proc-macro",
+        "std",
     ],
     crate_root = "src/lib.rs",
     edition = "2021",
@@ -53,7 +48,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=syn",
+        "crate-name=anstyle",
         "manual",
         "noclippy",
         "norustfmt",
@@ -115,10 +110,5 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "2.0.114",
-    deps = [
-        "@vendor__proc-macro2-1.0.105//:proc_macro2",
-        "@vendor__quote-1.0.43//:quote",
-        "@vendor__unicode-ident-1.0.22//:unicode_ident",
-    ],
+    version = "1.0.14",
 )

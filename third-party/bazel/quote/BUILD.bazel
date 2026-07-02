@@ -10,6 +10,6 @@ package(default_visibility = ["//visibility:public"])
 
 alias(
     name = "quote",
-    actual = "@vendor__quote-1.0.43//:quote",
+    actual = "@vendor__quote-1.0.46//:quote",
     tags = ["manual"],
 )

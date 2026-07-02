@@ -10,6 +10,6 @@ package(default_visibility = ["//visibility:public"])
 
 alias(
     name = "indexmap",
-    actual = "@vendor__indexmap-2.13.0//:indexmap",
+    actual = "@vendor__indexmap-2.14.0//:indexmap",
     tags = ["manual"],
 )

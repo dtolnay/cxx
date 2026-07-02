@@ -39,7 +39,7 @@ rust_library(
         "std",
     ],
     crate_root = "src/lib.rs",
-    edition = "2021",
+    edition = "2024",
     rustc_env_files = [
         ":cargo_toml_env_vars",
     ],
@@ -110,9 +110,9 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "2.13.0",
+    version = "2.14.0",
     deps = [
         "@vendor__equivalent-1.0.2//:equivalent",
-        "@vendor__hashbrown-0.16.1//:hashbrown",
+        "@vendor__hashbrown-0.17.1//:hashbrown",
     ],
 )
