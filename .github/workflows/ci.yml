@@ -254,6 +254,21 @@ jobs:
         run: git diff --exit-code
         if: matrix.os == 'ubuntu' || matrix.os == 'macos'
 
+  buildifier:
+    name: Buildifier
+    needs: pre_ci
+    if: needs.pre_ci.outputs.continue
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - run: go install github.com/bazelbuild/buildtools/buildifier@latest
+      - run: echo $(go env GOPATH)/bin >> $GITHUB_PATH
+      - run: git ls-files '*.bzl' '*.bazel' | xargs buildifier
+      - run: git ls-files ':(glob)**/BUCK' | xargs -n1 buildifier -path BUILD.bazel -lint fix
+      - name: Check that buildifier wanted no changes
+        run: git diff --exit-code
+
   minimal:
     name: Minimal versions
     needs: pre_ci
