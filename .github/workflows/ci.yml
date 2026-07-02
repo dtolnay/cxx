@@ -264,7 +264,7 @@ jobs:
       - uses: actions/checkout@v7
       - run: go install github.com/bazelbuild/buildtools/buildifier@latest
       - run: echo $(go env GOPATH)/bin >> $GITHUB_PATH
-      - run: git ls-files '*.bazel' | xargs buildifier
+      - run: git ls-files '*.bzl' '*.bazel' | xargs buildifier
       - name: Check that buildifier wanted no changes
         run: git diff --exit-code
 
