@@ -54,7 +54,9 @@ enum class Enum : uint16_t;
 
 class C {
 public:
+  C();
   C(size_t n);
+  C(size_t n, size_t m);
   size_t get() const;
   size_t set(size_t n);
   size_t get2() const;

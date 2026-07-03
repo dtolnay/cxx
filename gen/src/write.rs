@@ -899,6 +899,42 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         Lang::Rust => unreachable!(),
     }
     writeln!(out, " {{");
+
+    if efn.is_constructor {
+        write_constructor_function_body(out, efn);
+    } else {
+        write_default_function_body(out, efn, indirect_return);
+    }
+    writeln!(out, "}}");
+    for arg in &efn.args {
+        if let Type::Fn(f) = &arg.ty {
+            let var = &arg.name;
+            write_function_pointer_trampoline(out, efn, var, f);
+        }
+    }
+    out.end_block(Block::ExternC);
+}
+
+fn write_constructor_function_body<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
+    write!(out, "  return new ");
+    if let Some(Type::UniquePtr(ty)) = &efn.sig.ret {
+        write_type_to_generic_writer(out, &ty.inner, out.types)
+    } else {
+        panic!(
+            "Constructor: '{}' must return a  UniquePtr<T>",
+            efn.name.rust
+        );
+    }
+    write!(out, "(");
+    write_args_punctuated(out, efn);
+    writeln!(out, ");");
+}
+
+fn write_default_function_body<'a>(
+    out: &mut OutFile<'a>,
+    efn: &'a ExternFn,
+    indirect_return: bool,
+) {
     write!(out, "  ");
     write_return_type(out, &efn.ret);
     match efn.receiver() {
@@ -968,6 +1004,27 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         None => write!(out, "{}$(", efn.name.rust),
         Some(_) => write!(out, "(self.*{}$)(", efn.name.rust),
     }
+    write_args_punctuated(out, efn);
+    write!(out, ")");
+    match &efn.ret {
+        Some(Type::RustBox(_)) => write!(out, ".into_raw()"),
+        Some(Type::UniquePtr(_)) => write!(out, ".release()"),
+        Some(Type::Str(_) | Type::SliceRef(_)) if !indirect_return => write!(out, ")"),
+        _ => {}
+    }
+    if indirect_return {
+        write!(out, ")");
+    }
+    writeln!(out, ";");
+    if efn.throws {
+        writeln!(out, "        throw$.ptr = nullptr;");
+        writeln!(out, "      }},");
+        writeln!(out, "      ::rust::detail::Fail(throw$));");
+        writeln!(out, "  return throw$;");
+    }
+}
+
+fn write_args_punctuated<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     for (i, arg) in efn.args.iter().enumerate() {
         if i > 0 {
             write!(out, ", ");
@@ -996,31 +1053,6 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
             write!(out, "{}", arg.name.cxx);
         }
     }
-    write!(out, ")");
-    match &efn.ret {
-        Some(Type::RustBox(_)) => write!(out, ".into_raw()"),
-        Some(Type::UniquePtr(_)) => write!(out, ".release()"),
-        Some(Type::Str(_) | Type::SliceRef(_)) if !indirect_return => write!(out, ")"),
-        _ => {}
-    }
-    if indirect_return {
-        write!(out, ")");
-    }
-    writeln!(out, ";");
-    if efn.throws {
-        writeln!(out, "        throw$.ptr = nullptr;");
-        writeln!(out, "      }},");
-        writeln!(out, "      ::rust::detail::Fail(throw$));");
-        writeln!(out, "  return throw$;");
-    }
-    writeln!(out, "}}");
-    for arg in &efn.args {
-        if let Type::Fn(f) = &arg.ty {
-            let var = &arg.name;
-            write_function_pointer_trampoline(out, efn, var, f);
-        }
-    }
-    out.end_block(Block::ExternC);
 }
 
 fn write_function_pointer_trampoline(out: &mut OutFile, efn: &ExternFn, var: &Pair, f: &Signature) {

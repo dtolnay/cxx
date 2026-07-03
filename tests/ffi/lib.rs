@@ -112,6 +112,13 @@ pub mod ffi {
     unsafe extern "C++" {
         type C;
 
+        #[constructor]
+        fn new_c_0_args() -> UniquePtr<C>;
+        #[constructor]
+        fn new_c_1_args(n: usize) -> UniquePtr<C>;
+        #[constructor]
+        fn new_c_2_args(n: usize, m: usize) -> UniquePtr<C>;
+
         fn c_return_primitive() -> usize;
         fn c_return_shared() -> Shared;
         fn c_return_box() -> Box<R>;
