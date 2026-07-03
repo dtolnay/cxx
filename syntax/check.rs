@@ -129,7 +129,7 @@ fn check_type_rust_vec(cx: &mut Check, ty: &Ty1) {
                     Bool | Char | U8 | U16 | U32 | U64 | Usize | I8 | I16 | I32 | I64 | Isize | F32
                     | F64 | RustString,
                 ) => return,
-                Some(CxxString) => {}
+                Some(CxxString | Cvoid) => {}
             }
         }
         Type::Str(_) => return,
@@ -174,7 +174,7 @@ fn check_type_shared_ptr(cx: &mut Check, ptr: &Ty1) {
                 Bool | U8 | U16 | U32 | U64 | Usize | I8 | I16 | I32 | I64 | Isize | F32 | F64
                 | CxxString,
             ) => return,
-            Some(Char | RustString) => {}
+            Some(Char | RustString | Cvoid) => {}
         }
     } else if let Type::CxxVector(_) = &ptr.inner {
         cx.error(ptr, "std::shared_ptr<std::vector> is not supported yet");
@@ -197,7 +197,7 @@ fn check_type_weak_ptr(cx: &mut Check, ptr: &Ty1) {
                 Bool | U8 | U16 | U32 | U64 | Usize | I8 | I16 | I32 | I64 | Isize | F32 | F64
                 | CxxString,
             ) => return,
-            Some(Char | RustString) => {}
+            Some(Char | RustString | Cvoid) => {}
         }
     } else if let Type::CxxVector(_) = &ptr.inner {
         cx.error(ptr, "std::weak_ptr<std::vector> is not supported yet");
@@ -223,7 +223,7 @@ fn check_type_cxx_vector(cx: &mut Check, ptr: &Ty1) {
                 U8 | U16 | U32 | U64 | Usize | I8 | I16 | I32 | I64 | Isize | F32 | F64 | CxxString,
             ) => return,
             Some(Char) => { /* todo */ }
-            Some(Bool | RustString) => {}
+            Some(Bool | RustString | Cvoid) => {}
         }
     }
 
