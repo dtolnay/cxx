@@ -221,6 +221,40 @@ KJ_TEST("RustCopy struct - ArrayPtr conversion") {
   KJ_EXPECT(rustVec[2] == 3.3);
 }
 
+KJ_TEST("RustCopy struct - mutable ArrayPtr conversion") {
+  kj::Array<int> kjArray = kj::heapArray<int>({4, 5, 6});
+  kj::ArrayPtr<int> mutablePtr = kjArray.asPtr();
+
+  // A mutable ArrayPtr<T> (not ArrayPtr<const T>) still yields a rust::Vec<T>.
+  auto rustVec = mutablePtr.as<RustCopy>();
+
+  KJ_EXPECT(rustVec.size() == 3);
+  KJ_EXPECT(rustVec[0] == 4);
+  KJ_EXPECT(rustVec[2] == 6);
+}
+
+KJ_TEST("RustCopy struct - temporary ArrayPtr conversion") {
+  kj::Array<kj::byte> kjArray = kj::heapArray<kj::byte>({7, 8, 9});
+
+  // The ArrayPtr produced by asBytes() is a temporary; RustCopy must bind to it.
+  auto rustVec = kjArray.asBytes().as<RustCopy>();
+
+  KJ_EXPECT(rustVec.size() == 3);
+  KJ_EXPECT(rustVec[0] == 7);
+  KJ_EXPECT(rustVec[2] == 9);
+}
+
+KJ_TEST("RustCopy struct - Array conversion") {
+  kj::Array<double> kjArray = kj::heapArray<double>({1.5, 2.5});
+
+  // A kj::Array converts directly, without a manual .asPtr().
+  auto rustVec = kjArray.as<RustCopy>();
+
+  KJ_EXPECT(rustVec.size() == 2);
+  KJ_EXPECT(rustVec[0] == 1.5);
+  KJ_EXPECT(rustVec[1] == 2.5);
+}
+
 KJ_TEST("RustMutable struct - ArrayPtr conversion") {
   kj::Array<int> kjArray = kj::heapArray<int>({100, 200, 300});
   kj::ArrayPtr<int> arrayPtr = kjArray.asPtr();

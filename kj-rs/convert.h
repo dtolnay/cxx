@@ -239,14 +239,25 @@ inline kj::ArrayPtr<const char> fromImpl(Rust*, const ::rust::Str& str) {
 struct RustCopy {};
 
 /// kjArrayPtr.as<RustCopy>()
+///
+/// Taken by value so it binds equally to const and mutable `kj::ArrayPtr`s, to temporaries (e.g.
+/// `arr.asBytes().as<RustCopy>()`), and to lvalues -- a `kj::ArrayPtr` is just a pointer+size, so
+/// the copy is free. `kj::Decay` drops the element's constness so a `kj::ArrayPtr<const T>` still
+/// yields a `rust::Vec<T>`.
 template <typename T>
-static ::rust::Vec<T> asImpl(RustCopy*, kj::ArrayPtr<const T>& arr) {
-  ::rust::Vec<T> result;
+inline ::rust::Vec<kj::Decay<T>> asImpl(RustCopy*, kj::ArrayPtr<T> arr) {
+  ::rust::Vec<kj::Decay<T>> result;
   result.reserve(arr.size());
   for (auto& t: arr) {
     result.push_back(t);
   }
   return result;
+}
+
+/// kjArray.as<RustCopy>()
+template <typename T>
+inline ::rust::Vec<kj::Decay<T>> asImpl(RustCopy*, const kj::Array<T>& arr) {
+  return asImpl((RustCopy*)nullptr, arr.asPtr());
 }
 
 /// kjStringPtr.as<RustCopy>()
