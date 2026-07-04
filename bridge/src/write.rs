@@ -1,8 +1,8 @@
-use crate::gen::block::Block;
-use crate::gen::guard::Guard;
-use crate::gen::nested::NamespaceEntries;
-use crate::gen::out::{InfallibleWrite, OutFile};
-use crate::gen::{builtin, include, pragma, Opt};
+use crate::bridge::block::Block;
+use crate::bridge::guard::Guard;
+use crate::bridge::nested::NamespaceEntries;
+use crate::bridge::out::{InfallibleWrite, OutFile};
+use crate::bridge::{builtin, include, pragma, Opt};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::discriminant::{Discriminant, Limits};
 use crate::syntax::instantiate::{ImplKey, NamedImplKey};
@@ -17,7 +17,7 @@ use crate::syntax::{
     Trait, Type, TypeAlias, Types, Var,
 };
 
-pub(super) fn gen(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u8> {
+pub(super) fn generate(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u8> {
     let mut out_file = OutFile::new(header, opt, types);
     let out = &mut out_file;
 

@@ -189,10 +189,10 @@ pub(super) fn generate(syntax: File, opt: &Opt) -> Result<GeneratedCode> {
     // one or the other.
     let (mut header, mut implementation) = Default::default();
     if opt.gen_header {
-        header = write::gen(apis, types, opt, true);
+        header = write::generate(apis, types, opt, true);
     }
     if opt.gen_implementation {
-        implementation = write::gen(apis, types, opt, false);
+        implementation = write::generate(apis, types, opt, false);
     }
     Ok(GeneratedCode {
         header,

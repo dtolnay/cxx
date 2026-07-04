@@ -79,11 +79,11 @@
 )]
 #![allow(unknown_lints, mismatched_lifetime_syntaxes)]
 
+mod bridge;
 mod cargo;
 mod cfg;
 mod deps;
 mod error;
-mod gen;
 mod intern;
 mod out;
 mod paths;
@@ -91,11 +91,11 @@ mod syntax;
 mod target;
 mod vec;
 
+use crate::bridge::error::report;
+use crate::bridge::Opt;
 use crate::cargo::CargoEnvCfgEvaluator;
 use crate::deps::{Crate, HeaderDir};
 use crate::error::{Error, Result};
-use crate::gen::error::report;
-use crate::gen::Opt;
 use crate::paths::PathExt;
 use crate::syntax::map::{Entry, UnorderedMap};
 use crate::target::TargetDir;
@@ -387,7 +387,7 @@ fn make_include_dir(prj: &Project) -> Result<PathBuf> {
         out::absolute_symlink_file(original, cxx_h)?;
         out::absolute_symlink_file(original, shared_cxx_h)?;
     } else {
-        out::write(shared_cxx_h, gen::include::HEADER.as_bytes())?;
+        out::write(shared_cxx_h, bridge::include::HEADER.as_bytes())?;
         out::relative_symlink_file(shared_cxx_h, cxx_h)?;
     }
     Ok(include_dir)
@@ -403,7 +403,7 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
     if !rust_source_file.starts_with(&prj.out_dir) {
         println!("cargo:rerun-if-changed={}", rust_source_file.display());
     }
-    let generated = gen::generate_from_path(rust_source_file, &opt);
+    let generated = bridge::generate_from_path(rust_source_file, &opt);
     let ref rel_path = paths::local_relative_path(rust_source_file);
 
     let cxxbridge = prj.out_dir.join("cxxbridge");
@@ -430,7 +430,7 @@ fn generate_bridge(prj: &Project, build: &mut Build, rust_source_file: &Path) ->
 }
 
 fn best_effort_copy_headers(src: &Path, dst: &Path, max_depth: usize) {
-    // Not using crate::gen::fs because we aren't reporting the errors.
+    // Not using crate::bridge::fs because we aren't reporting the errors.
     use std::fs;
 
     let mut dst_created = false;

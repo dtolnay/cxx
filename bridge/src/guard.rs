@@ -1,4 +1,4 @@
-use crate::gen::out::OutFile;
+use crate::bridge::out::OutFile;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::Pair;
 use std::fmt::{self, Display};
