@@ -19,7 +19,7 @@ thread_local! {
     static CORRECT: Cell<bool> = const { Cell::new(false) };
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cxx_test_suite_set_correct() {
     CORRECT.with(|correct| correct.set(true));
 }
@@ -380,12 +380,12 @@ fn test_debug() {
     assert_eq!("Enum(9)", format!("{:?}", ffi::Enum { repr: 9 }));
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 extern "C" fn cxx_test_suite_get_box() -> *mut R {
     Box::into_raw(Box::new(R(2020usize)))
 }
 
-#[no_mangle]
+#[unsafe(no_mangle)]
 unsafe extern "C" fn cxx_test_suite_r_is_correct(r: *const R) -> bool {
     (*r).0 == 2020
 }
