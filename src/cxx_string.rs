@@ -90,6 +90,8 @@ macro_rules! let_cxx_string {
         let mut $var = match $value {
             let_cxx_string => unsafe { cxx_stack_string.init(let_cxx_string) },
         };
+        #[allow(unused_unsafe)]
+        let _cxx_stack_string_drop_guard = unsafe { cxx_stack_string.drop_guard() };
     };
 }
 
@@ -323,14 +325,20 @@ impl StackString {
             Pin::new_unchecked(&mut *this.as_mut_ptr())
         }
     }
-}
 
-impl Drop for StackString {
-    fn drop(&mut self) {
-        unsafe {
-            let this = &mut *self.space.get().cast::<MaybeUninit<CxxString>>();
-            string_destroy(this);
+    pub unsafe fn drop_guard(&self) -> impl Drop + '_ {
+        struct StackStringDropGuard<'a>(&'a StackString);
+
+        impl<'a> Drop for StackStringDropGuard<'a> {
+            fn drop(&mut self) {
+                unsafe {
+                    let this = &mut *self.0.space.get().cast::<MaybeUninit<CxxString>>();
+                    string_destroy(this);
+                }
+            }
         }
+
+        StackStringDropGuard(self)
     }
 }
 
