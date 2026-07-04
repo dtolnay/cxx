@@ -4,6 +4,7 @@ use crate::lossy;
 use alloc::borrow::Cow;
 #[cfg(feature = "alloc")]
 use alloc::string::String;
+use core::cell::UnsafeCell;
 use core::cmp::Ordering;
 use core::ffi::{c_char, CStr};
 use core::fmt::{self, Debug, Display};
@@ -84,7 +85,7 @@ pub struct CxxString {
 #[macro_export]
 macro_rules! let_cxx_string {
     ($var:ident = $value:expr $(,)?) => {
-        let mut cxx_stack_string = $crate::private::StackString::new();
+        let cxx_stack_string = $crate::private::StackString::new();
         #[allow(unused_mut, unused_unsafe)]
         let mut $var = match $value {
             let_cxx_string => unsafe { cxx_stack_string.init(let_cxx_string) },
@@ -301,20 +302,23 @@ impl std::io::Write for Pin<&mut CxxString> {
 pub struct StackString {
     // Static assertions in cxx.cc validate that this is large enough and
     // aligned enough.
-    space: MaybeUninit<[usize; 8]>,
+    space: UnsafeCell<MaybeUninit<[usize; 8]>>,
 }
+
+unsafe impl Sync for StackString {}
 
 impl StackString {
     pub fn new() -> Self {
         StackString {
-            space: MaybeUninit::uninit(),
+            space: UnsafeCell::new(MaybeUninit::uninit()),
         }
     }
 
-    pub unsafe fn init(&mut self, value: impl AsRef<[u8]>) -> Pin<&mut CxxString> {
+    #[allow(clippy::mut_from_ref)]
+    pub unsafe fn init(&self, value: impl AsRef<[u8]>) -> Pin<&mut CxxString> {
         let value = value.as_ref();
         unsafe {
-            let this = &mut *self.space.as_mut_ptr().cast::<MaybeUninit<CxxString>>();
+            let this = &mut *self.space.get().cast::<MaybeUninit<CxxString>>();
             string_init(this, value.as_ptr(), value.len());
             Pin::new_unchecked(&mut *this.as_mut_ptr())
         }
@@ -324,7 +328,7 @@ impl StackString {
 impl Drop for StackString {
     fn drop(&mut self) {
         unsafe {
-            let this = &mut *self.space.as_mut_ptr().cast::<MaybeUninit<CxxString>>();
+            let this = &mut *self.space.get().cast::<MaybeUninit<CxxString>>();
             string_destroy(this);
         }
     }
