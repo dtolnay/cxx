@@ -301,6 +301,20 @@ jobs:
       - run: cargo docs-rs -p cxxbridge-flags
       - run: cargo docs-rs -p cxxbridge-macro
 
+  miri:
+    name: Miri
+    needs: pre_ci
+    if: needs.pre_ci.outputs.continue
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@miri
+      - run: cargo miri setup
+      - run: cargo miri test --test=cxx_string
+        env:
+          MIRIFLAGS: -Zmiri-strict-provenance
+
   clippy:
     name: Clippy
     runs-on: ubuntu-latest
