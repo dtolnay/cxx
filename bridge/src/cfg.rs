@@ -1,4 +1,4 @@
-use crate::gen::{CfgEvaluator, CfgResult};
+use crate::bridge::{CfgEvaluator, CfgResult};
 use crate::syntax::cfg::CfgExpr;
 use crate::syntax::report::Errors;
 use crate::syntax::Api;

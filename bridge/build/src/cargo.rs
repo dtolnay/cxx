@@ -1,4 +1,4 @@
-use crate::gen::{CfgEvaluator, CfgResult};
+use crate::bridge::{CfgEvaluator, CfgResult};
 use std::borrow::Borrow;
 use std::cmp::Ordering;
 use std::collections::{BTreeMap as Map, BTreeSet as Set};

@@ -1,4 +1,4 @@
-use crate::gen::Opt;
+use crate::bridge::Opt;
 use crate::syntax::report::Errors;
 use crate::syntax::{error, Api};
 use quote::{quote, quote_spanned};
