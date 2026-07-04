@@ -354,7 +354,7 @@ mod miri {
 
     pub(super) type CxxStringRepr = [MaybeUninit<u8>; mem::size_of::<Vec<u8>>()];
 
-    #[export_name = "cxxbridge1$cxx_string$init"]
+    #[unsafe(export_name = "cxxbridge1$cxx_string$init")]
     unsafe extern "C" fn string_init(
         this: &mut MaybeUninit<CxxString>,
         ptr: *const u8,
@@ -367,38 +367,38 @@ mod miri {
         }
     }
 
-    #[export_name = "cxxbridge1$cxx_string$destroy"]
+    #[unsafe(export_name = "cxxbridge1$cxx_string$destroy")]
     unsafe extern "C" fn string_destroy(this: &mut MaybeUninit<CxxString>) {
         unsafe {
             ptr::drop_in_place(this.as_mut_ptr().cast::<Vec<u8>>());
         }
     }
 
-    #[export_name = "cxxbridge1$cxx_string$data"]
+    #[unsafe(export_name = "cxxbridge1$cxx_string$data")]
     unsafe extern "C" fn string_data(this: &CxxString) -> *const u8 {
         let vec = unsafe { &*ptr::from_ref(this).cast::<Vec<u8>>() };
         vec.as_ptr()
     }
 
-    #[export_name = "cxxbridge1$cxx_string$length"]
+    #[unsafe(export_name = "cxxbridge1$cxx_string$length")]
     unsafe extern "C" fn string_length(this: &CxxString) -> usize {
         let vec = unsafe { &*ptr::from_ref(this).cast::<Vec<u8>>() };
         vec.len()
     }
 
-    #[export_name = "cxxbridge1$cxx_string$clear"]
+    #[unsafe(export_name = "cxxbridge1$cxx_string$clear")]
     unsafe extern "C" fn string_clear(this: Pin<&mut CxxString>) {
         let vec = unsafe { &mut *ptr::from_mut(this.get_unchecked_mut()).cast::<Vec<u8>>() };
         vec.clear();
     }
 
-    #[export_name = "cxxbridge1$cxx_string$reserve_total"]
+    #[unsafe(export_name = "cxxbridge1$cxx_string$reserve_total")]
     unsafe extern "C" fn string_reserve_total(this: Pin<&mut CxxString>, new_cap: usize) {
         let vec = unsafe { &mut *ptr::from_mut(this.get_unchecked_mut()).cast::<Vec<u8>>() };
         vec.reserve(new_cap.saturating_sub(vec.len()));
     }
 
-    #[export_name = "cxxbridge1$cxx_string$push"]
+    #[unsafe(export_name = "cxxbridge1$cxx_string$push")]
     unsafe extern "C" fn string_push(this: Pin<&mut CxxString>, ptr: *const u8, len: usize) {
         let vec = unsafe { &mut *ptr::from_mut(this.get_unchecked_mut()).cast::<Vec<u8>>() };
         vec.extend_from_slice(unsafe { slice::from_raw_parts(ptr, len) });
