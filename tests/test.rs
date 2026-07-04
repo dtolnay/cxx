@@ -9,7 +9,7 @@
 
 use cxx::{CxxVector, SharedPtr, UniquePtr};
 use cxx_test_suite::module::ffi2;
-use cxx_test_suite::{cast, ffi, R};
+use cxx_test_suite::{R, cast, ffi};
 use std::cell::Cell;
 use std::ffi::CStr;
 use std::panic::{self, RefUnwindSafe, UnwindSafe};

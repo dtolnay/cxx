@@ -461,7 +461,7 @@ pub use crate::cxx_vector::CxxVector;
 #[cfg(feature = "alloc")]
 #[cfg_attr(docsrs, doc(cfg(feature = "alloc")))]
 pub use crate::exception::Exception;
-pub use crate::extern_type::{kind, ExternType};
+pub use crate::extern_type::{ExternType, kind};
 pub use crate::shared_ptr::SharedPtr;
 pub use crate::string::CxxString;
 pub use crate::unique_ptr::UniquePtr;
@@ -490,13 +490,13 @@ pub mod private {
     pub use crate::hash::hash;
     pub use crate::opaque::Opaque;
     #[cfg(feature = "alloc")]
-    pub use crate::result::{r#try, Result};
+    pub use crate::result::{Result, r#try};
     pub use crate::rust_slice::RustSlice;
     pub use crate::rust_str::RustStr;
     #[cfg(feature = "alloc")]
     pub use crate::rust_string::RustString;
     pub use crate::rust_type::{
-        require_box, require_unpin, require_vec, with, ImplBox, ImplVec, RustType, Without,
+        ImplBox, ImplVec, RustType, Without, require_box, require_unpin, require_vec, with,
     };
     #[cfg(feature = "alloc")]
     pub use crate::rust_vec::RustVec;

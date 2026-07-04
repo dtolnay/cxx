@@ -91,8 +91,8 @@ mod syntax;
 mod target;
 mod vec;
 
-use crate::bridge::error::report;
 use crate::bridge::Opt;
+use crate::bridge::error::report;
 use crate::cargo::CargoEnvCfgEvaluator;
 use crate::deps::{Crate, HeaderDir};
 use crate::error::{Error, Result};
@@ -108,7 +108,7 @@ use std::iter;
 use std::path::{Path, PathBuf};
 use std::process;
 
-pub use crate::cfg::{Cfg, CFG};
+pub use crate::cfg::{CFG, Cfg};
 
 /// This returns a [`cc::Build`] on which you should continue to set up any
 /// additional source files or compiler flags, and lastly call its [`compile`]

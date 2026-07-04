@@ -1,10 +1,10 @@
+use crate::bridge::Opt;
 use crate::bridge::block::Block;
 use crate::bridge::builtin::Builtins;
 use crate::bridge::include::Includes;
 use crate::bridge::pragma::Pragma;
-use crate::bridge::Opt;
-use crate::syntax::namespace::Namespace;
 use crate::syntax::Types;
+use crate::syntax::namespace::Namespace;
 use std::cell::RefCell;
 use std::fmt::{self, Arguments, Write};
 

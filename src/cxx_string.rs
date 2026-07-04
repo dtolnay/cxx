@@ -6,7 +6,7 @@ use alloc::borrow::Cow;
 use alloc::string::String;
 use core::cell::UnsafeCell;
 use core::cmp::Ordering;
-use core::ffi::{c_char, CStr};
+use core::ffi::{CStr, c_char};
 use core::fmt::{self, Debug, Display};
 use core::hash::{Hash, Hasher};
 use core::marker::{PhantomData, PhantomPinned};
