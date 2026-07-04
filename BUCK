@@ -8,7 +8,7 @@ rust_library(
     doc_deps = [
         ":cxx-build",
     ],
-    edition = "2021",
+    edition = "2024",
     features = [
         "alloc",
         "std",
@@ -36,7 +36,7 @@ rust_binary(
         "bridge/cmd/src/bridge",
         "bridge/cmd/src/syntax",
     ],
-    edition = "2021",
+    edition = "2024",
     env = {
         "CARGO_PKG_VERSION_PATCH": CARGO_PKG_VERSION_PATCH,
     },
@@ -65,7 +65,7 @@ rust_library(
     name = "cxxbridge-macro",
     srcs = glob(["macro/src/**/*.rs"]) + ["macro/src/syntax"],
     doctests = False,
-    edition = "2021",
+    edition = "2024",
     env = {
         "CARGO_PKG_VERSION_PATCH": CARGO_PKG_VERSION_PATCH,
     },
@@ -89,7 +89,7 @@ rust_library(
         "bridge/build/src/syntax",
     ],
     doctests = False,
-    edition = "2021",
+    edition = "2024",
     env = {
         "CARGO_PKG_VERSION_PATCH": CARGO_PKG_VERSION_PATCH,
     },
@@ -113,7 +113,7 @@ rust_library(
         "bridge/lib/src/bridge",
         "bridge/lib/src/syntax",
     ],
-    edition = "2021",
+    edition = "2024",
     env = {
         "CARGO_PKG_VERSION_PATCH": CARGO_PKG_VERSION_PATCH,
     },

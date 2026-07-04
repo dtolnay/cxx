@@ -313,7 +313,7 @@ def aliases(
 ###############################################################################
 
 _CRATE_EDITIONS = {
-    "third-party": "2021",
+    "third-party": "2024",
 }
 
 _NORMAL_DEPENDENCIES = {
