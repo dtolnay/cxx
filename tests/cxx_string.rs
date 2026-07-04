@@ -19,7 +19,7 @@ fn test_async_cxx_string() {
     }
 
     // https://github.com/dtolnay/cxx/issues/693
-    fn assert_send(_: impl Send) {}
+    fn assert_send(_: impl Send + Sync) {}
     assert_send(f());
 }
 
