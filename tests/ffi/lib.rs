@@ -534,7 +534,7 @@ fn r_return_box() -> Box<R> {
 
 fn r_return_unique_ptr() -> UniquePtr<ffi::C> {
     #[allow(missing_unsafe_on_extern)]
-    extern "C" {
+    unsafe extern "C" {
         fn cxx_test_suite_get_unique_ptr() -> *mut ffi::C;
     }
     unsafe { UniquePtr::from_raw(cxx_test_suite_get_unique_ptr()) }
@@ -542,7 +542,7 @@ fn r_return_unique_ptr() -> UniquePtr<ffi::C> {
 
 fn r_return_shared_ptr() -> SharedPtr<ffi::C> {
     #[allow(missing_unsafe_on_extern)]
-    extern "C" {
+    unsafe extern "C" {
         fn cxx_test_suite_get_shared_ptr(repr: *mut SharedPtr<ffi::C>);
     }
     let mut shared_ptr = MaybeUninit::<SharedPtr<ffi::C>>::uninit();
@@ -586,7 +586,7 @@ fn r_return_rust_string() -> String {
 
 fn r_return_unique_ptr_string() -> UniquePtr<CxxString> {
     #[allow(missing_unsafe_on_extern)]
-    extern "C" {
+    unsafe extern "C" {
         fn cxx_test_suite_get_unique_ptr_string() -> *mut CxxString;
     }
     unsafe { UniquePtr::from_raw(cxx_test_suite_get_unique_ptr_string()) }

@@ -15,7 +15,7 @@ use core::pin::Pin;
 use core::slice;
 use core::str::{self, Utf8Error};
 
-extern "C" {
+unsafe extern "C" {
     #[link_name = "cxxbridge1$cxx_string$init"]
     fn string_init(this: &mut MaybeUninit<CxxString>, ptr: *const u8, len: usize);
     #[link_name = "cxxbridge1$cxx_string$destroy"]

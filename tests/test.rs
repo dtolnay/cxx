@@ -240,7 +240,7 @@ fn test_c_callback() {
 #[test]
 fn test_c_call_r() {
     fn cxx_run_test() {
-        extern "C" {
+        unsafe extern "C" {
             fn cxx_run_test() -> *const i8;
         }
         let failure = unsafe { cxx_run_test() };
