@@ -1,0 +1,39 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light" dir="ltr">
+    <head>
+        <!-- sidebar iframe generated using mdBook
+
+        This is a frame, and not included directly in the page, to control the total size of the
+        book. The TOC contains an entry for each page, so if each page includes a copy of the TOC,
+        the total size of the page becomes O(n**2).
+
+        The frame is only used as a fallback when JS is turned off. When it's on, the sidebar is
+        instead added to the main page by `toc.js` instead. The JavaScript mode is better
+        because, when running in a `file:///` URL, the iframed page would not be Same-Origin as
+        the rest of the page, so the sidebar and the main page theme would fall out of sync.
+        -->
+        <meta charset="UTF-8">
+        <meta name="robots" content="noindex">
+        <!-- Custom HTML head -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DG41MK6DDN"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-DG41MK6DDN', {anonymize_ip: true, cookie_domain: 'cxx.rs', cookie_flags: 'samesite=strict;secure'});
+        </script>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="css/cxx.css">
+    <meta property="og:image" content="https://cxx.rs/cxx.png"><meta property="og:site_name" content="CXX"><meta property="og:title" content="CXX — safe interop between Rust and C++"><meta name="twitter:image:src" content="https://cxx.rs/cxx.png"><meta name="twitter:site" content="@davidtolnay"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="CXX — safe interop between Rust and C++"></head>
+    <body class="sidebar-iframe-inner">
+        <ol class="chapter"><li class="chapter-item expanded "><a href="index.html" target="_parent"><strong aria-hidden="true">1.</strong> Rust ❤️ C++</a></li><li class="chapter-item expanded "><a href="concepts.html" target="_parent"><strong aria-hidden="true">2.</strong> Core concepts</a></li><li class="chapter-item expanded "><a href="tutorial.html" target="_parent"><strong aria-hidden="true">3.</strong> Tutorial</a></li><li class="chapter-item expanded "><a href="context.html" target="_parent"><strong aria-hidden="true">4.</strong> Other Rust–C++ interop tools</a></li><li class="chapter-item expanded "><a href="building.html" target="_parent"><strong aria-hidden="true">5.</strong> Multi-language build system options</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="build/cargo.html" target="_parent"><strong aria-hidden="true">5.1.</strong> Cargo</a></li><li class="chapter-item expanded "><a href="build/bazel.html" target="_parent"><strong aria-hidden="true">5.2.</strong> Bazel or Buck2</a></li><li class="chapter-item expanded "><a href="build/cmake.html" target="_parent"><strong aria-hidden="true">5.3.</strong> CMake</a></li><li class="chapter-item expanded "><a href="build/other.html" target="_parent"><strong aria-hidden="true">5.4.</strong> More...</a></li></ol></li><li class="chapter-item expanded "><a href="reference.html" target="_parent"><strong aria-hidden="true">6.</strong> Reference: the bridge module</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="extern-rust.html" target="_parent"><strong aria-hidden="true">6.1.</strong> extern "Rust"</a></li><li class="chapter-item expanded "><a href="extern-c++.html" target="_parent"><strong aria-hidden="true">6.2.</strong> extern "C++"</a></li><li class="chapter-item expanded "><a href="shared.html" target="_parent"><strong aria-hidden="true">6.3.</strong> Shared types</a></li><li class="chapter-item expanded "><a href="attributes.html" target="_parent"><strong aria-hidden="true">6.4.</strong> Attributes</a></li><li class="chapter-item expanded "><a href="async.html" target="_parent"><strong aria-hidden="true">6.5.</strong> Async functions</a></li><li class="chapter-item expanded "><a href="binding/result.html" target="_parent"><strong aria-hidden="true">6.6.</strong> Error handling</a></li></ol></li><li class="chapter-item expanded "><a href="bindings.html" target="_parent"><strong aria-hidden="true">7.</strong> Reference: built-in bindings</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="binding/string.html" target="_parent"><strong aria-hidden="true">7.1.</strong> String — rust::String</a></li><li class="chapter-item expanded "><a href="binding/str.html" target="_parent"><strong aria-hidden="true">7.2.</strong> &amp;str — rust::Str</a></li><li class="chapter-item expanded "><a href="binding/slice.html" target="_parent"><strong aria-hidden="true">7.3.</strong> &amp;[T], &amp;mut [T] — rust::Slice&lt;T&gt;</a></li><li class="chapter-item expanded "><a href="binding/cxxstring.html" target="_parent"><strong aria-hidden="true">7.4.</strong> CxxString — std::string</a></li><li class="chapter-item expanded "><a href="binding/box.html" target="_parent"><strong aria-hidden="true">7.5.</strong> Box&lt;T&gt; — rust::Box&lt;T&gt;</a></li><li class="chapter-item expanded "><a href="binding/uniqueptr.html" target="_parent"><strong aria-hidden="true">7.6.</strong> UniquePtr&lt;T&gt; — std::unique_ptr&lt;T&gt;</a></li><li class="chapter-item expanded "><a href="binding/sharedptr.html" target="_parent"><strong aria-hidden="true">7.7.</strong> SharedPtr&lt;T&gt; — std::shared_ptr&lt;T&gt;</a></li><li class="chapter-item expanded "><a href="binding/vec.html" target="_parent"><strong aria-hidden="true">7.8.</strong> Vec&lt;T&gt; — rust::Vec&lt;T&gt;</a></li><li class="chapter-item expanded "><a href="binding/cxxvector.html" target="_parent"><strong aria-hidden="true">7.9.</strong> CxxVector&lt;T&gt; — std::vector&lt;T&gt;</a></li><li class="chapter-item expanded "><a href="binding/rawptr.html" target="_parent"><strong aria-hidden="true">7.10.</strong> *mut T, *const T raw pointers</a></li><li class="chapter-item expanded "><a href="binding/fn.html" target="_parent"><strong aria-hidden="true">7.11.</strong> Function pointers</a></li><li class="chapter-item expanded "><a href="binding/result.html" target="_parent"><strong aria-hidden="true">7.12.</strong> Result&lt;T&gt;</a></li></ol></li></ol>
+    </body>
+</html>
