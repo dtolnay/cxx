@@ -387,7 +387,7 @@ extern "C" fn cxx_test_suite_get_box() -> *mut R {
 
 #[unsafe(no_mangle)]
 unsafe extern "C" fn cxx_test_suite_r_is_correct(r: *const R) -> bool {
-    (*r).0 == 2020
+    unsafe { (*r).0 == 2020 }
 }
 
 #[test]
