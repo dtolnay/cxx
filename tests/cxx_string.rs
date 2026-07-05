@@ -5,7 +5,7 @@
     clippy::unused_async
 )]
 
-use cxx::{let_cxx_string, CxxString};
+use cxx::{CxxString, let_cxx_string};
 use std::fmt::Write as _;
 use std::panic;
 

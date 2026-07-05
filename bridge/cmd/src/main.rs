@@ -35,7 +35,7 @@ mod cfg;
 mod output;
 mod syntax;
 
-use crate::bridge::error::{report, Result};
+use crate::bridge::error::{Result, report};
 use crate::bridge::fs;
 use crate::bridge::include::{self, Include};
 use crate::cfg::{CfgValue, FlagsCfgEvaluator};

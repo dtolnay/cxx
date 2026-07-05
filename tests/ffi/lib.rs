@@ -18,7 +18,7 @@
 pub mod cast;
 pub mod module;
 
-use cxx::{type_id, CxxString, CxxVector, ExternType, SharedPtr, UniquePtr};
+use cxx::{CxxString, CxxVector, ExternType, SharedPtr, UniquePtr, type_id};
 use std::fmt::{self, Display};
 use std::mem::MaybeUninit;
 use std::os::raw::c_char;
@@ -407,7 +407,7 @@ pub mod ffi_no_rustfmt {
 
 mod other {
     use cxx::kind::{Opaque, Trivial};
-    use cxx::{type_id, CxxString, ExternType};
+    use cxx::{CxxString, ExternType, type_id};
 
     #[repr(C)]
     pub struct D {
@@ -422,7 +422,7 @@ mod other {
 
     pub mod f {
         use cxx::kind::Opaque;
-        use cxx::{type_id, CxxString, ExternType};
+        use cxx::{CxxString, ExternType, type_id};
 
         #[repr(C)]
         pub struct F {

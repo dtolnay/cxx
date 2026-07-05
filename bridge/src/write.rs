@@ -2,7 +2,7 @@ use crate::bridge::block::Block;
 use crate::bridge::guard::Guard;
 use crate::bridge::nested::NamespaceEntries;
 use crate::bridge::out::{InfallibleWrite, OutFile};
-use crate::bridge::{builtin, include, pragma, Opt};
+use crate::bridge::{Opt, builtin, include, pragma};
 use crate::syntax::atom::Atom::{self, *};
 use crate::syntax::discriminant::{Discriminant, Limits};
 use crate::syntax::instantiate::{ImplKey, NamedImplKey};
@@ -13,8 +13,8 @@ use crate::syntax::set::UnorderedSet;
 use crate::syntax::symbol::Symbol;
 use crate::syntax::trivial::{self, TrivialReason};
 use crate::syntax::{
-    derive, mangle, Api, Doc, Enum, ExternFn, ExternType, FnKind, Lang, Pair, Signature, Struct,
-    Trait, Type, TypeAlias, Types, Var,
+    Api, Doc, Enum, ExternFn, ExternType, FnKind, Lang, Pair, Signature, Struct, Trait, Type,
+    TypeAlias, Types, Var, derive, mangle,
 };
 
 pub(super) fn generate(apis: &[Api], types: &Types, opt: &Opt, header: bool) -> Vec<u8> {

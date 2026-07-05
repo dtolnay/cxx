@@ -46,7 +46,7 @@ mod bridge;
 mod error;
 mod syntax;
 
-pub use crate::bridge::include::{Include, HEADER};
+pub use crate::bridge::include::{HEADER, Include};
 pub use crate::bridge::{CfgEvaluator, CfgResult, GeneratedCode, Opt};
 pub use crate::error::Error;
 pub use crate::syntax::IncludeKind;

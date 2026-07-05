@@ -341,7 +341,7 @@ pub use self::r#impl::Cfg::CFG;
 
 #[cfg(not(doc))]
 mod r#impl {
-    use crate::intern::{intern, InternedString};
+    use crate::intern::{InternedString, intern};
     use crate::syntax::map::UnorderedMap as Map;
     use crate::vec::{self, InternedVec as _};
     use std::cell::RefCell;
