@@ -544,6 +544,7 @@ fn parse_extern_fn(
     let mut doc = Doc::new();
     let mut namespace = namespace.clone();
     let mut cxx_name = None;
+    let mut cxx_return_type = None;
     let mut rust_name = None;
     let mut self_type = None;
     let mut attrs = attrs.clone();
@@ -555,6 +556,7 @@ fn parse_extern_fn(
             doc: Some(&mut doc),
             namespace: Some(&mut namespace),
             cxx_name: Some(&mut cxx_name),
+            cxx_return_type: Some(&mut cxx_return_type),
             rust_name: Some(&mut rust_name),
             self_type: Some(&mut self_type),
             ..Default::default()
@@ -727,6 +729,7 @@ fn parse_extern_fn(
         },
         semi_token,
         trusted,
+        cxx_return_type,
     }))
 }
 
