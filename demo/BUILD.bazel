@@ -5,10 +5,12 @@ load("//tools/bazel:rust_cxx_bridge.bzl", "rust_cxx_bridge")
 rust_binary(
     name = "demo",
     srcs = glob(["src/**/*.rs"]),
-    edition = "2021",
-    deps = [
+    edition = "2024",
+    link_deps = [
         ":blobstore-sys",
         ":bridge",
+    ],
+    deps = [
         "//:cxx",
     ],
 )
