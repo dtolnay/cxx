@@ -10,6 +10,6 @@ package(default_visibility = ["//visibility:public"])
 
 alias(
     name = "rustversion",
-    actual = "@vendor__rustversion-1.0.22//:rustversion",
+    actual = "@vendor__rustversion-1.0.23//:rustversion",
     tags = ["manual"],
 )

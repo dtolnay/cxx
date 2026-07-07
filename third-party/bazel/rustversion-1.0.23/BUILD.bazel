@@ -9,7 +9,7 @@
 package(default_visibility = ["//visibility:public"])
 
 alias(
-    name = "cc-1.2.65",
-    actual = "@vendor__cc-1.2.65//:cc",
+    name = "rustversion-1.0.23",
+    actual = "@vendor__rustversion-1.0.23//:rustversion",
     tags = ["manual"],
 )

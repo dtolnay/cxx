@@ -32,14 +32,14 @@ filegroup(
 
 # Workspace Member Dependencies
 alias(
-    name = "cc-1.2.65",
-    actual = "@vendor__cc-1.2.65//:cc",
+    name = "cc-1.2.66",
+    actual = "@vendor__cc-1.2.66//:cc",
     tags = ["manual"],
 )
 
 alias(
     name = "cc",
-    actual = "@vendor__cc-1.2.65//:cc",
+    actual = "@vendor__cc-1.2.66//:cc",
     tags = ["manual"],
 )
 
@@ -116,14 +116,14 @@ alias(
 )
 
 alias(
-    name = "rustversion-1.0.22",
-    actual = "@vendor__rustversion-1.0.22//:rustversion",
+    name = "rustversion-1.0.23",
+    actual = "@vendor__rustversion-1.0.23//:rustversion",
     tags = ["manual"],
 )
 
 alias(
     name = "rustversion",
-    actual = "@vendor__rustversion-1.0.22//:rustversion",
+    actual = "@vendor__rustversion-1.0.23//:rustversion",
     tags = ["manual"],
 )
 

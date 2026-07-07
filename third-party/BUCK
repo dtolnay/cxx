@@ -31,18 +31,18 @@ alias(
 )
 
 http_archive(
-    name = "cc-1.2.65.crate",
-    sha256 = "e228eec9be7c17ccb640b59b36a5cd805ea2a564a4c5e162c2f659fea30d3b96",
-    strip_prefix = "cc-1.2.65",
-    urls = ["https://static.crates.io/crates/cc/1.2.65/download"],
+    name = "cc-1.2.66.crate",
+    sha256 = "f5d6cac793997bd970000024b2934968efe83b382de4fdcf4fcb46b6ee4ad996",
+    strip_prefix = "cc-1.2.66",
+    urls = ["https://static.crates.io/crates/cc/1.2.66/download"],
     visibility = [],
 )
 
 cargo.rust_library(
     name = "cc-1",
-    srcs = [":cc-1.2.65.crate"],
+    srcs = [":cc-1.2.66.crate"],
     crate = "cc",
-    crate_root = "cc-1.2.65.crate/src/lib.rs",
+    crate_root = "cc-1.2.66.crate/src/lib.rs",
     edition = "2018",
     visibility = [],
     deps = [
@@ -388,18 +388,18 @@ alias(
 )
 
 http_archive(
-    name = "rustversion-1.0.22.crate",
-    sha256 = "b39cdef0fa800fc44525c84ccb54a029961a8215f9619753635a9c0d2538d46d",
-    strip_prefix = "rustversion-1.0.22",
-    urls = ["https://static.crates.io/crates/rustversion/1.0.22/download"],
+    name = "rustversion-1.0.23.crate",
+    sha256 = "cf54715a573b99ac80df0bc206da022bcd442c974952c7b9720069370852e21f",
+    strip_prefix = "rustversion-1.0.23",
+    urls = ["https://static.crates.io/crates/rustversion/1.0.23/download"],
     visibility = [],
 )
 
 cargo.rust_library(
     name = "rustversion-1",
-    srcs = [":rustversion-1.0.22.crate"],
+    srcs = [":rustversion-1.0.23.crate"],
     crate = "rustversion",
-    crate_root = "rustversion-1.0.22.crate/src/lib.rs",
+    crate_root = "rustversion-1.0.23.crate/src/lib.rs",
     edition = "2018",
     env = {
         "OUT_DIR": "$(location :rustversion-1-build-script-run[out_dir])",
@@ -411,9 +411,9 @@ cargo.rust_library(
 
 cargo.rust_binary(
     name = "rustversion-1-build-script-build",
-    srcs = [":rustversion-1.0.22.crate"],
+    srcs = [":rustversion-1.0.23.crate"],
     crate = "build_script_build",
-    crate_root = "rustversion-1.0.22.crate/build/build.rs",
+    crate_root = "rustversion-1.0.23.crate/build/build.rs",
     edition = "2018",
     visibility = [],
 )
@@ -422,7 +422,7 @@ buildscript_run(
     name = "rustversion-1-build-script-run",
     package_name = "rustversion",
     buildscript_rule = ":rustversion-1-build-script-build",
-    version = "1.0.22",
+    version = "1.0.23",
 )
 
 alias(
