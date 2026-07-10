@@ -180,15 +180,7 @@ jobs:
         with:
           targets: wasm32-unknown-emscripten
           components: rust-src
-      - uses: actions/checkout@v7
-        with:
-          repository: emscripten-core/emsdk
-          ref: 6.0.2
-          path: emsdk
-      - run: echo ${{github.workspace}}/emsdk >> $GITHUB_PATH
-      - run: emsdk install latest
-      - run: emsdk activate latest
-      - run: echo ${{github.workspace}}/emsdk/upstream/emscripten >> $GITHUB_PATH
+      - uses: emscripten-core/setup-emsdk@v16
       - run: cargo build --target=wasm32-unknown-emscripten --manifest-path=demo/Cargo.toml --release -Zbuild-std
         env:
           RUSTFLAGS: -Clink-arg=--emrun ${{env.RUSTFLAGS}}
