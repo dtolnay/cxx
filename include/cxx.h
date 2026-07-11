@@ -243,6 +243,7 @@ public:
   using iterator_category = std::random_access_iterator_tag;
 #endif
   using value_type = T;
+  using element_type = T;
   using difference_type = std::ptrdiff_t;
   using pointer = typename std::add_pointer<T>::type;
   using reference = typename std::add_lvalue_reference<T>::type;
