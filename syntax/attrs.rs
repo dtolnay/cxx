@@ -34,6 +34,7 @@ pub(crate) struct Parser<'a> {
     pub default: Option<&'a mut bool>,
     pub namespace: Option<&'a mut Namespace>,
     pub cxx_name: Option<&'a mut Option<ForeignName>>,
+    pub cxx_return_type: Option<&'a mut Option<String>>,
     pub rust_name: Option<&'a mut Option<Ident>>,
     pub self_type: Option<&'a mut Option<Ident>>,
     pub ignore_unrecognized: bool,
@@ -122,6 +123,19 @@ pub(crate) fn parse(cx: &mut Errors, attrs: Vec<Attribute>, mut parser: Parser) 
                 Ok(attr) => {
                     if let Some(cxx_name) = &mut parser.cxx_name {
                         **cxx_name = Some(attr);
+                        continue;
+                    }
+                }
+                Err(err) => {
+                    cx.push(err);
+                    break;
+                }
+            }
+        } else if attr_path.is_ident("cxx_return_type") {
+            match parse_cxx_return_type_attribute(&attr.meta) {
+                Ok(attr) => {
+                    if let Some(cxx_return_type) = &mut parser.cxx_return_type {
+                        **cxx_return_type = Some(attr);
                         continue;
                     }
                 }
@@ -305,6 +319,28 @@ pub(crate) struct OtherAttrs {
     pub cfg: Vec<Attribute>,
     pub lint: Vec<Attribute>,
     pub passthrough: Vec<Attribute>,
+}
+
+fn parse_cxx_return_type_attribute(meta: &Meta) -> Result<String> {
+    if let Meta::NameValue(meta) = meta {
+        match &meta.value {
+            Expr::Lit(expr) => {
+                if let Lit::Str(lit) = &expr.lit {
+                    return Ok(lit.value());
+                }
+            }
+            Expr::Path(expr) => {
+                if let Some(ident) = expr.path.get_ident() {
+                    return Ok(ident.to_string());
+                }
+            }
+            _ => {}
+        }
+    }
+    Err(Error::new_spanned(
+        meta,
+        "unsupported cxx_return_type attribute",
+    ))
 }
 
 impl OtherAttrs {
