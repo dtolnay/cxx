@@ -644,12 +644,6 @@ cargo.rust_library(
     visibility = [],
 )
 
-alias(
-    name = "syn",
-    actual = ":syn-2",
-    visibility = ["PUBLIC"],
-)
-
 http_archive(
     name = "syn-2.0.119.crate",
     sha256 = "872831b642d1a07999a962a351ed35b955ea2cfc8f3862091e2a240a84f17297",
@@ -663,6 +657,41 @@ cargo.rust_library(
     srcs = [":syn-2.0.119.crate"],
     crate = "syn",
     crate_root = "syn-2.0.119.crate/src/lib.rs",
+    edition = "2021",
+    features = [
+        "clone-impls",
+        "derive",
+        "parsing",
+        "printing",
+        "proc-macro",
+    ],
+    visibility = [],
+    deps = [
+        ":proc-macro2-1",
+        ":quote-1",
+        ":unicode-ident-1",
+    ],
+)
+
+alias(
+    name = "syn",
+    actual = ":syn-3",
+    visibility = ["PUBLIC"],
+)
+
+http_archive(
+    name = "syn-3.0.0.crate",
+    sha256 = "f2fac314a64dc9a36e61a9eb4261a5e9bbfbc922b27e518af97bc32b926cf967",
+    strip_prefix = "syn-3.0.0",
+    urls = ["https://static.crates.io/crates/syn/3.0.0/download"],
+    visibility = [],
+)
+
+cargo.rust_library(
+    name = "syn-3",
+    srcs = [":syn-3.0.0.crate"],
+    crate = "syn",
+    crate_root = "syn-3.0.0.crate/src/lib.rs",
     edition = "2021",
     features = [
         "clone-impls",
