@@ -328,7 +328,7 @@ _NORMAL_DEPENDENCIES = {
             "quote": Label("//quote-1.0.46"),
             "scratch": Label("//scratch-1.0.9"),
             "serde": Label("//serde-1.0.228"),
-            "syn": Label("//syn-2.0.119"),
+            "syn": Label("//syn-3.0.0"),
         },
     },
 }
@@ -669,6 +669,16 @@ def crate_repositories():
 
     maybe(
         http_archive,
+        name = "vendor__syn-3.0.0",
+        sha256 = "f2fac314a64dc9a36e61a9eb4261a5e9bbfbc922b27e518af97bc32b926cf967",
+        type = "tar.gz",
+        urls = ["https://static.crates.io/crates/syn/3.0.0/download"],
+        strip_prefix = "syn-3.0.0",
+        build_file = Label("//third-party/bazel:BUILD.syn-3.0.0.bazel"),
+    )
+
+    maybe(
+        http_archive,
         name = "vendor__termcolor-1.4.1",
         sha256 = "06794f8f6c5c898b3275aebefa6b8a1cb24cd2c6c79397ab15774837a0bc5755",
         type = "tar.gz",
@@ -739,5 +749,5 @@ def crate_repositories():
         struct(repo = "vendor__rustversion-1.0.23", is_dev_dep = False),
         struct(repo = "vendor__scratch-1.0.9", is_dev_dep = False),
         struct(repo = "vendor__serde-1.0.228", is_dev_dep = False),
-        struct(repo = "vendor__syn-2.0.119", is_dev_dep = False),
+        struct(repo = "vendor__syn-3.0.0", is_dev_dep = False),
     ]

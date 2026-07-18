@@ -36,7 +36,9 @@ rust_library(
     ),
     crate_features = [
         "clone-impls",
+        "default",
         "derive",
+        "full",
         "parsing",
         "printing",
         "proc-macro",
@@ -113,7 +115,7 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "2.0.119",
+    version = "3.0.0",
     deps = [
         "@vendor__proc-macro2-1.0.106//:proc_macro2",
         "@vendor__quote-1.0.46//:quote",
