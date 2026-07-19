@@ -475,21 +475,21 @@ alias(
 )
 
 http_archive(
-    name = "serde-1.0.228.crate",
-    sha256 = "9a8e94ea7f378bd32cbbd37198a4a91436180c5bb472411e48b5ec2e2124ae9e",
-    strip_prefix = "serde-1.0.228",
-    urls = ["https://static.crates.io/crates/serde/1.0.228/download"],
+    name = "serde-1.0.229.crate",
+    sha256 = "4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba",
+    strip_prefix = "serde-1.0.229",
+    urls = ["https://static.crates.io/crates/serde/1.0.229/download"],
     visibility = [],
 )
 
 cargo.rust_library(
     name = "serde-1",
-    srcs = [":serde-1.0.228.crate"],
+    srcs = [":serde-1.0.229.crate"],
     crate = "serde",
-    crate_root = "serde-1.0.228.crate/src/lib.rs",
+    crate_root = "serde-1.0.229.crate/src/lib.rs",
     edition = "2021",
     env = {
-        "CARGO_PKG_VERSION_PATCH": "228",
+        "CARGO_PKG_VERSION_PATCH": "229",
         "OUT_DIR": "$(location :serde-1-build-script-run[out_dir])",
     },
     features = [
@@ -508,12 +508,12 @@ cargo.rust_library(
 
 cargo.rust_binary(
     name = "serde-1-build-script-build",
-    srcs = [":serde-1.0.228.crate"],
+    srcs = [":serde-1.0.229.crate"],
     crate = "build_script_build",
-    crate_root = "serde-1.0.228.crate/build.rs",
+    crate_root = "serde-1.0.229.crate/build.rs",
     edition = "2021",
     env = {
-        "CARGO_PKG_VERSION_PATCH": "228",
+        "CARGO_PKG_VERSION_PATCH": "229",
     },
     features = [
         "default",
@@ -529,7 +529,7 @@ buildscript_run(
     package_name = "serde",
     buildscript_rule = ":serde-1-build-script-build",
     env = {
-        "CARGO_PKG_VERSION_PATCH": "228",
+        "CARGO_PKG_VERSION_PATCH": "229",
     },
     features = [
         "default",
@@ -537,25 +537,25 @@ buildscript_run(
         "serde_derive",
         "std",
     ],
-    version = "1.0.228",
+    version = "1.0.229",
 )
 
 http_archive(
-    name = "serde_core-1.0.228.crate",
-    sha256 = "41d385c7d4ca58e59fc732af25c3983b67ac852c1a25000afe1175de458b67ad",
-    strip_prefix = "serde_core-1.0.228",
-    urls = ["https://static.crates.io/crates/serde_core/1.0.228/download"],
+    name = "serde_core-1.0.229.crate",
+    sha256 = "67dca2c9c51e58a4791a4b1ed58308b39c64224d349a935ab5039aa360942a48",
+    strip_prefix = "serde_core-1.0.229",
+    urls = ["https://static.crates.io/crates/serde_core/1.0.229/download"],
     visibility = [],
 )
 
 cargo.rust_library(
     name = "serde_core-1",
-    srcs = [":serde_core-1.0.228.crate"],
+    srcs = [":serde_core-1.0.229.crate"],
     crate = "serde_core",
-    crate_root = "serde_core-1.0.228.crate/src/lib.rs",
+    crate_root = "serde_core-1.0.229.crate/src/lib.rs",
     edition = "2021",
     env = {
-        "CARGO_PKG_VERSION_PATCH": "228",
+        "CARGO_PKG_VERSION_PATCH": "229",
         "OUT_DIR": "$(location :serde_core-1-build-script-run[out_dir])",
     },
     features = [
@@ -568,12 +568,12 @@ cargo.rust_library(
 
 cargo.rust_binary(
     name = "serde_core-1-build-script-build",
-    srcs = [":serde_core-1.0.228.crate"],
+    srcs = [":serde_core-1.0.229.crate"],
     crate = "build_script_build",
-    crate_root = "serde_core-1.0.228.crate/build.rs",
+    crate_root = "serde_core-1.0.229.crate/build.rs",
     edition = "2021",
     env = {
-        "CARGO_PKG_VERSION_PATCH": "228",
+        "CARGO_PKG_VERSION_PATCH": "229",
     },
     features = [
         "result",
@@ -587,31 +587,31 @@ buildscript_run(
     package_name = "serde_core",
     buildscript_rule = ":serde_core-1-build-script-build",
     env = {
-        "CARGO_PKG_VERSION_PATCH": "228",
+        "CARGO_PKG_VERSION_PATCH": "229",
     },
     features = [
         "result",
         "std",
     ],
-    version = "1.0.228",
+    version = "1.0.229",
 )
 
 http_archive(
-    name = "serde_derive-1.0.228.crate",
-    sha256 = "d540f220d3187173da220f885ab66608367b6574e925011a9353e4badda91d79",
-    strip_prefix = "serde_derive-1.0.228",
-    urls = ["https://static.crates.io/crates/serde_derive/1.0.228/download"],
+    name = "serde_derive-1.0.229.crate",
+    sha256 = "e7a5d71263a5a7d47b41f6b3f06ba276f10cc18b0931f1799f710578e2309348",
+    strip_prefix = "serde_derive-1.0.229",
+    urls = ["https://static.crates.io/crates/serde_derive/1.0.229/download"],
     visibility = [],
 )
 
 cargo.rust_library(
     name = "serde_derive-1",
-    srcs = [":serde_derive-1.0.228.crate"],
+    srcs = [":serde_derive-1.0.229.crate"],
     crate = "serde_derive",
-    crate_root = "serde_derive-1.0.228.crate/src/lib.rs",
+    crate_root = "serde_derive-1.0.229.crate/src/lib.rs",
     edition = "2021",
     env = {
-        "CARGO_PKG_VERSION_PATCH": "228",
+        "CARGO_PKG_VERSION_PATCH": "229",
     },
     features = ["default"],
     proc_macro = True,
@@ -619,7 +619,7 @@ cargo.rust_library(
     deps = [
         ":proc-macro2-1",
         ":quote-1",
-        ":syn-2",
+        ":syn-3",
     ],
 )
 
@@ -642,35 +642,6 @@ cargo.rust_library(
         "std",
     ],
     visibility = [],
-)
-
-http_archive(
-    name = "syn-2.0.119.crate",
-    sha256 = "872831b642d1a07999a962a351ed35b955ea2cfc8f3862091e2a240a84f17297",
-    strip_prefix = "syn-2.0.119",
-    urls = ["https://static.crates.io/crates/syn/2.0.119/download"],
-    visibility = [],
-)
-
-cargo.rust_library(
-    name = "syn-2",
-    srcs = [":syn-2.0.119.crate"],
-    crate = "syn",
-    crate_root = "syn-2.0.119.crate/src/lib.rs",
-    edition = "2021",
-    features = [
-        "clone-impls",
-        "derive",
-        "parsing",
-        "printing",
-        "proc-macro",
-    ],
-    visibility = [],
-    deps = [
-        ":proc-macro2-1",
-        ":quote-1",
-        ":unicode-ident-1",
-    ],
 )
 
 alias(
