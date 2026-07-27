@@ -112,7 +112,7 @@ rust_proc_macro(
     }),
     version = "1.0.23",
     deps = [
-        "@vendor__rustversion-1.0.23//:build_script_build",
+        ":build_script_build",
     ],
 )
 

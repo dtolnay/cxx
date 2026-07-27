@@ -319,16 +319,16 @@ _CRATE_EDITIONS = {
 _NORMAL_DEPENDENCIES = {
     "third-party": {
         _COMMON_CONDITION: {
-            "cc": Label("//cc-1.3.0"),
-            "clap": Label("//clap-4.6.2"),
-            "codespan-reporting": Label("//codespan-reporting-0.13.1"),
-            "foldhash": Label("//foldhash-0.2.0"),
-            "indexmap": Label("//indexmap-2.14.0"),
-            "proc-macro2": Label("//proc-macro2-1.0.106"),
-            "quote": Label("//quote-1.0.46"),
-            "scratch": Label("//scratch-1.0.9"),
-            "serde": Label("//serde-1.0.229"),
-            "syn": Label("//syn-3.0.0"),
+            "cc": Label("@vendor//cc-1.3.0"),
+            "clap": Label("@vendor//clap-4.6.2"),
+            "codespan-reporting": Label("@vendor//codespan-reporting-0.13.1"),
+            "foldhash": Label("@vendor//foldhash-0.2.0"),
+            "indexmap": Label("@vendor//indexmap-2.14.0"),
+            "proc-macro2": Label("@vendor//proc-macro2-1.0.106"),
+            "quote": Label("@vendor//quote-1.0.46"),
+            "scratch": Label("@vendor//scratch-1.0.9"),
+            "serde": Label("@vendor//serde-1.0.229"),
+            "syn": Label("@vendor//syn-3.0.0"),
         },
     },
 }
@@ -353,7 +353,7 @@ _NORMAL_DEV_ALIASES = {
 _PROC_MACRO_DEPENDENCIES = {
     "third-party": {
         _COMMON_CONDITION: {
-            "rustversion": Label("//rustversion-1.0.23"),
+            "rustversion": Label("@vendor//rustversion-1.0.23"),
         },
     },
 }

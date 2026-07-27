@@ -112,7 +112,7 @@ rust_library(
     }),
     version = "1.0.9",
     deps = [
-        "@vendor__scratch-1.0.9//:build_script_build",
+        ":build_script_build",
     ],
 )
 

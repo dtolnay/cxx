@@ -116,7 +116,7 @@ rust_library(
     }),
     version = "1.0.229",
     deps = [
-        "@vendor__serde_core-1.0.229//:build_script_build",
+        ":build_script_build",
     ],
 )
 

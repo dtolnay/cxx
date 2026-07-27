@@ -116,8 +116,8 @@ rust_library(
     }),
     version = "1.0.46",
     deps = [
+        ":build_script_build",
         "@vendor__proc-macro2-1.0.106//:proc_macro2",
-        "@vendor__quote-1.0.46//:build_script_build",
     ],
 )
 
