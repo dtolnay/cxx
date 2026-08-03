@@ -9,11 +9,11 @@ pub(crate) fn write(path: impl AsRef<Path>, content: &[u8]) -> Result<()> {
 
     let mut create_dir_error = None;
     if fs::exists(path) {
-        if let Ok(existing) = fs::read(path) {
-            if existing == content {
-                // Avoid bumping modified time with unchanged contents.
-                return Ok(());
-            }
+        if let Ok(existing) = fs::read(path)
+            && existing == content
+        {
+            // Avoid bumping modified time with unchanged contents.
+            return Ok(());
         }
         best_effort_remove(path);
     } else {
@@ -166,12 +166,11 @@ fn best_effort_relativize_symlink(original: impl AsRef<Path>, link: impl AsRef<P
     // directory of the symlink's target, not back to 'a'. In cxx-build's case
     // someone could be using `--target-dir` with a location containing such
     // symlinks.
-    if let Ok(original_canonical) = original.canonicalize() {
-        if let Ok(relative_canonical) = link.parent().unwrap().join(&relative_path).canonicalize() {
-            if original_canonical == relative_canonical {
-                return relative_path;
-            }
-        }
+    if let Ok(original_canonical) = original.canonicalize()
+        && let Ok(relative_canonical) = link.parent().unwrap().join(&relative_path).canonicalize()
+        && original_canonical == relative_canonical
+    {
+        return relative_path;
     }
 
     original.to_path_buf()

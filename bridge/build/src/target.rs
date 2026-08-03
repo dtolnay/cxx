@@ -37,12 +37,10 @@ pub(crate) fn find_target_dir(out_dir: &Path) -> TargetDir {
         if dir.pop() {
             continue;
         }
-        if also_try_canonical {
-            if let Ok(canonical_dir) = out_dir.canonicalize() {
-                dir = canonical_dir;
-                also_try_canonical = false;
-                continue;
-            }
+        if also_try_canonical && let Ok(canonical_dir) = out_dir.canonicalize() {
+            dir = canonical_dir;
+            also_try_canonical = false;
+            continue;
         }
         return TargetDir::Unknown;
     }
