@@ -47,6 +47,7 @@
 #![doc(html_root_url = "https://docs.rs/cxx-build/1.0.198")]
 #![cfg_attr(not(check_cfg), allow(unexpected_cfgs))]
 #![allow(
+    clippy::assert_is_empty,
     clippy::cast_sign_loss,
     clippy::default_trait_access,
     clippy::doc_markdown,

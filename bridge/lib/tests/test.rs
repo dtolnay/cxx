@@ -1,3 +1,5 @@
+#![allow(clippy::assert_is_empty)]
+
 use cxx_gen::Opt;
 use quote::quote;
 

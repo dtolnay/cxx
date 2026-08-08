@@ -12,6 +12,7 @@
 #![expect(dead_code)]
 #![cfg_attr(not(check_cfg), allow(unexpected_cfgs))]
 #![allow(
+    clippy::assert_is_empty,
     clippy::cast_sign_loss,
     clippy::default_trait_access,
     clippy::elidable_lifetime_names,

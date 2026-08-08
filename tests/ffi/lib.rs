@@ -1,4 +1,5 @@
 #![allow(
+    clippy::assert_is_empty,
     clippy::boxed_local,
     clippy::elidable_lifetime_names,
     clippy::missing_errors_doc,
