@@ -9,7 +9,7 @@
 package(default_visibility = ["//visibility:public"])
 
 alias(
-    name = "cc-1.3.0",
-    actual = "@vendor__cc-1.3.0//:cc",
+    name = "proc-macro2-1.0.107",
+    actual = "@vendor__proc-macro2-1.0.107//:proc_macro2",
     tags = ["manual"],
 )

@@ -115,7 +115,7 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "1.0.106",
+    version = "1.0.107",
     deps = [
         ":build_script_build",
         "@vendor__unicode-ident-1.0.24//:unicode_ident",
@@ -179,7 +179,7 @@ cargo_build_script(
         "noclippy",
         "norustfmt",
     ],
-    version = "1.0.106",
+    version = "1.0.107",
     visibility = ["//visibility:private"],
 )
 

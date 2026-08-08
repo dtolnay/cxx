@@ -9,7 +9,7 @@
 package(default_visibility = ["//visibility:public"])
 
 alias(
-    name = "syn-3.0.0",
-    actual = "@vendor__syn-3.0.0//:syn",
+    name = "syn-3.0.3",
+    actual = "@vendor__syn-3.0.3//:syn",
     tags = ["manual"],
 )

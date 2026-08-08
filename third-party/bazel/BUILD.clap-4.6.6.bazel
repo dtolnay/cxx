@@ -6,11 +6,7 @@
 #     bazel run @@//third-party:vendor
 ###############################################################################
 
-load(
-    "@rules_rust//cargo:defs.bzl",
-    "cargo_build_script",
-    "cargo_toml_env_vars",
-)
+load("@rules_rust//cargo:defs.bzl", "cargo_toml_env_vars")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
 package(default_visibility = ["//visibility:public"])
@@ -21,7 +17,7 @@ cargo_toml_env_vars(
 )
 
 rust_library(
-    name = "quote",
+    name = "clap",
     srcs = glob(
         include = ["**/*.rs"],
         allow_empty = True,
@@ -39,11 +35,13 @@ rust_library(
         ],
     ),
     crate_features = [
-        "default",
-        "proc-macro",
+        "error-context",
+        "help",
+        "std",
+        "usage",
     ],
     crate_root = "src/lib.rs",
-    edition = "2021",
+    edition = "2024",
     rustc_env_files = [
         ":cargo_toml_env_vars",
     ],
@@ -52,7 +50,7 @@ rust_library(
     ],
     tags = [
         "cargo-bazel",
-        "crate-name=quote",
+        "crate-name=clap",
         "manual",
         "noclippy",
         "norustfmt",
@@ -114,75 +112,8 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "1.0.46",
+    version = "4.6.6",
     deps = [
-        ":build_script_build",
-        "@vendor__proc-macro2-1.0.106//:proc_macro2",
+        "@vendor__clap_builder-4.6.6//:clap_builder",
     ],
-)
-
-cargo_build_script(
-    name = "_bs",
-    srcs = glob(
-        include = ["**/*.rs"],
-        allow_empty = True,
-    ),
-    build_script_env_files = [
-        ":cargo_toml_env_vars",
-    ],
-    compile_data = glob(
-        include = ["**"],
-        allow_empty = True,
-        exclude = [
-            "**/* *",
-            "**/*.rs",
-            ".tmp_git_root/**/*",
-            "BUILD",
-            "BUILD.bazel",
-            "WORKSPACE",
-            "WORKSPACE.bazel",
-        ],
-    ),
-    crate_features = [
-        "default",
-        "proc-macro",
-    ],
-    crate_name = "build_script_build",
-    crate_root = "build.rs",
-    data = glob(
-        include = ["**"],
-        allow_empty = True,
-        exclude = [
-            "**/* *",
-            ".tmp_git_root/**/*",
-            "BUILD",
-            "BUILD.bazel",
-            "WORKSPACE",
-            "WORKSPACE.bazel",
-        ],
-    ),
-    edition = "2021",
-    emit_warnings = False,
-    pkg_name = "quote",
-    rustc_env_files = [
-        ":cargo_toml_env_vars",
-    ],
-    rustc_flags = [
-        "--cap-lints=allow",
-    ],
-    tags = [
-        "cargo-bazel",
-        "crate-name=quote",
-        "manual",
-        "noclippy",
-        "norustfmt",
-    ],
-    version = "1.0.46",
-    visibility = ["//visibility:private"],
-)
-
-alias(
-    name = "build_script_build",
-    actual = ":_bs",
-    tags = ["manual"],
 )
