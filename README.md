@@ -76,43 +76,43 @@ supports a `put` operation for a discontiguous buffer upload. For example we
 might be uploading snapshots of a circular buffer which would tend to consist of
 2 chunks, or fragments of a file spread across memory for some other reason.
 
-A runnable version of this example is provided under the *demo* directory of
+A runnable version of this example is provided under the *`demo`* directory of
 this repo. To try it out, run `cargo run` from that directory.
 
 ```rust
 #[cxx::bridge]
 mod ffi {
-    // Any shared structs, whose fields will be visible to both languages.
-    struct BlobMetadata {
-        size: usize,
-        tags: Vec<String>,
-    }
+  // Any shared structs, whose fields will be visible to both languages.
+  struct BlobMetadata {
+  size: usize,
+  tags: Vec<String>,
+  }
 
-    extern "Rust" {
-        // Zero or more opaque types which both languages can pass around but
-        // only Rust can see the fields.
-        type MultiBuf;
+  extern "Rust" {
+  // Zero or more opaque types which both languages can pass around but
+  // only Rust can see the fields.
+  type MultiBuf;
 
-        // Functions implemented in Rust.
-        fn next_chunk(buf: &mut MultiBuf) -> &[u8];
-    }
+  // Functions implemented in Rust.
+  fn next_chunk(buf: &mut MultiBuf) -> &[u8];
+  }
 
-    unsafe extern "C++" {
-        // One or more headers with the matching C++ declarations. Our code
-        // generators don't read it but it gets #include'd and used in static
-        // assertions to ensure our picture of the FFI boundary is accurate.
-        include!("demo/include/blobstore.h");
+  unsafe extern "C++" {
+  // One or more headers with the matching C++ declarations. Our code
+  // generators don't read it but it gets #include'd and used in static
+  // assertions to ensure our picture of the FFI boundary is accurate.
+  include!("demo/include/blobstore.h");
 
-        // Zero or more opaque types which both languages can pass around but
-        // only C++ can see the fields.
-        type BlobstoreClient;
+  // Zero or more opaque types which both languages can pass around but
+  // only C++ can see the fields.
+  type BlobstoreClient;
 
-        // Functions implemented in C++.
-        fn new_blobstore_client() -> UniquePtr<BlobstoreClient>;
-        fn put(&self, parts: &mut MultiBuf) -> u64;
-        fn tag(&self, blobid: u64, tag: &str);
-        fn metadata(&self, blobid: u64) -> BlobMetadata;
-    }
+  // Functions implemented in C++.
+  fn new_blobstore_client() -> UniquePtr<BlobstoreClient>;
+  fn put(&self, parts: &mut MultiBuf) -> u64;
+  fn tag(&self, blobid: u64, tag: &str);
+  fn metadata(&self, blobid: u64) -> BlobMetadata;
+  }
 }
 ```
 
@@ -131,11 +131,11 @@ To look at the code generated in both languages for the example by the CXX code
 generators:
 
 ```console
-   # run Rust code generator and print to stdout
-   # (requires https://github.com/dtolnay/cargo-expand)
+  # run Rust code generator and print to stdout
+  # (requires https://github.com/dtolnay/cargo-expand)
 $ cargo expand --manifest-path demo/Cargo.toml
 
-   # run C++ code generator and print to stdout
+  # run C++ code generator and print to stdout
 $ cargo run --manifest-path bridge/cmd/Cargo.toml -- demo/src/main.rs
 ```
 
@@ -173,7 +173,7 @@ headers but for now we need the signatures written out; static assertions will
 verify that they are accurate.
 
 Your function implementations themselves, whether in C++ or Rust, *do not* need
-to be defined as `extern "C"` ABI or no\_mangle. CXX will put in the right shims
+to be defined as `extern "C"` ABI or `no_mangle`. CXX will put in the right shims
 where necessary to make it all work.
 
 <br>
@@ -195,7 +195,7 @@ than bindgen or cbindgen in a sense; you can think of it as being a replacement
 for the concept of `extern "C"` signatures as we know them, rather than a
 replacement for a bindgen. It would be reasonable to build a higher level
 bindgen-like tool on top of CXX which consumes a C++ header and/or Rust module
-(and/or IDL like Thrift) as source of truth and generates the cxx::bridge,
+(and/or IDL like Thrift) as source of truth and generates the `cxx::bridge`,
 eliminating the repetition while leveraging the static analysis safety
 guarantees of CXX.
 
@@ -242,13 +242,13 @@ cxx-build = "1.0"
 // build.rs
 
 fn main() {
-    cxx_build::bridge("src/main.rs")  // returns a cc::Build
-        .file("src/demo.cc")
-        .std("c++11")
-        .compile("cxxbridge-demo");
+  cxx_build::bridge("src/main.rs")  // returns a cc::Build
+  .file("src/demo.cc")
+  .std("c++11")
+  .compile("cxxbridge-demo");
 
-    println!("cargo:rerun-if-changed=src/demo.cc");
-    println!("cargo:rerun-if-changed=include/demo.h");
+  println!("cargo:rerun-if-changed=src/demo.cc");
+  println!("cargo:rerun-if-changed=include/demo.h");
 }
 ```
 
@@ -259,7 +259,7 @@ fn main() {
 For use in non-Cargo builds like Bazel or Buck, CXX provides an alternate way of
 invoking the C++ code generator as a standalone command line tool. The tool is
 packaged as the `cxxbridge-cmd` crate on crates.io or can be built from the
-*bridge/cmd* directory of this repo.
+*`bridge/cmd`* directory of this repo.
 
 ```bash
 $ cargo install cxxbridge-cmd
@@ -302,8 +302,8 @@ Some of the considerations that go into ensuring safety are:
   pass your structs by value without worries. This is made possible by owning
   both sides of the boundary rather than just one.
 
-- Template instantiations: for example in order to expose a UniquePtr\<T\> type
-  in Rust backed by a real C++ unique\_ptr, we have a way of using a Rust trait
+- Template instantiations: for example in order to expose a `UniquePtr<T>` type
+  in Rust backed by a real C++ `unique_ptr`, we have a way of using a Rust trait
   to connect the behavior back to the template instantiations performed by the
   other language.
 
@@ -313,29 +313,29 @@ Some of the considerations that go into ensuring safety are:
 
 ## Builtin types
 
-In addition to all the primitive types (i32 &lt;=&gt; int32_t), the following
+In addition to all the primitive types (`i32` &harr; `int32_t`), the following
 common types may be used in the fields of shared structs and the arguments and
 returns of functions.
 
 <table>
 <tr><th>name in Rust</th><th>name in C++</th><th>restrictions</th></tr>
-<tr><td>String</td><td>rust::String</td><td></td></tr>
-<tr><td>&amp;str</td><td>rust::Str</td><td></td></tr>
-<tr><td>&amp;[T]</td><td>rust::Slice&lt;const T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
-<tr><td>&amp;mut [T]</td><td>rust::Slice&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
-<tr><td><a href="https://docs.rs/cxx/1.0/cxx/struct.CxxString.html">CxxString</a></td><td>std::string</td><td><sup><i>cannot be passed by value</i></sup></td></tr>
-<tr><td>Box&lt;T&gt;</td><td>rust::Box&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
-<tr><td><a href="https://docs.rs/cxx/1.0/cxx/struct.UniquePtr.html">UniquePtr&lt;T&gt;</a></td><td>std::unique_ptr&lt;T&gt;</td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
-<tr><td><a href="https://docs.rs/cxx/1.0/cxx/struct.SharedPtr.html">SharedPtr&lt;T&gt;</a></td><td>std::shared_ptr&lt;T&gt;</td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
-<tr><td>[T; N]</td><td>std::array&lt;T, N&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
-<tr><td>Vec&lt;T&gt;</td><td>rust::Vec&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
-<tr><td><a href="https://docs.rs/cxx/1.0/cxx/struct.CxxVector.html">CxxVector&lt;T&gt;</a></td><td>std::vector&lt;T&gt;</td><td><sup><i>cannot be passed by value, cannot hold opaque Rust type</i></sup></td></tr>
-<tr><td>*mut T, *const T</td><td>T*, const T*</td><td><sup><i>fn with a raw pointer argument must be declared unsafe to call</i></sup></td></tr>
-<tr><td>fn(T, U) -&gt; V</td><td>rust::Fn&lt;V(T, U)&gt;</td><td><sup><i>only passing from Rust to C++ is implemented so far</i></sup></td></tr>
-<tr><td>Result&lt;T&gt;</td><td>throw/catch</td><td><sup><i>allowed as return type only</i></sup></td></tr>
+<tr><td><code>String</code></td><td><code>rust::String</code></td><td></td></tr>
+<tr><td><code>&amp;str</code></td><td><code>rust::Str</code></td><td></td></tr>
+<tr><td><code>&amp;[T]</code></td><td><code>rust::Slice&lt;const T&gt;</code></td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
+<tr><td><code>&amp;mut [T]</code></td><td><code>rust::Slice&lt;T&gt;</code></td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
+<tr><td><a href="https://docs.rs/cxx/1.0/cxx/struct.CxxString.html"><code>CxxString</code></a></td><td><code>std::string</code></td><td><sup><i>cannot be passed by value</i></sup></td></tr>
+<tr><td><code>Box&lt;T&gt;</code></td><td><code>rust::Box&lt;T&gt;</code></td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
+<tr><td><a href="https://docs.rs/cxx/1.0/cxx/struct.UniquePtr.html"><code>UniquePtr&lt;T&gt;</code></a></td><td><code>std::unique_ptr&lt;T&gt;</code></td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
+<tr><td><a href="https://docs.rs/cxx/1.0/cxx/struct.SharedPtr.html"><code>SharedPtr&lt;T&gt;</code></a></td><td><code>std::shared_ptr&lt;T&gt;</code></td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
+<tr><td><code>[T; N]</code></td><td><code>std::array&lt;T, N&gt;</code></td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
+<tr><td><code>Vec&lt;T&gt;</code></td><td><code>rust::Vec&lt;T&gt;</code></td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
+<tr><td><a href="https://docs.rs/cxx/1.0/cxx/struct.CxxVector.html"><code>CxxVector&lt;T&gt;</code></a></td><td><code>std::vector&lt;T&gt;</code></td><td><sup><i>cannot be passed by value, cannot hold opaque Rust type</i></sup></td></tr>
+<tr><td><code>*mut T</code>, <code>*const T</code></td><td><code>T*</code>, <code>const T*</code></td><td><sup><i>fn with a raw pointer argument must be declared unsafe to call</i></sup></td></tr>
+<tr><td><code>fn(T, U) -&gt; V</code></td><td><code>rust::Fn&lt;V(T, U)&gt;</code></td><td><sup><i>only passing from Rust to C++ is implemented so far</i></sup></td></tr>
+<tr><td><code>Result&lt;T&gt;</code></td><td><code>throw</code>/<code>catch</code></td><td><sup><i>allowed as return type only</i></sup></td></tr>
 </table>
 
-The C++ API of the `rust` namespace is defined by the *include/cxx.h* file in
+The C++ API of the `rust` namespace is defined by the *`include/cxx.h`* file in
 this repo. You will need to include this header in your C++ code when working
 with those types.
 
@@ -345,12 +345,12 @@ matter of designing a nice API for each in its non-native language.
 
 <table>
 <tr><th>name in Rust</th><th>name in C++</th></tr>
-<tr><td>BTreeMap&lt;K, V&gt;</td><td><sup><i>tbd</i></sup></td></tr>
-<tr><td>HashMap&lt;K, V&gt;</td><td><sup><i>tbd</i></sup></td></tr>
-<tr><td>Arc&lt;T&gt;</td><td><sup><i>tbd</i></sup></td></tr>
-<tr><td>Option&lt;T&gt;</td><td><sup><i>tbd</i></sup></td></tr>
-<tr><td><sup><i>tbd</i></sup></td><td>std::map&lt;K, V&gt;</td></tr>
-<tr><td><sup><i>tbd</i></sup></td><td>std::unordered_map&lt;K, V&gt;</td></tr>
+<tr><td><code>std::collections::BTreeMap&lt;K, V&gt;</code></td><td><sup><i>tbd</i></sup></td></tr>
+<tr><td><code>std::collections::HashMap&lt;K, V&gt;</code></td><td><sup><i>tbd</i></sup></td></tr>
+<tr><td><code>std::sync::Arc&lt;T&gt;</code></td><td><sup><i>tbd</i></sup></td></tr>
+<tr><td><code>Option&lt;T&gt;</code></td><td><sup><i>tbd</i></sup></td></tr>
+<tr><td><sup><i>tbd</i></sup></td><td><code>std::map&lt;K, V&gt;</code></td></tr>
+<tr><td><sup><i>tbd</i></sup></td><td><code>std::unordered_map&lt;K, V&gt;</code></td></tr>
 </table>
 
 <br>

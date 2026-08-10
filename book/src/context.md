@@ -48,7 +48,7 @@ Thus using bindgen correctly requires not just juggling all your pointers
 correctly at the language boundary, but also understanding ABI details and their
 workarounds and reliably applying them. For example, the programmer will
 discover that their program sometimes segfaults if they call a function that
-returns std::unique\_ptr\<T\> through bindgen. Why? Because unique\_ptr, despite
+returns `std::unique_ptr<T>` through bindgen. Why? Because `unique_ptr`, despite
 being "just a pointer", has a different ABI than a pointer or a C struct
 containing a pointer ([bindgen#778]) and is not directly expressible in Rust.
 Bindgen emitted something that *looks* reasonable and you will have a hell of a
@@ -106,7 +106,7 @@ From this perspective, CXX is a lower level tool than the bindgens. Just as
 bindgen and cbindgen are built on top of `extern "C"`, it makes sense to think
 about higher level tools built on top of CXX. Such a tool might consume a C++
 header and/or Rust module (and/or IDL like Thrift) and emit the corresponding
-safe cxx::bridge language boundary, leveraging CXX's static analysis and
+safe `cxx::bridge` language boundary, leveraging CXX's static analysis and
 underlying implementation of that boundary. We are beginning to see this space
 explored by the [autocxx] tool, though nothing yet ready for broad use in the
 way that CXX on its own is.

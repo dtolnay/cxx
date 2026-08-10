@@ -3,9 +3,9 @@
 
 ## namespace
 
-The top-level cxx::bridge attribute macro takes an optional `namespace` argument
-to control the C++ namespace into which to emit extern Rust items and the
-namespace in which to expect to find the extern C++ items.
+The top-level `cxx::bridge` attribute macro takes an optional `namespace` argument
+to control the C++ namespace into which to emit `extern "Rust"` items and the
+namespace in which to expect to find the `extern "C++"` items.
 
 ```rust,noplayground
 #[cxx::bridge(namespace = "path::of::my::company")]
@@ -23,7 +23,7 @@ mod ffi {
 Additionally, a `#[namespace = "..."]` attribute may be used inside the bridge
 module on any extern block or individual item. An item will inherit the
 namespace specified on its surrounding extern block if any, otherwise the
-namespace specified with the top level cxx::bridge attribute if any, otherwise
+namespace specified with the top level `cxx::bridge` attribute if any, otherwise
 the global namespace.
 
 ```rust,noplayground
@@ -68,8 +68,8 @@ The `#[rust_name = "..."]` attribute replaces the name that Rust should use for
 this function, and an analogous `#[cxx_name = "..."]` attribute replaces the
 name that C++ should use.
 
-Either of the two attributes may be used on extern "Rust" as well as extern
-"C++" functions, according to which one you find clearer in context.
+Either of the two attributes may be used on `extern "Rust"` as well as `extern "C++"`
+functions, according to which one you find clearer in context.
 
 The same attribute works for renaming functions, opaque types, shared
 structs and enums, and enum variants.

@@ -1,11 +1,11 @@
 {{#title Result<T> — Rust ♡ C++}}
 # Result\<T\>
 
-Result\<T\> is allowed as the return type of an extern function in either
+`Result<T>` is allowed as the return type of an extern function in either
 direction. Its behavior is to translate to/from C++ exceptions. If your codebase
 does not use C++ exceptions, or prefers to represent fallibility using something
-like outcome\<T\>, leaf::result\<T\>, StatusOr\<T\>, etc then you'll need to
-handle the translation of those to Rust Result\<T\> using your own shims for
+like `outcome<T>`, `leaf::result<T>`, `StatusOr<T>`, etc then you'll need to
+handle the translation of those to Rust `Result<T>` using your own shims for
 now. Better support for this is planned.
 
 If an exception is thrown from an `extern "C++"` function that is *not* declared
@@ -22,10 +22,10 @@ calls Rust's `std::process::abort`.
 An `extern "Rust"` function returning a Result turns into a `throw` in C++ if
 the Rust side produces an error.
 
-Note that the return type written inside of cxx::bridge must be written without
+Note that the return type written inside of `cxx::bridge` must be written without
 a second type parameter. Only the Ok type is specified for the purpose of the
 FFI. The Rust *implementation* (outside of the bridge module) may pick any error
-type as long as it has a std::fmt::Display impl.
+type as long as it has a `std::fmt::Display` impl.
 
 ```rust,noplayground
 # use std::io;
@@ -53,7 +53,7 @@ fn fallible2() -> Result<(), io::Error> {
 
 The exception that gets thrown by CXX on the C++ side is always of type
 `rust::Error` and has the following C++ public API. The `what()` member function
-gives the error message according to the Rust error's std::fmt::Display impl.
+gives the error message according to the Rust error's `std::fmt::Display` impl.
 
 ```cpp,hidelines=...
 // rust/cxx.h
@@ -80,7 +80,7 @@ public:
 An `extern "C++"` function returning a Result turns into a `catch` in C++ that
 converts the exception into an Err for Rust.
 
-Note that the return type written inside of cxx::bridge must be written without
+Note that the return type written inside of `cxx::bridge` must be written without
 a second type parameter. Only the Ok type is specified for the purpose of the
 FFI. The resulting error type created by CXX when an `extern "C++"` function
 throws will always be of type **[`cxx::Exception`]**.
@@ -110,19 +110,17 @@ fn main() {
 The specific set of caught exceptions and the conversion to error message are
 both customizable. The way you do this is by defining a template function
 `rust::behavior::trycatch` with a suitable signature inside any one of the
-headers `include!`'d by your cxx::bridge.
+headers `include!`'d by your `cxx::bridge`.
 
 The template signature is required to be:
 
 ```cpp
-namespace rust {
-namespace behavior {
+namespace rust::behavior {
 
 template <typename Try, typename Fail>
 static void trycatch(Try &&func, Fail &&fail) noexcept;
 
-} // namespace behavior
-} // namespace rust
+} // namespace rust::behavior
 ```
 
 The default `trycatch` used by CXX if you have not provided your own is the
@@ -133,8 +131,7 @@ you'd like for the Rust error to have.
 ```cpp,hidelines=...
 ...#include <exception>
 ...
-...namespace rust {
-...namespace behavior {
+...namespace rust::behavior {
 ...
 template <typename Try, typename Fail>
 static void trycatch(Try &&func, Fail &&fail) noexcept try {
@@ -143,6 +140,5 @@ static void trycatch(Try &&func, Fail &&fail) noexcept try {
   fail(e.what());
 }
 ...
-...} // namespace behavior
-...} // namespace rust
+...} // namespace rust::behavior
 ```

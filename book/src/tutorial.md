@@ -193,7 +193,7 @@ cxx-build = "1.0"
 
 Then add a build.rs build script adjacent to Cargo.toml to run the cxx-build
 code generator and C++ compiler. The relevant arguments are the path to the Rust
-source file containing the cxx::bridge language boundary definition, and the
+source file containing the `cxx::bridge` language boundary definition, and the
 paths to any additional C++ source files to be compiled during the Rust crate's
 build.
 

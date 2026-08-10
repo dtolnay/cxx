@@ -71,7 +71,7 @@
 //! tend to consist of 2 chunks, or fragments of a file spread across memory for
 //! some other reason.
 //!
-//! A runnable version of this example is provided under the *demo* directory of
+//! A runnable version of this example is provided under the *`demo`* directory of
 //! <https://github.com/dtolnay/cxx>. To try it out, run `cargo run` from that
 //! directory.
 //!
@@ -179,7 +179,7 @@
 //! assertions will verify that they are accurate.
 //!
 //! Your function implementations themselves, whether in C++ or Rust, *do not*
-//! need to be defined as `extern "C"` ABI or no\_mangle. CXX will put in the
+//! need to be defined as `extern "C"` ABI or `no_mangle`. CXX will put in the
 //! right shims where necessary to make it all work.
 //!
 //! <br>
@@ -188,7 +188,7 @@
 //!
 //! Notice that with CXX there is repetition of all the function signatures:
 //! they are typed out once where the implementation is defined (in C++ or Rust)
-//! and again inside the cxx::bridge module, though compile-time assertions
+//! and again inside the `cxx::bridge` module, though compile-time assertions
 //! guarantee these are kept in sync. This is different from [bindgen] and
 //! [cbindgen] where function signatures are typed by a human once and the tool
 //! consumes them in one language and emits them in the other language.
@@ -202,7 +202,7 @@
 //! rather than a replacement for a bindgen. It would be reasonable to build a
 //! higher level bindgen-like tool on top of CXX which consumes a C++ header
 //! and/or Rust module (and/or IDL like Thrift) as source of truth and generates
-//! the cxx::bridge, eliminating the repetition while leveraging the static
+//! the cxx::bridge`, eliminating the repetition while leveraging the static
 //! analysis safety guarantees of CXX.
 //!
 //! But note in other ways CXX is higher level than the bindgens, with rich
@@ -311,8 +311,8 @@
 //!   is made possible by owning both sides of the boundary rather than just
 //!   one.
 //!
-//! - Template instantiations: for example in order to expose a UniquePtr\<T\>
-//!   type in Rust backed by a real C++ unique\_ptr, we have a way of using a
+//! - Template instantiations: for example in order to expose a `UniquePtr<T>`
+//!   type in Rust backed by a real C++ `unique_ptr`, we have a way of using a
 //!   Rust trait to connect the behavior back to the template instantiations
 //!   performed by the other language.
 //!
@@ -322,29 +322,29 @@
 //!
 //! # Builtin types
 //!
-//! In addition to all the primitive types (i32 &lt;=&gt; int32_t), the
+//! In addition to all the primitive types (`i32` &harr; `int32_t`), the
 //! following common types may be used in the fields of shared structs and the
 //! arguments and returns of functions.
 //!
 //! <table>
 //! <tr><th>name in Rust</th><th>name in C++</th><th>restrictions</th></tr>
-//! <tr><td>String</td><td>rust::String</td><td></td></tr>
-//! <tr><td>&amp;str</td><td>rust::Str</td><td></td></tr>
-//! <tr><td>&amp;[T]</td><td>rust::Slice&lt;const T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
-//! <tr><td>&amp;mut [T]</td><td>rust::Slice&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
-//! <tr><td><a href="struct.CxxString.html">CxxString</a></td><td>std::string</td><td><sup><i>cannot be passed by value</i></sup></td></tr>
-//! <tr><td>Box&lt;T&gt;</td><td>rust::Box&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
-//! <tr><td><a href="struct.UniquePtr.html">UniquePtr&lt;T&gt;</a></td><td>std::unique_ptr&lt;T&gt;</td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
-//! <tr><td><a href="struct.SharedPtr.html">SharedPtr&lt;T&gt;</a></td><td>std::shared_ptr&lt;T&gt;</td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
-//! <tr><td>[T; N]</td><td>std::array&lt;T, N&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
-//! <tr><td>Vec&lt;T&gt;</td><td>rust::Vec&lt;T&gt;</td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
-//! <tr><td><a href="struct.CxxVector.html">CxxVector&lt;T&gt;</a></td><td>std::vector&lt;T&gt;</td><td><sup><i>cannot be passed by value, cannot hold opaque Rust type</i></sup></td></tr>
-//! <tr><td>*mut T, *const T</td><td>T*, const T*</td><td><sup><i>fn with a raw pointer argument must be declared unsafe to call</i></sup></td></tr>
-//! <tr><td>fn(T, U) -&gt; V</td><td>rust::Fn&lt;V(T, U)&gt;</td><td><sup><i>only passing from Rust to C++ is implemented so far</i></sup></td></tr>
-//! <tr><td>Result&lt;T&gt;</td><td>throw/catch</td><td><sup><i>allowed as return type only</i></sup></td></tr>
+//! <tr><td><code>String</code></td><td><code>rust::String</code></td><td></td></tr>
+//! <tr><td><code>&amp;str</code></td><td><code>rust::Str</code></td><td></td></tr>
+//! <tr><td><code>&amp;[T]</code></td><td><code>rust::Slice&lt;const T&gt;</code></td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
+//! <tr><td><code>&amp;mut [T]</code></td><td><code>rust::Slice&lt;T&gt;</code></td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
+//! <tr><td><a href="https://docs.rs/cxx/1.0/cxx/struct.CxxString.html"><code>CxxString</code></a></td><td><code>std::string</code></td><td><sup><i>cannot be passed by value</i></sup></td></tr>
+//! <tr><td><code>Box&lt;T&gt;</code></td><td><code>rust::Box&lt;T&gt;</code></td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
+//! <tr><td><a href="https://docs.rs/cxx/1.0/cxx/struct.UniquePtr.html"><code>UniquePtr&lt;T&gt;</code></a></td><td><code>std::unique_ptr&lt;T&gt;</code></td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
+//! <tr><td><a href="https://docs.rs/cxx/1.0/cxx/struct.SharedPtr.html"><code>SharedPtr&lt;T&gt;</code></a></td><td><code>std::shared_ptr&lt;T&gt;</code></td><td><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
+//! <tr><td><code>[T; N]</code></td><td><code>std::array&lt;T, N&gt;</code></td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
+//! <tr><td><code>Vec&lt;T&gt;</code></td><td><code>rust::Vec&lt;T&gt;</code></td><td><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
+//! <tr><td><a href="https://docs.rs/cxx/1.0/cxx/struct.CxxVector.html"><code>CxxVector&lt;T&gt;</code></a></td><td><code>std::vector&lt;T&gt;</code></td><td><sup><i>cannot be passed by value, cannot hold opaque Rust type</i></sup></td></tr>
+//! <tr><td><code>*mut T</code>, <code>*const T</code></td><td><code>T*</code>, <code>const T*</code></td><td><sup><i>fn with a raw pointer argument must be declared unsafe to call</i></sup></td></tr>
+//! <tr><td><code>fn(T, U) -&gt; V</code></td><td><code>rust::Fn&lt;V(T, U)&gt;</code></td><td><sup><i>only passing from Rust to C++ is implemented so far</i></sup></td></tr>
+//! <tr><td><code>Result&lt;T&gt;</code></td><td><code>throw</code>/<code>catch</code></td><td><sup><i>allowed as return type only</i></sup></td></tr>
 //! </table>
 //!
-//! The C++ API of the `rust` namespace is defined by the *include/cxx.h* file
+//! The C++ API of the `rust` namespace is defined by the *`include/cxx.h`* file
 //! in <https://github.com/dtolnay/cxx>. You will need to include this header in
 //! your C++ code when working with those types.
 //!
