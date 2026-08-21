@@ -262,6 +262,10 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+          cache: false
       - run: go install github.com/bazelbuild/buildtools/buildifier@latest
       - run: echo $(go env GOPATH)/bin >> $GITHUB_PATH
       - run: git ls-files '*.bzl' '*.bazel' | xargs buildifier
