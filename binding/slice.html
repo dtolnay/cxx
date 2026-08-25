@@ -1,0 +1,360 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>rust::Slice&lt;T&gt; — Rust ♡ C++</title>
+
+
+        <!-- Custom HTML head -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DG41MK6DDN"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-DG41MK6DDN', {anonymize_ip: true, cookie_domain: 'cxx.rs', cookie_flags: 'samesite=strict;secure'});
+        </script>
+
+        <meta name="description" content="CXX — safe interop between Rust and C++ by David Tolnay. This library provides a safe mechanism for calling C++ code from Rust and Rust code from C++.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../css/cxx.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    <meta property="og:image" content="https://cxx.rs/cxx.png"><meta property="og:site_name" content="CXX"><meta property="og:title" content="CXX — safe interop between Rust and C++"><meta name="twitter:image:src" content="https://cxx.rs/cxx.png"><meta name="twitter:site" content="@davidtolnay"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="CXX — safe interop between Rust and C++"></head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>const html = document.documentElement;
+html.classList.add('js');</script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list" style="display:none">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/dtolnay/cxx" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="rustsliceconst-t-rustslicet"><a class="header" href="#rustsliceconst-t-rustslicet">rust::Slice&lt;const T&gt;, rust::Slice&lt;T&gt;</a></h1>
+<ul>
+<li>Rust <code class="hljs">&amp;[T]</code> is written <code class="hljs">rust::Slice&lt;const T&gt;</code> in C++</li>
+<li>Rust <code class="hljs">&amp;mut [T]</code> is written <code class="hljs">rust::Slice&lt;T&gt;</code> in C++</li>
+</ul>
+<h3 id="public-api"><a class="header" href="#public-api">Public API:</a></h3>
+<pre><code class="hidelines=... hidelines hide-boring hljs"><span class="hljs-comment">// rust/cxx.h</span>
+<span class="boring">
+</span><span class="boring"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iterator&gt;</span></span>
+</span><span class="boring"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;type_traits&gt;</span></span>
+</span><span class="boring">
+</span><span class="boring"><span class="hljs-keyword">namespace</span> rust {
+</span>
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> T&gt;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Slice</span> <span class="hljs-title">final</span> {</span>
+<span class="hljs-keyword">public</span>:
+  <span class="hljs-keyword">using</span> value_type = T;
+
+  Slice() <span class="hljs-keyword">noexcept</span>;
+  Slice(<span class="hljs-keyword">const</span> Slice&lt;T&gt; &amp;) <span class="hljs-keyword">noexcept</span>;
+  Slice(T *, <span class="hljs-keyword">size_t</span> count) <span class="hljs-keyword">noexcept</span>;
+
+  <span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> C&gt;
+  <span class="hljs-function"><span class="hljs-keyword">explicit</span> <span class="hljs-title">Slice</span><span class="hljs-params">(C &amp;c)</span> : <span class="hljs-title">Slice</span><span class="hljs-params">(c.data(), c.size())</span></span>;
+
+  Slice &amp;<span class="hljs-keyword">operator</span>=(Slice&lt;T&gt; &amp;&amp;) &amp; <span class="hljs-keyword">noexcept</span>;
+  Slice &amp;<span class="hljs-keyword">operator</span>=(<span class="hljs-keyword">const</span> Slice&lt;T&gt; &amp;) &amp; <span class="hljs-keyword">noexcept</span>
+    <span class="hljs-keyword">requires</span> <span class="hljs-built_in">std</span>::is_const_v&lt;T&gt;;
+
+  <span class="hljs-function">T *<span class="hljs-title">data</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span></span>;
+  <span class="hljs-function"><span class="hljs-keyword">size_t</span> <span class="hljs-title">size</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span></span>;
+  <span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">empty</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span></span>;
+
+  T &amp;<span class="hljs-keyword">operator</span>[](<span class="hljs-keyword">size_t</span> n) <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span>;
+  <span class="hljs-function">T &amp;<span class="hljs-title">at</span><span class="hljs-params">(<span class="hljs-keyword">size_t</span> n)</span> <span class="hljs-keyword">const</span></span>;
+  <span class="hljs-function">T &amp;<span class="hljs-title">front</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span></span>;
+  <span class="hljs-function">T &amp;<span class="hljs-title">back</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span></span>;
+
+  <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">iterator</span>;</span>
+  <span class="hljs-function">iterator <span class="hljs-title">begin</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span></span>;
+  <span class="hljs-function">iterator <span class="hljs-title">end</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span></span>;
+
+  <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">swap</span><span class="hljs-params">(Slice &amp;)</span> <span class="hljs-keyword">noexcept</span></span>;
+};
+<span class="boring">
+</span><span class="boring"><span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> T&gt;
+</span><span class="boring"><span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Slice</span>&lt;T&gt;:</span>:iterator <span class="hljs-keyword">final</span> {
+</span><span class="boring"><span class="hljs-keyword">public</span>:
+</span><span class="boring"><span class="hljs-meta">#<span class="hljs-meta-keyword">if</span> __cplusplus &gt;= 202002L</span>
+</span><span class="boring">  <span class="hljs-keyword">using</span> iterator_category = <span class="hljs-built_in">std</span>::contiguous_iterator_tag;
+</span><span class="boring"><span class="hljs-meta">#<span class="hljs-meta-keyword">else</span></span>
+</span><span class="boring">  <span class="hljs-keyword">using</span> iterator_category = <span class="hljs-built_in">std</span>::random_access_iterator_tag;
+</span><span class="boring"><span class="hljs-meta">#<span class="hljs-meta-keyword">endif</span></span>
+</span><span class="boring">  <span class="hljs-keyword">using</span> value_type = T;
+</span><span class="boring">  <span class="hljs-keyword">using</span> pointer = T *;
+</span><span class="boring">  <span class="hljs-keyword">using</span> reference = T &amp;;
+</span><span class="boring">
+</span><span class="boring">  T &amp;<span class="hljs-keyword">operator</span>*() <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span>;
+</span><span class="boring">  T *<span class="hljs-keyword">operator</span>-&gt;() <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span>;
+</span><span class="boring">  T &amp;<span class="hljs-keyword">operator</span>[](<span class="hljs-keyword">ptrdiff_t</span>) <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span>;
+</span><span class="boring">
+</span><span class="boring">  iterator &amp;<span class="hljs-keyword">operator</span>++() <span class="hljs-keyword">noexcept</span>;
+</span><span class="boring">  iterator <span class="hljs-keyword">operator</span>++(<span class="hljs-keyword">int</span>) <span class="hljs-keyword">noexcept</span>;
+</span><span class="boring">  iterator &amp;<span class="hljs-keyword">operator</span>--() <span class="hljs-keyword">noexcept</span>;
+</span><span class="boring">  iterator <span class="hljs-keyword">operator</span>--(<span class="hljs-keyword">int</span>) <span class="hljs-keyword">noexcept</span>;
+</span><span class="boring">
+</span><span class="boring">  iterator &amp;<span class="hljs-keyword">operator</span>+=(<span class="hljs-keyword">ptrdiff_t</span>) <span class="hljs-keyword">noexcept</span>;
+</span><span class="boring">  iterator &amp;<span class="hljs-keyword">operator</span>-=(<span class="hljs-keyword">ptrdiff_t</span>) <span class="hljs-keyword">noexcept</span>;
+</span><span class="boring">  iterator <span class="hljs-keyword">operator</span>+(<span class="hljs-keyword">ptrdiff_t</span>) <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span>;
+</span><span class="boring">  iterator <span class="hljs-keyword">operator</span>-(<span class="hljs-keyword">ptrdiff_t</span>) <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span>;
+</span><span class="boring">  <span class="hljs-keyword">ptrdiff_t</span> <span class="hljs-keyword">operator</span>-(<span class="hljs-keyword">const</span> iterator &amp;) <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span>;
+</span><span class="boring">
+</span><span class="boring">  <span class="hljs-keyword">bool</span> <span class="hljs-keyword">operator</span>==(<span class="hljs-keyword">const</span> iterator &amp;) <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span>;
+</span><span class="boring">  <span class="hljs-keyword">bool</span> <span class="hljs-keyword">operator</span>!=(<span class="hljs-keyword">const</span> iterator &amp;) <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span>;
+</span><span class="boring">  <span class="hljs-keyword">bool</span> <span class="hljs-keyword">operator</span>&lt;(<span class="hljs-keyword">const</span> iterator &amp;) <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span>;
+</span><span class="boring">  <span class="hljs-keyword">bool</span> <span class="hljs-keyword">operator</span>&gt;(<span class="hljs-keyword">const</span> iterator &amp;) <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span>;
+</span><span class="boring">  <span class="hljs-keyword">bool</span> <span class="hljs-keyword">operator</span>&lt;=(<span class="hljs-keyword">const</span> iterator &amp;) <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span>;
+</span><span class="boring">  <span class="hljs-keyword">bool</span> <span class="hljs-keyword">operator</span>&gt;=(<span class="hljs-keyword">const</span> iterator &amp;) <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span>;
+</span><span class="boring">};
+</span><span class="boring">
+</span><span class="boring">} <span class="hljs-comment">// namespace rust</span>
+</span></code></pre>
+<h3 id="restrictions"><a class="header" href="#restrictions">Restrictions:</a></h3>
+<p>T must not be an opaque Rust type or opaque C++ type. Support for opaque Rust
+types in slices is coming.</p>
+<p>Allowed as function argument or return value. Not supported in shared structs.</p>
+<p>Only rust::Slice&lt;const T&gt; is copy-assignable, not rust::Slice&lt;T&gt;. (Both are
+move-assignable.) You'll need to write std::move occasionally as a reminder that
+accidentally exposing overlapping &amp;mut [T] to Rust is UB.</p>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<p>This example is a C++ program that constructs a slice containing JSON data (by
+reading from stdin, but it could be from anywhere), then calls into Rust to
+pretty-print that JSON data into a std::string via the <a href="https://github.com/serde-rs/json">serde_json</a> and
+<a href="https://github.com/sfackler/serde-transcode">serde_transcode</a> crates.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-comment">// src/main.rs</span>
+
+<span class="hljs-meta">#![no_main]</span> <span class="hljs-comment">// main defined in C++ by main.cc</span>
+
+<span class="hljs-keyword">use</span> cxx::CxxString;
+<span class="hljs-keyword">use</span> std::io::{<span class="hljs-keyword">self</span>, Write};
+<span class="hljs-keyword">use</span> std::pin::Pin;
+
+<span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;Rust&quot;</span> {
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">prettify_json</span></span>(input: &amp;[<span class="hljs-built_in">u8</span>], output: Pin&lt;&amp;<span class="hljs-keyword">mut</span> CxxString&gt;) -&gt; <span class="hljs-built_in">Result</span>&lt;()&gt;;
+    }
+}
+
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">WriteToCxxString</span></span>&lt;<span class="hljs-symbol">&#x27;a</span>&gt;(Pin&lt;&amp;<span class="hljs-symbol">&#x27;a</span> <span class="hljs-keyword">mut</span> CxxString&gt;);
+
+<span class="hljs-keyword">impl</span>&lt;<span class="hljs-symbol">&#x27;a</span>&gt; Write <span class="hljs-keyword">for</span> WriteToCxxString&lt;<span class="hljs-symbol">&#x27;a</span>&gt; {
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">write</span></span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>, buf: &amp;[<span class="hljs-built_in">u8</span>]) -&gt; io::<span class="hljs-built_in">Result</span>&lt;<span class="hljs-built_in">usize</span>&gt; {
+        <span class="hljs-keyword">self</span>.<span class="hljs-number">0</span>.as_mut().push_bytes(buf);
+        <span class="hljs-literal">Ok</span>(buf.len())
+    }
+    <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">flush</span></span>(&amp;<span class="hljs-keyword">mut</span> <span class="hljs-keyword">self</span>) -&gt; io::<span class="hljs-built_in">Result</span>&lt;()&gt; {
+        <span class="hljs-literal">Ok</span>(())
+    }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">prettify_json</span></span>(input: &amp;[<span class="hljs-built_in">u8</span>], output: Pin&lt;&amp;<span class="hljs-keyword">mut</span> CxxString&gt;) -&gt; serde_json::<span class="hljs-built_in">Result</span>&lt;()&gt; {
+    <span class="hljs-keyword">let</span> writer = WriteToCxxString(output);
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> deserializer = serde_json::Deserializer::from_slice(input);
+    <span class="hljs-keyword">let</span> <span class="hljs-keyword">mut</span> serializer = serde_json::Serializer::pretty(writer);
+    serde_transcode::transcode(&amp;<span class="hljs-keyword">mut</span> deserializer, &amp;<span class="hljs-keyword">mut</span> serializer)
+}</code></pre>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-comment">// src/main.cc</span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;example/src/main.rs.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iostream&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;iterator&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;string&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;vector&gt;</span></span>
+
+<span class="hljs-function"><span class="hljs-keyword">int</span> <span class="hljs-title">main</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-comment">// Read json from stdin.</span>
+  <span class="hljs-built_in">std</span>::istreambuf_iterator&lt;<span class="hljs-keyword">char</span>&gt; begin{<span class="hljs-built_in">std</span>::<span class="hljs-built_in">cin</span>}, end;
+  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">vector</span>&lt;<span class="hljs-keyword">unsigned</span> <span class="hljs-keyword">char</span>&gt; input{begin, end};
+  rust::Slice&lt;<span class="hljs-keyword">const</span> <span class="hljs-keyword">uint8_t</span>&gt; slice{input.data(), input.size()};
+
+  <span class="hljs-comment">// Prettify using serde_json and serde_transcode.</span>
+  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span> output;
+  prettify_json(slice, output);
+
+  <span class="hljs-comment">// Write to stdout.</span>
+  <span class="hljs-built_in">std</span>::<span class="hljs-built_in">cout</span> &lt;&lt; output &lt;&lt; <span class="hljs-built_in">std</span>::<span class="hljs-built_in">endl</span>;
+}
+</code></pre>
+<p>Testing the example:</p>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-meta">$</span><span class="bash">  <span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;{&quot;fearless&quot;:&quot;concurrency&quot;}&#x27;</span> | cargo run</span>
+    Finished dev [unoptimized + debuginfo] target(s) in 0.02s
+     Running `target/debug/example`
+{
+  &quot;fearless&quot;: &quot;concurrency&quot;
+}
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../binding/str.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../binding/cxxstring.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../binding/str.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../binding/cxxstring.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

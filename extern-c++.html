@@ -1,0 +1,476 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>extern &quot;C++&quot; — Rust ♡ C++</title>
+
+
+        <!-- Custom HTML head -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DG41MK6DDN"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-DG41MK6DDN', {anonymize_ip: true, cookie_domain: 'cxx.rs', cookie_flags: 'samesite=strict;secure'});
+        </script>
+
+        <meta name="description" content="CXX — safe interop between Rust and C++ by David Tolnay. This library provides a safe mechanism for calling C++ code from Rust and Rust code from C++.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css" disabled="true">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css" disabled="true">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="css/cxx.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    <meta property="og:image" content="https://cxx.rs/cxx.png"><meta property="og:site_name" content="CXX"><meta property="og:title" content="CXX — safe interop between Rust and C++"><meta name="twitter:image:src" content="https://cxx.rs/cxx.png"><meta name="twitter:site" content="@davidtolnay"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="CXX — safe interop between Rust and C++"></head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>const html = document.documentElement;
+html.classList.add('js');</script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list" style="display:none">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/dtolnay/cxx" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="extern-c"><a class="header" href="#extern-c">extern "C++"</a></h1>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        include!(<span class="hljs-string">&quot;path/to/header.h&quot;</span>);
+        include!(<span class="hljs-string">&quot;path/to/another.h&quot;</span>);
+
+        ...
+    }
+}</code></pre>
+<p>The <code class="hljs">extern "C++"</code> section of a CXX bridge declares C++ types and signatures to
+be made available to Rust, and gives the paths of the header(s) which contain
+the corresponding C++ declarations.</p>
+<p>A bridge module may contain zero or more extern "C++" blocks.</p>
+<h2 id="opaque-c-types"><a class="header" href="#opaque-c-types">Opaque C++ types</a></h2>
+<p>Type defined in C++ that are made available to Rust, but only behind an
+indirection.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="boring"><span class="hljs-meta">#[cxx::bridge]</span>
+</span><span class="boring"><span class="hljs-keyword">mod</span> ffi {
+</span>    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+<span class="boring">        include!(<span class="hljs-string">&quot;path/to/header.h&quot;</span>);
+</span><span class="boring">        
+</span>        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">MyType</span></span>;
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">MyOtherType</span></span>;
+    }
+<span class="boring">}</span></code></pre>
+<p>For example in the <em><strong><a href="tutorial.html">Tutorial</a></strong></em> we saw <code class="hljs">BlobstoreClient</code>
+implemented as an opaque C++ type. The blobstore client was created in C++ and
+returned to Rust by way of a UniquePtr.</p>
+<p><strong>Mutability:</strong> Unlike extern Rust types and shared types, an extern C++ type is
+not permitted to be passed by plain mutable reference <code class="hljs">&amp;mut MyType</code> across the
+FFI bridge. For mutation support, the bridge is required to use <code class="hljs">Pin&lt;&amp;mut MyType&gt;</code>. This is to safeguard against things like mem::swap-ing the contents of
+two mutable references, given that Rust doesn't have information about the size
+of the underlying object and couldn't invoke an appropriate C++ move constructor
+anyway.</p>
+<p><strong>Thread safety:</strong> Be aware that CXX does not assume anything about the thread
+safety of your extern C++ types. In other words the <code class="hljs">MyType</code> etc bindings which
+CXX produces for you in Rust <em>do not</em> come with <code class="hljs">Send</code> and <code class="hljs">Sync</code> impls. If you
+are sure that your C++ type satisfies the requirements of <code class="hljs">Send</code> and/or <code class="hljs">Sync</code>
+and need to leverage that fact from Rust, you must provide your own unsafe
+marker trait impls.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="boring"><span class="hljs-meta">#[cxx::bridge]</span>
+</span><span class="boring"><span class="hljs-keyword">mod</span> ffi {
+</span><span class="boring">    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+</span><span class="boring">        include!(<span class="hljs-string">&quot;path/to/header.h&quot;</span>);
+</span><span class="boring">
+</span><span class="boring">        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">MyType</span></span>;
+</span><span class="boring">    }
+</span><span class="boring">}
+</span><span class="boring">
+</span><span class="hljs-comment">/// The C++ implementation of MyType is thread safe.</span>
+<span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">impl</span> <span class="hljs-built_in">Send</span> <span class="hljs-keyword">for</span> ffi::MyType {}
+<span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">impl</span> <span class="hljs-built_in">Sync</span> <span class="hljs-keyword">for</span> ffi::MyType {}</code></pre>
+<p>Take care in doing this because thread safety in C++ can be extremely tricky to
+assess if you are coming from a Rust background. For example the
+<code class="hljs">BlobstoreClient</code> type in the tutorial is <em>not thread safe</em> despite doing only
+completely innocuous things in its implementation. Concurrent calls to the <code class="hljs">tag</code>
+member function trigger a data race on the <code class="hljs">blobs</code> map.</p>
+<h2 id="functions-and-member-functions"><a class="header" href="#functions-and-member-functions">Functions and member functions</a></h2>
+<p>This largely follows the same principles as <em><strong><a href="extern-rust.html">extern
+"Rust"</a></strong></em> functions and methods. In particular, any signature
+with a <code class="hljs">self</code> parameter is interpreted as a C++ non-static member function and
+exposed to Rust as a method; any signature with a <code class="hljs">#[Self = "…"]</code> attribute is
+interpreted as a C++ static member function and exposed to Rust as an associated
+function.</p>
+<p>The programmer <strong>does not</strong> need to promise that the signatures they have typed
+in are accurate; that would be unreasonable. CXX performs static assertions that
+the signatures exactly correspond with what is declared in C++. Rather, the
+programmer is only on the hook for things that C++'s static information is not
+precise enough to capture, i.e. things that would only be represented at most by
+comments in the C++ code unintelligible to a static assertion: namely whether
+the C++ function is safe or unsafe to be called from Rust.</p>
+<p><strong>Safety:</strong> the extern "C++" block is responsible for deciding whether to expose
+each signature inside as safe-to-call or unsafe-to-call. If an extern block
+contains at least one safe-to-call signature, it must be written as an <code class="hljs">unsafe extern</code> block, which serves as an item level unsafe block to indicate that an
+unchecked safety claim is being made about the contents of the block.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+<span class="boring">        include!(<span class="hljs-string">&quot;path/to/header.h&quot;</span>);
+</span><span class="boring">        
+</span>        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">f</span></span>();  <span class="hljs-comment">// safe to call</span>
+    }
+
+    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        <span class="hljs-keyword">unsafe</span> <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">g</span></span>();  <span class="hljs-comment">// unsafe to call</span>
+    }
+}</code></pre>
+<h2 id="lifetimes"><a class="header" href="#lifetimes">Lifetimes</a></h2>
+<p>C++ types holding borrowed data may be described naturally in Rust by an extern
+type with a generic lifetime parameter. For example in the case of the following
+pair of types:</p>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-comment">// header.h</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Resource</span>;</span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TypeContainingBorrow</span> {</span>
+  TypeContainingBorrow(<span class="hljs-keyword">const</span> Resource &amp;res) : res(res) {}
+  <span class="hljs-keyword">const</span> Resource &amp;res;
+};
+
+<span class="hljs-function"><span class="hljs-built_in">std</span>::<span class="hljs-built_in">shared_ptr</span>&lt;TypeContainingBorrow&gt; <span class="hljs-title">create</span><span class="hljs-params">(<span class="hljs-keyword">const</span> Resource &amp;res)</span></span>;
+</code></pre>
+<p>we'd want to expose this to Rust as:</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+<span class="boring">        include!(<span class="hljs-string">&quot;path/to/header.h&quot;</span>);
+</span><span class="boring">        
+</span>        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">Resource</span></span>;
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">TypeContainingBorrow</span></span>&lt;<span class="hljs-symbol">&#x27;a</span>&gt;;
+
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">create</span></span>&lt;<span class="hljs-symbol">&#x27;a</span>&gt;(res: &amp;<span class="hljs-symbol">&#x27;a</span> Resource) -&gt; SharedPtr&lt;TypeContainingBorrow&lt;<span class="hljs-symbol">&#x27;a</span>&gt;&gt;;
+
+        <span class="hljs-comment">// or with lifetime elision:</span>
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">create</span></span>(res: &amp;Resource) -&gt; SharedPtr&lt;TypeContainingBorrow&gt;;
+    }
+}</code></pre>
+<h2 id="reusing-existing-binding-types"><a class="header" href="#reusing-existing-binding-types">Reusing existing binding types</a></h2>
+<p>Extern C++ types support a syntax for declaring that a Rust binding of the
+correct C++ type already exists outside of the current bridge module. This
+avoids generating a fresh new binding which Rust's type system would consider
+non-interchangeable with the first.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-meta">#[cxx::bridge(namespace = <span class="hljs-meta-string">&quot;path::to&quot;</span>)]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">MyType</span></span> = crate::existing::MyType;
+    }
+
+    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;Rust&quot;</span> {
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">f</span></span>(x: &amp;MyType) -&gt; <span class="hljs-built_in">usize</span>;
+    }
+}</code></pre>
+<p>In this case rather than producing a unique new Rust type <code class="hljs">ffi::MyType</code> for the
+Rust binding of C++'s <code class="hljs">::path::to::MyType</code>, CXX will reuse the already existing
+binding at <code class="hljs">crate::existing::MyType</code> in expressing the signature of <code class="hljs">f</code> and any
+other uses of <code class="hljs">MyType</code> within the bridge module.</p>
+<p>CXX safely validates that <code class="hljs">crate::existing::MyType</code> is in fact a binding for the
+right C++ type <code class="hljs">::path::to::MyType</code> by generating a static assertion based on
+<code class="hljs">crate::existing::MyType</code>'s implementation of <a href="https://docs.rs/cxx/*/cxx/trait.ExternType.html"><code class="hljs">ExternType</code></a>, which is a trait
+automatically implemented by CXX for bindings that it generates but can also be
+manually implemented as described below.</p>
+<p><code class="hljs">ExternType</code> serves the following two related use cases.</p>
+<h4 id="safely-unifying-occurrences-of-an-extern-type-across-bridges"><a class="header" href="#safely-unifying-occurrences-of-an-extern-type-across-bridges">Safely unifying occurrences of an extern type across bridges</a></h4>
+<p>In the following snippet, two #[cxx::bridge] invocations in different files
+(possibly different crates) both contain function signatures involving the same
+C++ type <code class="hljs">example::Demo</code>. If both were written just containing <code class="hljs">type Demo;</code>,
+then both macro expansions would produce their own separate Rust type called
+<code class="hljs">Demo</code> and thus the compiler wouldn't allow us to take the <code class="hljs">Demo</code> returned by
+<code class="hljs">file1::ffi::create_demo</code> and pass it as the <code class="hljs">Demo</code> argument accepted by
+<code class="hljs">file2::ffi::take_ref_demo</code>. Instead, one of the two <code class="hljs">Demo</code>s has been defined as
+an extern type alias of the other, making them the same type in Rust.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-comment">// file1.rs</span>
+<span class="hljs-meta">#[cxx::bridge(namespace = <span class="hljs-meta-string">&quot;example&quot;</span>)]</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">Demo</span></span>;
+
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">create_demo</span></span>() -&gt; UniquePtr&lt;Demo&gt;;
+    }
+}</code></pre>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-comment">// file2.rs</span>
+<span class="hljs-meta">#[cxx::bridge(namespace = <span class="hljs-meta-string">&quot;example&quot;</span>)]</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">Demo</span></span> = crate::file1::ffi::Demo;
+
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">take_ref_demo</span></span>(demo: &amp;Demo);
+    }
+}</code></pre>
+<h4 id="integrating-with-bindgen-generated-or-handwritten-unsafe-bindings"><a class="header" href="#integrating-with-bindgen-generated-or-handwritten-unsafe-bindings">Integrating with bindgen-generated or handwritten unsafe bindings</a></h4>
+<p>Handwritten <code class="hljs">ExternType</code> impls make it possible to plug in a data structure
+emitted by bindgen as the definition of a C++ type emitted by CXX.</p>
+<p>By writing the unsafe <code class="hljs">ExternType</code> impl, the programmer asserts that the C++
+namespace and type name given in the type id refers to a C++ type that is
+equivalent to Rust type that is the <code class="hljs">Self</code> type of the impl.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-keyword">mod</span> folly_sys;  <span class="hljs-comment">// the bindgen-generated bindings</span>
+
+<span class="hljs-keyword">use</span> cxx::{type_id, ExternType};
+
+<span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">impl</span> ExternType <span class="hljs-keyword">for</span> folly_sys::StringPiece {
+    <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">Id</span></span> = type_id!(<span class="hljs-string">&quot;folly::StringPiece&quot;</span>);
+    <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">Kind</span></span> = cxx::kind::Opaque;
+}
+
+<span class="hljs-meta">#[cxx::bridge(namespace = <span class="hljs-meta-string">&quot;folly&quot;</span>)]</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        include!(<span class="hljs-string">&quot;rust_cxx_bindings.h&quot;</span>);
+
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">StringPiece</span></span> = crate::folly_sys::StringPiece;
+
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">print_string_piece</span></span>(s: &amp;StringPiece);
+    }
+}
+
+<span class="hljs-comment">// Now if we construct a StringPiece or obtain one through one</span>
+<span class="hljs-comment">// of the bindgen-generated signatures, we are able to pass it</span>
+<span class="hljs-comment">// along to ffi::print_string_piece.</span></code></pre>
+<p>The <code class="hljs">ExternType::Id</code> associated type encodes a type-level representation of the
+type's C++ namespace and type name. It will always be defined using the
+<code class="hljs">type_id!</code> macro exposed in the cxx crate.</p>
+<p>The <code class="hljs">ExternType::Kind</code> associated type will always be either
+<a href="https://docs.rs/cxx/*/cxx/kind/enum.Opaque.html"><code class="hljs">cxx::kind::Opaque</code></a> or <a href="https://docs.rs/cxx/*/cxx/kind/enum.Trivial.html"><code class="hljs">cxx::kind::Trivial</code></a> identifying whether a C++ type
+is soundly relocatable by Rust's move semantics. A C++ type is only okay to hold
+and pass around by value in Rust if its <a href="https://en.cppreference.com/w/cpp/types/is_move_constructible">move constructor is trivial</a> and it has
+no destructor. In CXX, these are called Trivial extern C++ types, while types
+with nontrivial move behavior or a destructor must be considered Opaque and
+handled by Rust only behind an indirection, such as a reference or UniquePtr.</p>
+<p>If you believe your C++ type reflected by the ExternType impl is indeed fine to
+hold by value and move in Rust, you can specify:</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="boring"><span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">impl</span> cxx::ExternType <span class="hljs-keyword">for</span> TypeName {
+</span><span class="boring">    <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">Id</span></span> = cxx::type_id!(<span class="hljs-string">&quot;name::space::of::TypeName&quot;</span>);
+</span>    <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">Kind</span></span> = cxx::kind::Trivial;
+<span class="boring">}</span></code></pre>
+<p>which will enable you to pass it into C++ functions by value, return it by
+value, and include it in <code class="hljs">struct</code>s that you have declared to <code class="hljs">cxx::bridge</code>. Your
+claim about the triviality of the C++ type will be checked by a <code class="hljs">static_assert</code>
+in the generated C++ side of the binding.</p>
+<h2 id="explicit-shim-trait-impls"><a class="header" href="#explicit-shim-trait-impls">Explicit shim trait impls</a></h2>
+<p>This is a somewhat niche feature, but important when you need it.</p>
+<p>CXX's support for C++'s std::unique_ptr and std::vector is built on a set of
+internal trait impls connecting the Rust API of UniquePtr and CxxVector to
+underlying template instantiations performed by the C++ compiler.</p>
+<p>When reusing a binding type across multiple bridge modules as described in the
+previous section, you may find that your code needs some trait impls which CXX
+hasn't decided to generate.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi1 {
+    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        include!(<span class="hljs-string">&quot;path/to/header.h&quot;</span>);
+
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">A</span></span>;
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">B</span></span>;
+
+        <span class="hljs-comment">// Okay: CXX sees UniquePtr&lt;B&gt; using a type B defined within the same</span>
+        <span class="hljs-comment">// bridge, and automatically emits the right template instantiations</span>
+        <span class="hljs-comment">// corresponding to std::unique_ptr&lt;B&gt;.</span>
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">get_b</span></span>() -&gt; UniquePtr&lt;B&gt;;
+    }
+}
+
+<span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi2 {
+    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">A</span></span> = crate::ffi1::A;
+
+        <span class="hljs-comment">// Rust trait error: CXX processing this module has no visibility into</span>
+        <span class="hljs-comment">// whether template instantiations corresponding to std::unique_ptr&lt;A&gt;</span>
+        <span class="hljs-comment">// have already been emitted by the upstream library, so it does not</span>
+        <span class="hljs-comment">// emit them here. If the upstream library does not have any signatures</span>
+        <span class="hljs-comment">// involving UniquePtr&lt;A&gt;, an explicit instantiation of the template</span>
+        <span class="hljs-comment">// needs to be requested in one module or the other.</span>
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">get_a</span></span>() -&gt; UniquePtr&lt;A&gt;;
+    }
+}</code></pre>
+<p>You can request a specific template instantiation at a particular location in
+the Rust crate hierarchy by writing <code class="hljs">impl UniquePtr&lt;A&gt; {}</code> inside of the bridge
+module which defines <code class="hljs">A</code> but does not otherwise contain any use of
+<code class="hljs">UniquePtr&lt;A&gt;</code>.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi1 {
+    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        include!(<span class="hljs-string">&quot;path/to/header.h&quot;</span>);
+
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">A</span></span>;
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">B</span></span>;
+
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">get_b</span></span>() -&gt; UniquePtr&lt;B&gt;;
+    }
+
+    <span class="hljs-keyword">impl</span> UniquePtr&lt;A&gt; {}  <span class="hljs-comment">// explicit instantiation</span>
+}</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="extern-rust.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="shared.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="extern-rust.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="shared.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,325 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>std::string — Rust ♡ C++</title>
+
+
+        <!-- Custom HTML head -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DG41MK6DDN"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-DG41MK6DDN', {anonymize_ip: true, cookie_domain: 'cxx.rs', cookie_flags: 'samesite=strict;secure'});
+        </script>
+
+        <meta name="description" content="CXX — safe interop between Rust and C++ by David Tolnay. This library provides a safe mechanism for calling C++ code from Rust and Rust code from C++.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../css/cxx.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    <meta property="og:image" content="https://cxx.rs/cxx.png"><meta property="og:site_name" content="CXX"><meta property="og:title" content="CXX — safe interop between Rust and C++"><meta name="twitter:image:src" content="https://cxx.rs/cxx.png"><meta name="twitter:site" content="@davidtolnay"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="CXX — safe interop between Rust and C++"></head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>const html = document.documentElement;
+html.classList.add('js');</script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list" style="display:none">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/dtolnay/cxx" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="stdstring"><a class="header" href="#stdstring">std::string</a></h1>
+<p>The Rust binding of std::string is called <strong><a href="https://docs.rs/cxx/*/cxx/struct.CxxString.html"><code class="hljs">CxxString</code></a></strong>. See the link for
+documentation of the Rust API.</p>
+<h3 id="restrictions"><a class="header" href="#restrictions">Restrictions:</a></h3>
+<p>Rust code can never obtain a CxxString by value. C++'s string requires a move
+constructor and may hold internal pointers, which is not compatible with Rust's
+move behavior. Instead in Rust code we will only ever look at a CxxString
+through a reference or smart pointer, as in &amp;CxxString or Pin&lt;&amp;mut CxxString&gt;
+or UniquePtr&lt;CxxString&gt;.</p>
+<p>In order to construct a CxxString on the stack from Rust, you must use the
+<a href="https://docs.rs/cxx/*/cxx/macro.let_cxx_string.html"><code class="hljs">let_cxx_string!</code></a> macro which will pin the string properly. The code below
+uses this in one place, and the link covers the syntax.</p>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<p>This example uses C++17's std::variant to build a toy JSON type. JSON can hold
+various types including strings, and JSON's object type is a map with string
+keys. The example demonstrates Rust indexing into one of those maps.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-comment">// src/main.rs</span>
+
+<span class="hljs-keyword">use</span> cxx::let_cxx_string;
+
+<span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        include!(<span class="hljs-string">&quot;example/include/json.h&quot;</span>);
+
+        <span class="hljs-meta">#[cxx_name = <span class="hljs-meta-string">&quot;json&quot;</span>]</span>
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">Json</span></span>;
+        <span class="hljs-meta">#[cxx_name = <span class="hljs-meta-string">&quot;object&quot;</span>]</span>
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">Object</span></span>;
+
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">isNull</span></span>(<span class="hljs-keyword">self</span>: &amp;Json) -&gt; <span class="hljs-built_in">bool</span>;
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">isNumber</span></span>(<span class="hljs-keyword">self</span>: &amp;Json) -&gt; <span class="hljs-built_in">bool</span>;
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">isString</span></span>(<span class="hljs-keyword">self</span>: &amp;Json) -&gt; <span class="hljs-built_in">bool</span>;
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">isArray</span></span>(<span class="hljs-keyword">self</span>: &amp;Json) -&gt; <span class="hljs-built_in">bool</span>;
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">isObject</span></span>(<span class="hljs-keyword">self</span>: &amp;Json) -&gt; <span class="hljs-built_in">bool</span>;
+
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">getNumber</span></span>(<span class="hljs-keyword">self</span>: &amp;Json) -&gt; <span class="hljs-built_in">f64</span>;
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">getString</span></span>(<span class="hljs-keyword">self</span>: &amp;Json) -&gt; &amp;CxxString;
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">getArray</span></span>(<span class="hljs-keyword">self</span>: &amp;Json) -&gt; &amp;CxxVector&lt;Json&gt;;
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">getObject</span></span>(<span class="hljs-keyword">self</span>: &amp;Json) -&gt; &amp;Object;
+
+        <span class="hljs-meta">#[cxx_name = <span class="hljs-meta-string">&quot;at&quot;</span>]</span>
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">get</span></span>&lt;<span class="hljs-symbol">&#x27;a</span>&gt;(<span class="hljs-keyword">self</span>: &amp;<span class="hljs-symbol">&#x27;a</span> Object, key: &amp;CxxString) -&gt; &amp;<span class="hljs-symbol">&#x27;a</span> Json;
+
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">load_config</span></span>() -&gt; UniquePtr&lt;Json&gt;;
+    }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> config = ffi::load_config();
+
+    let_cxx_string!(key = <span class="hljs-string">&quot;name&quot;</span>);
+    <span class="hljs-built_in">println!</span>(<span class="hljs-string">&quot;{}&quot;</span>, config.getObject().get(&amp;key).getString());
+}</code></pre>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-comment">// include/json.h</span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">pragma</span> once</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;map&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;memory&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;string&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;variant&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;vector&gt;</span></span>
+
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">json</span> <span class="hljs-title">final</span> {</span>
+<span class="hljs-keyword">public</span>:
+  <span class="hljs-keyword">static</span> <span class="hljs-keyword">const</span> json null;
+  <span class="hljs-keyword">using</span> number = <span class="hljs-keyword">double</span>;
+  <span class="hljs-keyword">using</span> <span class="hljs-built_in">string</span> = <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span>;
+  <span class="hljs-keyword">using</span> <span class="hljs-built_in">array</span> = <span class="hljs-built_in">std</span>::<span class="hljs-built_in">vector</span>&lt;json&gt;;
+  <span class="hljs-keyword">using</span> object = <span class="hljs-built_in">std</span>::<span class="hljs-built_in">map</span>&lt;<span class="hljs-built_in">string</span>, json&gt;;
+
+  json() <span class="hljs-keyword">noexcept</span> = <span class="hljs-keyword">default</span>;
+  json(<span class="hljs-keyword">const</span> json &amp;) = <span class="hljs-keyword">default</span>;
+  json(json &amp;&amp;) = <span class="hljs-keyword">default</span>;
+  <span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span>... T&gt;
+  json(T &amp;&amp;...value) : value(<span class="hljs-built_in">std</span>::forward&lt;T&gt;(value)...) {}
+
+  <span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">isNull</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span></span>;
+  <span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">isNumber</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span></span>;
+  <span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">isString</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span></span>;
+  <span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">isArray</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span></span>;
+  <span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">isObject</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span></span>;
+
+  <span class="hljs-function">number <span class="hljs-title">getNumber</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span></span>;
+  <span class="hljs-function"><span class="hljs-keyword">const</span> <span class="hljs-built_in">string</span> &amp;<span class="hljs-title">getString</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span></span>;
+  <span class="hljs-function"><span class="hljs-keyword">const</span> <span class="hljs-built_in">array</span> &amp;<span class="hljs-title">getArray</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span></span>;
+  <span class="hljs-function"><span class="hljs-keyword">const</span> object &amp;<span class="hljs-title">getObject</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span></span>;
+
+<span class="hljs-keyword">private</span>:
+  <span class="hljs-built_in">std</span>::variant&lt;<span class="hljs-built_in">std</span>::monostate, number, <span class="hljs-built_in">string</span>, <span class="hljs-built_in">array</span>, object&gt; value;
+};
+
+<span class="hljs-keyword">using</span> object = json::object;
+
+<span class="hljs-function"><span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;json&gt; <span class="hljs-title">load_config</span><span class="hljs-params">()</span></span>;
+</code></pre>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-comment">// include/json.cc</span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;example/include/json.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;initializer_list&gt;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;utility&gt;</span></span>
+
+<span class="hljs-keyword">const</span> json json::null{};
+<span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">json::isNull</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::holds_alternative&lt;<span class="hljs-built_in">std</span>::monostate&gt;(value); }
+<span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">json::isNumber</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::holds_alternative&lt;number&gt;(value); }
+<span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">json::isString</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::holds_alternative&lt;<span class="hljs-built_in">string</span>&gt;(value); }
+<span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">json::isArray</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::holds_alternative&lt;<span class="hljs-built_in">array</span>&gt;(value); }
+<span class="hljs-function"><span class="hljs-keyword">bool</span> <span class="hljs-title">json::isObject</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::holds_alternative&lt;object&gt;(value); }
+<span class="hljs-function">json::number <span class="hljs-title">json::getNumber</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::get&lt;number&gt;(value); }
+<span class="hljs-function"><span class="hljs-keyword">const</span> json::<span class="hljs-built_in">string</span> &amp;<span class="hljs-title">json::getString</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::get&lt;<span class="hljs-built_in">string</span>&gt;(value); }
+<span class="hljs-function"><span class="hljs-keyword">const</span> json::<span class="hljs-built_in">array</span> &amp;<span class="hljs-title">json::getArray</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::get&lt;<span class="hljs-built_in">array</span>&gt;(value); }
+<span class="hljs-function"><span class="hljs-keyword">const</span> json::object &amp;<span class="hljs-title">json::getObject</span><span class="hljs-params">()</span> <span class="hljs-keyword">const</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::get&lt;object&gt;(value); }
+
+<span class="hljs-function"><span class="hljs-built_in">std</span>::<span class="hljs-built_in">unique_ptr</span>&lt;json&gt; <span class="hljs-title">load_config</span><span class="hljs-params">()</span> </span>{
+  <span class="hljs-keyword">return</span> <span class="hljs-built_in">std</span>::make_unique&lt;json&gt;(
+      <span class="hljs-built_in">std</span>::in_place_type&lt;json::object&gt;,
+      <span class="hljs-built_in">std</span>::<span class="hljs-built_in">initializer_list</span>&lt;<span class="hljs-built_in">std</span>::<span class="hljs-built_in">pair</span>&lt;<span class="hljs-keyword">const</span> <span class="hljs-built_in">std</span>::<span class="hljs-built_in">string</span>, json&gt;&gt;{
+          {<span class="hljs-string">&quot;name&quot;</span>, <span class="hljs-string">&quot;cxx-example&quot;</span>},
+          {<span class="hljs-string">&quot;edition&quot;</span>, <span class="hljs-number">2021.</span>},
+          {<span class="hljs-string">&quot;repository&quot;</span>, json::null}});
+}
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../binding/slice.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../binding/box.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../binding/slice.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../binding/box.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

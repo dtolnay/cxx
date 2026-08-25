@@ -1,0 +1,265 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Rust ❤️ C++</title>
+
+
+        <!-- Custom HTML head -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DG41MK6DDN"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-DG41MK6DDN', {anonymize_ip: true, cookie_domain: 'cxx.rs', cookie_flags: 'samesite=strict;secure'});
+        </script>
+
+        <meta name="description" content="CXX — safe interop between Rust and C++ by David Tolnay. This library provides a safe mechanism for calling C++ code from Rust and Rust code from C++.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css" disabled="true">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css" disabled="true">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="css/cxx.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    <meta property="og:image" content="https://cxx.rs/cxx.png"><meta property="og:site_name" content="CXX"><meta property="og:title" content="CXX — safe interop between Rust and C++"><meta name="twitter:image:src" content="https://cxx.rs/cxx.png"><meta name="twitter:site" content="@davidtolnay"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="CXX — safe interop between Rust and C++"></head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>const html = document.documentElement;
+html.classList.add('js');</script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list" style="display:none">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/dtolnay/cxx" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <div class="badges">
+<a href="https://github.com/dtolnay/cxx"><img src="https://img.shields.io/badge/github-8da0cb?style=for-the-badge&labelColor=555555&logo=github" alt="github" height="28" class="badge"></a><a href="https://crates.io/crates/cxx"><img src="https://img.shields.io/badge/crates.io-fc8d62?style=for-the-badge&labelColor=555555&logo=rust" alt="crates-io" height="28" class="badge"></a><a href="https://docs.rs/cxx"><img src="https://img.shields.io/badge/docs.rs-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" alt="docs-rs" height="28" class="badge"></a>
+</div>
+<h1 id="cxx--safe-interop-between-rust-and-c"><a class="header" href="#cxx--safe-interop-between-rust-and-c">CXX — safe interop between Rust and C++</a></h1>
+<p>This library provides a safe mechanism for calling C++ code from Rust and Rust
+code from C++. It carves out a regime of commonality where Rust and C++ are
+semantically very similar and guides the programmer to express their language
+boundary effectively within this regime. CXX fills in the low level stuff so
+that you get a safe binding, preventing the pitfalls of doing a foreign function
+interface over unsafe C-style signatures.</p>
+<div style="height:190px;width=718px;padding:44px 0 44px">
+<object type="image/svg+xml" data="overview.svg"></object>
+</div>
+<p>From a high level description of the language boundary, CXX uses static analysis
+of the types and function signatures to protect both Rust's and C++'s
+invariants. Then it uses a pair of code generators to implement the boundary
+efficiently on both sides together with any necessary static assertions for
+later in the build process to verify correctness.</p>
+<p>The resulting FFI bridge operates at zero or negligible overhead, i.e. no
+copying, no serialization, no memory allocation, no runtime checks needed.</p>
+<p>The FFI signatures are able to use native data structures from whichever side
+they please. In addition, CXX provides builtin bindings for key standard library
+types like strings, vectors, Box, unique_ptr, etc to expose an idiomatic API on
+those types to the other language.</p>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<p>In this example we are writing a Rust application that calls a C++ client of a
+large-file blobstore service. The blobstore supports a <code class="hljs">put</code> operation for a
+discontiguous buffer upload. For example we might be uploading snapshots of a
+circular buffer which would tend to consist of 2 pieces, or fragments of a file
+spread across memory for some other reason (like a rope data structure).</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;Rust&quot;</span> {
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">MultiBuf</span></span>;
+
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">next_chunk</span></span>(buf: &amp;<span class="hljs-keyword">mut</span> MultiBuf) -&gt; &amp;[<span class="hljs-built_in">u8</span>];
+    }
+
+    <span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        include!(<span class="hljs-string">&quot;example/include/blobstore.h&quot;</span>);
+
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">BlobstoreClient</span></span>;
+
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">new_blobstore_client</span></span>() -&gt; UniquePtr&lt;BlobstoreClient&gt;;
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">put</span></span>(<span class="hljs-keyword">self</span>: &amp;BlobstoreClient, buf: &amp;<span class="hljs-keyword">mut</span> MultiBuf) -&gt; <span class="hljs-built_in">Result</span>&lt;<span class="hljs-built_in">u64</span>&gt;;
+    }
+}</code></pre>
+<p>Now we simply provide Rust definitions of all the things in the <code class="hljs">extern "Rust"</code>
+block and C++ definitions of all the things in the <code class="hljs">extern "C++"</code> block, and get
+to call back and forth safely.</p>
+<p>The <a href="tutorial.html"><em><strong>Tutorial</strong></em></a> chapter walks through a fleshed out version of
+this blobstore example in full detail, including all of the Rust code and all of
+the C++ code. The code is also provided in runnable form in the <em>demo</em> directory
+of <a href="https://github.com/dtolnay/cxx">https://github.com/dtolnay/cxx</a>. To try it out, run <code class="hljs">cargo run</code> from that
+directory.</p>
+<ul>
+<li><a href="https://github.com/dtolnay/cxx/blob/master/demo/src/main.rs">demo/src/main.rs</a></li>
+<li><a href="https://github.com/dtolnay/cxx/blob/master/demo/include/blobstore.h">demo/include/blobstore.h</a></li>
+<li><a href="https://github.com/dtolnay/cxx/blob/master/demo/src/blobstore.cc">demo/src/blobstore.cc</a></li>
+</ul>
+<p>The key takeaway, which is enabled by the CXX library, is that the Rust code in
+main.rs is 100% ordinary safe Rust code working idiomatically with Rust types
+while the C++ code in blobstore.cc is 100% ordinary C++ code working
+idiomatically with C++ types. The Rust code feels like Rust and the C++ code
+feels like C++, not like C-style "FFI glue".</p>
+<br>
+<p><em><strong>Chapter outline:</strong> See the hamburger menu in the top left if you are on a
+small screen and it didn't open with a sidebar by default.</em></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+                            <a rel="next prefetch" href="concepts.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+                    <a rel="next prefetch" href="concepts.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

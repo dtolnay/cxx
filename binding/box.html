@@ -1,0 +1,305 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>rust::Box&lt;T&gt; — Rust ♡ C++</title>
+
+
+        <!-- Custom HTML head -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DG41MK6DDN"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-DG41MK6DDN', {anonymize_ip: true, cookie_domain: 'cxx.rs', cookie_flags: 'samesite=strict;secure'});
+        </script>
+
+        <meta name="description" content="CXX — safe interop between Rust and C++ by David Tolnay. This library provides a safe mechanism for calling C++ code from Rust and Rust code from C++.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="../css/cxx.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    <meta property="og:image" content="https://cxx.rs/cxx.png"><meta property="og:site_name" content="CXX"><meta property="og:title" content="CXX — safe interop between Rust and C++"><meta name="twitter:image:src" content="https://cxx.rs/cxx.png"><meta name="twitter:site" content="@davidtolnay"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="CXX — safe interop between Rust and C++"></head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>const html = document.documentElement;
+html.classList.add('js');</script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list" style="display:none">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/dtolnay/cxx" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="rustboxt"><a class="header" href="#rustboxt">rust::Box&lt;T&gt;</a></h1>
+<h3 id="public-api"><a class="header" href="#public-api">Public API:</a></h3>
+<pre><code class="hidelines=... hidelines hide-boring hljs"><span class="hljs-comment">// rust/cxx.h</span>
+<span class="boring">
+</span><span class="boring"><span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&lt;type_traits&gt;</span></span>
+</span><span class="boring">
+</span><span class="boring"><span class="hljs-keyword">namespace</span> rust {
+</span>
+<span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> T&gt;
+<span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Box</span> <span class="hljs-title">final</span> {</span>
+<span class="hljs-keyword">public</span>:
+  <span class="hljs-keyword">using</span> element_type = T;
+  <span class="hljs-keyword">using</span> const_pointer =
+      <span class="hljs-keyword">typename</span> <span class="hljs-built_in">std</span>::add_pointer&lt;<span class="hljs-keyword">typename</span> <span class="hljs-built_in">std</span>::add_const&lt;T&gt;::type&gt;::type;
+  <span class="hljs-keyword">using</span> pointer = <span class="hljs-keyword">typename</span> <span class="hljs-built_in">std</span>::add_pointer&lt;T&gt;::type;
+
+  Box(Box &amp;&amp;) <span class="hljs-keyword">noexcept</span>;
+  ~Box() <span class="hljs-keyword">noexcept</span>;
+
+  <span class="hljs-function"><span class="hljs-keyword">explicit</span> <span class="hljs-title">Box</span><span class="hljs-params">(<span class="hljs-keyword">const</span> T &amp;)</span></span>;
+  <span class="hljs-function"><span class="hljs-keyword">explicit</span> <span class="hljs-title">Box</span><span class="hljs-params">(T &amp;&amp;)</span></span>;
+
+  Box &amp;<span class="hljs-keyword">operator</span>=(Box &amp;&amp;) &amp; <span class="hljs-keyword">noexcept</span>;
+
+  <span class="hljs-keyword">const</span> T *<span class="hljs-keyword">operator</span>-&gt;() <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span>;
+  <span class="hljs-keyword">const</span> T &amp;<span class="hljs-keyword">operator</span>*() <span class="hljs-keyword">const</span> <span class="hljs-keyword">noexcept</span>;
+  T *<span class="hljs-keyword">operator</span>-&gt;() <span class="hljs-keyword">noexcept</span>;
+  T &amp;<span class="hljs-keyword">operator</span>*() <span class="hljs-keyword">noexcept</span>;
+
+  <span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span>... Fields&gt;
+  <span class="hljs-function"><span class="hljs-keyword">static</span> Box <span class="hljs-title">in_place</span><span class="hljs-params">(Fields &amp;&amp;...)</span></span>;
+
+  <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">swap</span><span class="hljs-params">(Box &amp;)</span> <span class="hljs-keyword">noexcept</span></span>;
+
+  <span class="hljs-comment">// Important: requires that `raw` came from an into_raw call. Do not</span>
+  <span class="hljs-comment">// pass a pointer from `new` or any other source.</span>
+  <span class="hljs-function"><span class="hljs-keyword">static</span> Box <span class="hljs-title">from_raw</span><span class="hljs-params">(T *)</span> <span class="hljs-keyword">noexcept</span></span>;
+
+  <span class="hljs-function">T *<span class="hljs-title">into_raw</span><span class="hljs-params">()</span> <span class="hljs-keyword">noexcept</span></span>;
+};
+<span class="boring">
+</span><span class="boring">} <span class="hljs-comment">// namespace rust</span>
+</span></code></pre>
+<h3 id="restrictions"><a class="header" href="#restrictions">Restrictions:</a></h3>
+<p>Box&lt;T&gt; does not support T being an opaque C++ type. You should use
+<a href="uniqueptr.html">UniquePtr&lt;T&gt;</a> or <a href="sharedptr.html">SharedPtr&lt;T&gt;</a> instead for
+transferring ownership of opaque C++ types on the language boundary.</p>
+<p>If T is an opaque Rust type, the Rust type is required to be <a href="https://doc.rust-lang.org/std/marker/trait.Sized.html">Sized</a> i.e. size
+known at compile time. In the future we may introduce support for dynamically
+sized opaque Rust types.</p>
+<h2 id="example"><a class="header" href="#example">Example</a></h2>
+<p>This program uses a Box to pass ownership of some opaque piece of Rust state
+over to C++ and then back to a Rust callback, which is a useful pattern for
+implementing <a href="../async.html">async functions over FFI</a>.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-comment">// src/main.rs</span>
+
+<span class="hljs-keyword">use</span> std::io::Write;
+
+<span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;Rust&quot;</span> {
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">File</span></span>;
+    }
+
+    <span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        include!(<span class="hljs-string">&quot;example/include/example.h&quot;</span>);
+
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">f</span></span>(
+            callback: <span class="hljs-function"><span class="hljs-keyword">fn</span></span>(<span class="hljs-built_in">Box</span>&lt;File&gt;, fst: &amp;<span class="hljs-built_in">str</span>, snd: &amp;<span class="hljs-built_in">str</span>),
+            out: <span class="hljs-built_in">Box</span>&lt;File&gt;,
+        );
+    }
+}
+
+<span class="hljs-keyword">pub</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">File</span></span>(std::fs::File);
+
+<span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> out = std::fs::File::create(<span class="hljs-string">&quot;example.log&quot;</span>).unwrap();
+
+    ffi::f(
+        |<span class="hljs-keyword">mut</span> out, fst, snd| { <span class="hljs-keyword">let</span> _ = <span class="hljs-built_in">write!</span>(out.<span class="hljs-number">0</span>, <span class="hljs-string">&quot;{}{}\n&quot;</span>, fst, snd); },
+        <span class="hljs-built_in">Box</span>::new(File(out)),
+    );
+}</code></pre>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-comment">// include/example.h</span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">pragma</span> once</span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;example/src/main.rs.h&quot;</span></span>
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;rust/cxx.h&quot;</span></span>
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">f</span><span class="hljs-params">(rust::Fn&lt;<span class="hljs-keyword">void</span>(rust::Box&lt;File&gt;, rust::Str, rust::Str)&gt; callback,
+       rust::Box&lt;File&gt; out)</span></span>;
+</code></pre>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-comment">// include/example.cc</span>
+
+<span class="hljs-meta">#<span class="hljs-meta-keyword">include</span> <span class="hljs-meta-string">&quot;example/include/example.h&quot;</span></span>
+
+<span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">f</span><span class="hljs-params">(rust::Fn&lt;<span class="hljs-keyword">void</span>(rust::Box&lt;File&gt;, rust::Str, rust::Str)&gt; callback,
+       rust::Box&lt;File&gt; out)</span> </span>{
+  callback(<span class="hljs-built_in">std</span>::move(out), <span class="hljs-string">&quot;fearless&quot;</span>, <span class="hljs-string">&quot;concurrency&quot;</span>);
+}
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../binding/cxxstring.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../binding/uniqueptr.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../binding/cxxstring.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../binding/uniqueptr.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Attributes — Rust ♡ C++</title>
+
+
+        <!-- Custom HTML head -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DG41MK6DDN"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-DG41MK6DDN', {anonymize_ip: true, cookie_domain: 'cxx.rs', cookie_flags: 'samesite=strict;secure'});
+        </script>
+
+        <meta name="description" content="CXX — safe interop between Rust and C++ by David Tolnay. This library provides a safe mechanism for calling C++ code from Rust and Rust code from C++.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css" disabled="true">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css" disabled="true">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="css/cxx.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    <meta property="og:image" content="https://cxx.rs/cxx.png"><meta property="og:site_name" content="CXX"><meta property="og:title" content="CXX — safe interop between Rust and C++"><meta name="twitter:image:src" content="https://cxx.rs/cxx.png"><meta name="twitter:site" content="@davidtolnay"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="CXX — safe interop between Rust and C++"></head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>const html = document.documentElement;
+html.classList.add('js');</script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list" style="display:none">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/dtolnay/cxx" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="attributes"><a class="header" href="#attributes">Attributes</a></h1>
+<h2 id="namespace"><a class="header" href="#namespace">namespace</a></h2>
+<p>The top-level cxx::bridge attribute macro takes an optional <code class="hljs">namespace</code> argument
+to control the C++ namespace into which to emit extern Rust items and the
+namespace in which to expect to find the extern C++ items.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-meta">#[cxx::bridge(namespace = <span class="hljs-meta-string">&quot;path::of::my::company&quot;</span>)]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;Rust&quot;</span> {
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">MyType</span></span>;  <span class="hljs-comment">// emitted to path::of::my::company::MyType</span>
+    }
+
+    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">TheirType</span></span>;  <span class="hljs-comment">// refers to path::of::my::company::TheirType</span>
+    }
+}</code></pre>
+<p>Additionally, a <code class="hljs">#[namespace = "..."]</code> attribute may be used inside the bridge
+module on any extern block or individual item. An item will inherit the
+namespace specified on its surrounding extern block if any, otherwise the
+namespace specified with the top level cxx::bridge attribute if any, otherwise
+the global namespace.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-meta">#[cxx::bridge(namespace = <span class="hljs-meta-string">&quot;third_priority&quot;</span>)]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-meta">#[namespace = <span class="hljs-meta-string">&quot;second_priority&quot;</span>]</span>
+    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;Rust&quot;</span> {
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">f</span></span>();
+
+        <span class="hljs-meta">#[namespace = <span class="hljs-meta-string">&quot;first_priority&quot;</span>]</span>
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">g</span></span>();
+    }
+
+    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;Rust&quot;</span> {
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">h</span></span>();
+    }
+}</code></pre>
+<p>The above would result in functions <code class="hljs">::second_priority::f</code>,
+<code class="hljs">::first_priority::g</code>, <code class="hljs">::third_priority::h</code>.</p>
+<h2 id="rust_name-cxx_name"><a class="header" href="#rust_name-cxx_name">rust_name, cxx_name</a></h2>
+<p>Sometimes you want the Rust name of a function or type to differ from its C++
+name. Importantly, this enables binding multiple overloads of the same C++
+function name using distinct Rust names.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        <span class="hljs-meta">#[rust_name = <span class="hljs-meta-string">&quot;i32_overloaded_function&quot;</span>]</span>
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">cOverloadedFunction</span></span>(x: <span class="hljs-built_in">i32</span>) -&gt; <span class="hljs-built_in">String</span>;
+        <span class="hljs-meta">#[rust_name = <span class="hljs-meta-string">&quot;str_overloaded_function&quot;</span>]</span>
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">cOverloadedFunction</span></span>(x: &amp;<span class="hljs-built_in">str</span>) -&gt; <span class="hljs-built_in">String</span>;
+    }
+}</code></pre>
+<p>The <code class="hljs">#[rust_name = "..."]</code> attribute replaces the name that Rust should use for
+this function, and an analogous <code class="hljs">#[cxx_name = "..."]</code> attribute replaces the
+name that C++ should use.</p>
+<p>Either of the two attributes may be used on extern "Rust" as well as extern
+"C++" functions, according to which one you find clearer in context.</p>
+<p>The same attribute works for renaming functions, opaque types, shared
+structs and enums, and enum variants.</p>
+<h2 id="self"><a class="header" href="#self">Self</a></h2>
+<p>Indicates the name of the type in which to place a <a href="extern-rust.html#associated-functions">Rust associated function</a> or
+<a href="extern-c++.html#functions-and-member-functions">C++ static member function</a>.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;Rust&quot;</span> {
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">RustType</span></span>;
+
+        <span class="hljs-meta">#[Self = <span class="hljs-meta-string">&quot;RustType&quot;</span>]</span>
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">member</span></span>();  <span class="hljs-comment">// callable from C++ as `RustType::member()`</span>
+    }
+
+    <span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">CppType</span></span>;
+
+        <span class="hljs-meta">#[Self = <span class="hljs-meta-string">&quot;CppType&quot;</span>]</span>
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">member</span></span>();  <span class="hljs-comment">// callable from Rust as `CppType::member()`</span>
+    }
+}</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="shared.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="async.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="shared.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="async.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

@@ -1,0 +1,412 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Shared types — Rust ♡ C++</title>
+
+
+        <!-- Custom HTML head -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DG41MK6DDN"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-DG41MK6DDN', {anonymize_ip: true, cookie_domain: 'cxx.rs', cookie_flags: 'samesite=strict;secure'});
+        </script>
+
+        <meta name="description" content="CXX — safe interop between Rust and C++ by David Tolnay. This library provides a safe mechanism for calling C++ code from Rust and Rust code from C++.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css" disabled="true">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css" disabled="true">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="css/cxx.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    <meta property="og:image" content="https://cxx.rs/cxx.png"><meta property="og:site_name" content="CXX"><meta property="og:title" content="CXX — safe interop between Rust and C++"><meta name="twitter:image:src" content="https://cxx.rs/cxx.png"><meta name="twitter:site" content="@davidtolnay"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="CXX — safe interop between Rust and C++"></head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>const html = document.documentElement;
+html.classList.add('js');</script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list" style="display:none">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/dtolnay/cxx" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="shared-types"><a class="header" href="#shared-types">Shared types</a></h1>
+<p>Shared types enable <em>both</em> languages to have visibility into the internals of a
+type. This is in contrast to opaque Rust types and opaque C++ types, for which
+only one side gets to manipulate the internals.</p>
+<p>Unlike opaque types, the FFI bridge is allowed to pass and return shared types
+by value.</p>
+<p>The order in which shared types are written is not important. C++ is order
+sensitive but CXX will topologically sort and forward-declare your types as
+necessary.</p>
+<h2 id="shared-structs-and-enums"><a class="header" href="#shared-structs-and-enums">Shared structs and enums</a></h2>
+<p>For enums, only C-like a.k.a. unit variants are currently supported.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">PlayingCard</span></span> {
+        suit: Suit,
+        value: <span class="hljs-built_in">u8</span>,  <span class="hljs-comment">// A=1, J=11, Q=12, K=13</span>
+    }
+
+    <span class="hljs-class"><span class="hljs-keyword">enum</span> <span class="hljs-title">Suit</span></span> {
+        Clubs,
+        Diamonds,
+        Hearts,
+        Spades,
+    }
+
+    <span class="hljs-keyword">unsafe</span> <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">deck</span></span>() -&gt; <span class="hljs-built_in">Vec</span>&lt;PlayingCard&gt;;
+        <span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">sort</span></span>(cards: &amp;<span class="hljs-keyword">mut</span> <span class="hljs-built_in">Vec</span>&lt;PlayingCard&gt;);
+    }
+}</code></pre>
+<h2 id="the-generated-data-structures"><a class="header" href="#the-generated-data-structures">The generated data structures</a></h2>
+<p>Shared structs compile to an aggregate-initialization compatible C++ struct.</p>
+<p>Shared enums compile to a C++ <code class="hljs">enum class</code> with a sufficiently sized integral
+base type decided by CXX.</p>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-comment">// generated header</span>
+
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">PlayingCard</span> <span class="hljs-title">final</span> {</span>
+  Suit suit;
+  <span class="hljs-keyword">uint8_t</span> value;
+};
+
+<span class="hljs-keyword">enum</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Suit</span> :</span> <span class="hljs-keyword">uint8_t</span> {
+  Clubs = <span class="hljs-number">0</span>,
+  Diamonds = <span class="hljs-number">1</span>,
+  Hearts = <span class="hljs-number">2</span>,
+  Spades = <span class="hljs-number">3</span>,
+};
+</code></pre>
+<p>Because it is not UB in C++ for an <code class="hljs">enum class</code> to hold a value different from
+all of the listed variants, we use a Rust representation for shared enums that
+is compatible with this. The API you'll get is something like:</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-meta">#[derive(Copy, Clone, PartialEq, Eq)]</span>
+<span class="hljs-meta">#[repr(transparent)]</span>
+<span class="hljs-keyword">pub</span> <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Suit</span></span> {
+    <span class="hljs-keyword">pub</span> repr: <span class="hljs-built_in">u8</span>,
+}
+<span class="hljs-meta">#[allow(non_upper_case_globals)]</span>
+<span class="hljs-keyword">impl</span> Suit {
+    <span class="hljs-keyword">pub</span> <span class="hljs-keyword">const</span> Clubs: <span class="hljs-keyword">Self</span> = Suit { repr: <span class="hljs-number">0</span> };
+    <span class="hljs-keyword">pub</span> <span class="hljs-keyword">const</span> Diamonds: <span class="hljs-keyword">Self</span> = Suit { repr: <span class="hljs-number">1</span> };
+    <span class="hljs-keyword">pub</span> <span class="hljs-keyword">const</span> Hearts: <span class="hljs-keyword">Self</span> = Suit { repr: <span class="hljs-number">2</span> };
+    <span class="hljs-keyword">pub</span> <span class="hljs-keyword">const</span> Spades: <span class="hljs-keyword">Self</span> = Suit { repr: <span class="hljs-number">3</span> };
+}</code></pre>
+<p>Notice you're free to treat the enum as an integer in Rust code via the public
+<code class="hljs">repr</code> field.</p>
+<p>Pattern matching with <code class="hljs">match</code> still works but will require you to write wildcard
+arms to handle the situation of an enum value that is not one of the listed
+variants.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-function"><span class="hljs-keyword">fn</span> <span class="hljs-title">main</span></span>() {
+    <span class="hljs-keyword">let</span> suit: Suit = <span class="hljs-comment">/*...*/</span>;
+    <span class="hljs-keyword">match</span> suit {
+        Suit::Clubs =&gt; ...,
+        Suit::Diamonds =&gt; ...,
+        Suit::Hearts =&gt; ...,
+        Suit::Spades =&gt; ...,
+        _ =&gt; ...,  <span class="hljs-comment">// fallback arm</span>
+    }
+}</code></pre>
+<p>If a shared struct has generic lifetime parameters, the lifetimes are simply not
+represented on the C++ side. C++ code will need care when working with borrowed
+data (as usual in C++).</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Borrowed</span></span>&lt;<span class="hljs-symbol">&#x27;a</span>&gt; {
+        flags: &amp;<span class="hljs-symbol">&#x27;a</span> [&amp;<span class="hljs-symbol">&#x27;a</span> <span class="hljs-built_in">str</span>],
+    }
+}</code></pre>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-comment">// generated header</span>
+
+<span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">Borrowed</span> <span class="hljs-title">final</span> {</span>
+  rust::Slice&lt;<span class="hljs-keyword">const</span> rust::Str&gt; flags;
+};
+</code></pre>
+<h2 id="enum-discriminants"><a class="header" href="#enum-discriminants">Enum discriminants</a></h2>
+<p>You may provide explicit discriminants for some or all of the enum variants, in
+which case those numbers will be propagated into the generated C++ <code class="hljs">enum class</code>.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-class"><span class="hljs-keyword">enum</span> <span class="hljs-title">SmallPrime</span></span> {
+        Two = <span class="hljs-number">2</span>,
+        Three = <span class="hljs-number">3</span>,
+        Five = <span class="hljs-number">5</span>,
+        Seven = <span class="hljs-number">7</span>,
+    }
+}</code></pre>
+<p>Variants without an explicit discriminant are assigned the previous discriminant
+plus 1. If the first variant has not been given an explicit discriminant, it is
+assigned discriminant 0.</p>
+<p>By default CXX represents your enum using the smallest integer type capable of
+fitting all the discriminants (whether explicit or implicit). If you need a
+different representation for reasons, provide a <code class="hljs">repr</code> attribute.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-meta">#[repr(i32)]</span>
+    <span class="hljs-class"><span class="hljs-keyword">enum</span> <span class="hljs-title">Enum</span></span> {
+        Zero,
+        One,
+        Five = <span class="hljs-number">5</span>,
+        Six,
+    }
+}</code></pre>
+<pre><code class="hidelines hide-boring hljs"><span class="hljs-comment">// generated header</span>
+
+<span class="hljs-keyword">enum</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Enum</span> :</span> <span class="hljs-keyword">int32_t</span> {
+  Zero = <span class="hljs-number">0</span>,
+  One = <span class="hljs-number">1</span>,
+  Five = <span class="hljs-number">5</span>,
+  Six = <span class="hljs-number">6</span>,
+};
+</code></pre>
+<h2 id="extern-enums"><a class="header" href="#extern-enums">Extern enums</a></h2>
+<p>If you need to interoperate with an already existing enum for which an existing
+C++ definition is the source of truth, make sure that definition is provided by
+some header in the bridge and then declare your enum <em>additionally</em> as an extern
+C++ type.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-class"><span class="hljs-keyword">enum</span> <span class="hljs-title">Enum</span></span> {
+        Yes,
+        No,
+    }
+
+    <span class="hljs-keyword">extern</span> <span class="hljs-string">&quot;C++&quot;</span> {
+        include!(<span class="hljs-string">&quot;path/to/the/header.h&quot;</span>);
+        <span class="hljs-class"><span class="hljs-keyword">type</span> <span class="hljs-title">Enum</span></span>;
+    }
+}</code></pre>
+<p>CXX will recognize this pattern and, instead of generating a C++ definition of
+the enum, will instead generate C++ static assertions asserting that the
+variants and discriminant values and integer representation written in Rust all
+correctly match the existing C++ enum definition.</p>
+<p>Extern enums support all the same features as ordinary shared enums (explicit
+discriminants, repr). Again, CXX will static assert that all of those things you
+wrote are correct.</p>
+<h2 id="derives"><a class="header" href="#derives">Derives</a></h2>
+<p>The following standard traits are supported in <code class="hljs">derive(...)</code> within the CXX
+bridge module.</p>
+<ul>
+<li><code class="hljs">Clone</code></li>
+<li><code class="hljs">Copy</code></li>
+<li><code class="hljs">Debug</code></li>
+<li><code class="hljs">Default</code></li>
+<li><code class="hljs">Eq</code></li>
+<li><code class="hljs">Hash</code></li>
+<li><code class="hljs">Ord</code></li>
+<li><code class="hljs">PartialEq</code></li>
+<li><code class="hljs">PartialOrd</code></li>
+<li><code class="hljs">BitAnd</code> (enums only)</li>
+<li><code class="hljs">BitOr</code> (enums only)</li>
+<li><code class="hljs">BitXor</code> (enums only)</li>
+</ul>
+<p>Note that shared enums automatically always come with impls of <code class="hljs">Copy</code>, <code class="hljs">Clone</code>,
+<code class="hljs">Eq</code>, and <code class="hljs">PartialEq</code>, so you're free to omit those derives on an enum.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-meta">#[derive(Clone, Debug, Hash)]</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ExampleStruct</span></span> {
+        x: <span class="hljs-built_in">u32</span>,
+        s: <span class="hljs-built_in">String</span>,
+    }
+
+    <span class="hljs-meta">#[derive(Hash, Ord, PartialOrd)]</span>
+    <span class="hljs-class"><span class="hljs-keyword">enum</span> <span class="hljs-title">ExampleEnum</span></span> {
+        Yes,
+        No,
+    }
+}</code></pre>
+<p>The derives naturally apply to <em>both</em> the Rust data type <em>and</em> the corresponding
+C++ data type:</p>
+<ul>
+<li><code class="hljs">Hash</code> gives you a specialization of <a href="https://en.cppreference.com/w/cpp/utility/hash"><code class="hljs">template &lt;&gt; struct std::hash&lt;T&gt;</code></a> in C++</li>
+<li><code class="hljs">PartialEq</code> produces <code class="hljs">operator==</code> and <code class="hljs">operator!=</code></li>
+<li><code class="hljs">PartialOrd</code> produces <code class="hljs">operator&lt;</code>, <code class="hljs">operator&lt;=</code>, <code class="hljs">operator&gt;</code>, <code class="hljs">operator&gt;=</code></li>
+<li><code class="hljs">BitAnd</code> produces <code class="hljs">operator&amp;</code></li>
+<li><code class="hljs">BitOr</code> produces <code class="hljs">operator|</code></li>
+<li><code class="hljs">BitXor</code> produces <code class="hljs">operator^</code></li>
+</ul>
+<h2 id="alignment"><a class="header" href="#alignment">Alignment</a></h2>
+<p>The attribute <code class="hljs">repr(align(…))</code> sets a minimum required alignment for a shared
+struct. The alignment value must be a power of two in the range 2<sup>0</sup> to
+2<sup>13</sup>.</p>
+<p>This turns into an <a href="https://en.cppreference.com/w/cpp/language/alignas.html"><code class="hljs">alignas</code></a> specifier in C++.</p>
+<pre><code class="noplayground hidelines hide-boring hljs"><span class="hljs-meta">#[cxx::bridge]</span>
+<span class="hljs-keyword">mod</span> ffi {
+    <span class="hljs-meta">#[repr(align(4))]</span>
+    <span class="hljs-class"><span class="hljs-keyword">struct</span> <span class="hljs-title">ExampleStruct</span></span> {
+        b: [<span class="hljs-built_in">u8</span>; <span class="hljs-number">4</span>],
+    }
+}</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="extern-c++.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="attributes.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="extern-c++.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="attributes.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

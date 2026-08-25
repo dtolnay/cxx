@@ -1,0 +1,248 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Built-in bindings — Rust ♡ C++</title>
+
+
+        <!-- Custom HTML head -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-DG41MK6DDN"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-DG41MK6DDN', {anonymize_ip: true, cookie_domain: 'cxx.rs', cookie_flags: 'samesite=strict;secure'});
+        </script>
+
+        <meta name="description" content="CXX — safe interop between Rust and C++ by David Tolnay. This library provides a safe mechanism for calling C++ code from Rust and Rust code from C++.">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="tomorrow-night.css" disabled="true">
+        <link rel="stylesheet" id="ayu-highlight-css" href="ayu-highlight.css" disabled="true">
+
+        <!-- Custom theme stylesheets -->
+        <link rel="stylesheet" href="css/cxx.css">
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc.js"></script>
+    <meta property="og:image" content="https://cxx.rs/cxx.png"><meta property="og:site_name" content="CXX"><meta property="og:title" content="CXX — safe interop between Rust and C++"><meta name="twitter:image:src" content="https://cxx.rs/cxx.png"><meta name="twitter:site" content="@davidtolnay"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="CXX — safe interop between Rust and C++"></head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>const html = document.documentElement;
+html.classList.add('js');</script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list" style="display:none">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <a href="https://github.com/dtolnay/cxx" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="built-in-bindings-reference"><a class="header" href="#built-in-bindings-reference">Built-in bindings reference</a></h1>
+<p>In addition to all the primitive types (i32 &lt;=&gt; int32_t), the following
+common types may be used in the fields of shared structs and the arguments and
+returns of extern functions.</p>
+<br>
+<table>
+<tr><th>name in Rust</th><th>name in C++</th><th>restrictions</th></tr>
+<tr><td style="padding:3px 6px">String</td><td style="padding:3px 6px"><b><a href="binding/string.html">rust::String</a></b></td><td style="padding:3px 6px"></td></tr>
+<tr><td style="padding:3px 6px">&amp;str</td><td style="padding:3px 6px"><b><a href="binding/str.html">rust::Str</a></b></td><td style="padding:3px 6px"></td></tr>
+<tr><td style="padding:3px 6px">&amp;[T]</td><td style="padding:3px 6px"><b><a href="binding/slice.html">rust::Slice&lt;const&nbsp;T&gt;</a></b></td><td style="padding:3px 6px"><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
+<tr><td style="padding:3px 6px">&amp;mut [T]</td><td style="padding:3px 6px"><b><a href="binding/slice.html">rust::Slice&lt;T&gt;</a></b></td><td style="padding:3px 6px"><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
+<tr><td style="padding:3px 6px"><b><a href="binding/cxxstring.html">CxxString</a></b></td><td style="padding:3px 6px">std::string</td><td style="padding:3px 6px"><sup><i>cannot be passed by value</i></sup></td></tr>
+<tr><td style="padding:3px 6px">Box&lt;T&gt;</td><td style="padding:3px 6px"><b><a href="binding/box.html">rust::Box&lt;T&gt;</a></b></td><td style="padding:3px 6px"><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
+<tr><td style="padding:3px 6px"><b><a href="binding/uniqueptr.html">UniquePtr&lt;T&gt;</a></b></td><td style="padding:3px 6px">std::unique_ptr&lt;T&gt;</td><td style="padding:3px 6px"><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
+<tr><td style="padding:3px 6px"><b><a href="binding/sharedptr.html">SharedPtr&lt;T&gt;</a></b></td><td style="padding:3px 6px">std::shared_ptr&lt;T&gt;</td><td style="padding:3px 6px"><sup><i>cannot hold opaque Rust type</i></sup></td></tr>
+<tr><td style="padding:3px 6px">[T; N]</td><td style="padding:3px 6px">std::array&lt;T, N&gt;</td><td style="padding:3px 6px"><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
+<tr><td style="padding:3px 6px">Vec&lt;T&gt;</td><td style="padding:3px 6px"><b><a href="binding/vec.html">rust::Vec&lt;T&gt;</a></b></td><td style="padding:3px 6px"><sup><i>cannot hold opaque C++ type</i></sup></td></tr>
+<tr><td style="padding:3px 6px"><b><a href="binding/cxxvector.html">CxxVector&lt;T&gt;</a></b></td><td style="padding:3px 6px">std::vector&lt;T&gt;</td><td style="padding:3px 6px"><sup><i>cannot be passed by value, cannot hold opaque Rust type</i></sup></td></tr>
+<tr><td style="padding:3px 6px"><b><a href="binding/rawptr.html">*mut T, *const T</a></b></td><td style="padding:3px 6px">T*, const T*</td><td style="padding:3px 6px"><sup><i>fn with a raw pointer argument must be declared unsafe to call</i></sup></td></tr>
+<tr><td style="padding:3px 6px">fn(T, U) -&gt; V</td><td style="padding:3px 6px"><b><a href="binding/fn.html">rust::Fn&lt;V(T, U)&gt;</a></b></td><td style="padding:3px 6px"><sup><i>only passing from Rust to C++ is implemented so far</i></sup></td></tr>
+<tr><td style="padding:3px 6px"><b><a href="binding/result.html">Result&lt;T&gt;</a></b></td><td style="padding:3px 6px">throw/catch</td><td style="padding:3px 6px"><sup><i>allowed as return type only</i></sup></td></tr>
+</table>
+<br>
+<p>The C++ API of the <code class="hljs">rust</code> namespace is defined by the <em>include/cxx.h</em> file in
+the CXX GitHub repo. You will need to include this header in your C++ code when
+working with those types. <strong>When using Cargo and the cxx-build crate, the header
+is made available to you at <code class="hljs">#include "rust/cxx.h"</code>.</strong></p>
+<p>The <code class="hljs">rust</code> namespace additionally provides lowercase type aliases of all the
+types mentioned in the table, for use in codebases preferring that style. For
+example <code class="hljs">rust::String</code>, <code class="hljs">rust::Vec</code> may alternatively be written <code class="hljs">rust::string</code>,
+<code class="hljs">rust::vec</code> etc.</p>
+<h2 id="pending-bindings"><a class="header" href="#pending-bindings">Pending bindings</a></h2>
+<p>The following types are intended to be supported "soon" but are just not
+implemented yet. I don't expect any of these to be hard to make work but it's a
+matter of designing a nice API for each in its non-native language.</p>
+<br>
+<table>
+<tr><th>name in Rust</th><th>name in C++</th></tr>
+<tr><td>BTreeMap&lt;K, V&gt;</td><td><sup><i>tbd</i></sup></td></tr>
+<tr><td>HashMap&lt;K, V&gt;</td><td><sup><i>tbd</i></sup></td></tr>
+<tr><td>Arc&lt;T&gt;</td><td><sup><i>tbd</i></sup></td></tr>
+<tr><td>Option&lt;T&gt;</td><td><sup><i>tbd</i></sup></td></tr>
+<tr><td><sup><i>tbd</i></sup></td><td>std::map&lt;K, V&gt;</td></tr>
+<tr><td><sup><i>tbd</i></sup></td><td>std::unordered_map&lt;K, V&gt;</td></tr>
+</table>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="binding/result.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="binding/string.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="binding/result.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="binding/string.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
