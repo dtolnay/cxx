@@ -347,6 +347,11 @@ Str::Str(const char *s, std::size_t len) {
           len);
 }
 
+#if __cplusplus >= 201703L
+Str::Str(std::string_view sv) : Str(sv.data(), sv.size()) {
+}
+#endif
+
 Str::operator std::string() const {
   return std::string(this->data(), this->size());
 }

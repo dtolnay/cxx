@@ -910,6 +910,11 @@ extern "C" const char *cxx_run_test() noexcept {
   swap(cstr, other_cstr);
   ASSERT(cstr == "foo");
   ASSERT(other_cstr == "test");
+#if __cplusplus >= 201703L
+  std::string_view sv = "string view test";
+  rust::Str from_sv(sv);
+  ASSERT(from_sv == "string view test");
+#endif
 
   // Auto because u8"..." is `const char*` before C++20, and `const char8_t*` since.
   const auto *utf8_literal = u8"Test string";
