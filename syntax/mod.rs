@@ -154,6 +154,8 @@ pub(crate) struct ExternFn {
     pub sig: Signature,
     pub semi_token: Token![;],
     pub trusted: bool,
+    #[cfg_attr(proc_macro, expect(dead_code))]
+    pub cxx_return_type: Option<String>,
 }
 
 pub(crate) struct TypeAlias {

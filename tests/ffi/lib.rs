@@ -64,6 +64,7 @@ pub mod ffi {
     }
 
     #[namespace = "A"]
+    #[derive(Debug, PartialEq)]
     enum AEnum {
         AAVal,
         ABVal = 2020,
@@ -234,6 +235,9 @@ pub mod ffi {
         fn cOverloadedFunction(x: i32) -> String;
         #[rust_name = "str_overloaded_function"]
         fn cOverloadedFunction(x: &str) -> String;
+
+        #[cxx_return_type = "AEnumCxx"]
+        fn type_conversion() -> AEnum;
 
         #[namespace = "other"]
         fn ns_c_take_ns_shared(shared: AShared);
