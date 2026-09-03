@@ -27,9 +27,9 @@ impl<'a> Types<'a> {
             | TypeQuery::SharedPtr
             | TypeQuery::WeakPtr
             | TypeQuery::CxxVector
-            | TypeQuery::Void => false,
-            TypeQuery::Ref(_)
-            | TypeQuery::Str
+            | TypeQuery::Void
+            | TypeQuery::Ref(_) => false,
+            TypeQuery::Str
             | TypeQuery::Fn
             | TypeQuery::SliceRef
             | TypeQuery::Ptr(_) => true,
