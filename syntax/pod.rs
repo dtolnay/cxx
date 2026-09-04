@@ -29,10 +29,7 @@ impl<'a> Types<'a> {
             | TypeQuery::CxxVector
             | TypeQuery::Void
             | TypeQuery::Ref(_) => false,
-            TypeQuery::Str
-            | TypeQuery::Fn
-            | TypeQuery::SliceRef
-            | TypeQuery::Ptr(_) => true,
+            TypeQuery::Str | TypeQuery::Fn | TypeQuery::SliceRef | TypeQuery::Ptr(_) => true,
             TypeQuery::Array(array) => self.is_guaranteed_pod(&array.inner),
         }
     }
