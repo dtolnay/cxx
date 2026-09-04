@@ -29,7 +29,7 @@ fn test_unique_ptr_of_incomplete_foward_declared_pointee() {
 
 /// This is a regression test for returning a struct with reference members
 /// across extern "C" without triggering Clang's `-Wreturn-type-c-linkage`. See
-/// also: https://github.com/dtolnay/cxx/issues/1753
+/// also: <https://github.com/dtolnay/cxx/issues/1753>
 ///
 /// Note that the original repro required explicitly opting into extra C/C++
 /// warnings (as already done by `.github/workflows/ci.yml`):
