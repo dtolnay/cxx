@@ -900,7 +900,11 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
     }
     writeln!(out, " {{");
     write!(out, "  ");
-    write_return_type(out, &efn.ret);
+    if let Some(ref cxx_return_type) = efn.cxx_return_type {
+        write!(out, "{} ", cxx_return_type);
+    } else {
+        write_return_type(out, &efn.ret);
+    }
     match efn.receiver() {
         None => write!(out, "(*{}$)(", efn.name.rust),
         Some(receiver) => write!(
@@ -947,8 +951,14 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         write!(out, "new (return$) ");
         write_indirect_return_type(out, efn.ret.as_ref().unwrap());
         write!(out, "(");
+        if efn.cxx_return_type.is_some() {
+            write!(out, "cxx_to_rust(");
+        }
     } else if efn.ret.is_some() {
         write!(out, "return ");
+        if efn.cxx_return_type.is_some() {
+            write!(out, "cxx_to_rust(");
+        }
     }
     match &efn.ret {
         Some(Type::Ref(_)) => write!(out, "&"),
@@ -1002,6 +1012,9 @@ fn write_cxx_function_shim<'a>(out: &mut OutFile<'a>, efn: &'a ExternFn) {
         Some(Type::UniquePtr(_)) => write!(out, ".release()"),
         Some(Type::Str(_) | Type::SliceRef(_)) if !indirect_return => write!(out, ")"),
         _ => {}
+    }
+    if efn.cxx_return_type.is_some() {
+        write!(out, ")");
     }
     if indirect_return {
         write!(out, ")");
