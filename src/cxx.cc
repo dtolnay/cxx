@@ -26,6 +26,12 @@
 #define RUST_CXX_NO_EXCEPTIONS
 #endif
 
+#if !defined(__LCC__)
+#define NORETURN [[noreturn]]
+#else
+#define NORETURN
+#endif
+
 #ifdef __GNUC__
 #pragma GCC diagnostic ignored "-Wmissing-declarations"
 #pragma GCC diagnostic ignored "-Wshadow"
@@ -105,7 +111,7 @@ namespace rust {
 inline namespace cxxbridge1 {
 
 template <typename Exception>
-void panic [[noreturn]] (const char *msg) {
+void panic NORETURN (const char *msg) {
 #if defined(RUST_CXX_NO_EXCEPTIONS)
   std::fprintf(stderr, "Error: %s. Aborting.\n", msg);
   std::abort();
@@ -114,7 +120,7 @@ void panic [[noreturn]] (const char *msg) {
 #endif
 }
 
-template void panic<std::out_of_range> [[noreturn]] (const char *msg);
+template void panic<std::out_of_range> NORETURN (const char *msg);
 
 template <typename T>
 static bool is_aligned(const void *ptr) noexcept {
