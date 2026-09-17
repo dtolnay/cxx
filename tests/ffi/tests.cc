@@ -647,6 +647,8 @@ rust::String cOverloadedFunction(rust::Str x) {
   return rust::String(std::string(x));
 }
 
+AEnumCxx type_conversion() { return AEnumCxx::BVal; }
+
 size_t C::c_static_method() { return 2026; }
 
 void c_take_trivial_ptr(std::unique_ptr<D> d) {
