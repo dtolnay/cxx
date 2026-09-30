@@ -20,7 +20,7 @@ impl CfgEvaluator for CargoEnvCfgEvaluator {
         let env = ENV.get_or_init(CargoEnv::load);
         if name == "feature" {
             return if let Some(query_value) = query_value {
-                CfgResult::from(env.features.contains(Lookup::new(query_value)))
+                CfgResult::from(env.has_feature(query_value))
             } else {
                 let msg = "expected `feature = \"...\"`".to_owned();
                 CfgResult::Undetermined { msg }
@@ -67,6 +67,13 @@ impl CargoEnv {
             }
         }
         CargoEnv { features, cfgs }
+    }
+
+    fn has_feature(&self, name: &str) -> bool {
+        // Cargo sets CARGO_FEATURE_<name> with the name uppercased and `-`
+        // translated to `_`, so do the same for the name that is looked up.
+        let name = name.replace('-', "_");
+        self.features.contains(Lookup::new(&name))
     }
 }
 
@@ -152,5 +159,26 @@ impl Eq for CaseAgnosticByte {}
 impl PartialEq for CaseAgnosticByte {
     fn eq(&self, rhs: &Self) -> bool {
         self.cmp(rhs) == Ordering::Equal
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::cargo::{CargoEnv, Map, Name};
+
+    #[test]
+    fn test_has_feature() {
+        let env = CargoEnv {
+            features: ["FOO", "FOO_BAR"]
+                .into_iter()
+                .map(|feature| Name(feature.to_owned()))
+                .collect(),
+            cfgs: Map::new(),
+        };
+        assert!(env.has_feature("foo"));
+        assert!(env.has_feature("foo_bar"));
+        assert!(env.has_feature("foo-bar"));
+        assert!(!env.has_feature("bar"));
+        assert!(!env.has_feature("foo-baz"));
     }
 }
