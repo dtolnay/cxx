@@ -10,11 +10,12 @@ pub(crate) enum TargetDir {
 pub(crate) fn find_target_dir(out_dir: &Path) -> TargetDir {
     if let Some(target_dir) = env::var_os("CARGO_TARGET_DIR") {
         let target_dir = PathBuf::from(target_dir);
-        return if target_dir.is_absolute() {
-            TargetDir::Path(target_dir)
-        } else {
-            TargetDir::Unknown
-        };
+        if target_dir.is_absolute() {
+            return TargetDir::Path(target_dir);
+        }
+        // A relative CARGO_TARGET_DIR is relative to the directory cargo was
+        // invoked from, which is not known to the build script. Fall back to
+        // searching the ancestors of OUT_DIR.
     }
 
     // fs::canonicalize on Windows produces UNC paths which cl.exe is unable to
