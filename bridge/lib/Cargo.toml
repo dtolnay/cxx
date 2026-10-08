@@ -1,6 +1,6 @@
 [package]
 name = "cxx-gen"
-version = "0.7.202"
+version = "0.7.203"
 authors = ["Adrian Taylor <adetaylor@chromium.org>"]
 categories = ["development-tools::ffi"]
 description = "C++ code generator for integrating `cxx` crate into higher level tools."
