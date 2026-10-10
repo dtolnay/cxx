@@ -78,7 +78,8 @@ bool cxxbridge1$string$from_utf16(rust::String *self, const char16_t *ptr,
 void cxxbridge1$string$from_utf16_lossy(rust::String *self, const char16_t *ptr,
                                         std::size_t len) noexcept;
 void cxxbridge1$string$drop(rust::String *self) noexcept;
-const char *cxxbridge1$string$ptr(const rust::String *self) noexcept;
+const char *cxxbridge1$string$ptr_const(const rust::String *self) noexcept;
+char *cxxbridge1$string$ptr_mut(rust::String *self) noexcept;
 std::size_t cxxbridge1$string$len(const rust::String *self) noexcept;
 std::size_t cxxbridge1$string$capacity(const rust::String *self) noexcept;
 void cxxbridge1$string$reserve_additional(rust::String *self,
@@ -243,8 +244,10 @@ String::operator std::string() const {
 }
 
 const char *String::data() const noexcept {
-  return cxxbridge1$string$ptr(this);
+  return cxxbridge1$string$ptr_const(this);
 }
+
+char *String::data() noexcept { return cxxbridge1$string$ptr_mut(this); }
 
 std::size_t String::size() const noexcept {
   return cxxbridge1$string$len(this);
@@ -260,7 +263,7 @@ const char *String::c_str() noexcept {
   auto len = this->length();
   cxxbridge1$string$reserve_additional(this, 1);
   auto ptr = this->data();
-  const_cast<char *>(ptr)[len] = '\0';
+  ptr[len] = '\0';
   return ptr;
 }
 
@@ -272,13 +275,9 @@ void String::reserve(std::size_t new_cap) noexcept {
   cxxbridge1$string$reserve_total(this, new_cap);
 }
 
-String::iterator String::begin() noexcept {
-  return const_cast<char *>(this->data());
-}
+String::iterator String::begin() noexcept { return this->data(); }
 
-String::iterator String::end() noexcept {
-  return const_cast<char *>(this->data()) + this->size();
-}
+String::iterator String::end() noexcept { return this->data() + this->size(); }
 
 String::const_iterator String::begin() const noexcept { return this->cbegin(); }
 

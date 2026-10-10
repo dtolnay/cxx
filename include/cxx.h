@@ -72,6 +72,8 @@ public:
 
   // Note: no null terminator.
   const char *data() const noexcept;
+  char *data() noexcept;
+
   std::size_t size() const noexcept;
   std::size_t length() const noexcept;
   bool empty() const noexcept;
