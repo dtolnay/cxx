@@ -726,8 +726,10 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
       const rust::Vec<CXX_TYPE> *ptr) noexcept;                                \
   std::size_t cxxbridge1$rust_vec$##RUST_TYPE##$capacity(                      \
       const rust::Vec<CXX_TYPE> *ptr) noexcept;                                \
-  const CXX_TYPE *cxxbridge1$rust_vec$##RUST_TYPE##$data(                      \
+  const CXX_TYPE *cxxbridge1$rust_vec$##RUST_TYPE##$data_const(                \
       const rust::Vec<CXX_TYPE> *ptr) noexcept;                                \
+  CXX_TYPE *cxxbridge1$rust_vec$##RUST_TYPE##$data_mut(                        \
+      rust::Vec<CXX_TYPE> *ptr) noexcept;                                      \
   void cxxbridge1$rust_vec$##RUST_TYPE##$reserve_total(                        \
       rust::Vec<CXX_TYPE> *ptr, std::size_t new_cap) noexcept;                 \
   void cxxbridge1$rust_vec$##RUST_TYPE##$set_len(rust::Vec<CXX_TYPE> *ptr,     \
@@ -754,7 +756,11 @@ static_assert(sizeof(std::string) <= kMaxExpectedWordsInString * sizeof(void *),
   }                                                                            \
   template <>                                                                  \
   const CXX_TYPE *Vec<CXX_TYPE>::data() const noexcept {                       \
-    return cxxbridge1$rust_vec$##RUST_TYPE##$data(this);                       \
+    return cxxbridge1$rust_vec$##RUST_TYPE##$data_const(this);                 \
+  }                                                                            \
+  template <>                                                                  \
+  CXX_TYPE *Vec<CXX_TYPE>::data() noexcept {                                   \
+    return cxxbridge1$rust_vec$##RUST_TYPE##$data_mut(this);                   \
   }                                                                            \
   template <>                                                                  \
   void Vec<CXX_TYPE>::reserve_total(std::size_t new_cap) noexcept {            \
