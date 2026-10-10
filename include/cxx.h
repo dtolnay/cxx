@@ -906,11 +906,6 @@ bool Vec<T>::empty() const noexcept {
 }
 
 template <typename T>
-T *Vec<T>::data() noexcept {
-  return const_cast<T *>(const_cast<const Vec<T> *>(this)->data());
-}
-
-template <typename T>
 const T &Vec<T>::operator[](std::size_t n) const noexcept {
   assert(n < this->size());
   auto data = reinterpret_cast<const char *>(this->data());
