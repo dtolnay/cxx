@@ -32,19 +32,19 @@ alias(
 )
 
 http_archive(
-    name = "cc-1.6.0.crate",
-    sha256 = "f74872d07caf508b30a21f6836e7d7016a2eaf7d9ff4f48deaa58cd8a0407630",
-    size_bytes = 116280,
-    strip_prefix = "cc-1.6.0",
-    urls = ["https://static.crates.io/crates/cc/1.6.0/download"],
+    name = "cc-1.7.0.crate",
+    sha256 = "50a649af8a827553c29fb0cb4bd4a6f1a0dd695bd3232b9bc98bd9c8a3ffbb8b",
+    size_bytes = 123929,
+    strip_prefix = "cc-1.7.0",
+    urls = ["https://static.crates.io/crates/cc/1.7.0/download"],
     visibility = [],
 )
 
 cargo.rust_library(
     name = "cc-1",
-    srcs = [":cc-1.6.0.crate"],
+    srcs = [":cc-1.7.0.crate"],
     crate = "cc",
-    crate_root = "cc-1.6.0.crate/src/lib.rs",
+    crate_root = "cc-1.7.0.crate/src/lib.rs",
     edition = "2021",
     visibility = [],
     deps = [

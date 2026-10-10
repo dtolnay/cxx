@@ -10,6 +10,6 @@ package(default_visibility = ["//visibility:public"])
 
 alias(
     name = "cc",
-    actual = "@vendor__cc-1.6.0//:cc",
+    actual = "@vendor__cc-1.7.0//:cc",
     tags = ["manual"],
 )
