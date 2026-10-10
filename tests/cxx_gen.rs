@@ -12,6 +12,15 @@ const BRIDGE0: &str = r#"
     }
 "#;
 
+const BRIDGE_RAW_IDENTIFIER: &str = r#"
+    #[cxx::bridge]
+    mod ffi {
+        unsafe extern "C++" {
+            pub fn highlight(r#type: i32);
+        }
+    }
+"#;
+
 #[test]
 fn test_extern_c_function() {
     let opt = Opt::default();
@@ -21,6 +30,21 @@ fn test_extern_c_function() {
     // To avoid continual breakage we won't test every byte.
     // Let's look for the major features.
     assert!(output.contains(&format!("void {CXXPREFIX}$do_cpp_thing(::rust::Str foo)")));
+}
+
+#[test]
+fn test_raw_identifier_param() {
+    let opt = Opt::default();
+    let source = BRIDGE_RAW_IDENTIFIER.parse().unwrap();
+    let generated = generate_header_and_cc(source, &opt).unwrap();
+    let header = str::from_utf8(&generated.header).unwrap();
+    let implementation = str::from_utf8(&generated.implementation).unwrap();
+
+    assert!(!header.contains("r#"));
+    assert!(!implementation.contains("r#"));
+    assert!(implementation.contains(&format!(
+        "void {CXXPREFIX}$highlight(::std::int32_t type) noexcept",
+    )));
 }
 
 #[test]
