@@ -670,19 +670,19 @@ alias(
 )
 
 http_archive(
-    name = "syn-3.0.6.crate",
-    sha256 = "8593e8e72159ed2257d083c7a454a85cbf854f37a0966d8d483aff8c8a3ebcee",
-    size_bytes = 313821,
-    strip_prefix = "syn-3.0.6",
-    urls = ["https://static.crates.io/crates/syn/3.0.6/download"],
+    name = "syn-3.0.7.crate",
+    sha256 = "d62a2e0561533f2ca2561d0cf27fd9fedb640a1bf2616ff5d5c80d99017faadc",
+    size_bytes = 313684,
+    strip_prefix = "syn-3.0.7",
+    urls = ["https://static.crates.io/crates/syn/3.0.7/download"],
     visibility = [],
 )
 
 cargo.rust_library(
     name = "syn-3",
-    srcs = [":syn-3.0.6.crate"],
+    srcs = [":syn-3.0.7.crate"],
     crate = "syn",
-    crate_root = "syn-3.0.6.crate/src/lib.rs",
+    crate_root = "syn-3.0.7.crate/src/lib.rs",
     edition = "2021",
     features = [
         "clone-impls",

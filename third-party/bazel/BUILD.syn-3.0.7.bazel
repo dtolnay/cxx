@@ -115,7 +115,7 @@ rust_library(
         "@rules_rust//rust/platform:x86_64-unknown-uefi": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    version = "3.0.6",
+    version = "3.0.7",
     deps = [
         "@vendor__proc-macro2-1.0.107//:proc_macro2",
         "@vendor__quote-1.0.47//:quote",
