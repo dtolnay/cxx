@@ -1,7 +1,7 @@
 use crate::bridge::{CfgEvaluator, CfgResult};
 use std::borrow::Borrow;
 use std::cmp::Ordering;
-use std::collections::{BTreeMap as Map, BTreeSet as Set};
+use std::collections::BTreeMap as Map;
 use std::env;
 use std::ptr;
 use std::sync::OnceLock;
@@ -9,7 +9,6 @@ use std::sync::OnceLock;
 static ENV: OnceLock<CargoEnv> = OnceLock::new();
 
 struct CargoEnv {
-    features: Set<Name>,
     cfgs: Map<Name, String>,
 }
 
@@ -19,12 +18,12 @@ impl CfgEvaluator for CargoEnvCfgEvaluator {
     fn eval(&self, name: &str, query_value: Option<&str>) -> CfgResult {
         let env = ENV.get_or_init(CargoEnv::load);
         if name == "feature" {
-            return if let Some(query_value) = query_value {
-                CfgResult::from(env.features.contains(Lookup::new(query_value)))
-            } else {
+            if query_value.is_none() {
                 let msg = "expected `feature = \"...\"`".to_owned();
-                CfgResult::Undetermined { msg }
-            };
+                return CfgResult::Undetermined { msg };
+            } else if query_value == Some("") {
+                return CfgResult::False;
+            }
         }
         if name == "test" && query_value.is_none() {
             let msg = "cfg(test) is not supported because Cargo runs your build script only once across the lib and test build of the same crate".to_owned();
@@ -46,10 +45,6 @@ impl CfgEvaluator for CargoEnvCfgEvaluator {
 
 impl CargoEnv {
     fn load() -> Self {
-        const CARGO_FEATURE_PREFIX: &str = "CARGO_FEATURE_";
-        const CARGO_CFG_PREFIX: &str = "CARGO_CFG_";
-
-        let mut features = Set::new();
         let mut cfgs = Map::new();
         for (k, v) in env::vars_os() {
             let Some(k) = k.to_str() else {
@@ -58,15 +53,12 @@ impl CargoEnv {
             let Ok(v) = v.into_string() else {
                 continue;
             };
-            if let Some(feature_name) = k.strip_prefix(CARGO_FEATURE_PREFIX) {
-                let feature_name = Name(feature_name.to_owned());
-                features.insert(feature_name);
-            } else if let Some(cfg_name) = k.strip_prefix(CARGO_CFG_PREFIX) {
+            if let Some(cfg_name) = k.strip_prefix("CARGO_CFG_") {
                 let cfg_name = Name(cfg_name.to_owned());
                 cfgs.insert(cfg_name, v);
             }
         }
-        CargoEnv { features, cfgs }
+        CargoEnv { cfgs }
     }
 }
 
