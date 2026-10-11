@@ -36,6 +36,7 @@ impl CfgEvaluator for CargoEnvCfgEvaluator {
                 CfgResult::True
             };
         }
+        // Unneeded since Rust 1.93 (https://github.com/rust-lang/cargo/pull/16160)
         if name == "debug_assertions" && query_value.is_none() {
             return CfgResult::from(cfg!(debug_assertions));
         }
