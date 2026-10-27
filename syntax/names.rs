@@ -40,7 +40,10 @@ impl ForeignName {
         // non-alphanumeric characters (`operator++`).
         match Ident::parse_any.parse_str(text) {
             Ok(ident) => {
-                let text = ident.to_string();
+                let mut text = ident.to_string();
+                if let Some(unraw) = text.strip_prefix("r#") {
+                    text = unraw.to_owned();
+                }
                 Ok(ForeignName { text })
             }
             Err(err) => Err(Error::new(span, err)),
