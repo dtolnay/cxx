@@ -231,9 +231,6 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
-      - name: Disable initramfs update
-        run: sudo sed -i 's/^update_initramfs=yes$/update_initramfs=no/' /etc/initramfs-tools/update-initramfs.conf
-        if: matrix.os == 'ubuntu'
       - name: Disable man-db update
         run: sudo rm -f /var/lib/man-db/auto-update
         if: matrix.os == 'ubuntu'
@@ -341,8 +338,6 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
-      - name: Disable initramfs update
-        run: sudo sed -i 's/^update_initramfs=yes$/update_initramfs=no/' /etc/initramfs-tools/update-initramfs.conf
       - name: Disable man-db update
         run: sudo rm -f /var/lib/man-db/auto-update
       - name: Install clang-tidy
