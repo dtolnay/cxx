@@ -14,6 +14,7 @@
 #include <tuple>
 
 #ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wmissing-noreturn"
 #pragma GCC diagnostic ignored "-Wshadow"
 #endif
 
