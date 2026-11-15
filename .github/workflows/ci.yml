@@ -231,9 +231,6 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
-      - name: Disable man-db update
-        run: sudo rm -f /var/lib/man-db/auto-update
-        if: matrix.os == 'ubuntu'
       - name: Install lld
         run: sudo apt-get install lld
         if: matrix.os == 'ubuntu'
@@ -338,8 +335,6 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
-      - name: Disable man-db update
-        run: sudo rm -f /var/lib/man-db/auto-update
       - name: Install clang-tidy
         run: sudo apt-get update && sudo apt-get install clang-tidy-20
       - name: Run clang-tidy
