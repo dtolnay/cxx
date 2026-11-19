@@ -1,0 +1,29 @@
+name: Meson
+
+on:
+  push:
+  workflow_dispatch:
+  schedule: [cron: "40 1 * * *"]
+
+permissions:
+  contents: read
+
+jobs:
+  meson:
+    name: Meson on ${{matrix.os == 'ubuntu' && 'Linux' || matrix.os == 'macos' && 'macOS' || matrix.os == 'windows' && 'Windows' || '???'}}
+    runs-on: ${{matrix.os}}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu, macos, windows]
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rust-src
+      - run: pip install meson ninja
+      - run: cargo metadata > /dev/null
+      - run: meson setup +build
+      - run: ninja -C+build
+      - run: ninja -C+build test
