@@ -201,6 +201,58 @@ Extern enums support all the same features as ordinary shared enums (explicit
 discriminants, repr). Again, CXX will static assert that all of those things you
 wrote are correct.
 
+## Methods defined in Rust
+
+It is possible to define methods for shared types in Rust:
+
+```rust,noplayground
+#[cxx::bridge]
+mod ffi {
+    struct Person {
+        age: u8,
+        height: u8,
+    }
+
+    extern "Rust" {
+        fn is_adult(self: &Person) -> bool;
+    }
+}
+
+impl ffi::Person {
+    fn is_adult(&self) -> bool {
+        self.age > 18
+    }
+}
+```
+
+## Methods defined in C++
+
+Methods on shared types can also be defined in C++:
+
+```rust,noplayground
+#[cxx::bridge]
+mod ffi {
+    struct Person {
+        age: u8,
+        height: u8,
+    }
+
+    unsafe extern "C++" {
+        fn is_adult(self: &Person) -> bool;
+    }
+}
+```
+
+```cpp
+// person.cc (add to cxx_build's compile list build.rs)
+
+#include "path/to/main.rs.h"
+
+bool Person::is_adult() const noexcept {
+    return this->age > 18;
+}
+```
+
 ## Derives
 
 The following standard traits are supported in `derive(...)` within the CXX
